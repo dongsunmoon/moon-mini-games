@@ -3,7 +3,7 @@
 어린이를 위한 웹 미니 게임 모음입니다. 설치 없이 휴대폰·태블릿·PC 브라우저에서 바로 할 수 있어요.
 Mini games for kids that run right in the browser on phones, tablets and PCs.
 
-▶ **Play:** https://dongsunmoon.github.io/moon-mini-games/
+▶ **Play:** https://game.dongsunmoon.com/
 
 | 게임 | 파일 | 설명 |
 |---|---|---|
@@ -15,6 +15,7 @@ Mini games for kids that run right in the browser on phones, tablets and PCs.
 1. 이 폴더의 파일을 `main` 브랜치에 push 합니다.
 2. GitHub 저장소 → **Settings → Pages** → Source: **Deploy from a branch**, Branch: **main / (root)** → Save.
 3. 1~2분 뒤 위 Play 주소로 접속하면 `index.html`(게임 선택 화면)이 열립니다.
+4. 사용자 도메인(`game.dongsunmoon.com`)은 저장소의 `CNAME` 파일로 연결돼 있어요. 이 파일은 지우지 마세요.
 
 무료 계정은 저장소가 **public**이어야 Pages를 쓸 수 있습니다.
 

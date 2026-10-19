@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#5b6cff">
+<title data-en="Moon Mini Games">문 미니 게임 | Moon Mini Games</title>
+<meta name="description" content="어린이를 위한 무료 웹 미니 게임 · Free mini games for kids. 휴대폰·PC 모두 가능, 한국어/English.">
+<meta property="og:title" content="Moon Mini Games · 문 미니 게임">
+<meta property="og:description" content="꼬마 탐정단 · 마블 레이스 3D — 휴대폰과 PC에서 바로 플레이! Play right away on phone or PC.">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌙</text></svg>">
+<script>
+/* Language: ?lang=ko|en, then the saved choice, then the device language. Shared by every page on this site. */
+const LANG=(()=>{let q=null,s=null;try{q=new URLSearchParams(location.search).get('lang')}catch(e){}try{s=localStorage.getItem('moonGames.lang')}catch(e){}const l=q==='ko'||q==='en'?q:s==='ko'||s==='en'?s:/^ko/i.test(navigator.language||'')?'ko':'en';if(q===l){try{localStorage.setItem('moonGames.lang',l)}catch(e){}}document.documentElement.lang=l;return l})();
+const L=(ko,en)=>LANG==='en'?en:ko;
+function applyLang(){if(LANG!=='en')return;document.querySelectorAll('[data-en]').forEach(el=>{el.textContent=el.dataset.en});document.querySelectorAll('[data-en-html]').forEach(el=>{el.innerHTML=el.dataset.enHtml});for(const a of ['aria-label','placeholder','title'])document.querySelectorAll('[data-en-'+a+']').forEach(el=>el.setAttribute(a,el.getAttribute('data-en-'+a)))}
+function setLang(next){try{localStorage.setItem('moonGames.lang',next)}catch(e){}try{speechSynthesis.cancel()}catch(e){}const u=new URL(location.href);u.searchParams.set('lang',next);location.replace(u.href)}
+</script>
+<style>
+:root{
+  color-scheme:light;
+  --bg-top:#e9f0ff;--bg-bottom:#fff6e8;
+  --ink:#24305e;--muted:#5d6894;--card:#ffffff;--line:#dfe5f7;
+  --brand:#5b6cff;--brand-ink:#ffffff;--accent:#ffb84d;
+  --shadow:0 14px 34px rgba(54,72,160,.14);
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{
+  min-height:100vh;min-height:100dvh;color:var(--ink);
+  background:radial-gradient(circle at 85% -10%,#d8dcff 0,transparent 42%),linear-gradient(180deg,var(--bg-top),var(--bg-bottom));
+  font-family:system-ui,-apple-system,'Apple SD Gothic Neo','Noto Sans KR','Malgun Gothic',sans-serif;
+  -webkit-tap-highlight-color:transparent;
+}
+a{color:inherit}
+.wrap{width:min(980px,100%);margin:0 auto;padding:max(18px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) 36px max(16px,env(safe-area-inset-left))}
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:12px;min-width:0}
+.moon{width:58px;height:58px;flex:0 0 58px;border-radius:50%;display:grid;place-items:center;font-size:34px;background:linear-gradient(145deg,#fff3c4,#ffd36b);box-shadow:0 8px 22px rgba(255,184,77,.45),inset -6px -8px 0 rgba(224,148,40,.25)}
+.brand h1{margin:0;font-size:clamp(24px,5.4vw,36px);line-height:1.05;letter-spacing:-.6px}
+.brand h1 small{display:block;font-size:.46em;letter-spacing:0;color:var(--muted);font-weight:700;margin-top:5px}
+.lang{display:inline-flex;padding:4px;border-radius:999px;background:#fff;border:1px solid var(--line);box-shadow:0 4px 14px rgba(54,72,160,.08)}
+.lang button{font:inherit;font-size:14px;font-weight:800;border:0;border-radius:999px;padding:9px 15px;min-height:40px;background:transparent;color:var(--muted);cursor:pointer}
+.lang button[aria-pressed="true"]{background:var(--brand);color:var(--brand-ink)}
+.lang button:focus-visible,.card:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+.hello{margin:22px 0 18px;font-size:clamp(16px,3.6vw,20px);font-weight:800;line-height:1.45}
+.hello span{color:var(--muted);font-weight:700;font-size:.82em;display:block;margin-top:2px}
+.games{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:18px}
+.card{display:flex;flex-direction:column;text-decoration:none;background:var(--card);border-radius:26px;overflow:hidden;border:1px solid var(--line);box-shadow:var(--shadow);transition:transform .18s ease,box-shadow .18s ease}
+.card:hover{transform:translateY(-4px);box-shadow:0 20px 40px rgba(54,72,160,.2)}
+.card:active{transform:scale(.985)}
+.thumb{position:relative;height:178px;overflow:hidden}
+.body{padding:16px 18px 18px;display:flex;flex-direction:column;gap:10px;flex:1}
+.title{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
+.title h2{margin:0;font-size:23px;letter-spacing:-.4px}
+.age{flex:0 0 auto;font-size:12px;font-weight:800;color:#6a4b00;background:#fff0c9;border-radius:999px;padding:4px 10px}
+.desc{margin:0;color:var(--muted);font-size:15px;line-height:1.5;font-weight:600}
+.tags{display:flex;flex-wrap:wrap;gap:6px;margin:0;padding:0;list-style:none}
+.tags li{font-size:12.5px;font-weight:800;background:#f0f3ff;color:#3d4a8a;border-radius:10px;padding:5px 9px}
+.stat{align-self:flex-start;font-size:13px;font-weight:800;color:#2f6b45;background:#e4f6ea;border-radius:10px;padding:6px 10px}
+.play{margin-top:auto;display:flex;align-items:center;justify-content:center;gap:8px;min-height:52px;border-radius:16px;background:var(--brand);color:var(--brand-ink);font-size:18px;font-weight:900;box-shadow:0 8px 18px rgba(91,108,255,.35)}
+.card:hover .play{filter:brightness(1.08)}
+/* Detective thumbnail: city-map mint with the detective, magnifier and buddies */
+.t-detective{background:radial-gradient(circle,#b2d7cb 1.4px,transparent 1.6px) 0 0/30px 30px,linear-gradient(160deg,#d9f2e6,#c4e7f6)}
+.t-detective .road{position:absolute;left:-10%;right:-10%;top:58%;height:22px;background:#fefdf0;transform:rotate(-8deg);box-shadow:0 0 0 2px #c3d6c7}
+.t-detective .hero{position:absolute;left:50%;top:50%;transform:translate(-50%,-52%);font-size:86px;filter:drop-shadow(0 8px 10px rgba(37,57,110,.25))}
+.t-detective .glass{position:absolute;left:62%;top:22%;font-size:46px;transform:rotate(-18deg)}
+.t-detective .pin{position:absolute;font-size:30px}
+/* Marble thumbnail: dark sky, a glowing track and rolling marbles */
+.t-marble{background:radial-gradient(ellipse at 35% -30%,#3a5a96 0%,#0e1830 70%)}
+.t-marble .track{position:absolute;left:-15%;right:-15%;top:54%;height:44px;border-radius:30px;background:linear-gradient(180deg,#5b52b0,#36286e);transform:rotate(-7deg);box-shadow:0 -3px 0 #55ffed,0 3px 0 #55ffed,0 0 26px #55ffed66}
+.t-marble .m{position:absolute;width:var(--s,40px);height:var(--s,40px);border-radius:50%;background:var(--c);background:radial-gradient(circle at 32% 28%,#fff 0 7%,var(--c) 34%,color-mix(in srgb,var(--c) 60%,#000) 100%);box-shadow:0 0 16px var(--c);animation:roll 2.6s ease-in-out infinite alternate}
+.t-marble .flag{position:absolute;right:8%;top:16%;font-size:40px}
+@keyframes roll{to{transform:translateX(26px) rotate(160deg)}}
+@media (prefers-reduced-motion:reduce){.t-marble .m{animation:none}.card{transition:none}}
+.tips{margin:22px 0 0;padding:0;list-style:none;display:flex;flex-wrap:wrap;gap:8px}
+.tips li{background:#ffffffc7;border:1px solid var(--line);border-radius:14px;padding:9px 12px;font-size:13.5px;font-weight:700;color:var(--muted)}
+footer{margin-top:22px;text-align:center;color:#8a93b8;font-size:12px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <div class="moon" aria-hidden="true">🌙</div>
+      <h1>Moon Mini Games<small data-en="Mini games for kids">어린이 미니 게임 모음</small></h1>
+    </div>
+    <div class="lang" role="group" aria-label="언어 선택 · Language" data-en-aria-label="Language · 언어 선택">
+      <button type="button" data-lang="ko" lang="ko">한국어</button>
+      <button type="button" data-lang="en" lang="en">English</button>
+    </div>
+  </header>
+
+  <p class="hello"><b data-en="Which game do you want to play today? 🎮">오늘은 어떤 게임을 해 볼까요? 🎮</b><span data-en="Tap a card to start right away.">카드를 누르면 바로 시작해요.</span></p>
+
+  <main class="games" id="games" aria-label="게임 목록" data-en-aria-label="Games"></main>
+
+  <ul class="tips">
+    <li data-en="🔊 Turn the sound on to hear the voice guide">🔊 소리를 켜면 음성 안내가 나와요</li>
+    <li data-en="📱 Works on phones, tablets and computers">📱 휴대폰 · 태블릿 · 컴퓨터 모두 OK</li>
+    <li data-en="💾 Progress is saved on this device">💾 진행 기록은 이 기기에 저장돼요</li>
+  </ul>
+  <footer>Moon Mini Games · 🌙</footer>
+</div>
+
+<script>
+// To add a game: copy one entry, point `file` at the new HTML file, and fill both languages.
+const GAMES=[
+  {
+    file:'detective_game_v17.html',
+    thumb:'<div class="thumb t-detective" aria-hidden="true"><div class="road"></div><span class="pin" style="left:9%;top:14%">🏙️</span><span class="pin" style="left:76%;top:62%">🍪</span><span class="pin" style="left:14%;top:64%">🐶</span><span class="glass">🔍</span><span class="hero">🕵️</span></div>',
+    title:['꼬마 탐정단','Little Detectives'],
+    age:['6~9세','Ages 6–9'],
+    desc:['목격자의 단서를 듣고 범인을 찾아요! 동네 순찰 미니게임 6가지도 있어요.','Listen to the witness clues and catch the thief! Plus 6 patrol mini-games.'],
+    tags:[['🧠 추리','🧠 Logic'],['👀 관찰력','👀 Observation'],['🗺️ 지도 탐험','🗺️ Map quest']],
+    stat:()=>{const d=readSave('little-detective-v3');return d&&d.caught>0?L(`🏅 탐정 Lv.${d.level} · 해결한 사건 ${d.caught}개`,`🏅 Detective Lv.${d.level} · ${d.caught} case${d.caught===1?'':'s'} solved`):''}
+  },
+  {
+    file:'marble_rush_3d_v3.html',
+    thumb:'<div class="thumb t-marble" aria-hidden="true"><div class="track"></div><span class="flag">🏁</span><span class="m" style="--c:#ff4260;left:14%;top:44%"></span><span class="m" style="--c:#ffe55b;left:33%;top:41%;--s:36px;animation-delay:-.6s"></span><span class="m" style="--c:#40eb84;left:52%;top:36%;--s:42px;animation-delay:-1.1s"></span><span class="m" style="--c:#4cb4ff;left:70%;top:33%;--s:34px;animation-delay:-1.8s"></span></div>',
+    title:['마블 레이스 3D','Marble Rush 3D'],
+    age:['누구나','All ages'],
+    desc:['월드를 고르고 구슬 레이스를 응원해요! 과연 어떤 색 구슬이 1등을 할까요?','Pick a world and cheer for your marble! Which color will win the race?'],
+    tags:[['🌈 6개 월드','🌈 6 worlds'],['🎙️ 실시간 중계','🎙️ Live commentary'],['🔮 구슬 2~16개','🔮 2–16 marbles']],
+    stat:()=>{const m=readSave('marble3dsettings')?.mineStats;return m&&m.races>0?L(`🏆 내 구슬 우승 ${m.wins}번 / ${m.races}경기`,`🏆 Your marble won ${m.wins} of ${m.races} race${m.races===1?'':'s'}`):''}
+  }
+];
+const pick=pair=>L(pair[0],pair[1]);
+// Each game saves its own progress in this browser; show it on the card when there is some.
+const readSave=key=>{try{return JSON.parse(localStorage.getItem(key)||'null')}catch(e){return null}};
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+document.getElementById('games').innerHTML=GAMES.map(g=>`
+  <a class="card" href="${esc(g.file)}?lang=${LANG}">
+    ${g.thumb}
+    <div class="body">
+      <div class="title"><h2>${esc(pick(g.title))}</h2><span class="age">${esc(pick(g.age))}</span></div>
+      <p class="desc">${esc(pick(g.desc))}</p>
+      <ul class="tags">${g.tags.map(t=>`<li>${esc(pick(t))}</li>`).join('')}</ul>
+      ${(s=>s?`<span class="stat">${esc(s)}</span>`:'')(g.stat?.())}
+      <span class="play">▶ ${L('플레이','Play')}</span>
+    </div>
+  </a>`).join('');
+applyLang();
+document.querySelectorAll('[data-lang]').forEach(b=>{
+  b.setAttribute('aria-pressed',String(b.dataset.lang===LANG));
+  b.addEventListener('click',()=>{if(b.dataset.lang!==LANG)setLang(b.dataset.lang)});
+});
+</script>
+</body>
+</html>

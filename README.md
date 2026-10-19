@@ -7,7 +7,7 @@ Mini games for kids that run right in the browser on phones, tablets and PCs.
 
 | 게임 | 파일 | 설명 |
 |---|---|---|
-| 🕵️ 꼬마 탐정단 · Little Detectives | `detective_game.html` | 목격자 단서로 범인 찾기, 순찰 미니게임 6종 |
+| 🕵️ 꼬마 탐정단 · Little Detectives | `detective_game.html` | 목격자 단서로 범인 찾기, 순찰 미니게임 7종 |
 | 🔮 마블 레이스 · Marble Rush | `marble_rush_3d.html` | 진짜 물리로 튕기는 마블런 레이스, 내 구슬 응원 · 리그 5경기 |
 
 ## GitHub Pages로 공개하기

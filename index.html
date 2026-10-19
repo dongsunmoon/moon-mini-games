@@ -118,7 +118,7 @@ const GAMES=[
     thumb:'<div class="thumb t-detective" aria-hidden="true"><img class="cover" src="images/cover-detective.webp" alt="" onerror="this.remove()"><div class="road"></div><span class="pin" style="left:9%;top:14%">🏙️</span><span class="pin" style="left:76%;top:62%">🍪</span><span class="pin" style="left:14%;top:64%">🐶</span><span class="glass">🔍</span><span class="hero">🕵️</span></div>',
     title:['꼬마 탐정단','Little Detectives'],
     age:['6~9세','Ages 6–9'],
-    desc:['목격자의 단서를 듣고 범인을 찾아요! 동네 순찰 미니게임 6가지도 있어요.','Listen to the witness clues and catch the thief! Plus 6 patrol mini-games.'],
+    desc:['목격자의 단서를 듣고 범인을 찾아요! 동네 순찰 미니게임 7가지도 있어요.','Listen to the witness clues and catch the thief! Plus 7 patrol mini-games.'],
     tags:[['🧠 추리','🧠 Logic'],['👀 관찰력','👀 Observation'],['🗺️ 지도 탐험','🗺️ Map quest']],
     stat:()=>{const d=readSave('little-detective-v3');return d&&d.caught>0?L(`🏅 탐정 Lv.${d.level} · 해결한 사건 ${d.caught}개`,`🏅 Detective Lv.${d.level} · ${d.caught} case${d.caught===1?'':'s'} solved`):''}
   },

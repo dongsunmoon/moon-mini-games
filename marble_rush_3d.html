@@ -112,6 +112,7 @@ button,input,select{font:inherit}button{cursor:pointer}button:disabled{opacity:.
 @keyframes fall{to{transform:translate(var(--sx,30px),110vh) rotate(850deg);opacity:.4}}
 .footer-note{text-align:center;color:#7f90b0;font-size:11px;margin:14px 0 0}
 @media(max-width:860px){.app{padding:10px}.layout{grid-template-columns:1fr;gap:12px}.sidebar{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:12px}.map-section,.mine-section,.action-section,.mode-section{grid-column:1/-1}.maps{display:flex;overflow-x:auto;padding-bottom:4px}.map{min-width:160px;flex:0 0 160px}.scene-panel{height:66vh;min-height:430px}}
+@media(max-width:860px) and (max-height:520px) and (orientation:landscape){.scene-panel{height:calc(100dvh - 16px);min-height:0}.rank-board{width:150px;padding:6px}.rk{font-size:11px}.rk .st{display:none}.subtitle{min-height:40px;font-size:12px;padding:6px 10px}}
 @media(max-width:520px){.top-pill{display:none}.brand p{font-size:10px}.scene-panel{height:64vh;min-height:400px;border-radius:15px}.rank-board{width:142px;padding:6px}.rk{font-size:11px}.rk .st{display:none}.minimap{width:40px;top:50px;height:calc(100% - 134px)}.cheer-btn{right:56px;bottom:84px;padding:10px 14px;min-height:44px;font-size:14px}.subtitle{min-height:52px;font-size:12px;padding:7px 10px}.race-dots{top:auto;bottom:100px;font-size:10px}.race-dots i{width:18px;height:18px}.mini-btn{padding:7px 8px;font-size:11px}.mine-chip{width:31px;height:31px;font-size:12px}}
 </style>
 </head>
@@ -471,6 +472,8 @@ function startRace(){
  if(mode==='league'&&(!league||league.done)){startLeague();prepare()}
  else if(phase!=='ready')prepare();
  phase='countdown';countdownT=0;shownCount=-1;setControls();speak(pick(T.start),true);tone(400,140);
+ // Phones stack the settings above the track, so bring the race into view when it starts.
+ if(matchMedia('(max-width:860px)').matches)$('scenePanel').scrollIntoView({behavior:'smooth',block:'start'});
 }
 function beginRunning(){
  Sim.openGate(st);phase='running';$('startBanner').classList.add('hidden');setControls();speak(pick(T.go),true);tone(880,240,'triangle',.1);tone(220,160,'square',.04);
@@ -669,7 +672,7 @@ function drawMinimap(){
 // ---------------------------------------------------------------- HUD
 function updateHud(force){
  if(!force&&clock-lastHud<.25)return;lastHud=clock;
- const rank=Sim.ranking(st),n=rank.length,show=window.innerWidth<=520?5:8;let rows='';
+ const rank=Sim.ranking(st),n=rank.length,show=window.innerWidth<=520||window.innerHeight<=520?(window.innerHeight<=420?3:5):8;let rows='';
  const row=(m,i)=>`<div class="rk${m.id===mine?' mine':''}"><span class="no">${i<3&&(phase!=='ready'&&phase!=='countdown')?['🥇','🥈','🥉'][i]:i+1}</span><span class="dot" style="background:${PALETTE[m.id][1]}"></span><span class="nm">${esc(nameOf(m.id))}${m.id===mine?' ⭐':''}</span><span class="st">${m.done?'🏁':''}</span></div>`;
  rank.slice(0,show).forEach((m,i)=>rows+=row(m,i));
  const mi=rank.findIndex(m=>m.id===mine);if(mi>=show){rows+=`<div class="rk gap">⋯</div>`+row(rank[mi],mi)}

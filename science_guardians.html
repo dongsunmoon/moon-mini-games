@@ -652,6 +652,62 @@ main{width:min(980px,100%);margin:0 auto;padding:14px max(12px,env(safe-area-ins
  .opts.n4{grid-template-columns:1fr}
  .bins.n3 b{font-size:12.5px}
 }
+/* indicator lab */
+.indi{display:flex;gap:16px;align-items:center;justify-content:center;background:#f6f2ff;border-radius:18px;padding:12px;margin-bottom:8px}
+.beaker{position:relative;width:92px;height:118px;border:4px solid #9a8cc0;border-top-width:0;border-radius:0 0 24px 24px;background:#fff;overflow:hidden;flex:0 0 auto}
+.beaker .liq{position:absolute;left:0;right:0;bottom:0;height:74%;background:#7d55c7;transition:background-color 1.1s}
+.beaker .liq.stir{animation:stir .9s}
+@keyframes stir{30%{transform:scaleY(1.06)}60%{transform:scaleY(.97)}}
+.indi .side{display:flex;flex-direction:column;align-items:center;gap:6px;min-width:120px}
+.indi .cnt{font-weight:900;color:var(--muted);font-size:13px}
+.indi .what{display:flex;flex-direction:column;align-items:center;font-weight:900;text-align:center}
+.indi .what .ic{font-size:40px;line-height:1.1}
+.indikey{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;margin:0 0 8px}
+.indikey span{color:#fff;font-weight:900;font-size:12.5px;padding:4px 10px;border-radius:99px}
+.bin:disabled{opacity:.6}
+/* flame and circuit labs */
+.flamebox,.cktbox{border-radius:18px;overflow:hidden}
+.flamebox .outer{transition:fill .45s}
+.flamebox .fl{transform-origin:180px 140px;animation:flick .16s infinite alternate}
+@keyframes flick{to{transform:scale(.97,1.05)}}
+.flsamps{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin-top:10px}
+.flsamp{border:0;border-radius:14px;min-height:46px;padding:6px 12px;background:#eef2ff;color:var(--ink);font-weight:900;font-size:15px;box-shadow:0 3px 0 #cfd8f5}
+.flsamp.on{background:#fff3c4;box-shadow:0 3px 0 #e2b93a,0 0 0 3px #ffd84d}
+.ckts{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.ckt{border:0;border-radius:16px;background:#f3f7ff;padding:6px 4px 8px;display:flex;flex-direction:column;align-items:center;gap:2px;color:var(--ink);box-shadow:0 3px 0 #cfdcf2}
+.ckt .bt{font-size:18px;letter-spacing:-2px}
+.ckt b{font-size:12.5px;line-height:1.25;text-align:center}
+.ckt.mine{box-shadow:0 0 0 3px #7aa7ff,0 3px 0 #cfdcf2}
+.ckt.winner{background:#fff6cf;box-shadow:0 0 0 3px #ffc83d}
+[class^="bglow"]{transition:opacity .5s}
+/* seasons, water and water-cycle labs */
+.season .pick{cursor:pointer}
+.season .pf{transition:stroke .3s}
+.waterlab .ice,.waterlab .wat,.waterlab .bubs,.waterlab .steamg{transition:opacity .5s}
+.waterlab .stm{animation:steam 1.6s ease-in infinite}
+.waterlab .s1{animation-delay:.5s}.waterlab .s2{animation-delay:1s}
+@keyframes steam{from{transform:translateY(10px);opacity:0}40%{opacity:1}to{transform:translateY(-18px);opacity:0}}
+.waterlab .bb{animation:bubble 1s ease-in infinite}
+.waterlab .b1{animation-delay:.3s}.waterlab .b2{animation-delay:.6s}.waterlab .b3{animation-delay:.15s}
+@keyframes bubble{from{transform:translateY(0);opacity:.9}to{transform:translateY(-40px);opacity:0}}
+.cyc svg{border-radius:16px}
+.cyc .hot{cursor:pointer}
+.cyc .sun{transition:r .4s,fill .4s}.cyc .sun.sunon{r:28px;fill:#ffb400}
+.cyc .vap.up .vp{animation:steam 1.4s ease-in infinite}.cyc .vap .v1{animation-delay:.45s}.cyc .vap .v2{animation-delay:.9s}
+.cyc .cloud{transition:opacity .6s}.cyc .cloud.dark ellipse{fill:#b9c4d4}
+.cyc .rain.fall .rd{animation:rain .7s linear infinite}.cyc .rain .r1{animation-delay:.2s}.cyc .rain .r2{animation-delay:.4s}.cyc .rain .r3{animation-delay:.1s}.cyc .rain .r4{animation-delay:.5s}
+@keyframes rain{from{transform:translateY(0);opacity:1}to{transform:translateY(46px);opacity:0}}
+.cyc .riv{stroke-dasharray:14 10}.cyc .riv.flow{stroke:#2f8cf0;animation:flow .8s linear infinite}
+@keyframes flow{to{stroke-dashoffset:-24}}
+.cyc .sea.wave{animation:pulse 1s 2}
+.cyc .hinted{filter:drop-shadow(0 0 6px #ffc83d) drop-shadow(0 0 3px #ffc83d)}
+.cyc rect.hot.hinted{stroke:#ffc83d;stroke-width:6}
+.cyc path.hot.hinted[data-h="river"]{stroke:#ffc83d88}
+.cycsteps{list-style:none;margin:10px 0 0;padding:0;display:grid;gap:4px}
+.cycsteps li{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:800;color:var(--muted)}
+.cycsteps li span{flex:0 0 22px;height:22px;border-radius:50%;display:grid;place-items:center;background:#e6edf8;font-size:12px;font-weight:900}
+.cycsteps li.on{color:var(--ink)}.cycsteps li.on span{background:#33c46b;color:#fff}
+.cycnext{margin-top:6px}
 @media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
 </style>
 </head>
@@ -687,13 +743,13 @@ const WORLDS=[
  {id:'shadow',icon:'☀️',name:'그림자 공원|Shadow Park',topic:'빛 · 그림자 · 반사|Light · shadows · reflection',grad:'linear-gradient(135deg,#ffb347,#f0603c)',
   mon:{icon:'🦇',name:'깜깜 박쥐|Gloom Bat',hi:'파닥파닥! 빛을 다 가려 버릴 테다!|Flap flap! I’ll block out all the light!'},
   boss:{icon:'👤',name:'그림자 도둑|Shadow Snatcher',hi:'크크크… 공원의 그림자를 몽땅 훔쳐서 엉망으로 만들 거야!|Heh heh… I’ll steal every shadow in the park and mix them up!',lose:'으악, 눈부셔! 그림자를 돌려줄게!|Argh, too bright! I’ll give the shadows back!'}},
- {id:'force',icon:'🚌',name:'씽씽 버스길|Zoom Bus Road',topic:'힘 · 관성 · 마찰|Forces · inertia · friction',grad:'linear-gradient(135deg,#5b8cff,#3443c9)',
+ {id:'force',icon:'🚌',name:'씽씽 버스길|Zoom Bus Road',topic:'힘 · 관성 · 반작용 · 도구|Forces · inertia · action-reaction · tools',grad:'linear-gradient(135deg,#5b8cff,#3443c9)',
   mon:{icon:'🍌',name:'미끌 바나나|Slippy Banana',hi:'미끌미끌~ 모두 꽈당 넘어뜨려 주지!|Slip slip~ I’ll make everyone fall down!'},
   boss:{icon:'🦏',name:'꽈당 코뿔소 대장|Captain Crash Rhino',hi:'쿵쾅! 버스를 마구 흔들어서 다들 넘어지게 할 테다!|Stomp! I’ll shake the bus until everyone tumbles!',lose:'끼익… 안전벨트까지 맸구나. 졌다!|Screech… you even wore your seat belt. I lose!'}},
- {id:'magnet',icon:'🧲',name:'자석 공장|Magnet Factory',topic:'자석 · 물질 · 뜨고 가라앉기|Magnets · materials · floating',grad:'linear-gradient(135deg,#ff5e7e,#6b46e5)',
+ {id:'magnet',icon:'🧲',name:'자석 공장|Magnet Factory',topic:'자석 · 금속 · 전기 · 물질|Magnets · metals · electricity · materials',grad:'linear-gradient(135deg,#ff5e7e,#6b46e5)',
   mon:{icon:'🔩',name:'철컥 나사|Clanky Bolt',hi:'철컥철컥! 아무거나 다 붙여 버리겠다!|Clank clank! I’ll stick everything together!'},
   boss:{icon:'🧙‍♀️',name:'끈끈 마녀|Sticky Witch',hi:'호호호! 공장의 자석을 몽땅 엉터리로 바꿔 놨지!|Ho ho ho! I’ve turned every magnet in the factory into nonsense!',lose:'내 마법 자석이… 밀려난다!|My magic magnets… are pushing me away!'}},
- {id:'kitchen',icon:'🍳',name:'부엌 실험실|Kitchen Lab',topic:'얼음 · 물 · 수증기 · 열|Ice · water · steam · heat',grad:'linear-gradient(135deg,#ff9a6b,#e84a7f)',
+ {id:'kitchen',icon:'🍳',name:'부엌 실험실|Kitchen Lab',topic:'물의 변신 · 열 · 생활 속 화학|Water changes · heat · kitchen chemistry',grad:'linear-gradient(135deg,#ff9a6b,#e84a7f)',
   mon:{icon:'💧',name:'뚝뚝 물방울|Drippy Drop',hi:'뚝뚝! 부엌을 물바다로 만들 테다!|Drip drop! I’ll flood the kitchen!'},
   boss:{icon:'⛄',name:'녹녹 눈사람 대왕|King Melty Snowman',hi:'으하하! 얼음은 안 녹고 물은 안 끓게 만들어 주지!|Ha ha! I’ll make ice never melt and water never boil!',lose:'으으, 녹는다 녹아… 과학은 못 이기겠네!|Oh no, I’m melting… science wins!'}},
  {id:'life',icon:'🌱',name:'초록 숲|Green Forest',topic:'식물 · 동물 · 한살이|Plants · animals · life cycles',grad:'linear-gradient(135deg,#34b05a,#0b7a62)',
@@ -756,7 +812,8 @@ const CARD_RAW=[
  ['tools',2,2,'🔧','힘을 덜 쓰는 도구|Tools that make work easier','지레는 받침점에서 먼 곳을 누를수록 힘이 덜 들어요(병따개, 가위, 시소). 빗면은 길고 완만할수록 물건을 올리기 쉬워요(경사로). 도르래와 바퀴도 힘을 덜어 줘요.|A lever is easier to push the farther you push from its pivot (bottle openers, scissors, seesaws). A ramp is easier the longer and gentler it is. Pulleys and wheels help too.','무거운 짐은 바퀴 달린 카트나 경사로로 옮겨요.|Move heavy loads with a wheeled cart or a ramp.'],
  ['speed',2,3,'⏱️','속력|Speed','속력은 1초나 1시간처럼 정해진 시간 동안 얼마나 먼 거리를 가는지예요. 속력 = 이동 거리 ÷ 걸린 시간. 같은 거리를 더 짧은 시간에 가면 더 빨라요.|Speed is how far something goes in a set time, like one second or one hour. Speed = distance ÷ time. Covering the same distance in less time is faster.','학교 앞 어린이 보호구역에서는 차가 천천히 달려야 해요. 빠를수록 멈추는 데 더 먼 거리가 필요하거든요.|Cars must go slowly in school zones: the faster a car goes, the farther it needs to stop.'],
  ['flight',2,3,'✈️','비행기가 나는 힘|How planes fly','날개가 공기를 가르며 앞으로 나아가면 위로 뜨는 힘(양력)이 생겨요. 엔진은 앞으로 미는 힘(추력)을 내고, 공기는 뒤로 막는 힘(항력)을, 중력은 아래로 끄는 힘을 줘요.|As wings slice forward through the air, they get an upward push called lift. Engines give a forward push (thrust), the air pushes back (drag) and gravity pulls down.','종이비행기 날개 끝을 살짝 접어 올리거나 내리면 나는 모습이 달라져요.|Bend the back edges of a paper plane’s wings up or down and watch how its flight changes.'],
- ['pushback',2,3,'🎈','밀면 되밀어요|Every push pushes back','물체를 밀면 그 물체도 똑같은 크기로 나를 되밀어요(작용과 반작용). 풍선에서 바람이 뒤로 나가면 풍선은 앞으로, 로켓이 가스를 아래로 뿜으면 로켓은 위로 올라가요.|When you push on something, it pushes back on you just as hard (action and reaction). Air rushing out the back of a balloon sends it forward; a rocket blasts gas down and shoots up.','스케이트를 신고 벽을 밀면 내가 뒤로 미끄러져요.|On skates, push the wall and you glide backward.'],
+ ['pushback',2,2,'🎈','밀면 되밀어요|Every push pushes back','물체를 밀면 그 물체도 똑같은 크기로 나를 되밀어요(작용과 반작용). 풍선에서 바람이 뒤로 나가면 풍선은 앞으로, 로켓이 가스를 아래로 뿜으면 로켓은 위로 올라가요.|When you push on something, it pushes back on you just as hard (action and reaction). Air rushing out the back of a balloon sends it forward; a rocket blasts gas down and shoots up.','스케이트를 신고 벽을 밀면 내가 뒤로 미끄러져요.|On skates, push the wall and you glide backward.'],
+ ['inertia3',2,2,'🪙','관성 더 알아보기|More about inertia','움직이던 것은 계속 움직이려 하고, 멈춰 있던 것은 계속 멈춰 있으려 해요(관성). 무거울수록 관성이 커서 움직이게 하거나 멈추기가 더 어려워요.|Moving things want to keep moving and still things want to stay still (inertia). The heavier something is, the more inertia it has, so it’s harder to start or stop.','이불을 탁탁 털면 이불은 움직이지만 먼지는 제자리에 남으려 해서 떨어져 나가요.|Shake a blanket hard: the blanket moves, but the dust tends to stay put, so it falls off.'],
  // ---------------------------------------------------------------- 3 Magnet Factory
  ['magiron',3,1,'🧲','자석에 붙는 것|What magnets pick up','자석은 철(쇠)로 된 물건을 끌어당겨요. 클립, 쇠못, 옷핀은 붙고, 나무, 종이, 플라스틱, 유리는 안 붙어요.|Magnets pull things made of iron or steel. Paper clips, nails and safety pins stick; wood, paper, plastic and glass don’t.','냉장고 자석이 붙는 건 냉장고 문이 철로 만들어졌기 때문이에요.|Fridge magnets stick because the fridge door is made of steel.'],
  ['magmetal',3,2,'🥫','모든 금속이 붙지는 않아요|Not every metal sticks','알루미늄 캔, 구리, 금반지는 금속이지만 자석에 붙지 않아요. 자석은 주로 철로 된 것을 끌어당겨요.|Aluminum cans, copper and gold rings are metals, but magnets don’t pull them. Magnets mostly pull iron and steel.','재활용 공장에서는 큰 자석으로 철 캔만 골라내요.|Recycling plants use giant magnets to pull out steel cans.'],
@@ -772,6 +829,10 @@ const CARD_RAW=[
  ['circuit',3,3,'🔋','전기 회로|Electric circuits','전지, 전선, 전구가 끊기지 않고 둥글게 이어져야(닫힌 회로) 전기가 흘러 불이 켜져요. 전지 두 개를 한 줄로 이으면(직렬연결) 전구가 더 밝아요. 쇠나 구리처럼 전기가 잘 통하는 것을 도체, 고무나 플라스틱처럼 안 통하는 것을 부도체라고 해요.|Electricity flows only around an unbroken loop of battery, wires and bulb (a closed circuit). Two batteries in a row (in series) make the bulb brighter. Things that carry electricity well, like iron and copper, are conductors; rubber and plastic are insulators.','전선 겉을 고무나 플라스틱으로 싸는 건 전기가 밖으로 새지 않게 하려는 거예요.|Wires are coated in rubber or plastic to keep the electricity inside.'],
  ['emag',3,3,'🧲','전자석|Electromagnets','쇠못에 전선을 감고 전기를 흘리면 자석이 돼요(전자석). 전기를 끊으면 자석의 힘이 사라지고, 전선을 많이 감거나 전지를 더 이으면 세져요. 전지 방향을 바꾸면 N극과 S극도 바뀌어요.|Wrap wire around an iron nail and run electricity through it, and it becomes a magnet (an electromagnet). Switch off the power and it stops being a magnet. More turns of wire or more batteries make it stronger. Flip the battery and the poles flip too.','고철 공장의 기중기, 스피커, 초인종에 전자석이 들어 있어요.|Scrapyard cranes, speakers and doorbells all have electromagnets inside.'],
  ['energy',3,3,'♻️','에너지 아껴 쓰기|Saving energy','석유, 석탄, 가스는 쓰면 다시 채우기 어렵고 태우면 공기를 더럽혀요. 햇빛, 바람, 흐르는 물로 만드는 재생에너지는 계속 쓸 수 있어요. 전기를 아끼면 자원도 아끼고 지구도 지켜요.|Oil, coal and gas run out and pollute the air when we burn them. Renewable energy from sunlight, wind and moving water won’t run out. Saving electricity saves resources and protects the planet.','안 쓰는 방의 불 끄기, 충전이 끝난 충전기 뽑기부터 해 봐요.|Start by switching off lights in empty rooms and unplugging finished chargers.'],
+ ['metal',3,2,'🔩','금속의 성질|What metals are like','금속은 반짝이고 단단하며, 열과 전기가 잘 통해요. 두드리면 얇게 펴지고, 길게 늘여 전선을 만들 수 있어요. 철은 공기와 물을 만나면 녹이 슬지만 금은 녹슬지 않아요. 알루미늄은 가벼워서 캔과 비행기에 쓰여요.|Metals are shiny and strong, and they carry heat and electricity well. You can hammer them flat or stretch them into wire. Iron rusts with air and water, but gold doesn’t. Aluminum is light, so it’s used for cans and planes.','자전거 체인에 기름을 칠하거나 철에 페인트를 바르면 녹이 덜 슬어요.|Oil on a bike chain or paint on iron helps keep rust away.'],
+ ['static',3,2,'🎈','정전기|Static electricity','풍선을 머리카락에 문지르면 풍선과 머리카락이 서로 끌어당겨요. 문지를 때 생긴 전기가 흐르지 않고 머물러 있는 것을 정전기라고 해요. 번개도 구름에 쌓인 아주 큰 정전기가 한꺼번에 흐르는 거예요.|Rub a balloon on your hair and they pull toward each other. Electricity made by rubbing that stays put instead of flowing is static electricity. Lightning is a giant spark of static electricity from a cloud.','겨울에 문고리에서 찌릿하면 정전기예요. 손에 로션을 바르면 덜해요.|That zap from a doorknob in winter is static. Hand lotion helps.'],
+ ['transform',3,2,'🔄','에너지는 모습을 바꿔요|Energy changes form','전기는 전구에서 빛, 전기난로에서 열, 스피커에서 소리, 선풍기에서 움직임으로 바뀌어요. 음식 속 에너지는 우리 몸을 움직이게 하고, 건전지 속 에너지는 전기로 바뀌어요.|Electricity becomes light in a bulb, heat in a heater, sound in a speaker and motion in a fan. Energy in food makes our bodies move, and energy stored in a battery becomes electricity.','손을 비비면 움직임이 열로 바뀌어 따뜻해져요.|Rub your hands together: motion turns into heat.'],
+ ['generate',3,3,'⚡','전기는 어떻게 만들까요?|How electricity is made','발전기 속에서 자석과 구리 전선 뭉치가 서로 돌면 전기가 생겨요. 수력은 떨어지는 물, 풍력은 바람, 화력은 석탄이나 가스를 태운 증기로 발전기를 돌려요. 태양광 판은 햇빛을 바로 전기로 바꿔요. 만든 전기는 전선을 타고 집까지 와요.|Inside a generator, magnets and coils of copper wire spin past each other and make electricity. Hydro plants turn generators with falling water, wind turbines with wind, and thermal plants with steam from burning coal or gas. Solar panels turn sunlight straight into electricity. Power lines carry it to our homes.','자전거 바퀴 발전기 전등도 바퀴가 돌 때 자석이 돌아서 불이 켜져요.|A bike dynamo light glows because a magnet spins as the wheel turns.'],
  // ---------------------------------------------------------------- 4 Kitchen Lab
  ['states',4,1,'🧊','고체·액체·기체|Solid, liquid, gas','얼음처럼 모양이 일정한 것은 고체, 물처럼 흘러서 그릇 모양이 되는 것은 액체, 수증기나 공기처럼 퍼져 나가는 것은 기체예요.|Things that keep their shape, like ice, are solids. Things that flow and take the shape of their container, like water, are liquids. Things that spread out to fill a space, like steam and air, are gases.','주스는 액체, 컵은 고체, 풍선 속 공기는 기체!|Juice is a liquid, the cup is a solid and the air in a balloon is a gas!'],
  ['melt',4,1,'🍦','녹기|Melting','고체가 열을 받으면 액체가 돼요. 얼음은 녹아서 물이 되고, 초콜릿은 손에서 녹아요.|When a solid warms up, it can melt into a liquid. Ice melts into water and chocolate melts in your hand.','아이스크림은 햇볕 아래에서 빨리 녹으니 그늘에서 먹어요.|Ice cream melts fast in the sun, so eat it in the shade.'],
@@ -789,6 +850,13 @@ const CARD_RAW=[
  ['solution',4,3,'🥄','용액의 진하기|How strong a solution is','설탕이 물에 녹아 고르게 섞인 것을 용액이라고 해요. 같은 양의 물에 녹은 설탕이 많을수록 진한 용액이에요. 물에 녹는 양에는 한계가 있고, 따뜻한 물일수록 더 많이 녹아요. 녹은 설탕은 사라진 게 아니라서 무게는 그대로예요.|When sugar dissolves and mixes evenly into water, it makes a solution. The more sugar in the same amount of water, the stronger it is. Water can only hold so much, and warm water holds more. Dissolved sugar hasn’t vanished, so the weight stays the same.','진한 소금물에는 달걀이 둥둥 떠요. 바닷물에서 몸이 더 잘 뜨는 것과 같아요.|An egg floats in very salty water, just like you float more easily in the sea.'],
  ['burn',4,3,'🔥','불이 타는 조건|What fire needs','물질이 타려면 탈 물질, 산소(공기), 불이 붙을 만큼 높은 온도가 모두 있어야 해요. 셋 중 하나만 없애도 불이 꺼져요. 프라이팬 기름에 불이 붙으면 물을 붓지 말고 뚜껑을 덮어요.|Fire needs three things: fuel, oxygen (air) and enough heat. Take away any one and the fire goes out. If oil in a pan catches fire, never pour water on it; cover it with a lid.','부엌에서 불이 나면 바로 어른에게 알리고, 소화기 위치를 미리 알아 둬요.|Tell a grown-up right away about any kitchen fire, and know where the fire extinguisher is.'],
  ['change',4,3,'🍞','물질이 바뀌는 변화|Changes in matter','얼음이 녹거나 종이를 자르는 것은 물질의 성질은 그대로인 변화예요. 빵을 굽거나 나무가 타거나 쇠가 녹스는 것은 성질이 다른 새 물질이 생기는 변화예요. 이런 변화는 되돌리기 어려워요.|Melting ice or cutting paper doesn’t change what the material is. Baking bread, burning wood and rusting iron make brand-new substances, and those changes are hard to undo.','삶은 달걀은 다시 날달걀로 되돌릴 수 없어요!|Once an egg is boiled, you can’t turn it back into a raw egg!'],
+ ['fizz',4,1,'🫧','부글부글 거품 실험|Fizzy reactions','식초에 베이킹소다를 넣으면 부글부글 거품이 나요. 두 물질이 만나 이산화탄소라는 새 기체가 생겼기 때문이에요. 이 거품으로 화산 놀이를 할 수 있어요.|Add baking soda to vinegar and it fizzes and foams. The two react and make a new gas called carbon dioxide. You can use it to make a pretend volcano!','실험할 때는 보안경을 쓰고 어른과 함께 해요.|Wear goggles and do experiments with a grown-up.'],
+ ['chemsafe',4,1,'☠️','집 안 화학 제품 안전|Chemical safety at home','세제, 약, 표백제 같은 화학 제품은 어른만 다뤄요. 원래 통에 담아 두고, 모르는 병은 냄새 맡거나 맛보지 않아요. 병에 그려진 해골이나 불꽃 그림은 위험하다는 표시예요.|Cleaners, medicines and bleach are for grown-ups to handle. Keep them in their own containers, and never sniff or taste an unknown bottle. A skull or flame picture on a bottle means danger.','누가 잘못 삼켰다면 바로 어른에게 알리고 응급 전화를 해요.|If someone swallows something, tell a grown-up and call for help right away.'],
+ ['acidlife',4,2,'🍊','신맛은 산성, 미끈미끈은 염기성|Sour acids, slippery bases','레몬, 식초, 오렌지 주스처럼 신맛이 나는 것은 대개 산성이에요. 비눗물처럼 만지면 미끈미끈한 것은 대개 염기성이에요. 하지만 모르는 액체는 절대 맛보거나 만지지 말고 지시약으로 알아봐요.|Sour things like lemons, vinegar and orange juice are usually acids. Things that feel slippery, like soapy water, are usually bases. Never taste or touch an unknown liquid; test it with an indicator.','책에서 과일을 “알칼리성 식품”이라고 하는 건 음식을 태운 재로 나눈 거예요. 오렌지 주스 자체는 산성이에요.|When books call fruit an “alkaline food,” they mean the ash left after burning it. Orange juice itself is acidic.'],
+ ['kitchenchem',4,2,'🍎','부엌 속 화학|Chemistry in the kitchen','깎은 사과가 갈색으로 변하는 것은 공기 속 산소와 만나서예요. 레몬즙을 바르면 늦출 수 있어요. 빵 반죽은 효모가 만든 이산화탄소로 부풀고, 세제는 기름때를 감싸서 물에 씻겨 나가게 해요.|Cut apples turn brown when they meet oxygen in the air; lemon juice slows it down. Bread dough rises from carbon dioxide made by yeast, and dish soap wraps around grease so water can wash it away.','세제나 표백제는 서로 섞으면 독한 기체가 나올 수 있어요. 절대 섞지 말아요!|Mixing cleaners or bleach can make poisonous gas. Never mix them!'],
+ ['flame',4,2,'🎆','불꽃 반응|Flame tests','어떤 금속을 불꽃에 넣으면 금속마다 다른 색 불꽃이 나요. 구리는 청록색, 나트륨(소금)은 노란색, 리튬은 빨간색, 칼륨은 보라색이에요. 불꽃놀이의 여러 색이 바로 이 원리예요.|Put certain metals into a flame and each gives its own color: copper blue-green, sodium (in salt) yellow, lithium red, potassium violet. That’s how fireworks get their colors.','국이 끓어 넘쳐 가스 불에 닿으면 불꽃이 노랗게 변해요. 국 속 소금의 나트륨 때문이에요.|When salty soup boils over onto a gas flame, the flame flashes yellow from the sodium in the salt.'],
+ ['heatmove',4,3,'♨️','열이 이동하는 세 가지 방법|Three ways heat moves','고체에서는 열이 맞닿은 곳을 따라 전해지고(전도), 물이나 공기는 데워진 부분이 위로 올라가며 돌면서 열을 옮기고(대류), 햇볕이나 모닥불의 열은 곧장 날아와요(복사).|In solids, heat passes along through touching parts (conduction). In water and air, warm parts rise and circulate, carrying heat (convection). Heat from the Sun or a campfire travels straight to you (radiation).','에어컨은 위쪽에, 난로는 아래쪽에 두면 방 전체가 고르게 시원하고 따뜻해져요.|Put an air conditioner up high and a heater down low, and the whole room cools or warms evenly.'],
+ ['separate',4,3,'⚗️','섞인 것 나누기|Separating mixtures','섞인 물질은 성질 차이를 이용해 나눠요. 크기가 다르면 체로, 철이 섞였으면 자석으로, 물에 녹는 것과 안 녹는 것은 거름종이로 거르고, 녹아 있는 소금은 물을 증발시켜 얻어요.|Mixtures are separated using differences in their properties: a sieve for different sizes, a magnet for iron, filter paper for things that do and don’t dissolve, and evaporation to get dissolved salt back.','재활용 공장도 자석과 바람, 물을 이용해 쓰레기를 나눠요.|Recycling plants sort waste with magnets, air and water.'],
  // ---------------------------------------------------------------- 5 Green Forest
  ['plantneeds',5,1,'🌱','식물에게 필요한 것|What plants need','식물이 자라려면 햇빛, 물, 공기, 그리고 영양분이 있는 흙이 필요해요. 물이 너무 많아도 안 좋아요.|Plants need sunlight, water, air and soil with nutrients to grow. Too much water is bad, too.','화분은 햇빛 드는 창가에 두고, 흙이 마르면 물을 줘요.|Keep a plant by a sunny window and water it when the soil is dry.'],
  ['plantparts',5,1,'🌷','식물의 부분|Parts of a plant','뿌리는 물을 빨아들이고, 줄기는 물을 나르고, 잎은 햇빛으로 양분을 만들고, 꽃은 씨앗을 만들어요.|Roots soak up water, stems carry it, leaves make food from sunlight and flowers make seeds.','당근은 뿌리, 상추는 잎, 브로콜리는 꽃봉오리를 먹는 거예요!|A carrot is a root, lettuce is a leaf and broccoli is flower buds!'],
@@ -811,7 +879,7 @@ const CARD_RAW=[
  ['daynight',6,2,'🌍','지구의 자전|Earth spins','지구는 팽이처럼 하루에 한 바퀴 돌아요(자전). 해를 바라보는 쪽은 낮, 반대쪽은 밤이에요.|Earth spins like a top, once every day. The side facing the Sun has day; the other side has night.','한국이 낮일 때 캐나다는 밤이에요. 할머니 할아버지께 전화할 때 시간을 확인해요!|When it’s daytime in Korea, it’s night in Canada. Check the time before you call family far away!'],
  ['sunstar',6,1,'☀️','해는 별이에요|The Sun is a star','해(태양)는 스스로 빛과 열을 내는 아주 큰 별이에요. 가장 가까운 별이라서 크고 밝게 보여요.|The Sun is a huge star that makes its own light and heat. It looks big and bright because it’s the closest star to us.','해를 맨눈으로 똑바로 보면 눈을 다쳐요. 절대 보지 마요!|Never look straight at the Sun. It can hurt your eyes!'],
  ['moonphase',6,2,'🌙','달의 모양 변화|Moon phases','달은 스스로 빛나지 않고 햇빛을 반사해요. 약 한 달 동안 초승달 → 반달 → 보름달 → 반달 → 그믐달로 모양이 바뀌어 보여요.|The Moon doesn’t make light; it reflects sunlight. Over about a month it seems to change from crescent → half → full → half → crescent.','오늘 밤 달 모양을 그려 두고 일주일 뒤와 비교해 봐요.|Draw tonight’s Moon and compare it with the Moon a week later.'],
- ['watercycle',6,2,'🔄','물의 여행|The water cycle','바다와 강의 물이 증발해 수증기가 되고, 하늘에서 식어 구름이 되고, 비나 눈으로 내려 다시 강과 바다로 가요.|Water from oceans and rivers evaporates into vapor, cools into clouds, falls as rain or snow and flows back to rivers and oceans.','오늘 마신 물도 예전에는 구름이었을지 몰라요!|The water you drank today may once have been a cloud!'],
+ ['watercycle',6,1,'🔄','물의 여행|The water cycle','바다와 강의 물이 증발해 수증기가 되고, 하늘에서 식어 구름이 되고, 비나 눈으로 내려 다시 강과 바다로 가요.|Water from oceans and rivers evaporates into vapor, cools into clouds, falls as rain or snow and flows back to rivers and oceans.','오늘 마신 물도 예전에는 구름이었을지 몰라요!|The water you drank today may once have been a cloud!'],
  ['clouds',6,1,'☁️','구름과 비|Clouds and rain','구름은 아주 작은 물방울이나 얼음 알갱이가 모인 거예요. 물방울이 커지고 무거워지면 비나 눈이 되어 떨어져요.|Clouds are made of tiny water drops or ice crystals. When the drops grow big and heavy, they fall as rain or snow.','먹구름이 몰려오면 우산을 챙겨요.|When dark clouds roll in, grab an umbrella.'],
  ['rainbow',6,1,'🌈','무지개|Rainbows','햇빛 속에는 여러 색이 숨어 있어요. 비 온 뒤 해를 등지고 서면 물방울이 햇빛을 나눠서 무지개가 보여요(빨주노초파남보).|Sunlight hides many colors. After rain, stand with the Sun behind you and water drops split the light into a rainbow (red, orange, yellow, green, blue, indigo, violet).','맑은 날 해를 등지고 분무기를 뿌리면 작은 무지개를 만들 수 있어요.|On a sunny day, spray a mist with the Sun behind you to make a mini rainbow.'],
  ['thunder',6,1,'⚡','번개와 천둥|Lightning and thunder','빛은 소리보다 훨씬 빨라서 번개가 먼저 보이고 천둥은 나중에 들려요. 3초를 세면 약 1km 떨어진 거예요.|Light is much faster than sound, so we see lightning before we hear thunder. Every 3 seconds you count is about 1 km away.','천둥이 들리면 바로 건물 안으로! 큰 나무 아래는 위험해요.|When thunder roars, go indoors! Never shelter under a tall tree.'],
@@ -849,6 +917,7 @@ const CARD_RAW=[
  ['mineral',8,2,'💎','광물|Minerals','돌은 여러 가지 광물이 모여 이루어져 있어요. 연필심의 흑연, 음식에 넣는 소금, 유리를 만드는 석영도 광물이에요. 광물은 색깔과 단단한 정도가 저마다 달라요.|Rocks are made of minerals. Pencil graphite, table salt and quartz (used to make glass) are all minerals. Minerals differ in color and hardness.','캐나다는 니켈과 금 같은 광물이 많이 나는 나라예요.|Canada produces lots of minerals, such as nickel and gold.'],
  ['strata',8,3,'🍰','지층|Rock layers','강이나 바다 밑에 자갈, 모래, 진흙이 층층이 쌓이고 오랜 시간 눌려 굳으면 지층이 돼요. 보통 아래에 있는 층이 먼저 쌓여서 더 오래됐어요. 알갱이 크기에 따라 역암(자갈), 사암(모래), 이암(진흙)으로 나눠요.|Gravel, sand and mud pile up in layers under rivers and seas, then get pressed into rock over a long time. Usually the bottom layer formed first, so it’s the oldest. By grain size, these rocks are conglomerate (gravel), sandstone (sand) and mudstone (mud).','바닷가 절벽의 줄무늬는 지층이에요. 무너질 수 있으니 가까이 가지 마요.|The stripes in seaside cliffs are rock layers. Keep away from the edge; they can crumble.'],
  ['fossil2',8,3,'🐚','화석이 알려 주는 것|What fossils tell us','생물이 죽은 뒤 진흙이나 모래에 빨리 묻히고 그 위에 계속 흙이 쌓여 굳으면 화석이 돼요. 산에서 조개 화석이 나오면 그곳이 옛날에 바다였다는 걸 알 수 있어요. 석탄도 아주 옛날 식물이 땅속에 묻혀 만들어졌어요.|When a living thing dies and is quickly buried in mud or sand, and more layers pile on and harden, it can become a fossil. Seashell fossils on a mountain tell us the place was once under the sea. Coal formed from ancient plants buried underground.','박물관에서 화석을 보면 어떤 환경에서 살았을지 상상해 봐요.|At a museum, look at a fossil and imagine where that creature lived.'],
+ ['rocktypes',8,2,'🪨','돌의 세 가지 무리|Three kinds of rock','돌은 만들어진 방법에 따라 세 무리로 나눠요. 마그마가 식어 굳은 화성암(현무암, 화강암), 알갱이가 쌓여 굳은 퇴적암(사암, 이암, 석회암), 높은 열과 압력으로 모습이 바뀐 변성암(대리암, 편마암)이에요.|Rocks come in three groups depending on how they formed: igneous rock from cooled magma (basalt, granite), sedimentary rock from layers of grains pressed together (sandstone, mudstone, limestone), and metamorphic rock changed by great heat and pressure (marble, gneiss).','돌은 아주 오랜 시간 동안 깎이고 쌓이고 녹으며 다른 무리로 바뀌어요(암석의 순환).|Over a very long time, rocks wear away, pile up and melt, changing from one kind to another (the rock cycle).'],
 ];
 
 // Challenges. t: mc (choice), ox (true/false), sort (into bins), order (sequence), multi (pick all), riddle (clues), sim (interactive lab)
@@ -1009,6 +1078,16 @@ const QS=[
  {c:'pushback',l:3,t:'ox',s:'로켓은 가스를 아래로 세게 뿜어서 그 반대쪽인 위로 올라간다.|A rocket blasts gas downward and moves the opposite way: up.',v:1},
  {c:'pushback',l:3,t:'mc',q:'스케이트보드에 서서 벽을 앞으로 힘껏 밀면 나는 어떻게 될까요?|Standing on a skateboard, you shove a wall forward. What happens to you?',art:'🛹🧱',a:'뒤로 굴러가요|I roll backward',o:['앞으로 굴러가요|I roll forward','벽만 움직이고 나는 그대로예요|Only the wall moves','위로 붕 떠요|I float up']},
  {c:'pushback',l:3,t:'ox',s:'수영할 때 손으로 물을 뒤로 밀면 몸은 앞으로 나아간다.|When you swim, pushing water backward moves you forward.',v:1},
+ {c:'inertia3',l:2,t:'mc',q:'컵 위에 카드, 그 위에 동전을 올렸어요. 카드를 손가락으로 휙 튕기면 동전은?|A card sits on a cup with a coin on top. You flick the card away fast. What happens to the coin?',art:'🥛🪙',a:'컵 속으로 쏙 떨어져요|It drops into the cup',o:['카드와 함께 날아가요|It flies away with the card','공중에 둥둥 떠 있어요|It floats in the air','위로 튀어 올라요|It jumps up']},
+ {c:'inertia3',l:2,t:'ox',s:'이불을 세게 털면 먼지가 떨어져 나가는 것도 관성 때문이다.|Dust falling off a blanket you shake hard is also because of inertia.',v:1},
+ {c:'inertia3',l:2,t:'mc',q:'달리다가 돌부리에 발이 걸리면 몸은 어느 쪽으로 넘어질까요?|You trip on a rock while running. Which way do you fall?',art:'🏃🪨',a:'앞으로|Forward',o:['뒤로|Backward','옆으로|Sideways','그 자리에 딱 서요|You stop on the spot']},
+ {c:'inertia3',l:3,t:'mc',q:'같은 빠르기로 달리던 자전거와 큰 트럭 중, 브레이크를 밟았을 때 멈추기 더 어려운 것은?|A bike and a big truck are going the same speed. Which is harder to stop?',art:'🚚🚲',a:'🚚 무거운 트럭|🚚 The heavy truck',o:['🚲 가벼운 자전거|🚲 The light bike','둘 다 똑같아요|They’re the same','바퀴가 적은 쪽|Whichever has fewer wheels'],why:'무거울수록 관성이 커서 멈추게 하기 어려워요. 그래서 큰 차 가까이에서는 더 조심해야 해요.|Heavier things have more inertia, so they’re harder to stop. Take extra care near big trucks.'},
+ {c:'inertia3',l:3,t:'ox',s:'공기도 마찰도 없는 우주에서 던진 공은 멈추지 않고 계속 날아간다.|In space, with no air or friction, a thrown ball keeps flying without stopping.',v:1},
+ {c:'inertia3',l:3,t:'mc',q:'망치 머리가 헐거워졌어요. 손잡이 끝을 바닥에 쿵 내리치면 어떻게 될까요?|A hammer head is loose. You bang the end of the handle on the floor. What happens?',art:'🔨',a:'내려가던 머리가 계속 내려가서 손잡이에 꽉 박혀요|The moving head keeps going and jams tight on the handle',o:['머리가 빠져서 날아가요|The head flies off','손잡이만 짧아져요|Only the handle gets shorter','아무 변화가 없어요|Nothing happens']},
+ {c:'pushback',l:2,t:'mc',q:'보트에서 노로 물을 뒤로 밀면 보트는 어느 쪽으로 갈까요?|Rowing a boat, you push the water backward with the oars. Which way does the boat go?',art:'🚣',a:'앞으로|Forward',o:['뒤로|Backward','제자리에서 빙글 돌아요|It spins in place','물속으로 가라앉아요|It sinks']},
+ {c:'pushback',l:2,t:'ox',s:'높이 뛰어오를 때 우리는 발로 땅을 아래로 세게 민다.|When you jump up, your feet push hard down on the ground.',v:1,why:'땅을 아래로 밀면 땅도 나를 위로 밀어 줘서 뛰어오를 수 있어요.|Push down on the ground and the ground pushes you up.'},
+ {c:'pushback',l:2,t:'mc',q:'오징어와 문어는 어떻게 쌩 하고 앞으로 나아갈까요?|How do squid and octopuses zoom along?',art:'🦑',a:'몸속의 물을 뒤로 세게 뿜어요|They squirt water out backward',o:['물을 꿀꺽 마셔요|They gulp water','다리로 물 위를 걸어요|They walk on the water','바람을 타고 가요|They ride the wind']},
+ {c:'pushback',l:2,t:'ox',s:'작은 배에서 부두 쪽으로 힘껏 뛰면 배는 반대쪽으로 밀려난다.|If you jump hard from a small boat toward the dock, the boat gets pushed the other way.',v:1},
  // ======================================================== 3 Magnet Factory
  {c:'magiron',l:1,t:'sort',q:'자석에 붙을까요? 알맞은 곳에 넣어요.|Will a magnet pick it up? Sort them.',fx:'magnet',bins:[['🧲','붙어요|Sticks'],['🚫','안 붙어요|Doesn’t stick']],items:[['📎','쇠 클립|Steel paper clip',0],['🔩','쇠못|Iron nail',0],['🧷','옷핀|Safety pin',0],['🪛','쇠 나사|Steel screw',0],['✏️','연필|Pencil',1],['🧸','곰 인형|Teddy bear',1],['📄','종이|Paper',1],['🥛','유리컵|Glass cup',1],['🧩','플라스틱 블록|Plastic block',1],['🪵','나무 블록|Wooden block',1],['🧽','스펀지|Sponge',1]]},
  {c:'magiron',l:1,t:'mc',q:'자석에 붙는 것은 무엇일까요?|Which one will a magnet pick up?',art:'🧲',a:'📎 쇠 클립|📎 A steel paper clip',o:['✏️ 연필|✏️ A pencil','🧸 곰 인형|🧸 A teddy bear','📄 종이|📄 Paper']},
@@ -1063,6 +1142,27 @@ const QS=[
  {c:'energy',l:3,t:'multi',q:'전기를 아끼는 방법을 모두 골라요.|Pick every way to save electricity.',art:'🔌',yes:[['💡','안 쓰는 방 불 끄기|Turn off lights in empty rooms'],['🔌','다 쓴 충전기 뽑기|Unplug finished chargers'],['🧥','겨울엔 실내에서 따뜻한 옷 입기|Wear a sweater indoors in winter'],['🚪','냉장고 문 빨리 닫기|Close the fridge quickly']],no:[['📺','아무도 안 보는 TV 켜 두기|Leave the TV on with no one watching'],['🪟','에어컨 켜고 창문 열기|Open windows with the A/C on'],['🌙','밤새 모든 불 켜 두기|Leave every light on all night']],n:[3,2]},
  {c:'energy',l:3,t:'ox',s:'캐나다에서 쓰는 전기의 절반 넘게는 흐르는 강물의 힘(수력)으로 만든다.|More than half of Canada’s electricity comes from moving river water (hydro power).',v:1},
  {c:'energy',l:3,t:'mc',q:'석유와 석탄을 아껴 써야 하는 까닭은?|Why should we use less oil and coal?',art:'🏭',a:'양이 정해져 있고 태우면 공기가 더러워져서|They run out, and burning them dirties the air',o:['너무 가벼워서 날아가 버려서|They are so light they blow away','다시 금방 만들어져서|They are made again quickly','태우면 공기가 깨끗해져서|Burning them cleans the air']},
+ {c:'electric',l:2,t:'sim',sim:'circuit',v:'gap'},
+ {c:'circuit',l:3,t:'sim',sim:'circuit',v:'gap'},
+ {c:'circuit',l:3,t:'sim',sim:'circuit',v:'series'},
+ {c:'circuit',l:3,t:'mc',q:'집 안의 전등은 하나를 꺼도 다른 전등은 켜져 있어요. 어떻게 연결돼 있을까요?|At home, one light can be off while the others stay on. How are they connected?',art:'🏠💡',a:'각각 다른 갈래로 연결(병렬연결)|Each on its own branch (in parallel)',o:['모두 한 줄로 연결(직렬연결)|All in one line (in series)','전선 없이 연결|Without any wires','건전지로만 연결|Only with batteries']},
+ {c:'metal',l:2,t:'sort',q:'금속일까요, 아닐까요? 알맞은 곳에 넣어요.|Metal or not? Sort them.',bins:[['🔩','금속|Metal'],['🪵','금속 아님|Not metal']],items:[['🥫','깡통|Tin can',0],['🔑','열쇠|Key',0],['🥄','쇠 숟가락|Steel spoon',0],['💍','금반지|Gold ring',0],['🥡','알루미늄 포일|Aluminum foil',0],['🥢','나무젓가락|Wooden chopsticks',1],['🥛','유리컵|Glass cup',1],['🧸','곰 인형|Teddy bear',1],['📏','플라스틱 자|Plastic ruler',1]]},
+ {c:'metal',l:2,t:'mc',q:'전선 속을 구리로 만드는 까닭은?|Why is the inside of an electric wire made of copper?',art:'🔌',a:'전기가 잘 통해서|It carries electricity well',o:['자석에 잘 붙어서|It sticks to magnets','가장 가벼워서|It’s the lightest','반짝여서 예뻐서|It’s shiny and pretty']},
+ {c:'metal',l:2,t:'ox',s:'금속은 망치로 두드리면 깨지지 않고 얇게 펴진다.|Hammering metal flattens it instead of shattering it.',v:1},
+ {c:'metal',l:2,t:'mc',q:'오래 써도 녹이 슬지 않아서 반지와 목걸이에 많이 쓰는 금속은?|Which metal never rusts, so it’s used a lot for rings and necklaces?',art:'💍',a:'금|Gold',o:['철|Iron','구리|Copper','쇠못|Iron nails']},
+ {c:'metal',l:3,t:'mc',q:'자전거 체인이 녹슬지 않게 하는 방법은?|How can you keep a bike chain from rusting?',art:'🚲',a:'기름을 칠해 공기와 물을 막아요|Oil it to keep out air and water',o:['물을 자주 뿌려요|Spray it with water often','비 오는 날 밖에 세워 둬요|Leave it out in the rain','소금물로 닦아요|Wipe it with salt water']},
+ {c:'metal',l:3,t:'ox',s:'철이 녹스는 데에는 공기(산소)와 물이 필요하다.|Iron needs air (oxygen) and water to rust.',v:1},
+ {c:'static',l:2,t:'mc',q:'풍선을 머리카락에 문지른 뒤 머리 가까이 대면 어떻게 될까요?|You rub a balloon on your hair and hold it near your head. What happens?',art:'🎈💇',a:'머리카락이 풍선 쪽으로 끌려 올라가요|Your hair lifts toward the balloon',o:['머리카락이 젖어요|Your hair gets wet','풍선이 펑 터져요|The balloon pops','풍선이 차가워져요|The balloon gets cold']},
+ {c:'static',l:2,t:'ox',s:'겨울에 문고리를 만질 때 찌릿한 것은 정전기 때문이다.|The zap you sometimes feel from a doorknob in winter is static electricity.',v:1},
+ {c:'static',l:2,t:'ox',s:'번개는 구름에 쌓인 아주 큰 정전기가 한꺼번에 흐르는 것이다.|Lightning is a huge buildup of static electricity in a cloud flowing all at once.',v:1},
+ {c:'static',l:3,t:'mc',q:'털옷에 문지른 플라스틱 빗을 잘게 자른 종이에 가까이 대면?|You rub a plastic comb on a wool sweater and hold it near tiny bits of paper. What happens?',art:'💇📄',a:'종잇조각이 빗에 달라붙어요|The paper bits jump onto the comb',o:['종이가 타요|The paper burns','빗이 녹아요|The comb melts','빗이 자석이 돼서 클립도 붙어요|The comb becomes a magnet for paper clips']},
+ {c:'transform',l:2,t:'sort',q:'전기가 주로 무엇으로 바뀔까요? 알맞은 곳에 넣어요.|What does the electricity mostly turn into? Sort them.',bins:[['💡','빛|Light'],['🔥','열|Heat'],['🌀','움직임|Motion']],items:[['💡','전등|Lamp',0],['🔦','손전등|Flashlight',0],['🚦','신호등|Traffic light',0],['🍞','토스터|Toaster',1],['♨️','전기난로|Electric heater',1],['👕','다리미|Clothes iron',1],['🌀','선풍기|Fan',2],['🚗','전기 자동차|Electric car',2],['🧺','세탁기|Washing machine',2]]},
+ {c:'transform',l:2,t:'mc',q:'건전지를 넣은 장난감 자동차가 달려요. 건전지 속 에너지는 무엇으로 바뀌었을까요?|A battery-powered toy car zooms along. What did the battery’s energy turn into?',art:'🚗🔋',a:'움직임|Motion',o:['얼음|Ice','소금|Salt','물|Water']},
+ {c:'transform',l:2,t:'ox',s:'우리가 먹은 음식 속 에너지가 몸을 움직이게 한다.|The energy in the food we eat makes our bodies move.',v:1},
+ {c:'generate',l:3,t:'mc',q:'발전기 속에서 전기를 만드는 것은?|What makes electricity inside a generator?',art:'🌀🧲',a:'자석과 전선 뭉치가 서로 돌아요|Magnets and coils of wire spin past each other',o:['물이 전선 속으로 흘러들어요|Water flows into the wires','불꽃이 전선에 옮겨붙어요|Sparks jump onto the wires','건전지가 아주 많이 들어 있어요|It’s packed with batteries']},
+ {c:'generate',l:3,t:'order',q:'수력 발전소에서 만든 전기가 집까지 오는 순서대로 눌러요.|Tap how electricity gets from a hydro dam to your home, in order.',items:[['🌊','높은 곳의 물이 떨어져요|Water falls from up high'],['🌀','물이 터빈을 돌려요|It spins a turbine'],['⚡','발전기가 전기를 만들어요|The generator makes electricity'],['🗼','전선을 타고 이동해요|Power lines carry it'],['🏠','집에서 불이 켜져요|Lights turn on at home']]},
+ {c:'generate',l:3,t:'ox',s:'태양광 판은 햇빛을 바로 전기로 바꾼다.|Solar panels turn sunlight straight into electricity.',v:1},
+ {c:'generate',l:3,t:'mc',q:'바람의 힘으로 전기를 만드는 것은?|What makes electricity from the wind?',art:'🌬️',a:'풍력 발전기|A wind turbine',o:['태양광 판|A solar panel','수력 발전소 댐|A hydro dam','건전지|A battery']},
  // ======================================================== 4 Kitchen Lab
  {c:'states',l:1,t:'sort',q:'딱딱한 고체일까요, 흐르는 액체일까요?|Solid or liquid? Sort them.',bins:[['🧱','고체(모양이 그대로)|Solid (keeps its shape)'],['💧','액체(흘러요)|Liquid (flows)']],items:[['🧊','얼음|Ice',0],['🪨','돌|Rock',0],['✏️','연필|Pencil',0],['🍎','사과|Apple',0],['🥄','숟가락|Spoon',0],['🥛','우유|Milk',1],['🧃','주스|Juice',1],['🚰','수돗물|Tap water',1],['🫗','식용유|Cooking oil',1]]},
  {c:'states',l:2,t:'sort',q:'고체, 액체, 기체 중 무엇일까요?|Solid, liquid or gas?',bins:[['🧱','고체|Solid'],['💧','액체|Liquid'],['💨','기체|Gas']],items:[['🧊','얼음|Ice',0],['🪨','돌|Stone',0],['✏️','연필|Pencil',0],['🍎','사과|Apple',0],['🥛','우유|Milk',1],['🧃','주스|Juice',1],['🍯','꿀|Honey',1],['🚰','수돗물|Tap water',1],['🎈','풍선 속 공기|Air in a balloon',2],['♨️','수증기|Water vapor',2],['🌬️','선풍기 바람(공기)|Air from a fan',2]]},
@@ -1129,6 +1229,46 @@ const QS=[
  {c:'change',l:3,t:'ox',s:'쇠못이 녹스는 것은 쇠가 공기와 물을 만나 새로운 물질로 바뀌는 것이다.|Rusting happens when iron meets air and water and turns into a new substance.',v:1},
  {c:'change',l:3,t:'mc',q:'다음 중 되돌리기 어려운 변화는?|Which change is hard to undo?',art:'🥚',a:'🍳 달걀 익히기|🍳 Cooking an egg',o:['🧊 물 얼리기|🧊 Freezing water','✂️ 종이 접기|✂️ Folding paper','🍫 초콜릿 녹이기|🍫 Melting chocolate']},
  {c:'change',l:3,t:'ox',s:'물을 얼려 얼음을 만들면 물과 전혀 다른 새 물질이 된다.|Freezing water makes a totally new substance, different from water.',v:0,why:'얼음도 물이에요. 모습만 바뀌었고 녹이면 다시 물이 돼요.|Ice is still water. Only its form changed, and it melts back into water.'},
+ {c:'states',l:1,t:'sim',sim:'water'},
+ {c:'freeze',l:2,t:'sim',sim:'water'},
+ {c:'states',l:3,t:'sim',sim:'water'},
+ {c:'states',l:3,t:'mc',q:'얼음, 물, 수증기 중 알갱이 사이가 가장 멀리 떨어진 것은?|In ice, water or steam, where are the particles farthest apart?',art:'🧊💧💨',a:'수증기|Steam',o:['얼음|Ice','물|Water','모두 똑같아요|They’re all the same']},
+ {c:'states',l:3,t:'ox',s:'물이 수증기가 되면 물 알갱이 하나하나가 커진다.|When water turns into steam, each water particle gets bigger.',v:0,why:'알갱이 크기는 그대로예요. 알갱이 사이가 멀어져서 전체 부피가 커지는 거예요.|The particles stay the same size. They spread farther apart, so the whole thing takes up more space.'},
+ {c:'fizz',l:1,t:'mc',q:'식초에 베이킹소다를 넣으면 어떻게 될까요?|What happens when you add baking soda to vinegar?',art:'🫧',a:'부글부글 거품이 나요|It fizzes and foams',o:['꽁꽁 얼어요|It freezes','아무 일도 없어요|Nothing happens']},
+ {c:'fizz',l:1,t:'ox',s:'식초와 베이킹소다를 섞을 때 나오는 거품은 새로 생긴 기체다.|The bubbles from mixing vinegar and baking soda are a newly made gas.',v:1},
+ {c:'fizz',l:1,t:'mc',q:'거품 화산 놀이를 할 때 꼭 지킬 것은?|What must you do when making a fizzy volcano?',art:'🌋🥽',a:'보안경을 쓰고 어른과 함께 해요|Wear goggles and do it with a grown-up',o:['거품을 마셔 봐요|Taste the foam','눈 가까이 대고 봐요|Look at it up close to your eyes']},
+ {c:'fizz',l:2,t:'mc',q:'식초와 베이킹소다가 만나서 생기는 기체는?|What gas is made when vinegar and baking soda meet?',art:'🌋',a:'이산화탄소|Carbon dioxide',o:['산소|Oxygen','수증기|Water vapor','헬륨|Helium']},
+ {c:'fizz',l:2,t:'ox',s:'달걀 껍데기를 식초에 담가 두면 거품이 생기면서 껍데기가 녹는다.|An eggshell left in vinegar bubbles and slowly dissolves.',v:1,why:'달걀 껍데기, 조개껍데기, 석회암은 산을 만나면 이산화탄소 거품을 내며 녹아요.|Eggshells, seashells and limestone fizz and dissolve in acid, giving off carbon dioxide.'},
+ {c:'fizz',l:3,t:'mc',q:'식초 같은 산성 용액을 만나면 거품을 내며 녹는 것은?|Which of these fizzes and dissolves in an acid like vinegar?',art:'🧪',a:'🐚 조개껍데기|🐚 A seashell',o:['🥄 플라스틱 숟가락|🥄 A plastic spoon','🔮 유리구슬|🔮 A glass marble','🪵 나무 블록|🪵 A wooden block']},
+ {c:'chemsafe',l:1,t:'mc',q:'병에 해골 그림이 그려져 있어요. 무슨 뜻일까요?|A bottle has a skull picture on it. What does it mean?',art:'🧴',a:'☠️ 먹거나 만지면 위험해요|☠️ It’s dangerous to eat or touch',o:['🍬 맛있는 사탕이에요|🍬 It’s tasty candy','🏴‍☠️ 해적의 보물이에요|🏴‍☠️ It’s pirate treasure']},
+ {c:'chemsafe',l:1,t:'ox',s:'다 마신 음료수 병에 세제를 옮겨 담아 두면 편리하고 안전하다.|Pouring cleaner into an empty drink bottle is handy and safe.',v:0,why:'누군가 음료수인 줄 알고 마실 수 있어요. 화학 제품은 꼭 원래 통에 담아 둬요.|Someone might drink it by mistake. Always keep products in their own containers.'},
+ {c:'chemsafe',l:1,t:'multi',q:'어른만 다뤄야 하는 것을 모두 골라요.|Pick everything only grown-ups should handle.',art:'🏠',yes:[['🧴','표백제|Bleach'],['💊','약|Medicine'],['🧽','청소용 세제|Cleaning spray'],['🔥','라이터|Lighter']],no:[['🥛','우유|Milk'],['🍎','사과|Apple'],['🧸','곰 인형|Teddy bear']],n:[3,2]},
+ {c:'acidlife',l:2,t:'mc',q:'오렌지 주스는 산성일까요, 염기성일까요?|Is orange juice an acid or a base?',art:'🍊',a:'🍋 산성(신맛이 나요)|🍋 An acid (it tastes sour)',o:['🧼 염기성|🧼 A base','💧 중성|💧 Neutral']},
+ {c:'acidlife',l:2,t:'ox',s:'책에서 오렌지를 “알칼리성 식품”이라고 부르는 건 오렌지 주스가 염기성이기 때문이다.|Books call oranges an “alkaline food” because orange juice is a base.',v:0,why:'오렌지 주스는 신맛이 나는 산성이에요. “알칼리성 식품”은 음식을 태우고 남은 재(무기질)가 염기성이라는 뜻이라 주스 자체의 성질과는 달라요.|Orange juice is sour and acidic. “Alkaline food” describes the ash (minerals) left after burning the food, which is basic. That’s different from the juice itself.'},
+ {c:'acidlife',l:2,t:'sim',sim:'indicator'},
+ {c:'acidlife',l:2,t:'ox',s:'처음 보는 액체가 산성인지 알아보려면 조금 맛을 보면 된다.|To find out if an unknown liquid is an acid, just taste a little.',v:0,why:'모르는 액체는 위험할 수 있어요. 절대 맛보거나 만지지 말고 지시약으로 알아봐요.|Unknown liquids can be dangerous. Never taste or touch them; use an indicator.'},
+ {c:'acidlife',l:3,t:'mc',q:'어떤 음식을 먹어도 우리 몸의 피는 어떻게 될까요?|Whatever food you eat, what happens to your blood?',art:'🩸',a:'거의 같은 약한 염기성으로 유지돼요|It stays almost the same, slightly basic',o:['신 음식을 먹으면 피가 산성이 돼요|Sour food makes your blood acidic','과일을 먹으면 피가 강한 염기성이 돼요|Fruit makes your blood strongly basic','먹는 것에 따라 매일 크게 바뀌어요|It changes a lot every day with food'],why:'폐와 콩팥이 쉬지 않고 일해서 피의 성질을 늘 거의 똑같이 지켜요.|Your lungs and kidneys work nonstop to keep your blood almost exactly the same.'},
+ {c:'acidbase',l:3,t:'sim',sim:'indicator'},
+ {c:'kitchenchem',l:2,t:'mc',q:'깎아 둔 사과가 갈색으로 변하는 까닭은?|Why does a cut apple turn brown?',art:'🍎',a:'공기 속 산소와 만나서|It reacts with oxygen in the air',o:['햇볕에 타서|It gets sunburned','칼이 더러워서|The knife was dirty','사과가 추워서|The apple is cold']},
+ {c:'kitchenchem',l:2,t:'mc',q:'빵 반죽이 몽글몽글 부푸는 까닭은?|Why does bread dough puff up?',art:'🍞',a:'효모가 이산화탄소 거품을 만들어서|Yeast makes bubbles of carbon dioxide',o:['밀가루가 물을 싫어해서|Flour hates water','반죽에 입으로 바람을 불어 넣어서|Someone blew air into it','소금이 부풀어서|The salt swells up']},
+ {c:'kitchenchem',l:2,t:'mc',q:'기름 묻은 접시가 물로만은 잘 안 닦이다가 세제를 쓰면 깨끗해지는 까닭은?|Why does an oily plate come clean with dish soap but not with water alone?',art:'🍽️',a:'세제가 기름을 감싸서 물에 씻겨 나가게 해서|Soap wraps around the grease so water can carry it away',o:['세제가 접시를 녹여서|Soap melts the plate','물이 더 차가워져서|The water gets colder','기름이 세제를 무서워해서|Grease is scared of soap']},
+ {c:'kitchenchem',l:2,t:'ox',s:'청소용 세제끼리 섞으면 더 깨끗해지니까 섞어 써도 된다.|Mixing cleaning products makes them work better, so it’s fine to mix them.',v:0,why:'섞으면 독한 기체가 나올 수 있어요. 세제는 절대 섞지 말고, 어른이 하나씩 따로 써요.|Mixing can make poisonous gas. Never mix cleaners; grown-ups use them one at a time.'},
+ {c:'kitchenchem',l:3,t:'mc',q:'겨울에 얼어붙은 길에 소금(염화칼슘)을 뿌리는 까닭은?|Why do we spread salt on icy roads in winter?',art:'🧂❄️',a:'소금이 섞이면 더 낮은 온도에서도 얼음이 녹아서|With salt mixed in, ice melts even when it’s colder',o:['소금이 길을 뜨겁게 데워서|Salt heats up the road','소금이 눈을 더 하얗게 해서|Salt makes snow whiter','바퀴가 소금을 좋아해서|Tires like salt']},
+ {c:'flame',l:2,t:'sim',sim:'flame'},
+ {c:'flame',l:2,t:'mc',q:'구리를 불꽃에 넣으면 어떤 색 불꽃이 날까요?|What color flame does copper make?',art:'🔥',a:'💚 청록색(초록빛)|💚 Blue-green',o:['💛 노란색|💛 Yellow','❤️ 빨간색|❤️ Red','🤍 하얀색|🤍 White']},
+ {c:'flame',l:2,t:'mc',q:'소금물이 가스 불에 튀면 불꽃이 노랗게 변하는 까닭은?|Why does a gas flame flash yellow when salty water splashes on it?',art:'🍲🔥',a:'소금 속 나트륨 때문에|Because of the sodium in salt',o:['물이 불을 키워서|The water makes the fire bigger','소금이 얼어서|The salt freezes','가스가 다 떨어져서|The gas runs out']},
+ {c:'flame',l:2,t:'ox',s:'불꽃놀이의 여러 가지 색은 서로 다른 금속을 넣어서 만든다.|Fireworks get their different colors from different metals.',v:1},
+ {c:'flame',l:2,t:'ox',s:'불꽃 반응 실험은 집에서 혼자 해 봐도 괜찮다.|It’s fine to try flame tests alone at home.',v:0,why:'불과 화학 약품을 쓰는 실험이라 위험해요. 꼭 선생님이나 어른과 함께 해요.|It uses fire and chemicals, so it’s dangerous. Only do it with a teacher or grown-up.'},
+ {c:'flame',l:3,t:'sim',sim:'flame'},
+ {c:'flame',l:3,t:'mc',q:'보라색 불꽃을 내는 금속은?|Which metal makes a violet flame?',art:'💜🔥',a:'칼륨|Potassium',o:['구리|Copper','나트륨|Sodium','칼슘|Calcium']},
+ {c:'flame',l:3,t:'ox',s:'리튬과 스트론튬은 둘 다 빨간색 불꽃을 낸다.|Lithium and strontium both make red flames.',v:1,why:'그래서 색만으로는 헷갈릴 수 있어요. 과학자들은 분광기로 빛을 나눠 보고 정확히 구별해요.|That’s why color alone can be confusing. Scientists split the light with a spectroscope to tell them apart.'},
+ {c:'heatmove',l:3,t:'sort',q:'열이 어떻게 이동할까요? 알맞은 곳에 넣어요.|How does the heat move? Sort them.',bins:[['🥄','전도|Conduction'],['🌀','대류|Convection'],['☀️','복사|Radiation']],items:[['🥄','국에 담근 숟가락이 뜨거워져요|A spoon in hot soup gets hot',0],['🍳','프라이팬 손잡이 쪽까지 뜨거워져요|A pan heats up toward its handle',0],['🎈','열기구 속 데워진 공기가 올라가요|Warm air rises in a hot-air balloon',1],['🫕','냄비 속 물이 빙글빙글 돌며 데워져요|Water in a pot swirls as it heats',1],['🌞','햇볕을 쬐면 따뜻해요|Sunshine warms you',2],['🔥','모닥불 앞에 있으면 얼굴이 뜨거워요|Your face gets hot in front of a campfire',2]]},
+ {c:'heatmove',l:3,t:'mc',q:'방 안 난로는 어디에 두면 방 전체가 고르게 따뜻해질까요?|Where should a heater go so the whole room warms evenly?',art:'🏠',a:'방 아래쪽(바닥 가까이)|Low, near the floor',o:['천장 가까이 높은 곳|Up near the ceiling','창문 바깥|Outside the window','어디든 똑같아요|It doesn’t matter']},
+ {c:'heatmove',l:3,t:'ox',s:'데워진 공기는 위로 올라가고 차가운 공기는 아래로 내려온다.|Warm air rises and cool air sinks.',v:1},
+ {c:'heatmove',l:3,t:'mc',q:'공기가 없는 우주를 지나 햇볕의 열이 지구까지 오는 방법은?|How does the Sun’s heat reach Earth across airless space?',art:'☀️🌍',a:'복사(곧장 날아와요)|Radiation (it travels straight here)',o:['전도|Conduction','대류|Convection','바람에 실려 와요|Wind carries it']},
+ {c:'separate',l:3,t:'sort',q:'어떤 방법으로 나눌까요? 알맞은 곳에 넣어요.|How would you separate each mixture? Sort them.',bins:[['🧺','체로 걸러요|Sieve'],['🧲','자석을 대요|Magnet'],['☀️','물을 증발시켜요|Evaporate']],items:[['🫘','콩과 좁쌀|Beans and millet',0],['🪨','자갈과 모래|Gravel and sand',0],['📎','쇠 클립과 구슬|Steel clips and beads',1],['🔩','철 가루와 모래|Iron filings and sand',1],['🌊','바닷물에서 소금 얻기|Salt from seawater',2],['🧂','소금물에서 소금 얻기|Salt from salt water',2]]},
+ {c:'separate',l:3,t:'order',q:'소금과 모래가 섞인 것에서 소금만 얻는 순서대로 눌러요.|Tap the steps to get just the salt out of a salt-and-sand mix, in order.',items:[['💧','물을 부어 소금을 녹여요|Add water to dissolve the salt'],['🧻','거름종이로 모래를 걸러요|Filter out the sand'],['🔥','거른 물을 증발시켜요|Evaporate the filtered water'],['🧂','소금만 남아요|Only the salt is left']]},
+ {c:'separate',l:3,t:'ox',s:'철 가루와 모래가 섞여 있으면 자석으로 철 가루만 골라낼 수 있다.|If iron filings and sand are mixed, a magnet can pick out just the iron.',v:1},
  // ======================================================== 5 Green Forest
  {c:'plantneeds',l:1,t:'multi',q:'식물이 자라는 데 필요한 것을 모두 골라요.|Pick everything a plant needs to grow.',art:'🌱',yes:[['☀️','햇빛|Sunlight'],['💧','물|Water'],['🌬️','공기|Air'],['🟫','흙(영양분)|Soil (nutrients)']],no:[['🍭','사탕|Candy'],['📺','텔레비전|TV'],['🧸','장난감|Toys'],['🥤','탄산음료|Soda']],n:[3,3]},
  {c:'plantneeds',l:1,t:'ox',s:'식물은 햇빛이 없는 깜깜한 옷장 속에서도 잘 자란다.|Plants grow well in a dark closet with no sunlight.',v:0,why:'식물은 햇빛으로 양분을 만들어서 빛이 없으면 시들어요.|Plants make food from sunlight, so they wilt without light.'},
@@ -1256,6 +1396,20 @@ const QS=[
  {c:'constell',l:3,t:'mc',q:'캐나다와 한국의 겨울밤 하늘에서 잘 보이는 별자리는?|Which star pattern is easy to see on winter nights in Canada and Korea?',art:'🌌❄️',a:'오리온자리|Orion',o:['백조자리|Cygnus, the Swan','전갈자리|Scorpius','여름철 대삼각형|The Summer Triangle']},
  {c:'constell',l:3,t:'ox',s:'북두칠성은 북극성 가까이 있어서 거의 1년 내내 볼 수 있다.|The Big Dipper is near the North Star, so you can see it almost all year.',v:1},
  {c:'constell',l:3,t:'ox',s:'별자리를 이루는 별들은 모두 지구에서 같은 거리에 있다.|All the stars in a constellation are the same distance from Earth.',v:0,why:'같은 쪽에 모여 보일 뿐, 실제로는 가까운 별도 아주 먼 별도 있어요.|They only look close together. Some are much nearer to us than others.'},
+ {c:'watercycle',l:1,t:'sim',sim:'cycle'},
+ {c:'watercycle',l:2,t:'sim',sim:'cycle'},
+ {c:'watercycle',l:1,t:'mc',q:'비가 내린 물은 어디로 흘러갈까요?|Where does rainwater flow?',art:'🌧️',a:'🏞️ 시냇물과 강을 따라 바다로|🏞️ Into streams and rivers, then the sea',o:['🌙 달로 올라가요|🌙 Up to the Moon','🔥 불로 변해요|🔥 It turns into fire']},
+ {c:'watercycle',l:1,t:'ox',s:'바닷물도 햇볕을 받으면 수증기가 되어 하늘로 올라간다.|Seawater warmed by the Sun turns into water vapor and rises into the sky.',v:1},
+ {c:'watercycle',l:1,t:'mc',q:'추운 겨울, 구름에서 비 대신 내리는 것은?|On a cold winter day, what falls from clouds instead of rain?',art:'☁️',a:'❄️ 눈|❄️ Snow',o:['🍬 사탕|🍬 Candy','🍂 낙엽|🍂 Leaves']},
+ {c:'watercycle',l:2,t:'ox',s:'물이 순환하는 동안 지구의 물은 계속 줄어든다.|Earth keeps losing water as it goes around the water cycle.',v:0,why:'물은 모습만 바꿀 뿐 없어지지 않고 계속 돌고 돌아요.|Water only changes form. It doesn’t disappear; it keeps going around.'},
+ {c:'seasons',l:2,t:'sim',sim:'season',v:'angle'},
+ {c:'seasons',l:2,t:'mc',q:'여름이 더운 까닭으로 알맞은 것은?|Which is a reason summer is hot?',art:'☀️',a:'해가 높이 떠서 햇빛을 똑바로, 오래 받아서|The Sun is high, so sunlight hits more directly and for longer',o:['지구가 해에 아주 가까워져서|Earth gets very close to the Sun','여름에는 해가 더 커져서|The Sun gets bigger in summer','구름이 열을 만들어서|Clouds make heat']},
+ {c:'orbit',l:3,t:'sim',sim:'season',v:'orbit'},
+ {c:'sunalt',l:3,t:'sim',sim:'season',v:'angle'},
+ {c:'sunstar',l:2,t:'order',q:'해에서 가까운 행성부터 순서대로 눌러요.|Tap the planets in order, starting nearest the Sun.',items:[['🟤','수성|Mercury'],['🟡','금성|Venus'],['🌍','지구|Earth'],['🔴','화성|Mars'],['🟠','목성|Jupiter'],['🪐','토성|Saturn'],['🔵','천왕성|Uranus'],['🔷','해왕성|Neptune']],n:5},
+ {c:'moonphase',l:3,t:'mc',q:'낮에 달이 해를 가려서 해가 안 보이는 것을 무엇이라고 할까요?|What do we call it when the Moon blocks the Sun during the day?',art:'🌑☀️',a:'일식|A solar eclipse',o:['월식|A lunar eclipse','보름달|A full moon','무지개|A rainbow']},
+ {c:'moonphase',l:3,t:'ox',s:'월식은 지구의 그림자가 달을 가려서 생긴다.|A lunar eclipse happens when Earth’s shadow covers the Moon.',v:1},
+ {c:'moonphase',l:3,t:'ox',s:'일식 때는 해를 맨눈으로 똑바로 봐도 괜찮다.|During a solar eclipse it’s safe to look straight at the Sun with bare eyes.',v:0,why:'일식 때도 햇빛은 눈을 크게 다치게 해요. 꼭 일식 전용 안경을 써요.|Even during an eclipse, sunlight can badly hurt your eyes. Always use proper eclipse glasses.'},
  // ======================================================== 7 Healthy Town
  {c:'sound',l:1,t:'mc',q:'소리가 나는 물체는 어떤 상태일까요?|What is an object doing when it makes a sound?',art:'🥁',a:'떨리고 있어요|It’s vibrating',o:['가만히 멈춰 있어요|It’s perfectly still','차가워지고 있어요|It’s getting cold']},
  {c:'sound',l:1,t:'ox',s:'말할 때 목에 손을 대면 떨림을 느낄 수 있다.|You can feel a buzz when you touch your throat while talking.',v:1},
@@ -1367,6 +1521,11 @@ const QS=[
  {c:'fossil2',l:3,t:'mc',q:'높은 산에서 조개 화석이 나왔어요. 이것으로 알 수 있는 것은?|Clam fossils are found high on a mountain. What does that tell us?',art:'⛰️🐚',a:'그곳이 옛날에는 바다였어요|The place was once under the sea',o:['조개가 산을 기어 올라갔어요|The clams climbed the mountain','누가 조개를 버렸어요|Someone dumped clams there','산에도 조개가 살아요|Clams live on mountains']},
  {c:'fossil2',l:3,t:'ox',s:'생물이 죽은 뒤 묻히지 않고 땅 위에 오래 있어야 화석이 잘 만들어진다.|Fossils form best when a dead creature lies out in the open for a long time.',v:0,why:'땅 위에 있으면 썩거나 동물이 먹어 버려요. 진흙이나 모래에 빨리 묻혀야 화석이 될 수 있어요.|Out in the open it rots or gets eaten. It has to be buried quickly in mud or sand to become a fossil.'},
  {c:'fossil2',l:3,t:'mc',q:'석탄은 무엇이 땅속에 묻혀서 만들어졌을까요?|What was coal made from, buried underground long ago?',art:'⚫',a:'🌿 아주 옛날 식물|🌿 Ancient plants',o:['🦖 공룡 똥|🦖 Dinosaur poop','🧊 얼음|🧊 Ice','🧂 바닷소금|🧂 Sea salt']},
+ {c:'rocktypes',l:2,t:'sort',q:'어떤 무리의 돌일까요? 알맞은 곳에 넣어요.|Which kind of rock is it? Sort them.',bins:[['🌋','화성암|Igneous'],['🍰','퇴적암|Sedimentary'],['💎','변성암|Metamorphic']],items:[['⚫','현무암|Basalt',0],['⚪','화강암|Granite',0],['🏖️','사암|Sandstone',1],['🟤','이암|Mudstone',1],['🐚','석회암|Limestone',1],['🏛️','대리암|Marble',2],['〰️','편마암|Gneiss',2]]},
+ {c:'rocktypes',l:2,t:'mc',q:'높은 열과 누르는 힘을 받아 모습이 바뀐 돌을 무엇이라고 할까요?|What do we call rock changed by great heat and pressure?',art:'🔥⬇️',a:'변성암|Metamorphic rock',o:['화성암|Igneous rock','퇴적암|Sedimentary rock','운석|A meteorite']},
+ {c:'rocktypes',l:2,t:'ox',s:'대리암은 석회암이 높은 열과 압력을 받아 바뀐 변성암이다.|Marble is metamorphic rock that forms when limestone gets great heat and pressure.',v:1},
+ {c:'rocktypes',l:3,t:'mc',q:'석회암이나 대리암에 묽은 염산(또는 식초)을 떨어뜨리면?|What happens when you drip dilute acid (or vinegar) on limestone or marble?',art:'🪨🧪',a:'거품이 생겨요|It fizzes',o:['무지개색으로 변해요|It turns rainbow-colored','자석이 돼요|It becomes magnetic','더 단단해져요|It gets harder']},
+ {c:'rocktypes',l:3,t:'order',q:'화강암이 사암으로 바뀌는 순서대로 눌러요.|Tap how granite can become sandstone, in order.',items:[['⚪','화강암이 비바람에 깎여요|Granite is worn down by wind and rain'],['🏞️','부서진 모래가 강을 따라 옮겨져요|The sand is carried down rivers'],['🍰','바다 밑에 층층이 쌓여요|It piles up in layers under the sea'],['🪨','눌려 굳어서 사암이 돼요|It’s pressed into sandstone']]},
 ];
 </script>
 <script>
@@ -1968,6 +2127,227 @@ function gridPath(q,ctx,N){
     if(pos===g){box.dataset.done=1;SFX.good();sparkle(box);later(600,()=>done(bumps<=allowed,{why:bumps<=allowed?'':T('부딪힌 횟수가 많았어요. 방향을 먼저 생각하고 눌러요!|Too many bumps. Think about the direction before you tap!')}))}});
   },hint(){return false}};
 }
+// ---------------------------------------------------------------- red cabbage indicator: add a drop, watch the color, then sort it
+const PURPLE='#7d55c7';
+const INDI=[
+ ['🍶','식초|Vinegar',0,'#e2336e'],['🍋','레몬즙|Lemon juice',0,'#ea3f7c'],['🍊','오렌지 주스|Orange juice',0,'#de587e'],['🥤','탄산수|Soda water',0,'#c4529f'],
+ ['💧','맹물|Plain water',1,PURPLE],['🧂','소금물|Salt water',1,PURPLE],['🍬','설탕물|Sugar water',1,PURPLE],
+ ['🧼','비눗물|Soapy water',2,'#2f9c9a'],['🧁','베이킹소다 물|Baking soda water',2,'#2e9a78'],['🪟','유리 세정제|Glass cleaner',2,'#3aa35a'],['🧴','빨랫비누 물|Laundry soap water',2,'#58a83a']];
+SIMS.indicator=(q,ctx)=>{
+ const lv=Math.max(q.l,ctx.diff>=3?3:2),three=lv>=3,n=three?4:3;
+ const pool=INDI.filter(x=>three||x[2]!==1);
+ let list;do{list=shuffle(pool.slice()).slice(0,n)}while(!list.some(x=>x[2]===0)||!list.some(x=>x[2]===2));
+ const bins=three?[['🍋','산성|Acid',0],['💧','중성|Neutral',1],['🧼','염기성|Base',2]]:[['🍋','산성|Acid',0],['🧼','염기성|Base',2]];
+ const text=three?'보라색 적양배추 물에 한 방울 넣고, 색을 보고 산성·중성·염기성 중에서 골라요!|Add a drop to purple red-cabbage juice, watch the color, then choose acid, neutral or base!':'보라색 적양배추 물에 한 방울 넣고, 색을 보고 산성인지 염기성인지 골라요!|Add a drop to purple red-cabbage juice, watch the color, then choose acid or base!';
+ const name=b=>T(bins.find(x=>x[2]===b)[1]);
+ let k=0,miss=0,wrongs=[],B=null,ready=false;
+ return {tag:['🧪',T('지시약 실험|Indicator lab')],say:T(text),answer:'',
+  mount(box,done){B=box;
+   box.innerHTML=qText(T(text))+`<div class="indi"><div class="beaker"><div class="liq"></div></div><div class="side"><span class="cnt"></span><div class="what"><span class="ic"></span><b></b></div><button class="btn gold small drop" type="button">💧 ${T('한 방울 넣기|Add a drop')}</button></div></div>`
+    +(three?'':`<div class="indikey"><span style="background:#e2336e">${T('붉은색 = 산성|Red = acid')}</span><span style="background:${PURPLE}">${T('보라색 = 그대로|Purple = no change')}</span><span style="background:#2f9c9a">${T('푸른·초록 = 염기성|Blue-green = base')}</span></div>`)
+    +`<div class="bins n${bins.length}">${bins.map(b=>`<button class="bin" type="button" data-b="${b[2]}" disabled><span class="bi">${b[0]}</span><b>${esc(T(b[1]))}</b><span class="tray"></span></button>`).join('')}</div>`;
+   const liq=box.querySelector('.liq'),dropB=box.querySelector('.drop'),binEls=[...box.querySelectorAll('.bin')];
+   const show=()=>{const it=list[k];ready=false;liq.style.backgroundColor=PURPLE;box.querySelector('.cnt').textContent=`${k+1}/${list.length}`;box.querySelector('.what .ic').textContent=it[0];box.querySelector('.what b').textContent=T(it[1]);dropB.disabled=false;dropB.classList.remove('hidden');binEls.forEach(b=>{b.disabled=true;b.classList.remove('hinted')});if(k)speak(T(it[1]))};
+   dropB.addEventListener('click',()=>{if(dropB.disabled||box.dataset.done)return;dropB.disabled=true;SFX.splash();liq.style.backgroundColor=list[k][3];liq.classList.remove('stir');void liq.offsetWidth;liq.classList.add('stir');later(900,()=>{ready=true;dropB.classList.add('hidden');binEls.forEach(b=>b.disabled=false)})});
+   box.querySelector('.bins').addEventListener('click',e=>{const b=e.target.closest('.bin');if(!b||b.disabled||!ready||box.dataset.done)return;const it=list[k],bi=+b.dataset.b,ok=bi===it[2];ready=false;binEls.forEach(x=>x.disabled=true);
+    const target=box.querySelector(`.bin[data-b="${it[2]}"]`);
+    if(ok){SFX.good();b.classList.add('flash-ok')}else{miss++;wrongs.push(`${it[0]} ${T(it[1])} → ${name(it[2])}`);SFX.bad();b.classList.add('flash-bad');target.classList.add('flash-ok')}
+    later(ok?500:1100,()=>{b.classList.remove('flash-ok','flash-bad');target.classList.remove('flash-ok');target.querySelector('.tray').insertAdjacentHTML('beforeend',`<i class="${ok?'':'was'}">${it[0]}</i>`);k++;
+     if(k>=list.length){box.dataset.done=1;done(miss<=(three?0:1),{answer:wrongs.join(' · '),why:T('적양배추 물은 산성에서 붉은색, 염기성에서 푸른색이나 초록색으로 변해요. 맹물, 소금물, 설탕물 같은 중성 용액은 보라색 그대로예요.|Red-cabbage juice turns red in acids and blue or green in bases. Neutral liquids like plain, salty or sugary water leave it purple.')})}else show()})});
+   show();
+  },
+  hint(){if(!B||!ready||B.dataset.done)return false;const t=B.querySelector(`.bin[data-b="${list[k][2]}"]`);if(t.classList.contains('hinted'))return false;t.classList.add('hinted');return true}};
+};
+// ---------------------------------------------------------------- flame tests: dip a metal into the flame and watch its color
+const FLAMES=[['cu','구리|Copper','#2fd6a0','청록색|blue-green',2],['na','나트륨(소금)|Sodium (salt)','#ffc928','노란색|yellow',2],['li','리튬|Lithium','#ff2d55','빨간색|red',2],['k','칼륨|Potassium','#b46cff','보라색|violet',2],
+ ['ca','칼슘|Calcium','#ff7a2a','주황색|orange',3],['sr','스트론튬|Strontium','#ff2a3a','빨간색|red',3],['ba','바륨|Barium','#a8e63a','황록색|yellow-green',3]];
+const flameSVG=()=>`<div class="flamebox"><svg class="simsvg" viewBox="0 0 360 180"><rect width="360" height="180" fill="#1b1f3a"/><circle cx="180" cy="96" r="70" fill="#ffffff08"/>
+ <g class="fl"><path class="outer" d="M180 26C212 68 224 100 207 130C198 147 162 147 153 130C136 100 148 68 180 26z" fill="#5aa8ff" opacity=".9"/><path d="M180 72C195 96 197 116 189 128C183 136 177 136 171 128C163 116 165 96 180 72z" fill="#d9ecff" opacity=".85"/></g>
+ <rect x="158" y="138" width="44" height="34" rx="5" fill="#8a8fa8"/><rect x="150" y="166" width="60" height="10" rx="4" fill="#6c7088"/>
+ <g class="wire" opacity="0"><line x1="320" y1="34" x2="212" y2="104" stroke="#d4d4dc" stroke-width="4" stroke-linecap="round"/><circle cx="210" cy="105" r="6" fill="#fff"/></g>
+ <text class="fq" x="180" y="22" font-size="20" text-anchor="middle" fill="#fff"></text></svg></div>`;
+SIMS.flame=(q,ctx)=>{
+ const lv=Math.max(q.l,ctx.diff>=3?3:2),n=lv>=3?4:3;
+ const pool=FLAMES.filter(f=>f[4]<=lv);
+ // never show two samples with the same flame color
+ let set;do{set=shuffle(pool.slice()).slice(0,n)}while(new Set(set.map(f=>f[3])).size<set.length);
+ const mode=lv>=3&&Math.random()<.5?'name':'find',target=pick(set);
+ const col=f=>T(f[3]),nm=f=>T(f[1]);
+ const why=T('금속마다 불에 넣었을 때 내는 불꽃 색이 달라요(불꽃 반응). 불꽃놀이의 여러 가지 색도 이런 금속 덕분이에요. 불을 쓰는 실험은 꼭 선생님과 함께 해요!|Each metal gives the flame its own color (a flame test). Fireworks get their colors from these metals too. Only do fire experiments with a teacher!');
+ const text=mode==='find'?`${col(target)} 불꽃을 내는 금속을 찾아요! 시료를 눌러 불꽃에 넣어 보고, 찾았으면 “이거예요!”를 눌러요.|Find the metal that makes a ${col(target)} flame! Tap a sample to hold it in the flame, then press “This one!”`:'불꽃이 이 색으로 바뀌었어요. 어떤 금속을 넣었을까요?|The flame turned this color. Which metal was put in?';
+ let last=null,hint=null;
+ return {tag:['🔥',T('불꽃 반응|Flame test')],say:T(text),answer:mode==='find'?`${nm(target)}: ${col(target)}`:nm(target),
+  mount(box,done){box.__done=done;
+   box.innerHTML=qText(T(text))+flameSVG()+(mode==='find'?`<div class="flsamps">${set.map((f,i)=>`<button class="flsamp" type="button" data-i="${i}">🥄 ${esc(nm(f))}</button>`).join('')}</div>`+checkRow(T('이거예요!|This one!')):'');
+   const outer=box.querySelector('.outer'),wire=box.querySelector('.wire'),fq=box.querySelector('.fq');
+   const burn=f=>{outer.setAttribute('fill',f?f[2]:'#5aa8ff');wire.setAttribute('opacity',f?'1':'0');fq.textContent=f?col(f):''};
+   if(mode==='name'){burn(target);fq.textContent='?';
+    const others=pool.filter(f=>f!==target&&f[3]!==target[3]),opts=shuffle([target,...shuffle(others).slice(0,ctx.diff===1?2:3)]);
+    hint=choiceUI(box,opts.map(f=>({html:esc(nm(f))})),opts.indexOf(target),ok=>{fq.textContent=col(target);done(ok,{why})});return}
+   box.querySelector('.flsamps').addEventListener('click',e=>{const b=e.target.closest('.flsamp');if(!b||box.dataset.done)return;const f=set[+b.dataset.i];last=f;SFX.whoosh();box.querySelectorAll('.flsamp').forEach(x=>x.classList.toggle('on',x===b));burn(f)});
+   tryFlow(box,ctx,{check:()=>last===target,nudge:()=>last?T(`지금 불꽃은 ${col(last)}이에요. 다른 시료도 넣어 봐요!|This flame is ${col(last)}. Try another sample!`):T('먼저 시료를 눌러 불꽃에 넣어 봐요.|First tap a sample to put it in the flame.'),
+    reveal:cb=>{last=target;box.querySelectorAll('.flsamp').forEach((x,i)=>x.classList.toggle('on',set[i]===target));burn(target);later(600,cb)},answer:()=>`${nm(target)}: ${col(target)}`,why:()=>why});
+  },hint:()=>hint?hint():false};
+};
+// ---------------------------------------------------------------- seasons: which Earth has summer? / which light heats more?
+SIMS.season=(q,ctx)=>{
+ const mode=q.v||'orbit';
+ if(mode==='angle'){
+  const flip=Math.random()<.5;
+  const text='똑같은 손전등으로 땅을 비춰요. 땅이 더 많이 데워지는 쪽을 눌러요!|The same flashlight shines on the ground. Tap the side where the ground warms up more!';
+  const panel=(x,steep)=>`<g class="pick" data-p="${steep?1:0}" transform="translate(${x},0)"><rect class="pf" x="4" y="4" width="168" height="172" rx="14" fill="#fff8e6" stroke="#f0d9a0" stroke-width="3"/>
+   <g transform="${steep?'translate(76,26)':'translate(28,40) rotate(-50 22 14)'}"><rect width="26" height="40" rx="6" fill="#5b6b8c"/><rect x="-4" y="38" width="34" height="10" rx="3" fill="#f2c94c"/></g>
+   ${steep?'<path d="M76 74L100 74L108 150L68 150z" fill="#ffe066" opacity=".55"/><ellipse cx="88" cy="150" rx="22" ry="7" fill="#ffd21f"/>':'<path d="M62 84L76 72L156 146L40 154z" fill="#ffe066" opacity=".35"/><ellipse cx="98" cy="150" rx="62" ry="9" fill="#ffe680" opacity=".75"/>'}
+   <rect x="10" y="156" width="156" height="12" rx="4" fill="#9c6b3a"/></g>`;
+  return {tag:['🔦',T('빛의 각도 실험|Light angle lab')],say:T(text),answer:T('빛이 똑바로 내리쬐는 쪽|Where the light shines straight down'),
+   mount(box,done){
+    box.innerHTML=qText(T(text))+`<svg class="simsvg season" viewBox="0 0 360 180">${panel(flip?184:4,true)}${panel(flip?4:184,false)}</svg>`;
+    box.querySelector('svg').addEventListener('click',e=>{const g=e.target.closest('.pick');if(!g||box.dataset.done)return;box.dataset.done=1;const ok=g.dataset.p==='1';
+     box.querySelectorAll('.pick').forEach(x=>x.querySelector('.pf').setAttribute('stroke',x.dataset.p==='1'?'#22b35b':x===g?'#e5484d':'#f0d9a0'));(ok?SFX.good:SFX.bad)();
+     later(500,()=>done(ok,{why:T('빛이 똑바로 내리쬐면 좁은 곳에 빛이 모여서 땅이 더 뜨거워져요. 여름에 해가 높이 뜨면 바로 이렇게 돼요. 겨울 해는 비스듬히 비춰서 빛이 넓게 퍼져요.|Light shining straight down is packed into a small spot, so the ground gets hotter. That’s what the high summer Sun does. The low winter Sun shines at a slant and spreads its light out.')}))});
+   },hint(){return false}};
+ }
+ const task=pick(['caSummer','caWinter','auSummer','auWinter']);
+ // north is tilted to the right at both spots: the left Earth leans its north toward the Sun
+ const wantLeft=task==='caSummer'||task==='auWinter';
+ const CA=T('캐나다|Canada'),AU=T('호주|Australia');
+ const text={caSummer:`${CA}와 한국이 여름일 때 지구는 어디에 있을까요? 눌러요!|Where is Earth when it’s summer in ${CA} and Korea? Tap it!`,caWinter:`${CA}와 한국이 겨울일 때 지구는 어디에 있을까요? 눌러요!|Where is Earth when it’s winter in ${CA} and Korea? Tap it!`,auSummer:`${AU}가 여름일 때 지구는 어디에 있을까요? 눌러요!|Where is Earth when it’s summer in ${AU}? Tap it!`,auWinter:`${AU}가 겨울일 때 지구는 어디에 있을까요? 눌러요!|Where is Earth when it’s winter in ${AU}? Tap it!`}[task];
+ const a=23.5*Math.PI/180,N=[Math.sin(a),-Math.cos(a)],R=30;
+ const earth=(cx,left)=>{const p=s=>[cx+R*s*N[0],100+R*s*N[1]];const [nx,ny]=p(1.25),[sx,sy]=p(-1.25),[cax,cay]=p(Math.sin(50*Math.PI/180)),[aux,auy]=p(Math.sin(-28*Math.PI/180));
+  const night=left?`M${cx} ${100-R}A${R} ${R} 0 0 0 ${cx} ${100+R}z`:`M${cx} ${100-R}A${R} ${R} 0 0 1 ${cx} ${100+R}z`;
+  return `<g class="pick" data-left="${left?1:0}"><circle class="pf" cx="${cx}" cy="100" r="${R+10}" fill="#ffffff10" stroke="#ffffff30" stroke-width="3"/><circle cx="${cx}" cy="100" r="${R}" fill="#3b82d6"/><path d="M${cx-18} ${92}q8-10 18-4q6 6 14 0" fill="#5cc46a"/>
+   <path d="${night}" fill="#0b1030" opacity=".55"/>
+   <line x1="${nx}" y1="${ny}" x2="${sx}" y2="${sy}" stroke="#fff" stroke-width="2.5" stroke-dasharray="5 4"/><text x="${nx+4}" y="${ny-2}" font-size="12" font-weight="900" fill="#fff">N</text>
+   <circle cx="${cax}" cy="${cay}" r="5" fill="#ff4d6d" stroke="#fff" stroke-width="2"/><circle cx="${aux}" cy="${auy}" r="5" fill="#ffd21f" stroke="#fff" stroke-width="2"/></g>`};
+ return {tag:['🌏',T('계절 실험|Seasons lab')],say:T(text)+' '+T('지구의 축은 늘 같은 쪽으로 기울어져 있어요.|Earth’s axis always tilts the same way.'),answer:wantLeft?T('북극 쪽이 해를 향해 기운 왼쪽 지구|The left Earth, with its north tilted toward the Sun'):T('북극 쪽이 해 반대로 기운 오른쪽 지구|The right Earth, with its north tilted away from the Sun'),
+  mount(box,done){
+   box.innerHTML=qText(T(text))+`<svg class="simsvg season" viewBox="0 0 360 200"><rect width="360" height="200" rx="16" fill="#141a3c"/><ellipse cx="180" cy="100" rx="130" ry="42" fill="none" stroke="#ffffff40" stroke-width="2" stroke-dasharray="6 6"/>
+    <circle cx="180" cy="100" r="42" fill="#ffe066" opacity=".28"/><circle cx="180" cy="100" r="30" fill="#ffd21f"/>${earth(50,true)}${earth(310,false)}</svg>
+    <p class="sub center">🔴 ${T('캐나다·한국|Canada & Korea')} · 🟡 ${T('호주|Australia')} · N = ${T('북극|North Pole')}</p>`;
+   box.querySelector('svg').addEventListener('click',e=>{const g=e.target.closest('.pick');if(!g||box.dataset.done)return;box.dataset.done=1;const left=g.dataset.left==='1',ok=left===wantLeft;
+    box.querySelectorAll('.pick').forEach(x=>x.querySelector('.pf').setAttribute('stroke',(x.dataset.left==='1')===wantLeft?'#3ee07a':x===g?'#ff5a5f':'#ffffff30'));(ok?SFX.good:SFX.bad)();
+    later(500,()=>done(ok,{why:T('지구는 축이 기울어진 채 해 둘레를 돌아요. 북극 쪽이 해를 향해 기울면 북반구(캐나다·한국)는 해가 높이 떠서 여름, 남반구(호주)는 겨울이에요. 반대쪽에 가면 계절도 반대가 돼요.|Earth orbits the Sun with a tilted axis. When the north leans toward the Sun, the Sun climbs high in the northern half (Canada, Korea) and it’s summer, while the southern half (Australia) has winter. On the other side of the orbit, the seasons swap.')}))});
+  },hint(){return false}};
+};
+// ---------------------------------------------------------------- circuits: predict which one lights the bulb
+const COND=[['📎','쇠 클립|Steel clip',2],['🪙','동전|Coin',2],['🥄','쇠 숟가락|Steel spoon',2],['🥡','알루미늄 포일|Aluminum foil',2],['✏️','연필심(흑연)|Pencil lead (graphite)',3]];
+const INSUL=[['🧽','고무 지우개|Rubber eraser'],['📏','플라스틱 자|Plastic ruler'],['🥢','나무젓가락|Wooden chopstick'],['📄','종이|Paper'],['🔮','유리구슬|Glass marble'],['🧶','털실|Yarn']];
+const bulbSVG=(id,x,y,s=1)=>`<g transform="translate(${x},${y}) scale(${s})"><circle class="bglow${id}" cx="0" cy="0" r="30" fill="#ffe066" opacity="0"/><circle cx="0" cy="0" r="16" fill="#fffbe6" stroke="#8a8fa8" stroke-width="3"/><path d="M-6 4q6-12 12 0" stroke="#8a8fa8" stroke-width="2" fill="none"/><rect x="-9" y="15" width="18" height="12" rx="3" fill="#9aa0b4"/></g>`;
+SIMS.circuit=(q,ctx)=>{
+ const mode=q.v||'gap';
+ if(mode==='series'){
+  const C=[['🔋','전지 1개|1 battery',.55],['🔋🔋','전지 2개를 한 줄로(직렬)|2 batteries in a row (series)',1],['🔋🔃🔋','전지 2개, 하나는 거꾸로|2 batteries, one backward',0]];
+  const order=shuffle([0,1,2]);
+  const text='전구가 가장 밝게 켜질 회로를 예상해서 눌러요!|Predict which circuit lights the bulb the brightest, and tap it!';
+  return {tag:['💡',T('전기 회로|Circuit lab')],say:T(text),answer:T(C[1][1]),
+   mount(box,done){
+    box.innerHTML=qText(T(text))+`<div class="ckts">${order.map(i=>`<button class="ckt" type="button" data-i="${i}"><svg viewBox="0 0 110 96" width="100%">${bulbSVG(i,55,30,.8)}<path d="M20 30H38M72 30H90V80H20V30" stroke="#c0574b" stroke-width="4" fill="none"/><rect x="34" y="70" width="42" height="20" rx="4" fill="#fff" stroke="#c0574b" stroke-width="2"/></svg><span class="bt">${C[i][0]}</span><b>${esc(T(C[i][1]))}</b></button>`).join('')}</div><p class="sub center">👆 ${T('결과를 예상해서 하나를 눌러요!|Make a prediction: tap one!')}</p>`;
+    box.querySelector('.ckts').addEventListener('click',e=>{const b=e.target.closest('.ckt');if(!b||box.dataset.done)return;box.dataset.done=1;b.classList.add('mine');SFX.click();
+     later(400,()=>{C.forEach((c,i)=>{const g=box.querySelector('.bglow'+i);if(g)g.setAttribute('opacity',String(c[2]*.95))});SFX.zap();const ok=+b.dataset.i===1;box.querySelector(`.ckt[data-i="1"]`).classList.add('winner');(ok?SFX.good:SFX.bad)();
+      later(900,()=>done(ok,{why:T('전지를 한 줄로 이어(직렬연결) 같은 방향으로 놓으면 전구가 더 밝아져요. 하나를 거꾸로 놓으면 서로 밀어내서 불이 켜지지 않아요.|Batteries in a row (in series) facing the same way make the bulb brighter. Turn one around and they cancel out, so the bulb stays dark.')}))})});
+   },hint(){return false}};
+ }
+ const lv=Math.max(q.l,ctx.diff>=3?3:2),n=lv>=3?4:3;
+ const cond=pick(COND.filter(c=>c[2]<=lv&&(lv<3||c[2]===3||Math.random()<.5))),items=shuffle([cond,...shuffle(INSUL.slice()).slice(0,n-1)]);
+ const text='전선 사이 틈에 무엇을 끼우면 전구에 불이 켜질까요? 예상해서 하나를 골라요!|What can you put in the gap so the bulb lights up? Make a prediction: pick one!';
+ return {tag:['💡',T('전기 회로|Circuit lab')],say:T(text),answer:`${cond[0]} ${T(cond[1])}`,
+  mount(box,done){
+   box.innerHTML=qText(T(text))+`<div class="cktbox"><svg class="simsvg" viewBox="0 0 360 170"><rect width="360" height="170" rx="16" fill="#f3f7ff"/>
+    ${bulbSVG('',180,44)}<path d="M164 44H70V66M70 118V140H150M210 140H290V44H196" stroke="#c0574b" stroke-width="5" fill="none" stroke-linejoin="round"/>
+    <g transform="translate(54,66)"><rect x="10" y="-6" width="12" height="8" rx="2" fill="#b8b8c0"/><rect width="32" height="52" rx="6" fill="#2c2c34"/><rect width="32" height="18" rx="6" fill="#e2a400"/><text x="16" y="14" font-size="14" fill="#2c2c34" font-weight="900" text-anchor="middle">+</text><text x="16" y="44" font-size="16" fill="#fff" font-weight="900" text-anchor="middle">−</text></g>
+    <circle cx="150" cy="140" r="5" fill="#555"/><circle cx="210" cy="140" r="5" fill="#555"/><text class="gapi" x="180" y="150" font-size="30" text-anchor="middle">❔</text></svg></div>
+    <div class="flsamps">${items.map((it,i)=>`<button class="flsamp" type="button" data-i="${i}">${it[0]} ${esc(T(it[1]))}</button>`).join('')}</div>`;
+   box.querySelector('.flsamps').addEventListener('click',e=>{const b=e.target.closest('.flsamp');if(!b||box.dataset.done)return;box.dataset.done=1;const it=items[+b.dataset.i],ok=it===cond;b.classList.add('on');SFX.click();
+    box.querySelector('.gapi').textContent=it[0];
+    later(500,()=>{if(ok){box.querySelector('.bglow').setAttribute('opacity','.9');SFX.zap()}(ok?SFX.good:SFX.bad)();
+     later(800,()=>done(ok,{answer:`${cond[0]} ${T(cond[1])}`,why:T('쇠, 구리, 알루미늄 같은 금속과 연필심의 흑연은 전기가 잘 통해서(도체) 회로가 이어지고 불이 켜져요. 고무, 플라스틱, 나무, 유리, 종이는 전기가 통하지 않아요(부도체).|Metals like steel, copper and aluminum, and the graphite in pencil lead, carry electricity (conductors), so the circuit is complete and the bulb lights. Rubber, plastic, wood, glass and paper don’t (insulators).')}))})});
+  },hint(){return false}};
+};
+// ---------------------------------------------------------------- water changes: heat or cool the pot to make ice, water or steam
+SIMS.water=(q,ctx)=>{
+ const lv=Math.max(q.l,ctx.diff>=3?3:ctx.diff>=2?2:1),step=lv===1?20:10;
+ const goals=lv===1?['ice','water','steam']:lv===2?['ice','water','steam','boil','freeze']:['ice','water','steam','pIce','pSteam'];
+ const goal=pick(goals);
+ const state=t=>t<0?'ice':t===0?'mix':t<100?'water':'steam';
+ const okFor={ice:t=>t<0,water:t=>t>0&&t<100,steam:t=>t>=100,boil:t=>t===100,freeze:t=>t===0,pIce:t=>t<0,pSteam:t=>t>=100};
+ const starts={ice:[40,60,80],water:[-20,120],steam:[-20,20,40],boil:[20,40,60],freeze:[40,60,-20],pIce:[60,120],pSteam:[-20,20]};
+ let t=pick(starts[goal]);
+ const text={ice:'냄비 속 물을 꽁꽁 얼려 얼음으로 만들어요!|Freeze the water in the pot into ice!',water:'냄비 속을 흐르는 물(액체)로 만들어요!|Turn what’s in the pot into runny liquid water!',steam:'물을 끓여서 수증기(기체)로 날아가게 해요!|Boil the water so it turns into steam (a gas)!',
+  boil:'물이 끓기 시작하는 온도에 딱 맞춰요!|Set it to exactly the temperature where water starts to boil!',freeze:'물이 얼기 시작하는 온도에 딱 맞춰요!|Set it to exactly the temperature where water starts to freeze!',
+  pIce:'알갱이가 줄을 맞춰 꽉 붙어서 제자리에서 떨리기만 하는 상태로 만들어요!|Make the particles line up tightly and only jiggle in place!',pSteam:'알갱이가 서로 멀리 떨어져 아주 빠르게 날아다니는 상태로 만들어요!|Make the particles spread far apart and zoom around fast!'}[goal];
+ const parts=lv>=3;
+ return {tag:['♨️',T('물의 변신|Water changes')],say:T(text),answer:{ice:T('0°C보다 차갑게 식혀요|Cool it below 0°C'),water:T('0°C와 100°C 사이로 맞춰요|Keep it between 0°C and 100°C'),steam:T('100°C까지 데워요|Heat it to 100°C'),boil:'100°C',freeze:'0°C',pIce:T('얼음(고체)|Ice (solid)'),pSteam:T('수증기(기체)|Steam (gas)')}[goal],
+  mount(box,done){box.__done=done;
+   box.innerHTML=qText(T(text))+`<div class="waterlab"><svg class="simsvg" viewBox="0 0 360 190"><rect width="360" height="190" rx="16" fill="#eef6ff"/>
+    <g class="steamg">${[0,1,2].map(i=>`<path class="stm s${i}" d="M${(parts?110:150)+i*22} 70q-8-12 0-24q8-12 0-24" stroke="#c8d4e4" stroke-width="5" fill="none" stroke-linecap="round"/>`).join('')}</g>
+    <g transform="translate(${parts?40:80},0)"><path d="M30 80h140v70q0 18-18 18h-104q-18 0-18-18z" fill="#cfd6e2" stroke="#8a93a8" stroke-width="3"/><rect x="18" y="74" width="164" height="10" rx="5" fill="#8a93a8"/>
+     <rect class="wat" x="34" y="104" width="132" height="60" rx="8" fill="#5ab8ff"/><g class="ice"><rect x="62" y="112" width="34" height="34" rx="6" fill="#dff4ff" stroke="#9fd3f5" stroke-width="2"/><rect x="104" y="116" width="34" height="34" rx="6" fill="#dff4ff" stroke="#9fd3f5" stroke-width="2"/></g>
+     <g class="bubs">${[0,1,2,3].map(i=>`<circle class="bb b${i}" cx="${56+i*30}" cy="150" r="5" fill="#ffffffaa"/>`).join('')}</g>
+     <g class="fire" opacity="0">${[0,1,2,3].map(i=>`<path d="M${52+i*32} 186q-8-10 0-20q8 10 0 20z" fill="#ff8a3d"/>`).join('')}</g>
+     <g class="frost" opacity="0"><text x="100" y="186" font-size="18" text-anchor="middle">❄️ ❄️ ❄️</text></g></g>
+    ${parts?'<rect x="250" y="20" width="96" height="120" rx="12" fill="#fff" stroke="#b9c6dc" stroke-width="2"/><g class="pts"></g><text x="298" y="156" font-size="12" text-anchor="middle" fill="#5d6b85" font-weight="900">'+esc(T('알갱이 모습|Particles'))+'</text>':''}
+    <g transform="translate(${parts?250:292},${parts?160:20})"><rect width="${parts?96:56}" height="26" rx="13" fill="#fff" stroke="#b9c6dc" stroke-width="2"/><text class="tc" x="${parts?48:28}" y="18" font-size="15" font-weight="900" text-anchor="middle" fill="#24305e"></text></g>
+    <text class="stt" x="${parts?140:180}" y="62" font-size="15" font-weight="900" text-anchor="middle" fill="#24305e"></text></svg>
+    <div class="simrow"><button class="btn small heat" type="button" style="background:linear-gradient(180deg,#ff9a6b,#f0603c);box-shadow:0 4px 0 #b8432a">🔥 ${T('데우기|Heat')} +${step}°C</button><button class="btn small cool" type="button" style="background:linear-gradient(180deg,#7cc8ff,#3a8ee0);box-shadow:0 4px 0 #2a64a8">❄️ ${T('식히기|Cool')} −${step}°C</button></div></div>`+checkRow();
+   const $q=s=>box.querySelector(s);
+   const names={ice:T('얼음(고체)|Ice (solid)'),mix:T('얼음이 녹는 중|Melting ice'),water:T('물(액체)|Water (liquid)'),steam:T('끓어서 수증기가 돼요(기체)|Boiling into steam (gas)')};
+   // particles for the grade 5-6 view: positions jiggle more as it heats up
+   const P=parts?Array.from({length:9},(_,i)=>({hx:270+(i%3)*28,hy:44+Math.floor(i/3)*28,x:0,y:0,vx:0,vy:0})):[];
+   P.forEach(p=>{p.x=p.hx;p.y=p.hy});
+   if(parts)$q('.pts').innerHTML=P.map((p,i)=>`<circle class="pt" r="7" fill="#3a8ee0"/>`).join('');
+   const draw=(heat)=>{const s=state(t);$q('.tc').textContent=`${t<0?'−':''}${Math.abs(t)}°C`;$q('.stt').textContent=names[s];
+    $q('.ice').style.opacity=s==='ice'||s==='mix'?1:0;$q('.wat').style.opacity=s==='ice'?0:1;
+    $q('.bubs').style.opacity=s==='steam'?1:0;$q('.steamg').style.opacity=s==='steam'?1:t>=60?.35:0;
+    $q('.fire').setAttribute('opacity',heat===1?'1':'0');$q('.frost').setAttribute('opacity',heat===-1?'1':'0')};
+   if(parts){const pts=[...box.querySelectorAll('.pt')];const loop=()=>{if(!box.isConnected)return;const s=state(t),free=s==='steam'?1:s==='water'||s==='mix'?.45:0;
+     P.forEach((p,i)=>{if(free===0){p.x+=(p.hx-p.x)*.2+rand(-.7,.7);p.y+=(p.hy-p.y)*.2+rand(-.7,.7)}else{const sp=free===1?2.6:.9;p.vx=clamp(p.vx+rand(-.4,.4)*sp,-sp,sp);p.vy=clamp(p.vy+rand(-.4,.4)*sp,-sp,sp);
+       const lo=free===1?[258,28,338,132]:[262,64,334,132];p.x+=p.vx;p.y+=p.vy;if(p.x<lo[0]||p.x>lo[2])p.vx*=-1;if(p.y<lo[1]||p.y>lo[3])p.vy*=-1;p.x=clamp(p.x,lo[0],lo[2]);p.y=clamp(p.y,lo[1],lo[3])}
+      pts[i].setAttribute('cx',p.x.toFixed(1));pts[i].setAttribute('cy',p.y.toFixed(1))});requestAnimationFrame(loop)};requestAnimationFrame(loop)}
+   const nudgeT=d=>{if(box.dataset.done)return;t=clamp(t+d*step,-20,120);(d>0?SFX.whoosh:SFX.tick)();draw(d)};
+   $q('.heat').addEventListener('click',()=>nudgeT(1));$q('.cool').addEventListener('click',()=>nudgeT(-1));
+   draw(0);
+   tryFlow(box,ctx,{check:()=>okFor[goal](t),
+    nudge:()=>{const aim={ice:-10,water:40,steam:100,boil:100,freeze:0,pIce:-10,pSteam:100}[goal],more=aim>t?T('더 데워 봐요!|Heat it more!'):T('더 식혀 봐요!|Cool it more!');return goal==='boil'||goal==='freeze'?more+' '+T('물은 0°C에서 얼고 100°C에서 끓어요.|Water freezes at 0°C and boils at 100°C.'):more},
+    reveal:cb=>{t={ice:-10,water:40,steam:100,boil:100,freeze:0,pIce:-10,pSteam:100}[goal];draw(0);later(900,cb)},
+    answer:()=>({ice:T('0°C보다 차갑게 식히면 얼음이 돼요|Cool it below 0°C to make ice'),water:T('0°C와 100°C 사이에서는 물이에요|Between 0°C and 100°C it’s liquid water'),steam:T('100°C가 되면 끓어서 수증기가 돼요|At 100°C it boils into steam'),boil:'100°C',freeze:'0°C',pIce:T('얼음(고체): 0°C보다 차갑게|Ice (solid): below 0°C'),pSteam:T('수증기(기체): 100°C로 끓이기|Steam (gas): boil at 100°C')}[goal]),
+    why:()=>parts?T('얼음에서는 알갱이가 줄을 맞춰 붙어 있고, 물에서는 서로 미끄러지며 움직이고, 수증기에서는 멀리 떨어져 빠르게 날아다녀요. 데우면 알갱이가 더 활발해져요.|In ice the particles are lined up and stuck together; in water they slide past each other; in steam they fly far apart and fast. Heating makes particles move more.'):T('물은 0°C보다 차가우면 얼음(고체), 0°C~100°C에서는 물(액체), 100°C에서 끓어 수증기(기체)가 돼요.|Water is ice (solid) below 0°C, liquid between 0°C and 100°C, and boils into steam (gas) at 100°C.')});
+  },hint(){return false}};
+};
+// ---------------------------------------------------------------- the water cycle: tap the picture in the order things happen
+SIMS.cycle=(q,ctx)=>{
+ const lv=Math.max(q.l,ctx.diff>=3?3:ctx.diff>=2?2:1);
+ const S=[['sun','☀️','해가 바닷물을 데워요|The Sun warms the sea'],['sea','💨','바닷물이 증발해 수증기가 돼요|Seawater evaporates into water vapor'],['sky','☁️','수증기가 하늘에서 식어 구름이 돼요|The vapor cools high up and makes clouds'],
+  ['cloud','🌧️','구름에서 비가 내려요|Rain falls from the clouds'],['river','🏞️','빗물이 강을 따라 흘러요|Rainwater flows down the river'],['sea','🌊','다시 바다로 돌아가요|It flows back into the sea']];
+ const text='물방울의 여행! 무슨 일이 일어나는지 차례대로 그림을 눌러요.|A water drop’s journey! Tap the picture in the order things happen.';
+ let k=0,miss=0,B=null;
+ return {tag:['🌧️',T('물의 여행|Water cycle')],say:T(text),answer:S.map(s=>T(s[2])).join(' → '),
+  mount(box,done){B=box;
+   box.innerHTML=qText(T(text))+`<div class="cyc"><svg class="simsvg" viewBox="0 0 360 220"><defs><linearGradient id="cyS" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8fd3ff"/><stop offset="1" stop-color="#d9f2ff"/></linearGradient></defs>
+    <rect width="360" height="220" rx="16" fill="#cfe8b0"/><rect class="hot" data-h="sky" x="0" y="0" width="360" height="150" rx="16" fill="url(#cyS)"/>
+    <g class="hot sunG" data-h="sun"><circle cx="48" cy="40" r="34" fill="#ffffff01"/><circle class="sun" cx="48" cy="40" r="22" fill="#ffd21f"/></g>
+    <polygon points="0,220 0,150 70,78 150,190 160,220" fill="#7fae63"/><polygon points="58,90 70,78 82,90 76,96 64,94" fill="#fff"/>
+    <path class="hot" data-h="river" d="M70 150Q110 170 130 185T250 200" stroke="#ffffff01" stroke-width="30" fill="none"/>
+    <path class="riv" d="M70 150Q110 170 130 185T250 200" stroke="#4aa8ff" stroke-width="9" fill="none" stroke-linecap="round" pointer-events="none"/>
+    <path class="hot sea" data-h="sea" d="M210 165Q250 155 290 165T360 162V220H180z" fill="#2f7fd6"/>
+    <g class="vap" opacity="0" pointer-events="none">${[0,1,2].map(i=>`<path class="vp v${i}" d="M${262+i*28} 150q-7-10 0-20q7-10 0-20" stroke="#ffffff" stroke-width="4" fill="none" stroke-linecap="round"/>`).join('')}</g>
+    <g class="hot cloud" data-h="cloud" opacity="0" pointer-events="none"><ellipse cx="150" cy="48" rx="58" ry="22" fill="#ffffff"/><ellipse cx="122" cy="58" rx="32" ry="16" fill="#f2f6fb"/><ellipse cx="180" cy="60" rx="36" ry="16" fill="#f2f6fb"/></g>
+    <g class="rain" opacity="0" pointer-events="none">${[0,1,2,3,4].map(i=>`<line class="rd r${i}" x1="${110+i*18}" y1="80" x2="${104+i*18}" y2="94" stroke="#3a8ee0" stroke-width="3" stroke-linecap="round"/>`).join('')}</g></svg>
+    <ol class="cycsteps">${S.map((s,i)=>`<li data-i="${i}"><span>${i+1}</span><b>❓</b></li>`).join('')}</ol><p class="sub center cycnext"></p></div>`;
+   const svg=box.querySelector('svg'),$q=s=>box.querySelector(s);
+   const guide=()=>{const nx=$q('.cycnext');nx.textContent=k>=S.length?'':lv===1?`👆 ${T(S[k][2])}`:T('다음엔 어떤 일이 생길까요? 알맞은 곳을 눌러요.|What happens next? Tap the right spot.')};
+   const act=i=>{if(i===0){$q('.sun').classList.add('sunon')}else if(i===1){$q('.vap').setAttribute('opacity','1');$q('.vap').classList.add('up')}else if(i===2){$q('.vap').setAttribute('opacity','0');const c=$q('.cloud');c.setAttribute('opacity','1');c.setAttribute('pointer-events','auto')}
+    else if(i===3){$q('.cloud').classList.add('dark');$q('.rain').setAttribute('opacity','1');$q('.rain').classList.add('fall')}else if(i===4){$q('.riv').classList.add('flow')}else{$q('.sea').classList.add('wave')}};
+   const mark=()=>svg.querySelectorAll('.hot').forEach(h=>h.classList.remove('hinted'));
+   svg.addEventListener('click',e=>{const h=e.target.closest('.hot');if(!h||box.dataset.done)return;
+    // the cloud sits on top of the sky; once it exists, taps there count as the cloud
+    const id=h.dataset.h;
+    if(id===S[k][0]){SFX.good();mark();act(k);const li=box.querySelector(`.cycsteps li[data-i="${k}"]`);li.classList.add('on');li.querySelector('b').textContent=`${S[k][1]} ${T(S[k][2])}`;k++;guide();
+     if(k>=S.length){box.dataset.done=1;sparkle(box);later(700,()=>done(miss<=(lv===1?2:1),{why:T('물은 증발 → 구름 → 비나 눈 → 강 → 바다로 모습을 바꾸며 끝없이 돌고 돌아요. 이것을 물의 순환이라고 해요.|Water keeps going around: evaporation → clouds → rain or snow → rivers → the sea. This is the water cycle.')}))}}
+    else{miss++;SFX.bad();svg.classList.remove('shake');void svg.getBoundingClientRect();svg.classList.add('shake');if(lv===1||miss>1)hintNext()}});
+   const hintNext=()=>{mark();const t=S[k][0]==='cloud'?$q('.cloud'):svg.querySelector(`.hot[data-h="${S[k][0]}"]`);if(t)t.classList.add('hinted')};
+   guide();
+  },hint(){if(!B||B.dataset.done)return false;const S0=['sun','sea','sky','cloud','river','sea'][k];const t=S0==='cloud'?B.querySelector('.cloud'):B.querySelector(`.hot[data-h="${S0}"]`);if(!t||t.classList.contains('hinted'))return false;t.classList.add('hinted');return true}};
+};
 </script>
 <script>
 // ================================================================ Little Science Guardians
@@ -1995,7 +2375,7 @@ const CARD={},CARDS=[];
 CARD_RAW.forEach(([id,w,lv,ic,title,text,life])=>{const c={id,w,lv,icon:ic,title:T(title),text:T(text),life:T(life)};CARD[id]=c;CARDS.push(c)});
 const QALL=QS.map((q,k)=>({...q,k,l:Math.max(q.l,CARD[q.c].lv)}));
 const STAGES=5;
-const SIM_NAMES={compass:['🧭','나침반|Compass'],grid:['🗺️','지도 길 찾기|Map routes'],shadow:['🔦','그림자 실험|Shadow lab'],silhouette:['👤','그림자 맞히기|Whose shadow?'],bus:['🚌','버스 관성 실험|Bus inertia lab'],seesaw:['⚖️','시소 균형|Seesaw balance'],race:['🏁','예상하고 관찰하기|Predict and watch'],magnet:['🧲','자석 뒤집기|Magnet flip'],thermo:['🌡️','온도계|Thermometers'],earth:['🌍','지구 돌리기|Spin the Earth'],thunder:['⚡','천둥 세기|Count the thunder'],pitch:['🎵','소리 실험|Sound lab'],scrub:['🧼','손 씻기 대작전|Hand-washing mission']};
+const SIM_NAMES={compass:['🧭','나침반|Compass'],grid:['🗺️','지도 길 찾기|Map routes'],shadow:['🔦','그림자 실험|Shadow lab'],silhouette:['👤','그림자 맞히기|Whose shadow?'],bus:['🚌','버스 관성 실험|Bus inertia lab'],seesaw:['⚖️','시소 균형|Seesaw balance'],race:['🏁','예상하고 관찰하기|Predict and watch'],magnet:['🧲','자석 뒤집기|Magnet flip'],thermo:['🌡️','온도계|Thermometers'],earth:['🌍','지구 돌리기|Spin the Earth'],thunder:['⚡','천둥 세기|Count the thunder'],pitch:['🎵','소리 실험|Sound lab'],scrub:['🧼','손 씻기 대작전|Hand-washing mission'],indicator:['🧪','지시약 실험|Indicator lab'],flame:['🔥','불꽃 반응|Flame tests'],season:['🌏','계절 실험|Seasons lab'],circuit:['💡','전기 회로|Circuit lab'],water:['♨️','물의 변신|Water changes'],cycle:['🌧️','물의 여행|Water cycle']};
 const LABS=[];
 for(const q of QALL){if(q.t!=='sim')continue;let lab=LABS.find(x=>x.id===q.sim);if(!lab){lab={id:q.sim,icon:SIM_NAMES[q.sim][0],name:T(SIM_NAMES[q.sim][1]),w:CARD[q.c].w,items:[]};LABS.push(lab)}lab.w=Math.min(lab.w,CARD[q.c].w);lab.items.push(q)}
 const DIFFS=[null,

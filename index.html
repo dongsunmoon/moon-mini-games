@@ -7,7 +7,7 @@
 <title data-en="Moon Mini Games">문 미니 게임 | Moon Mini Games</title>
 <meta name="description" content="어린이를 위한 무료 웹 미니 게임 · Free mini games for kids. 휴대폰·PC 모두 가능, 한국어/English.">
 <meta property="og:title" content="Moon Mini Games · 문 미니 게임">
-<meta property="og:description" content="꼬마 탐정단 · 마블 레이스 — 휴대폰과 PC에서 바로 플레이! Play right away on phone or PC.">
+<meta property="og:description" content="꼬마 탐정단 · 마블 레이스 · 꼬마 체스 기사단 — 휴대폰과 PC에서 바로 플레이! Play right away on phone or PC.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://game.dongsunmoon.com/">
 <meta property="og:image" content="https://game.dongsunmoon.com/images/og-image.jpg">
@@ -79,7 +79,13 @@ a{color:inherit}
 .t-marble .m{position:absolute;width:var(--s,40px);height:var(--s,40px);border-radius:50%;background:var(--c);background:radial-gradient(circle at 32% 28%,#fff 0 7%,var(--c) 34%,color-mix(in srgb,var(--c) 60%,#000) 100%);box-shadow:0 0 16px var(--c);animation:roll 2.6s ease-in-out infinite alternate}
 .t-marble .flag{position:absolute;right:8%;top:16%;font-size:40px}
 @keyframes roll{to{transform:translateX(26px) rotate(160deg)}}
-@media (prefers-reduced-motion:reduce){.t-marble .m{animation:none}.card{transition:none}}
+/* Chess thumbnail: night-purple sky over a checkerboard and a golden knight */
+.t-chess{background:radial-gradient(circle at 50% 20%,#8f7bff 0,#2b2f7a 75%)}
+.t-chess .board{position:absolute;left:-10%;right:-10%;bottom:-38%;height:70%;transform:perspective(380px) rotateX(58deg);background:repeating-conic-gradient(#eeeed2 0 25%,#769656 0 50%) 0 0/16.66% 25%;box-shadow:0 -8px 30px rgba(0,0,0,.35)}
+.t-chess .knight{position:absolute;left:50%;top:46%;width:42%;height:auto;aspect-ratio:1;transform:translate(-50%,-50%);filter:drop-shadow(0 12px 14px rgba(0,0,0,.4));animation:hop 2.4s ease-in-out infinite}
+.t-chess .spark{position:absolute;font-size:30px}
+@keyframes hop{50%{transform:translate(-50%,-58%) rotate(-4deg)}}
+@media (prefers-reduced-motion:reduce){.t-marble .m,.t-chess .knight{animation:none}.card{transition:none}}
 .tips{margin:22px 0 0;padding:0;list-style:none;display:flex;flex-wrap:wrap;gap:8px}
 .tips li{background:#ffffffc7;border:1px solid var(--line);border-radius:14px;padding:9px 12px;font-size:13.5px;font-weight:700;color:var(--muted)}
 footer{margin-top:22px;text-align:center;color:#8a93b8;font-size:12px}
@@ -129,7 +135,16 @@ const GAMES=[
     age:['누구나','All ages'],
     desc:['진짜처럼 통통 튕기는 구슬 레이스! 내 구슬을 응원하고 5경기 리그 우승에 도전해요.','Marbles really bounce! Cheer for yours and go for the 5-race league title.'],
     tags:[['🌈 6개 월드','🌈 6 worlds'],['🏆 리그전','🏆 League'],['📣 내 구슬 응원','📣 Cheer your marble']],
-    stat:()=>{const m=readSave('marble3dsettings')?.mineStats;return m&&m.races>0?L(`🏆 내 구슬 우승 ${m.wins}번 / ${m.races}경기`,`🏆 Your marble won ${m.wins} of ${m.races} race${m.races===1?'':'s'}`):''}
+    stat:()=>{const m=(readSave('marbleRush.v2')||readSave('marble3dsettings'))?.mineStats;return m&&m.races>0?L(`🏆 내 구슬 우승 ${m.wins}번 / ${m.races}경기`,`🏆 Your marble won ${m.wins} of ${m.races} race${m.races===1?'':'s'}`):''}
+  },
+  {
+    file:'chess_knights.html',
+    thumb:'<div class="thumb t-chess" aria-hidden="true"><img class="cover" src="images/cover-chess.webp" alt="" onerror="this.remove()"><div class="board"></div><svg class="knight" viewBox="0 0 100 100"><defs><linearGradient id="tkG" x1="0" y1="0" x2=".3" y2="1"><stop offset="0" stop-color="#fff8cf"/><stop offset=".5" stop-color="#ffd659"/><stop offset="1" stop-color="#d99a0b"/></linearGradient></defs><g fill="url(#tkG)" stroke="#7a5200" stroke-width="3.2" stroke-linejoin="round"><path d="M71 81H30Q29 67 38 59Q45 53 46 46Q40 50 33 53Q26 56 22 51Q19 47 23 42L38 27Q42 19 49 15L50 6L58 13Q74 18 76 40Q78 62 71 81Z"/><path d="M22 89Q22 81 30 81H70Q78 81 78 89V90Q78 94 74 94H26Q22 94 22 90Z"/></g><circle cx="44" cy="29" r="3.6" fill="#5c3d00"/></svg><span class="spark" style="left:14%;top:16%">⭐</span><span class="spark" style="left:78%;top:20%">👑</span><span class="spark" style="left:80%;top:66%">🪙</span></div>',
+    title:['꼬마 체스 기사단','Little Chess Knights'],
+    age:['6세 이상','Ages 6+'],
+    desc:['체스 퍼즐을 풀고 보스를 이겨 새 지역을 열어요! 코인을 모아 체스판과 기물을 꾸며요.','Solve chess puzzles, beat the bosses and open new lands! Spend coins on boards and pieces.'],
+    tags:[['♞ 체스 퍼즐','♞ Chess puzzles'],['⚔️ AI 대결','⚔️ AI battles'],['📈 레벨업','📈 Level up']],
+    stat:()=>{const d=readSave('chessKnights.v1');return d&&d.solved>0?L(`♞ Lv.${d.lvl} · 퍼즐 점수 ${d.rating} · 푼 퍼즐 ${d.solved}개`,`♞ Lv.${d.lvl} · Puzzle score ${d.rating} · ${d.solved} solved`):''}
   }
 ];
 const pick=pair=>L(pair[0],pair[1]);

@@ -10,6 +10,7 @@ Mini games for kids that run right in the browser on phones, tablets and PCs.
 | 🕵️ 꼬마 탐정단 · Little Detectives | `detective_game.html` | 목격자 단서로 범인 찾기, 순찰 미니게임 7종 |
 | 🔮 마블 레이스 · Marble Rush | `marble_rush_3d.html` | 진짜 물리로 튕기는 마블런 레이스, 내 구슬 응원 · 리그 5경기 |
 | ♞ 꼬마 체스 기사단 · Little Chess Knights | `chess_knights.html` | 체스 퍼즐 모험 6지역 · 보스 AI 대결 · 번개 퍼즐 · 레벨업과 상점 |
+| 🔬 꼬마 과학 수호대 · Little Science Guardians | `science_guardians.html` | 초등 과학 퀴즈와 실험으로 악당 물리치기 · 8지역 · 난이도 3단계 · 대원(플레이어) 여러 명 |
 
 ## GitHub Pages로 공개하기
 
@@ -35,3 +36,7 @@ Mini games for kids that run right in the browser on phones, tablets and PCs.
 ## 체스 퍼즐 출처
 
 `chess_knights.html`의 퍼즐은 [Lichess 공개 퍼즐 데이터베이스](https://database.lichess.org/#puzzles)에서 골랐습니다. 이 데이터는 CC0(퍼블릭 도메인)으로 공개돼 있어 자유롭게 쓸 수 있습니다. 체스판·기물 그림, 캐릭터, 효과음, AI는 이 게임을 위해 직접 만들었습니다.
+
+## 과학 게임 내용
+
+`science_guardians.html`의 문제, 설명, 실험, 그림, 소리는 모두 이 게임을 위해 직접 썼습니다. 한국과 캐나다(온타리오 등) 초등 과학 교과에서 다루는 주제(방위·그림자·힘과 운동·자석·물질의 상태·생물·날씨와 지구·소리와 몸)와 생활 안전 상식을 바탕으로 했습니다.

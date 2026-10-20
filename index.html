@@ -7,7 +7,7 @@
 <title data-en="Moon Mini Games">문 미니 게임 | Moon Mini Games</title>
 <meta name="description" content="어린이를 위한 무료 웹 미니 게임 · Free mini games for kids. 휴대폰·PC 모두 가능, 한국어/English.">
 <meta property="og:title" content="Moon Mini Games · 문 미니 게임">
-<meta property="og:description" content="꼬마 탐정단 · 마블 레이스 · 꼬마 체스 기사단 — 휴대폰과 PC에서 바로 플레이! Play right away on phone or PC.">
+<meta property="og:description" content="꼬마 탐정단 · 마블 레이스 · 꼬마 체스 기사단 · 꼬마 과학 수호대 — 휴대폰과 PC에서 바로 플레이! Play right away on phone or PC.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://game.dongsunmoon.com/">
 <meta property="og:image" content="https://game.dongsunmoon.com/images/og-image.jpg">
@@ -85,7 +85,14 @@ a{color:inherit}
 .t-chess .knight{position:absolute;left:50%;top:46%;width:42%;height:auto;aspect-ratio:1;transform:translate(-50%,-50%);filter:drop-shadow(0 12px 14px rgba(0,0,0,.4));animation:hop 2.4s ease-in-out infinite}
 .t-chess .spark{position:absolute;font-size:30px}
 @keyframes hop{50%{transform:translate(-50%,-58%) rotate(-4deg)}}
-@media (prefers-reduced-motion:reduce){.t-marble .m,.t-chess .knight{animation:none}.card{transition:none}}
+/* Science thumbnail: lab-blue sky with a spinning atom, a magnet, a compass and a little villain */
+.t-science{background:radial-gradient(circle at 30% 20%,#5fe3ff 0,#1a7fb0 55%,#0f3d6e 100%)}
+.t-science .ring{position:absolute;left:50%;top:50%;width:46%;aspect-ratio:1;border:4px solid #ffffffb0;border-radius:50%;transform:translate(-50%,-50%) rotate(var(--r)) scaleY(.36);box-shadow:0 0 18px #7cf3ff}
+.t-science .core{position:absolute;left:50%;top:50%;width:12%;aspect-ratio:1;border-radius:50%;transform:translate(-50%,-50%);background:radial-gradient(circle at 35% 30%,#fff,#ffd84d 45%,#ff9f45);box-shadow:0 0 22px #ffd84d}
+.t-science .atom{position:absolute;inset:0;animation:spinA 9s linear infinite}
+.t-science .ic{position:absolute;font-size:38px;filter:drop-shadow(0 6px 8px rgba(0,0,0,.3))}
+@keyframes spinA{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.t-marble .m,.t-chess .knight,.t-science .atom{animation:none}.card{transition:none}}
 .tips{margin:22px 0 0;padding:0;list-style:none;display:flex;flex-wrap:wrap;gap:8px}
 .tips li{background:#ffffffc7;border:1px solid var(--line);border-radius:14px;padding:9px 12px;font-size:13.5px;font-weight:700;color:var(--muted)}
 footer{margin-top:22px;text-align:center;color:#8a93b8;font-size:12px}
@@ -145,6 +152,15 @@ const GAMES=[
     desc:['체스 퍼즐을 풀고 보스를 이겨 새 지역을 열어요! 코인을 모아 체스판과 기물을 꾸며요.','Solve chess puzzles, beat the bosses and open new lands! Spend coins on boards and pieces.'],
     tags:[['♞ 체스 퍼즐','♞ Chess puzzles'],['⚔️ AI 대결','⚔️ AI battles'],['📈 레벨업','📈 Level up']],
     stat:()=>{const d=readSave('chessKnights.v1');return d&&d.solved>0?L(`♞ Lv.${d.lvl} · 퍼즐 점수 ${d.rating} · 푼 퍼즐 ${d.solved}개`,`♞ Lv.${d.lvl} · Puzzle score ${d.rating} · ${d.solved} solved`):''}
+  },
+  {
+    file:'science_guardians.html',
+    thumb:'<div class="thumb t-science" aria-hidden="true"><img class="cover" src="images/cover-science.webp" alt="" onerror="this.remove()"><div class="atom"><div class="ring" style="--r:0deg"></div><div class="ring" style="--r:60deg"></div><div class="ring" style="--r:120deg"></div></div><div class="core"></div><span class="ic" style="left:9%;top:14%">🧭</span><span class="ic" style="left:78%;top:12%">🧲</span><span class="ic" style="left:12%;top:62%">🔦</span><span class="ic" style="left:76%;top:60%">🦹</span></div>',
+    title:['꼬마 과학 수호대','Little Science Guardians'],
+    age:['6~11세','Ages 6–11'],
+    desc:['그림자, 나침반, 관성, 자석, 날씨까지! 과학 퀴즈와 실험으로 헷갈 박사의 악당들을 물리쳐요.','Shadows, compasses, inertia, magnets and weather! Beat Dr. Mix-Up’s villains with science quizzes and hands-on labs.'],
+    tags:[['🔬 실험 13가지','🔬 13 labs'],['📚 과학 카드 80장','📚 80 science cards'],['🎚️ 학년별 난이도','🎚️ Grade levels']],
+    stat:()=>{const r=readSave('scienceGuardians.v1'),d=r&&r.P&&r.P[r.cur];return d&&d.correct>0?L(`🔬 ${d.name} Lv.${d.lvl} · 과학 카드 ${Object.keys(d.cards||{}).length}장`,`🔬 ${d.name} Lv.${d.lvl} · ${Object.keys(d.cards||{}).length} science cards`):''}
   }
 ];
 const pick=pair=>L(pair[0],pair[1]);

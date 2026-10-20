@@ -158,8 +158,8 @@ const GAMES=[
     thumb:'<div class="thumb t-science" aria-hidden="true"><img class="cover" src="images/cover-science.webp" alt="" onerror="this.remove()"><div class="atom"><div class="ring" style="--r:0deg"></div><div class="ring" style="--r:60deg"></div><div class="ring" style="--r:120deg"></div></div><div class="core"></div><span class="ic" style="left:9%;top:14%">🧭</span><span class="ic" style="left:78%;top:12%">🧲</span><span class="ic" style="left:12%;top:62%">🔦</span><span class="ic" style="left:76%;top:60%">🦹</span></div>',
     title:['꼬마 과학 수호대','Little Science Guardians'],
     age:['6~11세','Ages 6–11'],
-    desc:['그림자, 나침반, 관성, 자석, 날씨까지! 과학 퀴즈와 실험으로 헷갈 박사의 악당들을 물리쳐요.','Shadows, compasses, inertia, magnets and weather! Beat Dr. Mix-Up’s villains with science quizzes and hands-on labs.'],
-    tags:[['🔬 실험 13가지','🔬 13 labs'],['📚 과학 카드 80장','📚 80 science cards'],['🎚️ 학년별 난이도','🎚️ Grade levels']],
+    desc:['그림자, 나침반, 관성, 자석, 날씨, 공룡 화석까지! 과학 퀴즈와 실험으로 헷갈 박사의 악당들을 물리쳐요.','Shadows, compasses, inertia, magnets, weather and dinosaur fossils! Beat Dr. Mix-Up’s villains with science quizzes and hands-on labs.'],
+    tags:[['🔬 실험 13가지','🔬 13 labs'],['📚 과학 카드 125장','📚 125 science cards'],['🎚️ 학년별 난이도','🎚️ Grade levels']],
     stat:()=>{const r=readSave('scienceGuardians.v1'),d=r&&r.P&&r.P[r.cur];return d&&d.correct>0?L(`🔬 ${d.name} Lv.${d.lvl} · 과학 카드 ${Object.keys(d.cards||{}).length}장`,`🔬 ${d.name} Lv.${d.lvl} · ${Object.keys(d.cards||{}).length} science cards`):''}
   }
 ];

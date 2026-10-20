@@ -81,22 +81,6 @@ main{width:min(980px,100%);margin:0 auto;padding:14px max(12px,env(safe-area-ins
 .btn.small{min-height:42px;font-size:15px;padding:0 14px;border-radius:13px}
 .btn[disabled]{filter:grayscale(.8);opacity:.55;pointer-events:none}
 
-/* ---------------------------------------------------------------- splash */
-.splash{position:fixed;inset:0;z-index:80;display:grid;place-items:center;text-align:center;color:#fff;padding:24px;overflow:auto;
- background:radial-gradient(circle at 50% 30%,#2fb7c9,#0f3d6e 72%)}
-.logo3{display:flex;justify-content:center;gap:8px;font-size:70px;filter:drop-shadow(0 10px 18px rgba(0,0,0,.35))}
-.logo3 span{display:inline-block;animation:float 2.6s ease-in-out infinite}
-.logo3 span:nth-child(2){font-size:96px;animation-delay:-.8s}.logo3 span:nth-child(3){animation-delay:-1.6s}
-.splash h1{margin:6px 0 2px;font-size:clamp(36px,9vw,62px);font-weight:900;letter-spacing:-1px;text-shadow:0 5px 0 #0b5f73,0 10px 30px rgba(0,0,0,.4)}
-.splash p{margin:0 0 20px;font-weight:800;opacity:.92}
-.splash .btn{min-width:220px;font-size:21px;min-height:62px}
-.splash small{display:block;margin-top:18px;opacity:.7;font-weight:700}
-#splashPlayers p{margin:0 0 8px}
-.spl{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin-bottom:18px}
-.spl button{display:flex;flex-direction:column;align-items:center;gap:2px;border:0;border-radius:18px;padding:10px 14px;background:rgba(255,255,255,.16);color:#fff;min-width:96px;box-shadow:inset 0 0 0 2px rgba(255,255,255,.2)}
-.spl button.on{background:#fff;color:var(--ink)}
-.spl .ava{width:52px;height:52px;font-size:30px}
-.spl small{font-weight:800;opacity:.8}
 @keyframes float{50%{transform:translateY(-10px) rotate(-3deg)}}
 
 /* ---------------------------------------------------------------- avatar */
@@ -672,17 +656,6 @@ main{width:min(980px,100%);margin:0 auto;padding:14px max(12px,env(safe-area-ins
 </style>
 </head>
 <body>
-<div class="splash" id="splash">
- <div>
-  <div class="logo3"><span>🧭</span><span>🔬</span><span>🧲</span></div>
-  <h1 data-en="Little Science Guardians">꼬마 과학 수호대</h1>
-  <p data-en="Stop Dr. Mix-Up with real science!">진짜 과학으로 헷갈 박사를 막아라!</p>
-  <div id="splashPlayers"></div>
-  <button class="btn gold" id="startBtn" type="button">▶ <span data-en="Start">시작하기</span></button>
-  <small data-en="🔊 Turn the sound on: questions are read aloud">🔊 소리를 켜면 문제를 읽어 줘요</small>
- </div>
-</div>
-
 <header class="hud">
  <button class="back hidden" id="backBtn" type="button" aria-label="뒤로" data-en-aria-label="Back">←</button>
  <a class="back" id="homeLink" href="index.html" aria-label="게임 목록" data-en-aria-label="All games">🏠</a>
@@ -1916,8 +1889,12 @@ const bestVoice=()=>voices.find(v=>/google|yuna|sora|samantha|ava|allison|natura
 function speakable(t){t=String(t).replace(/−(\d+(?:\.\d+)?)°C/g,L('영하 $1도','minus $1 degrees')).replace(/(\d+(?:\.\d+)?)°C/g,L('$1도','$1 degrees')).replace(/(\d+(?:\.\d+)?)\s?km/g,L('$1킬로미터','$1 kilometers'))
  .replace(/×/g,L(' 곱하기 ',' times ')).replace(/÷/g,L(' 나누기 ',' divided by ')).replace(/→/g,', ').replace(/−/g,L(' 빼기 ',' minus ')).replace(/~/g,L('에서 ',' to '));
  return t.replace(/\p{Extended_Pictographic}|‍|️|[①②③④⭕❌]/gu,'').replace(/\s+/g,' ').trim()}
+// Browsers only allow speech after the first tap, so a line asked for before then waits for that tap
+let pendingSay=null,saySeq=0;
+document.addEventListener('pointerdown',()=>{const t=pendingSay;pendingSay=null;if(!t)return;const seq=saySeq;setTimeout(()=>{if(saySeq===seq)speak(t)},400)},{capture:true,once:true});
 function speak(text){
  if(!ROOT.opt.voice||!('speechSynthesis' in window)||!text)return;
+ saySeq++;if(navigator.userActivation&&!navigator.userActivation.hasBeenActive){pendingSay=text;return}
  try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(speakable(text));const v=bestVoice();if(v)u.voice=v;u.lang=LANG==='en'?'en-US':'ko-KR';u.rate=S.diff===1?.95:1.02;u.pitch=(BUDDIES[S.equip.buddy]||BUDDIES.puppy).pitch;speechSynthesis.speak(u)}catch(e){}
 }
 const stopVoice=()=>{try{speechSynthesis.cancel()}catch(e){}};
@@ -2081,7 +2058,7 @@ function renderHome(){
  const sub=nx.final?`${FINAL.icon} ${esc(FINAL.name)}`:`${w.icon} ${esc(w.name)} · ${nx.boss?esc(w.boss.name):L(`스테이지 ${nx.w+1}-${nx.s+1}`,`Stage ${nx.w+1}-${nx.s+1}`)}`;
  $('v-home').innerHTML=`<div class="home">
  <div class="hero"><button class="face" type="button" data-go="players" aria-label="${L('대원 바꾸기','Switch player')}">${avatarHTML()}</button><div class="hinfo"><div class="t1">${t.icon} ${esc(t.name)} · Lv.${S.lvl}</div><div class="t2">${esc(S.name)}</div>
-  <div class="stats"><button class="chip" type="button" data-go="diff">${d.icon} ${esc(d.name)} · ${esc(d.grade)}</button><span>📚 ${Object.keys(S.cards).length}/${CARDS.length}</span><span>⭐ ${totalStars()}</span><span>🥇 ${goldCards()}</span></div></div>
+  <div class="stats">${ROOT.order.length>1?`<button class="chip" type="button" data-go="players">👥 ${L('대원 바꾸기','Switch player')}</button>`:''}<button class="chip" type="button" data-go="diff">${d.icon} ${esc(d.name)} · ${esc(d.grade)}</button><span>📚 ${Object.keys(S.cards).length}/${CARDS.length}</span><span>⭐ ${totalStars()}</span><span>🥇 ${goldCards()}</span></div></div>
   <div class="buddy">${pic(BUDDIES[S.equip.buddy].img,BUDDIES[S.equip.buddy].icon)}</div></div>
  <button class="btn green cta" type="button" data-go="continue">▶ ${cta}<small>${sub}</small></button>
  <div class="tiles">
@@ -2598,19 +2575,11 @@ function introStory(){
    modal(`<div style="font-size:72px">${pic(b.img,b.icon)}</div><h2>${L(`${S.name} 대원, 도와줘요!`,`${S.name}, we need you!`)}</h2><p>${L('헷갈 박사의 몬스터들이 마을에 엉터리 상식을 퍼뜨리고 있어요. 과학 문제를 맞히면 공격, 틀리면 하트가 줄어요. 틀려도 괜찮아요. 설명을 보면 더 강해져요! 새로 배운 내용은 과학 카드로 모아요.','Dr. Mix-Up’s monsters are spreading silly myths around town. Answer science questions to attack; wrong answers cost a heart. Mistakes are okay: read the explanation and you get stronger! Everything you learn becomes a science card.')}</p>
     <div class="row"><button class="btn green" type="button" data-act="go">▶ ${L('출동!','Let’s go!')}</button></div>`,{closable:false,acts:{go:()=>{S.intro=true;save();return ()=>{dailyLogin();startStage(0,0)}}},onOpen:()=>speak(L(`${S.name} 대원, 도와줘요! 과학 문제를 맞히면 몬스터를 공격해요. 틀려도 괜찮아요, 설명을 보면 더 강해져요!`,`${S.name}, we need you! Answer science questions to attack the monsters. Mistakes are okay. Read the explanation and you get stronger!`))})}}}});
 }
-function renderSplashPlayers(){
- const el=$('splashPlayers');if(!el)return;
- if(ROOT.order.length<2){el.innerHTML='';return}
- el.innerHTML=`<p>${L('누가 할까요?','Who’s playing?')}</p><div class="spl">${ROOT.order.map(id=>{const p=id===ROOT.cur?S:merge(ROOT.P[id]);return `<button type="button" data-pid="${id}" class="${id===ROOT.cur?'on':''}">${avatarHTML(p)}<b>${esc(p.name)}</b><small>Lv.${p.lvl}</small></button>`}).join('')}</div>`;
-}
-function begin(){
- audio();SFX.level();$('splash').classList.add('hidden');go('home');
- if(!S.intro){playerForm(S,{isNew:true});return}
- dailyLogin();
-}
-applyLang();updateHud();ensureMissions();quietTrophies();$('homeLink').href='index.html?lang='+LANG;renderSplashPlayers();
-$('splashPlayers').addEventListener('click',e=>{const b=e.target.closest('[data-pid]');if(!b)return;const id=b.dataset.pid;if(id!==ROOT.cur){save();ROOT.cur=id;S=merge(ROOT.P[id]);save();quietTrophies();updateHud()}begin()});
-$('startBtn').addEventListener('click',begin);
+// No title screen: open straight onto the home screen with the last player
+applyLang();updateHud();ensureMissions();quietTrophies();$('homeLink').href='index.html?lang='+LANG;
+go('home');
+if(!S.intro)playerForm(S,{isNew:true});
+else{if(ROOT.order.length>1)toast(`${esc(S.av)} ${esc(L(`${S.name} 대원으로 시작해요. 얼굴을 누르면 바꿀 수 있어요`,`Playing as ${S.name}. Tap the face to switch`))}`);dailyLogin()}
 window.addEventListener('beforeunload',()=>save());
 
 // For browser verification

@@ -80,14 +80,6 @@ main{width:min(1120px,100%);margin:0 auto;padding:14px max(12px,env(safe-area-in
 .btn.small{min-height:40px;font-size:15px;padding:0 14px;border-radius:13px}
 .btn[disabled]{filter:grayscale(.8);opacity:.55;pointer-events:none}
 
-/* ---------------------------------------------------------------- splash */
-.splash{position:fixed;inset:0;z-index:80;display:grid;place-items:center;text-align:center;color:#fff;padding:24px;
- background:radial-gradient(circle at 50% 35%,#7d6bff,#2b2f7a 70%)}
-.splash .crown{font-size:92px;filter:drop-shadow(0 10px 20px rgba(0,0,0,.35));animation:float 2.4s ease-in-out infinite}
-.splash h1{margin:6px 0 2px;font-size:clamp(38px,9vw,64px);font-weight:900;letter-spacing:-1px;text-shadow:0 5px 0 #3a2fb0,0 10px 30px rgba(0,0,0,.4)}
-.splash p{margin:0 0 26px;font-weight:800;opacity:.9}
-.splash .btn{min-width:220px;font-size:21px;min-height:62px}
-.splash small{display:block;margin-top:18px;opacity:.65;font-weight:700}
 @keyframes float{50%{transform:translateY(-10px) rotate(-3deg)}}
 
 /* ---------------------------------------------------------------- home */
@@ -435,16 +427,6 @@ main{width:min(1120px,100%);margin:0 auto;padding:14px max(12px,env(safe-area-in
  <linearGradient id="gw-royal" x1="0" y1="0" x2=".3" y2="1"><stop offset="0" stop-color="#fff8cf"/><stop offset=".5" stop-color="#ffd659"/><stop offset="1" stop-color="#d99a0b"/></linearGradient>
  <linearGradient id="gb-royal" x1="0" y1="0" x2=".3" y2="1"><stop offset="0" stop-color="#43414f"/><stop offset="1" stop-color="#0c0b12"/></linearGradient>
 </defs></svg>
-
-<div class="splash" id="splash">
- <div>
-  <div class="crown" id="splashPiece">♞</div>
-  <h1 data-en="Little Chess Knights">꼬마 체스 기사단</h1>
-  <p data-en="Solve puzzles, beat the bosses and grow stronger!">퍼즐을 풀고 보스를 이기며 쑥쑥 강해져요!</p>
-  <button class="btn gold" id="startBtn" type="button">▶ <span data-en="Start">시작하기</span></button>
-  <small data-en="🔊 Turn the sound on for the voice guide">🔊 소리를 켜면 코치가 말로 알려줘요</small>
- </div>
-</div>
 
 <header class="hud">
  <button class="back hidden" id="backBtn" type="button" aria-label="뒤로" data-en-aria-label="Back">←</button>
@@ -2308,8 +2290,12 @@ const NOVELTY=/albert|bad news|bahh|bells|boing|bubbles|cellos|good news|jester|
 function loadVoices(){try{voices=speechSynthesis.getVoices().filter(v=>(v.lang||'').toLowerCase().startsWith(LANG)&&!NOVELTY.test(v.name))}catch(e){voices=[]}}
 if('speechSynthesis' in window){loadVoices();try{speechSynthesis.addEventListener('voiceschanged',loadVoices)}catch(e){}}
 const bestVoice=()=>voices.find(v=>/google|yuna|sora|samantha|ava|allison|natural|premium|enhanced|siri/i.test(v.name))||voices[0]||null;
+// Browsers only allow speech after the first tap, so a line asked for before then waits for that tap
+let pendingSay=null,saySeq=0;
+document.addEventListener('pointerdown',()=>{const t=pendingSay;pendingSay=null;if(!t)return;const seq=saySeq;setTimeout(()=>{if(saySeq===seq)speak(t)},400)},{capture:true,once:true});
 function speak(text){
  if(!S.voice||!('speechSynthesis' in window))return;
+ saySeq++;if(navigator.userActivation&&!navigator.userActivation.hasBeenActive){pendingSay=text;return}
  try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(String(text).replace(/\p{Extended_Pictographic}|️|[①②③]/gu,'').replace(/−/g,LANG==='en'?' minus ':' 빼기 '));
   const v=bestVoice();if(v)u.voice=v;u.lang=LANG==='en'?'en-US':'ko-KR';u.rate=1.02;u.pitch=(COACHES[S.equip.coach]||COACHES.puppy).pitch;speechSynthesis.speak(u)}catch(e){}
 }
@@ -3082,17 +3068,16 @@ function dailyLogin(){
 
 // ---------------------------------------------------------------- start
 boardBuild();applyLang();updateHud();ensureMissions();$('homeLink').href='index.html?lang='+LANG;
-$('splashPiece').innerHTML=`<span class="ps-royal" style="display:inline-block;width:120px;height:120px">${pieceHTML(2)}</span>`;
-$('splashPiece').querySelector('.pc').style.cssText='position:static;width:100%;height:100%;transform:none';
-$('startBtn').addEventListener('click',()=>{
- audio();SFX.level();$('splash').classList.add('hidden');go('home');
+// No title screen: open straight onto the home screen
+{
+ go('home');
  if(!S.intro){S.intro=true;save();const c=COACHES[S.equip.coach];
   modal(`<div style="font-size:70px">${pic(c.img,c.icon)}</div><h2>${L('안녕! 나는 멍멍 코치야','Hi! I am Coach Woof')}</h2><p>${L('체스 왕국에 온 걸 환영해! 퍼즐을 풀면 코인과 별을 받고, 레벨이 올라가. 지역마다 보스를 이기면 새 땅이 열려!','Welcome to the chess kingdom! Solve puzzles for coins and stars, and level up. Beat each land’s boss to open a new one!')}</p>
    <div class="row"><button class="btn green" type="button" data-act="go">▶ ${L('모험 시작!','Start the adventure!')}</button></div>`,
   {closable:false,acts:{go:()=>()=>startStage(0,0)},onOpen:()=>speak(L('안녕! 나는 멍멍 코치야. 체스 왕국에 온 걸 환영해! 퍼즐을 풀면 코인과 별을 받고, 레벨이 올라가. 지역마다 보스를 이기면 새 땅이 열려!','Hi! I am Coach Woof. Welcome to the chess kingdom! Solve puzzles for coins and stars, and level up. Beat each land’s boss to open a new one!'))});
  }
  dailyLogin();
-});
+}
 window.addEventListener('beforeunload',()=>{if(BT&&!BT.over)saveBattle();save()});
 
 // For browser verification

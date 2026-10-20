@@ -159,7 +159,7 @@ const GAMES=[
     title:['꼬마 과학 수호대','Little Science Guardians'],
     age:['6~11세','Ages 6–11'],
     desc:['그림자, 나침반, 관성, 자석, 전기, 불꽃 반응, 공룡 화석까지! 과학 퀴즈와 실험으로 헷갈 박사의 악당들을 물리쳐요.','Shadows, compasses, inertia, magnets, electricity, flame tests and dinosaur fossils! Beat Dr. Mix-Up’s villains with science quizzes and hands-on labs.'],
-    tags:[['🔬 실험 19가지','🔬 19 labs'],['📚 과학 카드 138장','📚 138 science cards'],['🎚️ 학년별 난이도','🎚️ Grade levels']],
+    tags:[['🔬 실험 22가지','🔬 22 labs'],['📚 과학 카드 143장','📚 143 science cards'],['🎚️ 학년별 난이도','🎚️ Grade levels']],
     stat:()=>{const r=readSave('scienceGuardians.v1'),d=r&&r.P&&r.P[r.cur];return d&&d.correct>0?L(`🔬 ${d.name} Lv.${d.lvl} · 과학 카드 ${Object.keys(d.cards||{}).length}장`,`🔬 ${d.name} Lv.${d.lvl} · ${Object.keys(d.cards||{}).length} science cards`):''}
   }
 ];

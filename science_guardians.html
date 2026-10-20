@@ -673,6 +673,7 @@ main{width:min(980px,100%);margin:0 auto;padding:14px max(12px,env(safe-area-ins
 .flsamps{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin-top:10px}
 .flsamp{border:0;border-radius:14px;min-height:46px;padding:6px 12px;background:#eef2ff;color:var(--ink);font-weight:900;font-size:15px;box-shadow:0 3px 0 #cfd8f5}
 .flsamp.on{background:#fff3c4;box-shadow:0 3px 0 #e2b93a,0 0 0 3px #ffd84d}
+.flsamp:disabled{opacity:.6}.flsamp.hinted{box-shadow:0 0 0 4px #ffc83d;animation:pulse 1s infinite}
 .ckts{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
 .ckt{border:0;border-radius:16px;background:#f3f7ff;padding:6px 4px 8px;display:flex;flex-direction:column;align-items:center;gap:2px;color:var(--ink);box-shadow:0 3px 0 #cfdcf2}
 .ckt .bt{font-size:18px;letter-spacing:-2px}
@@ -737,7 +738,7 @@ main{width:min(980px,100%);margin:0 auto;padding:14px max(12px,env(safe-area-ins
 // ================================================================ content: worlds, science cards and challenges
 // Every text is 'Korean|English'. Levels: 1 = grades 1–2, 2 = grades 3–4, 3 = grades 5–6.
 const WORLDS=[
- {id:'dir',icon:'🧭',name:'길찾기 캠프|Compass Camp',topic:'방향 · 나침반 · 지도|Directions · compass · maps',grad:'linear-gradient(135deg,#3fae6a,#17694f)',
+ {id:'dir',icon:'🧭',name:'길찾기 캠프|Compass Camp',topic:'방향 · 지도 · 길이와 단위|Directions · maps · length and units',grad:'linear-gradient(135deg,#3fae6a,#17694f)',
   mon:{icon:'🐌',name:'빙글 달팽이|Swirly Snail',hi:'빙글빙글~ 방향을 헷갈리게 해 주지!|Swirl swirl~ I’ll mix up your directions!'},
   boss:{icon:'👹',name:'빙글 도깨비|Spinny Goblin',hi:'히히! 나침반을 빙글빙글 돌려서 모두 길을 잃게 만들 테다!|Hee hee! I’ll spin every compass so everyone gets lost!',lose:'어질어질… 방향을 다 알다니, 내가 졌다!|So dizzy… you know every direction. I give up!'}},
  {id:'shadow',icon:'☀️',name:'그림자 공원|Shadow Park',topic:'빛 · 그림자 · 반사|Light · shadows · reflection',grad:'linear-gradient(135deg,#ffb347,#f0603c)',
@@ -784,6 +785,8 @@ const CARD_RAW=[
  ['moss',0,2,'🌿','이끼 방향은 믿지 마요|Don’t trust the moss','“이끼는 나무 북쪽에만 자란다”는 말은 믿을 수 없어요. 이끼는 그늘지고 축축하면 어느 쪽에나 자라요.|“Moss only grows on the north side of trees” is not true. Moss grows on any side that is shady and damp.','길을 찾을 땐 이끼 말고 나침반, 해, 지도를 써요.|To find your way, use a compass, the Sun or a map, not moss.'],
  ['startrail',0,3,'🌌','별의 하루 움직임|Stars wheel across the sky','지구가 서쪽에서 동쪽으로 돌기 때문에 해와 별은 동쪽에서 떠서 서쪽으로 지는 것처럼 보여요. 북쪽 하늘의 별들은 북극성을 중심으로 시계 반대 방향으로 빙 돌아요.|Because Earth spins from west to east, the Sun and stars seem to rise in the east and set in the west. Stars in the northern sky circle the North Star, counterclockwise.','캠핑 가서 한 시간마다 북두칠성을 보면 자리가 바뀐 걸 알 수 있어요.|At a campsite, check the Big Dipper every hour and you’ll see it has moved.'],
  ['mapscale',0,3,'📐','축척과 등고선|Map scale and contour lines','지도는 실제 땅을 작게 줄여 그린 그림이에요. 축척을 보면 지도 위 1cm가 실제로 얼마나 먼지 알 수 있어요. 높이가 같은 곳을 이은 등고선이 촘촘할수록 경사가 가팔라요.|A map shrinks real places down. The scale tells you how far 1 cm on the map really is. Contour lines join places of the same height; the closer together they are, the steeper the slope.','등산 지도에서 축척과 등고선을 보면 얼마나 멀고 가파른지 미리 알 수 있어요.|A trail map’s scale and contour lines tell you how far and how steep a hike is before you start.'],
+ ['measure',0,1,'📏','길이 재기|Measuring length','길이는 자로 재요. 물체의 한쪽 끝을 눈금 0에 맞추고 다른 끝의 눈금을 읽어요. 짧은 것은 cm(센티미터), 긴 것은 m(미터)로 나타내요. 1m는 100cm예요.|We measure length with a ruler. Line one end up with 0 and read the mark at the other end. Short things are measured in centimetres (cm), long things in metres (m). 1 m = 100 cm.','어른 손가락 너비는 약 1cm예요. 자가 없을 때 어림해 봐요!|A grown-up’s finger is about 1 cm wide. Use it to estimate when you have no ruler!'],
+ ['prefix',0,2,'🔢','킬로, 센티, 밀리|Kilo, centi, milli','단위 앞에 붙는 말로 크기를 알 수 있어요. 킬로(k)는 1000배, 센티(c)는 100분의 1, 밀리(m)는 1000분의 1이에요. 그래서 1km = 1000m, 1m = 100cm, 1cm = 10mm, 1kg = 1000g, 1L = 1000mL예요.|The word at the front of a unit tells you its size. Kilo (k) means 1000 times, centi (c) means one hundredth and milli (m) means one thousandth. So 1 km = 1000 m, 1 m = 100 cm, 1 cm = 10 mm, 1 kg = 1000 g and 1 L = 1000 mL.','도로 표지판의 km, 우유 팩의 mL, 과자 봉지의 g을 찾아봐요.|Spot km on road signs, mL on milk cartons and g on snack bags.'],
  // ---------------------------------------------------------------- 1 Shadow Park
  ['shform',1,1,'👤','그림자가 생기는 이유|How shadows form','빛은 곧게 나아가요. 물체가 빛을 막으면 그 뒤쪽은 빛이 닿지 않아 어두워져요. 그게 그림자예요.|Light travels in straight lines. When an object blocks the light, the area behind it gets no light. That dark area is a shadow.','손전등 빛을 손으로 막아 벽에 그림자 동물을 만들어 봐요.|Block a flashlight with your hands to make shadow animals on the wall.'],
  ['shopp',1,1,'↔️','그림자는 빛의 반대쪽|Shadows fall opposite the light','그림자는 언제나 빛이 오는 쪽의 반대쪽에 생겨요. 빛이 왼쪽에서 오면 그림자는 오른쪽!|A shadow always falls on the side away from the light. Light from the left makes a shadow on the right!','해를 등지고 서면 내 그림자가 내 앞에 생겨요.|Stand with your back to the Sun and your shadow is in front of you.'],
@@ -795,7 +798,7 @@ const CARD_RAW=[
  ['straight',1,2,'➡️','빛은 곧게 나아가요|Light travels straight','빛은 휘지 않고 똑바로 나아가요. 그래서 벽 뒤에 숨으면 빛이 닿지 않아요.|Light does not bend around corners; it goes straight. That is why light can’t reach you behind a wall.','커튼 틈으로 들어온 햇빛이 곧은 줄처럼 보여요.|Sunlight through a gap in the curtains looks like a straight beam.'],
  ['mirror',1,2,'🪞','빛의 반사|Light bounces','거울은 빛을 튕겨 보내요(반사). 우리가 물건을 보는 것도 물건에 튕긴 빛이 눈에 들어오기 때문이에요.|A mirror bounces light back (reflection). We see things because light bounces off them into our eyes.','깜깜한 방에서는 아무것도 안 보여요. 빛이 있어야 볼 수 있어요.|In a pitch-dark room you can’t see anything. We need light to see.'],
  ['glow',1,1,'💡','스스로 빛나는 것|Things that make light','해, 불, 전구, 반딧불이는 스스로 빛을 내요. 달과 거울은 스스로 빛나지 않고 다른 빛을 반사해요.|The Sun, fire, light bulbs and fireflies make their own light. The Moon and mirrors don’t; they reflect other light.','자전거 반사판도 스스로 빛나지 않고 자동차 불빛을 반사해서 반짝여요.|A bike reflector doesn’t glow by itself; it reflects car headlights.'],
- ['refract',1,3,'🥤','빛의 굴절|Light bends','빛은 곧게 나아가다가 공기에서 물이나 유리로 들어가는 경계에서 꺾여요(굴절). 그래서 물컵 속 빨대가 꺾여 보이고, 물속 바닥은 실제보다 얕아 보여요. 프리즘을 지난 햇빛은 여러 색으로 나뉘어요.|Light travels straight, but it bends where it passes from air into water or glass (refraction). That’s why a straw looks broken in a glass of water and a pool looks shallower than it is. Sunlight through a prism splits into colors.','수영장이나 냇가는 보이는 것보다 깊어요. 들어가기 전에 어른과 깊이를 꼭 확인해요.|Pools and streams are deeper than they look. Check the depth with a grown-up first.'],
+ ['refract',1,2,'🥤','빛의 굴절|Light bends','빛은 곧게 나아가다가 공기에서 물이나 유리로 들어가는 경계에서 꺾여요(굴절). 그래서 물컵 속 빨대가 꺾여 보이고, 물속 바닥은 실제보다 얕아 보여요. 프리즘을 지난 햇빛은 여러 색으로 나뉘어요.|Light travels straight, but it bends where it passes from air into water or glass (refraction). That’s why a straw looks broken in a glass of water and a pool looks shallower than it is. Sunlight through a prism splits into colors.','수영장이나 냇가는 보이는 것보다 깊어요. 들어가기 전에 어른과 깊이를 꼭 확인해요.|Pools and streams are deeper than they look. Check the depth with a grown-up first.'],
  ['lens',1,3,'🔍','볼록 렌즈와 돋보기|Lenses and magnifiers','가운데가 볼록한 렌즈는 가까운 물체를 크게 보여 주고, 햇빛을 한 점으로 모아요. 안경, 카메라, 현미경에 렌즈가 쓰여요.|A lens that bulges in the middle makes close things look bigger and gathers sunlight into one spot. Glasses, cameras and microscopes all use lenses.','돋보기로 모은 햇빛은 종이가 탈 만큼 뜨거워요. 절대 장난치면 안 돼요!|Sunlight focused by a magnifier can burn paper. Never play with it!'],
  ['sunalt',1,3,'📐','태양 고도와 기온|Sun height and temperature','해가 높이 뜰수록(태양 고도가 높을수록) 그림자는 짧아지고 땅이 더 많이 데워져요. 태양 고도는 한낮에 가장 높지만, 땅이 데워져 공기를 데우는 데 시간이 걸려서 기온은 오후 2시쯤 가장 높아요.|The higher the Sun climbs (its altitude), the shorter the shadows and the more the ground heats up. The Sun is highest at midday, but the air is warmest around 2 p.m., because the ground takes time to warm up and heat the air.','여름 오후 2~3시가 가장 더워요. 그늘에서 쉬고 물을 자주 마셔요.|Summer afternoons around 2–3 p.m. are the hottest. Rest in the shade and drink water often.'],
  // ---------------------------------------------------------------- 2 Zoom Bus Road
@@ -833,6 +836,8 @@ const CARD_RAW=[
  ['static',3,2,'🎈','정전기|Static electricity','풍선을 머리카락에 문지르면 풍선과 머리카락이 서로 끌어당겨요. 문지를 때 생긴 전기가 흐르지 않고 머물러 있는 것을 정전기라고 해요. 번개도 구름에 쌓인 아주 큰 정전기가 한꺼번에 흐르는 거예요.|Rub a balloon on your hair and they pull toward each other. Electricity made by rubbing that stays put instead of flowing is static electricity. Lightning is a giant spark of static electricity from a cloud.','겨울에 문고리에서 찌릿하면 정전기예요. 손에 로션을 바르면 덜해요.|That zap from a doorknob in winter is static. Hand lotion helps.'],
  ['transform',3,2,'🔄','에너지는 모습을 바꿔요|Energy changes form','전기는 전구에서 빛, 전기난로에서 열, 스피커에서 소리, 선풍기에서 움직임으로 바뀌어요. 음식 속 에너지는 우리 몸을 움직이게 하고, 건전지 속 에너지는 전기로 바뀌어요.|Electricity becomes light in a bulb, heat in a heater, sound in a speaker and motion in a fan. Energy in food makes our bodies move, and energy stored in a battery becomes electricity.','손을 비비면 움직임이 열로 바뀌어 따뜻해져요.|Rub your hands together: motion turns into heat.'],
  ['generate',3,3,'⚡','전기는 어떻게 만들까요?|How electricity is made','발전기 속에서 자석과 구리 전선 뭉치가 서로 돌면 전기가 생겨요. 수력은 떨어지는 물, 풍력은 바람, 화력은 석탄이나 가스를 태운 증기로 발전기를 돌려요. 태양광 판은 햇빛을 바로 전기로 바꿔요. 만든 전기는 전선을 타고 집까지 와요.|Inside a generator, magnets and coils of copper wire spin past each other and make electricity. Hydro plants turn generators with falling water, wind turbines with wind, and thermal plants with steam from burning coal or gas. Solar panels turn sunlight straight into electricity. Power lines carry it to our homes.','자전거 바퀴 발전기 전등도 바퀴가 돌 때 자석이 돌아서 불이 켜져요.|A bike dynamo light glows because a magnet spins as the wheel turns.'],
+ ['density',3,2,'⚖️','무게와 밀도는 달라요|Weight vs. density','무게는 지구가 물체를 끌어당기는 힘의 크기예요. 밀도는 같은 크기(부피)일 때 얼마나 무거운지, 즉 얼마나 꽉 차 있는지예요. 물에 뜨고 가라앉는 것은 무게가 아니라 밀도로 정해져요. 큰 통나무는 무거워도 뜨고, 작은 동전은 가벼워도 가라앉아요.|Weight is how hard Earth pulls on something. Density is how heavy something is for its size, or how tightly packed it is. Floating and sinking depend on density, not weight: a huge log is heavy but floats, while a tiny coin is light but sinks.','솜 1kg과 쇠 1kg은 무게가 똑같아요! 하지만 쇠는 밀도가 커서 훨씬 작은 덩어리예요.|1 kg of cotton and 1 kg of iron weigh exactly the same! But iron is denser, so it’s a much smaller lump.'],
+ ['density2',3,3,'🧮','밀도 계산과 달에서의 무게|Density math and weight on the Moon','밀도는 무게(질량)를 부피로 나눈 값이에요. 물 1cm³의 무게는 약 1g이라서 물의 밀도는 1g/cm³예요. 밀도가 이보다 작으면 물에 뜨고, 크면 가라앉아요. 달에서는 몸무게가 지구의 약 6분의 1이 되지만, 몸을 이루는 물질의 양과 밀도는 그대로예요.|Density is mass divided by volume. One cubic centimetre of water has a mass of about 1 g, so water’s density is 1 g/cm³. Anything less dense floats in water; anything denser sinks. On the Moon you weigh about one-sixth as much, but the amount of stuff in you and your density stay the same.','열기구는 속의 공기를 데워 밀도를 작게 만들어서 떠올라요.|A hot-air balloon rises because heating the air inside makes it less dense.'],
  // ---------------------------------------------------------------- 4 Kitchen Lab
  ['states',4,1,'🧊','고체·액체·기체|Solid, liquid, gas','얼음처럼 모양이 일정한 것은 고체, 물처럼 흘러서 그릇 모양이 되는 것은 액체, 수증기나 공기처럼 퍼져 나가는 것은 기체예요.|Things that keep their shape, like ice, are solids. Things that flow and take the shape of their container, like water, are liquids. Things that spread out to fill a space, like steam and air, are gases.','주스는 액체, 컵은 고체, 풍선 속 공기는 기체!|Juice is a liquid, the cup is a solid and the air in a balloon is a gas!'],
  ['melt',4,1,'🍦','녹기|Melting','고체가 열을 받으면 액체가 돼요. 얼음은 녹아서 물이 되고, 초콜릿은 손에서 녹아요.|When a solid warms up, it can melt into a liquid. Ice melts into water and chocolate melts in your hand.','아이스크림은 햇볕 아래에서 빨리 녹으니 그늘에서 먹어요.|Ice cream melts fast in the sun, so eat it in the shade.'],
@@ -857,6 +862,7 @@ const CARD_RAW=[
  ['flame',4,2,'🎆','불꽃 반응|Flame tests','어떤 금속을 불꽃에 넣으면 금속마다 다른 색 불꽃이 나요. 구리는 청록색, 나트륨(소금)은 노란색, 리튬은 빨간색, 칼륨은 보라색이에요. 불꽃놀이의 여러 색이 바로 이 원리예요.|Put certain metals into a flame and each gives its own color: copper blue-green, sodium (in salt) yellow, lithium red, potassium violet. That’s how fireworks get their colors.','국이 끓어 넘쳐 가스 불에 닿으면 불꽃이 노랗게 변해요. 국 속 소금의 나트륨 때문이에요.|When salty soup boils over onto a gas flame, the flame flashes yellow from the sodium in the salt.'],
  ['heatmove',4,3,'♨️','열이 이동하는 세 가지 방법|Three ways heat moves','고체에서는 열이 맞닿은 곳을 따라 전해지고(전도), 물이나 공기는 데워진 부분이 위로 올라가며 돌면서 열을 옮기고(대류), 햇볕이나 모닥불의 열은 곧장 날아와요(복사).|In solids, heat passes along through touching parts (conduction). In water and air, warm parts rise and circulate, carrying heat (convection). Heat from the Sun or a campfire travels straight to you (radiation).','에어컨은 위쪽에, 난로는 아래쪽에 두면 방 전체가 고르게 시원하고 따뜻해져요.|Put an air conditioner up high and a heater down low, and the whole room cools or warms evenly.'],
  ['separate',4,3,'⚗️','섞인 것 나누기|Separating mixtures','섞인 물질은 성질 차이를 이용해 나눠요. 크기가 다르면 체로, 철이 섞였으면 자석으로, 물에 녹는 것과 안 녹는 것은 거름종이로 거르고, 녹아 있는 소금은 물을 증발시켜 얻어요.|Mixtures are separated using differences in their properties: a sieve for different sizes, a magnet for iron, filter paper for things that do and don’t dissolve, and evaporation to get dissolved salt back.','재활용 공장도 자석과 바람, 물을 이용해 쓰레기를 나눠요.|Recycling plants sort waste with magnets, air and water.'],
+ ['volmass',4,2,'🧃','들이와 무게의 단위|Litres and grams','L(리터)와 mL(밀리리터)는 들이(담을 수 있는 양), kg(킬로그램)과 g(그램)은 무게를 나타내요. 1L = 1000mL, 1kg = 1000g이에요. 물 1mL의 무게는 약 1g이에요.|Litres (L) and millilitres (mL) measure how much something holds; kilograms (kg) and grams (g) measure weight. 1 L = 1000 mL and 1 kg = 1000 g. One millilitre of water weighs about 1 gram.','약을 먹을 때는 숟가락 대신 mL 눈금이 있는 계량컵이나 계량 주사기로 정확히 재요.|For medicine, measure exactly with a cup or syringe marked in mL, not a kitchen spoon.'],
  // ---------------------------------------------------------------- 5 Green Forest
  ['plantneeds',5,1,'🌱','식물에게 필요한 것|What plants need','식물이 자라려면 햇빛, 물, 공기, 그리고 영양분이 있는 흙이 필요해요. 물이 너무 많아도 안 좋아요.|Plants need sunlight, water, air and soil with nutrients to grow. Too much water is bad, too.','화분은 햇빛 드는 창가에 두고, 흙이 마르면 물을 줘요.|Keep a plant by a sunny window and water it when the soil is dry.'],
  ['plantparts',5,1,'🌷','식물의 부분|Parts of a plant','뿌리는 물을 빨아들이고, 줄기는 물을 나르고, 잎은 햇빛으로 양분을 만들고, 꽃은 씨앗을 만들어요.|Roots soak up water, stems carry it, leaves make food from sunlight and flowers make seeds.','당근은 뿌리, 상추는 잎, 브로콜리는 꽃봉오리를 먹는 거예요!|A carrot is a root, lettuce is a leaf and broccoli is flower buds!'],
@@ -969,6 +975,20 @@ const QS=[
  {c:'mapscale',l:3,t:'ox',s:'같은 동네를 그린 지도라면, 더 자세한 지도일수록 지도 위 1cm가 실제로 더 짧은 거리를 나타낸다.|For maps of the same town, the more detailed the map, the shorter the real distance 1 cm stands for.',v:1,why:'자세한 지도는 땅을 덜 줄여서 그려요. 그래서 1cm가 나타내는 실제 거리가 짧아요.|A detailed map shrinks things less, so each centimetre stands for a shorter distance.'},
  {c:'mapscale',l:3,t:'mc',q:'등산 지도에서 등고선이 아주 촘촘하게 모여 있는 곳은 어떤 곳일까요?|On a hiking map, what does a spot with contour lines packed close together mean?',art:'⛰️〰️',a:'경사가 가파른 곳|A steep slope',o:['평평한 들판|A flat field','깊은 호수|A deep lake','넓은 도로|A wide road']},
  {c:'magnetearth',l:3,t:'ox',s:'나침반이 가리키는 북쪽(자북)은 지구의 북극점과 정확히 같은 곳이다.|The north a compass points to (magnetic north) is exactly the same spot as the North Pole.',v:0,why:'나침반이 가리키는 자북은 북극점에서 조금 떨어져 있고 해마다 조금씩 움직여요. 그래서 정확한 길 찾기에서는 그 차이를 고쳐서 써요.|Magnetic north is a little away from the North Pole and moves a bit every year, so careful navigators correct for the difference.'},
+ {c:'measure',l:1,t:'sim',sim:'ruler'},
+ {c:'measure',l:2,t:'sim',sim:'ruler'},
+ {c:'measure',l:3,t:'sim',sim:'ruler'},
+ {c:'measure',l:1,t:'mc',q:'연필의 길이로 알맞은 것은?|Which is about the length of a pencil?',art:'✏️',a:'약 15cm|About 15 cm',o:['약 15m|About 15 m','약 15km|About 15 km']},
+ {c:'measure',l:1,t:'mc',q:'1m는 몇 cm일까요?|How many centimetres are in 1 metre?',art:'📏',a:'100cm',o:['10cm','1000cm']},
+ {c:'measure',l:1,t:'ox',s:'자로 길이를 잴 때는 물체의 한쪽 끝을 눈금 0에 맞춘다.|When you measure with a ruler, line one end up with the 0 mark.',v:1},
+ {c:'prefix',l:2,t:'sort',q:'어떤 단위가 알맞을까요? 알맞은 곳에 넣어요.|Which unit fits best? Sort them.',bins:[['🐜','mm(밀리미터)|mm (millimetres)'],['📏','cm(센티미터)|cm (centimetres)'],['🛣️','km(킬로미터)|km (kilometres)']],items:[['🐜','개미 한 마리의 길이|Length of an ant',0],['✏️','연필심의 굵기|Width of pencil lead',0],['💅','손톱의 두께|Thickness of a fingernail',0],['📖','책의 가로 길이|Width of a book',1],['🦶','내 발의 길이|Length of my foot',1],['🍌','바나나의 길이|Length of a banana',1],['🚗','서울에서 부산까지|Seoul to Busan',2],['🍁','토론토에서 오타와까지|Toronto to Ottawa',2],['🏃','마라톤 거리|A marathon',2]]},
+ {c:'prefix',l:2,t:'mc',q:'1km는 몇 m일까요?|How many metres are in 1 kilometre?',art:'🛣️',a:'1000m',o:['100m','10m','10000m']},
+ {c:'prefix',l:2,t:'mc',q:'1cm는 몇 mm일까요?|How many millimetres are in 1 centimetre?',art:'📏',a:'10mm',o:['100mm','1000mm','1mm']},
+ {c:'prefix',l:2,t:'mc',q:'단위 앞에 킬로(k)가 붙으면 어떤 뜻일까요?|What does “kilo” (k) at the front of a unit mean?',art:'🔢',a:'1000배|1000 times',o:['10배|10 times','100분의 1|One hundredth','1000분의 1|One thousandth']},
+ {c:'prefix',l:2,t:'ox',s:'밀리(m)는 1000분의 1을 뜻해서 1000mm가 모이면 1m가 된다.|Milli means one thousandth, so 1000 mm make 1 m.',v:1},
+ {c:'prefix',l:3,t:'mc',q:'2.5km는 몇 m일까요?|How many metres is 2.5 km?',art:'🛣️',a:'2500m',o:['250m','25m','25000m']},
+ {c:'prefix',l:3,t:'mc',q:'35mm는 몇 cm일까요?|How many centimetres is 35 mm?',art:'📏',a:'3.5cm',o:['35cm','0.35cm','350cm']},
+ {c:'prefix',l:3,t:'mc',q:'센티(c)는 100분의 1이에요. 그렇다면 1m는 몇 cm일까요?|Centi means one hundredth. So how many centimetres are in 1 m?',art:'🔢',a:'100cm',o:['10cm','1000cm','1cm']},
  // ======================================================== 1 Shadow Park
  {c:'shform',l:1,t:'mc',q:'그림자가 생기려면 무엇이 꼭 있어야 할까요?|What do you need to make a shadow?',art:'👤',a:'💡 빛과 빛을 막는 물체|💡 Light and something that blocks it',o:['💧 물|💧 Water','🌬️ 바람|🌬️ Wind']},
  {c:'shform',l:1,t:'ox',s:'불빛이 하나도 없는 깜깜한 방에서는 그림자가 생기지 않는다.|In a totally dark room with no light, there are no shadows.',v:1,why:'그림자는 빛이 막혀서 생기는 거라 빛이 없으면 그림자도 없어요.|A shadow is blocked light, so with no light there is no shadow.'},
@@ -1022,6 +1042,10 @@ const QS=[
  {c:'sunalt',l:3,t:'ox',s:'태양 고도가 높아지면 그림자 길이는 짧아진다.|As the Sun climbs higher, shadows get shorter.',v:1},
  {c:'sunalt',l:3,t:'mc',q:'해가 가장 높이 뜬 때보다 기온이 늦게 가장 높아지는 까닭은?|Why is the air warmest a while after the Sun is highest?',art:'🌍♨️',a:'땅이 데워지고 그 열이 공기를 데우는 데 시간이 걸려서|The ground takes time to warm up and then heat the air',o:['오후에는 해가 지구에 더 가까워져서|The Sun moves closer to Earth in the afternoon','오후에 해가 더 커져서|The Sun gets bigger in the afternoon','바람이 따뜻한 공기를 가져와서|The wind brings warm air']},
  {c:'sunalt',l:3,t:'ox',s:'한낮의 그림자는 여름이 겨울보다 더 길다.|At midday, shadows are longer in summer than in winter.',v:0,why:'여름에는 해가 더 높이 떠서 그림자가 짧고, 겨울에는 해가 낮아서 그림자가 길어요.|In summer the Sun climbs higher, so shadows are shorter. The low winter Sun makes long shadows.'},
+ {c:'refract',l:2,t:'mc',q:'물이 든 컵에 꽂은 빨대는 어떻게 보일까요?|How does a straw in a glass of water look?',art:'🥤💧',a:'물 표면에서 꺾인 것처럼 보여요|It looks broken at the water’s surface',o:['물속에서 사라져요|It disappears underwater','두 개로 늘어나요|It turns into two straws','색이 바뀌어요|It changes color']},
+ {c:'refract',l:2,t:'ox',s:'수영장 바닥은 실제보다 얕아 보이니까 들어가기 전에 깊이를 꼭 확인해야 한다.|A pool looks shallower than it really is, so always check how deep it is before going in.',v:1},
+ {c:'refract',l:2,t:'mc',q:'돋보기로 글씨를 보면 크게 보이는 것은 무엇 때문일까요?|Why do letters look bigger through a magnifying glass?',art:'🔍📖',a:'빛이 렌즈를 지나며 꺾여서|Light bends as it passes through the lens',o:['글씨가 진짜로 커져서|The letters really grow','눈이 커져서|Your eyes get bigger','렌즈가 글씨를 복사해서|The lens copies the letters']},
+ {c:'refract',l:3,t:'sim',sim:'prism',v:'bend'},
  // ======================================================== 2 Zoom Bus Road
  {c:'pushpull',l:1,t:'sort',q:'밀기일까요, 당기기일까요?|Push or pull?',bins:[['👐','밀기|Push'],['🤲','당기기|Pull']],items:[['⚽','공 차기|Kicking a ball',0],['🛒','카트 밀기|Moving a cart forward',0],['🔔','초인종 누르기|Pressing a doorbell',0],['🎠','그네 밀어 주기|Giving a swing a push',0],['🪢','줄다리기|Tug-of-war',1],['🥕','당근 뽑기|Pulling up a carrot',1],['🎣','물고기 끌어올리기|Reeling in a fish',1],['🐕','강아지 목줄 당기기|Tugging a dog leash',1]]},
  {c:'pushpull',l:1,t:'mc',q:'공을 더 멀리 굴리려면 어떻게 할까요?|How do you make a ball roll farther?',art:'⚽',a:'더 세게 밀어요|Push it harder',o:['더 살살 밀어요|Push it more gently','쳐다만 봐요|Just look at it']},
@@ -1163,6 +1187,18 @@ const QS=[
  {c:'generate',l:3,t:'order',q:'수력 발전소에서 만든 전기가 집까지 오는 순서대로 눌러요.|Tap how electricity gets from a hydro dam to your home, in order.',items:[['🌊','높은 곳의 물이 떨어져요|Water falls from up high'],['🌀','물이 터빈을 돌려요|It spins a turbine'],['⚡','발전기가 전기를 만들어요|The generator makes electricity'],['🗼','전선을 타고 이동해요|Power lines carry it'],['🏠','집에서 불이 켜져요|Lights turn on at home']]},
  {c:'generate',l:3,t:'ox',s:'태양광 판은 햇빛을 바로 전기로 바꾼다.|Solar panels turn sunlight straight into electricity.',v:1},
  {c:'generate',l:3,t:'mc',q:'바람의 힘으로 전기를 만드는 것은?|What makes electricity from the wind?',art:'🌬️',a:'풍력 발전기|A wind turbine',o:['태양광 판|A solar panel','수력 발전소 댐|A hydro dam','건전지|A battery']},
+ {c:'density',l:2,t:'sim',sim:'layers'},
+ {c:'density',l:2,t:'mc',q:'솜 1kg과 쇠 1kg 중 더 무거운 것은?|Which is heavier: 1 kg of cotton or 1 kg of iron?',art:'☁️🔩',a:'둘 다 똑같아요|They weigh the same',o:['쇠 1kg|1 kg of iron','솜 1kg|1 kg of cotton','물에 넣어 봐야 알아요|You have to put them in water to know'],why:'둘 다 1kg이라 무게는 같아요. 다만 쇠는 밀도가 커서 작은 덩어리이고, 솜은 밀도가 작아서 커다란 자루가 필요해요.|Both are 1 kg, so they weigh the same. Iron is denser, so it’s a small lump, while cotton needs a big sack.'},
+ {c:'density',l:2,t:'ox',s:'무거운 물체는 언제나 물에 가라앉고, 가벼운 물체는 언제나 물에 뜬다.|Heavy things always sink and light things always float.',v:0,why:'큰 통나무는 무거워도 뜨고, 작은 동전은 가벼워도 가라앉아요. 같은 크기의 물보다 무거운지(밀도)가 중요해요.|A huge log is heavy but floats; a tiny coin is light but sinks. What matters is whether it’s heavier than the same amount of water (density).'},
+ {c:'density',l:2,t:'mc',q:'크기가 똑같은 정육면체 4개가 있어요. 가장 무거운 것은?|Four cubes are exactly the same size. Which is heaviest?',art:'🧊',a:'🔩 쇠|🔩 Iron',o:['🪵 나무|🪵 Wood','🧽 스펀지|🧽 Sponge','🧊 얼음|🧊 Ice'],why:'크기가 같으면 밀도가 가장 큰 쇠가 가장 무거워요.|When the size is the same, the densest one, iron, is heaviest.'},
+ {c:'density',l:2,t:'mc',q:'커다란 통나무가 물에 둥둥 뜨는 까닭은?|Why does a huge log float?',art:'🪵🌊',a:'나무는 같은 크기의 물보다 가벼워서(밀도가 작아서)|Wood is lighter than the same amount of water (less dense)',o:['통나무가 아주 가벼워서|The log is very light','물이 통나무를 좋아해서|Water likes logs','통나무 속에서 바람이 불어서|Wind blows inside it']},
+ {c:'density',l:2,t:'ox',s:'찰흙 덩어리를 반으로 잘라 작게 만들면 물에 뜬다.|If you cut a lump of clay in half, the smaller piece floats.',v:0,why:'조각이 작아져도 찰흙의 밀도는 그대로라서 여전히 가라앉아요.|The piece is smaller, but clay is just as dense, so it still sinks.'},
+ {c:'density',l:2,t:'mc',q:'물 위에 식용유를 부으면 어떻게 될까요?|You pour cooking oil onto water. What happens?',art:'🫒💧',a:'기름이 물 위에 떠서 층이 생겨요|The oil floats in a layer on top',o:['기름이 바닥으로 가라앉아요|The oil sinks to the bottom','물과 섞여서 사라져요|It mixes in and disappears','물이 기름 위로 올라가요|The water rises above the oil']},
+ {c:'density2',l:3,t:'sim',sim:'layers'},
+ {c:'density2',l:3,t:'mc',q:'부피가 10cm³, 무게가 20g인 돌의 밀도는?|A stone has a volume of 10 cm³ and a mass of 20 g. What is its density?',art:'🪨',a:'2g/cm³ (물에 가라앉아요)|2 g/cm³ (it sinks)',o:['0.5g/cm³ (물에 떠요)|0.5 g/cm³ (it floats)','200g/cm³|200 g/cm³','30g/cm³|30 g/cm³']},
+ {c:'density2',l:3,t:'mc',q:'부피 100cm³, 무게 60g인 장난감은 물에서 어떻게 될까요?|A toy has a volume of 100 cm³ and a mass of 60 g. What does it do in water?',art:'🧸💧',a:'떠요(밀도 0.6g/cm³)|It floats (density 0.6 g/cm³)',o:['가라앉아요(밀도 1.6g/cm³)|It sinks (density 1.6 g/cm³)','물 한가운데에 멈춰요|It stops halfway down','물에 녹아요|It dissolves']},
+ {c:'density2',l:3,t:'ox',s:'달에 가면 몸무게는 줄어들지만 몸의 밀도는 그대로다.|On the Moon your weight drops, but your body’s density stays the same.',v:1,why:'무게는 끌어당기는 힘이라 달에서는 약 6분의 1이 돼요. 몸을 이루는 물질의 양과 부피는 그대로라 밀도는 변하지 않아요.|Weight is the pull of gravity, so on the Moon it’s about one-sixth. The amount of stuff in you and your size don’t change, so your density stays the same.'},
+ {c:'density2',l:3,t:'mc',q:'찰흙 공은 가라앉는데, 같은 찰흙으로 배 모양을 만들면 뜨는 까닭은?|A clay ball sinks, but the same clay shaped into a boat floats. Why?',art:'⚪🛶',a:'속이 빈 넓은 모양이 물을 많이 밀어내서|The wide, hollow shape pushes aside lots of water',o:['배 모양이 되면 찰흙이 가벼워져서|The clay gets lighter','찰흙이 다른 물질로 바뀌어서|The clay turns into a different material','물이 배 모양을 좋아해서|Water likes boat shapes']},
  // ======================================================== 4 Kitchen Lab
  {c:'states',l:1,t:'sort',q:'딱딱한 고체일까요, 흐르는 액체일까요?|Solid or liquid? Sort them.',bins:[['🧱','고체(모양이 그대로)|Solid (keeps its shape)'],['💧','액체(흘러요)|Liquid (flows)']],items:[['🧊','얼음|Ice',0],['🪨','돌|Rock',0],['✏️','연필|Pencil',0],['🍎','사과|Apple',0],['🥄','숟가락|Spoon',0],['🥛','우유|Milk',1],['🧃','주스|Juice',1],['🚰','수돗물|Tap water',1],['🫗','식용유|Cooking oil',1]]},
  {c:'states',l:2,t:'sort',q:'고체, 액체, 기체 중 무엇일까요?|Solid, liquid or gas?',bins:[['🧱','고체|Solid'],['💧','액체|Liquid'],['💨','기체|Gas']],items:[['🧊','얼음|Ice',0],['🪨','돌|Stone',0],['✏️','연필|Pencil',0],['🍎','사과|Apple',0],['🥛','우유|Milk',1],['🧃','주스|Juice',1],['🍯','꿀|Honey',1],['🚰','수돗물|Tap water',1],['🎈','풍선 속 공기|Air in a balloon',2],['♨️','수증기|Water vapor',2],['🌬️','선풍기 바람(공기)|Air from a fan',2]]},
@@ -1269,6 +1305,12 @@ const QS=[
  {c:'separate',l:3,t:'sort',q:'어떤 방법으로 나눌까요? 알맞은 곳에 넣어요.|How would you separate each mixture? Sort them.',bins:[['🧺','체로 걸러요|Sieve'],['🧲','자석을 대요|Magnet'],['☀️','물을 증발시켜요|Evaporate']],items:[['🫘','콩과 좁쌀|Beans and millet',0],['🪨','자갈과 모래|Gravel and sand',0],['📎','쇠 클립과 구슬|Steel clips and beads',1],['🔩','철 가루와 모래|Iron filings and sand',1],['🌊','바닷물에서 소금 얻기|Salt from seawater',2],['🧂','소금물에서 소금 얻기|Salt from salt water',2]]},
  {c:'separate',l:3,t:'order',q:'소금과 모래가 섞인 것에서 소금만 얻는 순서대로 눌러요.|Tap the steps to get just the salt out of a salt-and-sand mix, in order.',items:[['💧','물을 부어 소금을 녹여요|Add water to dissolve the salt'],['🧻','거름종이로 모래를 걸러요|Filter out the sand'],['🔥','거른 물을 증발시켜요|Evaporate the filtered water'],['🧂','소금만 남아요|Only the salt is left']]},
  {c:'separate',l:3,t:'ox',s:'철 가루와 모래가 섞여 있으면 자석으로 철 가루만 골라낼 수 있다.|If iron filings and sand are mixed, a magnet can pick out just the iron.',v:1},
+ {c:'volmass',l:2,t:'sort',q:'들이일까요, 무게일까요? 알맞은 곳에 넣어요.|Volume or weight? Sort the measurements.',bins:[['🥛','들이(L, mL)|Volume (L, mL)'],['⚖️','무게(kg, g)|Weight (kg, g)']],items:[['🥛','우유 1L|1 L of milk',0],['🧃','주스 200mL|200 mL of juice',0],['💊','물약 5mL|5 mL of medicine',0],['🛁','욕조 물 150L|150 L of bath water',0],['🍚','쌀 10kg|10 kg of rice',1],['🍫','초콜릿 50g|50 g of chocolate',1],['🍉','수박 5kg|A 5 kg watermelon',1]]},
+ {c:'volmass',l:2,t:'mc',q:'1L 우유 팩에 들어 있는 우유는 몇 mL일까요?|How many millilitres are in a 1 L carton of milk?',art:'🥛',a:'1000mL',o:['100mL','10mL','500mL']},
+ {c:'volmass',l:2,t:'mc',q:'1kg은 몇 g일까요?|How many grams are in 1 kilogram?',art:'⚖️',a:'1000g',o:['100g','10g','10000g']},
+ {c:'volmass',l:2,t:'mc',q:'초등학생의 몸무게로 알맞은 것은?|Which is about right for a school kid’s weight?',art:'🧒',a:'약 25kg|About 25 kg',o:['약 25g|About 25 g','약 25mg|About 25 mg','약 2500kg|About 2500 kg']},
+ {c:'volmass',l:3,t:'mc',q:'물 300mL와 물 700mL를 합치면 모두 얼마일까요?|300 mL of water plus 700 mL of water makes how much?',art:'💧',a:'1L(1000mL)|1 L (1000 mL)',o:['10L|10 L','1000L|1000 L','100mL|100 mL']},
+ {c:'volmass',l:3,t:'mc',q:'물 500mL의 무게는 대략 얼마일까요?|About how much does 500 mL of water weigh?',art:'🍶',a:'약 500g|About 500 g',o:['약 5g|About 5 g','약 50kg|About 50 kg','약 5kg|About 5 kg']},
  // ======================================================== 5 Green Forest
  {c:'plantneeds',l:1,t:'multi',q:'식물이 자라는 데 필요한 것을 모두 골라요.|Pick everything a plant needs to grow.',art:'🌱',yes:[['☀️','햇빛|Sunlight'],['💧','물|Water'],['🌬️','공기|Air'],['🟫','흙(영양분)|Soil (nutrients)']],no:[['🍭','사탕|Candy'],['📺','텔레비전|TV'],['🧸','장난감|Toys'],['🥤','탄산음료|Soda']],n:[3,3]},
  {c:'plantneeds',l:1,t:'ox',s:'식물은 햇빛이 없는 깜깜한 옷장 속에서도 잘 자란다.|Plants grow well in a dark closet with no sunlight.',v:0,why:'식물은 햇빛으로 양분을 만들어서 빛이 없으면 시들어요.|Plants make food from sunlight, so they wilt without light.'},
@@ -1410,6 +1452,12 @@ const QS=[
  {c:'moonphase',l:3,t:'mc',q:'낮에 달이 해를 가려서 해가 안 보이는 것을 무엇이라고 할까요?|What do we call it when the Moon blocks the Sun during the day?',art:'🌑☀️',a:'일식|A solar eclipse',o:['월식|A lunar eclipse','보름달|A full moon','무지개|A rainbow']},
  {c:'moonphase',l:3,t:'ox',s:'월식은 지구의 그림자가 달을 가려서 생긴다.|A lunar eclipse happens when Earth’s shadow covers the Moon.',v:1},
  {c:'moonphase',l:3,t:'ox',s:'일식 때는 해를 맨눈으로 똑바로 봐도 괜찮다.|During a solar eclipse it’s safe to look straight at the Sun with bare eyes.',v:0,why:'일식 때도 햇빛은 눈을 크게 다치게 해요. 꼭 일식 전용 안경을 써요.|Even during an eclipse, sunlight can badly hurt your eyes. Always use proper eclipse glasses.'},
+ {c:'rainbow',l:2,t:'sim',sim:'prism'},
+ {c:'rainbow',l:2,t:'mc',q:'무지개는 어떻게 생길까요?|How does a rainbow form?',art:'🌈',a:'공기 중의 작은 물방울이 햇빛을 여러 색으로 나눠서|Tiny water droplets in the air split sunlight into colors',o:['누가 구름에 색칠을 해서|Someone paints the clouds','하늘에 해가 일곱 개라서|There are seven suns','하늘의 물감이 비에 씻겨 내려서|Sky paint washes down with the rain']},
+ {c:'rainbow',l:2,t:'mc',q:'맑은 날 무지개를 직접 만들려면 어떻게 할까요?|How can you make your own rainbow on a sunny day?',art:'🌞🚿',a:'해를 등지고 호스로 물을 뿜어요|Stand with your back to the Sun and spray a hose',o:['해를 바라보며 물을 마셔요|Face the Sun and drink water','그늘에서 손뼉을 쳐요|Clap your hands in the shade','밤에 손전등을 꺼요|Turn off a flashlight at night']},
+ {c:'rainbow',l:2,t:'ox',s:'햇빛은 한 가지 색이 아니라 여러 가지 색이 섞여 있다.|Sunlight isn’t just one color; it’s a mix of many colors.',v:1},
+ {c:'rainbow',l:3,t:'ox',s:'무지개는 늘 해와 반대쪽 하늘에 생긴다.|A rainbow always appears in the part of the sky opposite the Sun.',v:1,why:'햇빛이 내 뒤에서 와서 앞쪽 물방울에 들어갔다가 꺾이고 튕겨 나와 내 눈으로 와요. 그래서 해를 등져야 무지개가 보여요.|Sunlight comes from behind you, enters the droplets in front, bends and bounces back to your eyes. That’s why you need the Sun at your back.'},
+ {c:'rainbow',l:3,t:'mc',q:'무지개에서 가장 바깥쪽 가장자리는 무슨 색일까요?|What color is the outermost edge of a rainbow?',art:'🌈',a:'빨간색|Red',o:['보라색|Violet','초록색|Green','노란색|Yellow']},
  // ======================================================== 7 Healthy Town
  {c:'sound',l:1,t:'mc',q:'소리가 나는 물체는 어떤 상태일까요?|What is an object doing when it makes a sound?',art:'🥁',a:'떨리고 있어요|It’s vibrating',o:['가만히 멈춰 있어요|It’s perfectly still','차가워지고 있어요|It’s getting cold']},
  {c:'sound',l:1,t:'ox',s:'말할 때 목에 손을 대면 떨림을 느낄 수 있다.|You can feel a buzz when you touch your throat while talking.',v:1},
@@ -2348,6 +2396,85 @@ SIMS.cycle=(q,ctx)=>{
    guide();
   },hint(){if(!B||B.dataset.done)return false;const S0=['sun','sea','sky','cloud','river','sea'][k];const t=S0==='cloud'?B.querySelector('.cloud'):B.querySelector(`.hot[data-h="${S0}"]`);if(!t||t.classList.contains('hinted'))return false;t.classList.add('hinted');return true}};
 };
+// ---------------------------------------------------------------- liquid layers: pour from the bottom up, densest first
+const LIQ=[['🍯','꿀|Honey','#e7a21a',1.42],['🧴','주방 세제|Dish soap','#43c46e',1.06],['💧','물|Water','#4aa8ff',1],['🫒','식용유|Cooking oil','#f3dc5a',.92]];
+SIMS.layers=(q,ctx)=>{
+ const lv=Math.max(q.l,ctx.diff>=3?3:2),set=lv>=3?LIQ.slice():[LIQ[0],LIQ[2],LIQ[3]];
+ const order=set.slice().sort((a,b)=>b[3]-a[3]),btns=shuffle(set.slice());
+ const text='같은 양이면 밀도가 큰(더 무거운) 액체가 아래로 가요. 컵 바닥에 깔릴 것부터 차례로 부어요!|For the same amount, the denser (heavier) liquid goes to the bottom. Pour them in order, starting with the one that ends up at the bottom!';
+ const ko=x=>x[1].split('|')[0],en=x=>x[1].split('|')[1].toLowerCase();
+ let poured=[],miss=0,B=null;
+ return {tag:['🥛',T('액체 층 쌓기|Liquid layers')],say:T(text),answer:order.map(x=>T(x[1])).join(' → '),
+  mount(box,done){B=box;
+   box.innerHTML=qText(T(text))+`<div class="cktbox"><svg class="simsvg" viewBox="0 0 360 200"><rect width="360" height="200" rx="16" fill="#f3f7ff"/><g class="lay"></g><path d="M120 18v158q0 12 12 12h76q12 0 12-12V18" fill="#ffffff66" stroke="#8a93a8" stroke-width="4"/></svg></div>
+    <div class="flsamps">${btns.map((x,i)=>`<button class="flsamp" type="button" data-i="${i}">${x[0]} ${esc(T(x[1]))}</button>`).join('')}</div><p class="sub center lmsg"></p>`;
+   const draw=()=>{const s=poured.slice().sort((a,b)=>b[3]-a[3]),h=Math.floor(150/set.length);let y=186;
+    box.querySelector('.lay').innerHTML=s.map(x=>{y-=h;return `<rect x="124" y="${y}" width="92" height="${h}" fill="${x[2]}"/><text x="232" y="${y+h/2+5}" font-size="13" font-weight="900" fill="#24305e">${x[0]} ${esc(T(x[1]))}</text>`}).join('')};
+   box.querySelector('.flsamps').addEventListener('click',e=>{const b=e.target.closest('.flsamp');if(!b||b.disabled||box.dataset.done)return;const x=btns[+b.dataset.i];
+    // right if nothing denser is still waiting to be poured
+    const left=set.filter(y=>!poured.includes(y)),ok=left.every(y=>y[3]<=x[3]),under=poured.filter(y=>y[3]<x[3]).sort((a,c)=>c[3]-a[3])[0];
+    b.disabled=true;b.classList.add('on');poured.push(x);draw();SFX.splash();const msg=box.querySelector('.lmsg');
+    if(under)msg.textContent='😮 '+T(`${ko(x)}${josaE(ko(x),'이','가')} ${ko(under)} 아래로 쏙 가라앉았어요!|The ${en(x)} sank right under the ${en(under)}!`);
+    else msg.textContent=ok?'👍 '+T('딱 맞는 자리예요!|Right where it belongs!'):'🤔 '+T(`${ko(x)}보다 더 무거운 액체가 아직 남아 있어요!|Something heavier than the ${en(x)} is still waiting!`);
+    if(ok)SFX.good();else{miss++;SFX.bad()}
+    if(poured.length===set.length){box.dataset.done=1;later(900,()=>done(miss<=(lv>=3?0:1),{why:T('같은 양일 때 더 무거운 것, 즉 밀도가 큰 것이 아래로 가라앉아요. 꿀 → 주방 세제 → 물 → 식용유 순서예요.|For the same amount, the heavier one, meaning the denser one, sinks lower: honey → dish soap → water → cooking oil.')}))}});
+   draw();
+  },
+  hint(){if(!B||B.dataset.done)return false;const nx=order.find(y=>!poured.includes(y));const b=B.querySelector(`.flsamp[data-i="${btns.indexOf(nx)}"]`);if(!b||b.classList.contains('hinted'))return false;b.classList.add('hinted');return true}};
+};
+// ---------------------------------------------------------------- prism: what splits sunlight into a rainbow? / which color bends most?
+const SPEC=['#ff3b3b','#ff8a1f','#ffd21f','#3ccf5a','#2f8cf0','#3f4fd0','#9a4fe0'];
+const PRISM_ITEMS=[['🔺','유리 프리즘|Glass prism','prism'],['🥛','물이 든 유리컵|Glass of water','glass'],['🪞','거울|Mirror','mirror'],['🪵','나무 블록|Wooden block','block'],['📦','두꺼운 종이 상자|Cardboard box','block']];
+SIMS.prism=(q,ctx)=>{
+ const mode=q.v||'find',lv=Math.max(q.l,ctx.diff>=3?3:2);
+ const scene=`<div class="flamebox"><svg class="simsvg" viewBox="0 0 360 190"><rect width="360" height="190" fill="#141a33"/><rect x="0" y="70" width="14" height="30" fill="#ffe680"/><rect x="346" y="10" width="14" height="170" fill="#e9edf7"/>
+  <g class="beam"><line class="b0" x1="14" y1="85" x2="346" y2="85" stroke="#fffbe6" stroke-width="5"/></g><g class="obj"></g><text class="pq" x="180" y="182" font-size="13" text-anchor="middle" fill="#cfd6f0"></text></svg></div>`;
+ const fan=(x0,y0,spread)=>SPEC.map((c,i)=>`<line x1="${x0}" y1="${y0}" x2="346" y2="${110+i*spread}" stroke="${c}" stroke-width="4" opacity=".95"/>`).join('');
+ const show=(box,kind)=>{const beam=box.querySelector('.beam'),obj=box.querySelector('.obj');
+  const prismSVG='<polygon points="180,40 140,120 220,120" fill="#bfe6ff55" stroke="#dff3ff" stroke-width="3"/>';
+  if(kind==='prism'){obj.innerHTML=prismSVG;beam.innerHTML='<line x1="14" y1="85" x2="157" y2="85" stroke="#fffbe6" stroke-width="5"/><line x1="157" y1="85" x2="207" y2="95" stroke="#fffbe6" stroke-width="4" opacity=".8"/>'+fan(207,95,9)}
+  else if(kind==='glass'){obj.innerHTML='<rect x="150" y="50" width="56" height="86" rx="8" fill="#9fd3ff55" stroke="#dff3ff" stroke-width="3"/><rect x="153" y="66" width="50" height="67" rx="6" fill="#4aa8ff55"/>';beam.innerHTML='<line x1="14" y1="85" x2="152" y2="85" stroke="#fffbe6" stroke-width="5"/><line x1="152" y1="85" x2="204" y2="96" stroke="#fffbe6" stroke-width="4" opacity=".8"/>'+fan(204,96,7)}
+  else if(kind==='mirror'){obj.innerHTML='<rect x="170" y="62" width="10" height="56" rx="2" fill="#dfe8f5" transform="rotate(-35 175 90)"/>';beam.innerHTML='<line x1="14" y1="85" x2="172" y2="85" stroke="#fffbe6" stroke-width="5"/><line x1="172" y1="85" x2="290" y2="8" stroke="#fffbe6" stroke-width="5"/>'}
+  else if(kind==='block'){obj.innerHTML='<rect x="160" y="50" width="44" height="80" rx="4" fill="#9c6b3a"/>';beam.innerHTML='<line x1="14" y1="85" x2="160" y2="85" stroke="#fffbe6" stroke-width="5"/>'}
+  else{obj.innerHTML='';beam.innerHTML='<line x1="14" y1="85" x2="346" y2="85" stroke="#fffbe6" stroke-width="5"/>'}};
+ const why=T('프리즘이나 물을 지나면 빛이 꺾이는데(굴절), 색마다 꺾이는 정도가 달라서 햇빛이 무지개 색으로 나뉘어요. 비가 그친 뒤 하늘의 작은 물방울들도 프리즘처럼 햇빛을 나눠서 무지개가 생겨요.|Light bends when it passes through a prism or water (refraction), and each color bends by a different amount, so sunlight splits into a rainbow. After rain, tiny droplets in the sky split sunlight the same way and make a rainbow.');
+ if(mode==='bend'){
+  const text='프리즘을 지난 햇빛이 여러 색으로 나뉘었어요. 가장 많이 꺾인(아래로 가장 많이 휜) 색은?|Sunlight split into colors after the prism. Which color bent the most (curved down the most)?';
+  const opts=shuffle([['보라색|Violet',1],['빨간색|Red',0],['초록색|Green',0],['노란색|Yellow',0]].slice(0,ctx.diff===1?3:4));let hint=null;
+  return {tag:['🔺',T('프리즘 실험|Prism lab')],say:T(text),answer:T('보라색|Violet'),
+   mount(box,done){box.innerHTML=qText(T(text))+scene;show(box,'prism');hint=choiceUI(box,opts.map(o=>({html:esc(T(o[0]))})),opts.findIndex(o=>o[1]),ok=>done(ok,{why:T('보라색이 가장 많이, 빨간색이 가장 적게 꺾여요. 그래서 색이 빨주노초파남보 순서로 나란히 펼쳐져요.|Violet bends the most and red the least, so the colors spread out in order: red, orange, yellow, green, blue, indigo, violet.')}))},
+   hint:()=>hint?hint():false};
+ }
+ const refr=pick(PRISM_ITEMS.filter(x=>x[2]==='prism'||x[2]==='glass')),others=shuffle(PRISM_ITEMS.filter(x=>x[2]!=='prism'&&x[2]!=='glass')).slice(0,lv>=3?3:2),items=shuffle([refr,...others]);
+ const text='어두운 방에 햇빛 한 줄기가 들어와요. 무엇을 빛 앞에 놓으면 벽에 무지개가 생길까요? 예상해서 골라요!|A single beam of sunlight shines into a dark room. What could you put in the beam to make a rainbow on the wall? Make a prediction!';
+ return {tag:['🌈',T('프리즘 실험|Prism lab')],say:T(text),answer:`${refr[0]} ${T(refr[1])}`,
+  mount(box,done){
+   box.innerHTML=qText(T(text))+scene+`<div class="flsamps">${items.map((x,i)=>`<button class="flsamp" type="button" data-i="${i}">${x[0]} ${esc(T(x[1]))}</button>`).join('')}</div>`;show(box,'none');
+   box.querySelector('.flsamps').addEventListener('click',e=>{const b=e.target.closest('.flsamp');if(!b||box.dataset.done)return;box.dataset.done=1;const x=items[+b.dataset.i],ok=x===refr;b.classList.add('on');SFX.whoosh();show(box,x[2]);
+    box.querySelector('.pq').textContent=x[2]==='mirror'?T('빛이 튕겨 나갔어요(반사)|The light bounced off (reflection)'):x[2]==='block'?T('빛이 막혀서 그림자가 생겼어요|The light was blocked: a shadow'):T('무지개가 생겼어요!|A rainbow!');
+    later(500,()=>{(ok?SFX.good:SFX.bad)();later(900,()=>done(ok,{answer:`${refr[0]} ${T(refr[1])}`,why}))})});
+  },hint(){return false}};
+};
+// ---------------------------------------------------------------- ruler: read how long something is (cm, then cm + mm, then mm)
+const RULER_OBJ=[['✏️','연필|pencil','#f2c94c'],['🖍️','크레파스|crayon','#ff7b6b'],['🔑','열쇠|key','#c0c4d0'],['🧲','막대자석|bar magnet','#e2333f'],['🍃','나뭇잎|leaf','#5cc46a'],['🥢','젓가락|chopstick','#c98a4b']];
+SIMS.ruler=(q,ctx)=>{
+ const lv=Math.max(q.l,ctx.diff>=3?3:ctx.diff>=2?2:1),[ic,nm,col]=pick(RULER_OBJ);
+ const mm=lv===1?10*(3+rnd(9)):21+rnd(100);
+ const fmt=x=>lv===1?`${x/10}cm`:lv===2?(x%10?`${Math.floor(x/10)}cm ${x%10}mm`:`${x/10}cm`):`${x}mm`;
+ const pool=lv===1?[mm+10,mm-10,mm+20,mm-20]:[mm+1,mm-1,mm+10,mm-10,mm+2];
+ const opts=shuffle([mm,...shuffle([...new Set(pool)].filter(x=>x>0&&x!==mm)).slice(0,ctx.diff===1?2:3)]);
+ const name=T(nm),text=lv===1?`${ic} ${name}의 길이는 몇 cm일까요? 자의 눈금을 읽어요.|How long is the ${ic} ${name}? Read the ruler in centimetres.`:lv===2?`${ic} ${name}의 길이는 몇 cm 몇 mm일까요?|How long is the ${ic} ${name}, in cm and mm?`:`${ic} ${name}의 길이는 몇 mm일까요? (1cm = 10mm)|How long is the ${ic} ${name}, in millimetres? (1 cm = 10 mm)`;
+ let hint=null;
+ return {tag:['📏',T('자로 재기|Ruler lab')],say:T(text),answer:fmt(mm),
+  mount(box,done){
+   const ticks=[];for(let i=0;i<=150;i++){const x=20+i*2,h=i%10===0?18:i%5===0?12:7;ticks.push(`<line x1="${x}" y1="80" x2="${x}" y2="${80+h}" stroke="#5d4a1a" stroke-width="${i%10===0?1.6:1}"/>`);if(i%10===0)ticks.push(`<text x="${x}" y="114" font-size="11" text-anchor="middle" fill="#5d4a1a" font-weight="700">${i/10}</text>`)}
+   box.innerHTML=qText(T(text))+`<div class="cktbox"><svg class="simsvg" viewBox="0 0 360 130"><rect width="360" height="130" rx="16" fill="#f3f7ff"/>
+    <rect x="20" y="40" width="${mm*2}" height="26" rx="8" fill="${col}" stroke="#00000030" stroke-width="2"/><text x="${20+mm}" y="59" font-size="16" text-anchor="middle">${ic}</text>
+    <line x1="20" y1="36" x2="20" y2="80" stroke="#e5484d" stroke-width="1.5" stroke-dasharray="3 3"/><line x1="${20+mm*2}" y1="36" x2="${20+mm*2}" y2="80" stroke="#e5484d" stroke-width="1.5" stroke-dasharray="3 3"/>
+    <rect x="10" y="78" width="340" height="44" rx="6" fill="#ffe7a3" stroke="#d9b45a" stroke-width="2"/>${ticks.join('')}<text x="344" y="114" font-size="10" text-anchor="end" fill="#5d4a1a">cm</text></svg></div>`;
+   hint=choiceUI(box,opts.map(o=>({html:esc(fmt(o))})),opts.indexOf(mm),ok=>done(ok,{why:lv===1?T('물체의 왼쪽 끝을 0에 맞추고, 오른쪽 끝이 닿은 큰 눈금의 숫자를 읽어요.|Line the left end up with 0, then read the number at the right end.'):T('큰 눈금 한 칸은 1cm, 작은 눈금 한 칸은 1mm예요. 1cm = 10mm!|Each big step is 1 cm and each small step is 1 mm. 1 cm = 10 mm!')}));
+  },hint:()=>hint?hint():false};
+};
 </script>
 <script>
 // ================================================================ Little Science Guardians
@@ -2375,7 +2502,7 @@ const CARD={},CARDS=[];
 CARD_RAW.forEach(([id,w,lv,ic,title,text,life])=>{const c={id,w,lv,icon:ic,title:T(title),text:T(text),life:T(life)};CARD[id]=c;CARDS.push(c)});
 const QALL=QS.map((q,k)=>({...q,k,l:Math.max(q.l,CARD[q.c].lv)}));
 const STAGES=5;
-const SIM_NAMES={compass:['🧭','나침반|Compass'],grid:['🗺️','지도 길 찾기|Map routes'],shadow:['🔦','그림자 실험|Shadow lab'],silhouette:['👤','그림자 맞히기|Whose shadow?'],bus:['🚌','버스 관성 실험|Bus inertia lab'],seesaw:['⚖️','시소 균형|Seesaw balance'],race:['🏁','예상하고 관찰하기|Predict and watch'],magnet:['🧲','자석 뒤집기|Magnet flip'],thermo:['🌡️','온도계|Thermometers'],earth:['🌍','지구 돌리기|Spin the Earth'],thunder:['⚡','천둥 세기|Count the thunder'],pitch:['🎵','소리 실험|Sound lab'],scrub:['🧼','손 씻기 대작전|Hand-washing mission'],indicator:['🧪','지시약 실험|Indicator lab'],flame:['🔥','불꽃 반응|Flame tests'],season:['🌏','계절 실험|Seasons lab'],circuit:['💡','전기 회로|Circuit lab'],water:['♨️','물의 변신|Water changes'],cycle:['🌧️','물의 여행|Water cycle']};
+const SIM_NAMES={compass:['🧭','나침반|Compass'],grid:['🗺️','지도 길 찾기|Map routes'],shadow:['🔦','그림자 실험|Shadow lab'],silhouette:['👤','그림자 맞히기|Whose shadow?'],bus:['🚌','버스 관성 실험|Bus inertia lab'],seesaw:['⚖️','시소 균형|Seesaw balance'],race:['🏁','예상하고 관찰하기|Predict and watch'],magnet:['🧲','자석 뒤집기|Magnet flip'],thermo:['🌡️','온도계|Thermometers'],earth:['🌍','지구 돌리기|Spin the Earth'],thunder:['⚡','천둥 세기|Count the thunder'],pitch:['🎵','소리 실험|Sound lab'],scrub:['🧼','손 씻기 대작전|Hand-washing mission'],indicator:['🧪','지시약 실험|Indicator lab'],flame:['🔥','불꽃 반응|Flame tests'],season:['🌏','계절 실험|Seasons lab'],circuit:['💡','전기 회로|Circuit lab'],water:['♨️','물의 변신|Water changes'],cycle:['🌧️','물의 여행|Water cycle'],layers:['🥛','액체 층 쌓기|Liquid layers'],prism:['🔺','프리즘 실험|Prism lab'],ruler:['📏','자로 재기|Ruler lab']};
 const LABS=[];
 for(const q of QALL){if(q.t!=='sim')continue;let lab=LABS.find(x=>x.id===q.sim);if(!lab){lab={id:q.sim,icon:SIM_NAMES[q.sim][0],name:T(SIM_NAMES[q.sim][1]),w:CARD[q.c].w,items:[]};LABS.push(lab)}lab.w=Math.min(lab.w,CARD[q.c].w);lab.items.push(q)}
 const DIFFS=[null,

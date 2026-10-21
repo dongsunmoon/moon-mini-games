@@ -528,6 +528,16 @@ main{width:min(980px,100%);margin:0 auto;padding:14px max(12px,env(safe-area-ins
 .whocard .wlast{font-size:12px}
 .whocard.last{box-shadow:0 0 0 4px #ffd23f,var(--shadow)}
 .prow .btn.small{min-height:36px;padding:0 10px}
+
+/* instrument and contest pictures */
+.iimg{width:100%;height:100%;object-fit:contain;display:block}
+.ib .iimg{width:56px;height:56px}
+.qart.instr .ib .iimg{width:80px;height:80px}
+.ibig .iimg{width:110px;height:110px;margin:auto}
+.vc span{display:grid;place-items:center;height:34px}
+.vc .iimg,.vc .isvg{width:34px;height:34px}
+.cic .ei{width:56px;height:56px;border-radius:14px;object-fit:cover}
+.poster .cic .ei{width:120px;height:120px;border-radius:20px}
 </style>
 </head>
 <body>
@@ -723,6 +733,8 @@ const IC_SVG={
  jing:'<path d="M32 2v6" stroke="#c0392b" stroke-width="2"/><circle cx="32" cy="32" r="24" fill="#e8b84a" stroke="#b08a1e" stroke-width="3"/><circle cx="32" cy="32" r="14" fill="#f2c94c"/><path d="M50 56l8-14" stroke="#8a5a2a" stroke-width="3" stroke-linecap="round"/><ellipse cx="58" cy="40" rx="5" ry="4" fill="#c0392b"/>',
 };
 const icHTML=ic=>ic&&ic[0]==='@'?`<svg class="isvg" viewBox="0 0 64 64">${IC_SVG[ic.slice(1)]||''}</svg>`:esc(ic||'');
+// instrument picture: the generated image when it exists, otherwise the drawing or emoji above
+const instrPic=id=>{const it=INSTR_BY[id];return it?`<img class="iimg" src="images/mus-i-${id}.webp" data-fb="${esc(it[1])}" alt="" draggable="false">`:esc(id)};
 
 // ---------------------------------------------------------------- lessons
 // Each lesson: teacher, intro slides (t text, v what to show, p what to play), then one activity (a).
@@ -1116,9 +1128,9 @@ function audioCtx(){
   const comp=AC.createDynamicsCompressor();comp.threshold.value=-16;comp.knee.value=10;comp.ratio.value=4;comp.attack.value=.003;comp.release.value=.2;
   MASTER=AC.createGain();MASTER.gain.value=SND.vol;MASTER.connect(comp);comp.connect(AC.destination);
   // a small room so the piano does not sound dry
-  const len=Math.floor(AC.sampleRate*1.4),ir=AC.createBuffer(2,len,AC.sampleRate);
-  for(let c=0;c<2;c++){const d=ir.getChannelData(c);for(let i=0;i<len;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/len,3.2)}
-  const conv=AC.createConvolver();conv.buffer=ir;VERB=AC.createGain();VERB.gain.value=.16;VERB.connect(conv);conv.connect(MASTER)}
+  const len=Math.floor(AC.sampleRate*.8),ir=AC.createBuffer(2,len,AC.sampleRate);
+  for(let c=0;c<2;c++){const d=ir.getChannelData(c);for(let i=0;i<len;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/len,4.5)}
+  const conv=AC.createConvolver();conv.buffer=ir;VERB=AC.createGain();VERB.gain.value=.09;VERB.connect(conv);conv.connect(MASTER)}
  if(AC.state==='suspended')AC.resume().catch(()=>{});
  return AC}
 const audioReady=()=>!!(AC&&AC.state==='running');
@@ -1163,25 +1175,25 @@ function ksBuf(m){if(KS[m])return KS[m];const sr=AC.sampleRate,N=Math.max(2,Math
 // play(voice, midi, when, dur, vol, dest) — every pitched sound in the game goes through here
 function play(v,m,when,dur=.5,vol=.8,dest){const a=audioCtx();if(!a||!SND.on)return;m=midiOf(m);const t=at(when),f=hz(m),out=dest||MASTER,end=t+Math.max(.08,dur);
  try{switch(v){
- case 'piano':{const g2=gate(t,end,.18,out);send(g2,.9);const e=env(t,vol*.3,.004,vol*.06,.55,g2),lp=filt('lowpass',Math.min(9000,f*7),.5,e);
-  lp.frequency.setTargetAtTime(Math.max(500,f*2.4),t+.02,.35);
-  osc('triangle',f,t,end+.9,lp);osc('sine',f*2.003,t,end+.9,lp,.32);osc('sine',f*3.01,t,end+.9,lp,.1);
+ case 'piano':{const g2=gate(t,end,.15,out);send(g2,.25);const e=env(t,vol*.3,.004,vol*.06,.55,g2),lp=filt('lowpass',Math.min(9000,f*8),.5,e),low=f<200;
+  lp.frequency.setTargetAtTime(Math.max(low?900:500,f*2.6),t+.02,.35);
+  osc('triangle',f,t,end+.9,lp);osc('sine',f*2,t,end+.9,lp,low?.5:.32);osc('sine',f*3,t,end+.9,lp,low?.25:.1);if(low)osc('sine',f*4,t,end+.9,lp,.14);
   const h=env(t,vol*.05,.001,0,.012,out);noiseSrc(t,.04,filt('bandpass',2600,1.2,h));break}
- case 'ep':{const g2=gate(t,end,.25,out);send(g2,.6);const e=env(t,vol*.22,.01,vol*.05,.6,g2);osc('sine',f,t,end+1,e);osc('sine',f*2,t,end+1,e,.18);break}
+ case 'ep':{const g2=gate(t,end,.25,out);send(g2,.2);const e=env(t,vol*.22,.01,vol*.05,.6,g2);osc('sine',f,t,end+1,e);osc('sine',f*2,t,end+1,e,.18);break}
  case 'bass':{const g2=gate(t,end,.08,out);const e=env(t,vol*.42,.008,vol*.18,.25,g2),lp=filt('lowpass',700,.7,e);osc('triangle',f,t,end+.4,lp);osc('sine',f,t,end+.4,lp,.6);break}
- case 'pluck':{const s=AC.createBufferSource();s.buffer=ksBuf(m);const g=AC.createGain();g.gain.value=vol*.6;s.connect(g);const g2=gate(t,end+.6,.3,out);g.connect(g2);send(g2,.7);s.start(t);s.stop(t+1.8);break}
- case 'bow':{const g2=gate(t,end,.18,out);send(g2,1);const e=env(t,vol*.2,.09,vol*.17,.3,g2),lp=filt('lowpass',Math.min(5200,f*7),.8,e),pk=filt('peaking',f*2.5,1.2,lp);pk.gain.value=5;
+ case 'pluck':{const s=AC.createBufferSource();s.buffer=ksBuf(m);const g=AC.createGain();g.gain.value=vol*(m>70?.85:.7);s.connect(g);const g2=gate(t,end+.6,.3,out);g.connect(g2);send(g2,.35);s.start(t);s.stop(t+1.8);break}
+ case 'bow':{const g2=gate(t,end,.18,out);send(g2,.45);const e=env(t,vol*.2,.09,vol*.17,.3,g2),lp=filt('lowpass',Math.min(5200,f*7),.8,e),pk=filt('peaking',f*2.5,1.2,lp);pk.gain.value=5;
   const o=osc('sawtooth',f,t,end+.8,pk),lfo=AC.createOscillator(),lg=AC.createGain();lfo.frequency.value=5.6;lg.gain.setValueAtTime(0,t);lg.gain.linearRampToValueAtTime(f*.007,t+.35);lfo.connect(lg);lg.connect(o.frequency);lfo.start(t);lfo.stop(end+.8);break}
- case 'flute':{const g2=gate(t,end,.12,out);send(g2,1);const e=env(t,vol*.26,.07,vol*.22,.3,g2);const o=osc('sine',f,t,end+.6,e);osc('triangle',f,t,end+.6,e,.18);
+ case 'flute':{const g2=gate(t,end,.12,out);send(g2,.4);const e=env(t,vol*.26,.07,vol*.22,.3,g2);const o=osc('sine',f,t,end+.6,e);osc('triangle',f,t,end+.6,e,.18);osc('sine',f*2,t,end+.6,e,f<300?.45:.15);osc('sine',f*3,t,end+.6,e,f<300?.22:.05);
   const lfo=AC.createOscillator(),lg=AC.createGain();lfo.frequency.value=5;lg.gain.setValueAtTime(0,t);lg.gain.linearRampToValueAtTime(f*.004,t+.4);lfo.connect(lg);lg.connect(o.frequency);lfo.start(t);lfo.stop(end+.6);
   const b=env(t,vol*.05,.03,vol*.015,.1,g2);noiseSrc(t,Math.max(.1,dur)+.3,filt('bandpass',f*2,1.5,b));break}
- case 'reed':{const g2=gate(t,end,.1,out);send(g2,.8);const e=env(t,vol*.2,.05,vol*.17,.3,g2),lp=filt('lowpass',f*3.2,1,e);osc('square',f,t,end+.5,lp);break}
- case 'brass':{const g2=gate(t,end,.12,out);send(g2,.9);const e=env(t,vol*.24,.04,vol*.2,.3,g2),lp=filt('lowpass',f*1.2,1.4,e);
+ case 'reed':{const g2=gate(t,end,.1,out);send(g2,.35);const e=env(t,vol*.2,.05,vol*.17,.3,g2),lp=filt('lowpass',f*3.2,1,e);osc('square',f,t,end+.5,lp);break}
+ case 'brass':{const g2=gate(t,end,.12,out);send(g2,.35);const e=env(t,vol*.24,.04,vol*.2,.3,g2),lp=filt('lowpass',f*1.2,1.4,e);
   lp.frequency.setValueAtTime(f*1.2,t);lp.frequency.linearRampToValueAtTime(f*6,t+.07);lp.frequency.setTargetAtTime(f*3.6,t+.08,.2);
   const o=osc('sawtooth',f*.985,t,end+.6,lp);o.frequency.setTargetAtTime(f,t,.03);break}
- case 'mallet':{const e=env(t,vol*.42,.002,0,.16,out);send(e,.8);osc('sine',f,t,t+1,e);osc('sine',f*3.93,t,t+1,e,.22);osc('sine',f*9.2,t,t+.3,e,.05);break}
- case 'bell':{const e=env(t,vol*.3,.002,0,.7,out);send(e,1);[1,2.76,5.4,8.9].forEach((k,i)=>osc('sine',f*k,t,t+3,e,[1,.5,.25,.12][i]));break}
- case 'organ':{const g2=gate(t,end,.06,out);send(g2,.8);const e=env(t,vol*.16,.02,vol*.16,.3,g2);[1,2,3,4].forEach((k,i)=>osc('sine',f*k,t,end+.4,e,[1,.6,.3,.15][i]));break}
+ case 'mallet':{const e=env(t,vol*.42,.002,0,.16,out);send(e,.35);osc('sine',f,t,t+1,e);osc('sine',f*2,t,t+1,e,f<250?.4:.12);osc('sine',f*3.93,t,t+1,e,.22);osc('sine',f*9.2,t,t+.3,e,.05);break}
+ case 'bell':{const e=env(t,vol*.3,.002,0,.7,out);send(e,.5);[1,2.76,5.4,8.9].forEach((k,i)=>osc('sine',f*k,t,t+3,e,[1,.5,.25,.12][i]));break}
+ case 'organ':{const g2=gate(t,end,.06,out);send(g2,.35);const e=env(t,vol*.16,.02,vol*.16,.3,g2);[1,2,3,4].forEach((k,i)=>osc('sine',f*k,t,end+.4,e,[1,.6,.3,.15][i]));break}
  }}catch(e){}}
 const playChord=(v,ms,when,dur,vol,dest)=>ms.forEach(m=>play(v,m,when,dur,vol,dest));
 
@@ -1189,16 +1201,16 @@ const playChord=(v,ms,when,dur,vol,dest)=>ms.forEach(m=>play(v,m,when,dur,vol,de
 function drum(k,when,vol=.9,dest){const a=audioCtx();if(!a||!SND.on)return;const t=at(when),out=dest||MASTER;
  try{switch(k){
  case 'kick':{const e=env(t,vol*.95,.002,0,.12,out);const o=osc('sine',150,t,t+.6,e);o.frequency.setValueAtTime(160,t);o.frequency.exponentialRampToValueAtTime(46,t+.12);
-  const c=env(t,vol*.2,.001,0,.006,out);osc('square',1300,t,t+.03,c);break}
- case 'snare':{const e=env(t,vol*.55,.001,0,.055,out);send(e,.5);noiseSrc(t,.35,filt('bandpass',1900,.7,filt('highpass',800,null,e)));const b=env(t,vol*.32,.001,0,.035,out);osc('triangle',190,t,t+.2,b);break}
- case 'hat':{const e=env(t,vol*.32,.001,0,.016,out);noiseSrc(t,.12,filt('highpass',7200,null,e));break}
- case 'ohat':{const e=env(t,vol*.28,.002,0,.09,out);noiseSrc(t,.6,filt('highpass',6500,null,e));break}
- case 'tom':{const e=env(t,vol*.75,.002,0,.12,out);const o=osc('sine',150,t,t+.6,e);o.frequency.exponentialRampToValueAtTime(88,t+.25);break}
+  const c=env(t,vol*.38,.001,0,.008,out);osc('square',1100,t,t+.03,c);const b2=env(t,vol*.35,.002,0,.05,out);osc('sine',180,t,t+.2,b2);break}
+ case 'snare':{const e=env(t,vol*.75,.001,0,.06,out);send(e,.25);noiseSrc(t,.35,filt('bandpass',1900,.7,filt('highpass',800,null,e)));const b=env(t,vol*.4,.001,0,.035,out);osc('triangle',190,t,t+.2,b);break}
+ case 'hat':{const e=env(t,vol*.55,.001,0,.02,out);noiseSrc(t,.12,filt('highpass',7200,null,e));break}
+ case 'ohat':{const e=env(t,vol*.45,.002,0,.09,out);noiseSrc(t,.6,filt('highpass',6500,null,e));break}
+ case 'tom':{const e=env(t,vol*.75,.002,0,.12,out);const o=osc('sine',150,t,t+.6,e);o.frequency.exponentialRampToValueAtTime(88,t+.25);osc('triangle',300,t,t+.25,e,.35);break}
  case 'crash':{const e=env(t,vol*.34,.002,0,.45,out);send(e,.6);noiseSrc(t,2,filt('highpass',4200,null,e));break}
- case 'clap':{for(let i=0;i<3;i++){const e=env(t+i*.011,vol*.4,.001,0,i===2?.06:.008,out);noiseSrc(t+i*.011,.3,filt('bandpass',1400,.9,e))}break}
+ case 'clap':{for(let i=0;i<3;i++){const e=env(t+i*.011,vol*.7,.001,0,i===2?.06:.008,out);noiseSrc(t+i*.011,.3,filt('bandpass',1400,.9,e))}break}
  case 'click':case 'accent':{const e=env(t,vol*(k==='accent'?.42:.3),.001,0,.012,out);osc('sine',k==='accent'?2200:1500,t,t+.08,e);break}
  case 'wood':{const e=env(t,vol*.4,.001,0,.02,out);osc('sine',920,t,t+.1,e);osc('sine',1380,t,t+.1,e,.4);break}
- case 'shaker':{const e=env(t,vol*.16,.02,0,.03,out);noiseSrc(t,.12,filt('highpass',5000,null,e));break}
+ case 'shaker':{const e=env(t,vol*.4,.02,0,.035,out);noiseSrc(t,.12,filt('highpass',5000,null,e));break}
  }}catch(e){}}
 
 // ---------------------------------------------------------------- sound effects
@@ -1623,7 +1635,7 @@ function runHighway(spec,host,opt){
   (async()=>{const ok=await ensureAudio();if(stopped)return;clk=makeClock(ok);bs=bus(1);t0=clk()+.5+sig*spb;
    if(ok){for(let i=0;i<sig;i++)drum(i===0?'accent':'click',t0-(sig-i)*spb,.8,bs);
     const click=spec.click!==false;
-    if(kind==='song'){schedBacking(chords,spb,sig,t0,bs,.9);if(spec.guide!==false&&!contest)melody.forEach(n=>{if(!n.rest)play('piano',n.m,t0+n.b*spb,n.d*spb,.16,bs)});
+    if(kind==='song'){schedBacking(chords,spb,sig,t0,bs,.9);if(spec.guide===true&&!contest)melody.forEach(n=>{if(!n.rest)play('piano',n.m,t0+n.b*spb,n.d*spb,.16,bs)});
      if(click){const nb=Math.ceil(songEnd/spb);for(let i=0;i<nb;i++)drum((i-pick0+sig*4)%sig===0?'accent':'click',t0+i*spb,.22,bs)}}
     else if(kind==='drum'){const loopC=['C','Am','F','G'],bars=Math.ceil(songEnd/(sig*spb));schedBacking(Array.from({length:bars},(_,b)=>({b:b*sig,d:sig,c:loopC[b%4]})),spb,sig,t0,bs,.7);
      notes.forEach(n=>{if(n.demo)drum(lanes[n.lane],t0+n.t,.9,bs)})}
@@ -1643,7 +1655,7 @@ function buildKeys(el,{from,to,labels=true,blackLabels=false,onDown}){
 function artHTML(a){if(!a)return '';if(typeof a==='string')return `<div class="qart">${esc(a)}</div>`;
  if(a.sym)return `<div class="qart sym">${symbolSVG(a.sym,{size:96})}</div>`;
  if(a.staff)return `<div class="qart staffart">${staffSVG(a.staff.notes||[],{w:300,labels:a.staff.labels})}</div>`;
- if(a.instr){const it=INSTR_BY[a.instr];return `<div class="qart instr"><span class="ib">${icHTML(it[1])}</span><b>${esc(T(it[2]))}</b></div>`}
+ if(a.instr){const it=INSTR_BY[a.instr];return `<div class="qart instr"><span class="ib">${instrPic(a.instr)}</span><b>${esc(T(it[2]))}</b></div>`}
  if(a.kbd)return `<div class="qart kbdart">${keyboardSVG({...a.kbd,w:300})}</div>`;
  if(a.emoji)return `<div class="qart">${esc(a.emoji)}</div>`;return ''}
 // sound clips for listening questions
@@ -1917,7 +1929,7 @@ const num=n=>Number(n).toLocaleString(LANG==='en'?'en-US':'ko-KR');
 const dayKey=(d=new Date())=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
 const daysSince=k=>{if(!k)return 999;const [y,m,d]=k.split('-').map(Number);return Math.round((new Date(dayKey())-new Date(y,m-1,d))/864e5)};
 const pic=(src,emoji)=>src?`<img class="ei" src="${src}" data-emoji="${esc(emoji)}" alt="" draggable="false">`:esc(emoji);
-document.addEventListener('error',e=>{const t=e.target;if(t&&t.tagName==='IMG'&&t.dataset.emoji!==undefined)t.replaceWith(document.createTextNode(t.dataset.emoji))},true);
+document.addEventListener('error',e=>{const t=e.target;if(!t||t.tagName!=='IMG')return;if(t.dataset.fb!==undefined){const w=document.createElement('span');w.innerHTML=icHTML(t.dataset.fb);t.replaceWith(...w.childNodes);return}if(t.dataset.emoji!==undefined)t.replaceWith(document.createTextNode(t.dataset.emoji))},true);
 const COIN='🪙';
 const COPYRIGHT=()=>`<footer class="copy">© 2026 Dongsun Moon. ${L('모든 권리 보유.','All rights reserved.')}<br>${L('노래 가락은 저작권이 끝난 전래 동요와 클래식 곡을 새로 편곡했어요. 소리, 그림, 캐릭터는 이 게임을 위해 직접 만들었어요.','Melodies are public-domain folk songs and classical pieces, newly arranged. Sounds, art and characters were made for this game.')}</footer>`;
 function sparkle(el){if(!el)return;const r=el.getBoundingClientRect();for(let i=0;i<8;i++){const s=document.createElement('i');s.className='spk';s.textContent=pick(['✨','⭐','🎵','💫']);s.style.left=(r.left+r.width*Math.random())+'px';s.style.top=(r.top+r.height*Math.random())+'px';$('fx').appendChild(s);setTimeout(()=>s.remove(),900)}}
@@ -2111,7 +2123,7 @@ function visHTML(v,p){let h='';v=v||{};
  if(v.staff)h+=`<div class="vstaff">${staffSVG(staffNotes(v.staff.notes),{w:340,labels:v.staff.labels})}</div>`;
  if(v.rhy)h+=`<div class="vrhy">${rhythmSVG(v.rhy,{w:340,sig:v.sig3?3:4,showSig:!!(v.sig||v.sig3),count:true,cursor:-20}).svg}</div>`;
  if(v.sym)h+=`<div class="vsym">${v.sym.map(([k,c])=>`<div>${symbolSVG(k,{size:80})}<b>${esc(T(c))}</b></div>`).join('')}</div>`;
- if(v.instr)h+=`<div class="vinstr">${v.instr.map(id=>{const it=INSTR_BY[id];return `<div><span class="ib">${icHTML(it[1])}</span><b>${esc(T(it[2]))}</b></div>`}).join('')}</div>`;
+ if(v.instr)h+=`<div class="vinstr">${v.instr.map(id=>{const it=INSTR_BY[id];return `<div><span class="ib">${instrPic(id)}</span><b>${esc(T(it[2]))}</b></div>`}).join('')}</div>`;
  if(p&&(p.drum||p.drums)&&!v.kbd)h+=`<div class="vpads">${['kick','snare','hat'].map(k=>`<span class="vp" data-d="${k}" style="--c:${DRUM_LANES[k].col}">${DRUM_LANES[k].icon}<small>${esc(T(DRUM_LANES[k].name))}</small></span>`).join('')}</div>`;
  if(p&&(p.majmin!=null||p.voices||p.dyn||p.tempo||p.chordpair))h+=`<div class="vlabel" id="vlabel"></div>`;
  if(!h)h=`<div class="vemoji">🎶</div>`;return h}
@@ -2254,11 +2266,11 @@ function playDrum(id){const d=DRUMS[id],spec={type:'drum',pattern:id,bars:8,bpm:
 
 // ---------------------------------------------------------------- free play: piano with many instrument voices, drum pads and a metronome
 let FREE={voice:'piano',oct:0,labels:true,metro:false,bpm:90,tab:'keys',timer:null};
-const FREE_VOICES=[['piano','🎹','피아노|Piano'],['mallet','🎼','실로폰|Xylophone'],['pluck','🎸','기타·가야금|Guitar · gayageum'],['bow','🎻','바이올린|Violin'],['flute','🎶','플루트·대금|Flute · daegeum'],['brass','🎺','트럼펫|Trumpet'],['reed','🎷','클라리넷|Clarinet'],['organ','⛪','오르간|Organ'],['bell','🔔','종|Bell']];
+const FREE_VOICES=[['piano','piano','피아노|Piano'],['mallet','xylophone','실로폰|Xylophone'],['pluck','guitar','기타·가야금|Guitar · gayageum'],['bow','violin','바이올린|Violin'],['flute','flute','플루트·대금|Flute · daegeum'],['brass','trumpet','트럼펫|Trumpet'],['reed','clarinet','클라리넷|Clarinet'],['organ','⛪','오르간|Organ'],['bell','triangle','트라이앵글|Triangle']];
 RENDER.free=()=>{stopMetro();const lo=60+FREE.oct*12,hi=lo+(window.innerWidth>700?24:12);
  $('v-free').innerHTML=`<div class="free"><h2 class="h2w">🎶 ${L('자유 연주','Free play')}</h2>
   <div class="seg tabs">${[['keys','🎹 '+L('건반','Keys')],['drums','🥁 '+L('드럼','Drums')]].map(([v,n])=>`<button type="button" data-tab="${v}" class="${FREE.tab===v?'on':''}">${n}</button>`).join('')}</div>
-  ${FREE.tab==='keys'?`<div class="voices">${FREE_VOICES.map(([v,ic,n])=>`<button type="button" data-voice="${v}" class="vc ${FREE.voice===v?'on':''}"><span>${ic}</span><small>${esc(T(n))}</small></button>`).join('')}</div>
+  ${FREE.tab==='keys'?`<div class="voices">${FREE_VOICES.map(([v,ic,n])=>`<button type="button" data-voice="${v}" class="vc ${FREE.voice===v?'on':''}"><span>${INSTR_BY[ic]?instrPic(ic):esc(ic)}</span><small>${esc(T(n))}</small></button>`).join('')}</div>
    <div class="row small"><button class="btn ghost small" id="octDn" type="button">◀ ${L('낮게','Lower')}</button><button class="btn ghost small" id="lblT" type="button">${FREE.labels?'🔤 '+L('이름 끄기','Hide names'):'🔤 '+L('이름 보기','Show names')}</button><button class="btn ghost small" id="octUp" type="button">${L('높게','Higher')} ▶</button></div>
    <div class="freekeys" id="freeKeys"></div>`
   :`<div class="kit">${[['kick','💥','쿵|Boom'],['snare','🥁','짝|Snare'],['hat','✨','칫|Hi-hat'],['ohat','💫','치이|Open hat'],['tom','🪘','둥|Tom'],['crash','🌟','챙|Crash'],['clap','👏','짝짝|Clap'],['wood','🪵','딱|Wood block'],['shaker','🧂','착착|Shaker']].map(([k,ic,n])=>`<button type="button" class="kpad" data-k="${k}"><span>${ic}</span><small>${esc(T(n))}</small></button>`).join('')}</div>`}
@@ -2266,7 +2278,7 @@ RENDER.free=()=>{stopMetro();const lo=60+FREE.oct*12,hi=lo+(window.innerWidth>70
  const v=$('v-free');v.querySelectorAll('[data-tab]').forEach(b=>b.addEventListener('click',()=>{FREE.tab=b.dataset.tab;RENDER.free()}));
  if(FREE.tab==='keys'){v.querySelectorAll('[data-voice]').forEach(b=>b.addEventListener('click',()=>{FREE.voice=b.dataset.voice;v.querySelectorAll('.vc').forEach(x=>x.classList.toggle('on',x===b));play(FREE.voice,67,0,.5,.8)}));
   buildKeys($('freeKeys'),{from:lo,to:hi,labels:FREE.labels,blackLabels:FREE.labels,onDown:m=>{play(FREE.voice,m,0,FREE.voice==='piano'||FREE.voice==='pluck'||FREE.voice==='mallet'||FREE.voice==='bell'?1.2:.6,.85)}});
-  $('octDn').addEventListener('click',()=>{FREE.oct=Math.max(-2,FREE.oct-1);RENDER.free()});$('octUp').addEventListener('click',()=>{FREE.oct=Math.min(1,FREE.oct+1);RENDER.free()});$('lblT').addEventListener('click',()=>{FREE.labels=!FREE.labels;RENDER.free()})}
+  $('octDn').addEventListener('click',()=>{FREE.oct=Math.max(-1,FREE.oct-1);RENDER.free()});$('octUp').addEventListener('click',()=>{FREE.oct=Math.min(1,FREE.oct+1);RENDER.free()});$('lblT').addEventListener('click',()=>{FREE.labels=!FREE.labels;RENDER.free()})}
  else v.querySelector('.kit').addEventListener('pointerdown',e=>{const b=e.target.closest('.kpad');if(!b)return;e.preventDefault();drum(b.dataset.k,0,1);b.classList.remove('hit');void b.offsetWidth;b.classList.add('hit')});
  $('metBtn').addEventListener('click',()=>{FREE.metro=!FREE.metro;RENDER.free();if(FREE.metro)startMetro()});
  $('bpm').addEventListener('input',e=>{FREE.bpm=+e.target.value;$('bpmV').textContent=FREE.bpm});if(FREE.metro)startMetro()};
@@ -2277,18 +2289,18 @@ function stopMetro(){if(FREE.timer){clearInterval(FREE.timer);FREE.timer=null}}
 // ---------------------------------------------------------------- instrument book
 RENDER.instr=()=>{const fams=['key','string','wood','brass','perc'];
  $('v-instr').innerHTML=`<div class="room"><h2 class="h2w">🎺 ${L('악기 도감','Instrument book')}</h2><p class="sub wsub">${L('악기를 누르면 소리를 들을 수 있어요!','Tap an instrument to hear it!')}</p>
-  ${fams.map(f=>`<div class="card fam"><b>${FAM[f].ic} ${esc(T(FAM[f].n))}</b><small class="sub"> · ${esc(T(FAM[f].how))}</small><div class="igrid">${INSTR.filter(x=>x[3]===f).map(x=>`<button type="button" class="icard" data-i="${x[0]}"><span class="ib">${icHTML(x[1])}</span><b>${esc(T(x[2]))}</b></button>`).join('')}</div></div>`).join('')}</div>`;
+  ${fams.map(f=>`<div class="card fam"><b>${FAM[f].ic} ${esc(T(FAM[f].n))}</b><small class="sub"> · ${esc(T(FAM[f].how))}</small><div class="igrid">${INSTR.filter(x=>x[3]===f).map(x=>`<button type="button" class="icard" data-i="${x[0]}"><span class="ib">${instrPic(x[0])}</span><b>${esc(T(x[2]))}</b></button>`).join('')}</div></div>`).join('')}</div>`;
  $('v-instr').querySelectorAll('[data-i]').forEach(b=>b.addEventListener('click',()=>{const it=INSTR_BY[b.dataset.i];const bb=bus(1);if(it[5]==='drum'){['kick','snare','tom','snare'].forEach((d,i)=>drum(d,AC?AC.currentTime+.05+i*.3:0,1,bb))}else ['C4','E4','G4','C5'].forEach((n,i)=>play(it[5],n,AC?AC.currentTime+.05+i*.32:0,.3,.8,bb));
-  modal(`<div class="center"><div class="ibig">${icHTML(it[1])}</div><h2>${esc(T(it[2]))}</h2><p class="sub">${esc(T(FAM[it[3]].n))}</p><p>${esc(T(it[4]))}</p></div><div class="row"><button class="btn gold" data-act="close" type="button">${L('알았어요!','Got it!')}</button></div>`,{onOpen:()=>speak(T(it[2])+'. '+T(it[4]))})}))};
+  modal(`<div class="center"><div class="ibig">${instrPic(it[0])}</div><h2>${esc(T(it[2]))}</h2><p class="sub">${esc(T(FAM[it[3]].n))}</p><p>${esc(T(it[4]))}</p></div><div class="row"><button class="btn gold" data-act="close" type="button">${L('알았어요!','Got it!')}</button></div>`,{onOpen:()=>speak(T(it[2])+'. '+T(it[4]))})}))};
 
 // ---------------------------------------------------------------- contests: rivals race you live, medals for the top three
 let CT=null;
 RENDER.contests=()=>{$('v-contests').innerHTML=`<div class="room"><h2 class="h2w">🏆 ${L('음악 대회','Music contests')}</h2><p class="sub wsub">${L('배운 실력으로 대회에 나가 메달을 따요! 몇 번이든 다시 도전할 수 있어요.','Use what you’ve learned to win medals! You can try as many times as you like.')}</p>
- ${CONTESTS.map(c=>{const open=contestOpen(c),rec=S.contests[c.id]||{};return `<button type="button" class="contest ${open?'':'locked'}" data-c="${c.id}" style="background:${c.bg}"><span class="cic">${c.icon}</span><span class="cinfo"><b>${esc(T(c.name))}</b><small>${c.rounds.length}${L('라운드',' rounds')} · ${c.rivals.map(r=>RIVALS[r].icon).join('')}</small>${open?'':`<small>🔒 ${esc(T(LESSON_BY[c.after].t))} ${L('레슨 후','after the lesson')}</small>`}</span><span class="cmedal">${['','🥉','🥈','🥇'][rec.medal||0]||(open?'▶':'🔒')}</span></button>`}).join('')}</div>`;
+ ${CONTESTS.map(c=>{const open=contestOpen(c),rec=S.contests[c.id]||{};return `<button type="button" class="contest ${open?'':'locked'}" data-c="${c.id}" style="background:${c.bg}"><span class="cic">${pic(`images/mus-c-${c.id}.webp`,c.icon)}</span><span class="cinfo"><b>${esc(T(c.name))}</b><small>${c.rounds.length}${L('라운드',' rounds')} · ${c.rivals.map(r=>RIVALS[r].icon).join('')}</small>${open?'':`<small>🔒 ${esc(T(LESSON_BY[c.after].t))} ${L('레슨 후','after the lesson')}</small>`}</span><span class="cmedal">${['','🥉','🥈','🥇'][rec.medal||0]||(open?'▶':'🔒')}</span></button>`}).join('')}</div>`;
  $('v-contests').querySelectorAll('[data-c]').forEach(b=>b.addEventListener('click',()=>{const c=CONTESTS.find(x=>x.id===b.dataset.c);if(!contestOpen(c)){SFX.pop();toast('🔒 '+L('레슨을 더 하면 열려요!','Opens after more lessons!'));return}SFX.click();contestLobby(c)}))};
 const roundName=r=>r.type==='song'?'🎹 '+T(SONGS[r.song].t):r.type==='drum'?'🥁 '+T(DRUMS[r.pattern].t):r.type==='beat'?'💓 '+L('박자 지키기','Keep the beat'):r.type==='echo'?'👂 '+L('리듬 따라 하기','Copy the rhythm'):'📖 '+L('리듬 읽기','Rhythm reading');
 function contestLobby(c){go('contest');const rec=S.contests[c.id]||{};
- $('v-contest').innerHTML=`<div class="lobby card" style="--bg:${c.bg}"><div class="poster" style="background:${c.bg}"><span class="cic">${c.icon}</span><h2>${esc(T(c.name))}</h2>${rec.medal?`<p>${L('최고 기록','Best')}: ${['','🥉','🥈','🥇'][rec.medal]}</p>`:''}</div>
+ $('v-contest').innerHTML=`<div class="lobby card" style="--bg:${c.bg}"><div class="poster" style="background:${c.bg}"><span class="cic">${pic(`images/mus-c-${c.id}.webp`,c.icon)}</span><h2>${esc(T(c.name))}</h2>${rec.medal?`<p>${L('최고 기록','Best')}: ${['','🥉','🥈','🥇'][rec.medal]}</p>`:''}</div>
   <h3>⚔️ ${L('함께 겨룰 친구들','Your rivals')}</h3><div class="rivals">${c.rivals.map(id=>{const r=RIVALS[id];return `<div class="rv"><span class="rf">${pic(r.img,r.icon)}</span><b>${esc(T(r.name))}</b><small>“${esc(T(r.hi))}”</small></div>`}).join('')}</div>
   <h3>🎯 ${L('라운드','Rounds')}</h3><ol class="rounds">${c.rounds.map(r=>`<li>${esc(roundName(r))}</li>`).join('')}</ol>
   <p class="sub">🥇 ${L('1등','1st')} · 🥈 ${L('2등','2nd')} · 🥉 ${L('3등','3rd')} — ${L('정확하게 칠수록 순위가 올라가요!','The more accurate you are, the higher you place!')}</p>

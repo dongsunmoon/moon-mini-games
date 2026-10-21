@@ -19,6 +19,15 @@ const L=(ko,en)=>LANG==='en'?en:ko;
 function applyLang(){if(LANG!=='en')return;document.querySelectorAll('[data-en]').forEach(el=>{el.textContent=el.dataset.en});for(const a of ['aria-label','placeholder','title'])document.querySelectorAll('[data-en-'+a+']').forEach(el=>el.setAttribute(a,el.getAttribute('data-en-'+a)))}
 function setLang(next){try{localStorage.setItem('moonGames.lang',next)}catch(e){}try{speechSynthesis.cancel()}catch(e){}const u=new URL(location.href);u.searchParams.set('lang',next);location.replace(u.href)}
 </script>
+<script>
+/* Player profile picked on the main page. Each game keeps its save per profile ("key@profileId"),
+   so players never share progress and resetting one game leaves every other game alone. */
+const MGP=(()=>{let P=null;try{P=JSON.parse(localStorage.getItem('moonGames.profiles')||'null')}catch(e){}
+ const me=P&&Array.isArray(P.list)&&P.list.find(x=>x&&x.id===P.cur)||null;
+ if(me){const S=Storage.prototype,g=S.getItem,s=S.setItem,r=S.removeItem,own=/^(little-detective-|marbleRush\.|marble3dsettings|chessKnights\.|scienceGuardians\.|musicAcademy\.)/,k=x=>{x=String(x);return own.test(x)&&!x.includes('@')?x+'@'+me.id:x};
+  S.getItem=function(x){return g.call(this,k(x))};S.setItem=function(x,v){return s.call(this,k(x),v)};S.removeItem=function(x){return r.call(this,k(x))}}
+ return {me}})();
+</script>
 <style>
 :root{
  color-scheme:light;
@@ -505,6 +514,20 @@ main{width:min(980px,100%);margin:0 auto;padding:14px max(12px,env(safe-area-ins
 
 .copy{text-align:center;color:#d9d0ff;font-size:12px;font-weight:700;line-height:1.5;margin:6px 8px 0}
 .modal .copy{color:var(--muted);margin-top:14px}
+
+/* who is practicing */
+.who .h2w{margin-top:10px;font-size:26px}
+.whogrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:14px 0 6px}
+.whocard{border:0;border-radius:24px;background:#fff;box-shadow:var(--shadow);padding:16px 10px 14px;display:flex;flex-direction:column;align-items:center;gap:4px;transition:transform .12s}
+.whocard:active{transform:scale(.96)}
+.whocard .ava.big{width:92px;height:92px;font-size:56px;margin-bottom:4px}
+.whocard .wn{font-size:24px;font-weight:900}
+.whocard small{color:var(--muted);font-weight:800;font-size:12.5px}
+.whocard .wstats{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin:4px 0}
+.whocard .wstats span{background:#f6f2ff;border-radius:99px;padding:3px 9px;font-weight:900;font-size:13px}
+.whocard .wlast{font-size:12px}
+.whocard.last{box-shadow:0 0 0 4px #ffd23f,var(--shadow)}
+.prow .btn.small{min-height:36px;padding:0 10px}
 </style>
 </head>
 <body>
@@ -517,6 +540,7 @@ main{width:min(980px,100%);margin:0 auto;padding:14px max(12px,env(safe-area-ins
  <button class="gear" id="gearBtn" type="button" aria-label="설정" data-en-aria-label="Settings">⚙️</button>
 </header>
 <main>
+ <section class="view hidden" id="v-who"></section>
  <section class="view" id="v-home"></section>
  <section class="view hidden" id="v-path"></section>
  <section class="view hidden" id="v-lesson"></section>
@@ -1908,6 +1932,9 @@ function loadRoot(){let r=null;try{r=JSON.parse(localStorage.getItem(SAVE_KEY)||
  if(!r||!Array.isArray(r.P)||!r.P.length)r={v:1,cur:0,P:[freshP()],opt:{}};
  r.opt={sound:true,voice:true,calib:0,...r.opt};r.P=r.P.map(mergeP);r.cur=clamp(r.cur||0,0,r.P.length-1);return r}
 let ROOT=loadRoot(),S=ROOT.P[ROOT.cur];
+// the player picked on the main page decides the name and face
+if(MGP.me){S.name=MGP.me.name;S.av=MGP.me.av;S.faceSet=true}
+const switchPlayer=()=>{if(MGP.me)location.href='index.html?lang='+LANG;else go('who')};
 const save=()=>{ROOT.P[ROOT.cur]=S;try{localStorage.setItem(SAVE_KEY,JSON.stringify(ROOT))}catch(e){}};
 function applyOpts(){SND.on=ROOT.opt.sound;TIMING.calib=(ROOT.opt.calib||0)/1000;OPT_NAMES=()=>ROOT.opt.names||(LANG==='en'?'letter':'solfege');
  LOOK.skin=S.equip.skin.replace('skin-','');LOOK.stage=S.equip.stage.replace('stage-','');LOOK.keys=S.equip.keys.replace('keys-','')}
@@ -2002,7 +2029,7 @@ function checkTrophies(){ACH.forEach(a=>{if(!S.ach.includes(a.id)&&a.test()){S.a
 // ---------------------------------------------------------------- views and navigation
 let VIEW='home',NAV=[];
 function go(v,push=true){stopActivity();stopVoice();micOff&&micOff();if(push&&VIEW!==v)NAV.push(VIEW);VIEW=v;
- document.querySelectorAll('.view').forEach(x=>x.classList.toggle('hidden',x.id!=='v-'+v));$('backBtn').classList.toggle('hidden',v==='home');$('homeLink').classList.toggle('hidden',v!=='home');
+ document.querySelectorAll('.view').forEach(x=>x.classList.toggle('hidden',x.id!=='v-'+v));const top=v==='home'||v==='who';$('backBtn').classList.toggle('hidden',top);$('homeLink').classList.toggle('hidden',!top);
  window.scrollTo(0,0);const r=RENDER[v];if(r)r();updateHud()}
 const popNav=()=>{let v=NAV.pop();while(v&&(v==='play'||v===VIEW))v=NAV.pop();return v||'home'};
 function back(){if(VIEW==='play'&&ACT){askQuit();return}go(popNav(),false)}
@@ -2042,7 +2069,7 @@ RENDER.home=()=>{ensureDaily();const nl=nextLesson(),t=nl?TEACHERS[teacherOf(nl)
  v.querySelectorAll('[data-teacher]').forEach(b=>b.addEventListener('click',()=>teacherCard(b.dataset.teacher)));
  if($('nextBtn'))$('nextBtn').addEventListener('click',()=>{SFX.click();openLesson(nl.id)});
  if($('chestBtn'))$('chestBtn').addEventListener('click',openDailyChest);
- $('heroFace').addEventListener('click',openPlayers);$('trophyBtn').addEventListener('click',()=>go('trophies'))};
+ $('heroFace').addEventListener('click',switchPlayer);$('trophyBtn').addEventListener('click',()=>go('trophies'))};
 const tile=(go,cls,ic,name,small,dot=0)=>`<button class="tile ${cls}" type="button" data-go="${go}"><span class="ic">${ic}</span><b>${esc(name)}</b><small>${esc(small)}</small>${dot?'<span class="dot">!</span>':''}</button>`;
 function teacherCard(k){const t=TEACHERS[k],units=UNITS.filter(u=>u.teacher===k);modal(`<div class="tcard"><span class="tface huge" style="background:${t.bg}">${pic(t.img,t.icon)}</span><h2>${esc(T(t.name))}</h2><p class="sub">${esc(T(t.role))}</p><p class="say">“${esc(T(pick(t.hi)))}”</p>
  ${units.map(u=>`<button class="btn ghost small" data-act="u" data-u="${u.id}" type="button">${u.ic} ${esc(T(u.t))}</button>`).join('')}</div>`,{acts:{u:b=>()=>{PATH_FOCUS=b.dataset.u;go('path')}},onOpen:()=>speak(T(pick(t.hi)))})}
@@ -2320,14 +2347,31 @@ RENDER.trophies=()=>{$('v-trophies').innerHTML=`<div class="room"><h2 class="h2w
  <div class="achlist">${ACH.map(a=>{const got=S.ach.includes(a.id);return `<div class="achrow ${got?'got':''}"><span>${got?a.icon:'🔒'}</span><div><b>${esc(T(a.name))}</b><small>${esc(T(a.desc))}</small></div></div>`}).join('')}</div></div>`};
 
 // ---------------------------------------------------------------- players, settings, timing check
-function openPlayers(){modal(`<h2>👨‍👩‍👧 ${L('누가 연습할까요?','Who’s practicing?')}</h2><div class="plist">${ROOT.P.map((p,i)=>`<button type="button" class="prow ${i===ROOT.cur?'on':''}" data-act="pick" data-i="${i}"><span class="ava mini">${esc(p.av)}</span><b>${esc(p.name)}</b><small>Lv.${p.lvl} · 🔥${p.streak.n}</small></button>`).join('')}</div>
- <div class="row"><button class="btn ghost small" data-act="edit" type="button">✏️ ${L('내 이름·얼굴','My name & face')}</button><button class="btn green small" data-act="add" type="button">➕ ${L('친구 추가','Add player')}</button></div>`,{acts:{
-  pick:b=>{const i=+b.dataset.i;if(i===ROOT.cur)return;save();ROOT.cur=i;S=ROOT.P[i];save();applyOpts();toast(`${esc(S.av)} ${L(`${esc(S.name)} 차례예요!`,`${esc(S.name)}’s turn!`)}`);go('home',false)},
-  edit:()=>()=>playerForm(false),add:()=>()=>playerForm(true)}})}
-function playerForm(isNew){const p=isNew?freshP():S;let av=p.av;
+// who is practicing: each profile keeps its own lessons, stars, streak, daily tasks, medals, stickers and coins
+const doneOf=p=>LESSONS.filter(l=>p.lessons[l.id]&&(p.lessons[l.id].s>=1||p.lessons[l.id].pass)).length;
+RENDER.who=()=>{const today=dayKey();
+ $('v-who').innerHTML=`<div class="who"><h2 class="h2w center">🎵 ${L('누가 연습할까요?','Who’s practicing?')}</h2><p class="wsub center">${L('내 이름을 눌러요. 진도는 사람마다 따로 저장돼요.','Tap your name. Everyone’s progress is saved separately.')}</p>
+  <div class="whogrid">${ROOT.P.map((p,i)=>{const t=titleOf(p.lvl),dn=p.daily&&p.daily.day===today?p.daily.done.filter(Boolean).length:0,gap=p.streak.last?daysSince(p.streak.last):null;
+   return `<button type="button" class="whocard ${i===ROOT.cur?'last':''}" data-p="${i}"><span class="ava big">${esc(p.av)}</span><b class="wn">${esc(p.name)}</b><small>${t.icon} ${esc(t.name)} · Lv.${p.lvl}</small>
+    <span class="wstats"><span>🔥 ${p.streak.n}</span><span>🎓 ${doneOf(p)}/${LESSONS.length}</span><span>📅 ${dn}/3</span></span>
+    <small class="wlast">${gap==null?L('아직 연습 전이에요','Hasn’t practiced yet'):gap===0?'✅ '+L('오늘 연습했어요!','Practiced today!'):gap===1?L('어제 연습했어요','Practiced yesterday'):L(`${gap}일 전에 연습했어요`,`Last practiced ${gap} days ago`)}</small></button>`}).join('')}</div>
+  <div class="row"><button class="btn ghost small" id="whoAdd" type="button">➕ ${L('친구 추가','Add player')}</button><button class="btn ghost small" id="whoEdit" type="button">✏️ ${L('이름·얼굴 바꾸기','Edit names & faces')}</button></div></div>`;
+ $('v-who').querySelectorAll('[data-p]').forEach(b=>b.addEventListener('click',()=>selectPlayer(+b.dataset.p)));
+ $('whoAdd').addEventListener('click',()=>playerForm(true));$('whoEdit').addEventListener('click',manageProfiles);
+ speak(L('누가 연습할까요? 내 이름을 눌러요!','Who’s practicing? Tap your name!'))};
+function selectPlayer(i){save();ROOT.cur=i;S=ROOT.P[i];save();applyOpts();SFX.open();toast(`${esc(S.av)} ${L(`${esc(S.name)} 차례예요!`,`${esc(S.name)}’s turn!`)}`);go('home',false);
+ if(!S.intro)welcome();else{speak(L(`${S.name}, 안녕! 오늘도 같이 연습해요!`,`Hi ${S.name}! Let’s practice together!`));returnGreeting()}}
+function manageProfiles(){modal(`<h2>✏️ ${L('이름·얼굴 바꾸기','Edit players')}</h2><div class="plist">${ROOT.P.map((p,i)=>`<div class="prow"><span class="ava mini">${esc(p.av)}</span><b>${esc(p.name)}</b><button type="button" class="btn ghost small" data-act="ed" data-i="${i}" aria-label="${esc(L('바꾸기','Edit'))}">✏️</button>${ROOT.P.length>1?`<button type="button" class="btn ghost small" data-act="del" data-i="${i}" aria-label="${esc(L('지우기','Delete'))}">🗑️</button>`:''}</div>`).join('')}</div>`,
+ {acts:{ed:b=>()=>playerForm(false,+b.dataset.i),del:b=>()=>confirmDelete(+b.dataset.i)}})}
+function confirmDelete(i){const p=ROOT.P[i];modal(`<div class="center"><span class="ava big">${esc(p.av)}</span><h2>${L(`${esc(p.name)} 기록을 지울까요?`,`Delete ${esc(p.name)}?`)}</h2><p>${L('별, 스티커, 코인, 메달이 모두 사라지고 되돌릴 수 없어요.','All stars, stickers, coins and medals will be gone for good.')}</p></div>
+ <div class="row"><button class="btn ghost" data-act="close" type="button">${L('아니요','No')}</button><button class="btn red" data-act="yes" type="button">${L('지울래요','Delete')}</button></div>`,
+ {acts:{yes:()=>()=>{save();const curP=ROOT.P[ROOT.cur];ROOT.P.splice(i,1);ROOT.cur=Math.max(0,ROOT.P.indexOf(curP));S=ROOT.P[ROOT.cur];save();applyOpts();go('who',false)}}})}
+function playerForm(isNew,idx=ROOT.cur){const p=isNew?freshP():ROOT.P[idx];let av=p.av;
  modal(`<h2>${isNew?L('새 친구','New player'):L('이름과 얼굴','Name and face')}</h2><input class="nameIn" id="nameIn" maxlength="12" value="${esc(isNew?'':p.name)}" placeholder="${esc(L('이름','Name'))}"><div class="avs">${AVATARS.map(a=>`<button type="button" class="avb ${a===av?'on':''}" data-a="${a}">${a}</button>`).join('')}</div>
   <div class="row"><button class="btn green" data-act="ok" type="button">${L('좋아요!','OK!')}</button></div>`,{onOpen:box=>{box.querySelector('.avs').addEventListener('click',e=>{const b=e.target.closest('.avb');if(!b)return;av=b.dataset.a;box.querySelectorAll('.avb').forEach(x=>x.classList.toggle('on',x===b))})},
-  acts:{ok:()=>{const n=($('nameIn').value||'').trim()||L('음악 친구','Music friend');if(isNew){const np=freshP();np.name=n;np.av=av;ROOT.P.push(np);save();ROOT.cur=ROOT.P.length-1;S=np}else{S.name=n;S.av=av}save();applyOpts();updateHud();go('home',false)}}})}
+  acts:{ok:()=>{const n=($('nameIn').value||'').trim()||L('음악 친구','Music friend');
+   if(isNew){const np=freshP();np.name=n;np.av=av;np.faceSet=true;ROOT.P.push(np);save();return ()=>selectPlayer(ROOT.P.length-1)}
+   p.name=n;p.av=av;p.faceSet=true;save();applyOpts();updateHud();if(VIEW==='who')RENDER.who()}}})}
 function openSettings(){const o=ROOT.opt;modal(`<h2>⚙️ ${L('설정','Settings')}</h2><div class="sets">
   <button type="button" class="setrow" data-act="snd">🔊 ${L('소리','Sound')}<b>${o.sound?'ON':'OFF'}</b></button>
   <button type="button" class="setrow" data-act="vce">🗣️ ${L('선생님 목소리','Teacher voice')}<b>${o.voice?'ON':'OFF'}</b></button>
@@ -2337,7 +2381,7 @@ function openSettings(){const o=ROOT.opt;modal(`<h2>⚙️ ${L('설정','Setting
   <button type="button" class="setrow" data-act="ppl">👨‍👩‍👧 ${L('연습하는 친구 바꾸기','Switch player')}</button>
   <button type="button" class="setrow danger" data-act="reset">🗑️ ${L('이 친구 기록 지우기','Reset this player')}</button></div>${COPYRIGHT()}`,{acts:{
   snd:()=>{o.sound=!o.sound;save();applyOpts();return ()=>openSettings()},vce:()=>{o.voice=!o.voice;if(!o.voice)stopVoice();save();return ()=>openSettings()},
-  nm:b=>{o.names=b.dataset.v;save();applyOpts();return ()=>{openSettings();if(VIEW!=='play')go(VIEW,false)}},cal:()=>()=>calibrate(),lang:()=>setLang(LANG==='en'?'ko':'en'),ppl:()=>()=>openPlayers(),
+  nm:b=>{o.names=b.dataset.v;save();applyOpts();return ()=>{openSettings();if(VIEW!=='play')go(VIEW,false)}},cal:()=>()=>calibrate(),lang:()=>setLang(LANG==='en'?'ko':'en'),ppl:()=>()=>switchPlayer(),
   reset:()=>()=>modal(`<h2>🗑️ ${L('정말 지울까요?','Really reset?')}</h2><p>${L('이 친구의 별, 스티커, 코인이 모두 사라져요.','All stars, stickers and coins for this player will be gone.')}</p><div class="row"><button class="btn ghost" data-act="close" type="button">${L('아니요','No')}</button><button class="btn red" data-act="yes" type="button">${L('지울래요','Reset')}</button></div>`,{acts:{yes:()=>()=>{const n=S.name,a=S.av;S=freshP();S.name=n;S.av=a;S.intro=true;ROOT.P[ROOT.cur]=S;save();applyOpts();go('home',false)}}})}})}
 // tap along with ticks; the average delay becomes the timing correction
 function calibrate(){let taps=[],clk=null,t0=0,b=null,spb=60/90,N=12;
@@ -2352,19 +2396,20 @@ function calibrate(){let taps=[],clk=null,t0=0,b=null,spb=60/90,N=12;
 
 // ---------------------------------------------------------------- welcome story for a new player
 function welcome(){const ts=Object.values(TEACHERS);
- modal(`<div class="welcome"><div class="tparade">${ts.map(t=>`<span class="tface" style="background:${t.bg}">${pic(t.img,t.icon)}</span>`).join('')}</div><h2>${L('꼬마 음악 아카데미에 온 걸 환영해요!','Welcome to Little Music Academy!')}</h2>
+ modal(`<div class="welcome"><div class="tparade">${ts.map(t=>`<span class="tface" style="background:${t.bg}">${pic(t.img,t.icon)}</span>`).join('')}</div><h2>${L(`${esc(S.name)}, 꼬마 음악 아카데미에 온 걸 환영해요!`,`${esc(S.name)}, welcome to Little Music Academy!`)}</h2>
   <p>${L('여섯 선생님과 함께 박자, 건반, 악보, 노래, 드럼, 악기를 하나씩 배워요. 매일 조금씩 연습하고, 대회에 나가 메달도 따 봐요!','Learn beat, keys, reading music, singing, drums and instruments with six teachers. Practice a little every day and win medals in contests!')}</p></div>
-  <div class="row"><button class="btn green cta" data-act="go" type="button">🎵 ${L('시작하기','Let’s start')}</button></div>`,{closable:false,onOpen:()=>{SFX.open();speak(L('꼬마 음악 아카데미에 온 걸 환영해요! 여섯 선생님과 함께 음악을 배워 봐요!','Welcome to Little Music Academy! Let’s learn music with six teachers!'))},
-  acts:{go:()=>()=>{S.intro=true;save();playerForm(false)}}})}
+  <div class="row"><button class="btn green cta" data-act="go" type="button">🎵 ${L('시작하기','Let’s start')}</button></div>`,{closable:false,onOpen:()=>{SFX.open();speak(L(`${S.name}, 꼬마 음악 아카데미에 온 걸 환영해요! 여섯 선생님과 함께 음악을 배워 봐요!`,`${S.name}, welcome to Little Music Academy! Let’s learn music with six teachers!`))},
+  acts:{go:()=>()=>{S.intro=true;save();if(!S.faceSet)playerForm(false)}}})}
 
 // ---------------------------------------------------------------- start
 function returnGreeting(){const gap=daysSince(S.streak.last);if(S.intro&&S.streak.last&&gap>=3){const t=TEACHERS[pick(Object.keys(TEACHERS))];
  modal(`<div class="center"><span class="tface huge" style="background:${t.bg}">${pic(t.img,t.icon)}</span><h2>${L('보고 싶었어요!','We missed you!')}</h2><p>${L('오늘은 가볍게 “오늘의 연습” 하나만 해 볼까요? 1분이면 돼요!','How about just one quick task today? It only takes a minute!')}</p></div><div class="row"><button class="btn green" data-act="close" type="button">${L('좋아요!','Okay!')}</button></div>`,{onOpen:()=>speak(L('보고 싶었어요! 오늘은 가볍게 하나만 해 볼까요?','We missed you! Just one quick task today?'))})}}
 $('backBtn').addEventListener('click',()=>{SFX.click();back()});
 $('gearBtn').addEventListener('click',openSettings);$('coinPill').addEventListener('click',()=>go('shop'));$('streakPill').addEventListener('click',()=>toast(`🔥 ${L(`${S.streak.n}일 연속 · 최고 ${S.streak.best}일 · 🛡️ 쉬는 날 카드 ${S.streak.shields}장`,`${S.streak.n}-day streak · best ${S.streak.best} · 🛡️ ${S.streak.shields} rest-day passes`)}`));
-$('lvlBtn').addEventListener('click',openPlayers);
-applyLang();applyOpts();save();go('home',false);if(!S.intro)welcome();else returnGreeting();
-window.__musTest={get:()=>S,root:()=>ROOT,set:o=>{Object.assign(S,o);save();updateHud()},go,openLesson,startLessonActivity,startDaily,contestLobby,act:()=>ACT,sim:acc=>ACT&&ACT.sim(acc),LESSONS,CONTESTS,SONGS,DRUMS,playSong,playDrum,modalFlush:()=>{while(CUR)closeModal();MQ.length=0}};
+$('lvlBtn').addEventListener('click',switchPlayer);
+// with more than one player, always ask who is practicing first so progress never mixes
+applyLang();applyOpts();save();if(!MGP.me&&ROOT.P.length>1)go('who',false);else{go('home',false);if(!S.intro)welcome();else returnGreeting()}
+window.__musTest={get:()=>S,root:()=>ROOT,selectPlayer,set:o=>{Object.assign(S,o);save();updateHud()},go,openLesson,startLessonActivity,startDaily,contestLobby,act:()=>ACT,sim:acc=>ACT&&ACT.sim(acc),LESSONS,CONTESTS,SONGS,DRUMS,playSong,playDrum,modalFlush:()=>{while(CUR)closeModal();MQ.length=0}};
 </script>
 </body>
 </html>

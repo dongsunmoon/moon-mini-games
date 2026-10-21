@@ -17,6 +17,15 @@ function applyLang(){if(LANG!=='en')return;document.querySelectorAll('[data-en]'
 function setLang(next){try{localStorage.setItem('moonGames.lang',next)}catch(e){}try{speechSynthesis.cancel()}catch(e){}const u=new URL(location.href);u.searchParams.set('lang',next);location.replace(u.href)}
 function wireLangTools(){const b=document.getElementById('langBtn');if(b){b.textContent=LANG==='en'?'🌐 한국어':'🌐 English';b.setAttribute('aria-label',LANG==='en'?'한국어로 바꾸기':'Switch to English');b.addEventListener('click',()=>setLang(LANG==='en'?'ko':'en'))}const h=document.getElementById('homeLink');if(h)h.href='index.html?lang='+LANG}
 </script>
+<script>
+/* Player profile picked on the main page. Each game keeps its save per profile ("key@profileId"),
+   so players never share progress and resetting one game leaves every other game alone. */
+const MGP=(()=>{let P=null;try{P=JSON.parse(localStorage.getItem('moonGames.profiles')||'null')}catch(e){}
+ const me=P&&Array.isArray(P.list)&&P.list.find(x=>x&&x.id===P.cur)||null;
+ if(me){const S=Storage.prototype,g=S.getItem,s=S.setItem,r=S.removeItem,own=/^(little-detective-|marbleRush\.|marble3dsettings|chessKnights\.|scienceGuardians\.|musicAcademy\.)/,k=x=>{x=String(x);return own.test(x)&&!x.includes('@')?x+'@'+me.id:x};
+  S.getItem=function(x){return g.call(this,k(x))};S.setItem=function(x,v){return s.call(this,k(x),v)};S.removeItem=function(x){return r.call(this,k(x))}}
+ return {me}})();
+</script>
 <style>
 :root{color-scheme:dark;--ink:#f4f7ff;--muted:#a9b7d2;--glass:rgba(13,25,47,.88)}
 *{box-sizing:border-box}html,body{margin:0;min-height:100%;background:#070d1b;color:var(--ink);font-family:system-ui,-apple-system,'Apple SD Gothic Neo','Noto Sans KR',sans-serif}

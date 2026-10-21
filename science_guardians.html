@@ -19,6 +19,15 @@ const L=(ko,en)=>LANG==='en'?en:ko;
 function applyLang(){if(LANG!=='en')return;document.querySelectorAll('[data-en]').forEach(el=>{el.textContent=el.dataset.en});document.querySelectorAll('[data-en-html]').forEach(el=>{el.innerHTML=el.dataset.enHtml});for(const a of ['aria-label','placeholder','title'])document.querySelectorAll('[data-en-'+a+']').forEach(el=>el.setAttribute(a,el.getAttribute('data-en-'+a)))}
 function setLang(next){try{localStorage.setItem('moonGames.lang',next)}catch(e){}try{speechSynthesis.cancel()}catch(e){}const u=new URL(location.href);u.searchParams.set('lang',next);location.replace(u.href)}
 </script>
+<script>
+/* Player profile picked on the main page. Each game keeps its save per profile ("key@profileId"),
+   so players never share progress and resetting one game leaves every other game alone. */
+const MGP=(()=>{let P=null;try{P=JSON.parse(localStorage.getItem('moonGames.profiles')||'null')}catch(e){}
+ const me=P&&Array.isArray(P.list)&&P.list.find(x=>x&&x.id===P.cur)||null;
+ if(me){const S=Storage.prototype,g=S.getItem,s=S.setItem,r=S.removeItem,own=/^(little-detective-|marbleRush\.|marble3dsettings|chessKnights\.|scienceGuardians\.|musicAcademy\.)/,k=x=>{x=String(x);return own.test(x)&&!x.includes('@')?x+'@'+me.id:x};
+  S.getItem=function(x){return g.call(this,k(x))};S.setItem=function(x,v){return s.call(this,k(x),v)};S.removeItem=function(x){return r.call(this,k(x))}}
+ return {me}})();
+</script>
 <style>
 :root{
  color-scheme:light;
@@ -2965,6 +2974,8 @@ try{const r=JSON.parse(localStorage.getItem(SAVE_KEY)||'null');if(r&&r.P&&r.orde
 if(!ROOT.P[ROOT.cur])ROOT.cur=ROOT.order.find(id=>ROOT.P[id])||'p1';
 let S=merge(ROOT.P[ROOT.cur]);
 if(!ROOT.order.includes(ROOT.cur))ROOT.order.push(ROOT.cur);
+// the player picked on the main page decides the name and face
+if(MGP.me){S.name=MGP.me.name;S.av=MGP.me.av}
 const save=()=>{ROOT.P[ROOT.cur]=S;try{localStorage.setItem(SAVE_KEY,JSON.stringify(ROOT))}catch(e){}};
 save();
 const totalStars=(s=S)=>Object.values(s.stars).reduce((a,b)=>a+b,0);
@@ -3673,21 +3684,24 @@ function openDifficulty(){
 function playerForm(p,{isNew}){
  let av=p.av,diff=p.diff;
  modal(`<h2>${isNew?L('🧑‍🚀 새 수호대원','🧑‍🚀 New guardian'):L('✏️ 내 정보','✏️ My profile')}</h2>
-  <label class="field"><span>${L('이름','Name')}</span><input id="pName" maxlength="12" value="${esc(p.name)}" autocomplete="off"></label>
-  <div class="avs">${AVATARS.map(a=>`<button type="button" data-act="av" data-a="${a}" class="${a===av?'on':''}">${a}</button>`).join('')}</div>
+  ${MGP.me?`<p class="center" style="font-size:40px;margin:4px 0">${esc(MGP.me.av)}</p><p class="center"><b>${esc(MGP.me.name)}</b></p>`:`<label class="field"><span>${L('이름','Name')}</span><input id="pName" maxlength="12" value="${esc(p.name)}" autocomplete="off"></label>
+  <div class="avs">${AVATARS.map(a=>`<button type="button" data-act="av" data-a="${a}" class="${a===av?'on':''}">${a}</button>`).join('')}</div>`}
   <p class="sub" style="margin-top:10px">${L('몇 학년이에요?','Which grade are you in?')}</p>${diffButtons(diff)}
-  <div class="row">${!isNew&&ROOT.order.length>1?`<button class="btn small red" type="button" data-act="del">🗑️ ${L('삭제','Delete')}</button>`:''}<button class="btn green" type="button" data-act="ok">${isNew?L('시작!','Start!'):L('저장','Save')}</button></div>`,
+  <div class="row">${!isNew&&ROOT.order.length>1&&!MGP.me?`<button class="btn small red" type="button" data-act="del">🗑️ ${L('삭제','Delete')}</button>`:''}<button class="btn green" type="button" data-act="ok">${isNew?L('시작!','Start!'):L('저장','Save')}</button></div>`,
  {closable:!(isNew&&!S.intro&&ROOT.order.length===1),acts:{
   av:b=>{av=b.dataset.a;document.querySelectorAll('.avs button').forEach(x=>x.classList.toggle('on',x===b));return false},
   ...Object.fromEntries([1,2,3].map(i=>['d'+i,b=>{diff=i;b.parentElement.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));return false}])),
   del:b=>{if(!b.dataset.arm){b.dataset.arm=1;b.textContent=L('정말요? 한 번 더','Really? Tap again');return false}const id=ROOT.cur;delete ROOT.P[id];ROOT.order=ROOT.order.filter(x=>x!==id);ROOT.cur=ROOT.order[0];S=merge(ROOT.P[ROOT.cur]);save();go('home');return},
-  ok:()=>{const name=($('pName').value||'').trim()||p.name;
+  ok:()=>{const name=MGP.me?MGP.me.name:($('pName').value||'').trim()||p.name;if(MGP.me)av=MGP.me.av;
    if(isNew&&p!==S){save();const id='p'+Date.now().toString(36);ROOT.order.push(id);ROOT.cur=id;S=fresh();}
    S.name=name;S.av=av;S.diff=diff;save();updateHud();
    if(VIEW==='home')renderHome();
    if(!S.intro)return ()=>introStory();go('home')}}});
 }
 function openPlayers(){
+ // players are chosen on the main page; here you can only change your grade
+ if(MGP.me){modal(`<div class="center"><p style="font-size:46px;margin:0">${esc(MGP.me.av)}</p><h2>${esc(MGP.me.name)}</h2><p>${L('플레이하는 사람은 첫 화면에서 바꿔요.','Switch players on the main page.')}</p></div>
+  <div class="row"><button class="btn ghost" type="button" data-act="edit">🎚️ ${L('학년 바꾸기','Change grade')}</button><button class="btn green" type="button" data-act="home">🏠 ${L('첫 화면으로','Main page')}</button></div>`,{acts:{edit:()=>()=>playerForm(S,{isNew:false}),home:()=>{location.href='index.html?lang='+LANG}}});return}
  modal(`<h2>👥 ${L('수호대원 바꾸기','Switch player')}</h2><p>${L('형제자매가 각자 기록을 따로 가질 수 있어요.','Brothers and sisters can each keep their own progress.')}</p>
   <div class="plist">${ROOT.order.map(id=>{const p=id===ROOT.cur?S:merge(ROOT.P[id]);return `<button type="button" class="pl ${id===ROOT.cur?'on':''}" data-act="p_${id}">${avatarHTML(p)}<span><b>${esc(p.name)}</b><small>Lv.${p.lvl} · ${DIFFS[p.diff].icon} ${esc(DIFFS[p.diff].grade)} · 📚 ${Object.keys(p.cards).length}</small></span>${id===ROOT.cur?'<em>✅</em>':''}</button>`}).join('')}</div>
   <div class="row"><button class="btn ghost" type="button" data-act="edit">✏️ ${L('내 정보 고치기','Edit my profile')}</button>${ROOT.order.length<6?`<button class="btn green" type="button" data-act="add">➕ ${L('새 대원','New player')}</button>`:''}</div>`,

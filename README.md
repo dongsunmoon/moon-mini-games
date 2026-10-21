@@ -11,6 +11,17 @@ Mini games for kids that run right in the browser on phones, tablets and PCs.
 | 🔮 마블 레이스 · Marble Rush | `marble_rush_3d.html` | 진짜 물리로 튕기는 마블런 레이스, 내 구슬 응원 · 리그 5경기 |
 | ♞ 꼬마 체스 기사단 · Little Chess Knights | `chess_knights.html` | 체스 퍼즐 모험 6지역 · 보스 AI 대결 · 번개 퍼즐 · 레벨업과 상점 |
 | 🔬 꼬마 과학 수호대 · Little Science Guardians | `science_guardians.html` | 초등 과학 퀴즈와 실험으로 악당 물리치기 · 9지역 · 학년별 난이도 3단계 · 대원(플레이어) 여러 명 |
+| 🎵 꼬마 음악 아카데미 · Little Music Academy | `music_academy.html` | 여섯 선생님과 박자·피아노·악보·노래·드럼·화음·악기 배우기 · 레슨 62개 · 매일 연습과 연속 기록 · 음악 대회 6개 |
+
+## 저작권 · 사용 제한 (Copyright)
+
+© 2026 Dongsun Moon. All rights reserved.
+
+이 저장소와 https://game.dongsunmoon.com/ 의 게임 코드, 그림, 캐릭터, 효과음과 음악 편곡, 문제와 설명 글은 저작권으로 보호됩니다. **저작권자의 허락 없이 복제, 배포, 수정, 다른 사이트·앱·서비스에 올리기, 상업적 이용을 하는 것을 금지합니다.** 사이트에서 게임을 플레이하는 것은 누구나 자유롭게 할 수 있습니다.
+
+다만 다른 사람의 저작물이 아닌 공개 자료는 원래 조건을 따릅니다. 체스 퍼즐 데이터(Lichess, CC0)와 저작권이 끝난 전래 동요·클래식 곡의 원래 가락은 이 제한에 포함되지 않으며, 이 저장소에서 새로 만든 편곡·코드·그림·글에만 위 제한이 적용됩니다.
+
+All code, artwork, characters, sounds and musical arrangements, questions and text in this repository and on https://game.dongsunmoon.com/ are protected by copyright. **Copying, redistributing, modifying, re-hosting on other sites, apps or services, or using them commercially without the copyright holder’s permission is prohibited.** Anyone is welcome to play the games on the site. Public material keeps its own terms: the Lichess puzzle data (CC0) and the original public-domain melodies are not restricted; the restriction covers the arrangements, code, art and text created for this project.
 
 ## GitHub Pages로 공개하기
 
@@ -44,3 +55,15 @@ Mini games for kids that run right in the browser on phones, tablets and PCs.
 - 난이도는 학년에 맞춰 나뉩니다. 쉬움(1~2학년)은 생활 속 관찰과 체험, 보통(3~4학년)은 한국 2022 개정 3~4학년군 단원(힘과 우리 생활, 자석, 물의 상태 변화, 땅의 변화, 밤하늘, 생물과 환경, 기체, 기후변화 등), 어려움(5~6학년)은 5~6학년군 단원(빛의 굴절과 렌즈, 열, 지구의 운동과 계절, 날씨, 속력, 우리 몸, 전기, 산과 염기·지시약·중화, 용해, 연소, 에너지, 지층과 화석, 세포, 태양계와 우주)을 다룹니다. 온타리오 1~6학년 주제(구조물, 단순 기계·톱니바퀴, 비행, 흙과 암석, 생물 다양성, 우주 탐사 등)도 함께 넣었습니다. 부력과 밀도, 지진의 원리와 지진이 잦은 지역, 지구의 속처럼 교과서 밖이지만 아이들이 자주 묻는 내용도 학년에 맞게 넣었습니다.
 - 직접 해 보는 실험 26가지: 그림자, 그림자 맞히기, 나침반, 지도 로봇, 버스 관성, 시소, 예상하고 관찰하기, 자석, 온도계, 지구 자전, 천둥, 소리, 손 씻기, 지시약(적양배추·BTB), 중화(BTB 색 맞추기), 불꽃 반응, 계절(지구 공전과 빛의 각도), 전기 회로, 물의 변신(얼음·물·수증기), 물의 여행(물의 순환), 액체 층 쌓기(밀도), 부력(소금물 달걀·용수철저울·잠수함), 프리즘(빛의 굴절과 무지개), 자로 재기(cm·mm), 지진(바위층 밀기), 지진 지도(불의 고리).
 - 어려움을 골라도 아래 학년 문제가 복습으로 조금씩 섞여 나옵니다. 보통은 약 4문제 중 3문제, 어려움은 약 3문제 중 2문제가 자기 학년 문제입니다.
+
+## 음악 게임 내용
+
+`music_academy.html`은 박자 감각을 가장 중요하게 다룹니다. 레슨마다 선생님이 먼저 말로 설명하고 소리와 함께 건반·악보를 빛내며 시범을 보인 뒤, 아이가 직접 해 봅니다.
+
+- 선생님 6명: 콩콩(박자), 미야(피아노·악보), 랄라(노래·발성), 쿵쾅(드럼), 하모(음계·화음), 부엉 박사(악기)
+- 레슨 62개, 10단원: 박자 느끼기, 높낮이와 건반, 노래와 발성, 음표와 쉼표, 드럼, 오선 읽기, 마디와 박자표, 음계와 화음(반음·온음, 장조·단조, 주요 3화음), 악기(국악기 포함), 셈여림·빠르기·기호
+- 활동: 박자 맞추기(빠름/늦음 표시, 소리 없이 박 유지하기), 리듬 따라 하기와 리듬 읽기, 떨어지는 음표 피아노(악보와 함께 보기, 기다려 주기 연습), 드럼, 화음 반주, 계이름 읽기, 건반 찾기, 화음 만들기, 장음계 만들기, 듣기 퀴즈, 숨쉬기와 노래(마이크로 음높이 보기)
+- 꾸준히 하기: 오늘의 연습 3가지, 연속 연습 기록(쉬는 날 카드), 스티커북, 레벨과 칭호, 트로피, 상점
+- 음악 대회 6개: 라이벌 점수가 실시간으로 함께 올라가고, 정확도에 따라 1~3등 메달을 받습니다
+- 노래 가락은 저작권이 끝난 전래 동요(뜨거운 빵, 메리의 어린 양, 달빛 아래서, 반짝반짝 작은 별, 작은 한스, 자크 형제, 맥도널드 할아버지 농장, 런던 다리, 이 할아버지, 양키 두들)와 클래식(베토벤 환희의 송가·엘리제를 위하여), 징글벨(1857)만 쓰고 가사는 넣지 않았습니다. 모든 소리는 브라우저에서 직접 합성합니다.
+- 마이크는 노래 레슨에서만 켜고, 목소리는 기기 안에서만 분석하며 녹음하거나 보내지 않습니다.

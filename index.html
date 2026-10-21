@@ -91,8 +91,13 @@ a{color:inherit}
 .t-science .core{position:absolute;left:50%;top:50%;width:12%;aspect-ratio:1;border-radius:50%;transform:translate(-50%,-50%);background:radial-gradient(circle at 35% 30%,#fff,#ffd84d 45%,#ff9f45);box-shadow:0 0 22px #ffd84d}
 .t-science .atom{position:absolute;inset:0;animation:spinA 9s linear infinite}
 .t-science .ic{position:absolute;font-size:38px;filter:drop-shadow(0 6px 8px rgba(0,0,0,.3))}
+.t-music{background:radial-gradient(circle at 30% 20%,#ff9ad5 0,#8a4dff 55%,#2a1466 100%)}
+.t-music .keys{position:absolute;left:8%;right:8%;bottom:10%;height:26%;border-radius:10px;background:repeating-linear-gradient(90deg,#fff 0 calc(12.5% - 3px),#d9d0ff calc(12.5% - 3px) 12.5%);box-shadow:0 8px 18px rgba(0,0,0,.3)}
+.t-music .ic{position:absolute;font-size:36px;filter:drop-shadow(0 6px 8px rgba(0,0,0,.3));animation:bob 3s ease-in-out infinite}
+.t-music .ic:nth-of-type(2n){animation-delay:-1.5s}
+@keyframes bob{50%{transform:translateY(-8px)}}
 @keyframes spinA{to{transform:rotate(360deg)}}
-@media (prefers-reduced-motion:reduce){.t-marble .m,.t-chess .knight,.t-science .atom{animation:none}.card{transition:none}}
+@media (prefers-reduced-motion:reduce){.t-marble .m,.t-chess .knight,.t-science .atom,.t-music .ic{animation:none}.card{transition:none}}
 .tips{margin:22px 0 0;padding:0;list-style:none;display:flex;flex-wrap:wrap;gap:8px}
 .tips li{background:#ffffffc7;border:1px solid var(--line);border-radius:14px;padding:9px 12px;font-size:13.5px;font-weight:700;color:var(--muted)}
 footer{margin-top:22px;text-align:center;color:#8a93b8;font-size:12px}
@@ -120,7 +125,7 @@ footer{margin-top:22px;text-align:center;color:#8a93b8;font-size:12px}
     <li data-en="📱 Works on phones, tablets and computers">📱 휴대폰 · 태블릿 · 컴퓨터 모두 OK</li>
     <li data-en="💾 Progress is saved on this device">💾 진행 기록은 이 기기에 저장돼요</li>
   </ul>
-  <footer>Moon Mini Games · 🌙</footer>
+  <footer>Moon Mini Games · 🌙<br>© 2026 Dongsun Moon. <span data-en="All rights reserved.">모든 권리 보유.</span></footer>
 </div>
 
 <script>
@@ -161,6 +166,15 @@ const GAMES=[
     desc:['그림자, 자석, 전기, 산과 염기, 부력, 지진, 우주, 공룡 화석까지! 과학 퀴즈와 실험으로 헷갈 박사의 악당들을 물리쳐요.','Shadows, magnets, electricity, acids and bases, buoyancy, earthquakes, space and dinosaur fossils! Beat Dr. Mix-Up’s villains with science quizzes and hands-on labs.'],
     tags:[['🔬 실험 26가지','🔬 26 labs'],['📚 과학 카드 164장','📚 164 science cards'],['🎚️ 학년별 난이도','🎚️ Grade levels']],
     stat:()=>{const r=readSave('scienceGuardians.v1'),d=r&&r.P&&r.P[r.cur];return d&&d.correct>0?L(`🔬 ${d.name} Lv.${d.lvl} · 과학 카드 ${Object.keys(d.cards||{}).length}장`,`🔬 ${d.name} Lv.${d.lvl} · ${Object.keys(d.cards||{}).length} science cards`):''}
+  },
+  {
+    file:'music_academy.html',
+    thumb:'<div class="thumb t-music" aria-hidden="true"><img class="cover" src="images/cover-music.webp" alt="" onerror="this.remove()"><div class="keys"></div><span class="ic" style="left:9%;top:12%">🎵</span><span class="ic" style="left:40%;top:6%">🎤</span><span class="ic" style="left:76%;top:12%">🥁</span><span class="ic" style="left:60%;top:34%">🎺</span><span class="ic" style="left:20%;top:36%">🎹</span></div>',
+    title:['꼬마 음악 아카데미','Little Music Academy'],
+    age:['6~11세','Ages 6–11'],
+    desc:['박자, 피아노, 악보, 노래, 드럼, 화음, 악기까지! 여섯 선생님과 매일 조금씩 연습하고 음악 대회에서 메달을 따요.','Beat, piano, reading music, singing, drums, chords and instruments! Practice a little every day with six teachers and win medals in music contests.'],
+    tags:[['🎓 레슨 62개','🎓 62 lessons'],['🏆 음악 대회','🏆 Music contests'],['🔥 매일 연습','🔥 Daily streaks']],
+    stat:()=>{const r=readSave('musicAcademy.v1'),d=r&&r.P&&r.P[r.cur];return d&&d.stats&&d.stats.plays>0?L(`🎵 ${d.name} Lv.${d.lvl} · 🔥 ${d.streak.n}일 연속`,`🎵 ${d.name} Lv.${d.lvl} · 🔥 ${d.streak.n}-day streak`):''}
   }
 ];
 const pick=pair=>L(pair[0],pair[1]);

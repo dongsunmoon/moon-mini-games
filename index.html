@@ -13,7 +13,9 @@
 <meta property="og:image" content="https://game.dongsunmoon.com/images/og-image.jpg">
 <meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌙</text></svg>">
+<link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32.png">
+<link rel="icon" type="image/png" sizes="64x64" href="images/favicon-64.png">
+<link rel="apple-touch-icon" href="images/apple-touch-icon.png">
 <script>
 /* Language: ?lang=ko|en, then the saved choice, then the device language. Shared by every page on this site. */
 const LANG=(()=>{let q=null,s=null;try{q=new URLSearchParams(location.search).get('lang')}catch(e){}try{s=localStorage.getItem('moonGames.lang')}catch(e){}const l=q==='ko'||q==='en'?q:s==='ko'||s==='en'?s:/^ko/i.test(navigator.language||'')?'ko':'en';if(q===l){try{localStorage.setItem('moonGames.lang',l)}catch(e){}}document.documentElement.lang=l;return l})();
@@ -41,7 +43,8 @@ a{color:inherit}
 .wrap{width:min(980px,100%);margin:0 auto;padding:max(18px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) 36px max(16px,env(safe-area-inset-left))}
 .top{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
 .brand{display:flex;align-items:center;gap:12px;min-width:0}
-.moon{width:58px;height:58px;flex:0 0 58px;border-radius:50%;display:grid;place-items:center;font-size:34px;background:linear-gradient(145deg,#fff3c4,#ffd36b);box-shadow:0 8px 22px rgba(255,184,77,.45),inset -6px -8px 0 rgba(224,148,40,.25)}
+.moon{width:58px;height:58px;flex:0 0 58px;border-radius:50%;display:grid;place-items:center;background:radial-gradient(circle at 35% 30%,#5a95ff,#1c4cc0);box-shadow:0 8px 22px rgba(40,90,200,.35),inset -5px -7px 0 rgba(10,40,130,.25)}
+.moon img{width:48px;height:48px;display:block}
 .brand h1{margin:0;font-size:clamp(24px,5.4vw,36px);line-height:1.05;letter-spacing:-.6px}
 .brand h1 small{display:block;font-size:.46em;letter-spacing:0;color:var(--muted);font-weight:700;margin-top:5px}
 .lang{display:inline-flex;padding:4px;border-radius:999px;background:#fff;border:1px solid var(--line);box-shadow:0 4px 14px rgba(54,72,160,.08)}
@@ -101,6 +104,14 @@ a{color:inherit}
 .tips{margin:22px 0 0;padding:0;list-style:none;display:flex;flex-wrap:wrap;gap:8px}
 .tips li{background:#ffffffc7;border:1px solid var(--line);border-radius:14px;padding:9px 12px;font-size:13.5px;font-weight:700;color:var(--muted)}
 footer{margin-top:22px;text-align:center;color:#8a93b8;font-size:12px}
+/* the person who makes these games */
+.maker{margin-top:22px;display:flex;align-items:center;gap:16px;background:#ffffffd9;border:1px solid var(--line);border-radius:24px;padding:16px 18px;box-shadow:0 10px 30px rgba(60,80,160,.08)}
+.mk-photo{width:84px;height:84px;flex:0 0 84px;border-radius:50%;object-fit:cover;box-shadow:0 0 0 4px #fff,0 0 0 6px #c9d8ff}
+.mk-text{flex:1;min-width:0}
+.mk-text b{display:block;font-size:16px}
+.mk-text p{margin:4px 0 0;color:var(--muted);font-size:14px;line-height:1.55;font-weight:600}
+.mk-logo{width:60px;height:60px;flex:0 0 60px}
+@media (max-width:480px){.maker{padding:14px}.mk-photo{width:68px;height:68px;flex-basis:68px}.mk-logo{display:none}}
 /* player profiles */
 .who{margin:18px 0 0}
 .pbar,.psetup{background:#fff;border:1px solid var(--line);border-radius:22px;box-shadow:var(--shadow);padding:12px 14px}
@@ -143,7 +154,7 @@ footer{margin-top:22px;text-align:center;color:#8a93b8;font-size:12px}
 <div class="wrap">
   <header class="top">
     <div class="brand">
-      <div class="moon" aria-hidden="true">🌙</div>
+      <div class="moon" aria-hidden="true"><img src="images/dm-logo.webp" alt="" width="48" height="48"></div>
       <h1>Moon Mini Games<small data-en="Mini games for kids">어린이 미니 게임 모음</small></h1>
     </div>
     <div class="lang" role="group" aria-label="언어 선택 · Language" data-en-aria-label="Language · 언어 선택">
@@ -163,8 +174,16 @@ footer{margin-top:22px;text-align:center;color:#8a93b8;font-size:12px}
     <li data-en="📱 Works on phones, tablets and computers">📱 휴대폰 · 태블릿 · 컴퓨터 모두 OK</li>
     <li data-en="💾 Progress is saved on this device, separately for each profile">💾 진행 기록은 이 기기에 프로필마다 따로 저장돼요</li>
   </ul>
+  <section class="maker" aria-label="만든 사람" data-en-aria-label="About the maker">
+    <img class="mk-photo" src="images/dm-profile.webp" alt="Dongsun Moon" width="84" height="84" loading="lazy">
+    <div class="mk-text">
+      <b data-en="Made by Dongsun Moon">만든 사람 · Dongsun Moon</b>
+      <p data-en="Hi, I'm Dongsun Moon. I'm making games one at a time where kids can have fun while they learn.">안녕하세요, Dongsun Moon이에요. 아이들이 즐겁게 배우며 놀 수 있는 게임을 하나씩 만들고 있어요.</p>
+    </div>
+    <img class="mk-logo" src="images/dm-logo.webp" alt="" aria-hidden="true" width="60" height="60" loading="lazy">
+  </section>
   <div id="pm"></div>
-  <footer>Moon Mini Games · 🌙<br>© 2026 Dongsun Moon. <span data-en="All rights reserved.">모든 권리 보유.</span></footer>
+  <footer>Moon Mini Games<br>© 2026 Dongsun Moon. <span data-en="All rights reserved.">모든 권리 보유.</span></footer>
 </div>
 
 <script>

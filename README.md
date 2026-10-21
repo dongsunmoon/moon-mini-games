@@ -19,9 +19,9 @@ Mini games for kids that run right in the browser on phones, tablets and PCs.
 
 이 저장소와 https://game.dongsunmoon.com/ 의 게임 코드, 그림, 캐릭터, 효과음과 음악 편곡, 문제와 설명 글은 저작권으로 보호됩니다. **저작권자의 허락 없이 복제, 배포, 수정, 다른 사이트·앱·서비스에 올리기, 상업적 이용을 하는 것을 금지합니다.** 사이트에서 게임을 플레이하는 것은 누구나 자유롭게 할 수 있습니다.
 
-다만 다른 사람의 저작물이 아닌 공개 자료는 원래 조건을 따릅니다. 체스 퍼즐 데이터(Lichess, CC0)와 저작권이 끝난 전래 동요·클래식 곡의 원래 가락은 이 제한에 포함되지 않으며, 이 저장소에서 새로 만든 편곡·코드·그림·글에만 위 제한이 적용됩니다.
+다만 다른 사람의 저작물이 아닌 공개 자료는 원래 조건을 따릅니다. 체스 퍼즐 데이터(Lichess, CC0), `sounds/` 폴더의 악기 녹음(Versilian Studios VCSL·VSCO 2 CE, Freesound bletort, 모두 CC0, 출처는 [sounds/README.md](sounds/README.md)), 저작권이 끝난 전래 동요·클래식 곡의 원래 가락은 이 제한에 포함되지 않으며, 이 저장소에서 새로 만든 편곡·코드·그림·글에만 위 제한이 적용됩니다.
 
-All code, artwork, characters, sounds and musical arrangements, questions and text in this repository and on https://game.dongsunmoon.com/ are protected by copyright. **Copying, redistributing, modifying, re-hosting on other sites, apps or services, or using them commercially without the copyright holder’s permission is prohibited.** Anyone is welcome to play the games on the site. Public material keeps its own terms: the Lichess puzzle data (CC0) and the original public-domain melodies are not restricted; the restriction covers the arrangements, code, art and text created for this project.
+All code, artwork, characters, sounds and musical arrangements, questions and text in this repository and on https://game.dongsunmoon.com/ are protected by copyright. **Copying, redistributing, modifying, re-hosting on other sites, apps or services, or using them commercially without the copyright holder’s permission is prohibited.** Anyone is welcome to play the games on the site. Public material keeps its own terms: the Lichess puzzle data (CC0), the instrument recordings in `sounds/` (Versilian Studios VCSL and VSCO 2 CE, and bletort on Freesound, all CC0; see [sounds/README.md](sounds/README.md)) and the original public-domain melodies are not restricted; the restriction covers the arrangements, code, art and text created for this project.
 
 ## GitHub Pages로 공개하기
 
@@ -74,5 +74,6 @@ All code, artwork, characters, sounds and musical arrangements, questions and te
 - 활동: 박자 맞추기(빠름/늦음 표시, 소리 없이 박 유지하기), 리듬 따라 하기와 리듬 읽기, 떨어지는 음표 피아노(악보와 함께 보기, 기다려 주기 연습), 드럼, 화음 반주, 계이름 읽기, 건반 찾기, 화음 만들기, 장음계 만들기, 듣기 퀴즈, 숨쉬기와 노래(마이크로 음높이 보기)
 - 꾸준히 하기: 오늘의 연습 3가지, 연속 연습 기록(쉬는 날 카드), 스티커북, 레벨과 칭호, 트로피, 상점
 - 음악 대회 6개: 라이벌 점수가 실시간으로 함께 올라가고, 정확도에 따라 1~3등 메달을 받습니다
-- 노래 가락은 저작권이 끝난 전래 동요(뜨거운 빵, 메리의 어린 양, 달빛 아래서, 반짝반짝 작은 별, 작은 한스, 자크 형제, 맥도널드 할아버지 농장, 런던 다리, 이 할아버지, 양키 두들)와 클래식(베토벤 환희의 송가·엘리제를 위하여), 징글벨(1857)만 쓰고 가사는 넣지 않았습니다. 모든 소리는 브라우저에서 직접 합성합니다.
+- 노래 가락은 저작권이 끝난 전래 동요(뜨거운 빵, 메리의 어린 양, 달빛 아래서, 반짝반짝 작은 별, 작은 한스, 자크 형제, 맥도널드 할아버지 농장, 런던 다리, 이 할아버지, 양키 두들)와 클래식(베토벤 환희의 송가·엘리제를 위하여), 징글벨(1857)만 쓰고 가사는 넣지 않았습니다.
+- 악기 소리는 퍼블릭 도메인(CC0)으로 공개된 실제 악기 녹음입니다(피아노, 바이올린, 첼로, 기타, 플루트, 클라리넷, 색소폰, 리코더, 트럼펫, 트롬본, 튜바, 실로폰, 철금, 드럼과 여러 타악기, 대금 등). 출처와 바꾼 점, 비슷한 소리로 대신한 국악기는 [sounds/README.md](sounds/README.md)에 적었습니다. 녹음을 받기 전이나 받지 못할 때는 브라우저 합성음이 대신 납니다.
 - 마이크는 노래 레슨에서만 켜고, 목소리는 기기 안에서만 분석하며 녹음하거나 보내지 않습니다.

@@ -8,7 +8,7 @@
 <meta property="og:title" content="꼬마 음악 아카데미 · Little Music Academy">
 <meta property="og:description" content="박자 · 피아노 · 드럼 · 노래 · 악기 — 매일 조금씩 연습하고 대회에서 메달을! Practice a little every day and win medals!">
 <meta property="og:type" content="website">
-<meta property="og:image" content="https://game.dongsunmoon.com/images/og-image.jpg">
+<meta property="og:image" content="https://game.dongsunmoon.com/images/og-music.jpg">
 <meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎵</text></svg>">
@@ -418,10 +418,13 @@ main{width:min(980px,100%);margin:0 auto;padding:14px max(12px,env(safe-area-ins
 .vc.on{background:#ffe9f4;box-shadow:0 3px 0 #ff9ccc,0 0 0 3px #ff5fa2}
 .free .row.small{margin:6px 0}
 .freekeys{height:min(230px,34vh);background:#fff;border-radius:16px;padding:6px;box-shadow:var(--shadow)}
-.kit{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.kit{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:10px}
 .kpad{border:0;border-radius:22px;aspect-ratio:1.2;background:linear-gradient(160deg,#9d84ff,#5636d6);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:0 6px 0 #3a1fa6;touch-action:none}
 .kpad span{font-size:38px}.kpad small{font-weight:900}
 .kpad.hit{animation:padhit .16s}
+.kith{color:#fff;margin:16px 4px 8px;font-size:17px}
+.kpad2{background:linear-gradient(160deg,#ffcf6b,#f08a24);box-shadow:0 6px 0 #b85c0c}
+.kpad2 span{display:grid;place-items:center;width:52px;height:52px}.kpad2 .iimg,.kpad2 .isvg{width:52px;height:52px}
 .metro{display:flex;align-items:center;gap:10px;margin-top:12px}
 .metro input{flex:1}
 .fam .igrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:8px;margin-top:8px}
@@ -685,31 +688,45 @@ const FAM={string:{n:'현악기|Strings',how:'줄을 켜거나 뜯어요|You bow
 const INSTR=[
  ['piano','🎹','피아노|Piano','key','건반을 누르면 안에 있는 작은 망치가 줄을 때려 소리가 나요.|Pressing a key makes a tiny hammer strike a string inside.','piano'],
  ['violin','🎻','바이올린|Violin','string','활로 줄을 문질러 소리를 내요. 오케스트라에 가장 많은 악기예요.|You draw a bow across the strings. Orchestras have more violins than anything else.','bow'],
- ['cello','@cello','첼로|Cello','string','바이올린보다 크고 낮은 소리가 나요. 의자에 앉아 다리 사이에 세워 켜요.|Bigger and lower than a violin. You sit and hold it between your knees.','bow'],
+ ['cello','@cello','첼로|Cello','string','바이올린보다 크고 낮은 소리가 나요. 의자에 앉아 다리 사이에 세워 켜요.|Bigger and lower than a violin. You sit and hold it between your knees.','cello'],
  ['guitar','🎸','기타|Guitar','string','손가락이나 피크로 줄을 튕겨요.|You pluck the strings with your fingers or a pick.','pluck'],
  ['flute','@flute','플루트|Flute','wood','옆으로 들고 구멍 가장자리에 입김을 불어요. 금속으로 만들어도 목관악기예요!|You hold it sideways and blow across a hole. It’s a woodwind even though it’s metal!','flute'],
  ['clarinet','@clarinet','클라리넷|Clarinet','wood','입에 무는 부분의 얇은 리드가 떨리면서 소리가 나요.|A thin reed in the mouthpiece vibrates to make the sound.','reed'],
- ['recorder','@recorder','리코더|Recorder','wood','구멍을 손가락으로 막았다 열었다 하며 불어요. 학교에서 많이 배워요.|You cover and uncover holes as you blow. Lots of kids learn it at school.','flute'],
- ['sax','🎷','색소폰|Saxophone','wood','금속으로 만들었지만 리드를 떨게 해서 소리를 내는 목관악기예요.|It’s made of metal, but it uses a reed, so it’s a woodwind.','reed'],
+ ['recorder','@recorder','리코더|Recorder','wood','구멍을 손가락으로 막았다 열었다 하며 불어요. 학교에서 많이 배워요.|You cover and uncover holes as you blow. Lots of kids learn it at school.','recorder'],
+ ['sax','🎷','색소폰|Saxophone','wood','금속으로 만들었지만 리드를 떨게 해서 소리를 내는 목관악기예요.|It’s made of metal, but it uses a reed, so it’s a woodwind.','sax'],
  ['trumpet','🎺','트럼펫|Trumpet','brass','입술을 마우스피스에 대고 부르르 떨면서 불어요. 밝고 힘찬 소리!|You buzz your lips into the mouthpiece. Bright and bold!','brass'],
- ['trombone','@trombone','트롬본|Trombone','brass','긴 관을 앞뒤로 밀고 당겨서 음 높이를 바꿔요.|You slide a long tube in and out to change the pitch.','brass'],
- ['tuba','@tuba','튜바|Tuba','brass','금관악기 중에서 가장 크고 가장 낮은 소리를 내요.|The biggest brass instrument, with the lowest sound.','brass'],
+ ['trombone','@trombone','트롬본|Trombone','brass','긴 관을 앞뒤로 밀고 당겨서 음 높이를 바꿔요.|You slide a long tube in and out to change the pitch.','trombone'],
+ ['tuba','@tuba','튜바|Tuba','brass','금관악기 중에서 가장 크고 가장 낮은 소리를 내요.|The biggest brass instrument, with the lowest sound.','tuba'],
  ['drum','🥁','드럼|Drum','perc','채로 두드려서 소리를 내요. 박자를 이끌어요.|You hit it with sticks. It drives the beat.','drum'],
  ['xylophone','@xylophone','실로폰|Xylophone','perc','나무 막대를 채로 두드려요. 음 높이가 있는 타악기예요.|You strike wooden bars with mallets. It’s percussion with pitches.','mallet'],
- ['triangle','@triangle','트라이앵글|Triangle','perc','쇠막대로 두드리면 “팅~” 하고 맑게 울려요.|Tap it with a metal beater and it rings “ting~”.','bell'],
+ ['triangle','@triangle','트라이앵글|Triangle','perc','쇠막대로 두드리면 “팅~” 하고 맑게 울려요.|Tap it with a metal beater and it rings “ting~”.','drum'],
  ['tambourine','@tambourine','탬버린|Tambourine','perc','흔들거나 손바닥으로 쳐서 찰랑찰랑 소리를 내요.|Shake it or tap it for a jingly sound.','drum'],
  ['timpani','@timpani','팀파니|Timpani','perc','커다란 솥 모양의 북이에요. 음 높이를 맞출 수 있어요.|A big kettle-shaped drum that can be tuned to notes.','drum'],
- ['gayageum','@gayageum','가야금|Gayageum','string','우리 악기예요. 줄 12개를 손가락으로 뜯어서 소리를 내요.|A Korean instrument. You pluck its 12 strings with your fingers.','pluck'],
- ['geomungo','@geomungo','거문고|Geomungo','string','우리 악기예요. 술대라는 막대로 줄 6개를 쳐서 낮고 굵은 소리를 내요.|A Korean instrument. You strike its 6 strings with a stick for a deep, bold sound.','pluck'],
+ ['gayageum','@gayageum','가야금|Gayageum','string','우리 악기예요. 줄 12개를 손가락으로 뜯어서 소리를 내요.|A Korean instrument. You pluck its 12 strings with your fingers.','gayageum'],
+ ['geomungo','@geomungo','거문고|Geomungo','string','우리 악기예요. 술대라는 막대로 줄 6개를 쳐서 낮고 굵은 소리를 내요.|A Korean instrument. You strike its 6 strings with a stick for a deep, bold sound.','gayageum'],
  ['haegeum','@haegeum','해금|Haegeum','string','우리 악기예요. 줄 2개 사이에 끼운 활로 켜요.|A Korean instrument. You play its 2 strings with a bow tucked between them.','bow'],
- ['daegeum','@daegeum','대금|Daegeum','wood','우리 악기예요. 대나무로 만든 긴 가로 피리예요.|A Korean instrument: a long bamboo flute held sideways.','flute'],
- ['danso','@danso','단소|Danso','wood','우리 악기예요. 대나무로 만든 짧은 세로 피리예요.|A Korean instrument: a short bamboo flute held upright.','flute'],
+ ['daegeum','@daegeum','대금|Daegeum','wood','우리 악기예요. 대나무로 만든 긴 가로 피리예요.|A Korean instrument: a long bamboo flute held sideways.','daegeum'],
+ ['danso','@danso','단소|Danso','wood','우리 악기예요. 대나무로 만든 짧은 세로 피리예요.|A Korean instrument: a short bamboo flute held upright.','recorder'],
  ['janggu','@janggu','장구|Janggu','perc','우리 악기예요. 허리가 잘록한 북으로, 양쪽을 다르게 두드려요.|A Korean hourglass drum. Each side makes a different sound.','drum'],
  ['buk','@buk','북|Buk','perc','우리 악기예요. 둥근 통에 가죽을 씌운 북이에요.|A Korean barrel drum covered with leather.','drum'],
- ['kkwaenggwari','@kkwaenggwari','꽹과리|Kkwaenggwari','perc','우리 악기예요. 작은 쇠 접시를 쳐서 “깽깽” 크고 높은 소리를 내요.|A small Korean brass gong with a loud, high “kkaeng” sound.','bell'],
- ['jing','@jing','징|Jing','perc','우리 악기예요. 큰 쇠 접시를 쳐서 “징~” 길게 울려요.|A big Korean gong that rings a long “jiiing”.','bell'],
+ ['kkwaenggwari','@kkwaenggwari','꽹과리|Kkwaenggwari','perc','우리 악기예요. 작은 쇠 접시를 쳐서 “깽깽” 크고 높은 소리를 내요.|A small Korean brass gong with a loud, high “kkaeng” sound.','drum'],
+ ['jing','@jing','징|Jing','perc','우리 악기예요. 큰 쇠 접시를 쳐서 “징~” 길게 울려요.|A big Korean gong that rings a long “jiiing”.','drum'],
 ];
 const INSTR_BY=Object.fromEntries(INSTR.map(x=>[x[0],x]));
+// what each instrument plays when you tap it: notes in its own range (n, gap d seconds) or percussion hits h:[kind, time]
+const INSTR_DEMO={
+ piano:{n:'C4 E4 G4 C5'},violin:{n:'G4 B4 D5 G5'},cello:{n:'C3 E3 G3 C4'},guitar:{n:'D4 F#4 A4 D5'},
+ flute:{n:'C5 E5 G5 C6'},clarinet:{n:'C4 E4 G4 C5'},recorder:{n:'C5 D5 E5 G5'},sax:{n:'C4 E4 G4 Bb4'},
+ trumpet:{n:'C4 E4 G4 C5'},trombone:{n:'C3 E3 G3 C4'},tuba:{n:'C2 E2 G2 C3'},xylophone:{n:'C5 E5 G5 C6'},
+ gayageum:{n:'D4 E4 G4 A4 D5',d:.28},geomungo:{n:'A2 D3 E3 A3',d:.4},haegeum:{n:'A4 C5 D5 E5',d:.4},daegeum:{n:'E4 G4 A4',d:.6},danso:{n:'E5 G5 A5 E5',d:.45},
+ drum:{h:[['kick',0],['hat',.25],['snare',.5],['hat',.75],['kick',1],['kick',1.25],['snare',1.5],['crash',1.9]]},
+ tambourine:{h:[['tamb',0],['tamb',.3],['tamb',.6],['tamb',.75],['tamb',.9]]},triangle:{h:[['triangle',0],['triangle',.7]]},
+ timpani:{h:[['timpani',0],['timpani',.5],['timpani',1]]},
+ janggu:{h:[['jangguL',0],['jangguH',.45],['jangguH',.67],['jangguL',.9],['jangguH',1.35]]},
+ buk:{h:[['buk',0],['buk',.5],['buk',.75],['buk',1]]},
+ kkwaenggwari:{h:[['kkwaeng',0],['kkwaeng',.22],['kkwaeng',.44],['kkwaeng',.88]]},
+ jing:{h:[['jing',0]]},
+};
 // small drawings for instruments without an emoji
 const IC_SVG={
  flute:'<g transform="rotate(-28 32 32)"><rect x="3" y="28" width="58" height="8" rx="4" fill="#d9dde6" stroke="#8a93a8" stroke-width="2"/>'+[16,24,32,40,48].map(x=>`<circle cx="${x}" cy="32" r="2" fill="#5f6b8f"/>`).join('')+'</g>',
@@ -1039,9 +1056,9 @@ const QUIZ={
   return Math.random()<.65?mc('이 악기는 어느 가족일까요?|Which family is this instrument in?',f.n,Object.values(FAM).filter(x=>x!==f).map(x=>x.n),{art:{instr:it[0]},why:it[4]})
    :mc(`${it[2].split('|')[0]}${josaKo(it[2].split('|')[0],'은','는')} 어떻게 소리를 낼까요?|How does the ${it[2].split('|')[1]} make its sound?`,f.how,Object.values(FAM).filter(x=>x!==f&&x.how!==f.how).map(x=>x.how),{art:{instr:it[0]},why:it[4]})},
  korean(){return pick([
-  mc('줄 12개를 손가락으로 뜯어 연주하는 우리 악기는?|Which Korean instrument has 12 strings you pluck with your fingers?','가야금|Gayageum',['해금|Haegeum','장구|Janggu','대금|Daegeum'],{art:{instr:'gayageum'},listen:{voice:'pluck'}}),
-  mc('줄 2개를 활로 켜는 우리 악기는?|Which Korean instrument has 2 strings played with a bow?','해금|Haegeum',['가야금|Gayageum','거문고|Geomungo','꽹과리|Kkwaenggwari'],{art:{instr:'haegeum'},listen:{voice:'bow'}}),
-  mc('대나무로 만든 긴 가로 피리는?|Which is a long bamboo flute held sideways?','대금|Daegeum',['단소|Danso','장구|Janggu','징|Jing'],{art:{instr:'daegeum'},listen:{voice:'flute'}}),
+  mc('줄 12개를 손가락으로 뜯어 연주하는 우리 악기는?|Which Korean instrument has 12 strings you pluck with your fingers?','가야금|Gayageum',['해금|Haegeum','장구|Janggu','대금|Daegeum'],{art:{instr:'gayageum'},listen:{instr:'gayageum'}}),
+  mc('줄 2개를 활로 켜는 우리 악기는?|Which Korean instrument has 2 strings played with a bow?','해금|Haegeum',['가야금|Gayageum','거문고|Geomungo','꽹과리|Kkwaenggwari'],{art:{instr:'haegeum'},listen:{instr:'haegeum'}}),
+  mc('대나무로 만든 긴 가로 피리는?|Which is a long bamboo flute held sideways?','대금|Daegeum',['단소|Danso','장구|Janggu','징|Jing'],{art:{instr:'daegeum'},listen:{instr:'daegeum'}}),
   mc('허리가 잘록하고 양쪽을 두드리는 우리 북은?|Which Korean drum has a narrow waist and two sides to hit?','장구|Janggu',['북|Buk','징|Jing','꽹과리|Kkwaenggwari'],{art:{instr:'janggu'}}),
   mc('사물놀이에 쓰는 네 악기가 아닌 것은?|Which is NOT one of the four samulnori instruments?','가야금|Gayageum',['꽹과리|Kkwaenggwari','장구|Janggu','징|Jing'],{why:'사물놀이는 꽹과리·징·장구·북으로 해요.|Samulnori uses kkwaenggwari, jing, janggu and buk.'}),
   mc('사물놀이에서 가장 높고 날카로운 소리로 앞장서는 악기는?|In samulnori, which instrument leads with the highest, sharpest sound?','꽹과리|Kkwaenggwari',['징|Jing','북|Buk','장구|Janggu'],{art:{instr:'kkwaenggwari'}}),
@@ -1120,7 +1137,7 @@ const SHOP=[
 const AVATARS=['🧒','👧','👦','🧑','👶','🐣','🐰','🐶','🐱','🦊','🐼','🐨','🦁','🐸','🦄','🐙'];
 </script>
 <script>
-// ================================================================ audio: every sound is synthesized (piano, drums, metronome, instrument voices)
+// ================================================================ audio: recorded instruments (public-domain samples in sounds/) with synthesized fallbacks
 let AC=null,MASTER=null,VERB=null,NOISE=null;
 const SND={on:true,vol:.9};
 function audioCtx(){
@@ -1130,7 +1147,8 @@ function audioCtx(){
   // a small room so the piano does not sound dry
   const len=Math.floor(AC.sampleRate*.8),ir=AC.createBuffer(2,len,AC.sampleRate);
   for(let c=0;c<2;c++){const d=ir.getChannelData(c);for(let i=0;i<len;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/len,4.5)}
-  const conv=AC.createConvolver();conv.buffer=ir;VERB=AC.createGain();VERB.gain.value=.09;VERB.connect(conv);conv.connect(MASTER)}
+  const conv=AC.createConvolver();conv.buffer=ir;VERB=AC.createGain();VERB.gain.value=.09;VERB.connect(conv);conv.connect(MASTER);
+  setTimeout(()=>{SMP_FIRST.forEach(loadSet);setTimeout(()=>SMP_NEXT.forEach(loadSet),2500)},0)}
  if(AC.state==='suspended')AC.resume().catch(()=>{});
  return AC}
 const audioReady=()=>!!(AC&&AC.state==='running');
@@ -1171,9 +1189,93 @@ function ksBuf(m){if(KS[m])return KS[m];const sr=AC.sampleRate,N=Math.max(2,Math
  const r=new Float32Array(N);for(let i=0;i<N;i++)r[i]=Math.random()*2-1;for(let k=0;k<2;k++)for(let i=1;i<N;i++)r[i]=(r[i]+r[i-1])*.5;
  let p=0;const damp=m>76?.991:.996;for(let i=0;i<len;i++){const nx=(p+1)%N;d[i]=r[p];r[p]=(r[p]+r[nx])*.5*damp;p=nx}return KS[m]=buf}
 
-// ---------------------------------------------------------------- instrument voices
+// ---------------------------------------------------------------- recorded instruments
+// Real instrument recordings from public-domain (CC0) sample libraries, kept in sounds/ (sources and licences: sounds/README.md).
+// Each set lists its files with the pitch each file sounds (MIDI, measured). Other notes are made by playing the nearest
+// file a little faster or slower. A set loads the first time it is needed; until then, or if it cannot load, the synthesized voice plays.
+const SMP_DIR='sounds/';
+const SETS={
+ piano:{r:'C2:36 E2:40 Gs2:44 C3:48 E3:52 Gs3:56 C4:60 E4:64 Gs4:68 C5:72 E5:76 Gs5:80 C6:84 E6:88 Gs6:92 C7:96',g:.62,rel:.12,send:.16,vel:1},
+ xylophone:{r:'G4:67.1 C5:72.12 G5:79.14 C6:84.16 G6:91.16 C7:96.16 G7:103.2 C8:108.16',g:.6,ring:1,send:.25},
+ glock:{r:'G5:79.08 C6:84.12 G6:91.12 C7:96.14 G7:103.16 C8:108.24',g:.5,ring:1,send:.3},
+ guitar:{r:'D3:50.05 Fs3:54 A3:57.05 Cs4:61.04 E4:64 G4:67.03 B4:71.01 D5:74.04 Fs5:78.01 A5:81',g:.6,ring:.5,send:.25},
+ gayageum:{r:'Cs3:49.19 Fs3:54.01 Gs3:56.11 Cs4:61.41 Fs4:65.89 Gs4:68 B4:71.09 Cs5:72.96 Fs5:78.04 Gs5:80.05 B5:82.94',g:.6,ring:.6,send:.3},
+ violin:{r:'G3:55.01 C4:60.06 E4:63.97 A4:69.08 C5:71.97 E5:76.25 A5:81.06 C6:84.02 E6:88',g:.4,hold:[.45,1.22],rel:.12,send:.35},
+ cello:{r:'D3:49.94 F3:53.01 A3:56.98 C4:59.97 E4:64.05 G4:66.98 B4:71.06 D5:73.91 F5:76.95',g:.45,hold:[.45,1.22],rel:.14,send:.35},
+ flute:{r:'C4:59.82 E4:63.99 A4:68.83 C5:72.01 E5:76 A5:81.04 C6:83.99 E6:88.04 A6:93 C7:95.98',g:.5,hold:[.45,1.22],rel:.1,send:.3},
+ recorder:{r:'C5:71.96 D5:74.02 E5:76.03 Fs5:78.09 Gs5:80.01 As5:82.07 C6:83.99 D6:86.02 E6:88.04 Fs6:90.03 G6:91.07 As6:94.12 C7:96.12',g:.36,hold:[.4,1.1],rel:.08,send:.3},
+ daegeum:{r:'E4:63.9',g:.6,hold:[.5,4.4],rel:.15,send:.35},
+ clarinet:{r:'D3:50.03 F3:53.01 As3:58.01 D4:62.05 F4:65.06 As4:70.03 D5:74.04 F5:77.06 As5:82.05 D6:86.06 F6:89.02',g:.4,hold:[.45,1.22],rel:.08,send:.3},
+ sax:{r:'C3:48.03 E3:52.08 Fs3:53.91 As3:57.88 C4:60.01 E4:64.09 Fs4:65.85 As4:69.94 C5:72.03 E5:76.05 G5:79.01 As5:81.98 C6:84.06',g:.4,hold:[.45,1.22],rel:.08,send:.3},
+ trumpet:{r:'F3:52.92 A3:56.95 C4:60.06 Ds4:63.02 G4:67.11 As4:69.96 D5:74.04 F5:77.01 A5:81.17 C6:84',g:.48,hold:[.45,1.22],rel:.08,send:.3},
+ trombone:{r:'As2:45.98 D3:49.99 F3:52.99 C4:59.99 Cs4:61 Ds4:63.01 F4:65.01',g:.42,hold:[.45,1.22],rel:.1,send:.3},
+ tuba:{r:'As1:34.01 Ds2:39.05 F2:40.97 As2:46.06 D3:49.93 F3:52.96 As3:58.12',g:.5,hold:[.45,1.22],rel:.1,send:.25},
+ perc:{f:'kick snare hihat hihat-open tom cymbal clap woodblock shaker tambourine triangle timpani darbuka-low darbuka-high framedrum gong brakedrum'},
+};
+for(const id in SETS){const S=SETS[id];S.id=id;if(S.r){const r={};S.r.split(' ').forEach(x=>{const [n,m]=x.split(':');r[n]=+m});S.r=r;S.f=Object.keys(r);const ms=Object.values(r);S.lo=Math.min(...ms);S.hi=Math.max(...ms)}else S.f=S.f.split(' ')}
+// which recorded set plays each voice; voices without a recording of their own borrow the closest one (see sounds/README.md)
+const VOICE_SET={piano:'piano',ep:'piano',bass:'piano',mallet:'xylophone',bell:'glock',pluck:'guitar',gayageum:'gayageum',bow:'violin',cello:'cello',
+ flute:'flute',recorder:'recorder',daegeum:'daegeum',reed:'clarinet',sax:'sax',brass:'trumpet',trombone:'trombone',tuba:'tuba'};
+const SYNTH_OF={gayageum:'pluck',cello:'bow',recorder:'flute',daegeum:'flute',sax:'reed',trombone:'brass',tuba:'brass'};
+const SMP_FIRST=['piano','perc','xylophone'],SMP_NEXT=['glock','trumpet','clarinet','flute'];
+const SMP_BYTES={};
+// file bytes can be fetched before audio is allowed; decoding waits for the audio context
+function fetchBytes(url){return SMP_BYTES[url]||(SMP_BYTES[url]=fetch(url).then(r=>{if(!r.ok)throw new Error(r.status);return r.arrayBuffer()}).catch(e=>{delete SMP_BYTES[url];throw e}))}
+const smpUrl=(id,n)=>SMP_DIR+id+'/'+n+'.m4a';
+function prefetchSets(ids){if(!window.fetch)return;ids.forEach(id=>{const S=SETS[id];if(S&&!S.buf)S.f.forEach(n=>fetchBytes(smpUrl(id,n)).catch(()=>{}))})}
+window.addEventListener('load',()=>setTimeout(()=>prefetchSets(SMP_FIRST),300));
+// AAC files start with a few milliseconds of encoder silence; start every note at its first sound so timing stays exact
+function leadOf(b){const d=b.getChannelData(0),n=Math.min(d.length,Math.floor(b.sampleRate*.25));for(let i=0;i<n;i++)if(Math.abs(d[i])>.01)return Math.max(0,i/b.sampleRate-.002);return 0}
+function loadSet(id){const S=SETS[id];if(!S)return Promise.resolve(false);if(S.buf)return Promise.resolve(true);if(S.p)return S.p;
+ const a=audioCtx();if(!a||!window.fetch)return Promise.resolve(false);
+ S.p=Promise.all(S.f.map(n=>fetchBytes(smpUrl(id,n)).then(ab=>new Promise((ok,no)=>{const q=a.decodeAudioData(ab.slice(0),ok,no);if(q&&q.catch)q.catch(()=>{})})).then(b=>[n,{b,o:leadOf(b)}])))
+  .then(list=>{S.buf=Object.fromEntries(list);return true})
+  .catch(()=>{setTimeout(()=>{S.p=null},15000);return false});
+ return S.p}
+// wait (at most ms) until the sets behind these voices are ready
+function want(vs,ms=2500){const ids=[...new Set(vs.map(v=>VOICE_SET[v]||(SETS[v]?v:DRUM_KIT[v]?'perc':null)).filter(Boolean))];
+ if(!ids.length||!audioCtx())return Promise.resolve();return Promise.race([Promise.all(ids.map(loadSet)),new Promise(r=>setTimeout(r,ms))])}
+const sampled=v=>{const id=VOICE_SET[v];return !!(id&&SETS[id].buf)};
+const HELD={};
+function playSample(S,v,m,t,dur,vol,out){
+ while(m<S.lo-7)m+=12;while(m>S.hi+7)m-=12;
+ let k=S.f[0],bd=99;for(const n of S.f){const d=Math.abs(m-S.r[n]);if(d<bd){bd=d;k=n}}
+ const B=S.buf[k],rate=Math.pow(2,(m-S.r[k])/12),end=t+Math.max(.08,dur),gv=vol*S.g*(v==='ep'?.8:v==='bass'?1.5:1);
+ // softer piano notes sound darker, like a real piano; the accompaniment voices are muffled so the melody stands out
+ const lpF=v==='bass'?1100:v==='ep'?2200:S.vel?Math.min(16000,700+15000*Math.pow(vol,1.6)):0;
+ const dst=lpF?filt('lowpass',lpF,.5,out):out,g=AC.createGain();g.gain.value=gv;g.connect(dst);send(g,S.send);
+ // pressing the same key again stops the note that is still sounding
+ const key=S.id+':'+Math.round(m),prev=HELD[key];if(prev&&prev.t<t-.01){try{prev.g.gain.cancelScheduledValues(t);prev.g.gain.setTargetAtTime(0,t,.03)}catch(e){}}HELD[key]={g,t};
+ const srcs=[],mk=(off,tt,d)=>{const s=AC.createBufferSource();s.buffer=B.b;s.playbackRate.value=rate;s.connect(d);s.start(tt,B.o+off);srcs.push(s)};
+ const tail=t+(B.b.duration-B.o)/rate;let stop;
+ if(S.hold){// held winds and strings: keep the steady middle of the recording going with overlapping copies
+  const [ha,hb]=S.hold,xf=.15;let cur=AC.createGain();cur.connect(g);mk(0,t,cur);let segEnd=t+hb/rate,n=0;
+  while(segEnd<end+.05&&n<40){const nx=AC.createGain(),ts=segEnd-xf;nx.connect(g);nx.gain.setValueAtTime(0,ts);nx.gain.linearRampToValueAtTime(1,segEnd);cur.gain.setValueAtTime(1,ts);cur.gain.linearRampToValueAtTime(0,segEnd);mk(ha,ts,nx);cur=nx;segEnd=ts+(hb-ha)/rate;n++}
+  g.gain.setValueAtTime(gv,end);g.gain.setTargetAtTime(0,end,S.rel);stop=end+S.rel*7}
+ else if(S.ring){// plucked and struck sounds ring on by themselves
+  mk(0,t,g);if(S.ring<1){g.gain.setValueAtTime(gv,end+S.ring);g.gain.setTargetAtTime(0,end+S.ring,.25)}stop=tail}
+ else{mk(0,t,g);g.gain.setValueAtTime(gv,end);g.gain.setTargetAtTime(0,end,S.rel);stop=Math.min(tail,end+S.rel*7)}
+ srcs.forEach(s=>s.stop(Math.max(stop,t+.05)));
+ srcs[srcs.length-1].onended=()=>{try{g.disconnect();if(dst!==out)dst.disconnect()}catch(e){}if(HELD[key]&&HELD[key].g===g)delete HELD[key]};
+ // off(): the key came up early (free play), so end the note like a real instrument would
+ return {off(){if(S.ring)return;const r=S.rel||.12,n=Math.max(AC.currentTime,t+(S.hold?.15:.3));if(n>=end)return;try{g.gain.cancelScheduledValues(n);g.gain.setValueAtTime(gv,n);g.gain.setTargetAtTime(0,n,r);srcs.forEach(s=>{try{s.stop(n+r*7)}catch(e){}})}catch(e){}}}}
+// drum and percussion recordings: kind -> [file, gain, reverb]
+const DRUM_KIT={kick:['kick',1.4],snare:['snare',.8,.12],hat:['hihat',.6],ohat:['hihat-open',.5],tom:['tom',1.3,.1],crash:['cymbal',.6,.2],clap:['clap',.9,.1],
+ wood:['woodblock',.6],shaker:['shaker',.65],tamb:['tambourine',.6,.1],triangle:['triangle',.6,.25],timpani:['timpani',1,.2],
+ jangguL:['darbuka-low',.95,.12],jangguH:['darbuka-high',.8,.1],buk:['framedrum',1.2,.15],kkwaeng:['brakedrum',.7,.12],jing:['gong',.5,.25]};
+let OPEN_HAT=null;
+function drumSample(k,t,vol,out){const P=SETS.perc,e=DRUM_KIT[k];if(!e||!P.buf)return false;const B=P.buf[e[0]];if(!B)return false;
+ const g=AC.createGain();g.gain.value=vol*e[1];g.connect(out);if(e[2])send(g,e[2]);
+ // a closed hi-hat cuts off the open one
+ if(k==='hat'&&OPEN_HAT&&OPEN_HAT.t<t){try{OPEN_HAT.g.gain.setTargetAtTime(0,t,.02)}catch(x){}}if(k==='ohat')OPEN_HAT={g,t};
+ const s=AC.createBufferSource();s.buffer=B.b;s.connect(g);s.start(t,B.o);s.onended=()=>{try{g.disconnect()}catch(x){}};return true}
+
+// ---------------------------------------------------------------- instrument voices (synthesized; used until the recordings load, or if they cannot)
 // play(voice, midi, when, dur, vol, dest) — every pitched sound in the game goes through here
-function play(v,m,when,dur=.5,vol=.8,dest){const a=audioCtx();if(!a||!SND.on)return;m=midiOf(m);const t=at(when),f=hz(m),out=dest||MASTER,end=t+Math.max(.08,dur);
+function play(v,m,when,dur=.5,vol=.8,dest){const a=audioCtx();if(!a||!SND.on)return;m=midiOf(m);const t=at(when),out=dest||MASTER;
+ const id=VOICE_SET[v];if(id){if(SETS[id].buf){try{const h=playSample(SETS[id],v,m,t,dur,vol,out);if(h)return h}catch(e){}}else loadSet(id)}
+ synth(SYNTH_OF[v]||v,m,t,dur,vol,out)}
+function synth(v,m,t,dur,vol,out){const f=hz(m),end=t+Math.max(.08,dur);
  try{switch(v){
  case 'piano':{const g2=gate(t,end,.15,out);send(g2,.25);const e=env(t,vol*.3,.004,vol*.06,.55,g2),lp=filt('lowpass',Math.min(9000,f*8),.5,e),low=f<200;
   lp.frequency.setTargetAtTime(Math.max(low?900:500,f*2.6),t+.02,.35);
@@ -1198,8 +1300,11 @@ function play(v,m,when,dur=.5,vol=.8,dest){const a=audioCtx();if(!a||!SND.on)ret
 const playChord=(v,ms,when,dur,vol,dest)=>ms.forEach(m=>play(v,m,when,dur,vol,dest));
 
 // ---------------------------------------------------------------- drums
+const DRUM_SYN={tamb:'shaker',timpani:'tom',jangguL:'tom',buk:'kick',jangguH:'wood'};
 function drum(k,when,vol=.9,dest){const a=audioCtx();if(!a||!SND.on)return;const t=at(when),out=dest||MASTER;
- try{switch(k){
+ if(DRUM_KIT[k]){try{if(drumSample(k,t,vol,out))return}catch(e){}if(!SETS.perc.buf)loadSet('perc')}
+ if(k==='triangle'||k==='kkwaeng'||k==='jing'){synth('bell',k==='triangle'?100:k==='kkwaeng'?86:50,t,.1,vol*.6,out);return}
+ try{switch(DRUM_SYN[k]||k){
  case 'kick':{const e=env(t,vol*.95,.002,0,.12,out);const o=osc('sine',150,t,t+.6,e);o.frequency.setValueAtTime(160,t);o.frequency.exponentialRampToValueAtTime(46,t+.12);
   const c=env(t,vol*.38,.001,0,.008,out);osc('square',1100,t,t+.03,c);const b2=env(t,vol*.35,.002,0,.05,out);osc('sine',180,t,t+.2,b2);break}
  case 'snare':{const e=env(t,vol*.75,.001,0,.06,out);send(e,.25);noiseSrc(t,.35,filt('bandpass',1900,.7,filt('highpass',800,null,e)));const b=env(t,vol*.4,.001,0,.035,out);osc('triangle',190,t,t+.2,b);break}
@@ -1378,7 +1483,8 @@ function tally(){return {p:0,g:0,o:0,m:0,extra:0,combo:0,maxCombo:0,n:0,offs:[],
  acc(){const tot=this.n+this.extra*.5;return tot?(this.p*JW.p+this.g*JW.g+this.o*JW.o)/tot:0},
  result(extra={}){const acc=this.acc(),avg=this.offs.length?this.offs.reduce((a,b)=>a+b,0)/this.offs.length:0;
   return {acc,stars:starsOf(acc),p:this.p,g:this.g,o:this.o,m:this.m,n:this.n,extra:this.extra,maxCombo:this.maxCombo,avgOff:avg,timed:true,...extra}}}}
-async function ensureAudio(){const a=audioCtx();if(a&&a.state!=='running'){try{await Promise.race([a.resume(),new Promise(r=>setTimeout(r,450))])}catch(e){}}return audioReady()}
+async function ensureAudio(){const a=audioCtx();if(a&&a.state!=='running'){try{await Promise.race([a.resume(),new Promise(r=>setTimeout(r,450))])}catch(e){}}
+ if(a&&!(SETS.piano.buf&&SETS.perc.buf))await want(['piano','perc'],1500);return audioReady()}
 const makeClock=useAC=>useAC?(perf=performance.now())=>heardTime(perf):(perf=performance.now())=>perf/1000;
 // keys that count as a tap in the beat and rhythm games
 const isTapKey=e=>!e.repeat&&!e.metaKey&&!e.ctrlKey&&!e.altKey&&e.key!=='Escape'&&e.key!=='Tab'&&(e.key.length===1||e.key==='Enter');
@@ -1658,8 +1764,14 @@ function artHTML(a){if(!a)return '';if(typeof a==='string')return `<div class="q
  if(a.instr){const it=INSTR_BY[a.instr];return `<div class="qart instr"><span class="ib">${instrPic(a.instr)}</span><b>${esc(T(it[2]))}</b></div>`}
  if(a.kbd)return `<div class="qart kbdart">${keyboardSVG({...a.kbd,w:300})}</div>`;
  if(a.emoji)return `<div class="qart">${esc(a.emoji)}</div>`;return ''}
+// an instrument's own little tune (INSTR_DEMO); returns how long it lasts
+function playInstr(id,b,t){const it=INSTR_BY[id],D=INSTR_DEMO[id]||{n:'C4 E4 G4 C5'};if(!it)return 0;
+ if(D.h){D.h.forEach(([k,s])=>drum(k,t+s,1,b));return D.h[D.h.length-1][1]+(id==='jing'?2.5:.8)}
+ const ns=D.n.split(' '),gap=D.d||.32;ns.forEach((n,i)=>play(it[5],n,t+i*gap,i===ns.length-1?gap*3:gap*.95,.8,b));return ns.length*gap+gap*2}
+const instrVoices=id=>{const it=INSTR_BY[id];return !it?[]:INSTR_DEMO[id]&&INSTR_DEMO[id].h?['perc']:[it[5]]};
 // sound clips for listening questions
 function playClip(c,b){const t=AC?AC.currentTime+.08:0;
+ if(c.instr)return playInstr(c.instr,b,t);
  if(c.seq){const spb=60/(c.bpm||90);parseMelody(c.seq).forEach(n=>{if(!n.rest)play(c.v||'piano',n.m,t+n.b*spb,n.d*spb*.95,c.vol||.8,b)});return parseMelody(c.seq).reduce((a,n)=>a+n.d,0)*spb}
  if(c.drums){c.drums.forEach((d,i)=>drum(d,t+i*.45,1,b));return c.drums.length*.45}
  if(c.voice){const spb=60/100;['C4','E4','G4','C5','G4','E4','C4'].forEach((p,i)=>play(c.voice,p,t+i*spb*.5,spb*.45,.8,b));return 2.2}
@@ -1685,6 +1797,7 @@ const LISTEN_GEN={
 function runQuiz(spec,host,opt){
  const gen=spec.type==='quiz'?()=>QUIZ[spec.bank](spec.set):spec.type==='pitch'?LISTEN_GEN[spec.task]:spec.type==='listen'?LISTEN_GEN.family:spec.type==='steps'?LISTEN_GEN.steps:spec.type==='scale'?LISTEN_GEN.majmin:LISTEN_GEN.chordmm;
  const N=spec.count||6,seen=new Set();let k=0,right=0,stopped=false,bs=bus(1),ended=false;
+ want(['pluck','bow','flute','reed','brass','mallet','gayageum','daegeum'],0);
  host.innerHTML=`<div class="quiz"><div class="tline">${tface(opt.teacher||'mia')}<div class="tbub"></div></div><div class="qdots">${Array.from({length:N},()=>'<i></i>').join('')}</div><div class="qcard"></div></div>`;
  const card=host.querySelector('.qcard'),dots=[...host.querySelectorAll('.qdots i')];
  const stop=()=>{stopped=true;killBus(bs)};
@@ -1851,7 +1964,7 @@ function runBreath(spec,host,opt){
 
 // ================================================================ singing games: siren slide, pitch match, scale and a solfège song
 function runSing(spec,host,opt){
- const task=spec.task,teacher=opt.teacher||'lala',$q=s=>host.querySelector(s);let stopped=false,raf=0,ended=false,bs=null,useMic=false;
+ const task=spec.task,teacher=opt.teacher||'lala',$q=s=>host.querySelector(s);let stopped=false,raf=0,ended=false,bs=null,useMic=false;want(['flute'],0);
  const stop=()=>{stopped=true;cancelAnimationFrame(raf);killBus(bs);micOff()};
  const finish=r=>{if(ended)return;ended=true;stop();opt.done(r)};
  ACT={stop,sim(acc=.9){finish({acc,stars:starsOf(acc),kind:'sing'})}};
@@ -1911,7 +2024,7 @@ function runSing(spec,host,opt){
     trace.push({t:now,m});if(trace.length>400)trace.shift();
     if(g!=null){tot++;if(m!=null&&Math.abs(m-g)<=(task==='siren'?1.2:.75))on++;tip.textContent=m==null?'🎤 '+T('소리를 내 봐요!|Let me hear you!'):Math.abs(m-g)<=.75?'🎯 '+T('좋아요!|Nice!'):m>g?'⬇️ '+T('조금 낮게|A bit lower'):'⬆️ '+T('조금 높게|A bit higher')}}
    draw(now);raf=requestAnimationFrame(loop)};
-  ctl.querySelector('.go').addEventListener('click',async()=>{ctl.innerHTML='';await ensureAudio();start=performance.now()/1000+1.2;const t0=AC?AC.currentTime+1.2:0;
+  ctl.querySelector('.go').addEventListener('click',async()=>{ctl.innerHTML='';await ensureAudio();await want(['flute'],1500);start=performance.now()/1000+1.2;const t0=AC?AC.currentTime+1.2:0;
    if(task==='siren'){for(let i=0;i<4;i++)drum('click',t0-1.2+i*.3,.6,bs);/* a soft guide glide */const o=AC&&SND.on?AC.createOscillator():null;if(o){const g2=AC.createGain();o.type='sine';g2.gain.value=0;o.connect(g2);g2.connect(bs);o.frequency.setValueAtTime(hz(55),t0);o.frequency.setValueAtTime(hz(55),t0+1);o.frequency.linearRampToValueAtTime(hz(72),t0+4);o.frequency.linearRampToValueAtTime(hz(55),t0+7);g2.gain.setValueAtTime(0,t0);g2.gain.linearRampToValueAtTime(.08,t0+.3);g2.gain.setValueAtTime(.08,t0+7.3);g2.gain.linearRampToValueAtTime(0,t0+7.8);o.start(t0);o.stop(t0+8)}}
    else{const spb=60/bpm;for(let i=0;i<4;i++)drum(i?'click':'accent',t0-4*spb+i*spb,.6,bs);notes.forEach(n=>play('flute',n.m,t0+n.t,n.d*.95,.3,bs));const nb=Math.ceil(dur/spb);for(let i=0;i<nb;i++)drum('click',t0+i*spb,.25,bs)}
    raf=requestAnimationFrame(loop)});
@@ -1931,7 +2044,7 @@ const daysSince=k=>{if(!k)return 999;const [y,m,d]=k.split('-').map(Number);retu
 const pic=(src,emoji)=>src?`<img class="ei" src="${src}" data-emoji="${esc(emoji)}" alt="" draggable="false">`:esc(emoji);
 document.addEventListener('error',e=>{const t=e.target;if(!t||t.tagName!=='IMG')return;if(t.dataset.fb!==undefined){const w=document.createElement('span');w.innerHTML=icHTML(t.dataset.fb);t.replaceWith(...w.childNodes);return}if(t.dataset.emoji!==undefined)t.replaceWith(document.createTextNode(t.dataset.emoji))},true);
 const COIN='🪙';
-const COPYRIGHT=()=>`<footer class="copy">© 2026 Dongsun Moon. ${L('모든 권리 보유.','All rights reserved.')}<br>${L('노래 가락은 저작권이 끝난 전래 동요와 클래식 곡을 새로 편곡했어요. 소리, 그림, 캐릭터는 이 게임을 위해 직접 만들었어요.','Melodies are public-domain folk songs and classical pieces, newly arranged. Sounds, art and characters were made for this game.')}</footer>`;
+const COPYRIGHT=()=>`<footer class="copy">© 2026 Dongsun Moon. ${L('모든 권리 보유.','All rights reserved.')}<br>${L('노래 가락은 저작권이 끝난 전래 동요와 클래식 곡을 새로 편곡했어요. 악기 소리는 퍼블릭 도메인(CC0)으로 공개된 실제 악기 녹음(Versilian Studios VCSL·VSCO 2 CE, Freesound bletort)을 다듬어 썼어요. 그림과 캐릭터는 이 게임을 위해 만들었어요.','Melodies are public-domain folk songs and classical pieces, newly arranged. Instrument sounds are real recordings released into the public domain (CC0) by Versilian Studios (VCSL, VSCO 2 CE) and bletort on Freesound. Art and characters were made for this game.')}</footer>`;
 function sparkle(el){if(!el)return;const r=el.getBoundingClientRect();for(let i=0;i<8;i++){const s=document.createElement('i');s.className='spk';s.textContent=pick(['✨','⭐','🎵','💫']);s.style.left=(r.left+r.width*Math.random())+'px';s.style.top=(r.top+r.height*Math.random())+'px';$('fx').appendChild(s);setTimeout(()=>s.remove(),900)}}
 
 // ---------------------------------------------------------------- save: several players on one device
@@ -2128,9 +2241,9 @@ function visHTML(v,p){let h='';v=v||{};
  if(p&&(p.majmin!=null||p.voices||p.dyn||p.tempo||p.chordpair))h+=`<div class="vlabel" id="vlabel"></div>`;
  if(!h)h=`<div class="vemoji">🎶</div>`;return h}
 // play a demonstration and light up the keys, notes, pads or labels in time with the sound
-let DEMO={bus:null,timers:[]};
-function stopDemo(){killBus(DEMO.bus);DEMO.timers.forEach(clearTimeout);DEMO.timers=[];DEMO.bus=null}
-async function demo(p,vis){stopDemo();const ok=await ensureAudio();const b=DEMO.bus=bus(1);if(!b)return;const t0=AC.currentTime+.15,at=(sec,f)=>DEMO.timers.push(setTimeout(f,Math.max(0,(t0-AC.currentTime+sec)*1000)));
+let DEMO={bus:null,timers:[],n:0};
+function stopDemo(){DEMO.n++;killBus(DEMO.bus);DEMO.timers.forEach(clearTimeout);DEMO.timers=[];DEMO.bus=null}
+async function demo(p,vis){stopDemo();const my=DEMO.n,ok=await ensureAudio();const vs=[...(p.voices||[]),...(p.seq&&p.seq.v?[p.seq.v]:[])];if(vs.length)await want(vs,2500);if(DEMO.n!==my)return;const b=DEMO.bus=bus(1);if(!b)return;const t0=AC.currentTime+.15,at=(sec,f)=>DEMO.timers.push(setTimeout(f,Math.max(0,(t0-AC.currentTime+sec)*1000)));
  const lightKey=(m,dur)=>{const r=vis.querySelector(`.vkbd rect[data-m="${m}"]`);if(r){r.setAttribute('fill',colorOf(m));setTimeout(()=>r.setAttribute('fill',r.dataset.c||'#fff'),dur*1000)}};
  const lightNote=(i,dur)=>{const g=vis.querySelector(`.vstaff .sn[data-i="${i}"]`);if(g){g.classList.add('lit');setTimeout(()=>g.classList.remove('lit'),dur*1000)}};
  const label=(txt)=>{const el=vis.querySelector('#vlabel');if(el){el.textContent=txt;el.classList.remove('pop');void el.offsetWidth;el.classList.add('pop')}};
@@ -2266,20 +2379,28 @@ function playDrum(id){const d=DRUMS[id],spec={type:'drum',pattern:id,bars:8,bpm:
 
 // ---------------------------------------------------------------- free play: piano with many instrument voices, drum pads and a metronome
 let FREE={voice:'piano',oct:0,labels:true,metro:false,bpm:90,tab:'keys',timer:null};
-const FREE_VOICES=[['piano','piano','피아노|Piano'],['mallet','xylophone','실로폰|Xylophone'],['pluck','guitar','기타·가야금|Guitar · gayageum'],['bow','violin','바이올린|Violin'],['flute','flute','플루트·대금|Flute · daegeum'],['brass','trumpet','트럼펫|Trumpet'],['reed','clarinet','클라리넷|Clarinet'],['organ','⛪','오르간|Organ'],['bell','triangle','트라이앵글|Triangle']];
-RENDER.free=()=>{stopMetro();const lo=60+FREE.oct*12,hi=lo+(window.innerWidth>700?24:12);
+// [voice, picture, name, octave shift so each instrument sounds in its own range]
+const FREE_VOICES=[['piano','piano','피아노|Piano'],['mallet','xylophone','실로폰|Xylophone'],['bell','✨','철금|Glockenspiel',24],['pluck','guitar','기타|Guitar'],['gayageum','gayageum','가야금|Gayageum'],
+ ['bow','violin','바이올린|Violin'],['cello','cello','첼로|Cello'],['flute','flute','플루트|Flute'],['recorder','recorder','리코더|Recorder',12],['reed','clarinet','클라리넷|Clarinet'],
+ ['sax','sax','색소폰|Saxophone'],['brass','trumpet','트럼펫|Trumpet'],['trombone','trombone','트롬본|Trombone',-12],['tuba','tuba','튜바|Tuba',-24],['organ','⛪','오르간|Organ']];
+const freeShift=()=>{const v=FREE_VOICES.find(x=>x[0]===FREE.voice);return v&&v[3]||0};
+RENDER.free=()=>{stopMetro();want([FREE.voice,'perc'],0);const lo=60+FREE.oct*12,hi=lo+(window.innerWidth>700?24:12);
  $('v-free').innerHTML=`<div class="free"><h2 class="h2w">🎶 ${L('자유 연주','Free play')}</h2>
   <div class="seg tabs">${[['keys','🎹 '+L('건반','Keys')],['drums','🥁 '+L('드럼','Drums')]].map(([v,n])=>`<button type="button" data-tab="${v}" class="${FREE.tab===v?'on':''}">${n}</button>`).join('')}</div>
   ${FREE.tab==='keys'?`<div class="voices">${FREE_VOICES.map(([v,ic,n])=>`<button type="button" data-voice="${v}" class="vc ${FREE.voice===v?'on':''}"><span>${INSTR_BY[ic]?instrPic(ic):esc(ic)}</span><small>${esc(T(n))}</small></button>`).join('')}</div>
    <div class="row small"><button class="btn ghost small" id="octDn" type="button">◀ ${L('낮게','Lower')}</button><button class="btn ghost small" id="lblT" type="button">${FREE.labels?'🔤 '+L('이름 끄기','Hide names'):'🔤 '+L('이름 보기','Show names')}</button><button class="btn ghost small" id="octUp" type="button">${L('높게','Higher')} ▶</button></div>
    <div class="freekeys" id="freeKeys"></div>`
-  :`<div class="kit">${[['kick','💥','쿵|Boom'],['snare','🥁','짝|Snare'],['hat','✨','칫|Hi-hat'],['ohat','💫','치이|Open hat'],['tom','🪘','둥|Tom'],['crash','🌟','챙|Crash'],['clap','👏','짝짝|Clap'],['wood','🪵','딱|Wood block'],['shaker','🧂','착착|Shaker']].map(([k,ic,n])=>`<button type="button" class="kpad" data-k="${k}"><span>${ic}</span><small>${esc(T(n))}</small></button>`).join('')}</div>`}
+  :`<div class="kit">${[['kick','💥','쿵|Boom'],['snare','🥁','짝|Snare'],['hat','✨','칫|Hi-hat'],['ohat','💫','치이|Open hat'],['tom','🪘','둥|Tom'],['crash','🌟','챙|Crash'],['clap','👏','짝짝|Clap'],['wood','🪵','딱|Wood block'],['shaker','🧂','착착|Shaker']].map(([k,ic,n])=>`<button type="button" class="kpad" data-k="${k}"><span>${ic}</span><small>${esc(T(n))}</small></button>`).join('')}</div>
+   <h3 class="kith">${L('여러 나라 타악기','Percussion from around the world')}</h3>
+   <div class="kit">${[['tamb','tambourine','탬버린|Tambourine'],['triangle','triangle','트라이앵글|Triangle'],['timpani','timpani','팀파니|Timpani'],['jangguL','janggu','장구 쿵|Janggu low'],['jangguH','janggu','장구 덕|Janggu high'],['buk','buk','북|Buk'],['kkwaeng','kkwaenggwari','꽹과리|Kkwaenggwari'],['jing','jing','징|Jing']].map(([k,i,n])=>`<button type="button" class="kpad kpad2" data-k="${k}"><span>${instrPic(i)}</span><small>${esc(T(n))}</small></button>`).join('')}</div>`}
   <div class="card metro"><button class="btn ${FREE.metro?'gold':'ghost'} small" id="metBtn" type="button">⏱️ ${L('메트로놈','Metronome')} ${FREE.metro?'ON':'OFF'}</button><input type="range" id="bpm" min="50" max="160" value="${FREE.bpm}"><b id="bpmV">${FREE.bpm}</b></div></div>`;
  const v=$('v-free');v.querySelectorAll('[data-tab]').forEach(b=>b.addEventListener('click',()=>{FREE.tab=b.dataset.tab;RENDER.free()}));
- if(FREE.tab==='keys'){v.querySelectorAll('[data-voice]').forEach(b=>b.addEventListener('click',()=>{FREE.voice=b.dataset.voice;v.querySelectorAll('.vc').forEach(x=>x.classList.toggle('on',x===b));play(FREE.voice,67,0,.5,.8)}));
-  buildKeys($('freeKeys'),{from:lo,to:hi,labels:FREE.labels,blackLabels:FREE.labels,onDown:m=>{play(FREE.voice,m,0,FREE.voice==='piano'||FREE.voice==='pluck'||FREE.voice==='mallet'||FREE.voice==='bell'?1.2:.6,.85)}});
+ if(FREE.tab==='keys'){v.querySelectorAll('[data-voice]').forEach(b=>b.addEventListener('click',()=>{FREE.voice=b.dataset.voice;v.querySelectorAll('.vc').forEach(x=>x.classList.toggle('on',x===b));want([FREE.voice],2000).then(()=>play(FREE.voice,67+freeShift(),0,.6,.8))}));
+  buildKeys($('freeKeys'),{from:lo,to:hi,labels:FREE.labels,blackLabels:FREE.labels,onDown:(m,e)=>{const ring=['piano','pluck','gayageum','mallet','bell'].includes(FREE.voice),h=play(FREE.voice,m+freeShift(),0,sampled(FREE.voice)?4:ring?1.2:.6,.85);
+   // recorded voices sound for as long as the key is held
+   if(h&&h.off){const up=ev=>{if(ev.pointerId!==e.pointerId)return;h.off();removeEventListener('pointerup',up);removeEventListener('pointercancel',up)};addEventListener('pointerup',up);addEventListener('pointercancel',up)}}});
   $('octDn').addEventListener('click',()=>{FREE.oct=Math.max(-1,FREE.oct-1);RENDER.free()});$('octUp').addEventListener('click',()=>{FREE.oct=Math.min(1,FREE.oct+1);RENDER.free()});$('lblT').addEventListener('click',()=>{FREE.labels=!FREE.labels;RENDER.free()})}
- else v.querySelector('.kit').addEventListener('pointerdown',e=>{const b=e.target.closest('.kpad');if(!b)return;e.preventDefault();drum(b.dataset.k,0,1);b.classList.remove('hit');void b.offsetWidth;b.classList.add('hit')});
+ else v.querySelectorAll('.kit').forEach(kit=>kit.addEventListener('pointerdown',e=>{const b=e.target.closest('.kpad');if(!b)return;e.preventDefault();drum(b.dataset.k,0,1);b.classList.remove('hit');void b.offsetWidth;b.classList.add('hit')}));
  $('metBtn').addEventListener('click',()=>{FREE.metro=!FREE.metro;RENDER.free();if(FREE.metro)startMetro()});
  $('bpm').addEventListener('input',e=>{FREE.bpm=+e.target.value;$('bpmV').textContent=FREE.bpm});if(FREE.metro)startMetro()};
 // a look-ahead metronome so ticks stay even
@@ -2290,7 +2411,7 @@ function stopMetro(){if(FREE.timer){clearInterval(FREE.timer);FREE.timer=null}}
 RENDER.instr=()=>{const fams=['key','string','wood','brass','perc'];
  $('v-instr').innerHTML=`<div class="room"><h2 class="h2w">🎺 ${L('악기 도감','Instrument book')}</h2><p class="sub wsub">${L('악기를 누르면 소리를 들을 수 있어요!','Tap an instrument to hear it!')}</p>
   ${fams.map(f=>`<div class="card fam"><b>${FAM[f].ic} ${esc(T(FAM[f].n))}</b><small class="sub"> · ${esc(T(FAM[f].how))}</small><div class="igrid">${INSTR.filter(x=>x[3]===f).map(x=>`<button type="button" class="icard" data-i="${x[0]}"><span class="ib">${instrPic(x[0])}</span><b>${esc(T(x[2]))}</b></button>`).join('')}</div></div>`).join('')}</div>`;
- $('v-instr').querySelectorAll('[data-i]').forEach(b=>b.addEventListener('click',()=>{const it=INSTR_BY[b.dataset.i];const bb=bus(1);if(it[5]==='drum'){['kick','snare','tom','snare'].forEach((d,i)=>drum(d,AC?AC.currentTime+.05+i*.3:0,1,bb))}else ['C4','E4','G4','C5'].forEach((n,i)=>play(it[5],n,AC?AC.currentTime+.05+i*.32:0,.3,.8,bb));
+ $('v-instr').querySelectorAll('[data-i]').forEach(b=>b.addEventListener('click',()=>{const it=INSTR_BY[b.dataset.i];const bb=bus(1);want(instrVoices(it[0]),2500).then(()=>{if(AC)playInstr(it[0],bb,AC.currentTime+.05)});
   modal(`<div class="center"><div class="ibig">${instrPic(it[0])}</div><h2>${esc(T(it[2]))}</h2><p class="sub">${esc(T(FAM[it[3]].n))}</p><p>${esc(T(it[4]))}</p></div><div class="row"><button class="btn gold" data-act="close" type="button">${L('알았어요!','Got it!')}</button></div>`,{onOpen:()=>speak(T(it[2])+'. '+T(it[4]))})}))};
 
 // ---------------------------------------------------------------- contests: rivals race you live, medals for the top three

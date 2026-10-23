@@ -1158,11 +1158,21 @@ function noiseBuf(){if(!NOISE){const n=AC.sampleRate*2;NOISE=AC.createBuffer(1,n
 
 // ---------------------------------------------------------------- clock: the time the listener is hearing right now
 // Scheduled sounds are heard later than they are scheduled (output latency); getOutputTimestamp tells us what is coming out of the speaker.
+// On many phones and tablets the audio clock moves in uneven jumps, which made falling notes and beat flashes shake.
+// So the games read performance.now() plus an offset that slowly follows the audio clock: smooth, and still in step with the sound.
+const CLK={off:0,n:0,far:0};
+function audioOff(){const now=performance.now(),fb=AC.currentTime-(AC.outputLatency||AC.baseLatency||0);let ts=null;try{ts=AC.getOutputTimestamp&&AC.getOutputTimestamp()}catch(e){}
+ // some browsers report the output timestamp in the wrong units, so it is used only when it agrees with currentTime
+ if(ts&&ts.performanceTime>0&&ts.contextTime>0){const h=ts.contextTime+(now-ts.performanceTime)/1000;if(Math.abs(h-fb)<.5)return h-now/1000}
+ return fb-now/1000}
 function heardTime(perf=performance.now()){
- if(audioReady()){let ts=null;try{ts=AC.getOutputTimestamp&&AC.getOutputTimestamp()}catch(e){}
-  if(ts&&ts.performanceTime>0&&ts.contextTime>0)return ts.contextTime+(perf-ts.performanceTime)/1000;
-  return AC.currentTime-(AC.outputLatency||AC.baseLatency||0)+(perf-performance.now())/1000}
- return perf/1000}
+ if(!AC||!CLK.n&&!audioReady())return perf/1000;
+ if(audioReady()){const d=audioOff()-CLK.off;
+  if(!CLK.n){CLK.off+=d;CLK.n=1}
+  // a big change that lasts (sound was paused, new headphones) is followed at once; a single odd reading is ignored
+  else if(Math.abs(d)>.1){if(++CLK.far>8){CLK.off+=d;CLK.n=1;CLK.far=0}}
+  else{CLK.far=0;if(CLK.n<120)CLK.n++;CLK.off+=d/CLK.n}}
+ return perf/1000+CLK.off}
 
 // ---------------------------------------------------------------- pitches
 const PC=['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
@@ -1486,6 +1496,8 @@ function tally(){return {p:0,g:0,o:0,m:0,extra:0,combo:0,maxCombo:0,n:0,offs:[],
 async function ensureAudio(){const a=audioCtx();if(a&&a.state!=='running'){try{await Promise.race([a.resume(),new Promise(r=>setTimeout(r,450))])}catch(e){}}
  if(a&&!(SETS.piano.buf&&SETS.perc.buf))await want(['piano','perc'],1500);return audioReady()}
 const makeClock=useAC=>useAC?(perf=performance.now())=>heardTime(perf):(perf=performance.now())=>perf/1000;
+// when the first sound of a game plays: a moment from now, but never already past on the audio clock (slow wireless speakers)
+const startAt=(clk,ok,lead)=>ok&&AC?Math.max(clk()+lead,AC.currentTime+.1):clk()+lead;
 // keys that count as a tap in the beat and rhythm games
 const isTapKey=e=>!e.repeat&&!e.metaKey&&!e.ctrlKey&&!e.altKey&&e.key!=='Escape'&&e.key!=='Tab'&&(e.key.length===1||e.key==='Enter');
 function bubble(host,txt,cls=''){const b=host.querySelector('.tbub');if(!b)return;b.textContent=T(txt);b.className='tbub show '+cls;clearTimeout(b._t);b._t=setTimeout(()=>b.classList.remove('show'),1600)}
@@ -1535,7 +1547,7 @@ function runBeat(spec,host,opt){
   if(now>beats[beats.length-1].t+.7){finish();return}
   raf=requestAnimationFrame(loop)};
  ACT={stop,sim(acc=.9){beats.forEach((b,i)=>{if(!b.j){const j=simJ(acc);mark(i,j,j==='m'?null:(Math.random()-.5)*.08)}});finish()},tap,step:loop,dbg:()=>({t0,beats:beats.map(b=>b.t),js:beats.map(b=>b.j)})};
- (async()=>{const ok=await ensureAudio();if(stopped)return;clk=makeClock(ok);bs=bus(1);t0=clk()+.4+lead*spb0;
+ (async()=>{const ok=await ensureAudio();if(stopped)return;clk=makeClock(ok);bs=bus(1);t0=startAt(clk,ok,.4)+lead*spb0;
   if(ok){const T0=t0;for(let i=0;i<lead;i++)drum(i===0?'accent':'click',T0-(lead-i)*spb0,.9,bs);beats.forEach((b,i)=>{if(!quiet(i))drum(i%sig===0?'accent':'click',T0+b.t,.9,bs)})}
   raf=requestAnimationFrame(loop)})();
 }
@@ -1577,12 +1589,12 @@ function runRhythm(spec,host,opt){
   const li=ctl.querySelector('.listen');if(li)li.addEventListener('click',()=>demo(p,toks,beatsLen));
   if(auto)setTimeout(()=>{if(!stopped&&ctl.querySelector('.go'))go()},1300)}
  // play the pattern once with a moving cursor, nothing is scored
- async function demo(p,toks,len){const ok=await ensureAudio();const c=makeClock(ok),b=bus(1),T0=c()+.3;if(ok)toks.forEach(tk=>{if(!tk.rest)drum('tom',T0+tk.t*spb,.8,b)});
+ async function demo(p,toks,len){const ok=await ensureAudio();const c=makeClock(ok),b=bus(1),T0=startAt(c,ok,.3);if(ok)toks.forEach(tk=>{if(!tk.rest)drum('tom',T0+tk.t*spb,.8,b)});
   for(let i=0;i<len;i++)if(ok)drum(i%sig===0?'accent':'click',T0+i*spb,.6,b);
   const r=drawSheet(p,[],0,false);const fr=()=>{if(stopped)return;const now=c()-T0;if(now>len*spb+.2){drawSheet(p,[],null,false);killBus(b);return}const cur=sheet.querySelector('.rcur');if(cur){const x=cursorX(r,toks,now/spb);cur.setAttribute('x1',x);cur.setAttribute('x2',x)}requestAnimationFrame(fr)};requestAnimationFrame(fr)}
  function cursorX(r,toks,beat){let x=r.xs[0];for(let i=0;i<toks.length;i++){const a=toks[i].t,b2=a+toks[i].d;if(beat>=a&&beat<b2){const nx=i+1<toks.length?r.xs[i+1]:r.xs[i]+toks[i].d*r.unit;x=r.xs[i]+(nx-r.xs[i])*((beat-a)/toks[i].d);return x}if(beat>=b2)x=i+1<toks.length?r.xs[i+1]:r.xs[i]+toks[i].d*r.unit}return x}
  async function run(p,toks,len){const ok=await ensureAudio();if(stopped)return;clk=makeClock(ok);killBus(bs);bs=bus(1);
-  const T0=clk()+.35,count=sig*spb,demoLen=echo?len*spb:0,kidStart=count+demoLen,kidEnd=kidStart+len*spb;
+  const T0=startAt(clk,ok,.35),count=sig*spb,demoLen=echo?len*spb:0,kidStart=count+demoLen,kidEnd=kidStart+len*spb;
   phase={t0:T0,taking:false,extra:0,kidStart,kidEnd,exp:toks.filter(t=>!t.rest).map(t=>({t:kidStart+t.t*spb,j:null,dt:null}))};
   if(ok){const total=Math.round((kidEnd)/spb);for(let i=0;i<total;i++)drum(i%sig===0?'accent':'click',T0+i*spb,.75,bs);if(echo)toks.forEach(tk=>{if(!tk.rest)drum('tom',T0+count+tk.t*spb,.9,bs)})}
   const r=echo?null:drawSheet(p,[],0,false);
@@ -1738,7 +1750,7 @@ function runHighway(spec,host,opt){
  ACT={stop,sim(acc=.9){judged.forEach(n=>{if(!n.j){const j=simJ(acc);hitNote(n,j,j==='m'?null:0)}});finish()},frameAt(t){fit();draw(t)},press,step:loop,dbg:()=>({n:notes.length,first:notes.slice(0,3),notes:notes.map(n=>({t:n.t,l:laneOf(n),demo:!!n.demo,j:n.j})),geo:laneGeo,cw,ch,started,t0})};
  requestAnimationFrame(()=>{fit();
   if(step){vt=notes[0].t-1;raf=requestAnimationFrame(loop);return}
-  (async()=>{const ok=await ensureAudio();if(stopped)return;clk=makeClock(ok);bs=bus(1);t0=clk()+.5+sig*spb;
+  (async()=>{const ok=await ensureAudio();if(stopped)return;clk=makeClock(ok);bs=bus(1);t0=startAt(clk,ok,.5)+sig*spb;
    if(ok){for(let i=0;i<sig;i++)drum(i===0?'accent':'click',t0-(sig-i)*spb,.8,bs);
     const click=spec.click!==false;
     if(kind==='song'){schedBacking(chords,spb,sig,t0,bs,.9);if(spec.guide===true&&!contest)melody.forEach(n=>{if(!n.rest)play('piano',n.m,t0+n.b*spb,n.d*spb,.16,bs)});
@@ -2240,10 +2252,10 @@ function visHTML(v,p){let h='';v=v||{};
  if(p&&(p.drum||p.drums)&&!v.kbd)h+=`<div class="vpads">${['kick','snare','hat'].map(k=>`<span class="vp" data-d="${k}" style="--c:${DRUM_LANES[k].col}">${DRUM_LANES[k].icon}<small>${esc(T(DRUM_LANES[k].name))}</small></span>`).join('')}</div>`;
  if(p&&(p.majmin!=null||p.voices||p.dyn||p.tempo||p.chordpair))h+=`<div class="vlabel" id="vlabel"></div>`;
  if(!h)h=`<div class="vemoji">🎶</div>`;return h}
-// play a demonstration and light up the keys, notes, pads or labels in time with the sound
+// play a demonstration and light up the keys, notes, pads or labels in time with the sound (lag: the sound reaches the ears a little after it is scheduled)
 let DEMO={bus:null,timers:[],n:0};
 function stopDemo(){DEMO.n++;killBus(DEMO.bus);DEMO.timers.forEach(clearTimeout);DEMO.timers=[];DEMO.bus=null}
-async function demo(p,vis){stopDemo();const my=DEMO.n,ok=await ensureAudio();const vs=[...(p.voices||[]),...(p.seq&&p.seq.v?[p.seq.v]:[])];if(vs.length)await want(vs,2500);if(DEMO.n!==my)return;const b=DEMO.bus=bus(1);if(!b)return;const t0=AC.currentTime+.15,at=(sec,f)=>DEMO.timers.push(setTimeout(f,Math.max(0,(t0-AC.currentTime+sec)*1000)));
+async function demo(p,vis){stopDemo();const my=DEMO.n,ok=await ensureAudio();const vs=[...(p.voices||[]),...(p.seq&&p.seq.v?[p.seq.v]:[])];if(vs.length)await want(vs,2500);if(DEMO.n!==my)return;const b=DEMO.bus=bus(1);if(!b)return;const t0=AC.currentTime+.15,lag=ok?clamp(AC.currentTime-heardTime(),0,.5):0,at=(sec,f)=>DEMO.timers.push(setTimeout(f,Math.max(0,(t0-AC.currentTime+lag+sec)*1000)));
  const lightKey=(m,dur)=>{const r=vis.querySelector(`.vkbd rect[data-m="${m}"]`);if(r){r.setAttribute('fill',colorOf(m));setTimeout(()=>r.setAttribute('fill',r.dataset.c||'#fff'),dur*1000)}};
  const lightNote=(i,dur)=>{const g=vis.querySelector(`.vstaff .sn[data-i="${i}"]`);if(g){g.classList.add('lit');setTimeout(()=>g.classList.remove('lit'),dur*1000)}};
  const label=(txt)=>{const el=vis.querySelector('#vlabel');if(el){el.textContent=txt;el.classList.remove('pop');void el.offsetWidth;el.classList.add('pop')}};
@@ -2255,7 +2267,7 @@ async function demo(p,vis){stopDemo();const my=DEMO.n,ok=await ensureAudio();con
  if(p.song){const s=SONGS[p.song],spb=60/s.bpm,mel=parseMelody(s.m);let beats=0,cut=mel.findIndex(n=>(beats+=n.d)>=s.sig*4);const part=mel.slice(0,cut<0?mel.length:cut+1).map(n=>(n.rest?'r':PC[n.m%12]+(Math.floor(n.m/12)-1))+'/'+n.d).join(' ');
   notes(part,s.bpm);schedBacking(parseChords(s.c).filter(c=>c.b<s.sig*4),spb,s.sig,t0+(s.pick||0)*0,b,.7)}
  if(p.rhy){const spb=60/p.rhy.bpm,sig=p.rhy.sig||4,toks=parseRhythm(p.rhy.p),len=Math.ceil(rhythmBeats(p.rhy.p)/sig)*sig;toks.forEach(tk=>{if(!tk.rest)drum('tom',t0+tk.t*spb,.9,b)});for(let i=0;i<len;i++)drum(i%sig===0?'accent':'click',t0+i*spb,.5,b);
-  const svg=vis.querySelector('.vrhy svg');if(svg){const r=rhythmSVG(p.rhy.p,{w:340,sig,count:true});const cur=svg.querySelector('.rcur');const start=performance.now()+(t0-AC.currentTime)*1000;
+  const svg=vis.querySelector('.vrhy svg');if(svg){const r=rhythmSVG(p.rhy.p,{w:340,sig,count:true});const cur=svg.querySelector('.rcur');const start=performance.now()+(t0-AC.currentTime+lag)*1000;
    const fr=()=>{if(!DEMO.bus||!cur.isConnected)return;const beat=(performance.now()-start)/1000/spb;if(beat>len+.3){cur.setAttribute('x1',-20);cur.setAttribute('x2',-20);return}let x=r.xs[0];for(let i=0;i<toks.length;i++){if(beat>=toks[i].t)x=r.xs[i]+(Math.min(beat,toks[i].t+toks[i].d)-toks[i].t)/toks[i].d*((i+1<toks.length?r.xs[i+1]:r.xs[i]+toks[i].d*r.unit)-r.xs[i])}if(beat<0)x=-20;cur.setAttribute('x1',x);cur.setAttribute('x2',x);requestAnimationFrame(fr)};requestAnimationFrame(fr)}}
  if(p.drum){const pt=DRUMS[p.drum.pattern],spb=60/(p.drum.bpm||pt.bpm),steps=pt.sig*4;for(let bar=0;bar<(p.drum.bars||2);bar++){const src=pt.fill&&(bar+1)%pt.every===0?pt.fill:pt;[['kick','k'],['snare','s'],['hat','h']].forEach(([k,c])=>{const s=src[c]||'';for(let i=0;i<steps;i++)if(s[i]==='x'){const tt=(bar*steps+i)*spb/4;drum(k,t0+tt,.9,b);at(tt,()=>pad(k))}})}}
  if(p.drums)p.drums.forEach((k,i)=>{drum(k,t0+i*.55,1,b);at(i*.55,()=>pad(k))});
@@ -2522,7 +2534,7 @@ function calibrate(){let taps=[],clk=null,t0=0,b=null,spb=60/90,N=12;
   <button type="button" class="bl-pad calpad" id="calPad">👆</button><p class="center" id="calMsg">${L('시작을 누르세요','Press start')}</p>
   <div class="row"><button class="btn green" id="calGo" type="button">▶ ${L('시작','Start')}</button><button class="btn ghost" data-act="zero" type="button">${L('0으로 되돌리기','Reset to 0')}</button></div>`,{acts:{zero:()=>{ROOT.opt.calib=0;save();applyOpts();toast('⏱️ 0ms')}},
   onOpen:box=>{const pad=box.querySelector('#calPad'),msg=box.querySelector('#calMsg');
-   box.querySelector('#calGo').addEventListener('click',async()=>{const ok=await ensureAudio();if(!ok){msg.textContent=L('소리를 켤 수 없어요','Sound is not available');return}taps=[];clk=makeClock(true);b=bus(1);t0=clk()+.6;for(let i=0;i<N;i++)drum(i%4?'click':'accent',t0+i*spb,.9,b);msg.textContent=L('똑딱에 맞춰 눌러요!','Tap with the ticks!');
+   box.querySelector('#calGo').addEventListener('click',async()=>{const ok=await ensureAudio();if(!ok){msg.textContent=L('소리를 켤 수 없어요','Sound is not available');return}taps=[];clk=makeClock(true);b=bus(1);t0=startAt(clk,true,.6);for(let i=0;i<N;i++)drum(i%4?'click':'accent',t0+i*spb,.9,b);msg.textContent=L('똑딱에 맞춰 눌러요!','Tap with the ticks!');
     setTimeout(()=>{killBus(b);const offs=taps.map(t=>{const k=Math.round((t-t0)/spb);return k>=2&&k<N?(t-t0)-k*spb:null}).filter(x=>x!=null&&Math.abs(x)<.3).sort((a,c)=>a-c);
      if(offs.length<5){msg.textContent=L('눌린 횟수가 부족해요. 다시 해 봐요!','Not enough taps. Try again!');return}const med=offs[Math.floor(offs.length/2)],ms=clamp(Math.round(med*1000),-200,250);ROOT.opt.calib=ms;save();applyOpts();msg.textContent=L(`보정 완료! ${ms>0?'+':''}${ms}ms`,`Done! ${ms>0?'+':''}${ms} ms`);SFX.good()},600+N*spb*1000+500)});
    pad.addEventListener('pointerdown',e=>{e.preventDefault();if(clk)taps.push(clk(e.timeStamp));pad.classList.remove('hit');void pad.offsetWidth;pad.classList.add('hit')})}})}

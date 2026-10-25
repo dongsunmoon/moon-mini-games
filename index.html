@@ -7,7 +7,7 @@
 <title data-en="Moon Mini Games">문 미니 게임 | Moon Mini Games</title>
 <meta name="description" content="어린이를 위한 무료 웹 미니 게임 · Free mini games for kids. 휴대폰·PC 모두 가능, 한국어/English.">
 <meta property="og:title" content="Moon Mini Games · 문 미니 게임">
-<meta property="og:description" content="꼬마 탐정단 · 마블 레이스 · 꼬마 체스 기사단 · 꼬마 과학 수호대 — 휴대폰과 PC에서 바로 플레이! Play right away on phone or PC.">
+<meta property="og:description" content="꼬마 탐정단 · 마블 레이스 · 꼬마 체스 기사단 · 꼬마 과학 수호대 · 꼬마 음악 아카데미 · 꼬마 수학 아쿠아리움 — 휴대폰과 PC에서 바로 플레이! Play right away on phone or PC.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://game.dongsunmoon.com/">
 <meta property="og:image" content="https://game.dongsunmoon.com/images/og-image.jpg">
@@ -100,7 +100,17 @@ a{color:inherit}
 .t-music .ic:nth-of-type(2n){animation-delay:-1.5s}
 @keyframes bob{50%{transform:translateY(-8px)}}
 @keyframes spinA{to{transform:rotate(360deg)}}
-@media (prefers-reduced-motion:reduce){.t-marble .m,.t-chess .knight,.t-science .atom,.t-music .ic{animation:none}.card{transition:none}}
+/* Aquarium thumbnail: a deep-blue tank with swaying kelp, fish, rising bubbles and floating sums */
+.t-aqua{background:radial-gradient(ellipse at 50% -20%,#9fe8ff 0,transparent 55%),repeating-linear-gradient(105deg,transparent 0 34px,#ffffff10 34px 52px),linear-gradient(180deg,#2bb3e8 0%,#0e6fb8 55%,#0a3f78 100%)}
+.t-aqua::after{content:"";position:absolute;left:0;right:0;bottom:0;height:16%;background:linear-gradient(180deg,#f3d99a,#d9b86a);border-radius:50% 50% 0 0/40% 40% 0 0}
+.t-aqua .ic{position:absolute;font-size:36px;filter:drop-shadow(0 6px 8px rgba(0,0,0,.3));animation:bob 3.2s ease-in-out infinite;z-index:1}.t-aqua .ic.big{font-size:64px}
+.t-aqua .ic:nth-of-type(2n){animation-delay:-1.6s}
+.t-aqua .math{position:absolute;z-index:1;font-weight:900;font-size:20px;color:#fff;background:#ffffff2e;border:2px solid #ffffff80;border-radius:12px;padding:2px 8px}
+.t-aqua .kelp{position:absolute;bottom:8%;width:14px;height:56%;border-radius:10px;background:linear-gradient(180deg,#5fe08a,#1f8a4c);transform-origin:bottom center;animation:sway 3s ease-in-out infinite alternate}
+.t-aqua .bb{position:absolute;bottom:12%;width:12px;height:12px;border-radius:50%;border:2px solid #ffffffcc;animation:riseB 4s linear infinite}
+@keyframes sway{from{transform:rotate(-6deg)}to{transform:rotate(6deg)}}
+@keyframes riseB{to{transform:translateY(-150px);opacity:0}}
+@media (prefers-reduced-motion:reduce){.t-marble .m,.t-chess .knight,.t-science .atom,.t-music .ic,.t-aqua .ic,.t-aqua .kelp,.t-aqua .bb{animation:none}.card{transition:none}}
 .tips{margin:22px 0 0;padding:0;list-style:none;display:flex;flex-wrap:wrap;gap:8px}
 .tips li{background:#ffffffc7;border:1px solid var(--line);border-radius:14px;padding:9px 12px;font-size:13.5px;font-weight:700;color:var(--muted)}
 footer{margin-top:22px;text-align:center;color:#8a93b8;font-size:12px}
@@ -233,6 +243,15 @@ const GAMES=[
     desc:['박자, 피아노, 악보, 노래, 드럼, 화음, 악기까지! 여섯 선생님과 매일 조금씩 연습하고 음악 대회에서 메달을 따요.','Beat, piano, reading music, singing, drums, chords and instruments! Practice a little every day with six teachers and win medals in music contests.'],
     tags:[['🎓 레슨 62개','🎓 62 lessons'],['🏆 음악 대회','🏆 Music contests'],['🔥 매일 연습','🔥 Daily streaks']],
     stat:()=>{const r=readSave('musicAcademy.v1'),d=r&&r.P&&r.P[r.cur];return d&&d.stats&&d.stats.plays>0?L(`🎵 ${d.name} Lv.${d.lvl} · 🔥 ${d.streak.n}일 연속`,`🎵 ${d.name} Lv.${d.lvl} · 🔥 ${d.streak.n}-day streak`):''}
+  },
+  {
+    file:'math_aquarium.html',
+    thumb:'<div class="thumb t-aqua" aria-hidden="true"><div class="kelp" style="left:6%"></div><div class="kelp" style="left:88%;animation-delay:-1.4s"></div><span class="ic" style="left:12%;top:18%">🐠</span><span class="ic" style="left:70%;top:14%">🐙</span><span class="ic big" style="left:40%;top:34%">🐳</span><span class="ic" style="left:18%;top:60%">🦀</span><span class="ic" style="left:72%;top:58%">🐡</span><span class="math" style="left:56%;top:12%">7×8</span><span class="math" style="left:8%;top:42%">½+¼</span><span class="math" style="left:78%;top:36%">+</span><i class="bb" style="left:30%"></i><i class="bb" style="left:62%;animation-delay:-1.5s"></i><i class="bb" style="left:84%;animation-delay:-2.6s"></i></div>',
+    title:['꼬마 수학 아쿠아리움','Little Math Aquarium'],
+    age:['6~12세','Ages 6–12'],
+    desc:['수학을 풀면 수조가 열리고 손님이 와요! 학년마다 아쿠아리움 20곳을 키우면 1~6학년 수학을 한 학년씩 마스터해요. 매점·직원·낚시·다이빙·운전 미션까지!','Solve math to open tanks and welcome visitors! Grow 20 aquariums per grade to master Grade 1–6 math, one grade at a time. Shops, staff, fishing, diving and driving too!'],
+    tags:[['🧮 1~6학년 수학','🧮 Grades 1–6 math'],['🐠 아쿠아리움 경영','🐠 Run an aquarium'],['🇰🇷🇨🇦 한국·캐나다 교육과정','🇰🇷🇨🇦 Korea + Canada curricula']],
+    stat:()=>{const d=readSave('mathAquarium.v1');if(!d||!d.stats||!d.stats.correct)return '';const n=Object.values(d.G||{}).reduce((t,g)=>t+(g.aq||[]).filter(a=>a&&a.done).length,0);return L(`🐠 ${d.grade}학년 · 마스터한 단원 ${n}개 · 맞힌 문제 ${d.stats.correct}개`,`🐠 Grade ${d.grade} · ${n} skill${n===1?'':'s'} mastered · ${d.stats.correct} right`)}
   }
 ];
 const pick=pair=>L(pair[0],pair[1]);
@@ -243,7 +262,7 @@ const $=id=>document.getElementById(id);
 // Profiles live only on this device. Every game stores its save under "key@profileId", so each player keeps
 // separate progress and resetting one game never touches another game or another player.
 const PKEY='moonGames.profiles',LKEY='moonGames.legacy';
-const GAME_KEYS=[['little-detective-v3','🕵️','꼬마 탐정단|Little Detectives'],['marbleRush.v2','🔮','마블 레이스|Marble Rush'],['marble3dsettings','🔮','마블 레이스(예전 설정)|Marble Rush (old settings)'],['chessKnights.v1','♞','꼬마 체스 기사단|Little Chess Knights'],['scienceGuardians.v1','🔬','꼬마 과학 수호대|Little Science Guardians'],['musicAcademy.v1','🎵','꼬마 음악 아카데미|Little Music Academy']];
+const GAME_KEYS=[['little-detective-v3','🕵️','꼬마 탐정단|Little Detectives'],['marbleRush.v2','🔮','마블 레이스|Marble Rush'],['marble3dsettings','🔮','마블 레이스(예전 설정)|Marble Rush (old settings)'],['chessKnights.v1','♞','꼬마 체스 기사단|Little Chess Knights'],['scienceGuardians.v1','🔬','꼬마 과학 수호대|Little Science Guardians'],['musicAcademy.v1','🎵','꼬마 음악 아카데미|Little Music Academy'],['mathAquarium.v1','🐠','꼬마 수학 아쿠아리움|Little Math Aquarium']];
 const AV=['🐰','🐻','🦊','🐼','🐨','🐯','🦁','🐸','🐱','🐶','🐥','🦄','🐙','🐬','🦖','⭐'];
 const T2=s=>{const [k,e]=s.split('|');return L(k,e||k)};
 const getJ=(k,d=null)=>{try{const v=JSON.parse(localStorage.getItem(k)||'null');return v==null?d:v}catch(e){return d}};

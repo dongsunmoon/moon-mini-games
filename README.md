@@ -12,6 +12,7 @@ Mini games for kids that run right in the browser on phones, tablets and PCs.
 | ♞ 꼬마 체스 기사단 · Little Chess Knights | `chess_knights.html` | 체스 퍼즐 모험 6지역 · 보스 AI 대결 · 번개 퍼즐 · 레벨업과 상점 |
 | 🔬 꼬마 과학 수호대 · Little Science Guardians | `science_guardians.html` | 초등 과학 퀴즈와 실험으로 악당 물리치기 · 9지역 · 학년별 난이도 3단계 · 대원(플레이어) 여러 명 |
 | 🎵 꼬마 음악 아카데미 · Little Music Academy | `music_academy.html` | 여섯 선생님과 박자·피아노·악보·노래·드럼·화음·악기 배우기 · 레슨 62개 · 매일 연습과 연속 기록 · 음악 대회 6개 |
+| 🐠 꼬마 수학 아쿠아리움 · Little Math Aquarium | `math_aquarium.html` | 1~6학년 수학(한국·캐나다 교육과정 통합)을 풀며 아쿠아리움 키우기 · 학년마다 아쿠아리움 20곳 = 단원 20개 · 매점·기프트샵·마트·화장실·직원·스킬 · 낚시·다이빙·운전 미션 |
 
 ## 저작권 · 사용 제한 (Copyright)
 
@@ -19,9 +20,9 @@ Mini games for kids that run right in the browser on phones, tablets and PCs.
 
 이 저장소와 https://game.dongsunmoon.com/ 의 게임 코드, 그림, 캐릭터, 효과음과 음악 편곡, 문제와 설명 글은 저작권으로 보호됩니다. **저작권자의 허락 없이 복제, 배포, 수정, 다른 사이트·앱·서비스에 올리기, 상업적 이용을 하는 것을 금지합니다.** 사이트에서 게임을 플레이하는 것은 누구나 자유롭게 할 수 있습니다.
 
-다만 다른 사람의 저작물이 아닌 공개 자료는 원래 조건을 따릅니다. 체스 퍼즐 데이터(Lichess, CC0), `sounds/` 폴더의 악기 녹음(Versilian Studios VCSL·VSCO 2 CE, Freesound bletort, 모두 CC0, 출처는 [sounds/README.md](sounds/README.md)), 저작권이 끝난 전래 동요·클래식 곡의 원래 가락은 이 제한에 포함되지 않으며, 이 저장소에서 새로 만든 편곡·코드·그림·글에만 위 제한이 적용됩니다.
+다만 다른 사람의 저작물이 아닌 공개 자료는 원래 조건을 따릅니다. 체스 퍼즐 데이터(Lichess, CC0), `sounds/` 폴더의 악기 녹음(Versilian Studios VCSL·VSCO 2 CE, Freesound bletort, 모두 CC0, 출처는 [sounds/README.md](sounds/README.md)), 저작권이 끝난 전래 동요·클래식 곡의 원래 가락, 실제 바다 생물에 관한 일반적인 사실은 이 제한에 포함되지 않으며, 이 저장소에서 새로 만든 편곡·코드·그림·글에만 위 제한이 적용됩니다.
 
-All code, artwork, characters, sounds and musical arrangements, questions and text in this repository and on https://game.dongsunmoon.com/ are protected by copyright. **Copying, redistributing, modifying, re-hosting on other sites, apps or services, or using them commercially without the copyright holder’s permission is prohibited.** Anyone is welcome to play the games on the site. Public material keeps its own terms: the Lichess puzzle data (CC0), the instrument recordings in `sounds/` (Versilian Studios VCSL and VSCO 2 CE, and bletort on Freesound, all CC0; see [sounds/README.md](sounds/README.md)) and the original public-domain melodies are not restricted; the restriction covers the arrangements, code, art and text created for this project.
+All code, artwork, characters, sounds and musical arrangements, questions and text in this repository and on https://game.dongsunmoon.com/ are protected by copyright. **Copying, redistributing, modifying, re-hosting on other sites, apps or services, or using them commercially without the copyright holder’s permission is prohibited.** Anyone is welcome to play the games on the site. Public material keeps its own terms: the Lichess puzzle data (CC0), the instrument recordings in `sounds/` (Versilian Studios VCSL and VSCO 2 CE, and bletort on Freesound, all CC0; see [sounds/README.md](sounds/README.md)) the original public-domain melodies and general facts about real sea animals are not restricted; the restriction covers the arrangements, code, art and text created for this project.
 
 ## GitHub Pages로 공개하기
 
@@ -77,3 +78,16 @@ All code, artwork, characters, sounds and musical arrangements, questions and te
 - 노래 가락은 저작권이 끝난 전래 동요(뜨거운 빵, 메리의 어린 양, 달빛 아래서, 반짝반짝 작은 별, 작은 한스, 자크 형제, 맥도널드 할아버지 농장, 런던 다리, 이 할아버지, 양키 두들)와 클래식(베토벤 환희의 송가·엘리제를 위하여), 징글벨(1857)만 쓰고 가사는 넣지 않았습니다.
 - 악기 소리는 퍼블릭 도메인(CC0)으로 공개된 실제 악기 녹음입니다(피아노, 바이올린, 첼로, 기타, 플루트, 클라리넷, 색소폰, 리코더, 트럼펫, 트롬본, 튜바, 실로폰, 철금, 드럼과 여러 타악기, 대금 등). 출처와 바꾼 점, 비슷한 소리로 대신한 국악기는 [sounds/README.md](sounds/README.md)에 적었습니다. 녹음을 받기 전이나 받지 못할 때는 브라우저 합성음이 대신 납니다.
 - 마이크는 노래 레슨에서만 켜고, 목소리는 기기 안에서만 분석하며 녹음하거나 보내지 않습니다.
+
+## 수학 아쿠아리움 내용
+
+`math_aquarium.html`은 학년별 초등 수학을 꾸준히, 즐겁게 공부하게 하는 게임입니다. 겉모습은 아쿠아리움 경영 게임이지만, 수조는 오직 수학으로만 열립니다.
+
+- **학년 = 바다 지역, 단원 = 아쿠아리움**: 1~6학년마다 아쿠아리움 20곳이 있고, 한 곳이 한 단원입니다. 20곳을 모두 완성하면 그 학년 수학을 다 배운 것이고, 졸업 인증서와 전설의 물고기를 받은 뒤 다음 학년으로 자동으로 넘어갑니다. 처음에 학년을 고르고, 설정에서 언제든 바꿀 수 있습니다.
+- **교육과정**: 한국 2022 개정 수학과 교육과정과 캐나다 온타리오 수학 교육과정(2020)의 학년별 내용을 합쳤습니다. 커리큘럼 화면에서 단원마다 🇰🇷/🇨🇦 어느 교육과정의 몇 학년 내용인지, 배운 것·배우는 중·배울 것을 볼 수 있습니다. 온타리오의 돈(캐나다 동전), 코딩, 좌표평면, 정수, 자료와 같은 내용도 들어 있고, 돈 문제는 원과 캐나다 달러 중에서 고를 수 있습니다.
+- **배우는 순서**: 수조 1 배우기(수달 선생님 무니의 설명과 그림 → 힌트와 함께 풀기) → 수조 2·3 연습 → 수조 4 도전(문장제·두 단계 문제) → 수조 5 마스터 쇼(8문제 중 6문제). 틀리면 풀이를 보여 주고 비슷한 새 문제가 나옵니다. 이미 아는 단원은 ‘바로 마스터 도전’으로 건너뛸 수 있습니다. 앞에서 마스터한 단원은 복습 문제로 다시 나옵니다.
+- **경영**: 손님 입장료, 매점·기프트샵·마트, 화장실 청소(손가락으로 문질러 청소), 수조 먹이 주기, 손님의 계산 질문(학년에 맞는 돈 계산), 직원 채용과 훈련, 스킬 12가지, 아이템·장식·물고기·자동차 상점, 다른 아쿠아리움에서 들어오는 수입.
+- **바다와 길**: 낚시와 다이빙으로 한국·캐나다 바다 생물을 잡아 오고(문제를 맞혀야 잡혀요), 아쿠아리움 사이를 운전하며 수학 표지판을 통과합니다.
+- **성장과 꾸준함**: 오늘의 미션 3개와 보물상자, 오늘의 선물, 오늘의 복습, 연속 공부 기록(쉬는 날 카드), 주 5일 목표, 레벨과 칭호, 업적, 영역별 정답률, 점점 빨라진 단원, 2주 그래프, 성장 일기, 도감. 칭찬은 정답뿐 아니라 다시 도전해서 맞힌 것과 빨라진 것에도 해 줍니다.
+- **바다 생물 122종**: 한국과 캐나다에 실제로 사는 물고기와 바다 동물 116종(일부는 두 나라 모두에 삽니다)과 학년을 마치면 오는 상상 속 전설의 물고기 6종입니다. 그림은 코드로 그리거나 기기의 이모지를 쓰고, 설명은 어린이가 이해할 수 있는 실제 사실만 썼습니다. 아쿠아리움 이름과 건물은 이 게임을 위해 지어낸 것입니다.
+

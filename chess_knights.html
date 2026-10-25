@@ -24,7 +24,7 @@ function setLang(next){try{localStorage.setItem('moonGames.lang',next)}catch(e){
    so players never share progress and resetting one game leaves every other game alone. */
 const MGP=(()=>{let P=null;try{P=JSON.parse(localStorage.getItem('moonGames.profiles')||'null')}catch(e){}
  const me=P&&Array.isArray(P.list)&&P.list.find(x=>x&&x.id===P.cur)||null;
- if(me){const S=Storage.prototype,g=S.getItem,s=S.setItem,r=S.removeItem,own=/^(little-detective-|marbleRush\.|marble3dsettings|chessKnights\.|scienceGuardians\.|musicAcademy\.)/,k=x=>{x=String(x);return own.test(x)&&!x.includes('@')?x+'@'+me.id:x};
+ if(me){const S=Storage.prototype,g=S.getItem,s=S.setItem,r=S.removeItem,own=/^(little-detective-|marbleRush\.|marble3dsettings|chessKnights\.|scienceGuardians\.|musicAcademy\.|mathAquarium\.)/,k=x=>{x=String(x);return own.test(x)&&!x.includes('@')?x+'@'+me.id:x};
   S.getItem=function(x){return g.call(this,k(x))};S.setItem=function(x,v){return s.call(this,k(x),v)};S.removeItem=function(x){return r.call(this,k(x))}}
  return {me}})();
 </script>

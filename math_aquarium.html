@@ -336,6 +336,51 @@ body.staged .toasts{bottom:calc(14px + env(safe-area-inset-bottom))}
 body.staged main,body.staged .nav,body.staged .hud{display:none}
 body.modaling main *,body.modaling main *::before,body.modaling main *::after{animation-play-state:paused!important}
 button{touch-action:manipulation}
+
+/* ---------------------------------------------------------------- walking around inside the aquarium */
+.bldwrap{position:relative;cursor:pointer}
+.walkin{position:absolute;right:10px;bottom:10px;background:#fff;color:var(--ink);border-radius:16px;padding:7px 13px;font-weight:900;font-size:14px;box-shadow:0 3px 0 #c9d6ee,0 4px 14px rgba(0,30,80,.18);animation:bounce 1.6s ease-in-out infinite}
+.stage.walk{background:#16305a;padding-top:0}
+.wk{position:absolute;inset:0;overflow:hidden;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+.wk-cv{position:absolute;left:0;top:0;width:100%;height:100%;display:block;touch-action:none}
+.wk-head{position:absolute;left:0;right:0;top:0;padding:calc(6px + env(safe-area-inset-top)) max(10px,env(safe-area-inset-right)) 0 max(10px,env(safe-area-inset-left));pointer-events:none}
+.wk-top{display:flex;align-items:center;gap:8px}.wk-head button,.wk-head .wk-title,.wk-head .wk-pill{pointer-events:auto}
+.wk-x{flex:0 0 44px;width:44px;height:44px;border:0;border-radius:14px;background:#ffffffee;font-size:18px;box-shadow:0 3px 0 #c9d6ee}
+.wk-title{flex:1;min-width:0;background:#ffffffe8;border-radius:14px;padding:4px 12px;display:flex;flex-direction:column;box-shadow:0 3px 0 #c9d6ee}
+.wk-title b{font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.wk-title small{font-size:11.5px;color:var(--muted);font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wk-pill{background:#ffffffee;border-radius:14px;padding:9px 12px;font-weight:900;font-size:14px;box-shadow:0 3px 0 #c9d6ee;white-space:nowrap}
+.wk-map{position:relative;margin-top:8px;height:34px;background:#fffffff0;border-radius:17px;box-shadow:0 2px 0 #c9d6ee;pointer-events:auto}
+.wk-map button{position:absolute;top:2px;width:30px;height:30px;margin-left:-15px;border:0;border-radius:50%;background:#fff;font-size:16px;padding:0;display:grid;place-items:center;box-shadow:0 1px 3px rgba(0,0,0,.15)}
+.wk-map button img{width:27px}.wk-map button.lock{opacity:.5;filter:grayscale(1)}
+.wk-map button.ask::after,.wk-map button.warn::after{position:absolute;top:-9px;right:-7px;font-size:12px;line-height:1;background:#fff;border-radius:9px;padding:2px 3px;box-shadow:0 1px 3px rgba(0,0,0,.2);animation:bounce .9s ease-in-out infinite}
+.wk-map button.ask::after{content:'🙋'}.wk-map button.warn::after{content:'❗'}
+.wk-me{position:absolute;left:0;top:-6px;width:16px;height:16px;margin-left:-8px;border-radius:50%;background:#ffcf33;border:3px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.35);will-change:transform;pointer-events:none;z-index:1}
+.wk-bot{position:absolute;left:0;right:0;bottom:0;display:flex;align-items:flex-end;gap:8px;padding:6px max(10px,env(safe-area-inset-right)) calc(8px + env(safe-area-inset-bottom)) max(10px,env(safe-area-inset-left));pointer-events:none}
+.wk-bot>*{pointer-events:auto}
+.wk-pad{display:flex;gap:6px;flex:0 0 auto}
+.wk-pad button{width:58px;height:58px;border:0;border-radius:18px;background:#ffffffe6;font-size:22px;color:#2b6fd6;box-shadow:0 4px 0 #c9d6ee;touch-action:none;-webkit-user-select:none;user-select:none}
+.wk-pad button.on{transform:translateY(3px);box-shadow:0 1px 0 #c9d6ee;background:#fff6c8}
+.wk-card{flex:1;min-width:0;min-height:58px;background:#fff;border-radius:20px;padding:8px 10px;display:flex;align-items:center;gap:6px 10px;flex-wrap:wrap;box-shadow:0 4px 0 #c9d6ee}
+.wk-ci{flex:0 0 auto;font-size:30px;line-height:1}.wk-ci img{width:48px;display:block}
+.wk-ct{flex:1 1 150px;min-width:0;display:flex;flex-direction:column}.wk-ct b{font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.wk-ct small{font-size:12.5px;color:var(--muted);font-weight:700;line-height:1.35}
+.wk-cb{display:flex;gap:6px;flex-wrap:wrap;margin-left:auto}
+.wk-cb button{border:0;border-radius:14px;padding:10px 13px;font-weight:900;font-size:14px;background:#eef4ff;color:var(--ink);box-shadow:0 3px 0 #cfdcf3;white-space:nowrap}
+.wk-cb button.main{background:linear-gradient(180deg,#5cc8ff,#2b8fe0);color:#fff;box-shadow:0 3px 0 #1a64b0}
+.wk-cb button.hot{background:linear-gradient(180deg,#ffd45a,#ffab1a);color:#4a2a00;box-shadow:0 3px 0 #d0861a;animation:pulse 1.1s ease-in-out infinite}
+.wk-fact{position:absolute;left:50%;top:calc(104px + env(safe-area-inset-top));transform:translateX(-50%);width:min(460px,calc(100% - 24px));background:#fff;border-radius:20px;padding:10px 40px 10px 12px;box-shadow:0 8px 24px rgba(0,20,60,.3);display:flex;gap:10px;align-items:flex-start;animation:rise2 .25s}
+.wk-fact.hidden{display:none}.wk-fact img{width:86px;flex:0 0 86px}
+.wk-fact b{font-size:16px}.wk-fact small{display:block;color:var(--muted);font-weight:800;font-size:12px}.wk-fact p{margin:4px 0 0;font-size:14px;line-height:1.45;font-weight:600}
+.wk-fx{position:absolute;top:8px;right:8px;width:30px;height:30px;border:0;border-radius:50%;background:#f0f4fb;font-size:13px}
+.stage.walk~.toasts{bottom:calc(132px + env(safe-area-inset-bottom))}
+.wk-flash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none}.wk-flash.on{animation:wkflash .55s ease-out}
+@keyframes wkflash{0%{opacity:.95}100%{opacity:0}}
+@media (max-height:540px){.wk-x{flex-basis:38px;width:38px;height:38px}.wk-pill{padding:7px 10px}.wk-title small{display:none}.wk-map{margin-top:5px;height:28px}.wk-map button{width:24px;height:24px;margin-left:-12px;font-size:13px}.wk-map button img{width:22px}
+ .wk-pad button{width:48px;height:48px;font-size:18px}.wk-card{min-height:48px;padding:5px 8px}.wk-ci{font-size:24px}.wk-ci img{width:36px}.wk-ct small{display:none}.wk-cb button{padding:8px 10px;font-size:13px}.wk-fact{top:calc(78px + env(safe-area-inset-top))}}
+@media (max-width:420px){.wk-pad button{width:50px;height:54px}.wk-cb button{padding:9px 10px;font-size:13px}}
+.photo{position:relative;margin:6px auto 10px;width:min(320px,100%);aspect-ratio:4/3;border-radius:18px;overflow:hidden;background:linear-gradient(180deg,var(--s1) 0%,#fff 46%,var(--w1) 47%,var(--w2) 100%);border:8px solid #ffd45a;box-shadow:0 0 0 3px #d99a1f,var(--shadow)}
+.photo .pfish{position:absolute;left:8%;top:30%;width:56%}.photo .pme{position:absolute;right:20%;bottom:16%;font-size:58px;line-height:1}
+.photo .mav{position:absolute;right:4%;bottom:12%;width:54px;height:54px;font-size:42px;display:grid;place-items:center}
+.photo b{position:absolute;left:0;right:0;top:8px;text-align:center;font-size:15px;color:#2a3350;text-shadow:0 1px 0 #fff}.photo small{position:absolute;left:0;right:0;bottom:6px;text-align:center;color:#fff;font-weight:800;font-size:12px;text-shadow:0 1px 2px rgba(0,0,0,.4)}
 </style>
 </head>
 <body>
@@ -8545,6 +8590,455 @@ return {
  stop,
  get _state(){return S?snap(S):(LAST||{running:false})}};
 })();
+// ================================================================ Little Math Aquarium · walking around inside
+// Walk.start(host,o) draws the inside of the aquarium you are at as a side-on hall to walk through: the entrance and ticket booth,
+// four tank windows with the restrooms, snack bar, gift shop and mart between them, the fifth tank as an undersea tunnel, and a
+// photo spot at the end. Visitors, hired staff and Mooni walk around too. Tap a place to walk there, tap a fish to hear about it,
+// and the card at the bottom shows what can be done where you stand. o.act(kind,arg) does the game side; o.exit() leaves.
+const Walk=(()=>{
+'use strict';
+const FY=445,Y0=472,Y1=590,TAU=Math.PI*2;
+const FONT="system-ui,-apple-system,'Apple SD Gothic Neo','Noto Sans KR',sans-serif",EFONT="'Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji',sans-serif";
+const cl=(v,a,b)=>v<a?a:v>b?b:v,rnd=(a,b)=>a+Math.random()*(b-a),pk=a=>a[Math.floor(Math.random()*a.length)];
+function rgb(h){h=String(h).replace('#','');if(h.length===3)h=[...h].map(c=>c+c).join('');const n=parseInt(h.slice(0,6),16)||0;return [n>>16&255,n>>8&255,n&255]}
+function mix(a,b,t){const x=rgb(a),y=rgb(b);return '#'+x.map((v,i)=>Math.round(v+(y[i]-v)*t).toString(16).padStart(2,'0')).join('')}
+const shade=(h,a)=>a<0?mix(h,'#000000',-a):mix(h,'#ffffff',a);
+const rgba=(h,a)=>{const [r,g,b]=rgb(h);return `rgba(${r},${g},${b},${a})`};
+const mk=(w,h)=>{const c=document.createElement('canvas');c.width=Math.max(1,Math.round(w));c.height=Math.max(1,Math.round(h));return c};
+function rr(c,x,y,w,h,r){r=Math.max(0,Math.min(r,w/2,h/2));c.beginPath();c.moveTo(x+r,y);c.arcTo(x+w,y,x+w,y+h,r);c.arcTo(x+w,y+h,x,y+h,r);c.arcTo(x,y+h,x,y,r);c.arcTo(x,y,x+w,y,r);c.closePath()}
+function lg(c,x0,y0,x1,y1,st){const g=c.createLinearGradient(x0,y0,x1,y1);for(const [o,col] of st)g.addColorStop(o,col);return g}
+function dot(c,x,y,r,f){c.beginPath();c.arc(x,y,Math.max(.01,r),0,TAU);c.fillStyle=f;c.fill()}
+function oval(c,x,y,rx,ry,f){c.beginPath();c.ellipse(x,y,Math.max(.01,rx),Math.max(.01,ry),0,0,TAU);c.fillStyle=f;c.fill()}
+const noEmoji=t=>String(t).replace(/<[^>]*>/g,'').replace(/[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{2B00}-\u{2BFF}\u{FE0F}\u{200D}]/gu,'').replace(/\s+/g,' ').trim();
+
+const FACS=['toilet','snack','gift','mart'];
+const FLOOR=[null,'#f4dfb0','#d9a774','#aab0ba','#c99a6e','#ead19c','#dcecfa'];
+const DECO_E={palm:'🌴',maple:'🍁',pine:'🌲',rock:'🪨',buoy:'🛟',flags:'🎏',harubang:'🗿',tangerine:'🍊',mountain:'🌲',reeds:'🌾',willow:'🌳',snow:'⛄',aurora:'🌟'};
+const POTTED=new Set(['palm','maple','pine','tangerine','reeds','willow','mountain']);
+const GOODS={snack:['🍦','🌭','🥤','🍿','🍪','🧁','🍩','🧃'],gift:['🧸','🐠','🔑','🧢','📕','🎈','🐬','🖍️'],mart:['💧','🍙','🥛','🍫','🍌','🍞','🧻','🍎']};
+const HELD={snack:['🍦','🌭','🥤','🍿'],gift:['🧸','🎈','🐬'],mart:['🛍️']};
+const HEADS=['🧒','👧','👦','👩','👨','👵','👴','🧑','👩‍🦰','👨‍🦱','🧕','👲','👱‍♀️','🧔'],KIDS=new Set(['🧒','👧','👦']);
+const SHIRTS=['#ff6a5a','#ffb020','#3cb878','#4cb4ff','#a66bff','#ff8ad8','#2bc4b0','#ffd23f','#7a8cff','#ff9a5a'],PANTS=['#3a4a7a','#2a3350','#5a4a3a','#4a5a8a','#6a3a5a'];
+const ROLE_SHIRT={janitor:'#3cb878',cashier:'#ff6a5a',snack:'#ffb020',gift:'#ff8ad8',mart:'#4cb4ff',keeper:'#2b8fe0',guide:'#a66bff',diver:'#1aa0b0'};
+const ROLE_HELD={janitor:'🧹',keeper:'🪣',guide:'🚩'};
+const STAFF_LINES={janitor:[['반짝반짝 청소 중이에요!','Keeping it sparkly!'],['화장실은 제가 맡을게요!','I’ve got the restrooms!']],cashier:[['어서 오세요! 입장권 여기 있어요.','Welcome! Here are your tickets.'],['오늘 손님이 정말 많아요!','So many visitors today!']],
+ snack:[['아이스크림 하나 드릴까요?','Ice cream, anyone?'],['핫도그가 제일 인기예요!','Hot dogs are the most popular!']],gift:[['물고기 인형이 인기 최고예요!','Fish plushies are a hit!'],['기념품 구경하세요!','Have a look at our souvenirs!']],
+ mart:[['필요한 건 다 있어요!','We have everything you need!'],['오늘은 바나나가 싱싱해요.','The bananas are fresh today.']],keeper:[['물고기들이 건강해요!','The fish are healthy!'],['먹이 시간은 제가 챙길게요.','I’ll keep an eye on feeding time.']],
+ guide:[['이쪽으로 오세요! 물고기 이야기를 들려 드릴게요.','This way! Let me tell you about the fish.'],['관장님, 손님들이 아주 좋아해요!','Director, the visitors love it!']],diver:[['물속은 정말 멋져요!','It’s amazing under water!'],['보글보글, 수조 청소 중!','Blub blub, cleaning the tank!']]};
+const MO_TAP=[['관장님 최고!','You’re the best, director!'],['오늘도 수학 공부하고 수조를 열어 봐요!','Let’s do some math and open a tank today!'],['물고기를 눌러 보면 이야기를 들려줘요.','Tap a fish to hear its story.'],['손님들이 정말 행복해 보여요!','The visitors look so happy!'],['같이 걸으니까 신나요!','Walking together is fun!']];
+const VIS_HI=[['안녕하세요, 관장님!','Hello, director!'],['물고기가 너무 예뻐요!','The fish are so pretty!'],['여기 정말 좋아요!','I love it here!'],['또 올게요!','I’ll come again!']];
+const FSPR={};
+let W=null;
+
+// ---------------------------------------------------------------- the hall: a row of places, left to right
+function layout(){const secs=[];let x=0;const add=(kind,w,o={})=>{const s=Object.assign({kind,x0:x,x1:x+w,w,cx:x+w/2,i:secs.length},o);s.spot=s.cx;secs.push(s);x+=w;return s};
+ const en=add('entry',470);en.spot=en.x0+360;
+ for(let k=0;k<4;k++){const t=add('tank',380,{k});t.win={x:t.x0+28,y:96,w:t.w-56,h:290};add(FACS[k],310,{f:FACS[k]})}
+ const tu=add('tunnel',1150,{k:4});tu.win={x:tu.x0+40,y:0,w:tu.w-80,h:FY-8};add('photo',380);return {secs,len:x}}
+const secOf=f=>f==='ticket'?W.secs[0]:W.secs.find(s=>s.f===f);
+const spotOf=f=>f==='ticket'?W.secs[0].x0+360:secOf(f).cx;
+const vis=s=>s.x1>W.cam-60&&s.x0<W.cam+W.vw+60;
+const scaleAt=y=>.8+.36*(y-Y0)/(Y1-Y0);
+const tankOpen=k=>W.a.open>k;
+
+// ---------------------------------------------------------------- sprites: text, emoji and fish drawn once, then copied
+function txt(s,size,col,o={}){const key='t|'+s+'|'+size+'|'+col+'|'+(o.w||800)+'|'+(o.max||0)+'|'+(o.stroke||'');let sp=W.spr.get(key);if(sp)return sp;
+ const sc=W.k*W.dpr,fs=Math.max(4,size*sc),font=`${o.w||800} ${fs}px ${FONT}`,m=mk(4,4).getContext('2d');m.font=font;
+ const lines=o.max?wrap(m,String(s),o.max*sc):[String(s)],lw=Math.max(...lines.map(l=>m.measureText(l).width)),pad=Math.ceil(fs*.2)+(o.stroke?Math.ceil(fs*.12):0);
+ const cv=mk(lw+pad*2,lines.length*fs*1.25+pad*2),c=cv.getContext('2d');c.font=font;c.textAlign='center';c.textBaseline='middle';
+ lines.forEach((l,i)=>{const y=pad+fs*1.25*(i+.5);if(o.stroke){c.lineJoin='round';c.lineWidth=fs*.22;c.strokeStyle=o.stroke;c.strokeText(l,cv.width/2,y)}c.fillStyle=col;c.fillText(l,cv.width/2,y)});
+ sp={cv,w:cv.width/sc,h:cv.height/sc};W.spr.set(key,sp);return sp}
+function wrap(m,s,max){const out=[];let line='';for(const w of s.split(' ')){const t=line?line+' '+w:w;if(m.measureText(t).width>max&&line){out.push(line);line=w}else line=t}if(line)out.push(line);
+ return out.flatMap(l=>{if(m.measureText(l).width<=max)return [l];const r=[];let cur='';for(const ch of l){if(m.measureText(cur+ch).width>max&&cur){r.push(cur);cur=ch}else cur+=ch}if(cur)r.push(cur);return r})}
+function fit(s,size,col,maxW,o){let sp=txt(s,size,col,o);if(sp.w>maxW){const z=Math.max(9,Math.floor(size*maxW/sp.w));sp=txt(s,z,col,o)}return sp}
+function emo(ch,size){size=Math.round(size/2)*2;const key='e|'+ch+'|'+size;let sp=W.spr.get(key);if(sp)return sp;
+ const sc=W.k*W.dpr,fs=Math.max(4,size*sc),cv=mk(fs*1.3,fs*1.3),c=cv.getContext('2d');c.font=`${fs}px ${EFONT}`;c.textAlign='center';c.textBaseline='middle';c.fillText(ch,cv.width/2,cv.height/2+fs*.06);
+ sp={cv,w:cv.width/sc,h:cv.height/sc};W.spr.set(key,sp);return sp}
+const put=(c,sp,x,y)=>c.drawImage(sp.cv,x-sp.w/2,y-sp.h/2,sp.w,sp.h);
+// fish pictures are scale-free, so they live across walks; a dark copy is the "coming soon" shadow
+function fspr(id,dark){const key=id+(dark?'#':'');if(FSPR[key])return FSPR[key];let im=null;try{im=fishImg(id)}catch(e){}
+ if(!im||!im.complete||!im.naturalWidth)return null;const cv=mk(330,220),c=cv.getContext('2d');try{c.drawImage(im,0,0,330,220)}catch(e){return null}
+ if(dark){c.globalCompositeOperation='source-in';c.fillStyle='rgba(12,30,62,.9)';c.fillRect(0,0,330,220)}return FSPR[key]=cv}
+let MOONI_IM=null;
+function mooniImg(){if(!ART.mooni)return null;if(!MOONI_IM){MOONI_IM=new Image();MOONI_IM.src='images/aq-mooni.webp'}return MOONI_IM.complete&&MOONI_IM.naturalWidth?MOONI_IM:null}
+
+// ---------------------------------------------------------------- start and stop
+function start(host,o){stop();const h=here();
+ W={host,o,t:0,last:0,raf:0,q:1,ft:1/60,ftN:0,spr:new Map(),cam:0,hold:0,keys:{},people:[],items:[],pops:[],bubbles:[],staff:[],tanks:[0,1,2,3,4].map(()=>({fish:[],food:[],sig:''})),
+  been:new Set(),slow:0,lastSay:-9,panelSig:'',mapSig:'',mePx:-1,ripple:null,g:h.g,i:h.i,d:h.d,a:h.a,R:REGIONS[h.g],on:[]};
+ Object.assign(W,layout());
+ W.me={x:150,y:530,tx:null,ty:null,dir:1,ph:0,moving:false,run:false,head:S.av||'🧒',shirt:'#2b6fd6',pants:'#2a3350',badge:'⭐',s:1};
+ W.mo={x:84,y:548,dir:1,ph:0,moving:false};
+ dom();W.cur=W.secs[0];enter(W.cur);panel();resize();sync(true);hud();marks();
+ const n=Math.min(9,Math.round(visitorsPerMin(h.g,h.i)*1.1));for(let j=0;j<n;j++)spawn({c:0,bought:['snack','gift','mart'].filter(f=>Math.random()<shopChance(f))},true);
+ listen();W.raf=requestAnimationFrame(frame);
+ setTimeout(()=>{if(W)moSay(L('어서 와요, 관장님! 우리 아쿠아리움을 같이 둘러봐요.','Welcome in, director! Let’s look around our aquarium.'))},600)}
+function stop(){if(!W)return;cancelAnimationFrame(W.raf);clearTimeout(W.factT);for(const [t,ev,fn,o] of W.on)t.removeEventListener(ev,fn,o);W=null}
+
+function dom(){const d=W.d,R_=W.R;
+ W.host.innerHTML=`<div class="wk"><canvas class="wk-cv"></canvas><div class="wk-flash"></div>
+ <div class="wk-head"><div class="wk-top"><button type="button" class="wk-x" data-w="exit" aria-label="${esc(L('나가기','Leave'))}">✕</button><div class="wk-title"><b>${R_.flag} ${esc(d.name)}</b><small id="wkSub"></small></div><span class="wk-pill" id="wkCoins"></span></div>
+ <div class="wk-map" id="wkMap">${W.secs.map((s,j)=>`<button type="button" data-w="go" data-i="${j}" style="left:${((j+.5)/W.secs.length*100).toFixed(2)}%">${secIcon(s)}</button>`).join('')}<i class="wk-me"></i></div></div>
+ <div class="wk-fact hidden" id="wkFact"></div>
+ <div class="wk-bot"><div class="wk-pad"><button type="button" data-w="hold" data-d="-1" aria-label="${esc(L('왼쪽','left'))}">◀</button><button type="button" data-w="hold" data-d="1" aria-label="${esc(L('오른쪽','right'))}">▶</button></div><div class="wk-card" id="wkCard"></div></div></div>`;
+ const q=s=>W.host.querySelector(s);W.el={head:q('.wk-head'),bot:q('.wk-bot'),card:q('#wkCard'),map:q('#wkMap'),me:q('.wk-me'),coins:q('#wkCoins'),sub:q('#wkSub'),fact:q('#wkFact'),flash:q('.wk-flash')};
+ W.cv=q('.wk-cv');W.ctx=W.cv.getContext('2d')}
+function secIcon(s){if(s.kind==='tank')return `<img src="${fishURL(W.d.tanks[s.k])}" alt="">`;return {entry:'🎫',toilet:'🚻',snack:'🍦',gift:'🎁',mart:'🛒',tunnel:'🌊',photo:'📸'}[s.kind]}
+
+// the scene keeps signs-to-feet (design y 56…596) between the top bar and the bottom card; wider screens see more of the hall
+function resize(){if(!W)return;const r=W.host.getBoundingClientRect(),cw=Math.max(1,r.width),ch=Math.max(1,r.height);
+ const top=W.el.head.getBoundingClientRect().bottom-r.top,bot=r.bottom-W.el.bot.getBoundingClientRect().top,avail=Math.max(100,ch-top-bot);
+ W.k=Math.min(avail/540,cw/430);W.oy=top+(avail-540*W.k)/2-56*W.k;W.cw=cw;W.ch=ch;W.vw=cw/W.k;W.yTop=-W.oy/W.k;W.yBot=(ch-W.oy)/W.k;W.topY=(top-W.oy)/W.k;
+ let dpr=Math.min(window.devicePixelRatio||1,2)*W.q;if(cw*ch*dpr*dpr>2.8e6)dpr=Math.sqrt(2.8e6/(cw*ch));W.dpr=Math.max(.6,dpr);
+ W.cv.width=Math.round(cw*W.dpr);W.cv.height=Math.round(ch*W.dpr);W.spr.clear();W.mapW=W.el.map.clientWidth;W.mePx=-1;palette()}
+function palette(){const c=W.ctx,d=W.d,R_=W.R,trim=d.grand?'#f0b52a':d.trim,wall=mix(d.wall,'#ffffff',.42),floor=FLOOR[W.g]||'#f4dfb0',sand=mix(R_.ground,'#f3d99a',.55);
+ W.col={wall,trim,ceil:mix(R_.water[1],'#000000',.35),floor,wain:mix(trim,'#ffffff',.62),sand};
+ W.gWall=lg(c,0,56,0,FY,[[0,shade(wall,-.07)],[1,shade(wall,.12)]]);
+ W.gFloor=lg(c,0,FY,0,FY+230,[[0,shade(floor,-.12)],[.22,shade(floor,.14)],[1,shade(floor,-.1)]]);
+ W.gWater=lg(c,0,0,0,290,[[0,shade(R_.water[0],.28)],[.6,R_.water[0]],[1,R_.water[1]]]);
+ W.gLock=lg(c,0,0,0,290,[[0,'#5d6d8f'],[1,'#29324e']]);
+ W.gSand=lg(c,0,236,0,290,[[0,shade(sand,.15)],[1,shade(sand,-.18)]]);
+ W.gTun=lg(c,0,-300,0,FY,[[0,shade(R_.water[0],.4)],[.5,R_.water[0]],[1,R_.water[1]]]);
+ W.gTunSand=lg(c,0,FY-70,0,FY,[[0,shade(sand,.1)],[1,shade(sand,-.25)]]);
+ W.gRefl=lg(c,0,FY,0,FY+90,[[0,rgba(R_.water[0],.3)],[1,rgba(R_.water[0],0)]]);
+ W.gOut=lg(c,0,150,0,FY,[[0,R_.sky[0]],[.72,R_.sky[1]],[.72,R_.ground],[1,shade(R_.ground,-.15)]]);
+ W.gPhoto=lg(c,0,102,0,382,[[0,R_.sky[0]],[.42,R_.sky[1]],[.42,shade(R_.water[0],.25)],[1,R_.water[1]]])}
+
+// ---------------------------------------------------------------- keeping up with the game (fish moved in, staff hired, shops built)
+function sync(force){const a=W.a;
+ for(let k=0;k<5;k++){const T=W.tanks[k],sig=a.open>k?a.fish[k].join(',')+(k===4?'|'+a.open:''):'x';if(force||sig!==T.sig){T.sig=sig;buildTank(k)}}
+ const ss=S.staff.map(x=>x.id+x.role).join()+'|'+['snack','gift','mart'].map(f=>S.fac[f]).join()+'|'+a.open;if(force||ss!==W.staffSig){W.staffSig=ss;buildStaff()}}
+function buildTank(k){const a=W.a,T=W.tanks[k],s=W.secs.find(x=>x.k===k),box=s.win,big=k===4;T.food=[];T.fish=[];if(a.open<=k)return;
+ let list=a.fish[k].slice(0,big?12:10).map(id=>({id}));
+ if(big)for(let j=0;j<4;j++)if(a.open>j&&a.fish[j].length){list.push({id:a.fish[j][0],amb:1});list.push({id:a.fish[j][a.fish[j].length-1],amb:1})}
+ T.fish=list.map(it=>{const f=FISH_BY[it.id];if(!f)return null;const bottom=BOTTOM.has(f.look.split('|')[0]),w=fishW(it.id)*(big?(it.amb?1.45:2):1.3);
+  const vx=(bottom?rnd(5,10):rnd(20,44)*(big?1.5:1))*(Math.random()<.5?-1:1);
+  return {id:it.id,w,bottom,x:rnd(w*.6,box.w-w*.6),base:bottom?box.h-(big?46:34)-w*.12:rnd(26+w*.35,box.h-(big?100:74)-w*.25),ph:rnd(0,TAU),vx,dir:vx>0?1:-1,y:0,hl:0}}).filter(Boolean)}
+function buildStaff(){const a=W.a;W.staff=[];const n={};
+ for(const x of S.staff){n[x.role]=(n[x.role]||0)+1;const p=mkPerson({head:x.av,shirt:ROLE_SHIRT[x.role]||'#4cb4ff',pants:'#2a3350',s:.95});Object.assign(p,{kind:'staff',ref:x,role:x.role,badge:(ROLES[x.role]||{}).icon||'',held:ROLE_HELD[x.role]||''});
+  const shopRole=['snack','gift','mart'].includes(x.role),sec=x.role==='cashier'?W.secs[0]:shopRole?secOf(x.role):x.role==='janitor'?secOf('toilet'):x.role==='diver'?W.secs.find(s=>s.kind==='tunnel'):null;
+  if(n[x.role]===1&&(x.role==='cashier'||shopRole&&S.fac[x.role])){p.bust=true;p.x=spotOf(x.role==='cashier'?'ticket':x.role);p.y=x.role==='cashier'?336:346;p.held='';W.staff.push(p);continue}
+  if(n[x.role]===1&&x.role==='diver'&&a.open>=5){p.swim=true;W.staff.push(p);continue}
+  let z=[W.secs[1].x0+40,W.secs[8].x1-40];if(sec)z=[sec.x0+40,sec.x1-40];if(x.role==='guide')z=[W.secs[0].x0+260,W.len-140];
+  Object.assign(p,{zone:z,x:rnd(z[0],z[1]),y:rnd(Y0+10,Y1-20),loop:true,sp:x.role==='guide'?55:70});W.staff.push(p)}}
+
+// ---------------------------------------------------------------- people
+function mkPerson(o){const head=o.head||pk(HEADS);return {x:0,y:530,dir:1,ph:rnd(0,6),moving:false,head,shirt:o.shirt||pk(SHIRTS),pants:o.pants||pk(PANTS),s:o.s||(KIDS.has(head)?.82:1),sp:rnd(70,100),stops:[],si:0,wait:0,held:'',emo:'',emoT:0,badge:''}}
+// a visitor pays at the booth, looks at a few tanks, shops where they bought, maybe uses the restroom, then heads back out
+function spawn(v,mid){if(!W)return;if(W.people.filter(p=>!p.ask).length>=16)return;const a=W.a,p=mkPerson({});p.kind='vis';p.x=118;p.y=rnd(505,565);
+ const st=[{x:W.secs[0].x0+360+rnd(-24,24),y:Y0+rnd(4,16),wait:1,on:q=>{if(v&&v.c&&Math.random()<.4)pop(q.x,q.y-130,`+${short(v.c)} ${COIN}`)}}];
+ const open=[];for(let k=0;k<Math.min(4,a.open);k++)open.push(k);open.sort(()=>Math.random()-.5);
+ for(const k of open.slice(0,Math.max(1,Math.round(rnd(1,Math.min(3,open.length)))))){const s=W.secs.find(x=>x.k===k);st.push({x:s.cx+rnd(-110,110),y:rnd(Y0+2,Y0+40),wait:rnd(2.5,5),on:q=>emote(q,pk(['😍','🤩','😮','👀','💙','🥰']))})}
+ for(const f of (v&&v.bought)||[]){const s=secOf(f);if(!s)continue;st.push({x:s.cx+rnd(-60,60),y:Y0+rnd(2,10),wait:rnd(2,3.5),on:q=>{q.held=pk(HELD[f]);if(Math.random()<.1)dropTrash(q)}})}
+ if(UNLOCK.toilet()&&Math.random()<.3){const s=secOf('toilet');st.push({x:s.cx+(Math.random()<.5?-58:58),y:Y0,wait:rnd(3,5),on:q=>{q.hide=true}})}
+ if(a.open>=5&&Math.random()<.65){const s=W.secs.find(x=>x.kind==='tunnel');st.push({x:rnd(s.x0+150,s.x1-150),y:rnd(Y0+10,Y1-10),wait:rnd(3,6),on:q=>emote(q,pk(['🤩','😲','🐋','💙']))})}
+ if(Math.random()<.18){const s=W.secs[W.secs.length-1];st.push({x:s.cx+rnd(-40,40),y:rnd(505,540),wait:2.5,on:q=>emote(q,'📸')})}
+ st.sort((m,n)=>m.x-n.x);
+ if(v&&Math.random()<.13&&st.length>1){const j=1+Math.floor(Math.random()*(st.length-1)),o0=st[j].on;st[j].on=q=>{o0&&o0(q);dropTip(q)}}
+ st.push({x:112,y:rnd(505,560),wait:.01,on:q=>{q.gone=true}});p.stops=st;
+ if(mid){const j=Math.floor(rnd(1,st.length-1));p.si=j;p.x=cl(st[j].x+rnd(-90,90),60,W.len-60);p.y=cl(st[j].y+rnd(0,30),Y0,Y1)}
+ W.people.push(p)}
+function walker(p,dt){const st=p.stops[p.si];if(!st){if(p.loop){p.stops=[{x:rnd(p.zone[0],p.zone[1]),y:rnd(Y0+8,Y1-14),wait:rnd(1.5,4.5),on:q=>{if(Math.random()<.25)emote(q,pk(['😊','💪','✨']))}}];p.si=0}else p.gone=true;return}
+ if(p.wait>0){p.wait-=dt;p.moving=false;if(p.wait<=0){p.si++;p.hide=false}return}
+ const dx=st.x-p.x,dy=st.y-p.y,d=Math.hypot(dx,dy);if(d<3){p.moving=false;p.wait=st.wait||.001;if(st.on)st.on(p);return}
+ const v=Math.min(d,p.sp*dt);p.x+=dx/d*v;p.y+=dy/d*v;p.moving=true;if(Math.abs(dx)>1)p.dir=dx>0?1:-1;p.ph+=dt*p.sp/10}
+// the visitor with a question waits at the counter until it is answered or they give up
+function asker(){const f=REQ?REQ.f:null;let p=W.people.find(x=>x.ask);
+ if(f&&!p){const s=secOf(f);if(!s)return;const sx=spotOf(f),side=W.me.x<sx?1:-1;p=mkPerson({});Object.assign(p,{kind:'vis',ask:f,x:cl(sx+side*280,60,W.len-60),y:rnd(Y0+20,Y1-20)});
+  p.stops=[{x:sx+side*52,y:Y0+18,wait:Infinity,on:q=>{q.dir=-side}},{x:112,y:530,wait:.01,on:q=>{q.gone=true}}];W.people.push(p)}
+ else if(p&&p.ask!==f){p.ask=false;if(p.wait>0)p.wait=.01;else p.si=1;emote(p,'😊')}}
+const emote=(p,e)=>{p.emo=e;p.emoT=W.t+1.7};
+const pop=(x,y,text)=>W.pops.push({x,y,text,t:0});
+function bubble(who,text,secs=3.4){W.bubbles=W.bubbles.filter(b=>b.who!==who);W.bubbles.push({who,text,until:W.t+secs})}
+function moSay(text){if(!W)return;bubble(W.mo,text,4.2);if(W.t-W.lastSay>2.5){W.lastSay=W.t;say(noEmoji(text),{raw:true})}}
+function dropTip(q){W.items.push({kind:'tip',x:cl(q.x+q.dir*22,60,W.len-60),y:cl(q.y+8,Y0,Y1),born:W.t,val:Math.max(1,Math.round(ticketPrice(W.g,W.i)*3))})}
+function dropTrash(q){if(W.items.filter(i=>i.kind==='trash').length>=4)return;W.items.push({kind:'trash',x:cl(q.x-q.dir*18,60,W.len-60),y:cl(q.y+6,Y0,Y1),e:pk(['🥤','🍿','🧃','🍌','🧻']),born:W.t})}
+
+// ---------------------------------------------------------------- the clock
+function frame(ts){if(!W)return;W.raf=requestAnimationFrame(frame);if(document.hidden||modalOpen()){W.last=0;return}
+ const dt=W.last?Math.min(.05,(ts-W.last)/1000):1/60;W.last=ts;W.t+=dt;W.a=here().a;update(dt);draw();
+ // slower tablets get a lighter canvas
+ W.ft=W.ft*.95+dt*.05;if(++W.ftN>150&&W.ft>.03&&W.q>.6){W.q*=.8;W.ftN=0;resize()}}
+function update(dt){const me=W.me,ix=W.hold+(W.keys.r?1:0)-(W.keys.l?1:0),iy=(W.keys.d?1:0)-(W.keys.u?1:0);
+ if(ix||iy){me.tx=null;me.run=false;me.x+=ix*260*dt;me.y+=iy*160*dt;me.moving=true;if(ix)me.dir=ix>0?1:-1}
+ else if(me.tx!=null){const dx=me.tx-me.x,dy=me.ty-me.y,d=Math.hypot(dx,dy),sp=me.run?620:260;if(d<3){me.tx=null;me.run=false;me.moving=false}else{const v=Math.min(d,sp*dt);me.x+=dx/d*v;me.y+=dy/d*v;me.moving=true;if(Math.abs(dx)>2)me.dir=dx>0?1:-1}}
+ else me.moving=false;
+ me.x=cl(me.x,40,W.len-40);me.y=cl(me.y,Y0,Y1);if(me.moving)me.ph+=dt*(me.run?17:10);
+ const want=W.vw>=W.len?(W.len-W.vw)/2:cl(me.x-W.vw*.5,0,W.len-W.vw);W.cam+=(want-W.cam)*Math.min(1,dt*7);
+ // Mooni trots along a step behind
+ const mo=W.mo,fx=cl(me.x-me.dir*72,30,W.len-30),fy=cl(me.y+14,Y0,Y1),ddx=fx-mo.x,ddy=fy-mo.y,dd=Math.hypot(ddx,ddy);
+ if(dd>8){const v=Math.min(dd,(110+dd*2.4)*dt);mo.x+=ddx/dd*v;mo.y+=ddy/dd*v;mo.moving=true;mo.ph+=dt*12;if(Math.abs(ddx)>3)mo.dir=ddx>0?1:-1}else mo.moving=false;
+ const sec=W.secs.find(s=>me.x>=s.x0&&me.x<s.x1)||W.secs[0];if(sec!==W.cur){W.cur=sec;hideFact();enter(sec)}
+ for(const p of W.people)walker(p,dt);W.people=W.people.filter(p=>!p.gone);
+ for(const p of W.staff)if(!p.bust&&!p.swim)walker(p,dt);
+ asker();
+ for(const s of W.secs)if(s.k!=null&&vis(s))stepTank(s,dt);
+ collect();
+ W.pops=W.pops.filter(p=>(p.t+=dt)<1.3);W.bubbles=W.bubbles.filter(b=>W.t<b.until);if(W.ripple&&(W.ripple.t+=dt)>.6)W.ripple=null;
+ if((W.slow+=dt)>.4){W.slow=0;sync();panel();marks();hud()}
+ meDot()}
+function stepTank(s,dt){const k=s.k,T=W.tanks[k],box=s.win,slow=hungry(W.a,k)?.45:1;
+ for(const f of T.food){if(f.y<box.h-(k===4?50:38))f.y+=42*dt;f.age+=dt}T.food=T.food.filter(f=>f.age<9&&!f.eaten);
+ for(const f of T.fish){let fd=null;if(T.food.length){let bd=1e9;for(const x of T.food){if(f.bottom&&x.y<box.h-(k===4?54:42))continue;const d=Math.abs(x.x-f.x)+Math.abs(x.y-f.y);if(d<bd){bd=d;fd=x}}}
+  if(fd){const dx=fd.x-f.x;f.dir=dx>0?1:-1;f.x+=cl(dx,-(f.bottom?30:95)*dt,(f.bottom?30:95)*dt);if(!f.bottom)f.base+=(fd.y-f.base)*Math.min(1,dt*2.6);if(Math.abs(dx)<f.w*.3&&Math.abs(fd.y-f.y)<f.w*.3)fd.eaten=true}
+  else{f.x+=f.vx*slow*dt;const m=f.w*.55;if(f.x>box.w-m&&f.vx>0||f.x<m&&f.vx<0||Math.random()<dt*.04)f.vx=-f.vx;f.dir=f.vx>0?1:-1}
+  f.base=cl(f.base,18+f.w*.3,box.h-30-f.w*.2);f.y=f.base+(f.bottom?0:Math.sin(W.t*1.2+f.ph)*6)}}
+function dropFood(k){const s=W.secs.find(x=>x.k===k),T=W.tanks[k];T.food=Array.from({length:k===4?20:14},()=>({x:rnd(30,s.win.w-30),y:rnd(2,30),age:0}))}
+function collect(){const me=W.me,mag=boostOn('magnet');
+ for(const it of W.items){if(it.got)continue;if(Math.abs(it.x-me.x)<38&&Math.abs(it.y-me.y)<34||mag&&it.kind==='tip'&&W.t-it.born>1.5){it.got=true;const at=scr(it.x,it.y-24);
+  if(it.kind==='tip')W.o.act('tip',{val:it.val,at});else{W.o.act('trash',{at});pop(it.x,it.y-50,'✨')}}}
+ W.items=W.items.filter(i=>!i.got)}
+const scr=(x,y)=>({x:(x-W.cam)*W.k,y:y*W.k+W.oy});
+
+// ---------------------------------------------------------------- arriving somewhere: Mooni explains, and the day's tour is ticked off
+function enter(s){const w=S.walk,day=dayKey();if(w.day!==day){w.day=day;w.been=[];w.toured=false}const key=W.d.key+':'+s.i;
+ if(!w.been.includes(key)){w.been.push(key);if(!w.toured&&W.secs.every(x=>w.been.includes(W.d.key+':'+x.i))){w.toured=true;W.o.act('tour')}}
+ if(W.been.has(s.i))return;W.been.add(s.i);if(s.kind==='entry')return;const line=intro(s);if(line)moSay(line)}
+function intro(s){const a=W.a,r=REQ;
+ if(r&&(r.f===s.f||r.f==='ticket'&&s.kind==='entry'))return L('손님이 도움이 필요해요! 🙋 버튼을 눌러 봐요.','A visitor needs help! Tap the 🙋 button.');
+ if(s.kind==='tank'){if(a.open<=s.k)return L(`${stageName(s.k)} 수업을 마치면 이 수조가 열려요!`,`Finish the ${stageName(s.k)} lesson to open this tank!`);
+  if(hungry(a,s.k)&&UNLOCK.feed())return L('물고기들이 배고파 보여요! 먹이를 줘요.','The fish look hungry! Let’s feed them.');
+  return L(`${s.k+1}번 수조예요. 물고기를 눌러 보면 이야기를 들려줘요!`,`This is tank ${s.k+1}. Tap a fish to hear its story!`)}
+ if(s.kind==='tunnel')return a.open>=5?L('와! 해저 터널이에요. 위를 올려다봐요!','Wow, the undersea tunnel! Look up!'):L('마스터 쇼를 통과하면 해저 터널이 열려요!','Pass the Mastery Show to open the undersea tunnel!');
+ if(s.kind==='photo')return L('여기는 포토존이에요. 기념사진을 찍어 봐요!','This is the photo spot. Let’s take a picture!');
+ if(s.f==='toilet'){if(!UNLOCK.toilet())return '';return a.dirt>60?L('화장실이 더러워요. 깨끗하게 청소해 줄까요?','The restrooms are dirty. Shall we clean them?'):L('화장실이 깨끗해요. 반짝반짝!','The restrooms are clean. Sparkly!')}
+ const F=FAC[s.f],nm=L(F.ko,F.en);if(!UNLOCK[s.f]())return `${nm}: ${T(UNLOCK_HINT[s.f])}`;
+ if(!S.fac[s.f])return L(`여기에 ${nm}${josa(nm,'을','를')} 지을 수 있어요!`,`We can build a ${nm.toLowerCase()} here!`);
+ return L(`${nm}에 손님이 북적북적해요!`,`The ${nm.toLowerCase()} is busy!`)}
+
+// ---------------------------------------------------------------- the card at the bottom: what you can do here
+function panel(){const s=W.cur;if(!s)return;const {g,i}=W,a=W.a,r=REQ;let ic='',ti='',st='';const bt=[];
+ const B=(k,v,label,cls='')=>bt.push(`<button type="button" class="${cls}" data-w="act" data-k="${k}" data-v="${v}">${label}</button>`);
+ if(r&&(r.f==='ticket'&&s.kind==='entry'||r.f===s.f))B('request','',`🙋 ${L('손님 도와주기','Help the visitor')}`,'hot');
+ if(s.kind==='entry'){const F=FAC.ticket;ic='🎫';ti=`${L(F.ko,F.en)} Lv.${S.fac.ticket}`;st=a.open?L(`입장료 ${COIN}${ticketPrice(g,i)} · 손님 ${visitorsPerMin(g,i).toFixed(1)}명/분`,`Ticket ${COIN}${ticketPrice(g,i)} · ${visitorsPerMin(g,i).toFixed(1)} visitors/min`):L('첫 수조를 열면 손님이 와요.','Visitors come once the first tank is open.');
+  B('fac','ticket',`⬆️ ${L('매표소','Booth')}`);B('exit','',`🚪 ${L('밖으로','Go outside')}`)}
+ else if(s.kind==='tank'||s.kind==='tunnel'){const k=s.k,id=W.d.tanks[k],tun=s.kind==='tunnel';
+  if(a.open<=k){ic='🔒';ti=tun?L('해저 터널 · 5번 수조','Undersea tunnel · tank 5'):L(`${k+1}번 수조`,`Tank ${k+1}`);st=L(`${STAGES[k].icon} ${stageName(k)} 수업을 마치면 열려요.`,`Opens after the ${STAGES[k].icon} ${stageName(k)} lesson.`);if(k===nextStageOf(a))B('lesson',k,`▶ ${L('수업 시작','Start lesson')}`,'main')}
+  else{const hung=hungry(a,k)&&UNLOCK.feed();ic=`<img src="${fishURL(id)}" alt="">`;ti=(tun?`🌊 ${L('해저 터널','Undersea tunnel')} · `:`${k+1}. `)+esc(fishName(id));
+   st=`🐟 ${a.fish[k].length}/${tankCap(a,k)} · ⭐ ${Math.round(tankPower(a,k))}`+(hung?` · 🍤 ${L('배고파요!','Hungry!')}`:` · ${L('물고기를 눌러 보세요','tap a fish')}`);
+   if(UNLOCK.feed())B('feed',k,`🍤 ${L('먹이','Feed')}`,hung?'hot':'');if(W.tanks[k].fish.length)B('look',k,`🔍 ${L('물고기 이야기','Fish story')}`,hung?'':'main');B('tank',k,`⚙️ ${L('수조 관리','Tank')}`)}}
+ else if(s.kind==='toilet'){ic='🚻';ti=L('화장실','Restrooms');if(!UNLOCK.toilet())st=T(UNLOCK_HINT.toilet);else{const c=Math.round(100-a.dirt);st=L(`깨끗함 ${c}%`,`${c}% clean`)+(a.dirt>60?` · ${L('청소해 주세요!','Needs cleaning!')}`:'');B('clean','',`🧽 ${L('청소하기','Clean')}`,a.dirt>60?'hot':'');B('fac','toilet',`⚙️ ${L('관리','Manage')}`)}}
+ else if(s.f){const F=FAC[s.f],lv=S.fac[s.f];ic=F.icon;ti=`${L(F.ko,F.en)}${lv?' Lv.'+lv:''}`;
+  if(!UNLOCK[s.f]()){ic='🔒';st=T(UNLOCK_HINT[s.f])}
+  else if(!lv){st=L('아직 빈 가게예요. 지으면 손님이 물건을 사요.','An empty shop. Build it and visitors will buy things.');B('fac',s.f,`🏗️ ${L('짓기','Build')} ${COIN}${short(facCost(s.f,0))}`,'main')}
+  else{st=L(`손님 ${Math.round(shopChance(s.f)*100)}%가 사요 · ${COIN}${shopPrice(s.f,g,i)}`,`${Math.round(shopChance(s.f)*100)}% of visitors buy · ${COIN}${shopPrice(s.f,g,i)}`);B('fac',s.f,lv<FAC_MAX?`⬆️ ${L('업그레이드','Upgrade')}`:`👑 ${L('최고 레벨','Max level')}`)}}
+ else if(s.kind==='photo'){ic='📸';ti=L('포토존','Photo spot');st=(S.walk.photo||{})[W.d.key]===dayKey()?L('오늘 사진을 찍었어요. 또 찍어도 돼요!','You took one today. Take more!'):L('사진을 찍으면 선물을 받아요!','Take a photo for a little gift!');B('photo','',`📸 ${L('사진 찍기','Take a photo')}`,'main')}
+ const sig=ic+ti+st+bt.join('');if(sig===W.panelSig)return;W.panelSig=sig;
+ W.el.card.innerHTML=`<span class="wk-ci">${ic}</span><span class="wk-ct"><b>${ti}</b><small>${st}</small></span><span class="wk-cb">${bt.join('')}</span>`}
+// the little map: dim places that are still closed, flag the ones that need you
+function marks(){const a=W.a,r=REQ;const cls=W.secs.map(s=>{let c='';if(s.k!=null&&a.open<=s.k||s.f&&s.f!=='toilet'&&!S.fac[s.f]||s.f==='toilet'&&!UNLOCK.toilet())c='lock';
+  if(r&&(r.f===s.f||r.f==='ticket'&&s.kind==='entry'))c+=' ask';else if(s.k!=null&&hungry(a,s.k)&&UNLOCK.feed()||s.f==='toilet'&&UNLOCK.toilet()&&a.dirt>60)c+=' warn';return c});
+ const sig=cls.join('|');if(sig===W.mapSig)return;W.mapSig=sig;W.el.map.querySelectorAll('button').forEach((b,j)=>b.className=cls[j])}
+function hud(){W.el.coins.textContent=`${COIN} ${short(S.coins)}`;const w=S.walk,n=w.day===dayKey()?W.secs.filter(x=>w.been.includes(W.d.key+':'+x.i)).length:0;
+ const sub=w.toured&&w.day===dayKey()?`🚶 ${L('오늘 한 바퀴 완료!','Tour done today!')}`:`🚶 ${L('한 바퀴','Tour')} ${n}/${W.secs.length} · ${L('다 돌면','finish for')} ${PEARL}+1`;if(W.el.sub.textContent!==sub)W.el.sub.textContent=sub}
+function meDot(){const cs=W.secs.map(s=>s.cx),n=cs.length,x=W.me.x;let f;if(x<=cs[0])f=.5;else if(x>=cs[n-1])f=n-.5;else{let j=0;while(cs[j+1]<x)j++;f=j+.5+(x-cs[j])/(cs[j+1]-cs[j])}
+ const px=f/n*W.mapW;if(Math.abs(px-W.mePx)>.5){W.mePx=px;W.el.me.style.transform=`translateX(${px.toFixed(1)}px)`}}
+
+// ---------------------------------------------------------------- input: tap to walk, hold ◀ ▶, arrow keys
+function listen(){const cv=W.cv,on=(t,ev,fn,o)=>{t.addEventListener(ev,fn,o);W.on.push([t,ev,fn,o])};
+ const at=e=>{const r=cv.getBoundingClientRect();return [(e.clientX-r.left)/W.k+W.cam,(e.clientY-r.top-W.oy)/W.k]};
+ on(cv,'pointerdown',e=>{if(!W)return;e.preventDefault();const [wx,wy]=at(e);W.drag=null;if(tap(wx,wy))return;W.drag=e.pointerId;try{cv.setPointerCapture(e.pointerId)}catch(_){}floorTo(wx,wy,false)});
+ on(cv,'pointermove',e=>{if(!W||W.drag!==e.pointerId)return;const [wx,wy]=at(e);floorTo(wx,wy,true)});
+ const up=e=>{if(W&&W.drag===e.pointerId)W.drag=null};on(cv,'pointerup',up);on(cv,'pointercancel',up);
+ on(W.host,'click',e=>{const b=e.target.closest('[data-w]');if(!b||!W)return;const w=b.dataset.w;
+  if(w==='exit'){sfx('tap');W.o.exit()}else if(w==='go'){sfx('tap');goSec(W.secs[+b.dataset.i],true)}else if(w==='act')act(b.dataset.k,b.dataset.v);else if(w==='fx')hideFact()});
+ W.host.querySelectorAll('[data-w=hold]').forEach(b=>{const d=+b.dataset.d,go_=e=>{e.preventDefault();if(!W)return;W.hold=d;W.me.tx=null;b.classList.add('on')},end=()=>{if(W)W.hold=0;b.classList.remove('on')};
+  on(b,'pointerdown',go_);on(b,'pointerup',end);on(b,'pointercancel',end);on(b,'pointerleave',end);on(b,'contextmenu',e=>e.preventDefault())});
+ const key=e=>{if(!W||modalOpen())return;const down=e.type==='keydown',m={ArrowLeft:'l',a:'l',A:'l',ArrowRight:'r',d:'r',D:'r',ArrowUp:'u',w:'u',W:'u',ArrowDown:'d',s:'d',S:'d'}[e.key];
+  if(m){W.keys[m]=down;e.preventDefault();return}if(!down)return;if(e.key==='Enter'||e.key===' '){e.preventDefault();primary()}else if(e.key==='Escape')W.o.exit()};
+ on(window,'keydown',key);on(window,'keyup',key);on(window,'blur',()=>{if(W){W.keys={};W.hold=0}});
+ let rt=0;on(window,'resize',()=>{clearTimeout(rt);rt=setTimeout(resize,120)})}
+function floorTo(wx,wy,drag){const me=W.me;me.tx=cl(wx,40,W.len-40);me.ty=cl(wy,Y0,Y1);me.run=!drag&&Math.abs(me.tx-me.x)>700;if(!drag)W.ripple={x:me.tx,y:me.ty,t:0}}
+function goSec(s,run){const me=W.me;me.tx=s.spot+(s.kind==='tunnel'?0:rnd(-20,20));me.ty=cl(me.y,Y0+8,Y0+56);me.run=run||Math.abs(me.tx-me.x)>700;W.ripple={x:me.tx,y:me.ty,t:0}}
+function tap(wx,wy){const hit=p=>{const s=scaleAt(p.y)*(p.s||1);return Math.abs(wx-p.x)<26*s&&wy<p.y+6&&wy>p.y-118*s};
+ const ask=W.people.find(p=>p.ask&&!p.hide&&hit(p));if(ask&&REQ){act('request');return true}
+ for(const p of W.staff){if(p.swim)continue;if(p.bust?Math.abs(wx-p.x)<32&&wy>p.y-96&&wy<p.y+8:hit(p)){sfx('tap');emote(p,'😊');const line=T(pk(STAFF_LINES[p.role]||[['안녕하세요!','Hello!']]));bubble(p,line);say(line,{raw:true});return true}}
+ const mo=W.mo,ms=scaleAt(mo.y);if(Math.abs(wx-mo.x)<32*ms&&wy<mo.y+6&&wy>mo.y-70*ms){sfx('bubble');mo.jump=W.t;moSay(T(pk(MO_TAP)));return true}
+ const v=W.people.find(p=>!p.ask&&!p.hide&&hit(p));if(v){sfx('tap');emote(v,'👋');bubble(v,T(pk(VIS_HI)),2.4);return true}
+ // a fish in a window close by
+ for(const s of W.secs){if(s.k==null||!vis(s)||!tankOpen(s.k))continue;const b=s.win;if(wx<b.x||wx>b.x+b.w||wy<b.y||wy>b.y+b.h)continue;
+  if(Math.abs(W.me.x-(b.x+b.w/2))>b.w*.5+160&&s.kind!=='tunnel'){goSec(s,false);return true}
+  const lx=wx-b.x,ly=wy-b.y;let best=null,bd=1e9;for(const f of W.tanks[s.k].fish){const dx=Math.abs(lx-f.x),dy=Math.abs(ly-f.y);if(dx<f.w*.6&&dy<f.w*.45&&dx+dy<bd){bd=dx+dy;best=f}}
+  if(best){sfx('bubble');look(best.id,best);return true}break}
+ // a place on the wall: walk over, or use it if you are already there
+ if(wy<FY){const s=W.secs.find(x=>wx>=x.x0&&wx<x.x1);if(s){if(W.cur===s&&Math.abs(W.me.x-s.spot)<s.w*.5+40)primary();else goSec(s,false);return true}}
+ return false}
+function primary(){const b=W.el.card.querySelector('button.hot')||W.el.card.querySelector('button.main')||W.el.card.querySelector('[data-w=act]');if(b)act(b.dataset.k,b.dataset.v)}
+function act(k,v){if(!W)return;sfx('tap');
+ if(k==='feed'){if(W.o.act('feed',+v))dropFood(+v)}
+ else if(k==='look'){const fs=W.tanks[+v].fish;if(fs.length){const f=pk(fs);look(f.id,f)}}
+ else if(k==='photo'){const fl=W.el.flash;fl.classList.remove('on');void fl.offsetWidth;fl.classList.add('on');setTimeout(()=>{if(W)W.o.act('photo')},420)}
+ else if(k==='exit')W.o.exit();
+ else W.o.act(k,k==='tank'||k==='lesson'?+v:v);
+ if(W){W.panelSig='';W.slow=1}}
+function look(id,f){if(f)f.hl=W.t+2.6;const first=W.o.act('look',id),F=FISH_BY[id];
+ W.el.fact.innerHTML=`<img src="${fishURL(id)}" alt=""><div><b>${esc(fishName(id))}</b><small>${flagsOf(F)} · <span style="color:${RARITY[F.r].c}">${'★'.repeat(F.r)}</span>${first?` · ✨ ${L('처음 관찰!','First look!')}`:''}</small><p>${esc(fishFact(id))}</p></div><button type="button" class="wk-fx" data-w="fx" aria-label="close">✕</button>`;
+ W.el.fact.classList.remove('hidden');clearTimeout(W.factT);W.factT=setTimeout(hideFact,9000)}
+function hideFact(){if(W)W.el.fact.classList.add('hidden')}
+
+// ---------------------------------------------------------------- drawing
+function draw(){const c=W.ctx,k=W.k,dpr=W.dpr,x0=W.cam-60,x1=W.cam+W.vw+60,col=W.col;
+ c.setTransform(k*dpr,0,0,k*dpr,-W.cam*k*dpr,W.oy*dpr);
+ c.fillStyle=col.ceil;c.fillRect(x0,W.yTop-4,x1-x0,62-W.yTop);c.fillStyle=W.gWall;c.fillRect(x0,56,x1-x0,FY-56);
+ c.fillStyle=shade(col.trim,-.1);c.fillRect(x0,52,x1-x0,7);c.fillStyle=col.wain;c.fillRect(x0,392,x1-x0,FY-392);c.fillStyle=shade(col.wain,-.14);c.fillRect(x0,388,x1-x0,6);
+ for(const s of W.secs)if(vis(s)){ceiling(c,s);lights(c,s)}
+ for(const s of W.secs)if(vis(s))DRAW[s.kind](c,s);
+ for(let j=1;j<W.secs.length;j++){const x=W.secs[j].x0;if(x>x0-40&&x<x1+40)pillar(c,x)}
+ floor(c,x0,x1);
+ for(let j=1;j<W.secs.length;j++){const x=W.secs[j].x0;if(x>x0-60&&x<x1+60&&j%2)plant(c,x,j)}
+ const list=[];for(const it of W.items)list.push([it.y,()=>item(c,it)]);
+ for(const p of W.people)if(!p.hide&&p.x>x0&&p.x<x1)list.push([p.y,()=>person(c,p)]);
+ for(const p of W.staff)if(!p.bust&&!p.swim&&p.x>x0&&p.x<x1)list.push([p.y,()=>person(c,p)]);
+ list.push([W.mo.y,()=>mooni(c)],[W.me.y+.1,()=>person(c,W.me)]);list.sort((a,b)=>a[0]-b[0]);for(const d of list)d[1]();
+ overlays(c,x0,x1)}
+const DRAW={entry,tank:tankSec,tunnel,toilet,snack:shop,gift:shop,mart:shop,photo};
+function ceiling(c,s){if(s.kind==='tunnel'&&W.a.open>=5)return;const cols=[W.col.trim,'#ffffff',W.R.water[0],'#ffd23f'],P0=[s.x0+6,12],P1=[s.cx,44],P2=[s.x1-6,12],at=t=>[(1-t)*(1-t)*P0[0]+2*(1-t)*t*P1[0]+t*t*P2[0],(1-t)*(1-t)*P0[1]+2*(1-t)*t*P1[1]+t*t*P2[1]];
+ c.strokeStyle='rgba(255,255,255,.55)';c.lineWidth=2;c.beginPath();c.moveTo(P0[0],P0[1]);c.quadraticCurveTo(P1[0],P1[1],P2[0],P2[1]);c.stroke();
+ const n=Math.max(5,Math.round(s.w/46));for(let j=1;j<n;j++){const [x,y]=at(j/n);c.fillStyle=cols[(j+s.i)%4];c.beginPath();c.moveTo(x-8,y);c.lineTo(x+8,y);c.lineTo(x,y+17);c.closePath();c.fill()}
+ // a fish mobile turning slowly, when there is ceiling to spare (tall screens)
+ if(W.topY<-70&&s.k!=null){const id=W.d.tanks[s.k],im=fspr(id),y=W.topY*.5,sx=Math.cos(W.t*.8+s.i);c.strokeStyle='rgba(255,255,255,.4)';c.lineWidth=1.5;c.beginPath();c.moveTo(s.cx,W.yTop);c.lineTo(s.cx,y-20);c.stroke();
+  if(im){c.save();c.translate(s.cx,y+Math.sin(W.t*1.3+s.i)*3);c.scale(Math.abs(sx)<.15?.15*Math.sign(sx||1):sx,1);c.drawImage(im,-34,-23,68,45);c.restore()}}}
+function lights(c,s){if(s.kind==='tunnel'&&W.a.open>=5)return;for(const x of s.kind==='entry'?[s.x0+130,s.x0+360]:s.kind==='tunnel'?[s.x0+300,s.x1-300]:[s.cx]){
+ c.fillStyle='rgba(255,246,200,.08)';c.beginPath();c.moveTo(x-22,52);c.lineTo(x+22,52);c.lineTo(x+150,FY);c.lineTo(x-150,FY);c.closePath();c.fill();
+ c.fillStyle=shade(W.col.ceil,.2);c.fillRect(x-26,38,52,9);oval(c,x,50,22,6,'#fff6c8')}}
+function sign(c,cx,cy,text,bg,maxW){const sp=fit(text,26,'#ffffff',maxW,{stroke:'rgba(0,0,0,.18)'}),w=sp.w+26,h=sp.h+8;
+ c.fillStyle='rgba(0,0,0,.16)';rr(c,cx-w/2,cy-h/2+4,w,h,14);c.fill();c.fillStyle=bg;rr(c,cx-w/2,cy-h/2,w,h,14);c.fill();c.fillStyle='rgba(255,255,255,.2)';rr(c,cx-w/2+4,cy-h/2+3,w-8,h*.42,10);c.fill();put(c,sp,cx,cy)}
+function awning(c,x,y,w,h,col){const n=Math.max(4,Math.round(w/34)),sw=w/n;for(let j=0;j<n;j++){c.fillStyle=j%2?'#ffffff':col;c.fillRect(x+j*sw,y,sw+.6,h);c.beginPath();c.arc(x+j*sw+sw/2,y+h,sw/2,0,Math.PI);c.fill()}c.fillStyle='rgba(0,0,0,.1)';c.fillRect(x,y,w,5)}
+function pillar(c,x){const t=W.col.trim;c.fillStyle=shade(t,-.15);c.fillRect(x-15,56,30,FY-56);c.fillStyle='rgba(255,255,255,.22)';c.fillRect(x-11,56,7,FY-56);
+ c.fillStyle=shade(t,-.32);c.fillRect(x-20,56,40,12);c.fillRect(x-20,FY-16,40,16);dot(c,x,172,26,'rgba(255,240,180,.22)');dot(c,x,172,8,'#fff3c0')}
+function plant(c,x,j){const d=W.d,key=j%4===1?d.deco:d.deco2,e=DECO_E[key]||'🌿';
+ if(POTTED.has(key)){put(c,emo(e,64),x,FY-26);c.fillStyle='#d9774a';c.beginPath();c.moveTo(x-20,FY-4);c.lineTo(x+20,FY-4);c.lineTo(x+15,FY+22);c.lineTo(x-15,FY+22);c.closePath();c.fill();c.fillStyle='#f0905e';c.fillRect(x-22,FY-8,44,8)}
+ else put(c,emo(e,54),x,FY-2)}
+function badge(c,x,y,t){dot(c,x,y,17,'#ffffff');dot(c,x,y,14,W.col.trim);put(c,txt(t,17,'#ffffff'),x,y)}
+
+function entry(c,s){const R_=W.R,col=W.col,dx=s.x0+40,dw=180,dy=152;
+ c.fillStyle=shade(col.trim,-.25);rr(c,dx-10,dy-10,dw+20,FY-dy+12,14);c.fill();
+ c.save();rr(c,dx,dy,dw,FY-dy,8);c.clip();c.fillStyle=W.gOut;c.fillRect(dx,dy,dw,FY-dy);dot(c,dx+140,dy+46,18,'#fff4a8');
+ put(c,emo(DECO_E[W.d.deco]||'🌴',70),dx+46,FY-78);c.fillStyle='rgba(255,255,255,.2)';c.beginPath();c.moveTo(dx+20,dy);c.lineTo(dx+70,dy);c.lineTo(dx+10,FY);c.lineTo(dx-40,FY);c.closePath();c.fill();c.restore();
+ c.fillStyle=shade(col.trim,-.25);c.fillRect(dx+dw/2-3,dy,6,FY-dy);c.fillStyle='#e8eef8';rr(c,dx+dw/2-17,dy+140,8,44,4);c.fill();rr(c,dx+dw/2+9,dy+140,8,44,4);c.fill();
+ sign(c,dx+dw/2,100,`${R_.flag} ${W.d.name}`,col.trim,250);
+ const bx=s.x0+272,bw=176,cx=bx+bw/2;sign(c,cx,152,`🎫 ${L('매표소','Tickets')}`,shade(col.trim,-.15),160);awning(c,bx-8,184,bw+16,36,col.trim);
+ c.fillStyle=mix(col.trim,'#ffffff',.72);c.fillRect(bx,220,bw,FY-220);c.fillStyle=shade(col.wall,-.5);rr(c,bx+16,236,bw-32,104,10);c.fill();
+ const cs=W.staff.find(p=>p.bust&&p.role==='cashier');if(cs)person(c,cs);else put(c,emo('🛎️',26),cx+44,322);
+ c.fillStyle=shade(col.trim,.35);rr(c,bx-6,334,bw+12,16,6);c.fill();c.fillStyle=col.trim;c.fillRect(bx,350,bw,FY-350);c.fillStyle='rgba(255,255,255,.16)';c.fillRect(bx,350,bw,14);
+ put(c,emo('🎫',36),cx-40,398);put(c,txt(`${COIN}${short(ticketPrice(W.g,W.i))}`,20,'#ffffff',{stroke:'rgba(0,0,0,.25)'}),cx+26,398)}
+function winPath(c,x,y,w,h,shape){if(shape==='arch'){const ah=Math.min(h*.36,92);c.beginPath();c.moveTo(x,y+h);c.lineTo(x,y+ah);c.ellipse(x+w/2,y+ah,w/2,ah,0,Math.PI,TAU);c.lineTo(x+w,y+h);c.closePath()}else rr(c,x,y,w,h,shape==='port'?Math.min(w,h)*.3:20)}
+function tankSec(c,s){const a=W.a,k=s.k,b=s.win,open=a.open>k,shape=W.d.win;
+ c.fillStyle=shade(W.col.trim,-.22);winPath(c,b.x-14,b.y-14,b.w+28,b.h+28,shape);c.fill();
+ c.strokeStyle=shade(W.col.trim,.3);c.lineWidth=4;winPath(c,b.x-7,b.y-7,b.w+14,b.h+14,shape);c.stroke();
+ c.save();c.translate(b.x,b.y);winPath(c,0,0,b.w,b.h,shape);c.clip();if(open)water(c,s);else locked(c,s);c.restore();
+ if(shape==='port')for(const [px,py] of [[-7,b.h*.5],[b.w+7,b.h*.5],[b.w*.5,-7],[b.w*.5,b.h+7]])dot(c,b.x+px,b.y+py,4,shade(W.col.trim,.45));
+ if(!open&&k===nextStageOf(a)){c.strokeStyle=`rgba(255,210,63,${.55+.45*Math.sin(W.t*4)})`;c.lineWidth=6;winPath(c,b.x-3,b.y-3,b.w+6,b.h+6,shape);c.stroke()}
+ badge(c,b.x+10,b.y+10,String(k+1));
+ const id=W.d.tanks[k],tx=open?`${fishName(id)} ${'★'.repeat(FISH_BY[id].r)}`:L(`${k+1}번 수조 · 곧 열려요`,`Tank ${k+1} · soon`),sp=fit(tx,17,'#2a3350',230),w=Math.max(120,sp.w+26);
+ c.fillStyle='rgba(0,0,0,.12)';rr(c,s.cx-w/2,403,w,30,10);c.fill();c.fillStyle='#fffdf6';rr(c,s.cx-w/2,399,w,30,10);c.fill();put(c,sp,s.cx,414);
+ if(open&&hungry(a,k)&&UNLOCK.feed()){dot(c,b.x+b.w-22,b.y+22,20,'#ffffff');put(c,emo('🍤',26),b.x+b.w-22,b.y+22+Math.sin(W.t*5)*3)}}
+function water(c,s){const b=s.win,k=s.k,T=W.tanks[k],w=b.w,h=b.h,t=W.t;
+ c.fillStyle=W.gWater;c.fillRect(0,0,w,h);c.fillStyle='rgba(255,255,255,.07)';
+ for(let j=0;j<3;j++){const x=(t*14+j*130+k*40)%(w+160)-80;c.beginPath();c.moveTo(x,0);c.lineTo(x+44,0);c.lineTo(x+110,h);c.lineTo(x+40,h);c.closePath();c.fill()}
+ c.fillStyle=W.gSand;c.beginPath();c.moveTo(0,h-38);c.quadraticCurveTo(w*.3,h-54,w*.55,h-40);c.quadraticCurveTo(w*.8,h-28,w,h-44);c.lineTo(w,h);c.lineTo(0,h);c.closePath();c.fill();
+ c.lineCap='round';c.lineWidth=7;for(let j=0;j<4;j++){const x=w*(.07+j*.29)+(k*13%20),hh=58+(j*37+k*11)%50,sw=Math.sin(t*1.3+j*1.7)*10;c.strokeStyle=j%2?'#2fae5a':'#3cc070';c.beginPath();c.moveTo(x,h-30);c.quadraticCurveTo(x+sw,h-30-hh*.5,x+sw*1.6,h-30-hh);c.stroke()}
+ const dec=W.a.decor[k];dec.forEach((id,j)=>{const D=DECOR_BY[id];if(D)put(c,emo(D.icon,40),w*(j+1)/(dec.length+1),h-36)});
+ for(const f of T.food)dot(c,f.x,f.y,3.6,'#c8762a');
+ for(const f of T.fish)fish(c,f);
+ c.strokeStyle='rgba(255,255,255,.6)';c.lineWidth=1.6;for(let j=0;j<6;j++){const x=(j*67+k*41)%w+Math.sin(t*2+j)*4,y=h-(t*38+j*61)%h;c.beginPath();c.arc(x,y,3+j%3,0,TAU);c.stroke()}
+ c.fillStyle='rgba(255,255,255,.09)';c.beginPath();c.moveTo(w*.06,0);c.lineTo(w*.26,0);c.lineTo(w*.02,h);c.lineTo(-w*.18,h);c.closePath();c.fill()}
+function fish(c,f){const im=fspr(f.id);if(!im)return;const w=f.w,h=w*2/3;c.save();c.translate(f.x,f.y);if(f.dir<0)c.scale(-1,1);c.drawImage(im,-w/2,-h/2,w,h);c.restore();
+ if(f.hl>W.t){c.strokeStyle=`rgba(255,236,110,${Math.min(1,(f.hl-W.t)/1.2)})`;c.lineWidth=3;c.beginPath();c.ellipse(f.x,f.y,w*.62,h*.66,0,0,TAU);c.stroke()}}
+function locked(c,s){const b=s.win,w=b.w,h=b.h,k=s.k,id=W.d.tanks[k],im=fspr(id,true);c.fillStyle=W.gLock;c.fillRect(0,0,w,h);
+ if(im){const fw=Math.min(170,fishW(id)*2.2),y=h*.58+Math.sin(W.t*1.1)*6;c.globalAlpha=.6;c.drawImage(im,w/2-fw/2,y-fw/3,fw,fw*2/3);c.globalAlpha=1}
+ put(c,emo('🔒',42),w/2,h*.2);put(c,txt(`${STAGES[k].icon} ${stageName(k)}`,19,'#ffffff',{stroke:'rgba(0,0,0,.3)'}),w/2,h*.2+40);
+ c.fillStyle='#ffd23f';c.fillRect(0,h-24,w,24);c.fillStyle='#2a3350';for(let x=-20;x<w;x+=36){c.beginPath();c.moveTo(x,h);c.lineTo(x+16,h-24);c.lineTo(x+30,h-24);c.lineTo(x+14,h);c.closePath();c.fill()}}
+function tunnel(c,s){const a=W.a,b=s.win,col=W.col;if(a.open<5){curtain(c,s);return}const top=W.yTop-4,t=W.t;
+ c.save();c.beginPath();c.rect(b.x,top,b.w,FY-top);c.clip();c.fillStyle=W.gTun;c.fillRect(b.x,top,b.w,FY-top);
+ c.fillStyle='rgba(255,255,255,.06)';for(let j=0;j<6;j++){const x=b.x+(t*16+j*230)%(b.w+300)-150;c.beginPath();c.moveTo(x,top);c.lineTo(x+60,top);c.lineTo(x+170,FY);c.lineTo(x+70,FY);c.closePath();c.fill()}
+ c.fillStyle=W.gTunSand;c.beginPath();c.moveTo(b.x,FY);for(let x=0;x<=b.w;x+=60)c.lineTo(b.x+x,FY-44-Math.sin(x*.021)*14-Math.sin(x*.057)*8);c.lineTo(b.x+b.w,FY);c.closePath();c.fill();
+ ['🪸','🌿','🪨','🐚','🪸','🌿'].forEach((e,j)=>{for(let x=b.x+60+j*170;x<b.x+b.w;x+=1020)put(c,emo(e,j%3===2?34:44),x,FY-40-(j%2)*8)});
+ c.translate(b.x,b.y);
+ const sh=fspr(W.d.star,true);if(sh){const u=(t*.022)%1.4-.2,dir=Math.floor(t*.022/1.4)%2?-1:1,x=dir>0?u*b.w:(1-u)*b.w,fw=360;c.save();c.globalAlpha=.16;c.translate(x,120+Math.sin(t*.4)*14);if(dir<0)c.scale(-1,1);c.drawImage(sh,-fw/2,-fw/3,fw,fw*2/3);c.restore()}
+ // a shimmering school of little silver fish
+ const sx=b.w*(.5+.38*Math.sin(t*.13)),sy=150+60*Math.sin(t*.21),sd=Math.cos(t*.13)>0?1:-1;for(let j=0;j<22;j++){const ox=Math.cos(j*2.4)*70*(.35+(j%5)/6),oy=Math.sin(j*1.7)*34+Math.sin(t*2+j)*3,x=sx+ox,y=sy+oy;oval(c,x,y,9,3.6,'#cfdbe8');oval(c,x+sd*3,y-1,4,1.6,'#ffffff');c.fillStyle='#9fb2c8';c.beginPath();c.moveTo(x-sd*8,y);c.lineTo(x-sd*14,y-4);c.lineTo(x-sd*14,y+4);c.closePath();c.fill()}
+ const dv=W.staff.find(p=>p.swim);if(dv){const x=b.w*(.5+.42*Math.sin(t*.09+1)),y=250+40*Math.sin(t*.3),dir=Math.cos(t*.09+1)>0?1:-1;put(c,emo(dv.head,50),x,y);oval(c,x+dir*4,y-6,17,8,'rgba(80,200,255,.5)');c.strokeStyle='rgba(255,255,255,.6)';c.lineWidth=1.5;for(let j=0;j<3;j++){c.beginPath();c.arc(x+dir*10,y-30-((t*40+j*20)%60),3+j,0,TAU);c.stroke()}}
+ for(const f of W.tanks[4].food)dot(c,f.x,f.y,4,'#c8762a');for(const f of W.tanks[4].fish)fish(c,f);c.restore();
+ for(let x=b.x+100;x<b.x+b.w-60;x+=200){c.fillStyle='rgba(255,255,255,.16)';c.fillRect(x-7,top,14,FY-top);c.fillStyle='rgba(20,40,80,.16)';c.fillRect(x+7,top,3,FY-top)}
+ for(const x of [b.x,b.x+b.w]){c.fillStyle=shade(col.trim,-.25);c.fillRect(x-14,top,28,FY-top);c.fillStyle='rgba(255,255,255,.18)';c.fillRect(x-10,top,6,FY-top)}
+ sign(c,b.x+170,76,`🌊 ${L('해저 터널','Undersea tunnel')}`,shade(col.trim,-.1),260);
+ if(hungry(a,4)&&UNLOCK.feed()){dot(c,b.x+330,76,20,'#ffffff');put(c,emo('🍤',26),b.x+330,76+Math.sin(W.t*5)*3)}}
+function curtain(c,s){const x=s.x0+40,w=s.w-80,y=64,h=FY-64,a=W.a;c.fillStyle='#7a1f3a';c.fillRect(x,y,w,h);
+ for(let j=0,xx=x;xx<x+w;j++,xx+=46){c.fillStyle=j%2?'rgba(255,255,255,.08)':'rgba(0,0,0,.14)';c.fillRect(xx,y,23,h)}
+ c.fillStyle='#f0b52a';c.fillRect(x,y,w,20);for(let xx=x;xx<x+w;xx+=40){c.beginPath();c.arc(xx+20,y+20,20,0,Math.PI);c.fill()}
+ const next=nextStageOf(a)===4,im=fspr(W.d.star,true);for(const cx of [s.x0+230,s.cx,s.x1-230]){if(cx<W.cam-220||cx>W.cam+W.vw+220)continue;
+  c.fillStyle='rgba(0,0,0,.2)';rr(c,cx-158,166,316,132,18);c.fill();c.fillStyle='#fffaf0';rr(c,cx-158,160,316,132,18);c.fill();c.strokeStyle='#f0b52a';c.lineWidth=5;rr(c,cx-150,168,300,116,14);c.stroke();
+  put(c,fit(`🏆 ${L('마스터 쇼 · 해저 터널','Mastery Show · Undersea tunnel')}`,22,'#7a1f3a',280),cx,200);put(c,fit(next?`▶ ${L('마스터 쇼를 통과하면 열려요!','Pass the Mastery Show to open it!')}`:`🔒 ${L('수조 4개를 먼저 열어요','Open four tanks first')}`,17,'#4a5070',280),cx,246);
+  if(im){c.globalAlpha=.35;c.drawImage(im,cx-75,312,150,100);c.globalAlpha=1}}}
+function shop(c,s){const col=W.col,f=s.f,lv=S.fac[f],x=s.x0+22,w=s.w-44,cx=s.cx,F=FAC[f];
+ if(!lv){const unl=UNLOCK[f]();c.fillStyle=unl?'#d9b27a':'#a9aab4';c.fillRect(x,122,w,FY-122);c.strokeStyle='rgba(0,0,0,.12)';c.lineWidth=2;c.beginPath();for(let yy=154;yy<FY;yy+=34){c.moveTo(x,yy);c.lineTo(x+w,yy)}c.stroke();
+  c.strokeStyle=unl?'#b8894a':'#8a8b95';c.lineWidth=16;c.lineCap='round';c.beginPath();c.moveTo(x+24,156);c.lineTo(x+w-24,FY-30);c.moveTo(x+w-24,156);c.lineTo(x+24,FY-30);c.stroke();
+  sign(c,cx,96,`${unl?F.icon:'🔒'} ${L(F.ko,F.en)}`,unl?'#ff9a3a':'#8a90a8',w-24);
+  c.fillStyle='#fffdf6';rr(c,cx-112,232,224,62,10);c.fill();put(c,emo(unl?'🏗️':'🔒',30),cx,250);put(c,fit(unl?L('여기에 지을 수 있어요!','Build here!'):L('아직 잠겨 있어요','Still locked'),16,'#4a3a20',200),cx,278);return}
+ sign(c,cx,92,`${F.icon} ${L(F.ko,F.en)}`,col.trim,w-14);awning(c,x-6,118,w+12,40,col.trim);
+ c.fillStyle=shade(col.wall,-.38);c.fillRect(x,158,w,FY-158);c.fillStyle='#b98a5a';c.fillRect(x+10,234,w-20,8);c.fillRect(x+10,302,w-20,8);
+ const goods=GOODS[f],n=Math.min(goods.length,2+Math.ceil(lv/2)*2),per=Math.ceil(n/2);for(let j=0;j<n;j++)put(c,emo(goods[j],30),x+24+(w-48)*(Math.floor(j/2)+.5)/per,j%2?284:216);
+ const cs=W.staff.find(p=>p.bust&&p.role===f);if(cs)person(c,cs);
+ c.fillStyle=shade(col.trim,.35);rr(c,x-6,344,w+12,16,6);c.fill();c.fillStyle=col.trim;c.fillRect(x,360,w,FY-360);c.fillStyle='rgba(255,255,255,.15)';c.fillRect(x,360,w,12);
+ put(c,emo(F.icon,38),cx-34,404);put(c,txt('Lv.'+lv,20,'#ffffff',{stroke:'rgba(0,0,0,.25)'}),cx+28,404)}
+function toilet(c,s){const a=W.a,x=s.x0+22,w=s.w-44,cx=s.cx,unl=UNLOCK.toilet(),dirt=unl?a.dirt:0;
+ sign(c,cx,92,`🚻 ${L('화장실','Restrooms')}`,'#4a90d9',w-14);
+ c.fillStyle='#eef6ff';c.fillRect(x,122,w,FY-122);c.strokeStyle='rgba(120,160,210,.35)';c.lineWidth=1.5;c.beginPath();for(let yy=150;yy<FY;yy+=28){c.moveTo(x,yy);c.lineTo(x+w,yy)}for(let xx=x+28;xx<x+w;xx+=28){c.moveTo(xx,122);c.lineTo(xx,FY)}c.stroke();
+ for(const [sd,cl_,ic] of [[-1,'#4a90d9','🚹'],[1,'#ff7aa8','🚺']]){const X=cx+sd*58-38;c.fillStyle=cl_;rr(c,X,206,76,FY-206,8);c.fill();c.fillStyle='rgba(255,255,255,.2)';rr(c,X+6,212,64,40,6);c.fill();put(c,emo(ic,32),X+38,250);dot(c,X+(sd<0?64:12),330,5,'#e8eef8')}
+ if(dirt>25){c.fillStyle=`rgba(120,90,40,${Math.min(.55,(dirt-25)/110)})`;for(let j=0;j<8;j++){c.beginPath();c.ellipse(x+20+(j*83+s.i*29)%(w-40),150+(j*47)%250,10+j%3*5,7+j%2*4,j,0,TAU);c.fill()}}
+ if(!unl){c.fillStyle='#fffdf6';rr(c,cx-100,150,200,44,10);c.fill();put(c,fit(`🔒 ${L('준비 중','Coming soon')}`,17,'#4a3a20',180),cx,172)}
+ if(dirt>60){for(let j=0;j<(dirt>85?4:2);j++)put(c,emo('🪰',18),cx+Math.sin(W.t*2.3+j*2)*84,200+Math.cos(W.t*3.1+j*1.3)*50)}
+ else if(unl&&dirt<15){for(let j=0;j<3;j++){c.globalAlpha=(Math.sin(W.t*3+j*2)+1)/2;put(c,emo('✨',22),x+40+j*(w-80)/2,170+(j%2)*90);c.globalAlpha=1}}}
+function photo(c,s){const x=s.x0+40,w=s.w-80,y=102,h=280,t=W.t;sign(c,s.cx,74,`📸 ${L('포토존','Photo spot')}`,'#ff6a9a',w);
+ c.fillStyle='#d99a1f';rr(c,x-14,y-10,w+28,h+24,18);c.fill();c.fillStyle='#ffd45a';rr(c,x-8,y-4,w+16,h+12,14);c.fill();
+ c.save();rr(c,x,y,w,h,10);c.clip();c.fillStyle=W.gPhoto;c.fillRect(x,y,w,h);dot(c,x+w-50,y+40,22,'#fff4a8');
+ const im=fspr(W.d.star);if(im){const fw=200,fy=y+190+Math.sin(t*1.2)*8;c.save();c.translate(x+w/2,fy);c.drawImage(im,-fw/2,-fw/3,fw,fw*2/3);c.restore()}
+ c.strokeStyle='rgba(255,255,255,.7)';c.lineWidth=2;for(let j=0;j<5;j++){c.beginPath();c.arc(x+30+j*55,y+h-((t*30+j*50)%140),4+j%2*2,0,TAU);c.stroke()}c.restore();
+ put(c,emo('⭐',26),x-4,y-2);put(c,emo('⭐',26),x+w+4,y-2)}
+function floor(c,x0,x1){const yb=W.yBot+4,mid=W.cam+W.vw/2;c.fillStyle=W.gFloor;c.fillRect(x0,FY,x1-x0,yb-FY);
+ for(const s of W.secs){if(!vis(s))continue;if(s.kind==='tank'&&W.a.open>s.k||s.kind==='tunnel'&&W.a.open>=5){c.fillStyle=W.gRefl;c.fillRect(s.win.x,FY,s.win.w,90)}}
+ c.strokeStyle='rgba(0,0,0,.06)';c.lineWidth=1.5;c.beginPath();for(let x=Math.floor(x0/90)*90;x<x1;x+=90){c.moveTo(x,FY);c.lineTo(x+(x-mid)*.5*(yb-FY)/150,yb)}for(const yy of [FY+16,FY+40,FY+74,FY+120,FY+180,FY+260,FY+360])if(yy<yb){c.moveTo(x0,yy);c.lineTo(x1,yy)}c.stroke();
+ c.fillStyle=shade(W.col.wain,-.32);c.fillRect(x0,FY-4,x1-x0,8);
+ for(const s of W.secs){if(!vis(s))continue;
+  if(s.kind==='tunnel'){if(W.a.open>=5){c.fillStyle='rgba(40,120,210,.1)';c.fillRect(s.win.x,FY,s.win.w,yb-FY);for(let j=0;j<7;j++){const cx=s.win.x+((W.t*22+j*170)%s.win.w),cy=FY+30+((j*53)%130);oval(c,cx,cy,40+j%3*14,8+j%2*4,'rgba(200,240,255,.13)')}}
+   else{c.strokeStyle='#c8302a';c.lineWidth=5;c.beginPath();const xs=[];for(let x=s.x0+120;x<=s.x1-120;x+=230)xs.push(x);xs.forEach((x,j)=>{if(j){const p=xs[j-1];c.moveTo(p,FY-14);c.quadraticCurveTo((p+x)/2,FY+18,x,FY-14)}});c.stroke();for(const x of xs){c.fillStyle='#d9a52a';c.fillRect(x-4,FY-30,8,50);oval(c,x,FY+22,14,5,'#b8861a');dot(c,x,FY-32,7,'#f0c040')}}}
+  if(s.f==='toilet'&&UNLOCK.toilet()&&W.a.dirt>50){oval(c,s.cx-40,FY+24,46,9,'rgba(150,120,60,.28)');oval(c,s.cx+52,FY+40,30,7,'rgba(150,120,60,.22)')}
+  if(s.kind==='photo'){c.strokeStyle='rgba(255,255,255,.85)';c.lineWidth=3;c.setLineDash([10,8]);c.beginPath();c.ellipse(s.cx,522,80,20,0,0,TAU);c.stroke();c.setLineDash([]);put(c,emo('👣',26),s.cx,522)}}}
+function item(c,it){const bob=Math.sin(W.t*4+it.x)*3;oval(c,it.x,it.y,14,4,'rgba(20,30,60,.16)');
+ if(it.kind==='tip'){dot(c,it.x,it.y-18+bob,20,'rgba(255,220,80,.35)');put(c,emo('💰',28),it.x,it.y-18+bob)}else put(c,emo(it.e,24),it.x,it.y-10)}
+// a chibi person: emoji head on a round glossy body; feet at (p.x,p.y). Shop clerks stand behind their counters (bust)
+function person(c,p){const s=(p.bust?1:scaleAt(p.y))*(p.s||1),mv=p.moving?1:0,sw=Math.sin(p.ph)*mv,bob=mv?Math.abs(Math.cos(p.ph))*2.4:0,dir=p.dir||1;
+ c.save();c.translate(p.x,p.y);c.scale(s,s);
+ if(!p.bust){oval(c,0,0,20,5.5,'rgba(20,30,60,.2)');c.lineCap='round';c.strokeStyle=p.pants;c.lineWidth=8;c.beginPath();c.moveTo(-5,-26);c.lineTo(-5+sw*7,-5);c.moveTo(5,-26);c.lineTo(5-sw*7,-5);c.stroke();
+  oval(c,-5+sw*7+dir*2,-3,5.5,3.2,'#3a3f58');oval(c,5-sw*7+dir*2,-3,5.5,3.2,'#3a3f58')}
+ const ty=(p.bust?0:-26-bob)-38;if(!p.g||p.gb!==!!p.bust){p.gb=!!p.bust;p.g=lg(c,-16,ty,16,ty+40,[[0,shade(p.shirt,.32)],[1,shade(p.shirt,-.18)]])}
+ c.lineCap='round';c.strokeStyle=shade(p.shirt,-.08);c.lineWidth=7;c.beginPath();c.moveTo(-14,ty+9);c.lineTo(-17-sw*6,ty+30);c.moveTo(14,ty+9);c.lineTo(17+sw*6,ty+30);c.stroke();
+ dot(c,-17-sw*6,ty+31,4.5,'#ffd9b8');dot(c,17+sw*6,ty+31,4.5,'#ffd9b8');
+ c.fillStyle=p.g;rr(c,-16,ty,32,40,13);c.fill();c.fillStyle='rgba(255,255,255,.24)';rr(c,-11,ty+4,8,18,4);c.fill();
+ if(p.badge)put(c,emo(p.badge,14),7,ty+14);if(p.held)put(c,emo(p.held,22),dir*21,ty+28);
+ const hd=emo(p.head,48);c.drawImage(hd.cv,-hd.w/2,ty-20-hd.h/2,hd.w,hd.h);c.restore()}
+function mooni(c){const m=W.mo,s=scaleAt(m.y),hop=m.moving?Math.abs(Math.sin(m.ph))*6:0,u=(W.t-(m.jump||-9))/.5,jump=u<1?Math.sin(u*Math.PI)*28:0;
+ c.save();c.translate(m.x,m.y);c.scale(s,s);oval(c,0,0,22,6,'rgba(20,30,60,.2)');const im=mooniImg();
+ if(im){c.drawImage(im,-32,-70-hop-jump,64,64)}else{const sp=emo('🦦',58);c.drawImage(sp.cv,-sp.w/2,-sp.h+10-hop-jump,sp.w,sp.h)}c.restore()}
+function speech(c,x,y,text){const sp=txt(text,17,'#2a3350',{max:230}),w=sp.w+18,h=sp.h+8,bx=cl(x,W.cam+w/2+6,W.cam+W.vw-w/2-6);
+ // never cover the child's own head: lift the bubble above it when they overlap
+ if(Math.abs(bx-W.me.x)<w/2+26)y=Math.min(y,headY(W.me)-34);const by=Math.max(W.topY+h+6,y);
+ c.fillStyle='rgba(0,0,0,.14)';rr(c,bx-w/2,by-h+3,w,h,14);c.fill();c.fillStyle='#ffffff';rr(c,bx-w/2,by-h,w,h,14);c.fill();c.beginPath();c.moveTo(cl(x,bx-w/2+14,bx+w/2-14)-8,by-1);c.lineTo(x,by+12);c.lineTo(cl(x,bx-w/2+14,bx+w/2-14)+8,by-1);c.closePath();c.fill();put(c,sp,bx,by-h/2)}
+const headY=p=>p===W.mo?p.y-72*scaleAt(p.y):p.bust?p.y-92:p.y-132*scaleAt(p.y)*(p.s||1);
+function overlays(c,x0,x1){const t=W.t;
+ if(W.ripple){const r=W.ripple,u=r.t/.6;c.strokeStyle=`rgba(255,255,255,${.8*(1-u)})`;c.lineWidth=3;c.beginPath();c.ellipse(r.x,r.y,10+u*26,3+u*8,0,0,TAU);c.stroke()}
+ for(const p of W.people.concat(W.staff)){if(p.hide||p.swim||p.x<x0||p.x>x1)continue;
+  if(p.ask&&p.wait>0){const y=headY(p)-14+Math.sin(t*5)*4;dot(c,p.x,y,22,'#ffffff');put(c,emo('❓',26),p.x,y);put(c,emo('🙋',26),p.x+26,y+10)}
+  else if(p.emoT>t)put(c,emo(p.emo,26),p.x,headY(p)-8)}
+ const m=W.me,y=headY(m)-6+Math.sin(t*4)*4;c.fillStyle='#ffcf33';c.strokeStyle='#ffffff';c.lineWidth=3;c.beginPath();c.moveTo(m.x-11,y-13);c.lineTo(m.x+11,y-13);c.lineTo(m.x,y);c.closePath();c.fill();c.stroke();
+ for(const b of W.bubbles)speech(c,b.who.x,headY(b.who)-8,b.text);
+ for(const p of W.pops){c.globalAlpha=Math.max(0,1-p.t/1.3);put(c,txt(p.text,20,'#ffd23f',{stroke:'rgba(60,40,0,.6)'}),p.x,p.y-p.t*42);c.globalAlpha=1}}
+
+return {start,stop,on:()=>!!W,visitor:v=>{if(W)spawn(v,false)},
+ _state:()=>W&&{x:Math.round(W.me.x),y:Math.round(W.me.y),cam:Math.round(W.cam),k:+W.k.toFixed(3),dpr:+W.dpr.toFixed(2),vw:Math.round(W.vw),len:W.len,sec:W.cur&&W.cur.kind,people:W.people.length,staff:W.staff.length,items:W.items.length,ask:!!W.people.find(p=>p.ask),fish:W.tanks.map(T=>T.fish.length),panel:W.el.card.textContent},
+ _walk:x=>{if(W){W.me.x=x;W.me.tx=null;W.cam=cl(x-W.vw*.5,0,Math.max(0,W.len-W.vw))}},_tap:(wx,wy)=>W&&(tap(wx,wy)||(floorTo(wx,wy,false),false)),_screen:(wx,wy)=>W&&scr(wx,wy)};
+})();
 </script>
 <script>
 // ================================================================ Little Math Aquarium · core
@@ -8572,9 +9066,10 @@ const freshS=()=>({v:1,created:dayKey(),name:L('관장님','Director'),av:'🧒'
  fac:{ticket:1,toilet:1,snack:0,gift:0,mart:0},staff:[],board:{day:'',c:[]},car:{model:'van',color:'#ff6a5a',speed:0,magnet:0,shield:0,owned:['van']},store:{},dex:{},
  stats:{solved:0,correct:0,first:0,wrong:0,secs:0,bestCombo:0,cleans:0,orders:0,feeds:0,drives:0,trips:0,caught:0,stars3:0,tanks:0,aqs:0,reviews:0,earned:0,hired:0},
  sk:{},hist:{},daily:{day:'',tasks:[],gift:false,chest:false,review:false},streak:{n:0,best:0,last:'',shields:1},week:{key:'',days:[]},ach:[],log:[],
- opt:{sound:true,voice:true,readQ:true,money:LANG==='en'?'cad':'krw'},tut:{},last:now(),orders:{},deliveries:{day:'',n:0}});
+ opt:{sound:true,voice:true,readQ:true,money:LANG==='en'?'cad':'krw'},tut:{},last:now(),orders:{},deliveries:{day:'',n:0},
+ walk:{seen:{},photo:{},day:'',been:[],toured:false,today:{day:'',ids:[]}}});
 function loadS(){let d=null;try{d=JSON.parse(localStorage.getItem(SAVE_KEY)||'null')}catch(e){}const f=freshS();if(!d||typeof d!=='object')return f;
- const s={...f,...d};for(const k of ['fac','car','stats','daily','streak','week','opt','tut','board','deliveries'])s[k]={...f[k],...(d[k]||{})};
+ const s={...f,...d};for(const k of ['fac','car','stats','daily','streak','week','opt','tut','board','deliveries','walk'])s[k]={...f[k],...(d[k]||{})};
  s.items={...d.items};for(const g in s.G){s.G[g].aq=(s.G[g].aq||[]).map(a=>({...freshAq(),...a}))}return s}
 let S=loadS();
 if(MGP.me){S.name=MGP.me.name;S.av=MGP.me.av}
@@ -8717,7 +9212,8 @@ const MISSIONS=[
  {id:'catch',icon:'🎣',goal:[1,2],ko:'바다에서 물고기 {n}마리 잡기',en:'Catch {n} sea animals',need:'sea'},
  {id:'drive',icon:'🚗',goal:[1,1],ko:'운전 미션 1번 하기',en:'Do 1 driving mission',need:'drive'},
  {id:'review',icon:'🧠',goal:[1,1],ko:'오늘의 복습 하기',en:'Do today’s review',need:'review'},
- {id:'star3',icon:'⭐',goal:[1,1],ko:'수업에서 별 3개 받기',en:'Get 3 stars in a lesson'}];
+ {id:'star3',icon:'⭐',goal:[1,1],ko:'수업에서 별 3개 받기',en:'Get 3 stars in a lesson'},
+ {id:'look',icon:'🔍',goal:[2,3],ko:'아쿠아리움 안을 걸으며 물고기 {n}종 관찰하기',en:'Walk inside and look closely at {n} kinds of fish',need:'sea'}];
 const reviewReady=()=>Object.keys(S.sk).filter(id=>S.sk[id].m).length>=1;
 function rollDaily(){const t=dayKey();if(S.daily.day===t)return false;const pool=MISSIONS.filter(m=>m.id!=='solve'&&(!m.need||(m.need==='review'?reviewReady():UNLOCK[m.need]())));
  const pickd=[MISSIONS[0],...sample(pool,2)];S.daily={day:t,tasks:pickd.map(m=>({id:m.id,goal:R(m.goal[0],m.goal[1]),n:0,done:false})),gift:false,chest:false,review:false};refreshBoard();save(true);return true}
@@ -8736,7 +9232,7 @@ const ACH=[
  ['star10','⭐','별 3개 10번','3 stars × 10',s=>s.stats.stars3>=10],['star50','🌟','별 3개 50번','3 stars × 50',s=>s.stats.stars3>=50],['combo10','🔥','10연속 정답','10 in a row',s=>s.stats.bestCombo>=10],['combo25','☄️','25연속 정답','25 in a row',s=>s.stats.bestCombo>=25],
  ['streak3','📅','3일 연속','3-day streak',s=>s.streak.best>=3],['streak7','🗓️','7일 연속','7-day streak',s=>s.streak.best>=7],['streak30','🏆','30일 연속','30-day streak',s=>s.streak.best>=30],
  ['clean10','🧽','화장실 청소 10번','10 cleanings',s=>s.stats.cleans>=10],['order20','🙋','손님 질문 20개','20 visitor questions',s=>s.stats.orders>=20],['catch10','🎣','바다 생물 10마리','10 sea catches',s=>s.stats.caught>=10],['catch50','🐋','바다 생물 50마리','50 sea catches',s=>s.stats.caught>=50],
- ['drive5','🚗','운전 5번','5 drives',s=>s.stats.drives>=5],['hire3','👥','직원 3명','3 staff',s=>s.stats.hired>=3],['dex30','📖','도감 30종','30 species',s=>Object.keys(s.dex).length>=30],['dex80','📗','도감 80종','80 species',s=>Object.keys(s.dex).length>=80],
+ ['drive5','🚗','운전 5번','5 drives',s=>s.stats.drives>=5],['look20','🔍','물고기 20종 관찰','Looked closely at 20 kinds',s=>Object.keys((s.walk||{}).seen||{}).length>=20],['hire3','👥','직원 3명','3 staff',s=>s.stats.hired>=3],['dex30','📖','도감 30종','30 species',s=>Object.keys(s.dex).length>=30],['dex80','📗','도감 80종','80 species',s=>Object.keys(s.dex).length>=80],
  ['grad1','🎓','1학년 졸업','Grade 1 graduate',s=>!!(s.G[1]&&s.G[1].grad)],['grad2','🎓','2학년 졸업','Grade 2 graduate',s=>!!(s.G[2]&&s.G[2].grad)],['grad3','🎓','3학년 졸업','Grade 3 graduate',s=>!!(s.G[3]&&s.G[3].grad)],['grad4','🎓','4학년 졸업','Grade 4 graduate',s=>!!(s.G[4]&&s.G[4].grad)],['grad5','🎓','5학년 졸업','Grade 5 graduate',s=>!!(s.G[5]&&s.G[5].grad)],['grad6','👑','6학년 졸업','Grade 6 graduate',s=>!!(s.G[6]&&s.G[6].grad)]];
 function checkAch(){for(const [id,ic,ko,en,f] of ACH){if(S.ach.includes(id))continue;let ok=false;try{ok=f(S)}catch(e){}if(ok){S.ach.push(id);S.pearls+=2;toast(`🏆 ${ic} ${L(ko,en)} <b>+2 ${PEARL}</b>`);logEvent(ic,ko,en)}}}
 
@@ -9035,7 +9531,7 @@ function facCardHTML(k){const f=FAC[k],lv=S.fac[k],{a}=here();
  if(!lv)return `<button type="button" class="fac build" data-a="fac" data-f="${k}"><span class="fic">${f.icon}</span><b>${L(f.ko,f.en)}</b><small>${L('짓기','Build')} ${COIN}${short(facCost(k,0))}</small></button>`;
  return `<button type="button" class="fac" data-a="fac" data-f="${k}" id="fac-${k}"><span class="fic">${f.icon}</span><b>${L(f.ko,f.en)}</b><small>Lv.${lv}</small></button>`}
 function renderHome(){const {g,i,d,a}=here(),el=$('v-home');const stars=a.done?'⭐'.repeat(a.best):'';
- el.innerHTML=`<div class="aqhead"><div class="bldwrap">${buildingSVG(d)}</div><div class="aqname"><span class="flag">${REGIONS[g].flag}</span><b>${esc(d.name)}</b><small>${L(`${g}학년 · ${REGIONS[g].ko} · ${i+1}/20`,`Grade ${g} · ${REGIONS[g].en} · ${i+1}/20`)}</small>${stars?`<span class="aqstars">${stars}</span>`:''}</div></div>
+ el.innerHTML=`<div class="aqhead"><div class="bldwrap" data-a="walk" role="button" aria-label="${esc(L('아쿠아리움 안으로 들어가기','Walk inside the aquarium'))}">${buildingSVG(d)}<span class="walkin">🚶 ${L('안으로 들어가기','Walk inside')}</span></div><div class="aqname"><span class="flag">${REGIONS[g].flag}</span><b>${esc(d.name)}</b><small>${L(`${g}학년 · ${REGIONS[g].ko} · ${i+1}/20`,`Grade ${g} · ${REGIONS[g].en} · ${i+1}/20`)}</small>${stars?`<span class="aqstars">${stars}</span>`:''}</div></div>
  <div class="chips" id="homeChips"></div>
  ${ctaHTML()}
  <div class="tanks">${[0,1,2,3,4].map(k=>tankHTML(g,i,k)).join('')}</div>
@@ -9054,7 +9550,7 @@ function flashTank(k){const t=document.querySelector(`.tank[data-k="${k}"]`);if(
 
 // visitors walking through the lobby (only drawn when the aquarium is on screen)
 const PEOPLE=['🧒','👧','👦','👩','👨','👵','👴','🧑','👩‍🦰','👨‍🦱','🧕','👲','🧑‍🦽','👨‍👧','👩‍👦'];
-function walkVisitor(v){const lob=$('lobby');if(!lob||VIEW!=='home'||document.hidden||document.body.classList.contains('staged')||modalOpen())return;if(lob.querySelectorAll('.vis-p').length>9)return;
+function walkVisitor(v){if(typeof Walk!=='undefined'&&Walk.on()){Walk.visitor(v);return}const lob=$('lobby');if(!lob||VIEW!=='home'||document.hidden||document.body.classList.contains('staged')||modalOpen())return;if(lob.querySelectorAll('.vis-p').length>9)return;
  const p=document.createElement('span');p.className='vis-p';p.style.setProperty('--dur',(9+Math.random()*5)+'s');p.style.bottom=(6+Math.random()*16)+'px';const shop=v.bought.length?{snack:'🍦',gift:'🧸',mart:'🛍️'}[pick(v.bought)]:'';
  p.innerHTML=`<i>${pick(PEOPLE)}</i>${shop?`<b>${shop}</b>`:''}`;lob.appendChild(p);p.addEventListener('animationend',()=>p.remove());
  if(Math.random()<.13){const tip=document.createElement('button');tip.type='button';tip.className='tip';tip.textContent='💰';p.appendChild(tip);const val=Math.round(ticketPrice(S.at.g,S.at.i)*3);
@@ -9116,7 +9612,7 @@ function decorModal(k){const {a}=here();modal(`<h2>🪸 ${L(`${k+1}번 수조 �
 function fishInfo(id,back){const f=FISH_BY[id];modal(`<div class="fishcard">${fishImgTag(id,'big')}</div><h2>${esc(fishName(id))}</h2><p class="muted">${flagsOf(f)} ${f.where==='legend'?L('전설','Legend'):f.where.split(' ').map(w=>w==='kr'?L('한국','Korea'):L('캐나다','Canada')).join(' · ')} · <span style="color:${RARITY[f.r].c}">${'★'.repeat(f.r)} ${L(RARITY[f.r].ko,RARITY[f.r].en)}</span></p><p class="fact">🦦 ${esc(fishFact(id))}</p><button class="btn ghost wide" data-act="say">🔊 ${L('읽어 주기','Read aloud')}</button>`,{acts:{say:()=>{say(fishName(id)+'. '+fishFact(id),{raw:false});return false}},onClose:back?()=>{}:null})}
 
 // ---------------------------------------------------------------- facilities: build, upgrade, clean
-function facModal(k){const f=FAC[k],lv=S.fac[k],{g,i,a}=here();sfx('tap');if(REQ&&REQ.f===k){openRequest();return}
+function facModal(k,o={}){const f=FAC[k],lv=S.fac[k],{g,i,a}=here();sfx('tap');if(!o.noReq&&REQ&&REQ.f===k){openRequest();return}
  if(k==='toilet'){modal(`<h2>🚻 ${L('화장실','Restrooms')}</h2><p>${L(`깨끗함 ${Math.round(100-a.dirt)}%`,`${Math.round(100-a.dirt)}% clean`)} · ${L('손님이 많이 쓸수록 더러워져요. 더러우면 손님이 덜 행복해요.','The more visitors, the dirtier. Dirty restrooms make visitors unhappy.')}</p>
    <div class="row wrap"><button class="btn" data-act="clean">🧽 ${L('청소하기','Clean')}</button>${S.items.soap?`<button class="btn ghost" data-act="soap">✨ ${L('반짝 세제','Sparkle soap')} ×${S.items.soap}</button>`:''}${lv<FAC_MAX?`<button class="btn ghost" data-act="up">⬆️ Lv.${lv+1} ${COIN}${short(facCost(k,lv))}</button>`:''}</div><p class="muted">${L('레벨이 오르면 화장실이 더 천천히 더러워져요.','Higher levels get dirty more slowly.')}</p>`,
   {acts:{clean:()=>()=>cleanGame(),soap:()=>{S.items.soap--;a.dirt=0;S.stats.cleans++;mission('clean');sfx('finish');celebrate('stars',14);save();renderHome()},up:()=>{if(!spend(facCost(k,lv)))return false;S.fac[k]++;sfx('open');save();renderHome()}}});return}
@@ -9131,6 +9627,30 @@ function cleanGame(){const {a}=here();const spots=Array.from({length:5+Math.roun
   const rub=e=>{const el=document.elementFromPoint(e.clientX,e.clientY);if(!el||!el.classList.contains('dirt'))return;const s=spots[+el.dataset.j];if(s.h<=0)return;s.h-=34;el.style.opacity=Math.max(0,s.h/100);sfx('scrub');if(s.h<=0){el.classList.add('gone');left--;popAt({x:e.clientX,y:e.clientY},'✨');if(!left)done()}};
   const done=()=>{a.dirt=0;S.stats.cleans++;mission('clean');const c=Math.round(10*ticketPrice(S.at.g,S.at.i));earn(c);sfx('finish');celebrate('stars',18);say(T(pick([['반짝반짝! 손님들이 좋아해요!','Sparkling! The visitors love it!'],['깨끗해졌어요! 최고의 관장님!','All clean! Best director ever!']])),{raw:true});save();setTimeout(()=>{closeModal();renderHome()},900)};
   sc.addEventListener('pointerdown',e=>{down=true;sc.setPointerCapture&&sc.setPointerCapture(e.pointerId);rub(e)});sc.addEventListener('pointermove',e=>{if(down)rub(e)});sc.addEventListener('pointerup',()=>down=false);sc.addEventListener('pointercancel',()=>down=false)}})}
+
+// ---------------------------------------------------------------- walking around inside (walk.js draws it; this is the game side)
+function startWalk(){if(typeof Walk==='undefined')return;audio();sfx('open');const st=openStage();st.className='stage game walk';
+ const exit=()=>{try{Walk.stop()}catch(e){}closeStage();go('home')};
+ try{Walk.start(st,{act:walkAct,exit})}catch(e){console.warn(e);exit()}}
+function walkAct(kind,v){const {g,i,a}=here();
+ switch(kind){
+  case 'tank':openTank_(v);return;
+  case 'fac':facModal(v,{noReq:true});return;
+  case 'clean':cleanGame();return;
+  case 'request':openRequest();return;
+  case 'lesson':Walk.stop();closeStage();startLesson(g,i,v);return;
+  case 'feed':{if(!UNLOCK.feed())return false;if(!hungry(a,v)&&now()-(a.fed[v]||0)<60000){toast(L('방금 먹었어요! 배불러요 😋','They just ate! Full 😋'));return false}
+   a.fed[v]=now();S.stats.feeds++;mission('feed');sfx('bubble');say(T(pick([['냠냠! 물고기들이 신났어요!','Yum! The fish are so happy!'],['맛있게 먹어요!','They love it!']])),{raw:true});save(true);return true}
+  case 'look':{const w=S.walk;if(w.today.day!==dayKey())w.today={day:dayKey(),ids:[]};if(!w.today.ids.includes(v)){w.today.ids.push(v);mission('look')}
+   const first=!w.seen[v];if(first){w.seen[v]=1;addXP(2);toast(`🔍 ${esc(fishName(v))} ${L('처음 관찰! +2 XP','— first look! +2 XP')}`);checkAch()}save(true);say(fishName(v)+'. '+fishFact(v));return first}
+  case 'tip':earn(v.val,{at:v.at});sfx('coin');return;
+  case 'trash':{S.stats.litter=(S.stats.litter||0)+1;earn(Math.max(1,Math.round(ticketPrice(g,i)*2)),{at:v.at});sfx('coin');if(S.stats.litter%5===0)say(T(pick([['깨끗한 아쿠아리움, 최고예요!','A tidy aquarium is the best!'],['쓰레기를 주워 줘서 고마워요!','Thanks for picking up!']])),{raw:true});return}
+  case 'tour':S.pearls++;sfx('level');celebrate('stars',16);toast(`🚶 ${L('아쿠아리움 한 바퀴 산책 완료!','You walked around the whole aquarium!')} <b>+1 ${PEARL}</b>`);say(L('아쿠아리움을 한 바퀴 다 돌았어요! 진주를 하나 줄게요.','You toured the whole aquarium! Here is a pearl.'),{raw:true});save(true);updateHud();return;
+  case 'photo':walkPhoto();return}}
+function walkPhoto(){const {g,i,d}=here(),today=dayKey(),first=S.walk.photo[d.key]!==today;S.walk.photo[d.key]=today;let c=0;if(first){c=Math.round(8*ticketPrice(g,i));earn(c,{pop:false});addXP(3)}save(true);sfx('finish');
+ modal(`<h2>📸 ${L('찰칵! 기념사진','Snap! A souvenir photo')}</h2><div class="photo" style="--w1:${REGIONS[g].water[0]};--w2:${REGIONS[g].water[1]};--s1:${REGIONS[g].sky[0]}"><img class="pfish" src="${fishURL(d.star)}" alt=""><span class="pme">${esc(S.av)}</span>${MAV}<b>${REGIONS[g].flag} ${esc(d.name)}</b><small>${esc(S.name)} · ${today}</small></div>
+  ${first?`<div class="rew"><span>${COIN} +${short(c)}</span><span>⭐ +3 XP</span></div>`:`<p class="muted">${L('오늘 이곳 사진 선물은 이미 받았어요.','You already got today’s photo gift here.')}</p>`}<button class="btn wide" data-act="close">${L('멋져요!','Lovely!')}</button>`,
+  {onOpen:()=>say(L('김치! 정말 멋진 사진이에요!','Say cheese! What a great photo!'),{raw:true})})}
 
 // ---------------------------------------------------------------- the map (20 aquariums of a grade)
 function renderMap(){const g=TAB.map||S.at.g||S.grade||1;TAB.map=g;const gd=gradeData(g),el=$('v-map'),R_=REGIONS[g],dn=doneCount(g);
@@ -9317,6 +9837,7 @@ function welcome(){modal(`<div class="big">🦦</div><h2>${L('꼬마 수학 아�
 // one-time tips as new things open up
 function tips(){const t=S.tut;const tip=(k,ko,en)=>{if(t[k])return false;t[k]=1;save(true);modal(`<div class="big">🦦</div><p>${L(ko,en)}</p><button class="btn wide" data-act="close">${L('알겠어요!','OK!')}</button>`,{onOpen:()=>say(L(ko,en).replace(/<[^>]+>/g,''),{raw:false})});return true};
  if(UNLOCK.toilet()&&tip('t1','물고기가 이사 왔어요! 이제 손님이 와서 입장료를 내요. 손님 머리 위 <b>💰</b>를 누르면 팁을 받아요. <b>🚻 화장실</b>은 더러워지면 청소해 주세요.','Fish moved in! Visitors now come and pay for tickets. Tap the <b>💰</b> above visitors for tips. Clean the <b>🚻 restrooms</b> when they get dirty.'))return;
+ if(UNLOCK.toilet()&&here().a.open&&tip('t6','아쿠아리움 <b>건물 그림</b>을 누르면 안으로 들어가서 걸어 다닐 수 있어요! 물고기를 가까이 보고, 손님과 직원도 만나 봐요. 🚶','Tap the <b>aquarium building</b> to go inside and walk around! See the fish up close and meet visitors and staff. 🚶'))return;
  if(UNLOCK.snack()&&tip('t2','<b>🍦 매점</b>을 지을 수 있어요! 그리고 손님이 <b>🙋❓</b> 질문을 하면 눌러서 계산을 도와주세요. 팁을 많이 줘요.','You can build a <b>🍦 snack bar</b>! When a visitor shows <b>🙋❓</b>, tap it and help with the math for a big tip.'))return;
  if(UNLOCK.sea()&&tip('t3','이제 <b>🌊 바다</b>에 나갈 수 있어요! 낚시나 다이빙으로 새 친구를 데려와요. 바다 티켓은 수업을 끝낼 때마다 받아요.','You can go out to <b>🌊 sea</b> now! Fish or dive to bring back new friends. You get a sea ticket for every lesson.'))return;
  if(UNLOCK.staff()&&tip('t4','<b>🏢 본부</b>에서 직원을 뽑을 수 있어요! 청소 담당, 사육 담당이 일을 도와줘요.','Hire staff at <b>🏢 headquarters</b>! Cleaners and keepers help you out.'))return;
@@ -9340,6 +9861,7 @@ function wire(){
    case 'gonext':sfx('tap');travelTo(g,i+1);break;
    case 'nextgrade':sfx('tap');if(!S.G[g].grad)graduation(g);else goNextGrade();break;
    case 'map':go('map');break;
+   case 'walk':sfx('tap');startWalk();break;
    case 'gift':dailyGift();break;case 'chest':missionChest();break;case 'review':sfx('tap');dailyReview();break;
    case 'grade':sfx('tap');TAB.map=+b.dataset.g;renderMap();break;
    case 'node':nodeModal(TAB.map,+b.dataset.i);break;
@@ -9367,7 +9889,7 @@ function tick(){if(document.hidden)return;tickN++;const {g,i,a}=here();
  if(tickN%30===0){const w=staffWork();if(w==='clean'&&VIEW==='home'){toast(L('🧹 청소 담당이 화장실을 청소했어요!','🧹 Your cleaner cleaned the restrooms!'));renderHome()}if(w==='feed'&&VIEW==='home'){toast(L('🐟 사육 담당이 먹이를 줬어요!','🐟 Your keeper fed the fish!'));renderHome()}}
  maybeRequest();if(REQ&&REQ.until<now()){REQ=null;document.querySelectorAll('.reqb').forEach(x=>x.remove())}
  if(tickN%3===0&&VIEW==='home'&&!document.body.classList.contains('staged')){updateChips();const tc=document.querySelector('[data-f="toilet"]');if(tc&&!LES){const want=a.dirt>60;if(want!==tc.classList.contains('dirty')||tickN%15===0){const x=document.createElement('div');x.innerHTML=facCardHTML('toilet');tc.replaceWith(x.firstElementChild);if(REQ)showReqBubble()}}}
- if(tickN%20===0){rollDaily()&&VIEW==='home'&&renderHome();if(VIEW==='home'&&!LES&&!modalOpen())tips()}
+ if(tickN%20===0){rollDaily()&&VIEW==='home'&&renderHome();if(VIEW==='home'&&!LES&&!modalOpen()&&!document.body.classList.contains('staged'))tips()}
  if(tickN%15===0)save();updateHud()}
 
 // ---------------------------------------------------------------- start
@@ -9376,7 +9898,7 @@ function boot(){applyLang();wire();rollDaily();refreshBoard();const back=catchUp
  go('home');
  if(back&&back.inc>0)modal(`<div class="big">🐠</div><h2>${L('다시 와 줘서 고마워요!','Welcome back!')}</h2><p>${L(`관장님이 없는 동안 아쿠아리움이 ${COIN} <b>${short(back.inc)}</b> 코인을 벌었어요.`,`While you were away, the aquarium earned ${COIN} <b>${short(back.inc)}</b> coins.`)}</p>${here().a.dirt>50?`<p>🚻 ${L('화장실 청소가 필요해요!','The restrooms need cleaning!')}</p>`:''}<button class="btn wide" data-act="close">${L('좋아요!','Great!')}</button>`,{onOpen:()=>say(L('다시 와 줘서 고마워요! 물고기들이 기다렸어요.','Welcome back! The fish missed you.'),{raw:true})});
  setTimeout(tips,1500)}
-window.__aq={get S(){return S},go,startLesson,openRequest,finishStage:()=>finishStage(),graduation,travelTo,arrive,askQuick,shopProblem,speakable,speechOf,checkAnswer,tick,catchUp};
+window.__aq={get S(){return S},go,startWalk,walkAct,startLesson,openRequest,finishStage:()=>finishStage(),graduation,travelTo,arrive,askQuick,shopProblem,speakable,speechOf,checkAnswer,tick,catchUp};
 boot();
 </script>
 </body>

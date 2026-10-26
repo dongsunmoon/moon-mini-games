@@ -386,6 +386,9 @@ button{touch-action:manipulation}
 .stpic{display:block;object-fit:contain;-webkit-user-drag:none;user-select:none}
 .lic .stpic{width:46px;height:46px}.cav .stpic{width:84px;height:84px;margin:0 auto}.big .stpic.hero{width:150px;height:150px;margin:0 auto;animation:pop .6s ease-out}
 .mav img{object-fit:cover;object-position:50% 18%}
+.mepic{display:block;-webkit-user-drag:none;user-select:none}
+.meav{overflow:hidden}.meav .mepic,.lvl .badge .mepic{width:100%;height:100%;object-fit:cover;object-position:50% 12%;border-radius:50%}
+.photo .pme .mepic{width:110px;height:auto}.photo .pme{bottom:0}
 </style>
 </head>
 <body>
@@ -8670,12 +8673,9 @@ function fspr(id,dark){const key=id+(dark?'#':'');if(FSPR[key])return FSPR[key];
  if(dark){c.globalCompositeOperation='source-in';c.fillStyle='rgba(12,30,62,.9)';c.fillRect(0,0,330,220)}return FSPR[key]=cv}
 // staff pictures (images/aq-staff-<animal>.webp) are busts: they stand on little legs, or behind a counter
 const SIM={};function staffImg(key){if(!key)return null;let im=SIM[key];if(!im){im=SIM[key]=new Image();im.src=`images/aq-staff-${key}.webp`}return im.complete&&im.naturalWidth?im:null}
-// the child: their profile animal as a little aquarium director (images/aq-me-<key>.webp once drawn).
-// Until then a chibi director is drawn; avatars that are not a front-facing face (🦄🐙🐬🦖⭐) ride on the chest badge.
-const ME_KEY={'🐰':'bunny','🐻':'bear','🦊':'fox','🐼':'panda','🐨':'koala','🐯':'tiger','🦁':'lion','🐸':'frog','🐱':'cat','🐶':'puppy','🐥':'chick','🦄':'unicorn','🐙':'octopus','🐬':'dolphin','🦖':'dino','⭐':'star'};
-const ME_HAVE=new Set([]);   // avatar keys with a picture in images/aq-me-<key>.webp
+// the child: their profile animal as a little aquarium director (images/aq-me-<key>.webp, helpers in core.js).
+// If the picture cannot load, a chibi director is drawn; avatars that are not a front-facing face (🦄🐙🐬🦖⭐) ride on the chest badge.
 const FACES=new Set(['🐰','🐻','🦊','🐼','🐨','🐯','🦁','🐸','🐱','🐶','🐥','🐮','🐷','🐵','🐹','🐭','🧒','👧','👦','🧑','👩','👨','👶','👱','👱‍♀️','👩‍🦰','👨‍🦱']);
-const meKey=av=>ME_KEY[String(av||'').replace(/\uFE0F/g,'')]||'kid';
 let ME_IM=null;function meImg(){const k=meKey(S.av);if(!ME_HAVE.has(k))return null;if(!ME_IM||ME_IM.k!==k){ME_IM=new Image();ME_IM.k=k;ME_IM.src=`images/aq-me-${k}.webp`}return ME_IM.complete&&ME_IM.naturalWidth?ME_IM:null}
 let MOONI_IM=null;
 function mooniImg(){if(!ART.mooni)return null;if(!MOONI_IM){MOONI_IM=new Image();MOONI_IM.src='images/aq-mooni.webp'}return MOONI_IM.complete&&MOONI_IM.naturalWidth?MOONI_IM:null}
@@ -9203,6 +9203,11 @@ const hireCost=c=>Math.round((120+60*c.stars*c.stars)*(1+.45*S.staff.length));
 const trainCost=x=>Math.round(70*x.stars*Math.pow(1.55,x.lv));
 function refreshBoard(force){if(!force&&S.board.day===dayKey()&&S.board.c.length)return;const roles=Object.keys(ROLES);S.board={day:dayKey(),c:Array.from({length:3},()=>{const a=pick(ANIMALS),n=pick(NAMES),st=Math.random()<.12?3:Math.random()<.45?2:1;return {id:'s'+now().toString(36)+Math.random().toString(36).slice(2,6),role:pick(roles),av:a[0],ak:a[1],ae:a[2],nk:n[0],ne:n[1],stars:st,lv:1}})};save(true)}
 const staffName=x=>L(`${x.ak} ${x.nk}`,`${x.ne} the ${x.ae}`);
+// the child's own picture: their profile animal as a little aquarium director (images/aq-me-<key>.webp)
+const ME_KEY={'🐰':'bunny','🐻':'bear','🦊':'fox','🐼':'panda','🐨':'koala','🐯':'tiger','🦁':'lion','🐸':'frog','🐱':'cat','🐶':'puppy','🐥':'chick','🦄':'unicorn','🐙':'octopus','🐬':'dolphin','🦖':'dino','⭐':'star'};
+const ME_HAVE=new Set(['bunny','bear','fox','panda','koala','tiger','lion','frog','cat','puppy','chick','unicorn','octopus','dolphin','dino','star','kid']);
+const meKey=av=>ME_KEY[String(av||'').replace(/\uFE0F/g,'')]||'kid';
+const mePic=(cls='')=>{const k=meKey(S.av);return ME_HAVE.has(k)?`<img class="mepic ${cls}" src="images/aq-me-${k}.webp" alt="" draggable="false" onerror="this.replaceWith(this.dataset.av)" data-av="${esc(S.av)}">`:esc(S.av)};
 // staff pictures live in images/aq-staff-<animal>.webp; the animal emoji stands in if one cannot load
 const staffKey=x=>String(x.ae||'').toLowerCase().replace(/[^a-z]/g,'');
 const staffPic=(x,cls='')=>`<img class="stpic ${cls}" src="images/aq-staff-${staffKey(x)}.webp" alt="" draggable="false" onerror="this.replaceWith('${x.av}')">`;
@@ -9352,7 +9357,7 @@ const PRAISE={
 const praise=k=>T(pick(PRAISE[k]));
 
 // ---------------------------------------------------------------- small UI services used everywhere
-function updateHud(){if(!$('hudCoins'))return;const t=titleOf(S.lvl);$('hudLvl').textContent=S.lvl;$('hudAv').textContent=S.av;$('hudName').textContent=S.name;$('hudTitle').textContent=t.icon+' '+t.name;$('hudXp').style.width=Math.min(100,100*S.xp/xpNeed(S.lvl))+'%';
+function updateHud(){if(!$('hudCoins'))return;const t=titleOf(S.lvl);$('hudLvl').textContent=S.lvl;{const h=$('hudAv'),k=meKey(S.av)+S.av;if(h.dataset.k!==k){h.dataset.k=k;h.innerHTML=mePic()}}$('hudName').textContent=S.name;$('hudTitle').textContent=t.icon+' '+t.name;$('hudXp').style.width=Math.min(100,100*S.xp/xpNeed(S.lvl))+'%';
  $('hudCoins').textContent=short(S.coins);$('hudPearls').textContent=S.pearls;$('hudTickets').textContent=S.tickets;$('hudStreak').textContent=S.streak.n;$('hudStreakPill').classList.toggle('lit',S.streak.last===dayKey())}
 // at most two toasts at a time; the rest wait their turn
 const TQ=[];let tOn=0;
@@ -9690,7 +9695,7 @@ function walkAct(kind,v){const {g,i,a}=here();
   case 'tour':S.pearls++;sfx('level');celebrate('stars',16);toast(`🚶 ${L('아쿠아리움 한 바퀴 산책 완료!','You walked around the whole aquarium!')} <b>+1 ${PEARL}</b>`);say(L('아쿠아리움을 한 바퀴 다 돌았어요! 진주를 하나 줄게요.','You toured the whole aquarium! Here is a pearl.'),{raw:true});save(true);updateHud();return;
   case 'photo':walkPhoto();return}}
 function walkPhoto(){const {g,i,d}=here(),today=dayKey(),first=S.walk.photo[d.key]!==today;S.walk.photo[d.key]=today;let c=0;if(first){c=Math.round(8*ticketPrice(g,i));earn(c,{pop:false});addXP(3)}save(true);sfx('finish');
- modal(`<h2>📸 ${L('찰칵! 기념사진','Snap! A souvenir photo')}</h2><div class="photo" style="--w1:${REGIONS[g].water[0]};--w2:${REGIONS[g].water[1]};--s1:${REGIONS[g].sky[0]}"><img class="pfish" src="${fishURL(d.star)}" alt=""><span class="pme">${esc(S.av)}</span>${MAV}<b>${REGIONS[g].flag} ${esc(d.name)}</b><small>${esc(S.name)} · ${today}</small></div>
+ modal(`<h2>📸 ${L('찰칵! 기념사진','Snap! A souvenir photo')}</h2><div class="photo" style="--w1:${REGIONS[g].water[0]};--w2:${REGIONS[g].water[1]};--s1:${REGIONS[g].sky[0]}"><img class="pfish" src="${fishURL(d.star)}" alt=""><span class="pme">${mePic()}</span>${MAV}<b>${REGIONS[g].flag} ${esc(d.name)}</b><small>${esc(S.name)} · ${today}</small></div>
   ${first?`<div class="rew"><span>${COIN} +${short(c)}</span><span>⭐ +3 XP</span></div>`:`<p class="muted">${L('오늘 이곳 사진 선물은 이미 받았어요.','You already got today’s photo gift here.')}</p>`}<button class="btn wide" data-act="close">${L('멋져요!','Lovely!')}</button>`,
   {onOpen:()=>say(L('김치! 정말 멋진 사진이에요!','Say cheese! What a great photo!'),{raw:true})})}
 
@@ -9797,7 +9802,7 @@ function growMe(){const st=S.stats,acc=st.solved?Math.round(100*st.correct/st.so
  const gains=Object.keys(S.sk).map(id=>({id,g:speedGain(id)})).filter(x=>x.g>=1&&SKILL_BY[x.id]).sort((a,b)=>b.g-a.g).slice(0,3);
  const strand={};for(const id in S.sk){const sk=SKILL_BY[id];if(!sk)continue;const s=strand[sk.strand]=strand[sk.strand]||{n:0,c:0};s.n+=S.sk[id].n;s.c+=S.sk[id].c}
  const week=S.week.key===weekKey()?S.week.days.length:0;
- return `<div class="mecard"><span class="meav">${esc(S.av)}</span><div><b>${esc(S.name)}</b><small>${t.icon} ${esc(t.name)} · Lv.${S.lvl}</small><span class="xpbar"><i style="width:${Math.min(100,100*S.xp/xpNeed(S.lvl))}%"></i></span></div></div>
+ return `<div class="mecard"><span class="meav">${mePic()}</span><div><b>${esc(S.name)}</b><small>${t.icon} ${esc(t.name)} · Lv.${S.lvl}</small><span class="xpbar"><i style="width:${Math.min(100,100*S.xp/xpNeed(S.lvl))}%"></i></span></div></div>
  <div class="bigstats"><div><b>${num(st.correct)}</b><small>✏️ ${L('맞힌 문제','right answers')}</small></div><div><b>${acc}%</b><small>🎯 ${L('정답률','accuracy')}</small></div><div><b>${S.streak.n}</b><small>🔥 ${L('연속 일수','day streak')}</small></div><div><b>${totalDone()}</b><small>🏛️ ${L('마스터한 단원','skills mastered')}</small></div><div><b>${Object.keys(S.dex).length}/${FISH.length}</b><small>📖 ${L('만난 바다 친구','sea friends')}</small></div><div><b>${st.bestCombo}</b><small>☄️ ${L('최고 연속 정답','best streak')}</small></div></div>
  <div class="card"><h3>📅 ${L('최근 2주 동안 맞힌 문제','Right answers in the last 2 weeks')}</h3>${chart}<p class="muted">${L(`이번 주 ${week}일 공부했어요. 일주일에 5일이 목표예요!`,`You practised ${week} day${week===1?'':'s'} this week. Goal: 5 days!`)} ${'🟢'.repeat(Math.min(5,week))}${'⚪'.repeat(Math.max(0,5-week))}</p></div>
  ${gains.length?`<div class="card good"><h3>⚡ ${L('점점 빨라지고 있어요!','You’re getting faster!')}</h3>${gains.map(x=>`<p>${SKILL_BY[x.id].icon} <b>${esc(SKILL_BY[x.id].name)}</b> · ${L(`처음보다 한 문제에 ${x.g.toFixed(1)}초 빨라졌어요`,`${x.g.toFixed(1)} s faster per problem than at first`)}</p>`).join('')}</div>`:''}

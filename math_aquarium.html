@@ -8,7 +8,7 @@
 <meta property="og:title" content="꼬마 수학 아쿠아리움 · Little Math Aquarium">
 <meta property="og:description" content="1~6학년 수학을 풀면 수조가 열리고 손님이 와요! 낚시·다이빙·운전 미션까지. Solve math, open tanks, welcome visitors!">
 <meta property="og:type" content="website">
-<meta property="og:image" content="https://game.dongsunmoon.com/images/og-image.jpg">
+<meta property="og:image" content="https://game.dongsunmoon.com/images/og-aquarium.jpg">
 <meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐠</text></svg>">
@@ -381,6 +381,11 @@ button{touch-action:manipulation}
 .photo .pfish{position:absolute;left:8%;top:30%;width:56%}.photo .pme{position:absolute;right:20%;bottom:16%;font-size:58px;line-height:1}
 .photo .mav{position:absolute;right:4%;bottom:12%;width:54px;height:54px;font-size:42px;display:grid;place-items:center}
 .photo b{position:absolute;left:0;right:0;top:8px;text-align:center;font-size:15px;color:#2a3350;text-shadow:0 1px 0 #fff}.photo small{position:absolute;left:0;right:0;bottom:6px;text-align:center;color:#fff;font-weight:800;font-size:12px;text-shadow:0 1px 2px rgba(0,0,0,.4)}
+
+/* staff pictures */
+.stpic{display:block;object-fit:contain;-webkit-user-drag:none;user-select:none}
+.lic .stpic{width:46px;height:46px}.cav .stpic{width:84px;height:84px;margin:0 auto}.big .stpic.hero{width:150px;height:150px;margin:0 auto;animation:pop .6s ease-out}
+.mav img{object-fit:cover;object-position:50% 18%}
 </style>
 </head>
 <body>
@@ -908,13 +913,17 @@ function fishSVG(id){if(FISH_SVG[id])return FISH_SVG[id];const f=FISH_BY[id];if(
  const out=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}">${shape==='emoji'?'':`<defs>${defs}</defs>`}${s}</svg>`;FISH_SVG[id]=out;return out}
 // as an <img> (the same picture is used by the tanks, the sea and the drive)
 const FISH_URL={};
-const IMG_HAVE=new Set([]);   // fish with a real picture in images/aq-fish-<id>.webp
-const ART={mooni:false};       // true once images/aq-mooni.webp exists
-const MAV=ART.mooni?'<span class="mav"><img src="images/aq-mooni.webp" alt=""></span>':'<span class="mav">🦦</span>';
-const fishURL=id=>FISH_URL[id]||(FISH_URL[id]=IMG_HAVE.has(id)?`images/aq-fish-${id}.webp`:'data:image/svg+xml;charset=utf-8,'+encodeURIComponent(fishSVG(id)));
+const IMG_HAVE=new Set(FISH.map(f=>f.id));   // fish with a real picture in images/aq-fish-<id>.webp (all of them now)
+const ART={mooni:true};        // images/aq-mooni.webp exists
+const MAV=ART.mooni?'<span class="mav"><img src="images/aq-mooni.webp" alt="" onerror="this.replaceWith(\'🦦\')"></span>':'<span class="mav">🦦</span>';
+const fishSvgURL=id=>'data:image/svg+xml;charset=utf-8,'+encodeURIComponent(fishSVG(id));
+const fishURL=id=>FISH_URL[id]||(FISH_URL[id]=IMG_HAVE.has(id)?`images/aq-fish-${id}.webp`:fishSvgURL(id));
 const fishImgTag=(id,cls='')=>`<img class="fishpic ${cls}" src="${fishURL(id)}" alt="${esc(fishName(id))}" draggable="false">`;
+// if a picture cannot load (offline, a missing file), the drawn fish takes its place everywhere
+function fishFallback(id){if(!IMG_HAVE.has(id))return;IMG_HAVE.delete(id);FISH_URL[id]=fishSvgURL(id);const im=FISH_IMG[id];if(im)im.src=FISH_URL[id]}
+document.addEventListener('error',e=>{const t=e.target,src=t&&(t.currentSrc||t.src||(t.getAttribute&&t.getAttribute('href'))||''),m=/aq-fish-([a-z0-9]+)\.webp/.exec(typeof src==='string'?src:(src.baseVal||''));if(!m)return;fishFallback(m[1]);if(t.tagName==='IMG')t.src=FISH_URL[m[1]];else if(t.setAttribute)t.setAttribute('href',FISH_URL[m[1]])},true);
 const FISH_IMG={};
-function fishImg(id){if(FISH_IMG[id])return FISH_IMG[id];const im=new Image();im.src=fishURL(id);FISH_IMG[id]=im;return im}
+function fishImg(id){if(FISH_IMG[id])return FISH_IMG[id];const im=new Image();im.onerror=()=>{if(IMG_HAVE.has(id))fishFallback(id)};im.src=fishURL(id);FISH_IMG[id]=im;return im}
 
 // ---------------------------------------------------------------- regions: one per school grade
 const REGIONS=[null,
@@ -8659,6 +8668,8 @@ const put=(c,sp,x,y)=>c.drawImage(sp.cv,x-sp.w/2,y-sp.h/2,sp.w,sp.h);
 function fspr(id,dark){const key=id+(dark?'#':'');if(FSPR[key])return FSPR[key];let im=null;try{im=fishImg(id)}catch(e){}
  if(!im||!im.complete||!im.naturalWidth)return null;const cv=mk(330,220),c=cv.getContext('2d');try{c.drawImage(im,0,0,330,220)}catch(e){return null}
  if(dark){c.globalCompositeOperation='source-in';c.fillStyle='rgba(12,30,62,.9)';c.fillRect(0,0,330,220)}return FSPR[key]=cv}
+// staff pictures (images/aq-staff-<animal>.webp) are busts: they stand on little legs, or behind a counter
+const SIM={};function staffImg(key){if(!key)return null;let im=SIM[key];if(!im){im=SIM[key]=new Image();im.src=`images/aq-staff-${key}.webp`}return im.complete&&im.naturalWidth?im:null}
 let MOONI_IM=null;
 function mooniImg(){if(!ART.mooni)return null;if(!MOONI_IM){MOONI_IM=new Image();MOONI_IM.src='images/aq-mooni.webp'}return MOONI_IM.complete&&MOONI_IM.naturalWidth?MOONI_IM:null}
 
@@ -8715,7 +8726,7 @@ function buildTank(k){const a=W.a,T=W.tanks[k],s=W.secs.find(x=>x.k===k),box=s.w
   const vx=(bottom?rnd(5,10):rnd(20,44)*(big?1.5:1))*(Math.random()<.5?-1:1);
   return {id:it.id,w,bottom,x:rnd(w*.6,box.w-w*.6),base:bottom?box.h-(big?46:34)-w*.12:rnd(26+w*.35,box.h-(big?100:74)-w*.25),ph:rnd(0,TAU),vx,dir:vx>0?1:-1,y:0,hl:0}}).filter(Boolean)}
 function buildStaff(){const a=W.a;W.staff=[];const n={};
- for(const x of S.staff){n[x.role]=(n[x.role]||0)+1;const p=mkPerson({head:x.av,shirt:ROLE_SHIRT[x.role]||'#4cb4ff',pants:'#2a3350',s:.95});Object.assign(p,{kind:'staff',ref:x,role:x.role,badge:(ROLES[x.role]||{}).icon||'',held:ROLE_HELD[x.role]||''});
+ for(const x of S.staff){n[x.role]=(n[x.role]||0)+1;const p=mkPerson({head:x.av,shirt:ROLE_SHIRT[x.role]||'#4cb4ff',pants:'#2a3350',s:.95});Object.assign(p,{kind:'staff',ref:x,role:x.role,badge:(ROLES[x.role]||{}).icon||'',held:ROLE_HELD[x.role]||'',pic:typeof staffKey==='function'?staffKey(x):''});
   const shopRole=['snack','gift','mart'].includes(x.role),sec=x.role==='cashier'?W.secs[0]:shopRole?secOf(x.role):x.role==='janitor'?secOf('toilet'):x.role==='diver'?W.secs.find(s=>s.kind==='tunnel'):null;
   if(n[x.role]===1&&(x.role==='cashier'||shopRole&&S.fac[x.role])){p.bust=true;p.x=spotOf(x.role==='cashier'?'ticket':x.role);p.y=x.role==='cashier'?336:346;p.held='';W.staff.push(p);continue}
   if(n[x.role]===1&&x.role==='diver'&&a.open>=5){p.swim=true;W.staff.push(p);continue}
@@ -8958,7 +8969,8 @@ function tunnel(c,s){const a=W.a,b=s.win,col=W.col;if(a.open<5){curtain(c,s);ret
  const sh=fspr(W.d.star,true);if(sh){const u=(t*.022)%1.4-.2,dir=Math.floor(t*.022/1.4)%2?-1:1,x=dir>0?u*b.w:(1-u)*b.w,fw=360;c.save();c.globalAlpha=.16;c.translate(x,120+Math.sin(t*.4)*14);if(dir<0)c.scale(-1,1);c.drawImage(sh,-fw/2,-fw/3,fw,fw*2/3);c.restore()}
  // a shimmering school of little silver fish
  const sx=b.w*(.5+.38*Math.sin(t*.13)),sy=150+60*Math.sin(t*.21),sd=Math.cos(t*.13)>0?1:-1;for(let j=0;j<22;j++){const ox=Math.cos(j*2.4)*70*(.35+(j%5)/6),oy=Math.sin(j*1.7)*34+Math.sin(t*2+j)*3,x=sx+ox,y=sy+oy;oval(c,x,y,9,3.6,'#cfdbe8');oval(c,x+sd*3,y-1,4,1.6,'#ffffff');c.fillStyle='#9fb2c8';c.beginPath();c.moveTo(x-sd*8,y);c.lineTo(x-sd*14,y-4);c.lineTo(x-sd*14,y+4);c.closePath();c.fill()}
- const dv=W.staff.find(p=>p.swim);if(dv){const x=b.w*(.5+.42*Math.sin(t*.09+1)),y=250+40*Math.sin(t*.3),dir=Math.cos(t*.09+1)>0?1:-1;put(c,emo(dv.head,50),x,y);oval(c,x+dir*4,y-6,17,8,'rgba(80,200,255,.5)');c.strokeStyle='rgba(255,255,255,.6)';c.lineWidth=1.5;for(let j=0;j<3;j++){c.beginPath();c.arc(x+dir*10,y-30-((t*40+j*20)%60),3+j,0,TAU);c.stroke()}}
+ const dv=W.staff.find(p=>p.swim);if(dv){const x=b.w*(.5+.42*Math.sin(t*.09+1)),y=250+40*Math.sin(t*.3),dir=Math.cos(t*.09+1)>0?1:-1,dim=staffImg(dv.pic);
+  if(dim){const w=64,h=w*dim.naturalHeight/dim.naturalWidth;c.save();c.translate(x,y);c.rotate(dir*.22);c.drawImage(dim,-w/2,-h/2,w,h);c.restore();put(c,emo('🤿',24),x+dir*16,y+h*.3)}else{put(c,emo(dv.head,50),x,y);oval(c,x+dir*4,y-6,17,8,'rgba(80,200,255,.5)')}c.strokeStyle='rgba(255,255,255,.6)';c.lineWidth=1.5;for(let j=0;j<3;j++){c.beginPath();c.arc(x+dir*10,y-30-((t*40+j*20)%60),3+j,0,TAU);c.stroke()}}
  for(const f of W.tanks[4].food)dot(c,f.x,f.y,4,'#c8762a');for(const f of W.tanks[4].fish)fish(c,f);c.restore();
  for(let x=b.x+100;x<b.x+b.w-60;x+=200){c.fillStyle='rgba(255,255,255,.16)';c.fillRect(x-7,top,14,FY-top);c.fillStyle='rgba(20,40,80,.16)';c.fillRect(x+7,top,3,FY-top)}
  for(const x of [b.x,b.x+b.w]){c.fillStyle=shade(col.trim,-.25);c.fillRect(x-14,top,28,FY-top);c.fillStyle='rgba(255,255,255,.18)';c.fillRect(x-10,top,6,FY-top)}
@@ -9012,6 +9024,9 @@ function person(c,p){const s=(p.bust?1:scaleAt(p.y))*(p.s||1),mv=p.moving?1:0,sw
  c.save();c.translate(p.x,p.y);c.scale(s,s);
  if(!p.bust){oval(c,0,0,20,5.5,'rgba(20,30,60,.2)');c.lineCap='round';c.strokeStyle=p.pants;c.lineWidth=8;c.beginPath();c.moveTo(-5,-26);c.lineTo(-5+sw*7,-5);c.moveTo(5,-26);c.lineTo(5-sw*7,-5);c.stroke();
   oval(c,-5+sw*7+dir*2,-3,5.5,3.2,'#3a3f58');oval(c,5-sw*7+dir*2,-3,5.5,3.2,'#3a3f58')}
+ const pim=p.pic&&staffImg(p.pic);
+ if(pim){const w=p.bust?76:70,h=w*pim.naturalHeight/pim.naturalWidth,by=p.bust?10:-22-bob;c.drawImage(pim,-w/2,by-h,w,h);
+  if(p.held)put(c,emo(p.held,24),dir*31,by-20);if(p.badge){dot(c,-w*.34,by-16,11,'#ffffff');put(c,emo(p.badge,15),-w*.34,by-16)}c.restore();return}
  const ty=(p.bust?0:-26-bob)-38;if(!p.g||p.gb!==!!p.bust){p.gb=!!p.bust;p.g=lg(c,-16,ty,16,ty+40,[[0,shade(p.shirt,.32)],[1,shade(p.shirt,-.18)]])}
  c.lineCap='round';c.strokeStyle=shade(p.shirt,-.08);c.lineWidth=7;c.beginPath();c.moveTo(-14,ty+9);c.lineTo(-17-sw*6,ty+30);c.moveTo(14,ty+9);c.lineTo(17+sw*6,ty+30);c.stroke();
  dot(c,-17-sw*6,ty+31,4.5,'#ffd9b8');dot(c,17+sw*6,ty+31,4.5,'#ffd9b8');
@@ -9020,12 +9035,12 @@ function person(c,p){const s=(p.bust?1:scaleAt(p.y))*(p.s||1),mv=p.moving?1:0,sw
  const hd=emo(p.head,48);c.drawImage(hd.cv,-hd.w/2,ty-20-hd.h/2,hd.w,hd.h);c.restore()}
 function mooni(c){const m=W.mo,s=scaleAt(m.y),hop=m.moving?Math.abs(Math.sin(m.ph))*6:0,u=(W.t-(m.jump||-9))/.5,jump=u<1?Math.sin(u*Math.PI)*28:0;
  c.save();c.translate(m.x,m.y);c.scale(s,s);oval(c,0,0,22,6,'rgba(20,30,60,.2)');const im=mooniImg();
- if(im){c.drawImage(im,-32,-70-hop-jump,64,64)}else{const sp=emo('🦦',58);c.drawImage(sp.cv,-sp.w/2,-sp.h+10-hop-jump,sp.w,sp.h)}c.restore()}
+ if(im){const h=76,w=h*im.naturalWidth/im.naturalHeight,st=m.moving?Math.sin(m.ph)*4:0;oval(c,-10+st,-4,9,4.5,'#6b4a2e');oval(c,10-st,-4,9,4.5,'#6b4a2e');c.drawImage(im,-w/2,-h-6-hop-jump,w,h)}else{const sp=emo('🦦',58);c.drawImage(sp.cv,-sp.w/2,-sp.h+10-hop-jump,sp.w,sp.h)}c.restore()}
 function speech(c,x,y,text){const sp=txt(text,17,'#2a3350',{max:230}),w=sp.w+18,h=sp.h+8,bx=cl(x,W.cam+w/2+6,W.cam+W.vw-w/2-6);
  // never cover the child's own head: lift the bubble above it when they overlap
  if(Math.abs(bx-W.me.x)<w/2+26)y=Math.min(y,headY(W.me)-34);const by=Math.max(W.topY+h+6,y);
  c.fillStyle='rgba(0,0,0,.14)';rr(c,bx-w/2,by-h+3,w,h,14);c.fill();c.fillStyle='#ffffff';rr(c,bx-w/2,by-h,w,h,14);c.fill();c.beginPath();c.moveTo(cl(x,bx-w/2+14,bx+w/2-14)-8,by-1);c.lineTo(x,by+12);c.lineTo(cl(x,bx-w/2+14,bx+w/2-14)+8,by-1);c.closePath();c.fill();put(c,sp,bx,by-h/2)}
-const headY=p=>p===W.mo?p.y-72*scaleAt(p.y):p.bust?p.y-92:p.y-132*scaleAt(p.y)*(p.s||1);
+const headY=p=>p===W.mo?p.y-(mooniImg()?90:72)*scaleAt(p.y):p.bust?p.y-92:p.y-132*scaleAt(p.y)*(p.s||1);
 function overlays(c,x0,x1){const t=W.t;
  if(W.ripple){const r=W.ripple,u=r.t/.6;c.strokeStyle=`rgba(255,255,255,${.8*(1-u)})`;c.lineWidth=3;c.beginPath();c.ellipse(r.x,r.y,10+u*26,3+u*8,0,0,TAU);c.stroke()}
  for(const p of W.people.concat(W.staff)){if(p.hide||p.swim||p.x<x0||p.x>x1)continue;
@@ -9164,6 +9179,9 @@ const hireCost=c=>Math.round((120+60*c.stars*c.stars)*(1+.45*S.staff.length));
 const trainCost=x=>Math.round(70*x.stars*Math.pow(1.55,x.lv));
 function refreshBoard(force){if(!force&&S.board.day===dayKey()&&S.board.c.length)return;const roles=Object.keys(ROLES);S.board={day:dayKey(),c:Array.from({length:3},()=>{const a=pick(ANIMALS),n=pick(NAMES),st=Math.random()<.12?3:Math.random()<.45?2:1;return {id:'s'+now().toString(36)+Math.random().toString(36).slice(2,6),role:pick(roles),av:a[0],ak:a[1],ae:a[2],nk:n[0],ne:n[1],stars:st,lv:1}})};save(true)}
 const staffName=x=>L(`${x.ak} ${x.nk}`,`${x.ne} the ${x.ae}`);
+// staff pictures live in images/aq-staff-<animal>.webp; the animal emoji stands in if one cannot load
+const staffKey=x=>String(x.ae||'').toLowerCase().replace(/[^a-z]/g,'');
+const staffPic=(x,cls='')=>`<img class="stpic ${cls}" src="images/aq-staff-${staffKey(x)}.webp" alt="" draggable="false" onerror="this.replaceWith('${x.av}')">`;
 
 // ---------------------------------------------------------------- facilities (one brand: levels count in every aquarium)
 const FAC={ticket:{icon:'🎫',ko:'매표소',en:'Ticket booth',base:120},toilet:{icon:'🚻',ko:'화장실',en:'Restrooms',base:100},snack:{icon:'🍦',ko:'매점',en:'Snack bar',base:150},gift:{icon:'🎁',ko:'기프트샵',en:'Gift shop',base:260},mart:{icon:'🛒',ko:'마트',en:'Mart',base:380}};
@@ -9730,8 +9748,8 @@ function buyItem(id){const x=ITEM_BY[id];if(x.pearl){if(!spend(x.pearl,'pearls')
 // ---------------------------------------------------------------- headquarters: facilities, staff, skills, the chain
 function renderHQ(){const el=$('v-hq'),t=TAB.hq;let body='';
  if(t==='fac')body=`<div class="list">${Object.keys(FAC).map(k=>{const f=FAC[k],lv=S.fac[k],open=k==='ticket'||k==='toilet'?(k==='ticket'||UNLOCK.toilet()):UNLOCK[k]();return `<div class="lrow"><span class="lic">${f.icon}</span><div class="lt"><b>${L(f.ko,f.en)} ${lv?'Lv.'+lv:''}</b><small>${open?(lv?'●'.repeat(Math.min(lv,10))+'○'.repeat(Math.max(0,10-lv)):L('아직 안 지었어요','Not built yet')):T(UNLOCK_HINT[k]||['',''])}</small></div>${open&&lv<FAC_MAX?`<button class="btn small" data-a="facup" data-f="${k}">${lv?'⬆️':'🏗️'} ${COIN}${short(facCost(k,lv))}</button>`:''}</div>`}).join('')}</div><p class="muted">${L('시설 레벨은 모든 아쿠아리움에 똑같이 적용돼요.','Facility levels count in every aquarium.')}</p>`;
- else if(t==='staff'){if(!UNLOCK.staff())body=lockCard('staff');else{refreshBoard();body=`<h3>👥 ${L('우리 직원','Our team')} ${S.staff.length}/${staffSlots()}</h3><div class="list">${S.staff.map(x=>{const r=ROLES[x.role];return `<div class="lrow"><span class="lic">${x.av}</span><div class="lt"><b>${esc(staffName(x))} ${'⭐'.repeat(x.stars)}</b><small>${r.icon} ${L(r.ko,r.en)} · Lv.${x.lv}</small></div>${x.lv<10?`<button class="btn small" data-a="train" data-id="${x.id}">📚 ${COIN}${short(trainCost(x))}</button>`:''}</div>`}).join('')||`<p class="muted">${L('아직 직원이 없어요. 아래 게시판에서 뽑아 보세요!','No staff yet. Hire someone from the board below!')}</p>`}</div>
-  <h3>📋 ${L('오늘의 채용 게시판','Today’s job board')}</h3><div class="cands">${S.board.c.map(c=>{const r=ROLES[c.role];return `<div class="cand"><span class="cav">${c.av}</span><b>${esc(staffName(c))}</b><span class="st">${'⭐'.repeat(c.stars)}</span><small>${r.icon} ${L(r.ko,r.en)}</small><small class="d">${L(r.dk,r.de)}</small><button class="btn small" data-a="hire" data-id="${c.id}">${L('채용','Hire')} ${COIN}${short(hireCost(c))}</button></div>`}).join('')||`<p class="muted">${L('오늘 지원자를 모두 만났어요. 내일 새 지원자가 와요!','You met everyone today. New applicants tomorrow!')}</p>`}</div>
+ else if(t==='staff'){if(!UNLOCK.staff())body=lockCard('staff');else{refreshBoard();body=`<h3>👥 ${L('우리 직원','Our team')} ${S.staff.length}/${staffSlots()}</h3><div class="list">${S.staff.map(x=>{const r=ROLES[x.role];return `<div class="lrow"><span class="lic">${staffPic(x)}</span><div class="lt"><b>${esc(staffName(x))} ${'⭐'.repeat(x.stars)}</b><small>${r.icon} ${L(r.ko,r.en)} · Lv.${x.lv}</small></div>${x.lv<10?`<button class="btn small" data-a="train" data-id="${x.id}">📚 ${COIN}${short(trainCost(x))}</button>`:''}</div>`}).join('')||`<p class="muted">${L('아직 직원이 없어요. 아래 게시판에서 뽑아 보세요!','No staff yet. Hire someone from the board below!')}</p>`}</div>
+  <h3>📋 ${L('오늘의 채용 게시판','Today’s job board')}</h3><div class="cands">${S.board.c.map(c=>{const r=ROLES[c.role];return `<div class="cand"><span class="cav">${staffPic(c)}</span><b>${esc(staffName(c))}</b><span class="st">${'⭐'.repeat(c.stars)}</span><small>${r.icon} ${L(r.ko,r.en)}</small><small class="d">${L(r.dk,r.de)}</small><button class="btn small" data-a="hire" data-id="${c.id}">${L('채용','Hire')} ${COIN}${short(hireCost(c))}</button></div>`}).join('')||`<p class="muted">${L('오늘 지원자를 모두 만났어요. 내일 새 지원자가 와요!','You met everyone today. New applicants tomorrow!')}</p>`}</div>
   <button class="btn ghost wide" data-a="reboard">🔄 ${L('새 지원자 부르기','Call new applicants')} · ${PEARL} 2</button>`}}
  else if(t==='skills'){if(!UNLOCK.skills())body=lockCard('skills');else body=`<p class="spbox">⚡ ${L(`스킬 포인트 ${S.sp}개`,`${S.sp} skill point${S.sp===1?'':'s'}`)}<small>${L('레벨이 오르거나 별 3개로 아쿠아리움을 완성하면 받아요.','Earn them by levelling up or finishing an aquarium with 3 stars.')}</small></p><div class="skills">${SKILLTREE.map(x=>{const l=skl(x.id);return `<button type="button" class="skill ${l>=5?'max':''}" data-a="skill" data-id="${x.id}"><span class="sic">${x.icon}</span><b>${L(x.ko,x.en)}</b><small>${L(x.dk,x.de)}</small><span class="lv">${'●'.repeat(l)}${'○'.repeat(5-l)}</span></button>`}).join('')}</div>`}
  else if(t==='chain'){const {g,i}=here();const rows=[];for(const gg in S.G)S.G[gg].aq.forEach((a,ii)=>{if(a.done)rows.push([+gg,ii,a])});
@@ -9739,7 +9757,7 @@ function renderHQ(){const el=$('v-hq'),t=TAB.hq;let body='';
   <p class="muted">${L(`쉬는 동안에도 최대 ${2+skl('idle')}시간까지 돈을 벌어요.`,`You keep earning for up to ${2+skl('idle')} hours while away.`)}</p><h3>🏛️ ${L('완성한 아쿠아리움','Finished aquariums')} ${rows.length}</h3><div class="minis">${rows.map(([gg,ii,a])=>`<span title="${esc(aqDef(gg,ii).name)}">${fishImgTag(aqDef(gg,ii).star,'tiny')}<small>${gg}-${ii+1}</small></span>`).join('')||'—'}</div>`}
  el.innerHTML=`<h2 class="vtitle">🏢 ${L('본부','Headquarters')}</h2>${tabsHTML('hq',[['fac','🏪','시설','Facilities'],['staff','👥','직원','Staff',!UNLOCK.staff()],['skills','⚡','스킬','Skills',!UNLOCK.skills()],['chain','💼','수입','Income']])}${body}`}
 function hire(id){const c=S.board.c.find(x=>x.id===id);if(!c)return;if(S.staff.length>=staffSlots()){toast(L('직원 자리가 꽉 찼어요. 스킬 ‘인사 담당’으로 늘릴 수 있어요.','All staff slots are full. The “Team leader” skill adds more.'));return}if(!spend(hireCost(c)))return;
- S.staff.push({...c,hired:dayKey()});S.board.c=S.board.c.filter(x=>x!==c);S.stats.hired++;sfx('fanfare');celebrate('confetti',18);const r=ROLES[c.role];modal(`<div class="big">${c.av}</div><h2>${L(`${staffName(c)} 입사!`,`${staffName(c)} joined!`)}</h2><p>${r.icon} ${L(r.ko,r.en)} · ${L(r.dk,r.de)}</p><p class="fact">${c.av} ${L('“관장님, 열심히 할게요!”','“I’ll do my best, director!”')}</p><button class="btn wide" data-act="close">${L('환영해요!','Welcome!')}</button>`);checkAch();save();renderHQ()}
+ S.staff.push({...c,hired:dayKey()});S.board.c=S.board.c.filter(x=>x!==c);S.stats.hired++;sfx('fanfare');celebrate('confetti',18);const r=ROLES[c.role];modal(`<div class="big">${staffPic(c,'hero')}</div><h2>${L(`${staffName(c)} 입사!`,`${staffName(c)} joined!`)}</h2><p>${r.icon} ${L(r.ko,r.en)} · ${L(r.dk,r.de)}</p><p class="fact">${c.av} ${L('“관장님, 열심히 할게요!”','“I’ll do my best, director!”')}</p><button class="btn wide" data-act="close">${L('환영해요!','Welcome!')}</button>`);checkAch();save();renderHQ()}
 // ================================================================ growth, curriculum, dex, trophies, daily routine, graduation, settings and start-up
 
 // ---------------------------------------------------------------- my growth

@@ -145,8 +145,10 @@ main{width:min(980px,100%);margin:0 auto;padding:14px max(12px,env(safe-area-ins
 .t-free{background:linear-gradient(160deg,#e9fff1,#c9f5da)}.t-instr{background:linear-gradient(160deg,#eefbf6,#c9f1e2)}.t-stk{background:linear-gradient(160deg,#fffbe6,#fff0b3)}.t-shop{background:linear-gradient(160deg,#fffbe0,#ffe9a0)}
 @keyframes pulse{50%{transform:scale(1.12)}}
 @media (max-width:620px){.tiles{grid-template-columns:repeat(4,1fr);gap:7px}.tile{min-height:96px;padding:10px 2px 8px;border-radius:16px}.tile .ic{font-size:32px}.tile b{font-size:12.5px}.tile small{font-size:10.5px}}
-.teachers .trow{display:flex;gap:8px;overflow-x:auto;padding:8px 2px 4px;scrollbar-width:none}
-.tchip{flex:0 0 auto;border:0;background:#f6f2ff;border-radius:16px;padding:8px 10px;display:flex;flex-direction:column;align-items:center;gap:2px;min-width:92px}
+/* all six teachers always show: 3 × 2 on phones, one row of 6 on wide screens */
+.teachers .trow{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;padding:8px 2px 4px}
+@media (min-width:700px){.teachers .trow{grid-template-columns:repeat(6,minmax(0,1fr))}}
+.tchip{border:0;background:#f6f2ff;border-radius:16px;padding:8px 6px;display:flex;flex-direction:column;align-items:center;gap:2px;min-width:0;text-align:center}
 .tchip b{font-size:13px}.tchip small{font-size:11px;color:var(--muted);font-weight:800}
 .trophyBtn{justify-self:center}
 .tcard{text-align:center}.tcard .say{font-weight:800;background:#f6f2ff;border-radius:16px;padding:10px 12px}.tcard .btn{margin:4px}

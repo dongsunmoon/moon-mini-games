@@ -258,7 +258,7 @@ main{width:min(780px,100%);margin:0 auto;padding:10px max(12px,env(safe-area-ins
 .rvtag{display:inline-block;background:#f1ebff;color:#6a4bd8;border-radius:12px;padding:4px 10px;font-weight:800;font-size:13px;margin-bottom:6px}
 .qcard{background:#fff;border-radius:22px;padding:14px;box-shadow:var(--shadow);border:1px solid var(--line)}
 .qhead{display:flex;gap:10px;align-items:flex-start}
-.spk{flex:0 0 42px;width:42px;height:42px;border:0;border-radius:50%;background:#eaf4ff;font-size:19px}
+.qhead .spk{flex:0 0 42px;width:42px;height:42px;border:0;border-radius:50%;background:#eaf4ff;font-size:19px}
 .qtext{flex:1;font-size:clamp(18px,4.6vw,23px);font-weight:800;line-height:1.5;padding-top:4px}
 .qvis{margin:8px 0;overflow-x:auto}
 .qans{margin-top:8px}
@@ -323,7 +323,8 @@ main{width:min(780px,100%);margin:0 auto;padding:10px max(12px,env(safe-area-ins
 .toast{background:#1f2b55ee;color:#fff;border-radius:16px;padding:10px 14px;font-weight:800;font-size:14px;box-shadow:0 8px 20px rgba(0,0,0,.25);animation:rise2 .25s;text-align:center}.toast.out{opacity:0;transform:translateY(10px);transition:all .4s}
 body.staged .toasts{bottom:calc(14px + env(safe-area-inset-bottom))}
 .fx{position:fixed;inset:0;pointer-events:none;z-index:80;overflow:hidden}
-.pop{position:fixed;font-style:normal;font-weight:900;font-size:18px;color:#c86a00;text-shadow:0 2px 0 #fff,0 0 8px #fff;transform:translate(-50%,0);animation:popup 1.2s ease-out forwards;white-space:nowrap}
+/* coin pops live in #fx only, so mini-game classes named .pop are left alone */
+.fx .pop{position:fixed;font-style:normal;font-weight:900;font-size:18px;color:#c86a00;text-shadow:0 2px 0 #fff,0 0 8px #fff;transform:translate(-50%,0);animation:popup 1.2s ease-out forwards;white-space:nowrap}
 @keyframes popup{to{transform:translate(-50%,-60px);opacity:0}}
 .conf{position:fixed;top:-40px;font-style:normal;animation:fall 3s ease-in forwards}
 @keyframes fall{to{transform:translateY(110vh) rotate(540deg)}}

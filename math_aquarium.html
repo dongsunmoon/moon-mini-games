@@ -389,6 +389,15 @@ button{touch-action:manipulation}
 .mepic{display:block;-webkit-user-drag:none;user-select:none}
 .meav{overflow:hidden}.meav .mepic,.lvl .badge .mepic{width:100%;height:100%;object-fit:cover;object-position:50% 12%;border-radius:50%}
 .photo .pme .mepic{width:110px;height:auto}.photo .pme{bottom:0}
+/* sea tickets */
+.tkbox{display:flex;flex-direction:column;gap:8px}
+.tkrow{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}.tkrow b{font-size:17px}.tkrow span{font-weight:800;font-size:13px;color:#0b6fb8;background:#e8f5ff;border-radius:12px;padding:4px 10px;font-variant-numeric:tabular-nums}
+.tkmath{display:flex;flex-direction:column;gap:4px;font-weight:800;font-size:13px}.tkbar{display:block;height:10px;border-radius:6px;background:#e6edf8;overflow:hidden}.tkbar b{display:block;height:100%;background:linear-gradient(90deg,#ffd45a,#ff9a3a);border-radius:6px}
+.tkbox .muted{font-size:12.5px;line-height:1.5;margin:0}
+.tqdots{display:flex;gap:8px;justify-content:center;margin:6px 0 10px}.tqdots i{width:22px;height:22px;border-radius:50%;background:#e6edf8;border:2px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,.15)}.tqdots i.on{background:linear-gradient(180deg,#ffd45a,#ffab1a);animation:pop .4s}
+.tqq{font-size:clamp(28px,8vw,40px);font-weight:900;text-align:center;margin:6px 0 14px;letter-spacing:.5px}
+.tqo{display:grid;grid-template-columns:1fr 1fr;gap:10px}.tqb{border:0;border-radius:16px;padding:14px 8px;font-size:22px;font-weight:900;background:#eef4ff;color:var(--ink);box-shadow:0 4px 0 #cfdcf3;touch-action:manipulation}
+.tqb.ok{background:#d6f8e3;box-shadow:0 4px 0 #8fdcae}.tqb.bad{background:#ffe0e4;box-shadow:0 4px 0 #f3a3ae;animation:shake .4s}
 </style>
 </head>
 <body>
@@ -9101,7 +9110,7 @@ const COPYRIGHT=()=>`<footer class="copy">© 2026 Dongsun Moon. ${L('모든 권�
 // ---------------------------------------------------------------- save (one save per profile picked on the main page)
 const SAVE_KEY='mathAquarium.v1';
 const freshAq=()=>({st:[0,0,0,0,0],open:0,fish:[[],[],[],[],[]],lv:[1,1,1,1,1],decor:[[],[],[],[],[]],fed:[0,0,0,0,0],dirt:0,done:false,best:0,tries:0,at:0});
-const freshS=()=>({v:1,created:dayKey(),name:L('관장님','Director'),av:'🧒',grade:0,start:0,at:{g:1,i:0},G:{},coins:150,pearls:5,tickets:2,xp:0,lvl:1,sp:0,skills:{},items:{hint:2,shield:1},boosts:{},
+const freshS=()=>({v:1,created:dayKey(),name:L('관장님','Director'),av:'🧒',grade:0,start:0,at:{g:1,i:0},G:{},coins:150,pearls:5,tickets:3,tkt:{at:now(),c:0},xp:0,lvl:1,sp:0,skills:{},items:{hint:2,shield:1},boosts:{},
  fac:{ticket:1,toilet:1,snack:0,gift:0,mart:0},staff:[],board:{day:'',c:[]},car:{model:'van',color:'#ff6a5a',speed:0,magnet:0,shield:0,owned:['van']},store:{},dex:{},
  stats:{solved:0,correct:0,first:0,wrong:0,secs:0,bestCombo:0,cleans:0,orders:0,feeds:0,drives:0,trips:0,caught:0,stars3:0,tanks:0,aqs:0,reviews:0,earned:0,hired:0},
  sk:{},hist:{},daily:{day:'',tasks:[],gift:false,chest:false,review:false},streak:{n:0,best:0,last:'',shields:1},week:{key:'',days:[]},ach:[],log:[],
@@ -9109,7 +9118,8 @@ const freshS=()=>({v:1,created:dayKey(),name:L('관장님','Director'),av:'🧒'
  walk:{seen:{},photo:{},day:'',been:[],toured:false,today:{day:'',ids:[]}}});
 function loadS(){let d=null;try{d=JSON.parse(localStorage.getItem(SAVE_KEY)||'null')}catch(e){}const f=freshS();if(!d||typeof d!=='object')return f;
  const s={...f,...d};for(const k of ['fac','car','stats','daily','streak','week','opt','tut','board','deliveries','walk'])s[k]={...f[k],...(d[k]||{})};
- s.items={...d.items};for(const g in s.G){s.G[g].aq=(s.G[g].aq||[]).map(a=>({...freshAq(),...a}))}return s}
+ s.items={...d.items};for(const g in s.G){s.G[g].aq=(s.G[g].aq||[]).map(a=>({...freshAq(),...a}))}
+ if(!d.tkt)s.tkt={at:now(),c:s.stats.correct||0};return s}
 let S=loadS();
 if(MGP.me){S.name=MGP.me.name;S.av=MGP.me.av}
 let saveT=0;
@@ -9178,7 +9188,7 @@ const ITEMS=[
  {id:'turbo',icon:'⚡',ko:'터보',en:'Turbo',cost:60,dk:'다음 운전에서 방패 +2.',de:'+2 shields on your next drive.'},
  {id:'bait',icon:'🪱',ko:'황금 미끼',en:'Golden bait',pearl:2,dk:'다음 낚시에서 희귀한 물고기가 더 잘 물어요.',de:'Rare fish bite more on your next fishing trip.'},
  {id:'air',icon:'🧯',ko:'큰 산소통',en:'Big air tank',pearl:2,dk:'다음 다이빙 공기 +20초.',de:'+20 s of air on your next dive.'},
- {id:'seaticket',icon:'🎫',ko:'바다 티켓',en:'Sea ticket',pearl:3,dk:'낚시나 다이빙을 한 번 더 할 수 있어요.',de:'One more fishing or diving trip.'}];
+ {id:'seaticket',icon:'🎫',ko:'바다 티켓',en:'Sea ticket',cost:60,dk:'낚시나 다이빙을 한 번 더 할 수 있어요.',de:'One more fishing or diving trip.'}];
 const ITEM_BY={};ITEMS.forEach(x=>ITEM_BY[x.id]=x);
 const DECOR=[['weed','🌿','해초','Seaweed',40],['rock','🪨','바위','Rock',40],['shell','🐚','조개','Shell',60],['flower','🌺','바다꽃','Sea flower',90],['coral','🪸','산호','Coral',120],['bubbler','🫧','기포기','Bubbler',150],['anchor','⚓','닻','Anchor',180],['castle','🏰','모래성','Sandcastle',220],['statue','🗿','돌 석상','Stone statue',260],['ship','🚢','난파선','Shipwreck',320],['chest','💎','보물상자','Treasure chest',400],['star','🌟','반짝 별','Shiny star',500]];
 const DECOR_BY={};DECOR.forEach(x=>DECOR_BY[x[0]]={id:x[0],icon:x[1],ko:x[2],en:x[3],cost:x[4]});
@@ -9248,6 +9258,15 @@ function catchUp(){const gone=now()-(S.last||now());if(gone<60000)return null;co
  if(a.open&&UNLOCK.toilet())a.dirt=Math.min(80,a.dirt+visitorsPerMin(g,i)*mins*.45*dirtPerVisitor()*2.2*.3);
  staffWork();if(inc>0){S.coins+=inc;S.stats.earned+=inc}return {inc,mins:Math.round(gone/60000)}}
 function staffWork(){const {a}=here();if(staffPower('janitor')>=2&&a.dirt>80){a.dirt=10;return 'clean'}if(staffPower('keeper')>=2){for(let k=0;k<a.open;k++)if(hungry(a,k)){a.fed[k]=now();return 'feed'}}return null}
+
+// ---------------------------------------------------------------- sea tickets: a free one every 15 minutes (5 at most), lessons, and every 8 right answers
+const TK_EVERY=15*60000,TK_CAP=5,TK_RIGHT=8;
+function refillTickets(){const t=S.tkt;if(S.tickets>=TK_CAP){t.at=now();return 0}const n=Math.floor((now()-t.at)/TK_EVERY);if(n<1)return 0;
+ const add=Math.min(n,TK_CAP-S.tickets);S.tickets+=add;t.at=S.tickets>=TK_CAP?now():t.at+n*TK_EVERY;return add}
+const nextTicketIn=()=>S.tickets>=TK_CAP?0:Math.max(0,TK_EVERY-(now()-S.tkt.at));
+const tkClock=ms=>{const m=Math.floor(ms/60000),s=Math.floor(ms%60000/1000);return m+':'+String(s).padStart(2,'0')};
+const rightToward=()=>Math.max(0,Math.min(TK_RIGHT,S.stats.correct-S.tkt.c));
+function rightTickets(){const d=S.stats.correct-S.tkt.c;if(d<TK_RIGHT)return 0;const n=Math.floor(d/TK_RIGHT);S.tkt.c+=n*TK_RIGHT;S.tickets+=n;return n}
 
 // ---------------------------------------------------------------- daily missions, streak, gifts
 const MISSIONS=[
@@ -9520,7 +9539,7 @@ function finishStage(){const L_=LES,{g,i,sk,stage,mode,spec}=L_,a=aqState(g,i),d
  const opened=[];
  if(mode==='test'){for(let k=0;k<5;k++){if(a.st[k]<2)a.st[k]=k===4?stars:2;if(a.open<=k){opened.push(k);openTank(g,i,k)}}}
  else{a.st[stage]=Math.max(a.st[stage],stars);if(a.open<=stage){opened.push(stage);openTank(g,i,stage)}}
- if(firstTime){S.tickets++;}
+ S.tickets+=firstTime?2:1;
  earn(coins,{pop:false});addXP(xp);
  let grand=false;if((stage===4||mode==='test')&&!a.done){a.done=true;a.best=stars;grand=true;S.stats.aqs++;const r=S.sk[sk.id]=S.sk[sk.id]||{n:0,c:0,t:0,m:0,last:'',first:[],recent:[]};r.m=1;r.last=dayKey();const bonus=Math.round(200*Math.pow(tier(g,i),.8));earn(bonus,{pop:false});coins+=bonus;S.pearls+=stars===3?3:2;if(stars===3)S.sp++;logEvent('🏛️',`${aqDef(g,i).name} 완성 · ${sk.name} 마스터`,`${aqDef(g,i).name} finished · ${sk.name} mastered`)}
  else if(stage===4&&a.done)a.best=Math.max(a.best,stars);
@@ -9530,7 +9549,7 @@ function finishStage(){const L_=LES,{g,i,sk,stage,mode,spec}=L_,a=aqState(g,i),d
   <h2>${grand?L(`🎉 ${d.name} 그랜드 오픈!`,`🎉 ${d.name} grand opening!`):opened.length?L(`${opened.map(k=>k+1).join(', ')}번 수조가 열렸어요!`,`Tank ${opened.map(k=>k+1).join(', ')} is open!`):L('수업 완료!','Lesson complete!')}</h2>
   ${grand?`<p class="mastered">🏅 <b>${esc(sk.name)}</b> ${L('마스터!','mastered!')}</p>`:''}
   ${tankFish.length?`<div class="newfish">${tankFish.map(id=>`<div>${fishImgTag(id,'swimin')}<b>${esc(fishName(id))}</b><small>${flagsOf(FISH_BY[id])}</small></div>`).join('')}</div>`:''}
-  <div class="rew"><span>${COIN} +${short(coins)}</span><span>✨ XP +${xp}</span>${firstTime?`<span>${TICKET} +1</span>`:''}${grand?`<span>${PEARL} +${stars===3?3:2}</span>`:''}</div>
+  <div class="rew"><span>${COIN} +${short(coins)}</span><span>✨ XP +${xp}</span><span>${TICKET} +${firstTime?2:1}</span>${grand?`<span>${PEARL} +${stars===3?3:2}</span>`:''}</div>
   <p class="acc">${spec.fixed?L(`${L_.mr}/8 정답`,`${L_.mr}/8 right`):L(`첫 시도 정답률 ${Math.round(acc*100)}% · 최고 ${L_.max}연속`,`First-try accuracy ${Math.round(acc*100)}% · best streak ${L_.max}`)}</p>
   <div class="row"><button class="btn" data-r="home">${L('수조 보러 가기','See the tank')} 🐠</button></div></div>`;
  sfx(grand?'fanfare':'open');celebrate(grand?'confetti':'fish',grand?50:26);
@@ -9740,11 +9759,29 @@ function renderSea(){const el=$('v-sea');if(!UNLOCK.sea()){el.innerHTML=`<div cl
  <div class="spots">${[1,2,3,4,5,6].map(x=>`<button type="button" class="spot ${x===g?'on':''} ${x>mg?'lock':''}" data-a="spot" data-g="${x}" style="--w1:${REGIONS[x].water[0]};--w2:${REGIONS[x].water[1]}"><b>${REGIONS[x].flag} ${regionName(x)}</b><small>${x>mg?L(`${x}학년에 열려요`,`Opens in Grade ${x}`):`📖 ${FISH.filter(f=>f.reg===x&&S.dex[f.id]).length}/${FISH.filter(f=>f.reg===x).length}`}</small></button>`).join('')}</div>
  <div class="seacard" style="--w1:${R_.water[0]};--w2:${R_.water[1]}"><div class="seafish">${FISH.filter(f=>f.reg===g).slice(0,8).map(f=>S.dex[f.id]?fishImgTag(f.id):fishImgTag(f.id,'shadow')).join('')}</div><p>${L(`이 바다 친구 ${got}/${all}마리를 만났어요.`,`You’ve met ${got}/${all} animals here.`)}</p>
  <div class="row"><button type="button" class="bigbtn half" data-a="fish"><span class="bb-ic">🎣</span><span class="bb-t"><b>${L('낚시','Fishing')}</b><small>${TICKET} 1${S.items.bait?` · 🪱×${S.items.bait}`:''}</small></span></button><button type="button" class="bigbtn half" data-a="dive"><span class="bb-ic">🤿</span><span class="bb-t"><b>${L('다이빙','Diving')}</b><small>${TICKET} 1${S.items.air?` · 🧯×${S.items.air}`:''}</small></span></button></div>
- <p class="muted">${L(`${TICKET} 바다 티켓은 수업을 끝낼 때마다 1장씩 받아요.`,`You get a ${TICKET} sea ticket for every finished lesson.`)}</p></div>
+ </div>
+ <div class="card tkbox"><div class="tkrow"><b>${TICKET} ${L(`바다 티켓 ${S.tickets}장`,`${S.tickets} sea ticket${S.tickets===1?'':'s'}`)}</b><span id="tkClock">${tkLine()}</span></div>
+  <div class="tkmath"><span>🧮 ${L(`정답 ${rightToward()}/${TK_RIGHT} · ${TK_RIGHT}개 맞힐 때마다 ${TICKET} +1`,`${rightToward()}/${TK_RIGHT} right answers → ${TICKET} +1`)}</span><i class="tkbar"><b style="width:${rightToward()/TK_RIGHT*100}%"></b></i></div>
+  <button type="button" class="btn wide" data-a="tquiz">🧮 ${L('문제 5개 맞히고 티켓 받기','Get 5 right for a ticket')}</button>
+  <p class="muted">${L(`${TICKET} 받는 법: 15분마다 1장씩 저절로(${TK_CAP}장까지) · 수업 1번 +1(처음이면 +2) · 정답 ${TK_RIGHT}개마다 +1 · 오늘의 선물·미션 상자 +2 · 상점에서 코인으로 사기`,`Ways to get ${TICKET}: 1 free every 15 min (up to ${TK_CAP}) · +1 per lesson (+2 the first time) · +1 per ${TK_RIGHT} right answers · +2 from the daily gift and mission chest · buy with coins in the shop`)}</p></div>
  ${store.length?`<div class="card"><h3>🎒 ${L('잡아 온 친구들','Your catch')}</h3><div class="shopgrid">${store.map(([x,n])=>`<div class="sitem">${fishImgTag(x)}<b>${esc(fishName(x))}</b><small>×${n}</small></div>`).join('')}</div><button class="btn wide" data-a="placeall">🐠 ${L('지금 아쿠아리움 수조에 넣기','Put them in this aquarium')}</button></div>`:''}`}
 function placeAll(){const {a}=here();let n=0;for(const [x,c] of Object.entries(S.store)){for(let j=0;j<c;j++){let best=-1;for(let k=0;k<a.open;k++)if(a.fish[k].length<tankCap(a,k)&&(best<0||a.fish[k].length<a.fish[best].length))best=k;if(best<0)break;a.fish[best].push(x);S.store[x]--;n++}if(!S.store[x])delete S.store[x]}
  save();if(n){sfx('splash');toast(L(`🐠 ${n}마리가 수조로 이사했어요!`,`🐠 ${n} moved into your tanks!`))}else toast(L('빈 자리가 없어요. 수조를 넓히거나 새 수조를 열어요.','No space. Make tanks bigger or open new ones.'));renderSea()}
-function startSea(mode){const g=TAB.sea||S.at.g;if(S.tickets<1){modal(`<h2>${TICKET} ${L('바다 티켓이 없어요','No sea tickets')}</h2><p>${L('수업을 하나 끝내면 티켓을 받아요! 상점에서 진주로 살 수도 있어요.','Finish a lesson to get a ticket! You can also buy one with pearls in the shop.')}</p><button class="btn wide" data-act="close">${L('알겠어요','OK')}</button>`);return}
+const tkLine=()=>S.tickets>=TK_CAP?L('무료 티켓이 가득 찼어요!','Free tickets are full!'):L(`다음 무료 티켓 ${tkClock(nextTicketIn())}`,`Next free ticket in ${tkClock(nextTicketIn())}`);
+// out of tickets is never a dead end: solve five problems, or buy one with coins
+function ticketQuiz(then){const need=5;let right=0;
+ modal(`<h2>🧮 ${L('문제 풀고 바다 티켓 받기','Solve for a sea ticket')}</h2><p class="muted">${L(`${need}문제를 맞히면 ${TICKET} 1장!`,`Get ${need} right for ${TICKET} 1!`)}</p><div class="tqdots">${'<i></i>'.repeat(need)}</div><div id="tqBox"></div>`,{cls:'tqm',onOpen:box=>{
+  const dots=box.querySelectorAll('.tqdots i'),host=box.querySelector('#tqBox');
+  const ask=()=>{const p=askQuick(),opts=shuffle([p.a,...p.w.slice(0,3)]);host.innerHTML=`<div class="tqq">${esc(p.q)}</div><div class="tqo">${opts.map(o=>`<button type="button" class="tqb" data-v="${esc(o)}">${esc(o)}</button>`).join('')}</div>`;
+   if(S.opt.readQ)say(p.q);let lock=false;
+   host.querySelectorAll('.tqb').forEach(b=>b.addEventListener('click',()=>{if(lock)return;lock=true;const ok=b.dataset.v===p.a;S.stats.solved++;
+    if(ok){S.stats.correct++;right++;dots[right-1].classList.add('on');b.classList.add('ok');sfx('good')}else{S.stats.wrong++;b.classList.add('bad');host.querySelectorAll('.tqb').forEach(x=>{if(x.dataset.v===p.a)x.classList.add('ok')});sfx('bad')}
+    setTimeout(()=>{if(!document.body.contains(host))return;if(right>=need)done();else ask()},ok?650:1400)}))};
+  const done=()=>{S.tickets++;save();updateHud();sfx('catch');celebrate('stars',16);const m=T(pick([['바다 티켓을 받았어요! 수학 실력 최고!','You earned a sea ticket! Math star!'],['척척 맞혔어요! 바다로 가 볼까요?','Spot on! Off to the sea?']]));say(m,{raw:true});
+   host.innerHTML=`<div class="big">🎫</div><p class="center"><b>${m}</b></p><button class="btn wide" data-act="go">🌊 ${L('바다로 가요!','To the sea!')}</button>`};
+  ask()},acts:{go:()=>()=>{if(then)then();else{go('sea')}}},onClose:()=>{if(VIEW==='sea')renderSea()}})}
+function startSea(mode){const g=TAB.sea||S.at.g;if(S.tickets<1){const c=itemCost(ITEM_BY.seaticket);modal(`<h2>${TICKET} ${L('바다 티켓이 없어요','No sea tickets')}</h2><p>${tkLine()}</p><p>${L('기다리지 않아도 돼요! 문제를 풀거나 코인으로 살 수 있어요.','No need to wait! Solve some problems or buy one with coins.')}</p>
+  <div class="row wrap"><button class="btn" data-act="quiz">🧮 ${L('문제 5개 맞히기','Get 5 right')}</button><button class="btn ghost" data-act="buy">${L('코인으로 사기','Buy')} · ${COIN} ${short(c)}</button></div>`,{acts:{quiz:()=>()=>ticketQuiz(()=>startSea(mode)),buy:()=>{if(!spend(c))return false;S.tickets++;sfx('coin');toast(`${TICKET} +1`);save();return ()=>startSea(mode)}}});return}
  if(typeof Sea==='undefined')return;S.tickets--;S.stats.trips++;audio();const st=openStage();st.className='stage game';const bait=(S.items.bait||0)>0&&mode==='fish',air=(S.items.air||0)>0&&mode==='dive';if(bait)S.items.bait--;if(air)S.items.air--;save();
  const o={g,pool:seaPool(g),bait:bait?2:0,casts:6+(skl('dive')>=2?1:0)+(skl('dive')>=4?1:0),oxygen:60+8*skl('dive')+(air?20:0)+5*staffPower('diver'),ask:askQuick,sfx,say:t=>say(t),onEnd:res=>{try{Sea.stop()}catch(e){}closeStage();finishSea(mode,res)}};
  try{mode==='fish'?Sea.fish(st,o):Sea.dive(st,o)}catch(e){console.warn(e);closeStage();S.tickets++}}
@@ -9830,11 +9867,11 @@ function renderDailyMini(){const el=$('dailyMini');if(!el)return;const d=S.daily
  ${d.tasks.map(t=>{const m=MISSIONS.find(x=>x.id===t.id);return `<div class="dt ${t.done?'done':''}"><span>${t.done?'✅':m.icon}</span><span class="dtt">${fill(L(m.ko,m.en),{n:t.goal})}</span><small>${Math.min(t.n,t.goal)}/${t.goal}</small></div>`}).join('')}
  <div class="drow">${!d.gift?`<button type="button" class="btn small gold" data-a="gift">🎁 ${L('오늘의 선물','Daily gift')}</button>`:''}${allDone&&!d.chest?`<button type="button" class="btn small gold" data-a="chest">🧰 ${L('미션 보물상자','Mission chest')}</button>`:''}${reviewReady()&&!d.review?`<button type="button" class="btn small" data-a="review">🧠 ${L('오늘의 복습','Daily review')}</button>`:''}</div></div>`}
 function dailyGift(){if(S.daily.gift)return;S.daily.gift=true;const t=tier(S.at.g,S.at.i);const opts=[{k:'coins',v:Math.round(80*t)},{k:'tickets',v:1},{k:'pearls',v:2},{k:'item',v:pick(['hint','shield','soap','flyer'])}];const r=pick(opts);
- if(r.k==='coins')earn(r.v,{pop:false});else if(r.k==='item')S.items[r.v]=(S.items[r.v]||0)+1;else S[r.k]+=r.v;S.tickets+=1;save();sfx('catch');celebrate('confetti',20);
+ if(r.k==='coins')earn(r.v,{pop:false});else if(r.k==='item')S.items[r.v]=(S.items[r.v]||0)+1;else S[r.k]+=r.v;S.tickets+=2;save();sfx('catch');celebrate('confetti',20);
  const label=r.k==='coins'?`${COIN} ${short(r.v)}`:r.k==='tickets'?`${TICKET} ${r.v}`:r.k==='pearls'?`${PEARL} ${r.v}`:`${ITEM_BY[r.v].icon} ${L(ITEM_BY[r.v].ko,ITEM_BY[r.v].en)}`;
- modal(`<div class="big">🎁</div><h2>${L('오늘의 선물!','Today’s gift!')}</h2><div class="rew"><span>${label}</span><span>${TICKET} +1</span></div><p>${L('매일 오면 선물이 있어요. 오늘도 수학 한 판 해 볼까요?','A gift every day you come. Ready for some math today?')}</p><button class="btn wide" data-act="close">${L('고마워요!','Thanks!')}</button>`);renderDailyMini();updateHud()}
-function missionChest(){if(S.daily.chest)return;S.daily.chest=true;const c=Math.round(150*tier(S.at.g,S.at.i));earn(c,{pop:false});S.pearls+=3;const it=pick(['hint','shield','flyer','food','turbo']);S.items[it]=(S.items[it]||0)+1;save();sfx('fanfare');celebrate('confetti',40);
- modal(`<div class="big">🧰</div><h2>${L('오늘의 미션 완료!','All missions done!')}</h2><div class="rew"><span>${COIN} +${short(c)}</span><span>${PEARL} +3</span><span>${ITEM_BY[it].icon} +1</span></div><p>${L('매일매일 해내는 관장님, 정말 멋져요!','A director who shows up every day — amazing!')}</p><button class="btn wide" data-act="close">${L('최고!','Awesome!')}</button>`);say(L('오늘의 미션을 모두 해냈어요! 정말 대단해요!','You finished all of today’s missions! Amazing!'),{raw:true});renderDailyMini();updateHud()}
+ modal(`<div class="big">🎁</div><h2>${L('오늘의 선물!','Today’s gift!')}</h2><div class="rew"><span>${label}</span><span>${TICKET} +2</span></div><p>${L('매일 오면 선물이 있어요. 오늘도 수학 한 판 해 볼까요?','A gift every day you come. Ready for some math today?')}</p><button class="btn wide" data-act="close">${L('고마워요!','Thanks!')}</button>`);renderDailyMini();updateHud()}
+function missionChest(){if(S.daily.chest)return;S.daily.chest=true;const c=Math.round(150*tier(S.at.g,S.at.i));earn(c,{pop:false});S.pearls+=3;const it=pick(['hint','shield','flyer','food','turbo']);S.items[it]=(S.items[it]||0)+1;S.tickets+=2;save();sfx('fanfare');celebrate('confetti',40);
+ modal(`<div class="big">🧰</div><h2>${L('오늘의 미션 완료!','All missions done!')}</h2><div class="rew"><span>${COIN} +${short(c)}</span><span>${PEARL} +3</span><span>${ITEM_BY[it].icon} +1</span><span>${TICKET} +2</span></div><p>${L('매일매일 해내는 관장님, 정말 멋져요!','A director who shows up every day — amazing!')}</p><button class="btn wide" data-act="close">${L('최고!','Awesome!')}</button>`);say(L('오늘의 미션을 모두 해냈어요! 정말 대단해요!','You finished all of today’s missions! Amazing!'),{raw:true});renderDailyMini();updateHud()}
 // five problems from skills already mastered: the oldest ones come back first
 function dailyReview(){const ids=Object.keys(S.sk).filter(id=>S.sk[id].m&&SKILL_BY[id]).sort((x,y)=>(S.sk[x].last||'')<(S.sk[y].last||'')?-1:1);if(!ids.length)return;
  const list=Array.from({length:5},(_,k)=>SKILL_BY[ids[k%ids.length]]);let n=0,right=0;
@@ -9846,12 +9883,12 @@ function dailyReview(){const ids=Object.keys(S.sk).filter(id=>S.sk[id].m&&SKILL_
 // ---------------------------------------------------------------- after a grand opening: on to the next aquarium, or graduation
 function afterGrandOpening(g,i){if(gradeDone(g)&&!S.G[g].grad){graduation(g);return}
  if(i<19&&!aqState(g,i+1).done){const nx=aqDef(g,i+1);modal(`<div class="big">🚗</div><h2>${L('다음 아쿠아리움이 기다려요!','The next aquarium is waiting!')}</h2><p><b>${esc(nx.name)}</b> · ${skillOf(g,i+1)?esc(skillOf(g,i+1).name):''}</p><div class="row"><button class="btn ghost" data-act="close">${L('조금 있다가','Later')}</button><button class="btn" data-act="go">${L('운전해서 가기','Drive there')} ▶</button></div>`,{acts:{go:()=>()=>travelTo(g,i+1)}})}}
-function graduation(g){const gd=S.G[g];gd.grad=dayKey();const t=tier(g,19),coins=Math.round(1500*t);earn(coins,{pop:false});S.pearls+=20;S.tickets+=3;const leg='leg'+g;addDex(leg);S.store[leg]=(S.store[leg]||0)+1;S.sp+=2;
+function graduation(g){const gd=S.G[g];gd.grad=dayKey();const t=tier(g,19),coins=Math.round(1500*t);earn(coins,{pop:false});S.pearls+=20;S.tickets+=5;const leg='leg'+g;addDex(leg);S.store[leg]=(S.store[leg]||0)+1;S.sp+=2;
  const stars=gd.aq.reduce((x,a)=>x+a.best,0),probs=SKILLS.filter(s=>s.id.startsWith(`g${g}-`)).reduce((x,s)=>x+(S.sk[s.id]?S.sk[s.id].c:0),0);
  logEvent('🎓',`${g}학년 수학 마스터! 졸업!`,`Grade ${g} math mastered! Graduated!`);checkAch();save();sfx('fanfare');celebrate('confetti',70);setTimeout(()=>celebrate('stars',40),900);
  modal(`<div class="diploma"><div class="dribbon">🎓</div><h2>${L(`${g}학년 수학 마스터 인증서`,`Grade ${g} Math Master Certificate`)}</h2><p class="dname">${esc(S.name)}</p><p>${L(`위 관장님은 꼬마 수학 아쿠아리움에서 ${g}학년 수학 단원 20개를 모두 마스터하였기에 이 인증서를 드립니다.`,`This certifies that our director mastered all 20 Grade ${g} math skills at Little Math Aquarium.`)}</p>
   <div class="dstats"><span>⭐ ${stars}/60</span><span>✏️ ${num(probs)}</span><span>📅 ${gd.started||''} → ${gd.grad}</span></div><div class="dfish">${fishImgTag(leg,'big')}<b>${esc(fishName(leg))}</b><small>${L('전설의 물고기가 찾아왔어요!','A legendary fish came to you!')}</small></div><div class="dstamp">© Little Math Aquarium · ${dayKey()}</div></div>
-  <div class="rew"><span>${COIN} +${short(coins)}</span><span>${PEARL} +20</span><span>${TICKET} +3</span><span>⚡ +2</span></div>
+  <div class="rew"><span>${COIN} +${short(coins)}</span><span>${PEARL} +20</span><span>${TICKET} +5</span><span>⚡ +2</span></div>
   ${g<6?`<button class="btn wide gold" data-act="next">${L(`${g+1}학년 바다로 출발!`,`Off to the Grade ${g+1} sea!`)} 🚗</button>`:`<p><b>${L('🎉 초등 수학 1~6학년을 모두 마스터했어요! 정말 대단해요!','🎉 You mastered all of elementary math, grades 1–6! Incredible!')}</b></p><button class="btn wide" data-act="close">${L('최고!','The best!')}</button>`}`,{cls:'wide',closable:g===6,acts:{next:()=>()=>{S.grade=g+1;startDrive({kind:'move',g:g+1,from:aqDef(g,19).name,to:aqDef(g+1,curIndex(g+1)).name,after:()=>arrive(g+1,curIndex(g+1))})}}});
  say(L(`축하해요! ${g}학년 수학을 모두 마스터했어요! 정말 자랑스러워요!`,`Congratulations! You mastered all of grade ${g} math! I’m so proud of you!`),{raw:true})}
 function goNextGrade(){const {g}=here();if(g>=6)return;S.grade=g+1;startDrive({kind:'move',g:g+1,from:here().d.name,to:aqDef(g+1,curIndex(g+1)).name,after:()=>arrive(g+1,curIndex(g+1))})}
@@ -9913,6 +9950,7 @@ function wire(){
    case 'grade':sfx('tap');TAB.map=+b.dataset.g;renderMap();break;
    case 'node':nodeModal(TAB.map,+b.dataset.i);break;
    case 'spot':if(b.classList.contains('lock')){toast(L('그 학년에 가면 열려요!','Opens when you reach that grade!'));break}sfx('tap');TAB.sea=+b.dataset.g;renderSea();break;
+   case 'tquiz':sfx('tap');ticketQuiz();break;
    case 'fish':startSea('fish');break;case 'dive':startSea('dive');break;case 'placeall':placeAll();break;
    case 'buyitem':buyItem(b.dataset.id);break;case 'decor':decorModal(+b.dataset.k);break;case 'fishbuy':buyFishModal(+b.dataset.k);break;
    case 'car':{const c=CARS.find(x=>x[0]===b.dataset.id);if(!S.car.owned.includes(c[0])){if(!spend(c[4]))break;S.car.owned.push(c[0]);sfx('fanfare');toast(`${c[1]} ${L('새 차!','New car!')}`)}S.car.model=c[0];save();renderShop();break}
@@ -9931,6 +9969,8 @@ function wire(){
 // ---------------------------------------------------------------- the clock: visitors, income, requests, staff, saving
 let visAcc=0,chainAcc=0,tickN=0;
 function tick(){if(document.hidden)return;tickN++;const {g,i,a}=here();
+ const tk1=refillTickets(),tk2=rightTickets();if(tk1&&UNLOCK.sea())toast(`${TICKET} ${L('무료 바다 티켓이 생겼어요!','A free sea ticket arrived!')} <b>+${tk1}</b>`);if(tk2)toast(`🧮 ${L(`정답 ${TK_RIGHT*tk2}개! 바다 티켓`,`${TK_RIGHT*tk2} right answers! Sea ticket`)} <b>+${tk2} ${TICKET}</b>`);
+ if((tk1||tk2)&&VIEW==='sea'&&!modalOpen())renderSea();else if(VIEW==='sea'){const c=$('tkClock');if(c)c.textContent=tkLine()}
  if(a.open){visAcc+=visitorsPerMin(g,i)/60;while(visAcc>=1){visAcc--;const v=visitorArrives();walkVisitor(v)}}
  chainAcc+=chainPerMin()/60;if(chainAcc>=1){const c=Math.floor(chainAcc);chainAcc-=c;S.coins+=c;S.stats.earned+=c}
  if(tickN%30===0){const w=staffWork();if(w==='clean'&&VIEW==='home'){toast(L('🧹 청소 담당이 화장실을 청소했어요!','🧹 Your cleaner cleaned the restrooms!'));renderHome()}if(w==='feed'&&VIEW==='home'){toast(L('🐟 사육 담당이 먹이를 줬어요!','🐟 Your keeper fed the fish!'));renderHome()}}
@@ -9940,7 +9980,7 @@ function tick(){if(document.hidden)return;tickN++;const {g,i,a}=here();
  if(tickN%15===0)save();updateHud()}
 
 // ---------------------------------------------------------------- start
-function boot(){applyLang();wire();rollDaily();refreshBoard();const back=catchUp();updateHud();setInterval(tick,1000);
+function boot(){applyLang();wire();rollDaily();refreshBoard();const back=catchUp();refillTickets();updateHud();setInterval(tick,1000);
  if(!S.grade){go('home');welcome();return}
  go('home');
  if(back&&back.inc>0)modal(`<div class="big">🐠</div><h2>${L('다시 와 줘서 고마워요!','Welcome back!')}</h2><p>${L(`관장님이 없는 동안 아쿠아리움이 ${COIN} <b>${short(back.inc)}</b> 코인을 벌었어요.`,`While you were away, the aquarium earned ${COIN} <b>${short(back.inc)}</b> coins.`)}</p>${here().a.dirt>50?`<p>🚻 ${L('화장실 청소가 필요해요!','The restrooms need cleaning!')}</p>`:''}<button class="btn wide" data-act="close">${L('좋아요!','Great!')}</button>`,{onOpen:()=>say(L('다시 와 줘서 고마워요! 물고기들이 기다렸어요.','Welcome back! The fish missed you.'),{raw:true})});

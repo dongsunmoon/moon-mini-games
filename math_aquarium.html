@@ -399,6 +399,29 @@ button{touch-action:manipulation}
 .tqq{font-size:clamp(28px,8vw,40px);font-weight:900;text-align:center;margin:6px 0 14px;letter-spacing:.5px}
 .tqo{display:grid;grid-template-columns:1fr 1fr;gap:10px}.tqb{border:0;border-radius:16px;padding:14px 8px;font-size:22px;font-weight:900;background:#eef4ff;color:var(--ink);box-shadow:0 4px 0 #cfdcf3;touch-action:manipulation}
 .tqb.ok{background:#d6f8e3;box-shadow:0 4px 0 #8fdcae}.tqb.bad{background:#ffe0e4;box-shadow:0 4px 0 #f3a3ae;animation:shake .4s}
+/* ---------------------------------------------------------------- number claw machine */
+.stage.claw{background:#3a2470;padding-top:0}
+.cl{position:absolute;inset:0;overflow:hidden;user-select:none;-webkit-user-select:none}
+.cl-cv{position:absolute;left:0;top:0;width:100%;height:100%;display:block;touch-action:none}
+.cl-top{position:absolute;left:0;right:0;top:0;display:flex;align-items:center;gap:8px;padding:calc(8px + env(safe-area-inset-top)) max(10px,env(safe-area-inset-right)) 0 max(10px,env(safe-area-inset-left))}
+.cl-x{flex:0 0 44px;width:44px;height:44px;border:0;border-radius:14px;background:#ffffffee;font-size:18px;box-shadow:0 3px 0 #c9b6ee}
+.cl-q{flex:1;min-width:0;display:flex;align-items:center;justify-content:center;gap:8px;background:#fff;border-radius:18px;padding:6px 12px;box-shadow:0 4px 0 #c9b6ee;cursor:pointer}
+.cl-qt{font-size:clamp(22px,6.4vw,34px);font-weight:900;color:#24305e;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.cl-spk{font-size:18px;opacity:.7;flex:none}
+.cl-chip{flex:none;display:flex;flex-direction:column;align-items:center;background:#ffffffee;border-radius:14px;padding:4px 10px;font-weight:900;font-size:13px;box-shadow:0 3px 0 #c9b6ee;line-height:1.3}.cl-chip .cl-rd{font-size:11px;color:var(--muted)}
+.cl-msg{position:absolute;left:50%;top:calc(70px + env(safe-area-inset-top));transform:translate(-50%,-8px);opacity:0;transition:opacity .2s,transform .2s;background:#fff;border-radius:16px;padding:8px 14px;font-weight:900;font-size:16px;color:#24305e;box-shadow:0 6px 18px rgba(0,0,0,.25);max-width:calc(100% - 24px);text-align:center;pointer-events:none}
+.cl-msg.on{opacity:1;transform:translate(-50%,0)}.cl-msg.good{background:#d6f8e3}.cl-msg.bad{background:#ffe6ea}.cl-msg.warn{background:#fff3c4}
+.cl-bot{position:absolute;left:0;right:0;bottom:0;display:flex;justify-content:center;align-items:center;gap:12px;padding:8px max(10px,env(safe-area-inset-right)) calc(12px + env(safe-area-inset-bottom)) max(10px,env(safe-area-inset-left))}
+.cl-mv{width:68px;height:64px;border:0;border-radius:20px;background:#ffffffe8;font-size:24px;color:#d6337a;box-shadow:0 5px 0 #c9b6ee;touch-action:none}
+.cl-mv.on{transform:translateY(3px);box-shadow:0 2px 0 #c9b6ee;background:#fff6c8}
+.cl-drop{min-width:150px;height:68px;border:0;border-radius:24px;background:linear-gradient(180deg,#ffd45a,#ffab1a);color:#5a3200;font-size:22px;font-weight:900;box-shadow:0 6px 0 #d0861a;touch-action:manipulation}
+.cl-drop:active{transform:translateY(3px);box-shadow:0 3px 0 #d0861a}.cl-drop:disabled{filter:grayscale(.6);opacity:.6}
+@media (max-height:560px){.cl-mv{height:52px;width:58px}.cl-drop{height:54px;min-width:120px;font-size:19px}.cl-x{width:38px;height:38px;flex-basis:38px}}
+.fac.claw{background:linear-gradient(135deg,#fff0f7,#ffe1ef)}
+@media (max-width:420px){.wk-map button{width:27px;height:27px;margin-left:-13.5px;font-size:14px}.wk-map button img{width:24px}}
+.cl-land .cl-bot{padding:0}
+.cl-land .cl-mv[data-c="l"]{position:absolute;left:max(14px,env(safe-area-inset-left));bottom:calc(16px + env(safe-area-inset-bottom))}
+.cl-land .cl-mv[data-c="r"]{position:absolute;left:calc(max(14px,env(safe-area-inset-left)) + 70px);bottom:calc(16px + env(safe-area-inset-bottom))}
+.cl-land .cl-drop{position:absolute;right:max(14px,env(safe-area-inset-right));bottom:calc(16px + env(safe-area-inset-bottom))}
 </style>
 </head>
 <body>
@@ -8655,7 +8678,7 @@ let W=null;
 // ---------------------------------------------------------------- the hall: a row of places, left to right
 function layout(){const secs=[];let x=0;const add=(kind,w,o={})=>{const s=Object.assign({kind,x0:x,x1:x+w,w,cx:x+w/2,i:secs.length},o);s.spot=s.cx;secs.push(s);x+=w;return s};
  const en=add('entry',470);en.spot=en.x0+360;
- for(let k=0;k<4;k++){const t=add('tank',380,{k});t.win={x:t.x0+28,y:96,w:t.w-56,h:290};add(FACS[k],310,{f:FACS[k]})}
+ for(let k=0;k<4;k++){const t=add('tank',380,{k});t.win={x:t.x0+28,y:96,w:t.w-56,h:290};add(FACS[k],310,{f:FACS[k]});if(FACS[k]==='gift')add('claw',260)}
  const tu=add('tunnel',1150,{k:4});tu.win={x:tu.x0+40,y:0,w:tu.w-80,h:FY-8};add('photo',380);return {secs,len:x}}
 const secOf=f=>f==='ticket'?W.secs[0]:W.secs.find(s=>s.f===f);
 const spotOf=f=>f==='ticket'?W.secs[0].x0+360:secOf(f).cx;
@@ -8698,10 +8721,11 @@ function start(host,o){stop();const h=here();
  const av=String(S.av||'🧒').replace(/\uFE0F/g,''),face=FACES.has(av);
  W.me={x:150,y:530,tx:null,ty:null,dir:1,ph:0,moving:false,run:false,head:face?av:'🧒',chest:face?'':av,s:1};
  W.mo={x:84,y:548,dir:1,ph:0,moving:false};
+ if(o.spot){const sp=W.secs.find(x=>x.kind===o.spot);if(sp){W.me.x=sp.spot;W.mo.x=sp.spot-70;W.cam=Math.max(0,Math.min(W.len-1,sp.spot-300))}}
  dom();W.cur=W.secs[0];enter(W.cur);panel();resize();sync(true);hud();marks();
  const n=Math.min(9,Math.round(visitorsPerMin(h.g,h.i)*1.1));for(let j=0;j<n;j++)spawn({c:0,bought:['snack','gift','mart'].filter(f=>Math.random()<shopChance(f))},true);
  listen();W.raf=requestAnimationFrame(frame);
- setTimeout(()=>{if(W)moSay(L('어서 와요, 관장님! 우리 아쿠아리움을 같이 둘러봐요.','Welcome in, director! Let’s look around our aquarium.'))},600)}
+ if(!o.spot)setTimeout(()=>{if(W)moSay(L('어서 와요, 관장님! 우리 아쿠아리움을 같이 둘러봐요.','Welcome in, director! Let’s look around our aquarium.'))},600)}
 function stop(){if(!W)return;cancelAnimationFrame(W.raf);clearTimeout(W.factT);for(const [t,ev,fn,o] of W.on)t.removeEventListener(ev,fn,o);W=null}
 
 function dom(){const d=W.d,R_=W.R;
@@ -8712,7 +8736,7 @@ function dom(){const d=W.d,R_=W.R;
  <div class="wk-bot"><div class="wk-pad"><button type="button" data-w="hold" data-d="-1" aria-label="${esc(L('왼쪽','left'))}">◀</button><button type="button" data-w="hold" data-d="1" aria-label="${esc(L('오른쪽','right'))}">▶</button></div><div class="wk-card" id="wkCard"></div></div></div>`;
  const q=s=>W.host.querySelector(s);W.el={head:q('.wk-head'),bot:q('.wk-bot'),card:q('#wkCard'),map:q('#wkMap'),me:q('.wk-me'),coins:q('#wkCoins'),sub:q('#wkSub'),fact:q('#wkFact'),flash:q('.wk-flash')};
  W.cv=q('.wk-cv');W.ctx=W.cv.getContext('2d')}
-function secIcon(s){if(s.kind==='tank')return `<img src="${fishURL(W.d.tanks[s.k])}" alt="">`;return {entry:'🎫',toilet:'🚻',snack:'🍦',gift:'🎁',mart:'🛒',tunnel:'🌊',photo:'📸'}[s.kind]}
+function secIcon(s){if(s.kind==='tank')return `<img src="${fishURL(W.d.tanks[s.k])}" alt="">`;return {entry:'🎫',toilet:'🚻',snack:'🍦',gift:'🎁',claw:'🕹️',mart:'🛒',tunnel:'🌊',photo:'📸'}[s.kind]}
 
 // the scene keeps signs-to-feet (design y 56…596) between the top bar and the bottom card; wider screens see more of the hall
 function resize(){if(!W)return;const r=W.host.getBoundingClientRect(),cw=Math.max(1,r.width),ch=Math.max(1,r.height);
@@ -8830,6 +8854,7 @@ function intro(s){const a=W.a,r=REQ;
   return L(`${s.k+1}번 수조예요. 물고기를 눌러 보면 이야기를 들려줘요!`,`This is tank ${s.k+1}. Tap a fish to hear its story!`)}
  if(s.kind==='tunnel')return a.open>=5?L('와! 해저 터널이에요. 위를 올려다봐요!','Wow, the undersea tunnel! Look up!'):L('마스터 쇼를 통과하면 해저 터널이 열려요!','Pass the Mastery Show to open the undersea tunnel!');
  if(s.kind==='photo')return L('여기는 포토존이에요. 기념사진을 찍어 봐요!','This is the photo spot. Let’s take a picture!');
+ if(s.kind==='claw')return UNLOCK.claw()?L('인형뽑기예요! 문제의 답이 적힌 인형을 집으면 내 거예요.','The claw machine! Grab the plush with the answer and it’s yours.'):`${L('인형뽑기','Claw machine')}: ${T(UNLOCK_HINT.claw)}`;
  if(s.f==='toilet'){if(!UNLOCK.toilet())return '';return a.dirt>60?L('화장실이 더러워요. 깨끗하게 청소해 줄까요?','The restrooms are dirty. Shall we clean them?'):L('화장실이 깨끗해요. 반짝반짝!','The restrooms are clean. Sparkly!')}
  const F=FAC[s.f],nm=L(F.ko,F.en);if(!UNLOCK[s.f]())return `${nm}: ${T(UNLOCK_HINT[s.f])}`;
  if(!S.fac[s.f])return L(`여기에 ${nm}${josa(nm,'을','를')} 지을 수 있어요!`,`We can build a ${nm.toLowerCase()} here!`);
@@ -8851,11 +8876,12 @@ function panel(){const s=W.cur;if(!s)return;const {g,i}=W,a=W.a,r=REQ;let ic='',
   if(!UNLOCK[s.f]()){ic='🔒';st=T(UNLOCK_HINT[s.f])}
   else if(!lv){st=L('아직 빈 가게예요. 지으면 손님이 물건을 사요.','An empty shop. Build it and visitors will buy things.');B('fac',s.f,`🏗️ ${L('짓기','Build')} ${COIN}${short(facCost(s.f,0))}`,'main')}
   else{st=L(`손님 ${Math.round(shopChance(s.f)*100)}%가 사요 · ${COIN}${shopPrice(s.f,g,i)}`,`${Math.round(shopChance(s.f)*100)}% of visitors buy · ${COIN}${shopPrice(s.f,g,i)}`);B('fac',s.f,lv<FAC_MAX?`⬆️ ${L('업그레이드','Upgrade')}`:`👑 ${L('최고 레벨','Max level')}`)}}
+ else if(s.kind==='claw'){ic='🕹️';ti=L('숫자 인형뽑기','Number claw machine');if(!UNLOCK.claw())st=T(UNLOCK_HINT.claw);else{const f=clawFreeLeft();st=(f?L(`오늘 무료 ${f}판`,`${f} free today`):`${COIN}${short(clawCost())}`)+` · 🧸 ${plushKinds()}${L('종','')}`;B('claw','',`🕹️ ${L('하기','Play')}`,'main');B('shelf','',`🧸 ${L('진열장','Shelf')}`)}}
  else if(s.kind==='photo'){ic='📸';ti=L('포토존','Photo spot');st=(S.walk.photo||{})[W.d.key]===dayKey()?L('오늘 사진을 찍었어요. 또 찍어도 돼요!','You took one today. Take more!'):L('사진을 찍으면 선물을 받아요!','Take a photo for a little gift!');B('photo','',`📸 ${L('사진 찍기','Take a photo')}`,'main')}
  const sig=ic+ti+st+bt.join('');if(sig===W.panelSig)return;W.panelSig=sig;
  W.el.card.innerHTML=`<span class="wk-ci">${ic}</span><span class="wk-ct"><b>${ti}</b><small>${st}</small></span><span class="wk-cb">${bt.join('')}</span>`}
 // the little map: dim places that are still closed, flag the ones that need you
-function marks(){const a=W.a,r=REQ;const cls=W.secs.map(s=>{let c='';if(s.k!=null&&a.open<=s.k||s.f&&s.f!=='toilet'&&!S.fac[s.f]||s.f==='toilet'&&!UNLOCK.toilet())c='lock';
+function marks(){const a=W.a,r=REQ;const cls=W.secs.map(s=>{let c='';if(s.kind==='claw'&&!UNLOCK.claw()||s.k!=null&&a.open<=s.k||s.f&&s.f!=='toilet'&&!S.fac[s.f]||s.f==='toilet'&&!UNLOCK.toilet())c='lock';
   if(r&&(r.f===s.f||r.f==='ticket'&&s.kind==='entry'))c+=' ask';else if(s.k!=null&&hungry(a,s.k)&&UNLOCK.feed()||s.f==='toilet'&&UNLOCK.toilet()&&a.dirt>60)c+=' warn';return c});
  const sig=cls.join('|');if(sig===W.mapSig)return;W.mapSig=sig;W.el.map.querySelectorAll('button').forEach((b,j)=>b.className=cls[j])}
 function hud(){W.el.coins.textContent=`${COIN} ${short(S.coins)}`;const w=S.walk,n=w.day===dayKey()?W.secs.filter(x=>w.been.includes(W.d.key+':'+x.i)).length:0;
@@ -8920,7 +8946,7 @@ function draw(){const c=W.ctx,k=W.k,dpr=W.dpr,x0=W.cam-60,x1=W.cam+W.vw+60,col=W
  for(const p of W.staff)if(!p.bust&&!p.swim&&p.x>x0&&p.x<x1)list.push([p.y,()=>person(c,p)]);
  list.push([W.mo.y,()=>mooni(c)],[W.me.y+.1,()=>meDraw(c)]);list.sort((a,b)=>a[0]-b[0]);for(const d of list)d[1]();
  overlays(c,x0,x1)}
-const DRAW={entry,tank:tankSec,tunnel,toilet,snack:shop,gift:shop,mart:shop,photo};
+const DRAW={entry,tank:tankSec,tunnel,toilet,snack:shop,gift:shop,mart:shop,photo,claw:clawSec};
 function ceiling(c,s){if(s.kind==='tunnel'&&W.a.open>=5)return;const cols=[W.col.trim,'#ffffff',W.R.water[0],'#ffd23f'],P0=[s.x0+6,12],P1=[s.cx,44],P2=[s.x1-6,12],at=t=>[(1-t)*(1-t)*P0[0]+2*(1-t)*t*P1[0]+t*t*P2[0],(1-t)*(1-t)*P0[1]+2*(1-t)*t*P1[1]+t*t*P2[1]];
  c.strokeStyle='rgba(255,255,255,.55)';c.lineWidth=2;c.beginPath();c.moveTo(P0[0],P0[1]);c.quadraticCurveTo(P1[0],P1[1],P2[0],P2[1]);c.stroke();
  const n=Math.max(5,Math.round(s.w/46));for(let j=1;j<n;j++){const [x,y]=at(j/n);c.fillStyle=cols[(j+s.i)%4];c.beginPath();c.moveTo(x-8,y);c.lineTo(x+8,y);c.lineTo(x,y+17);c.closePath();c.fill()}
@@ -9020,6 +9046,19 @@ function toilet(c,s){const a=W.a,x=s.x0+22,w=s.w-44,cx=s.cx,unl=UNLOCK.toilet(),
  if(!unl){c.fillStyle='#fffdf6';rr(c,cx-100,150,200,44,10);c.fill();put(c,fit(`🔒 ${L('준비 중','Coming soon')}`,17,'#4a3a20',180),cx,172)}
  if(dirt>60){for(let j=0;j<(dirt>85?4:2);j++)put(c,emo('🪰',18),cx+Math.sin(W.t*2.3+j*2)*84,200+Math.cos(W.t*3.1+j*1.3)*50)}
  else if(unl&&dirt<15){for(let j=0;j<3;j++){c.globalAlpha=(Math.sin(W.t*3+j*2)+1)/2;put(c,emo('✨',22),x+40+j*(w-80)/2,170+(j%2)*90);c.globalAlpha=1}}}
+// the claw machine: a pink cabinet with a glass full of fish plushies and a claw that bobs
+function clawSec(c,s){const x=s.cx-90,w=180,y=128,h=FY-128,t=W.t,open=UNLOCK.claw();
+ sign(c,s.cx,92,`🕹️ ${L('인형뽑기','Claw machine')}`,'#ff5c9d',w+40);
+ c.fillStyle='rgba(0,0,0,.15)';rr(c,x+6,y+6,w,h,18);c.fill();c.fillStyle=open?'#ff6aa8':'#b9a9c0';rr(c,x,y,w,h,18);c.fill();c.fillStyle='rgba(255,255,255,.2)';rr(c,x+8,y+6,w*.4,h-12,14);c.fill();
+ for(let j=0;j<8;j++)dot(c,x+16+j*(w-32)/7,y+12,4,(Math.floor(t*4)+j)%2?'#ffffff':'#ffd23f');
+ c.fillStyle='#d8efff';rr(c,x+14,y+26,w-28,170,10);c.fill();
+ c.save();rr(c,x+14,y+26,w-28,170,10);c.clip();const ids=W.d.tanks;for(let j=0;j<5;j++){const im=fspr(ids[j%ids.length]);if(im)c.drawImage(im,x+18+j*30,y+150+(j%2)*12,60,40)}
+ const cx=x+w/2+Math.sin(t*.9)*50,cy=y+70+Math.max(0,Math.sin(t*1.3))*30;c.strokeStyle='#5a6480';c.lineWidth=2;c.beginPath();c.moveTo(cx,y+30);c.lineTo(cx,cy);c.stroke();
+ c.fillStyle='#c9d1e6';c.beginPath();c.ellipse(cx,cy+6,11,8,0,Math.PI,TAU);c.fill();c.strokeStyle='#8a94b0';c.lineWidth=3;c.beginPath();c.moveTo(cx-8,cy+6);c.quadraticCurveTo(cx-16,cy+16,cx-6,cy+24);c.moveTo(cx+8,cy+6);c.quadraticCurveTo(cx+16,cy+16,cx+6,cy+24);c.stroke();
+ c.fillStyle='rgba(255,255,255,.25)';c.beginPath();c.moveTo(x+30,y+26);c.lineTo(x+60,y+26);c.lineTo(x+24,y+196);c.lineTo(x+14,y+196);c.closePath();c.fill();c.restore();
+ c.fillStyle='#c93a72';rr(c,x+14,y+206,w-28,h-220,12);c.fill();c.fillStyle='#2a1040';rr(c,x+24,y+218,56,46,8);c.fill();
+ dot(c,x+120,y+238,12,'#ff3a5a');dot(c,x+150,y+242,10,'#3a9aff');
+ if(!open){c.fillStyle='#fffdf6';rr(c,s.cx-88,y+80,176,44,10);c.fill();put(c,fit(`🔒 ${L('곧 열려요','Opens soon')}`,17,'#4a3a20',160),s.cx,y+102)}}
 function photo(c,s){const x=s.x0+40,w=s.w-80,y=102,h=280,t=W.t;sign(c,s.cx,74,`📸 ${L('포토존','Photo spot')}`,'#ff6a9a',w);
  c.fillStyle='#d99a1f';rr(c,x-14,y-10,w+28,h+24,18);c.fill();c.fillStyle='#ffd45a';rr(c,x-8,y-4,w+16,h+12,14);c.fill();
  c.save();rr(c,x,y,w,h,10);c.clip();c.fillStyle=W.gPhoto;c.fillRect(x,y,w,h);dot(c,x+w-50,y+40,22,'#fff4a8');
@@ -9088,6 +9127,159 @@ return {start,stop,on:()=>!!W,visitor:v=>{if(W)spawn(v,false)},
  _state:()=>W&&{x:Math.round(W.me.x),y:Math.round(W.me.y),cam:Math.round(W.cam),k:+W.k.toFixed(3),dpr:+W.dpr.toFixed(2),vw:Math.round(W.vw),len:W.len,sec:W.cur&&W.cur.kind,people:W.people.length,staff:W.staff.length,items:W.items.length,ask:!!W.people.find(p=>p.ask),fish:W.tanks.map(T=>T.fish.length),panel:W.el.card.textContent},
  _walk:x=>{if(W){W.me.x=x;W.me.tx=null;W.cam=cl(x-W.vw*.5,0,Math.max(0,W.len-W.vw))}},_tap:(wx,wy)=>W&&(tap(wx,wy)||(floorTo(wx,wy,false),false)),_screen:(wx,wy)=>W&&scr(wx,wy)};
 })();
+// ================================================================ Little Math Aquarium · number claw machine (claw.js)
+// Claw.start(host,o) runs the gift-shop claw machine. Each round asks a question; the fish plushies in the glass carry number
+// tags. Move the claw over the plush with the answer and drop it: the right plush drops into the prize chute and is yours,
+// a wrong one slips back with the right answer shown, and an empty grab can be tried again (three drops a round).
+// o = {pool:[{id,w}], ask:()=>({q,a,w:[...]}), rounds, sfx, say, onEnd(res)}; res = {prizes:[ids], right, wrong, quit}.
+const Claw=(()=>{
+'use strict';
+const TAU=Math.PI*2,FONT="system-ui,-apple-system,'Apple SD Gothic Neo','Noto Sans KR',sans-serif";
+const cl=(v,a,b)=>v<a?a:v>b?b:v,rnd=(a,b)=>a+Math.random()*(b-a),pk=a=>a[Math.floor(Math.random()*a.length)];
+const mix=a=>{a=[...a];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const H_=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function rr(c,x,y,w,h,r){r=Math.max(0,Math.min(r,w/2,h/2));c.beginPath();c.moveTo(x+r,y);c.arcTo(x+w,y,x+w,y+h,r);c.arcTo(x+w,y+h,x,y+h,r);c.arcTo(x,y+h,x,y,r);c.arcTo(x,y,x+w,y,r);c.closePath()}
+function lg(c,x0,y0,x1,y1,st){const g=c.createLinearGradient(x0,y0,x1,y1);for(const [o,col] of st)g.addColorStop(o,col);return g}
+function dot(c,x,y,r,f){c.beginPath();c.arc(x,y,Math.max(.01,r),0,TAU);c.fillStyle=f;c.fill()}
+// the cabinet is drawn in a 640 × 800 design space
+const DW=560,DH=820,GL=24,GR=536,GT=96,GB=642,FLOOR=626,RAIL=118,CHUTE_R=124,XMIN=64,XMAX=502,DROP_X=74;
+const SPR={};
+function spr(id){if(SPR[id])return SPR[id];let im=null;try{im=fishImg(id)}catch(e){}if(!im||!im.complete||!im.naturalWidth)return null;const c=document.createElement('canvas');c.width=330;c.height=220;try{c.getContext('2d').drawImage(im,0,0,330,220)}catch(e){return null}return SPR[id]=c}
+let C=null;
+
+// ---------------------------------------------------------------- start and stop
+function start(host,o){stop();C={host,o,t:0,last:0,raf:0,round:0,rounds:o.rounds||3,prizes:[],right:0,wrong:0,ended:false,
+  cx:(XMIN+XMAX)/2,tx:null,hold:0,len:0,open:1,state:'intro',timer:0,plush:[],held:null,shaky:false,slipAt:0,msgT:0,reveal:null,door:null,on:[],
+  lights:0,drops:0};
+ host.innerHTML=`<div class="cl"><canvas class="cl-cv"></canvas>
+  <div class="cl-top"><button type="button" class="cl-x" data-c="quit" aria-label="${H_(L('그만하기','Quit'))}">✕</button><div class="cl-q" data-c="say"><span class="cl-qt"></span><span class="cl-spk">🔊</span></div><div class="cl-chip"><span class="cl-rd"></span><span>🧸 <b class="cl-pz">0</b></span></div></div>
+  <div class="cl-msg"></div>
+  <div class="cl-bot"><button type="button" class="cl-mv" data-c="l" aria-label="${H_(L('왼쪽','left'))}">◀</button><button type="button" class="cl-drop" data-c="drop">⬇ ${H_(L('집기','Grab'))}</button><button type="button" class="cl-mv" data-c="r" aria-label="${H_(L('오른쪽','right'))}">▶</button></div></div>`;
+ const q=s=>host.querySelector(s);C.el={cv:q('.cl-cv'),top:q('.cl-top'),bot:q('.cl-bot'),qt:q('.cl-qt'),rd:q('.cl-rd'),pz:q('.cl-pz'),msg:q('.cl-msg'),drop:q('.cl-drop')};C.ctx=C.el.cv.getContext('2d');
+ listen();resize();nextRound();C.raf=requestAnimationFrame(frame)}
+function stop(){if(!C)return;cancelAnimationFrame(C.raf);clearTimeout(C.endT);for(const [t,ev,fn] of C.on)t.removeEventListener(ev,fn);C=null}
+function finish(quit){if(!C||C.ended)return;C.ended=true;const res={prizes:C.prizes.slice(),right:C.right,wrong:C.wrong,quit:!!quit};const cb=C.o.onEnd;if(cb)cb(res)}
+
+// on a phone held sideways the buttons move to the sides and the glass fills the height (the lower panel runs off the bottom)
+function resize(){if(!C)return;const r=C.host.getBoundingClientRect(),cw=Math.max(1,r.width),ch=Math.max(1,r.height),land=cw>ch*1.25&&ch<600;
+ C.host.querySelector('.cl').classList.toggle('cl-land',land);
+ const top=C.el.top.getBoundingClientRect().bottom-r.top,bot=land?0:r.bottom-C.el.bot.getBoundingClientRect().top,avail=Math.max(120,ch-top-bot-8),dh=land?GB+26:DH;
+ C.k=Math.min((cw-12)/DW,avail/dh);C.ox=(cw-DW*C.k)/2;C.oy=top+4+(avail-dh*C.k)/2;C.cw=cw;C.ch=ch;
+ let dpr=Math.min(window.devicePixelRatio||1,2);if(cw*ch*dpr*dpr>2.6e6)dpr=Math.sqrt(2.6e6/(cw*ch));C.dpr=dpr;
+ C.el.cv.width=Math.round(cw*dpr);C.el.cv.height=Math.round(ch*dpr);C.el.msg.style.top=Math.round(C.oy+(GT+18)*C.k)+'px'}
+
+// ---------------------------------------------------------------- a round: one question, plushies with number tags
+function weighted(pool){const tot=pool.reduce((t,p)=>t+p.w,0);let r=Math.random()*tot;for(const p of pool){r-=p.w;if(r<=0)return p.id}return pool[0].id}
+function nextRound(){if(!C)return;if(C.round>=C.rounds){C.state='done';C.endT=setTimeout(()=>finish(false),900);return}
+ C.round++;C.drops=0;C.reveal=null;const p=C.o.ask();C.q=p;const tags=mix([p.a,...p.w].slice(0,5));const n=tags.length;
+ C.plush=[];
+ // a soft pile at the back that cannot be grabbed, then the tagged plushies in front
+ for(let j=0;j<6;j++){const w=rnd(78,92);C.plush.push({id:weighted(C.o.pool),x:CHUTE_R+40+j*(GR-CHUTE_R-70)/5+rnd(-12,12),y:FLOOR-w*.3-rnd(16,34),w,back:true,rest:0,vy:0,st:'rest',rot:rnd(-.25,.25)})}
+ const x0=CHUTE_R+58,x1=GR-58,gap=(x1-x0)/n;
+ tags.forEach((tag,j)=>{const w=n>=5?104:112,x=x0+gap*(j+.5)+rnd(-6,6),y=FLOOR-w*.33-(j%2?18:0);C.plush.push({id:weighted(C.o.pool),tag,ti:j,x,y,w,rest:y,vy:0,st:'rest',rot:rnd(-.18,.18),back:false})});
+ C.el.qt.textContent=/[?？□=]/.test(p.q)?p.q:p.q+' = ?';C.el.rd.textContent=`${C.round}/${C.rounds}`;C.state='aim';C.open=1;C.len=0;C.held=null;
+ msg(L('답이 적힌 인형을 집어요!','Grab the plush with the answer!'),'',1.6);if(C.o.say)C.o.say(p.q)}
+function msg(text,cls,secs){const m=C.el.msg;m.textContent=text;m.className='cl-msg on '+(cls||'');C.msgT=C.t+(secs||2)}
+
+// ---------------------------------------------------------------- input: hold ◀ ▶, tap where to go, ⬇ to drop
+function listen(){const on=(t,ev,fn,o)=>{t.addEventListener(ev,fn,o);C.on.push([t,ev,fn])};
+ const cv=C.el.cv;on(cv,'pointerdown',e=>{if(!C||C.state!=='aim')return;const r=cv.getBoundingClientRect(),x=((e.clientX-r.left)-C.ox)/C.k;if(x>GL-20&&x<GR+20)C.tx=cl(x,XMIN,XMAX)});
+ C.host.querySelectorAll('.cl-mv').forEach(b=>{const d=b.dataset.c==='l'?-1:1,go_=e=>{e.preventDefault();if(C){C.hold=d;C.tx=null;b.classList.add('on')}},end=()=>{if(C)C.hold=0;b.classList.remove('on')};
+  on(b,'pointerdown',go_);on(b,'pointerup',end);on(b,'pointercancel',end);on(b,'pointerleave',end);on(b,'contextmenu',e=>e.preventDefault())});
+ on(C.host,'click',e=>{const b=e.target.closest('[data-c]');if(!b||!C)return;const c=b.dataset.c;if(c==='drop')drop();else if(c==='quit'){C.o.sfx&&C.o.sfx('tap');finish(true)}else if(c==='say'&&C.q&&C.o.say)C.o.say(C.q.q)});
+ const key=e=>{if(!C)return;const down=e.type==='keydown';if(e.key==='ArrowLeft'){C.hold=down?-1:(C.hold<0?0:C.hold);e.preventDefault()}else if(e.key==='ArrowRight'){C.hold=down?1:(C.hold>0?0:C.hold);e.preventDefault()}else if(down&&(e.key===' '||e.key==='Enter'||e.key==='ArrowDown')){e.preventDefault();drop()}};
+ on(window,'keydown',key);on(window,'keyup',key);let rt=0;on(window,'resize',()=>{clearTimeout(rt);rt=setTimeout(resize,120)})}
+function drop(){if(!C||C.state!=='aim')return;C.state='down';C.tx=null;C.hold=0;C.drops++;C.o.sfx&&C.o.sfx('boost');C.el.drop.disabled=true}
+
+// ---------------------------------------------------------------- the machine at work
+const headY=()=>RAIL+34+C.len;           // top of the claw head
+const tipY=()=>headY()+66;               // where the prongs close
+function under(){let best=null;for(const p of C.plush){if(p.back||p.st!=='rest')continue;if(Math.abs(p.x-C.cx)<p.w*.62&&(!best||p.y<best.y))best=p}return best}
+function frame(ts){if(!C)return;C.raf=requestAnimationFrame(frame);if(document.hidden){C.last=0;return}const dt=C.last?Math.min(.05,(ts-C.last)/1000):1/60;C.last=ts;C.t+=dt;update(dt);draw()}
+function update(dt){const s=C;s.lights+=dt;
+ if(s.state==='aim'){if(s.hold)s.cx=cl(s.cx+s.hold*300*dt,XMIN,XMAX);else if(s.tx!=null){const d=s.tx-s.cx;if(Math.abs(d)<2)s.tx=null;else s.cx+=Math.sign(d)*Math.min(Math.abs(d),420*dt)}}
+ else if(s.state==='down'){const target=under(),stopAt=target?target.y-target.w*.22:FLOOR-14;s.len+=330*dt;if(tipY()>=stopAt){s.len-=tipY()-stopAt;s.state='grab';s.timer=.38}}
+ else if(s.state==='grab'){s.open=Math.max(0,s.open-dt/.32);s.timer-=dt;if(s.timer<=0){const p=under();s.held=null;s.shaky=false;
+   if(p){const dx=Math.abs(p.x-s.cx);if(dx<p.w*.3)s.held=p;else if(dx<p.w*.56){s.held=p;s.shaky=Math.random()<.55;s.slipAt=rnd(.25,.7)}}
+   if(s.held){s.held.st='held';s.held.gx=s.held.x-s.cx}s.state='up';s.upFrom=s.len;s.o.sfx&&s.o.sfx('tap')}}
+ else if(s.state==='up'){s.len=Math.max(0,s.len-260*dt);const h=s.held;
+   if(h){h.x=s.cx+h.gx*.9;h.y=tipY()+h.w*.18;if(s.shaky&&s.upFrom>0&&1-s.len/s.upFrom>=s.slipAt){h.st='fall';h.vy=0;s.held=null;s.shaky=false;s.open=.6;msg(L('아슬아슬! 조금만 더 가운데로!','So close! A little more to the middle!'),'warn',1.8);s.o.sfx&&s.o.sfx('bad')}}
+   if(s.len<=0){if(!s.held){s.open=1;if(s.drops>=3){reveal();}else{if(!s.el.msg.classList.contains('warn'))msg(L('아깝다! 다시 해 봐요.','Missed! Try again.'),'warn',1.6);s.state='aim';s.el.drop.disabled=false}}
+    else if(String(s.held.tag)===String(s.q.a)){s.state='carry';msg(L('정답 인형이에요! 🎉','That’s the answer! 🎉'),'good',2)}
+    else{s.state='wobble';s.timer=.7;const h2=s.held;s.wrong++;s.o.sfx&&s.o.sfx('bad');msg(L(`앗, 이 인형은 ${h2.tag}! 정답은 ${s.q.a}이에요.`,`Oops, this one is ${h2.tag}. The answer is ${s.q.a}.`),'bad',2.6);if(s.o.say)s.o.say(L(`정답은 ${s.q.a}`,`The answer is ${s.q.a}`))}}}
+ else if(s.state==='wobble'){s.timer-=dt;const h=s.held;if(h){h.x=s.cx+h.gx*.9+Math.sin(s.t*30)*4;h.y=tipY()+h.w*.18}if(s.timer<=0){if(h){h.st='fall';h.vy=0}s.held=null;s.open=1;showAnswer();s.state='wait';s.timer=2.2}}
+ else if(s.state==='carry'){const d=DROP_X-s.cx;s.cx+=Math.sign(d)*Math.min(Math.abs(d),300*dt);const h=s.held;h.x=s.cx+h.gx*.9;h.y=tipY()+h.w*.18;if(Math.abs(d)<1){s.state='release';s.timer=.5;s.open=1;h.st='chute';h.vy=0;s.held=null;s.o.sfx&&s.o.sfx('splash')}}
+ else if(s.state==='release'){s.timer-=dt;if(s.timer<=0){const p=s.plush.find(x=>x.st==='chute'||x.st==='gone');s.right++;s.prizes.push(p.id);s.el.pz.textContent=s.prizes.length;s.door={id:p.id,t:0};s.o.sfx&&s.o.sfx('catch');
+   if(s.o.say)s.o.say(T(pk([['정답! 인형을 뽑았어요!','Correct! You won the plush!'],['최고예요! 인형 획득!','Amazing! A new plush!'],['척척박사! 인형을 뽑았어요!','Math whiz! You got it!']])));s.state='wait';s.timer=1.8}}
+ else if(s.state==='wait'){s.timer-=dt;if(s.timer<=0){s.el.drop.disabled=false;s.cx=cl(s.cx,XMIN,XMAX);nextRound()}}
+ // plushies falling back onto the pile or down the chute
+ for(const p of s.plush){if(p.st==='fall'){p.vy+=900*dt;p.y+=p.vy*dt;if(p.y>=p.rest){p.y=p.rest;p.vy=0;p.st='rest'}}
+  else if(p.st==='chute'){p.vy+=900*dt;p.y+=p.vy*dt;if(p.y>GB+60)p.st='gone'}}
+ if(s.door)s.door.t+=dt;
+ if(s.msgT&&s.t>s.msgT){s.el.msg.classList.remove('on');s.msgT=0}}
+function reveal(){C.reveal=C.plush.find(p=>!p.back&&String(p.tag)===String(C.q.a));C.wrong++;msg(L(`정답은 ${C.q.a}이었어요. 다음 문제!`,`The answer was ${C.q.a}. Next one!`),'bad',2.4);C.o.say&&C.o.say(L(`정답은 ${C.q.a}`,`The answer is ${C.q.a}`));C.state='wait';C.timer=2.4}
+function showAnswer(){C.reveal=C.plush.find(p=>!p.back&&String(p.tag)===String(C.q.a))}
+
+// ---------------------------------------------------------------- drawing
+function draw(){const c=C.ctx,k=C.k,dpr=C.dpr;c.setTransform(dpr,0,0,dpr,0,0);
+ const g=lg(c,0,0,0,C.ch,[[0,'#3a2470'],[1,'#6a3aa0']]);c.fillStyle=g;c.fillRect(0,0,C.cw,C.ch);
+ c.fillStyle='rgba(255,255,255,.08)';for(let j=0;j<18;j++){const x=(j*137)%C.cw,y=(j*89+C.t*12)%C.ch;dot(c,x,y,2+j%3,'rgba(255,255,255,.12)')}
+ c.setTransform(k*dpr,0,0,k*dpr,C.ox*dpr,C.oy*dpr);
+ // cabinet
+ c.fillStyle='rgba(0,0,0,.25)';rr(c,8,14,DW,DH,34);c.fill();
+ c.fillStyle=lg(c,0,0,DW,0,[[0,'#ff5c9d'],[.5,'#ff8ac0'],[1,'#e0457f']]);rr(c,0,0,DW,DH,34);c.fill();
+ c.fillStyle='rgba(255,255,255,.18)';rr(c,10,8,DW*.45,DH-16,28);c.fill();
+ // marquee with blinking lights
+ c.fillStyle=lg(c,0,10,0,84,[[0,'#ffe680'],[1,'#ffbf2e']]);rr(c,20,12,DW-40,70,22);c.fill();
+ for(let j=0;j<14;j++){const x=36+j*(DW-72)/13,on=(Math.floor(C.lights*4)+j)%2===0;dot(c,x,20,5,on?'#ffffff':'#ff9a3a');dot(c,x,74,5,on?'#ff9a3a':'#ffffff')}
+ c.fillStyle='#7a2a10';c.font=`900 34px ${FONT}`;c.textAlign='center';c.textBaseline='middle';c.fillText(`🐠 ${L('숫자 인형뽑기','Number Claw')}`,DW/2,48);
+ // glass box
+ c.fillStyle=lg(c,0,GT,0,GB,[[0,'#d8efff'],[1,'#a9d6ff']]);rr(c,GL,GT,GR-GL,GB-GT,14);c.fill();
+ c.save();rr(c,GL,GT,GR-GL,GB-GT,14);c.clip();
+ for(let j=0;j<7;j++)dot(c,GL+40+j*72,GT+60+(j%3)*40,3,'rgba(255,255,255,.5)');
+ // prize chute (left) with its little acrylic wall
+ c.fillStyle=lg(c,0,GB-80,0,GB,[[0,'#5a2a7a'],[1,'#2a1040']]);c.fillRect(GL,GB-70,CHUTE_R-GL,70);c.fillStyle='rgba(255,255,255,.4)';c.fillRect(CHUTE_R-4,GB-110,8,110);
+ c.font=`900 30px ${FONT}`;c.fillText('🎁',(GL+CHUTE_R)/2,GB-96);
+ // plushies: the back pile, then the tagged ones from far to near
+ for(const p of C.plush)if(p.back)plush(c,p);
+ const front=C.plush.filter(p=>!p.back&&p.st!=='gone'&&p!==C.held).sort((a,b)=>a.y-b.y);for(const p of front)plush(c,p);
+ // rail, carriage, cable, claw (with the plush it holds)
+ c.fillStyle='#8a94b0';c.fillRect(GL,RAIL-8,GR-GL,14);c.fillStyle='#c9d1e6';c.fillRect(GL,RAIL-8,GR-GL,5);
+ c.fillStyle=lg(c,C.cx-30,0,C.cx+30,0,[[0,'#5a6480'],[.5,'#a7b2cf'],[1,'#5a6480']]);rr(c,C.cx-30,RAIL-14,60,26,8);c.fill();
+ c.strokeStyle='#4a5470';c.lineWidth=3;c.beginPath();c.moveTo(C.cx,RAIL+10);c.lineTo(C.cx,headY()+4);c.stroke();
+ if(C.held)plush(c,C.held);
+ claw(c);
+ c.restore();
+ // glass shine and frame
+ c.fillStyle='rgba(255,255,255,.16)';c.beginPath();c.moveTo(GL+60,GT);c.lineTo(GL+130,GT);c.lineTo(GL+30,GB);c.lineTo(GL-40,GB);c.closePath();c.fill();
+ c.strokeStyle='#ffffff';c.lineWidth=6;rr(c,GL,GT,GR-GL,GB-GT,14);c.stroke();
+ // lower cabinet: prize door and a decorative joystick and button
+ c.fillStyle='#c93a72';rr(c,20,GB+14,DW-40,DH-GB-30,22);c.fill();
+ c.fillStyle='#2a1040';rr(c,40,GB+30,150,120,16);c.fill();c.fillStyle='rgba(255,255,255,.12)';rr(c,48,GB+36,134,40,12);c.fill();
+ if(C.door){const u=Math.min(1,C.door.t/.5),sp=spr(C.door.id);if(sp){const w=110,bob=Math.sin(C.door.t*5)*3*(C.door.t<3?1:0);c.save();rr(c,40,GB+30,150,120,16);c.clip();c.drawImage(sp,115-w/2,GB+146-u*96+bob-w/3,w,w*2/3);c.restore()}}
+ c.font=`900 22px ${FONT}`;c.fillStyle='#fff';c.fillText(`${C.prizes.length?'🧸 '+C.prizes.length:'🎁'}`,115,GB+164);
+ dot(c,340,GB+90,30,'#3a1a50');c.fillStyle='#5a5a70';c.fillRect(335,GB+40,10,50);dot(c,340,GB+40,22,'#ff3a5a');dot(c,333,GB+33,7,'rgba(255,255,255,.6)');
+ dot(c,450,GB+80,32,'#1a6ad8');dot(c,450,GB+74,30,'#3a9aff');dot(c,442,GB+66,9,'rgba(255,255,255,.55)')}
+function plush(c,p){const sp=spr(p.id),w=p.w,h=w*2/3;c.save();c.translate(p.x,p.y);c.rotate(p.rot||0);
+ if(p.back)c.globalAlpha=.75;
+ c.fillStyle='rgba(40,30,80,.18)';c.beginPath();c.ellipse(0,h*.45,w*.42,h*.12,0,0,TAU);c.fill();
+ if(sp)c.drawImage(sp,-w/2,-h/2,w,h);else{dot(c,0,0,w*.32,'#ffb0d0')}
+ c.restore();
+ if(p.tag!=null){const side=p.x>(CHUTE_R+GR)/2?-1:1,s0=String(p.tag),r0=Math.max(22,8+s0.length*(s0.length>4?16:s0.length>3?19:23)*.32),tx=cl(p.x+side*w*.18,CHUTE_R+r0+4,GR-r0-6),ty=p.y-h*.62-(p.ti%2?30:0),isAns=C.reveal===p;c.strokeStyle='#ffffff';c.lineWidth=2;c.beginPath();c.moveTo(p.x+w*.08,p.y-h*.25);c.lineTo(tx,ty+14);c.stroke();
+  const s=String(p.tag),fs=s.length>4?16:s.length>3?19:23,r=Math.max(22,8+s.length*fs*.32);
+  if(isAns){c.fillStyle=`rgba(255,215,64,${.5+.4*Math.sin(C.t*8)})`;c.beginPath();c.arc(tx,ty,r+9,0,TAU);c.fill()}
+  c.fillStyle='#ffffff';c.beginPath();c.ellipse(tx,ty,r,22,0,0,TAU);c.fill();c.strokeStyle=isAns?'#ffb000':'#ff6aa8';c.lineWidth=3;c.stroke();
+  c.fillStyle='#24305e';c.font=`900 ${fs}px ${FONT}`;c.textAlign='center';c.textBaseline='middle';c.fillText(s,tx,ty+1)}}
+function claw(c){const x=C.cx,y=headY(),o=C.open;
+ c.fillStyle=lg(c,x-26,y,x+26,y,[[0,'#6a7490'],[.45,'#e8eefc'],[1,'#6a7490']]);c.beginPath();c.ellipse(x,y+16,26,18,0,Math.PI,TAU);c.lineTo(x+26,y+26);c.lineTo(x-26,y+26);c.closePath();c.fill();
+ c.fillStyle='#ff5c9d';c.fillRect(x-26,y+22,52,8);
+ c.lineCap='round';c.strokeStyle='#8a94b0';c.lineWidth=7;
+ for(const sd of [-1,1]){const sx=x+sd*18,sy=y+28,mx=x+sd*(24+o*26),my=y+52,ex=x+sd*(6+o*22),ey=y+66;c.beginPath();c.moveTo(sx,sy);c.quadraticCurveTo(mx,my,ex,ey);c.stroke();c.strokeStyle='#c9d1e6';c.lineWidth=3;c.beginPath();c.moveTo(sx,sy);c.quadraticCurveTo(mx,my,ex,ey);c.stroke();c.strokeStyle='#8a94b0';c.lineWidth=7}
+ c.beginPath();c.moveTo(x,y+30);c.lineTo(x,y+62);c.stroke()}
+
+return {start,stop,_state:()=>C&&{state:C.state,round:C.round,cx:Math.round(C.cx),answer:C.q&&C.q.a,tags:C.plush.filter(p=>!p.back).map(p=>[p.tag,Math.round(p.x)]),prizes:C.prizes.length,right:C.right,wrong:C.wrong},
+ _aim:x=>{if(C){C.cx=cl(x,XMIN,XMAX);C.tx=null}}};
+})();
 </script>
 <script>
 // ================================================================ Little Math Aquarium · core
@@ -9112,13 +9304,13 @@ const COPYRIGHT=()=>`<footer class="copy">© 2026 Dongsun Moon. ${L('모든 권�
 const SAVE_KEY='mathAquarium.v1';
 const freshAq=()=>({st:[0,0,0,0,0],open:0,fish:[[],[],[],[],[]],lv:[1,1,1,1,1],decor:[[],[],[],[],[]],fed:[0,0,0,0,0],dirt:0,done:false,best:0,tries:0,at:0});
 const freshS=()=>({v:1,created:dayKey(),name:L('관장님','Director'),av:'🧒',grade:0,start:0,at:{g:1,i:0},G:{},coins:150,pearls:5,tickets:3,tkt:{at:now(),c:0},xp:0,lvl:1,sp:0,skills:{},items:{hint:2,shield:1},boosts:{},
- fac:{ticket:1,toilet:1,snack:0,gift:0,mart:0},staff:[],board:{day:'',c:[]},car:{model:'van',color:'#ff6a5a',speed:0,magnet:0,shield:0,owned:['van']},store:{},dex:{},
+ fac:{ticket:1,toilet:1,snack:0,gift:0,mart:0},staff:[],board:{day:'',c:[]},car:{model:'van',color:'#ff6a5a',speed:0,magnet:0,shield:0,owned:['van']},store:{},dex:{},plush:{},claw:{day:'',used:0},
  stats:{solved:0,correct:0,first:0,wrong:0,secs:0,bestCombo:0,cleans:0,orders:0,feeds:0,drives:0,trips:0,caught:0,stars3:0,tanks:0,aqs:0,reviews:0,earned:0,hired:0},
  sk:{},hist:{},daily:{day:'',tasks:[],gift:false,chest:false,review:false},streak:{n:0,best:0,last:'',shields:1},week:{key:'',days:[]},ach:[],log:[],
  opt:{sound:true,voice:true,readQ:true,money:LANG==='en'?'cad':'krw'},tut:{},last:now(),orders:{},deliveries:{day:'',n:0},
  walk:{seen:{},photo:{},day:'',been:[],toured:false,today:{day:'',ids:[]}}});
 function loadS(){let d=null;try{d=JSON.parse(localStorage.getItem(SAVE_KEY)||'null')}catch(e){}const f=freshS();if(!d||typeof d!=='object')return f;
- const s={...f,...d};for(const k of ['fac','car','stats','daily','streak','week','opt','tut','board','deliveries','walk'])s[k]={...f[k],...(d[k]||{})};
+ const s={...f,...d};for(const k of ['fac','car','stats','daily','streak','week','opt','tut','board','deliveries','walk','claw'])s[k]={...f[k],...(d[k]||{})};
  s.items={...d.items};for(const g in s.G){s.G[g].aq=(s.G[g].aq||[]).map(a=>({...freshAq(),...a}))}
  if(!d.tkt)s.tkt={at:now(),c:s.stats.correct||0};return s}
 let S=loadS();
@@ -9146,8 +9338,8 @@ const totalDone=()=>Object.keys(S.G).reduce((t,g)=>t+doneCount(+g),0);
 const totalTanks=()=>Object.values(S.G).reduce((t,gd)=>t+gd.aq.reduce((u,a)=>u+a.open,0),0);
 const maxGrade=()=>{let m=S.grade||1;for(const g in S.G)if(S.G[g].aq.some(a=>a.open))m=Math.max(m,+g);return m};
 // what unlocks when: the game opens up step by step so a young child is never swamped
-const UNLOCK={toilet:()=>totalTanks()>=1,snack:()=>totalTanks()>=2,feed:()=>totalTanks()>=1,staff:()=>totalDone()>=1||totalTanks()>=4,sea:()=>totalTanks()>=3,gift:()=>totalDone()>=1,mart:()=>totalDone()>=2,skills:()=>S.lvl>=3,orders:()=>totalTanks()>=2,drive:()=>totalDone()>=1};
-const UNLOCK_HINT={toilet:['수조 1개를 열면 생겨요','Opens with your first tank'],snack:['수조 2개를 열면 생겨요','Opens after 2 tanks'],staff:['첫 아쿠아리움을 완성하면 열려요','Opens when your first aquarium is finished'],sea:['수조 3개를 열면 바다에 나갈 수 있어요','Open 3 tanks to go out to sea'],gift:['첫 아쿠아리움을 완성하면 열려요','Opens when your first aquarium is finished'],mart:['아쿠아리움 2곳을 완성하면 열려요','Opens after 2 finished aquariums'],skills:['관장 레벨 3이 되면 열려요','Opens at director level 3'],orders:['수조 2개를 열면 손님이 질문해요','Visitors start asking after 2 tanks'],drive:['첫 아쿠아리움을 완성하면 운전할 수 있어요','Drive after your first aquarium']};
+const UNLOCK={toilet:()=>totalTanks()>=1,snack:()=>totalTanks()>=2,feed:()=>totalTanks()>=1,staff:()=>totalDone()>=1||totalTanks()>=4,sea:()=>totalTanks()>=3,gift:()=>totalDone()>=1,mart:()=>totalDone()>=2,skills:()=>S.lvl>=3,orders:()=>totalTanks()>=2,drive:()=>totalDone()>=1,claw:()=>totalTanks()>=2};
+const UNLOCK_HINT={toilet:['수조 1개를 열면 생겨요','Opens with your first tank'],snack:['수조 2개를 열면 생겨요','Opens after 2 tanks'],staff:['첫 아쿠아리움을 완성하면 열려요','Opens when your first aquarium is finished'],sea:['수조 3개를 열면 바다에 나갈 수 있어요','Open 3 tanks to go out to sea'],gift:['첫 아쿠아리움을 완성하면 열려요','Opens when your first aquarium is finished'],mart:['아쿠아리움 2곳을 완성하면 열려요','Opens after 2 finished aquariums'],skills:['관장 레벨 3이 되면 열려요','Opens at director level 3'],orders:['수조 2개를 열면 손님이 질문해요','Visitors start asking after 2 tanks'],drive:['첫 아쿠아리움을 완성하면 운전할 수 있어요','Drive after your first aquarium'],claw:['수조 2개를 열면 인형뽑기가 생겨요','The claw machine opens after 2 tanks']};
 
 // ---------------------------------------------------------------- levels, titles and rewards
 const xpNeed=l=>50+l*35;
@@ -9239,7 +9431,10 @@ function tankPower(a,k){if(a.open<=k)return 0;let p=a.fish[k].reduce((t,id)=>t+f
 function attraction(g,i){const a=aqState(g,i);let p=0;for(let k=0;k<5;k++)p+=tankPower(a,k);if(boostOn('food'))p*=1.2;return p}
 const happiness=a=>{let h=1;if(a.dirt>85)h*=.6;else if(a.dirt>60)h*=.82;return h};
 const ticketPrice=(g,i)=>Math.max(1,Math.round(2*tier(g,i)*(1+.1*(S.fac.ticket-1))*(1+.1*skl('ticket'))*(1+.06*staffPower('cashier'))*(boostOn('music')?1.2:1)));
-const shopPrice=(k,g,i)=>Math.max(1,Math.round({snack:1.3,gift:2.4,mart:1.8}[k]*tier(g,i)*(1+.15*(S.fac[k]-1))*(1+.1*skl('shops'))*(1+.08*staffPower(k))*(boostOn('music')?1.2:1)));
+// plushies won at the claw machine go on the gift shop shelf: +2% gift sales per kind, up to +50%
+const plushKinds=()=>Object.keys(S.plush||{}).length;
+const plushBonusPct=()=>2*Math.min(25,plushKinds());
+const shopPrice=(k,g,i)=>Math.max(1,Math.round({snack:1.3,gift:2.4,mart:1.8}[k]*tier(g,i)*(1+.15*(S.fac[k]-1))*(1+.1*skl('shops'))*(1+.08*staffPower(k))*(boostOn('music')?1.2:1)*(k==='gift'?1+plushBonusPct()/100:1)));
 const shopChance=k=>S.fac[k]?Math.min(.75,{snack:.33,gift:.2,mart:.24}[k]+.03*S.fac[k]):0;
 const visitorsPerMin=(g,i)=>{const a=aqState(g,i);if(!a.open)return 0;return Math.min(45,(2+Math.sqrt(attraction(g,i))*2.2)*happiness(a)*(boostOn('flyer')?2:1)*(1+.08*staffPower('guide')))};
 const incomePerMin=(g,i)=>{const v=visitorsPerMin(g,i);let c=ticketPrice(g,i);for(const k of ['snack','gift','mart'])c+=shopChance(k)*shopPrice(k,g,i)*(k==='gift'&&boostOn('balloon')?2:1);return v*c};
@@ -9280,6 +9475,7 @@ const MISSIONS=[
  {id:'drive',icon:'🚗',goal:[1,1],ko:'운전 미션 1번 하기',en:'Do 1 driving mission',need:'drive'},
  {id:'review',icon:'🧠',goal:[1,1],ko:'오늘의 복습 하기',en:'Do today’s review',need:'review'},
  {id:'star3',icon:'⭐',goal:[1,1],ko:'수업에서 별 3개 받기',en:'Get 3 stars in a lesson'},
+ {id:'claw',icon:'🕹️',goal:[1,2],ko:'인형뽑기에서 인형 {n}개 뽑기',en:'Win {n} plush at the claw machine',need:'claw'},
  {id:'look',icon:'🔍',goal:[2,3],ko:'아쿠아리움 안을 걸으며 물고기 {n}종 관찰하기',en:'Walk inside and look closely at {n} kinds of fish',need:'sea'}];
 const reviewReady=()=>Object.keys(S.sk).filter(id=>S.sk[id].m).length>=1;
 function rollDaily(){const t=dayKey();if(S.daily.day===t)return false;const pool=MISSIONS.filter(m=>m.id!=='solve'&&(!m.need||(m.need==='review'?reviewReady():UNLOCK[m.need]())));
@@ -9299,7 +9495,7 @@ const ACH=[
  ['star10','⭐','별 3개 10번','3 stars × 10',s=>s.stats.stars3>=10],['star50','🌟','별 3개 50번','3 stars × 50',s=>s.stats.stars3>=50],['combo10','🔥','10연속 정답','10 in a row',s=>s.stats.bestCombo>=10],['combo25','☄️','25연속 정답','25 in a row',s=>s.stats.bestCombo>=25],
  ['streak3','📅','3일 연속','3-day streak',s=>s.streak.best>=3],['streak7','🗓️','7일 연속','7-day streak',s=>s.streak.best>=7],['streak30','🏆','30일 연속','30-day streak',s=>s.streak.best>=30],
  ['clean10','🧽','화장실 청소 10번','10 cleanings',s=>s.stats.cleans>=10],['order20','🙋','손님 질문 20개','20 visitor questions',s=>s.stats.orders>=20],['catch10','🎣','바다 생물 10마리','10 sea catches',s=>s.stats.caught>=10],['catch50','🐋','바다 생물 50마리','50 sea catches',s=>s.stats.caught>=50],
- ['drive5','🚗','운전 5번','5 drives',s=>s.stats.drives>=5],['look20','🔍','물고기 20종 관찰','Looked closely at 20 kinds',s=>Object.keys((s.walk||{}).seen||{}).length>=20],['hire3','👥','직원 3명','3 staff',s=>s.stats.hired>=3],['dex30','📖','도감 30종','30 species',s=>Object.keys(s.dex).length>=30],['dex80','📗','도감 80종','80 species',s=>Object.keys(s.dex).length>=80],
+ ['drive5','🚗','운전 5번','5 drives',s=>s.stats.drives>=5],['plush10','🧸','인형 10종','10 kinds of plush',s=>Object.keys(s.plush||{}).length>=10],['plush40','🎪','인형 40종','40 kinds of plush',s=>Object.keys(s.plush||{}).length>=40],['look20','🔍','물고기 20종 관찰','Looked closely at 20 kinds',s=>Object.keys((s.walk||{}).seen||{}).length>=20],['hire3','👥','직원 3명','3 staff',s=>s.stats.hired>=3],['dex30','📖','도감 30종','30 species',s=>Object.keys(s.dex).length>=30],['dex80','📗','도감 80종','80 species',s=>Object.keys(s.dex).length>=80],
  ['grad1','🎓','1학년 졸업','Grade 1 graduate',s=>!!(s.G[1]&&s.G[1].grad)],['grad2','🎓','2학년 졸업','Grade 2 graduate',s=>!!(s.G[2]&&s.G[2].grad)],['grad3','🎓','3학년 졸업','Grade 3 graduate',s=>!!(s.G[3]&&s.G[3].grad)],['grad4','🎓','4학년 졸업','Grade 4 graduate',s=>!!(s.G[4]&&s.G[4].grad)],['grad5','🎓','5학년 졸업','Grade 5 graduate',s=>!!(s.G[5]&&s.G[5].grad)],['grad6','👑','6학년 졸업','Grade 6 graduate',s=>!!(s.G[6]&&s.G[6].grad)]];
 function checkAch(){for(const [id,ic,ko,en,f] of ACH){if(S.ach.includes(id))continue;let ok=false;try{ok=f(S)}catch(e){}if(ok){S.ach.push(id);S.pearls+=2;toast(`🏆 ${ic} ${L(ko,en)} <b>+2 ${PEARL}</b>`);logEvent(ic,ko,en)}}}
 
@@ -9603,7 +9799,7 @@ function renderHome(){const {g,i,d,a}=here(),el=$('v-home');const stars=a.done?'
  ${ctaHTML()}
  <div class="tanks">${[0,1,2,3,4].map(k=>tankHTML(g,i,k)).join('')}</div>
  ${a.open?`<div class="lobby" id="lobby"><span class="floor"></span></div>`:''}
- <div class="facs">${['ticket','toilet','snack','gift','mart'].map(facCardHTML).join('')}</div>
+ <div class="facs">${['ticket','toilet','snack','gift','mart'].map(facCardHTML).join('')}${clawCardHTML()}</div>
  <div id="dailyMini"></div>
  ${COPYRIGHT()}`;
  updateChips();renderDailyMini();if(REQ)showReqBubble();sizeScene()}
@@ -9687,7 +9883,8 @@ function facModal(k,o={}){const f=FAC[k],lv=S.fac[k],{g,i,a}=here();sfx('tap');i
  const desc={ticket:L('손님이 입장료를 내는 곳이에요.','Where visitors buy tickets.'),snack:L('아이스크림, 핫도그, 주스를 팔아요.','Sells ice cream, hot dogs and juice.'),gift:L('물고기 인형과 기념품을 팔아요. 물고기가 많을수록 인기가 많아요.','Sells fish plushies and souvenirs.'),mart:L('물, 간식, 우유 같은 생활용품을 팔아요.','Sells water, snacks, milk and more.')}[k];
  const staffN=S.staff.filter(x=>x.role===(k==='ticket'?'cashier':k)).length;
  modal(`<h2>${f.icon} ${L(f.ko,f.en)} ${lv?`Lv.${lv}`:''}</h2><p>${desc}</p>${lv?`<p><b>${what}</b></p>`:''}<p class="muted">👥 ${L(`담당 직원 ${staffN}명`,`${staffN} staff here`)}</p>
-  ${lv<FAC_MAX?`<button class="btn wide" data-act="up">${lv?`⬆️ ${L('업그레이드','Upgrade')} → Lv.${lv+1}`:`🏗️ ${L('짓기','Build')}`} · ${COIN} ${short(facCost(k,lv))}</button>`:`<p>👑 ${L('최고 레벨이에요!','Max level!')}</p>`}`,{acts:{up:()=>{if(!spend(facCost(k,lv)))return false;S.fac[k]++;sfx('open');if(!lv){celebrate('confetti',20);toast(L(`${f.icon} ${f.ko} 개장!`,`${f.icon} ${f.en} is open!`))}save();renderHome()}}})}
+  ${lv<FAC_MAX?`<button class="btn wide" data-act="up">${lv?`⬆️ ${L('업그레이드','Upgrade')} → Lv.${lv+1}`:`🏗️ ${L('짓기','Build')}`} · ${COIN} ${short(facCost(k,lv))}</button>`:`<p>👑 ${L('최고 레벨이에요!','Max level!')}</p>`}
+  ${k==='gift'?`<div class="row wrap"><button class="btn ghost" data-act="shelf">🧸 ${L('인형 진열장','Plush shelf')} ${plushKinds()}</button>${UNLOCK.claw()?`<button class="btn ghost" data-act="claw">🕹️ ${L('인형뽑기','Claw machine')}</button>`:''}</div>`:''}`,{acts:{shelf:()=>()=>plushShelf(),claw:()=>()=>startClaw('home'),up:()=>{if(!spend(facCost(k,lv)))return false;S.fac[k]++;sfx('open');if(!lv){celebrate('confetti',20);toast(L(`${f.icon} ${f.ko} 개장!`,`${f.icon} ${f.en} is open!`))}save();renderHome()}}})}
 // scrub the dirt away with your finger
 function cleanGame(){const {a}=here();const spots=Array.from({length:5+Math.round(a.dirt/25)},()=>({x:10+Math.random()*80,y:12+Math.random()*70,h:100}));let left=spots.length;
  modal(`<h2>🧽 ${L('문질러서 깨끗하게!','Scrub it clean!')}</h2><p class="muted">${L('얼룩을 손가락으로 문질러요.','Rub the spots with your finger.')}</p><div class="scrub" id="scrub"><span class="wc">🚽</span>${spots.map((s,j)=>`<i class="dirt" data-j="${j}" style="left:${s.x}%;top:${s.y}%"></i>`).join('')}</div>`,{cls:'cleanm',onOpen:box=>{const sc=box.querySelector('#scrub');let down=false;
@@ -9696,9 +9893,9 @@ function cleanGame(){const {a}=here();const spots=Array.from({length:5+Math.roun
   sc.addEventListener('pointerdown',e=>{down=true;sc.setPointerCapture&&sc.setPointerCapture(e.pointerId);rub(e)});sc.addEventListener('pointermove',e=>{if(down)rub(e)});sc.addEventListener('pointerup',()=>down=false);sc.addEventListener('pointercancel',()=>down=false)}})}
 
 // ---------------------------------------------------------------- walking around inside (walk.js draws it; this is the game side)
-function startWalk(){if(typeof Walk==='undefined')return;audio();sfx('open');const st=openStage();st.className='stage game walk';
+function startWalk(spot){if(typeof Walk==='undefined')return;audio();if(!spot)sfx('open');const st=openStage();st.className='stage game walk';
  const exit=()=>{try{Walk.stop()}catch(e){}closeStage();go('home')};
- try{Walk.start(st,{act:walkAct,exit})}catch(e){console.warn(e);exit()}}
+ try{Walk.start(st,{act:walkAct,exit,spot})}catch(e){console.warn(e);exit()}}
 function walkAct(kind,v){const {g,i,a}=here();
  switch(kind){
   case 'tank':openTank_(v);return;
@@ -9713,11 +9910,49 @@ function walkAct(kind,v){const {g,i,a}=here();
   case 'tip':earn(v.val,{at:v.at});sfx('coin');return;
   case 'trash':{S.stats.litter=(S.stats.litter||0)+1;earn(Math.max(1,Math.round(ticketPrice(g,i)*2)),{at:v.at});sfx('coin');if(S.stats.litter%5===0)say(T(pick([['깨끗한 아쿠아리움, 최고예요!','A tidy aquarium is the best!'],['쓰레기를 주워 줘서 고마워요!','Thanks for picking up!']])),{raw:true});return}
   case 'tour':S.pearls++;sfx('level');celebrate('stars',16);toast(`🚶 ${L('아쿠아리움 한 바퀴 산책 완료!','You walked around the whole aquarium!')} <b>+1 ${PEARL}</b>`);say(L('아쿠아리움을 한 바퀴 다 돌았어요! 진주를 하나 줄게요.','You toured the whole aquarium! Here is a pearl.'),{raw:true});save(true);updateHud();return;
-  case 'photo':walkPhoto();return}}
+  case 'photo':walkPhoto();return;
+  case 'claw':Walk.stop();closeStage();startClaw('walk');return;
+  case 'shelf':plushShelf();return}}
 function walkPhoto(){const {g,i,d}=here(),today=dayKey(),first=S.walk.photo[d.key]!==today;S.walk.photo[d.key]=today;let c=0;if(first){c=Math.round(8*ticketPrice(g,i));earn(c,{pop:false});addXP(3)}save(true);sfx('finish');
  modal(`<h2>📸 ${L('찰칵! 기념사진','Snap! A souvenir photo')}</h2><div class="photo" style="--w1:${REGIONS[g].water[0]};--w2:${REGIONS[g].water[1]};--s1:${REGIONS[g].sky[0]}"><img class="pfish" src="${fishURL(d.star)}" alt=""><span class="pme">${mePic()}</span>${MAV}<b>${REGIONS[g].flag} ${esc(d.name)}</b><small>${esc(S.name)} · ${today}</small></div>
   ${first?`<div class="rew"><span>${COIN} +${short(c)}</span><span>⭐ +3 XP</span></div>`:`<p class="muted">${L('오늘 이곳 사진 선물은 이미 받았어요.','You already got today’s photo gift here.')}</p>`}<button class="btn wide" data-act="close">${L('멋져요!','Lovely!')}</button>`,
   {onOpen:()=>say(L('김치! 정말 멋진 사진이에요!','Say cheese! What a great photo!'),{raw:true})})}
+
+// ---------------------------------------------------------------- the number claw machine (claw.js): grab the plush with the answer
+const CLAW_FREE=3;
+const clawDay=()=>{if(!S.claw||S.claw.day!==dayKey())S.claw={day:dayKey(),used:0};return S.claw};
+const clawFreeLeft=()=>Math.max(0,CLAW_FREE-clawDay().used);
+const clawCost=()=>Math.round(30*Math.pow(tier(S.at.g,S.at.i),.5));
+function clawCardHTML(){if(!UNLOCK.claw())return `<div class="fac lockf"><span class="fic">🔒</span><b>${L('인형뽑기','Claw machine')}</b><small>${T(UNLOCK_HINT.claw)}</small></div>`;
+ const f=clawFreeLeft();return `<button type="button" class="fac claw" data-a="claw"><span class="fic">🕹️</span><b>${L('인형뽑기','Claw machine')}</b><small>${f?L(`오늘 무료 ${f}판`,`${f} free today`):`${COIN}${short(clawCost())}`} · 🧸${plushKinds()}</small></button>`}
+// questions whose answers fit on a plush tag; whole-number answers get extra near misses so the glass is full
+function clawAsk(){for(let k=0;k<8;k++){const p=askQuick(),all=[p.a,...p.w];if(!all.every(x=>String(x).length<=6))continue;const w=p.w.slice(0,4);
+  if(w.length<4&&/^\d+$/.test(p.a))for(const v of near(+p.a,{n:6}))if(w.length<4&&!w.includes(String(v))&&String(v)!==p.a)w.push(String(v));return {q:p.q,a:p.a,w}}
+ const a=R(3,9),b=R(2,9);return {q:`${a} × ${b}`,a:String(a*b),w:near(a*b,{n:4}).map(String)}}
+function startClaw(from){if(typeof Claw==='undefined')return;if(!UNLOCK.claw()){toast(T(UNLOCK_HINT.claw));return}
+ const free=clawFreeLeft()>0,c=clawCost();
+ const play=()=>{if(free)clawDay().used++;else if(!spend(c))return;save(true);audio();sfx('start');const st=openStage();st.className='stage game claw';
+  try{Claw.start(st,{pool:seaPool(here().g),ask:clawAsk,rounds:3,sfx,say:t=>say(t),onEnd:res=>{try{Claw.stop()}catch(e){}closeStage();finishClaw(res,from)}})}catch(e){console.warn(e);closeStage()}};
+ if(free){play();return}
+ modal(`<div class="big">🕹️</div><h2>${L('인형뽑기 한 판 더?','One more claw game?')}</h2><p>${L(`오늘 무료 판은 다 했어요. 한 판에 ${COIN} ${short(c)}이에요. 문제 3개, 정답 인형을 뽑으면 내 것!`,`Today’s free games are used. One game costs ${COIN} ${short(c)}: 3 questions, and every right plush is yours!`)}</p>
+  <div class="row"><button class="btn" data-act="go">🕹️ ${L('하기','Play')} · ${COIN}${short(c)}</button><button class="btn ghost" data-act="close">${L('내일 할래요','Tomorrow')}</button></div>`,{acts:{go:()=>()=>play()}})}
+function finishClaw(res,from){const news=[];res.prizes.forEach(id=>{if(!S.plush[id])news.push(id);S.plush[id]=(S.plush[id]||0)+1});
+ S.stats.correct+=res.right;S.stats.wrong+=res.wrong;S.stats.solved+=res.right+res.wrong;S.stats.plush=(S.stats.plush||0)+res.prizes.length;if(res.prizes.length)mission('claw',res.prizes.length);
+ const c=Math.round(res.right*6*Math.pow(tier(S.at.g,S.at.i),.6));earn(c,{pop:false});checkAch();save();
+ let again=false;const back=()=>{if(again)return;if(from==='walk')startWalk('claw');else go(VIEW)};
+ if(res.quit&&!res.prizes.length&&!res.right&&!res.wrong){back();return}
+ const n=res.prizes.length;modal(`<div class="big">🧸</div><h2>${n?L(`인형 ${n}개를 뽑았어요!`,`You won ${n} plush${n>1?'ies':''}!`):L('아쉬워요, 다음엔 꼭 뽑아요!','So close! Next time for sure!')}</h2>
+  ${n?`<div class="shopgrid">${res.prizes.map(id=>`<div class="sitem ${news.includes(id)?'new':''}">${fishImgTag(id)}<b>${esc(fishName(id))}</b><small>${news.includes(id)?'✨ '+L('새 인형!','New!'):'×'+S.plush[id]}</small></div>`).join('')}</div>`:''}
+  <div class="rew"><span>✅ ${res.right}/${res.right+res.wrong}</span>${c?`<span>${COIN} +${short(c)}</span>`:''}</div>
+  <p class="muted">🧸 ${L(`인형 진열장 ${plushKinds()}종 · 기프트샵 판매 +${plushBonusPct()}%`,`Plush shelf: ${plushKinds()} kinds · gift shop sales +${plushBonusPct()}%`)}</p>
+  <div class="row wrap"><button class="btn" data-act="again">🕹️ ${L('한 판 더','Play again')} ${clawFreeLeft()?`(${L('무료','free')} ${clawFreeLeft()})`:`· ${COIN}${short(clawCost())}`}</button><button class="btn ghost" data-act="shelf">🧸 ${L('진열장','Shelf')}</button><button class="btn ghost" data-act="close">${L('그만','Done')}</button></div>`,
+  {acts:{again:()=>{again=true;return ()=>startClaw(from)},shelf:()=>{again=true;return ()=>plushShelf(()=>{again=false;back()},from)}},onClose:()=>back(),onOpen:()=>{if(n)say(L(`인형 ${n}개를 뽑았어요! 수학 실력 최고!`,`You won ${n}! Great math!`),{raw:true})}})}
+// the plush shelf: every kind won so far, and shadows of the ones still in this sea
+function plushShelf(after,from){let playing=false;const {g}=here(),have=Object.entries(S.plush||{}),todo=FISH.filter(f=>f.reg===g&&!(S.plush||{})[f.id]).slice(0,12);
+ modal(`<h2>🧸 ${L('인형 진열장','Plush shelf')}</h2><p class="muted">${L(`${plushKinds()}종 · 기프트샵 판매 +${plushBonusPct()}% (1종마다 +2%, 최대 +50%)`,`${plushKinds()} kinds · gift shop sales +${plushBonusPct()}% (+2% each, up to +50%)`)}</p>
+  ${have.length?`<div class="shopgrid">${have.map(([id,n])=>`<div class="sitem">${fishImgTag(id)}<b>${esc(fishName(id))}</b><small>×${n}</small></div>`).join('')}</div>`:`<p>${L('아직 인형이 없어요. 인형뽑기에서 뽑아 봐요!','No plushies yet. Win some at the claw machine!')}</p>`}
+  ${todo.length?`<h3>${L('이 바다에서 뽑을 수 있는 인형','Plushies from this sea')}</h3><div class="shopgrid">${todo.map(f=>`<div class="sitem">${fishImgTag(f.id,'shadow')}<small>?</small></div>`).join('')}</div>`:''}
+  ${UNLOCK.claw()?`<button class="btn wide" data-act="play">🕹️ ${L('인형뽑기 하러 가기','Go to the claw machine')}</button>`:''}`,{acts:{play:()=>{playing=true;return ()=>startClaw(from||'home')}},onClose:()=>{if(!playing&&after)after()}})}
 
 // ---------------------------------------------------------------- the map (20 aquariums of a grade)
 function renderMap(){const g=TAB.map||S.at.g||S.grade||1;TAB.map=g;const gd=gradeData(g),el=$('v-map'),R_=REGIONS[g],dn=doneCount(g);
@@ -9947,6 +10182,7 @@ function wire(){
    case 'nextgrade':sfx('tap');if(!S.G[g].grad)graduation(g);else goNextGrade();break;
    case 'map':go('map');break;
    case 'walk':sfx('tap');startWalk();break;
+   case 'claw':sfx('tap');startClaw('home');break;
    case 'gift':dailyGift();break;case 'chest':missionChest();break;case 'review':sfx('tap');dailyReview();break;
    case 'grade':sfx('tap');TAB.map=+b.dataset.g;renderMap();break;
    case 'node':nodeModal(TAB.map,+b.dataset.i);break;

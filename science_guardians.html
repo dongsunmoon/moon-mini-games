@@ -49,6 +49,7 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid var(-
 img{-webkit-user-drag:none}
 .svgi{display:inline-block;width:1.15em;height:1.15em;vertical-align:-.2em}
 .svgi svg{width:100%;height:100%;display:block}
+img.svgi{object-fit:contain}
 .center{text-align:center}
 .sub{color:var(--muted);font-size:14px;font-weight:700}
 
@@ -1579,7 +1580,7 @@ const QS=[
  {c:'plantparts',l:2,t:'sort',q:'우리가 먹는 건 식물의 어느 부분일까요?|Which part of the plant do we eat?',bins:[['🥕','뿌리|Root'],['🥬','잎|Leaf'],['🍎','열매|Fruit']],items:[['🥕','당근|Carrot',0],['🍠','고구마|Sweet potato',0],['🥬','상추|Lettuce',1],['🍃','시금치|Spinach',1],['🥗','배추|Napa cabbage',1],['🍎','사과|Apple',2],['🍅','토마토|Tomato',2],['🍓','딸기|Strawberry',2]]},
  {c:'plantparts',l:2,t:'ox',s:'토마토는 식물의 열매다.|A tomato is the fruit of a plant.',v:1,why:'토마토 속에는 씨앗이 있어요. 씨앗을 품은 부분이 열매예요.|Tomatoes have seeds inside. The part that holds the seeds is the fruit.'},
  {c:'lifecycle',l:1,t:'order',q:'나비가 자라는 순서대로 눌러요.|Tap how a butterfly grows, in order.',items:[['🥚','알|Egg'],['🐛','애벌레|Caterpillar'],['@chrysalis','번데기|Chrysalis'],['🦋','나비|Butterfly']]},
- {c:'lifecycle',l:1,t:'order',q:'씨앗이 자라는 순서대로 눌러요.|Tap how a seed grows, in order.',items:[['🌰','씨앗|Seed'],['🌱','싹|Sprout'],['🌿','자란 줄기와 잎|Stem and leaves'],['🌻','꽃|Flower']]},
+ {c:'lifecycle',l:1,t:'order',q:'씨앗이 자라는 순서대로 눌러요.|Tap how a seed grows, in order.',items:[['@seed','씨앗|Seed'],['🌱','싹|Sprout'],['🌿','자란 줄기와 잎|Stem and leaves'],['🌻','꽃|Flower']]},
  {c:'lifecycle',l:1,t:'ox',s:'애벌레는 자라서 나비가 된다.|A caterpillar grows up to become a butterfly.',v:1},
  {c:'lifecycle',l:2,t:'mc',q:'번데기 안에서는 무슨 일이 일어날까요?|What happens inside a chrysalis?',art:'@chrysalis',a:'애벌레가 나비로 모습을 바꿔요|The caterpillar changes into a butterfly',o:['그냥 잠만 자요|It just sleeps','알을 낳아요|It lays eggs','껍질이 단단해지기만 해요|Only the shell gets harder']},
  {c:'frog',l:1,t:'order',q:'개구리가 자라는 순서대로 눌러요.|Tap how a frog grows, in order.',items:[['@frogspawn','알|Eggs'],['@tadpole','올챙이|Tadpole'],['@froglet','다리가 난 올챙이|Tadpole with legs'],['🐸','개구리|Frog']]},
@@ -1633,7 +1634,7 @@ const QS=[
  {c:'balance',l:3,t:'ox',s:'생태계에서는 생물 한 종류가 사라져도 다른 생물에게 아무 영향이 없다.|In an ecosystem, losing one kind of living thing doesn’t affect any others.',v:0,why:'먹이그물로 이어져 있어서, 하나가 사라지면 그것을 먹던 동물과 그것이 먹던 생물 모두 영향을 받아요.|They’re linked in a food web, so the animals that ate it and the things it ate are all affected.'},
  {c:'balance',l:3,t:'sort',q:'양분을 만드는 생산자, 먹는 소비자, 죽은 것을 분해하는 분해자 중 무엇일까요?|Producer (makes food), consumer (eats) or decomposer (breaks down dead things)?',bins:[['🌿','생산자|Producer'],['🦊','소비자|Consumer'],['🍄','분해자|Decomposer']],items:[['🌳','나무|Tree',0],['🌾','풀|Grass',0],['🐇','토끼|Rabbit',1],['🦉','부엉이|Owl',1],['🐛','애벌레|Caterpillar',1],['🍄','버섯|Mushroom',2],['🦠','세균|Bacteria',2]]},
  {c:'balance',l:3,t:'mc',q:'먹이 사슬 여러 개가 그물처럼 얽혀 이어진 것을 무엇이라고 할까요?|What do we call many food chains linked together like a net?',art:'🕸️',a:'먹이그물|A food web',o:['먹이 계단|A food staircase','먹이 바구니|A food basket','먹이 사다리|A food ladder']},
- {c:'plantcycle',l:1,t:'order',q:'식물의 한살이를 순서대로 눌러요.|Tap a plant’s life cycle in order.',items:[['🌰','씨앗|Seed'],['🌱','싹|Sprout'],['🌿','잎과 줄기가 자라요|Leaves and stem grow'],['🌼','꽃|Flower'],['🍅','열매|Fruit']]},
+ {c:'plantcycle',l:1,t:'order',q:'식물의 한살이를 순서대로 눌러요.|Tap a plant’s life cycle in order.',items:[['@seed','씨앗|Seed'],['🌱','싹|Sprout'],['🌿','잎과 줄기가 자라요|Leaves and stem grow'],['🌼','꽃|Flower'],['🍅','열매|Fruit']]},
  {c:'plantcycle',l:1,t:'mc',q:'씨앗이 싹 트려면 꼭 필요한 것은?|What does a seed need to sprout?',art:'🌰',a:'💧 물과 알맞은 온도|💧 Water and the right temperature',o:['🍬 설탕|🍬 Sugar','🎵 음악|🎵 Music','🧂 소금|🧂 Salt']},
  {c:'plantcycle',l:1,t:'ox',s:'꽃이 지고 난 자리에 열매가 생긴다.|Fruit grows where the flower was.',v:1},
  {c:'plantcycle',l:2,t:'mc',q:'강낭콩 싹이 틀 때 가장 먼저 나오는 것은?|When a bean sprouts, what comes out first?',art:'🌱',a:'뿌리|The root',o:['꽃|A flower','열매|A fruit','본잎|True leaves']},
@@ -1917,12 +1918,16 @@ const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 const rnd=n=>Math.floor(Math.random()*n),pick=a=>a[rnd(a.length)],rand=(a,b)=>a+Math.random()*(b-a);
 const shuffle=a=>{for(let i=a.length-1;i>0;i--){const k=rnd(i+1);[a[i],a[k]]=[a[k],a[i]]}return a};
 const ICON_SVG={
+ seed:'<svg viewBox="0 0 64 64"><defs><radialGradient id="sdg" cx=".38" cy=".32" r=".75"><stop offset="0" stop-color="#e2b07a"/><stop offset=".55" stop-color="#a8692f"/><stop offset="1" stop-color="#6b3e17"/></radialGradient></defs><path d="M32 8c13 9 18 22 15 33-3 10-9 15-15 15s-12-5-15-15C14 30 19 17 32 8z" fill="url(#sdg)"/><path d="M32 14c-4 10-4 26 0 38" stroke="#5a3311" stroke-width="2.2" fill="none" stroke-linecap="round" opacity=".55"/><ellipse cx="25" cy="25" rx="4" ry="7" fill="#fff" opacity=".35" transform="rotate(-20 25 25)"/></svg>',
  chrysalis:'<svg viewBox="0 0 64 64"><path d="M32 3v9" stroke="#7a5230" stroke-width="3" stroke-linecap="round"/><path d="M32 11c11 6 13 19 10 31-2 9-6 16-10 19-4-3-8-10-10-19-3-12-1-25 10-31z" fill="#8ccf63" stroke="#3f7d2c" stroke-width="2.5"/><path d="M25 25q7 4 14 0M24 34q8 4 16 0M26 43q6 3 12 0" stroke="#3f7d2c" stroke-width="2" fill="none" stroke-linecap="round"/><circle cx="29" cy="18" r="2" fill="#e8c43a"/></svg>',
  frogspawn:'<svg viewBox="0 0 64 64">'+[[20,22],[34,18],[46,26],[16,36],[30,32],[44,40],[24,48],[38,50],[50,14]].map(([x,y])=>`<circle cx="${x}" cy="${y}" r="8" fill="#d8f0ff" stroke="#9cc8e0" stroke-width="1.5"/><circle cx="${x}" cy="${y}" r="3" fill="#222"/>`).join('')+'</svg>',
  tadpole:'<svg viewBox="0 0 64 64"><path d="M30 34q14 -2 22 6q-6 -2 -10 2q-4 4 -12 -2z" fill="#3a4a3a"/><ellipse cx="22" cy="32" rx="13" ry="10" fill="#3a4a3a"/><circle cx="17" cy="29" r="2.4" fill="#fff"/><circle cx="16.5" cy="29" r="1.2" fill="#000"/></svg>',
  froglet:'<svg viewBox="0 0 64 64"><path d="M34 32q12 -1 20 6q-6 -2 -9 2q-4 3 -11 -3z" fill="#4c7a3a"/><path d="M22 40l-6 10m0 0l-5 1m5-1l1 5M30 40l5 9m0 0l5 0m-5 0l-1 5" stroke="#4c7a3a" stroke-width="3" fill="none" stroke-linecap="round"/><ellipse cx="25" cy="32" rx="14" ry="11" fill="#5f9a46"/><circle cx="20" cy="27" r="3.4" fill="#fff"/><circle cx="20" cy="27" r="1.6" fill="#000"/><circle cx="30" cy="27" r="3.4" fill="#fff"/><circle cx="30" cy="27" r="1.6" fill="#000"/></svg>',
 };
-const icon=(s,cls='')=>s&&s[0]==='@'?`<span class="svgi ${cls}">${ICON_SVG[s.slice(1)]||''}</span>`:esc(s);
+const ICO_HAVE=new Set([]);
+const icon=(s,cls='')=>s&&s[0]==='@'?(ICO_HAVE.has(s.slice(1))?`<img class="svgi ${cls}" src="images/sci-ico-${s.slice(1)}.webp" alt="" draggable="false">`:`<span class="svgi ${cls}">${ICON_SVG[s.slice(1)]||''}</span>`):esc(s);
+// a run of emoji that may hold @name pictures, e.g. '💧@tadpole'
+const richE=s=>esc(s).replace(/@([a-z]+)/g,(m,n)=>ICON_SVG[n]||ICO_HAVE.has(n)?icon('@'+n):m);
 const svgPt=(svg,e)=>{const p=svg.createSVGPoint();p.x=e.clientX;p.y=e.clientY;const m=svg.getScreenCTM();return m?p.matrixTransform(m.inverse()):{x:0,y:0}};
 // pointer drag over an element; cb(point in svg units, phase)
 function onDrag(el,svg,cb){
@@ -3983,14 +3988,14 @@ Object.assign(LEARN,{
  lifecycle:{who:'🐛',hook:'잎을 실컷 먹었더니 이제 번데기가 될 때래요! 그 속에서 무슨 일이 생기는지 알려 주세요.|I’ve eaten lots of leaves, and now it’s time to become a chrysalis! Tell me what happens inside.',
   play:{t:'predict',ask:'번데기 속에서 애벌레는 어떻게 될까요?|What happens to the caterpillar inside the chrysalis?',
    opts:[['🦋','나비로 모습이 바뀌어요|It turns into a butterfly',1],['💤','쿨쿨 잠만 자요|It just sleeps',0],['🐛','더 큰 애벌레가 돼요|It becomes a bigger caterpillar',0]],
-   show:[['🥚🍃','나비가 잎 뒷면에 작은 알을 낳아요.|A butterfly lays tiny eggs under a leaf.'],['🐛🍃','애벌레가 잎을 먹고 허물을 벗으며 자라요.|The caterpillar eats leaves and sheds its skin as it grows.'],['🌿🟢✨','번데기가 됐어요. 그 속에서 몸이 완전히 바뀌어요.|It becomes a chrysalis, and its body changes completely inside.'],['🦋🌸','번데기에서 나비가 나왔어요!|A butterfly comes out of the chrysalis!']],
+   show:[['🥚🍃','나비가 잎 뒷면에 작은 알을 낳아요.|A butterfly lays tiny eggs under a leaf.'],['🐛🍃','애벌레가 잎을 먹고 허물을 벗으며 자라요.|The caterpillar eats leaves and sheds its skin as it grows.'],['@chrysalis✨','번데기가 됐어요. 그 속에서 몸이 완전히 바뀌어요.|It becomes a chrysalis, and its body changes completely inside.'],['🦋🌸','번데기에서 나비가 나왔어요!|A butterfly comes out of the chrysalis!']],
    why:'나비는 알, 애벌레, 번데기, 나비 순서로 자라요. 번데기 속에서 모습이 완전히 바뀌어요.|A butterfly grows from egg to caterpillar to chrysalis to butterfly. It changes completely inside the chrysalis.'},
   thanks:'번데기 속에서 저는 멋진 나비로 완전히 바뀌는 거군요!|So inside the chrysalis, I’ll change completely into a butterfly!'},
 
  frog:{who:'🐢',hook:'연못에 꼬리 달린 올챙이가 잔뜩 생겼어요! 자라면 누가 되는지 보여 주세요.|My pond is full of wiggly tadpoles! Show me what they grow into.',
   play:{t:'predict',ask:'올챙이가 다 자라면 누가 될까요?|What will a tadpole grow up to be?',
    opts:[['🐸','개구리|A frog',1],['🐟','물고기|A fish',0],['🦎','도마뱀|A lizard',0]],
-   show:[['💧🥚','봄 연못에 젤리 같은 알 덩어리가 생겨요.|Jelly-like clumps of eggs appear in a spring pond.'],['💧⚫〰️','알에서 나온 올챙이는 아가미로 숨 쉬어요.|Tadpoles hatch and breathe with gills.'],['⚫〰️🦵','뒷다리가 먼저, 그다음 앞다리가 나와요.|Back legs grow first, then front legs.'],['🐸🍃','꼬리가 없어지면 개구리 완성! 폐와 피부로 숨 쉬어요.|The tail disappears: it’s a frog! It breathes with lungs and skin.']],
+   show:[['💧@frogspawn','봄 연못에 젤리 같은 알 덩어리가 생겨요.|Jelly-like clumps of eggs appear in a spring pond.'],['💧@tadpole','알에서 나온 올챙이는 아가미로 숨 쉬어요.|Tadpoles hatch and breathe with gills.'],['@froglet','뒷다리가 먼저, 그다음 앞다리가 나와요.|Back legs grow first, then front legs.'],['🐸🍃','꼬리가 없어지면 개구리 완성! 폐와 피부로 숨 쉬어요.|The tail disappears: it’s a frog! It breathes with lungs and skin.']],
    why:'개구리는 알, 올챙이, 다리가 난 올챙이, 개구리 순서로 자라요.|A frog grows from egg to tadpole, to tadpole with legs, to frog.'},
   thanks:'꼬리 달린 올챙이가 자라서 개구리가 되는 거였군요!|So wiggly tadpoles grow up into frogs!'},
 
@@ -4111,7 +4116,7 @@ Object.assign(LEARN,{
 
  plantcycle:{who:'🐥',hook:'토마토 씨앗을 심었어요! 언제 토마토가 열리는지 순서대로 알려 주세요.|I planted tomato seeds! Show me, step by step, how I’ll get tomatoes.',
   play:{t:'order',ask:'토마토가 자라는 순서대로 쌓아요.|Stack how a tomato plant grows, in order.',steps:[
-   ['🌰','씨앗|Seed','씨앗은 물과 알맞은 온도가 있으면 어두운 흙 속에서도 싹 터요.|With water and the right warmth, a seed sprouts even in dark soil.'],
+   ['@seed','씨앗|Seed','씨앗은 물과 알맞은 온도가 있으면 어두운 흙 속에서도 싹 터요.|With water and the right warmth, a seed sprouts even in dark soil.'],
    ['🌱','싹|Sprout','뿌리가 먼저 나오고, 떡잎 두 장이 펼쳐져요.|The root comes out first, then two seed leaves open.'],
    ['🌿','본잎과 줄기|Leaves and stem','본잎이 나고 줄기가 자라요. 이제 햇빛이 꼭 필요해요.|True leaves and a stem grow. Now it really needs sunlight.'],
    ['🌼','꽃|Flower','노란 꽃이 피어요. 꽃은 열매와 씨앗을 만들어요.|Yellow flowers bloom. Flowers make fruit and seeds.'],
@@ -5306,7 +5311,7 @@ function hintFor(t){return {find:L('맞는 물건이 있는 진열대 앞에 서
 function taskText(){const O=Y.O;if(!O)return '';const ask=esc(T(O.p.ask));
  if(O.t==='find')return `🛒 ${ask} <b>${O.got}/${O.need}</b>`;
  if(O.t==='sort')return `🛍️ ${ask} <b>${O.got}/${O.need}</b>`;
- if(O.t==='order')return `🍔 ${ask} <span class="ty-steps">${Array.from({length:O.need},(_,k)=>`<i class="${k<O.next?'on':''}">${k<O.next?O.stack[k]:k+1}</i>`).join('')}</span>`;
+ if(O.t==='order')return `🍔 ${ask} <span class="ty-steps">${Array.from({length:O.need},(_,k)=>`<i class="${k<O.next?'on':''}">${k<O.next?richE(O.stack[k]):k+1}</i>`).join('')}</span>`;
  if(O.t==='pair')return `🔗 ${ask} <b>${O.got}/${O.need}</b>`;
  return `🔬 ${ask}${O.lab?' <b>📋</b>':''}`}
 function orderUI(){if(!Y)return;const O=Y.O;Y.el.order.innerHTML=O?`<span class="w">${O.X.who}</span><span class="tx"><small>🔬 ${L('과학 손님','Science customer')}</small>${taskText()}</span><span class="sp">🔊</span>`:'';hud()}
@@ -5314,8 +5319,8 @@ function hud(){if(!Y)return;const un=UN(),n=UPG.filter(u=>un[u.id]).length,tot=Y
  Y.el.day.textContent=`🍔 ${L(`${S.shopX.days||1}일째`,`Day ${S.shopX.days||1}`)} · 🔬 ${Math.max(0,Math.min(Y.oi,tot))+(Y.O&&Y.O.done?1:0)}/${tot}`;
  Y.el.bar.style.width=n/UPG.length*100+'%';Y.el.up.textContent=L(`가게 키우기 ${n}/${UPG.length}`,`Shop upgrades ${n}/${UPG.length}`)}
 function handUI(){if(!Y)return;const sci=Y.hold.filter(h=>!h.food),fd={};Y.hold.filter(h=>h.food).forEach(h=>fd[h.e]=(fd[h.e]||0)+1);
- Y.el.hand.innerHTML=Y.hold.length?`<b>🖐️</b>${sci.map(h=>`<span>${h.e}<small>${esc(h.l)}</small></span>`).join('')}${Object.entries(fd).map(([e,n])=>`<span>${e}<small>×${n}</small></span>`).join('')}`:'';Y.el.hand.classList.toggle('hidden',!Y.hold.length)}
-function caption(ic,txt,good,say){if(!Y)return;const c=Y.el.cap;c.className='ty-cap'+(good===true?' good':good===false?' bad':'');c.innerHTML=`<span class="ic">${ic}</span><span>${esc(txt)}</span>`;void c.offsetWidth;c.classList.add('in');if(say!==false)speak(txt)}
+ Y.el.hand.innerHTML=Y.hold.length?`<b>🖐️</b>${sci.map(h=>`<span>${richE(h.e)}<small>${esc(h.l)}</small></span>`).join('')}${Object.entries(fd).map(([e,n])=>`<span>${e}<small>×${n}</small></span>`).join('')}`:'';Y.el.hand.classList.toggle('hidden',!Y.hold.length)}
+function caption(ic,txt,good,say){if(!Y)return;const c=Y.el.cap;c.className='ty-cap'+(good===true?' good':good===false?' bad':'');c.innerHTML=`<span class="ic">${richE(ic)}</span><span>${esc(txt)}</span>`;void c.offsetWidth;c.classList.add('in');if(say!==false)speak(txt)}
 function banner(html,ms){if(!Y)return;const b=Y.el.ban;b.innerHTML=html;b.classList.remove('hidden','in');void b.offsetWidth;b.classList.add('in');clearTimeout(Y.banT);Y.banT=setTimeout(()=>{if(Y)b.classList.add('hidden')},ms)}
 function mood(c,m,t=1.6){c.mood=m;c.moodT=t}
 function pop(x,y,txt,col){Y.pops.push({x,y,txt,col,t:0})}
@@ -5499,7 +5504,12 @@ function box(c,x,y,w,d,h,top,left,right){const A=iso(x,y),B=iso(x+w,y),C=iso(x+w
  poly(c,[D,C,u(C),u(D)],left);poly(c,[B,C,u(C),u(B)],right);poly(c,[u(A),u(B),u(C),u(D)],top)}
 const quad=(x0,y0,x1,y1)=>[iso(x0,y0),iso(x1,y0),iso(x1,y1),iso(x0,y1)];
 function tint(h,a){const n=parseInt(h.slice(1),16),r=n>>16,g=n>>8&255,b=n&255,f=v=>Math.round(a<0?v*(1+a):v+(255-v)*a);return `rgb(${f(r)},${f(g)},${f(b)})`}
-function emo(c,e,x,y,size){c.font=`${size}px ${EF}`;c.textAlign='center';c.textBaseline='middle';c.fillText(e,x,y)}
+// emoji, or a picture for @name (the 3D one once it is in images/, the drawn icon until then)
+const ICO={};
+function icoImg(n){if(!ICO[n]){const svg=(ICON_SVG[n]||'').replace('<svg ','<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" ');ICO[n]=img(ICO_HAVE.has(n)?`images/sci-ico-${n}.webp`:'data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg))}return ok_(ICO[n])?ICO[n]:null}
+function emo(c,e,x,y,size){if(e&&e.includes('@')){const parts=e.split(/(@[a-z]+)/).filter(Boolean);let w=0;const ws=parts.map(p=>{let v;if(p[0]==='@')v=size;else{c.font=`${size}px ${EF}`;v=c.measureText(p).width}w+=v;return v});let px=x-w/2;
+  parts.forEach((p,k)=>{if(p[0]==='@'){const im=icoImg(p.slice(1));if(im)c.drawImage(im,px,y-size/2,size,size)}else{c.font=`${size}px ${EF}`;c.textAlign='left';c.textBaseline='middle';c.fillText(p,px,y)}px+=ws[k]});return}
+ c.font=`${size}px ${EF}`;c.textAlign='center';c.textBaseline='middle';c.fillText(e,x,y)}
 function label(c,t,x,y,bg,fg='#24304a'){c.font=`800 13px ${TF}`;const w=Math.min(96,c.measureText(t).width+12);c.fillStyle=bg;c.beginPath();c.roundRect(x-w/2,y-10,w,20,9);c.fill();c.strokeStyle='rgba(0,0,0,.08)';c.stroke();c.fillStyle=fg;c.textAlign='center';c.textBaseline='middle';c.fillText(t,x,y+.5,w-8)}
 function wallQuad(c,x0,y0,x1,y1,h0,h1,fill){const a=iso(x0,y0),b=iso(x1,y1);poly(c,[[a[0],a[1]-h0],[b[0],b[1]-h0],[b[0],b[1]-h1],[a[0],a[1]-h1]],fill)}
 function draw(){const c=Y.ctx,me=Y.me,un=UN(),O=Y.O;
@@ -5663,14 +5673,14 @@ return {open,stop,get _y(){return Y},_route:(x,y)=>route(x,y),_tile:()=>Y&&[Y.me
 const PLAYS={};
 // predict: guess, watch the experiment frames, then see why
 PLAYS.predict=(box,p,api)=>{
- box.innerHTML=`<div class="ls-ask">🔮 ${esc(T(p.ask))}</div><div class="ls-opts">${p.opts.map((o,k)=>`<button class="ls-opt" type="button" data-k="${k}"><span class="e">${o[0]}</span><b>${esc(T(o[1]))}</b></button>`).join('')}</div>
+ box.innerHTML=`<div class="ls-ask">🔮 ${esc(T(p.ask))}</div><div class="ls-opts">${p.opts.map((o,k)=>`<button class="ls-opt" type="button" data-k="${k}"><span class="e">${richE(o[0])}</span><b>${esc(T(o[1]))}</b></button>`).join('')}</div>
   <div class="ls-theater hidden" id="lsTh"><div class="ls-sc" id="lsSc"></div><div class="ls-cap" id="lsCap"></div></div>
   <div class="ls-fb" id="lsFb">${L('어떻게 될지 예상해서 골라요. 틀려도 괜찮아요!','Make a guess. Any guess is okay!')}</div>`;
  box.querySelector('.ls-opts').addEventListener('click',e=>{const b=e.target.closest('.ls-opt');if(!b||b.disabled||!api.alive())return;const k=+b.dataset.k,right=p.opts[k][2]===1;
   box.querySelectorAll('.ls-opt').forEach(x=>x.disabled=true);b.classList.add('pick');SFX.click();
   $('lsTh').classList.remove('hidden');$('lsFb').innerHTML=`<span class="ls-fi">🔬</span><span>${L('좋아요! 실험해 볼까요?','Great! Let’s test it!')}</span>`;
   const sc=$('lsSc'),cap=$('lsCap');let f=0;
-  const frame=()=>{if(!api.alive())return;if(f<p.show.length){const s=p.show[f++];sc.textContent=s[0];sc.classList.remove('in');void sc.offsetWidth;sc.classList.add('in');cap.textContent=T(s[1]);SFX.tick();speak(T(s[1]));setTimeout(frame,2300);return}
+  const frame=()=>{if(!api.alive())return;if(f<p.show.length){const s=p.show[f++];sc.innerHTML=richE(s[0]);sc.classList.remove('in');void sc.offsetWidth;sc.classList.add('in');cap.textContent=T(s[1]);SFX.tick();speak(T(s[1]));setTimeout(frame,2300);return}
    box.querySelector(`.ls-opt[data-k="${p.opts.findIndex(o=>o[2]===1)}"]`).classList.add('right');
    if(right){SFX.good();api.fb('🎯',L('예상 적중! ','You called it! ')+T(p.why),true)}else{api.miss();SFX.hint();api.fb('🤯',L('깜짝! ','Surprise! ')+T(p.why),null)}
    api.done()};
@@ -5683,12 +5693,12 @@ PLAYS.explore=(box,p,api)=>{
   <div class="ls-fb" id="lsFb">${L('버튼을 모두 눌러 봐요!','Try every button!')}</div>`;
  const scn=$('lsScene');
  const show=k=>{const st=p.states[k],w=Math.max(200,scn.clientWidth-24),tot=st[1].reduce((a,x)=>a+x[1],0)+14*(st[1].length-1),z=Math.min(1,w/tot);
-  const spans=scn.children;if(spans.length===st[1].length)st[1].forEach((x,j)=>{spans[j].textContent=x[0];spans[j].style.fontSize=x[1]*z+'px';spans[j].style.opacity=1});
-  else scn.innerHTML=st[1].map(x=>`<span style="font-size:${x[1]*z}px">${x[0]}</span>`).join('');
+  const spans=scn.children;if(spans.length===st[1].length)st[1].forEach((x,j)=>{spans[j].innerHTML=richE(x[0]);spans[j].style.fontSize=x[1]*z+'px';spans[j].style.opacity=1});
+  else scn.innerHTML=st[1].map(x=>`<span style="font-size:${x[1]*z}px">${richE(x[0])}</span>`).join('');
   box.querySelectorAll('.ls-exs button').forEach((b,j)=>{b.classList.toggle('on',j===k);if(seen.has(j)||j===k)b.classList.add('seen')});
   seen.add(k);api.fb('👀',T(st[2]),true);if(seen.size===p.states.length)api.done()};
  box.querySelector('.ls-exs').addEventListener('click',e=>{const b=e.target.closest('button');if(!b||!api.alive())return;SFX.click();show(+b.dataset.k)});
- scn.innerHTML=p.states[0][1].map(x=>`<span style="font-size:${x[1]}px;opacity:.35">${x[0]}</span>`).join('');
+ scn.innerHTML=p.states[0][1].map(x=>`<span style="font-size:${x[1]}px;opacity:.35">${richE(x[0])}</span>`).join('');
 };
 /*SHOP:END*/
 function renderCards(){

@@ -5287,6 +5287,10 @@ const iso=(x,y)=>[(x-y)*TW/2,(x+y)*TH/2];
 function toTile(px,py){const sx=(px-Y.cw/2)/Y.k+Y.cam[0],sy=(py-Y.ch*.5)/Y.k+Y.cam[1];return [(sy/(TH/2)+sx/(TW/2))/2,(sy/(TH/2)-sx/(TW/2))/2]}
 const free=(x,y)=>x>=.3&&y>=.3&&x<=MW-.3&&y<=MH-.3&&!blocked(Math.floor(x),Math.floor(y));
 const freeR=(x,y)=>{const r=.22;return free(x-r,y-r)&&free(x+r,y-r)&&free(x-r,y+r)&&free(x+r,y+r)};
+// if something appears where you stand (a table you just bought), step to the nearest free tile so you never get stuck
+function unstick(){const me=Y.me;if(freeR(me.x,me.y))return;let best=null,bd=1e9;
+ for(let r=1;r<=3&&!best;r++)for(let a=-r;a<=r;a++)for(let b=-r;b<=r;b++){const x=Math.floor(me.x)+a+.5,y=Math.floor(me.y)+b+.5;if(!freeR(x,y))continue;const d=Math.hypot(x-me.x,y-me.y);if(d<bd){bd=d;best=[x,y]}}
+ if(best){me.x=best[0];me.y=best[1];me.path=null}}
 
 // ---------------------------------------------------------------- science orders
 function startOrder(i){if(!Y)return;const ses=Y.ses;if(i>=ses.list.length){closing();return}
@@ -5459,7 +5463,7 @@ function payPad(u){const un=UN(),pd=S.shopX.pad=S.shopX.pad||{},have=pd[u.id]||0
  if(S.coins<=0){if(Y.saidBroke!==u.id){Y.saidBroke=u.id;caption('🪙',L('동전이 모자라요! 손님을 더 받고 다시 와요.','Not enough coins! Serve more customers and come back.'),null,false)}return}
  const n=Math.min(need,S.coins,Math.max(2,Math.round(u.price/40)));S.coins-=n;pd[u.id]=have+n;updateHud();if(Y.padSnd++%3===0)SFX.tick();
  if(pd[u.id]>=u.price){un[u.id]=true;delete pd[u.id];save();SFX.level();const t=u.tile||[Math.floor(Y.me.x),Math.floor(Y.me.y)];burst(t[0]+.5,t[1]+.5);syncStaff();
-  if(blocked(Math.floor(Y.me.x),Math.floor(Y.me.y))){Y.me.x-=1;}
+  unstick();
   caption(u.ic,L(`${T(u.name)} 완성!`,`${T(u.name)} unlocked!`)+(u.perk?' '+T(u.perk):''),true);hud()}
  else if(Y.padSnd%20===0)save()}
 function openLab(){const O=Y.O;if(!O||O.done)return;
@@ -5482,7 +5486,7 @@ function update(dt){const me=Y.me,sp=UN().shoes?3.7:2.9;let vx=0,vy=0;
   let jx=0,jy=0;if(Y.joy&&Y.joy.on){jx=Y.joy.dx;jy=Y.joy.dy}else if(kx||ky){jx=kx;jy=ky}
   if(jx||jy){me.path=null;const m=Math.min(1,Math.hypot(jx,jy)),wx=2*jy+jx,wy=2*jy-jx,n=Math.hypot(wx,wy)||1;vx=wx/n*sp*m;vy=wy/n*sp*m}
   else if(me.path&&me.path.length){const [px,py]=me.path[0],dx=px-me.x,dy=py-me.y,d=Math.hypot(dx,dy);if(d<.1)me.path.shift();else{const v=Math.min(sp,d/dt);vx=dx/d*v;vy=dy/d*v}}}
- const ox=me.x,oy=me.y;
+ unstick();const ox=me.x,oy=me.y;
  if(vx||vy){const nx=me.x+vx*dt,ny=me.y+vy*dt;if(freeR(nx,me.y))me.x=nx;if(freeR(me.x,ny))me.y=ny;const sx=vx-vy;if(Math.abs(sx)>.05)me.dir=sx>0?1:-1}
  me.moving=Math.hypot(me.x-ox,me.y-oy)>.004;if(me.moving){me.ph+=dt*11;Y.stillT=0}else Y.stillT+=dt;
  // the buddy trots behind you, or fetches coins once the coin buddy is bought

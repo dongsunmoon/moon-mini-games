@@ -5216,12 +5216,12 @@ const SPOT1=[8.5,6.5],SPOT2=[[8.5,5.5],[8.5,7.5]],LINE=[[8.5,6.5],[8.5,7.65],[8.
 const MACH=[{id:'burger',e:'🍔',x:9,y:0,price:5,top:'#ff6b4a',side:['#e0452a','#c93a22'],un:null},{id:'fries',e:'🍟',x:11,y:0,price:3,top:'#ffd23f',side:['#f0b400','#d89f00'],un:'fries'},{id:'drink',e:'🥤',x:12,y:0,price:2,top:'#5ab8ff',side:['#2f95e6','#2380cc'],un:'drink'}].map(m=>({...m,zx:m.x,zy:m.y+1}));
 const TABLES=[{x:10,y:3,un:null},{x:10,y:6,un:'table2'},{x:10,y:9,un:'table3'}].map((t,i)=>({...t,i,zx:9,zy:t.y,seats:[[10.5,t.y-.4],[10.5,t.y+1.4]]}));
 const PADFREE=[[4,9],[1,9],[5,10]];
-const PALS=['🐻','🐰','🐼','🐨','🐯','🐷','🐮','🦁','🐵','🐧','🦉','🐢','🦝','🦔','🐶','🐱','🐸','🐹'];
+const PALS=['🐻','🐰','🐼','🐨','🐯','🐷','🐵','🐧','🦉','🐢','🦝','🦔','🐶','🐸','🐹','🦊','🐿️','🦦'];
 const DECOR=['🧸','📒','🖍️','🧴','🔦','🎈','🧃','🪀'];
 const FOOD={burger:'🍔',fries:'🍟',drink:'🥤'};
 // pictures from images/ (step 14 of the prompt file): customers are waist-up like the player, legs are drawn here.
 // Add a key to SHOP_HAVE once its file is in images/; until then customers and furniture are drawn from emoji and boxes.
-const SHOP_HAVE=new Set([]);
+const SHOP_HAVE=new Set(['shop-stand','shop-counter','shop-lab',...['bear','squirrel','fox','turtle','owl','bunny','panda','scientist','puppy','farmer','hedgehog','penguin','koala','raccoon','hamster','frog','otter','pig','tiger','monkey'].map(k=>'cust-'+k)]);
 const CUST_KEY={'🐻':'bear','🐿️':'squirrel','🦊':'fox','🐢':'turtle','🦉':'owl','🐰':'bunny','🐇':'bunny','🐼':'panda','👩‍🔬':'scientist','🧑‍🔬':'scientist','🐶':'puppy','🧑‍🌾':'farmer','🦔':'hedgehog','🐧':'penguin','🐨':'koala','🦝':'raccoon','🐹':'hamster','🐸':'frog','🦦':'otter','🐷':'pig','🐯':'tiger','🐵':'monkey'};
 const PICS={};
 const cl=(v,a,b)=>v<a?a:v>b?b:v,rnd=(a,b)=>a+Math.random()*(b-a);
@@ -5557,9 +5557,8 @@ function draw(){const c=Y.ctx,me=Y.me,un=UN(),O=Y.O;
  D.push([me.x+me.y,()=>drawMe(c)]);
  D.push([Y.bd.x+Y.bd.y,()=>drawBuddy(c)]);
  if(Y.foe)D.push([Y.foe.x+Y.foe.y,()=>drawFoe(c)]);
+ D.push([MW+1.2+5.5,()=>drawSign(c)]);
  D.sort((a,b)=>a[0]-b[0]).forEach(o=>o[1]());
- // big entrance sign over the door
- const [ex,ey]=iso(MW+1.5,5.2);c.fillStyle='#ff5a6a';c.fillRect(ex-62,ey-96,6,80);c.fillRect(ex+56,ey-96,6,80);c.beginPath();c.roundRect(ex-74,ey-118,148,34,14);c.fill();c.fillStyle='#ffd23f';c.font=`900 17px ${TF}`;c.textAlign='center';c.textBaseline='middle';c.fillText(L('🍔 과학 버거','🍔 Science Burger'),ex,ey-101,138);
  // guide arrow
  let ar=null;if(O&&!O.done){if(sciHold&&!(O.t==='sort'&&Y.blockCust>=0))ar=[CCOL+.5,6.5];else if((O.t==='predict'||O.t==='explore')&&!O.lab)ar=[LAB.zx+.5,LAB.zy+.5]}
  if(ar){const [x,y]=iso(...ar);emo(c,'⬇️',x,y-40+Math.sin(Y.t*6)*5,22)}
@@ -5570,8 +5569,8 @@ function draw(){const c=Y.ctx,me=Y.me,un=UN(),O=Y.O;
  if(Y.dim){c.setTransform(Y.dpr,0,0,Y.dpr,0,0);c.fillStyle=`rgba(30,15,70,${Y.dim})`;c.fillRect(0,0,Y.cw,Y.ch);if(Y.foe){c.setTransform(Y.dpr*Y.k,0,0,Y.dpr*Y.k,Y.dpr*(Y.cw/2-Y.cam[0]*Y.k),Y.dpr*(Y.ch*.5-Y.cam[1]*Y.k));drawFoe(c)}}
 }
 function furn(c,k,cx,by,w){const im=shopPic('shop-'+k);if(!im)return false;const h=w*im.naturalHeight/im.naturalWidth;c.drawImage(im,cx-w/2,by-h,w,h);return true}
-function drawShelf(c,s){const g=s.g,glow=s.glow&&Math.sin(Y.t*8)>0,[bx,by]=iso(s.x+.5,s.y+1);
- if(!furn(c,'stand',bx,by+4,74))box(c,s.x+.07,s.y+.07,.86,.86,28,glow?'#ffe27a':'#c5b2ff','#9a82ea','#8468da');
+function drawShelf(c,s){const g=s.g,glow=s.glow&&Math.sin(Y.t*8)>0,[bx]=iso(s.x+.5,s.y+.5),[,by]=iso(s.x+1,s.y+1);
+ if(!furn(c,'stand',bx,by+6,76))box(c,s.x+.07,s.y+.07,.86,.86,28,glow?'#ffe27a':'#c5b2ff','#9a82ea','#8468da');
  else if(glow){c.fillStyle='rgba(255,215,60,.35)';c.beginPath();c.ellipse(bx,by-16,34,17,0,0,TAU);c.fill()}
  const [x,y]=iso(s.x+.5,s.y+.5);
  if(!g){c.globalAlpha=.5;emo(c,s.deco,x,y-40,22);c.globalAlpha=1;return}
@@ -5579,20 +5578,23 @@ function drawShelf(c,s){const g=s.g,glow=s.glow&&Math.sin(Y.t*8)>0,[bx,by]=iso(s
  if(g.out){c.globalAlpha=.25;emo(c,g.e,x,y-42,26);c.globalAlpha=1}
  else{if(g.tried)c.globalAlpha=.35;emo(c,g.e,x-9,y-36,22);emo(c,g.e,x+9,y-36,22);emo(c,g.e,x,y-48,26);c.globalAlpha=1;if(g.tried)emo(c,'✖️',x+16,y-58,14)}
  label(c,g.l,x,y-76,g.tried?'#ebecf0':s.glow?'#fff3b0':'#ffffff',g.tried?'#9aa0ad':'#24304a')}
-function drawLab(c){const O=Y.O,need=O&&(O.t==='predict'||O.t==='explore')&&!O.lab,[bx,by]=iso(LAB.x+.5,LAB.y+1),pic_=furn(c,'lab',bx,by+4,80);
+function drawLab(c){const O=Y.O,need=O&&(O.t==='predict'||O.t==='explore')&&!O.lab,[bx]=iso(LAB.x+.5,LAB.y+.5),[,by]=iso(LAB.x+1,LAB.y+1);
+ if(need){c.fillStyle=`rgba(160,100,255,${.25+.2*Math.sin(Y.t*5)})`;c.beginPath();c.ellipse(bx,by-16,38,19,0,0,TAU);c.fill()}
+ const pic_=furn(c,'lab',bx,by+6,84);
  if(!pic_)box(c,LAB.x+.07,LAB.y+.07,.86,.86,26,need?'#eadfff':'#ffffff','#c9d4e6','#b4c2da');
  const [x,y]=iso(LAB.x+.5,LAB.y+.5);if(!pic_){emo(c,'🔬',x-8,y-38,24);emo(c,'🧪',x+11,y-34,18)}label(c,L('실험대','Lab'),x,y-66,need?'#f1e8ff':'#ffffff')}
-function drawCounter(c){const [bx,by]=iso(7.5,8);if(!furn(c,'counter',bx-40,by+6,170)){box(c,7.1,5.04,.8,2.92,30,'#9fdcff','#5ab0e6','#4a9ad0');
+function drawCounter(c){const [cx]=iso(7.5,6.5),[,cy]=iso(8,8);if(!furn(c,'counter',cx,cy+10,152)){box(c,7.1,5.04,.8,2.92,30,'#9fdcff','#5ab0e6','#4a9ad0');
  const [x,y]=iso(7.5,5.5);emo(c,'🧾',x,y-46,26)}
  const [lx,ly]=iso(7.5,6.5);label(c,L('🔬 과학 계산대','🔬 Science counter'),lx,ly-58,'#e6f4ff');
  const O=Y.O;if(O&&O.t==='order'&&O.stack.length){const [a,b]=iso(7.5,7.4);O.stack.forEach((e,k)=>emo(c,e,a,b-46-k*15,22))}}
 function coinStack(c,x,y,n){const h=Math.min(16,2+Math.ceil(n/5));for(let k=0;k<h;k++){c.fillStyle=k%2?'#ffd23f':'#f4b400';c.beginPath();c.ellipse(x,y-k*4,14,7,0,0,TAU);c.fill();c.strokeStyle='#c98a00';c.stroke()}return h}
 function drawPile(c){const n=Math.round(Y.pileShow);if(n<=0)return;const [x,y]=iso(COINS.x+.5,COINS.y+.5),h=coinStack(c,x,y,n);label(c,`🪙 ${n}`,x,y-h*4-16,'#fff6d0')}
-function drawMach(c,m){const fast=UN().fast,max=fast?10:6;box(c,m.x+.06,m.y+.06,.88,.88,34,m.top,m.side[0],m.side[1]);
- const [x,y]=iso(m.x+.5,m.y+.5);c.fillStyle='#ffffff';c.beginPath();c.roundRect(x-20,y-36,40,10,4);c.fill();
+function drawMach(c,m){const fast=UN().fast,max=fast?10:6,[x,y]=iso(m.x+.5,m.y+.5),[,by]=iso(m.x+1,m.y+1);
+ if(!furn(c,{burger:'grill',fries:'fries',drink:'drink'}[m.id],x,by+6,80)){box(c,m.x+.06,m.y+.06,.88,.88,34,m.top,m.side[0],m.side[1]);c.fillStyle='#ffffff';c.beginPath();c.roundRect(x-20,y-36,40,10,4);c.fill()}
  for(let k=0;k<m.n;k++)emo(c,m.e,x,y-52-k*12,22);
  if(m.n>=max){c.font=`900 13px ${TF}`;c.fillStyle='#e0533d';c.textAlign='center';c.lineWidth=3;c.strokeStyle='#fff';c.strokeText('MAX',x,y-64-m.n*12);c.fillText('MAX',x,y-64-m.n*12);c.lineWidth=1}}
-function drawTable(c,t){const [x,y]=iso(t.x+.5,t.y+.5);
+function drawTable(c,t){const [x,y]=iso(t.x+.5,t.y+.5),[,by]=iso(t.x+1,t.y+1);
+ if(furn(c,'table',x,by+4,72)){const n=Math.round(t.coinShow);if(n>0){const h=coinStack(c,x+14,y-22,n);label(c,`🪙 ${n}`,x+14,y-38-h*4,'#fff6d0')}return}
  c.fillStyle='#5ab0e6';c.fillRect(x-3,y-18,6,18);c.fillStyle='rgba(0,0,0,.12)';c.beginPath();c.ellipse(x,y,22,11,0,0,TAU);c.fill();
  c.fillStyle='#ffffff';c.beginPath();c.ellipse(x,y-20,30,15,0,0,TAU);c.fill();c.strokeStyle='#dfe7f3';c.lineWidth=2;c.stroke();c.lineWidth=1;
  const n=Math.round(t.coinShow);if(n>0){const h=coinStack(c,x+14,y-22,n);label(c,`🪙 ${n}`,x+14,y-38-h*4,'#fff6d0')}}
@@ -5617,8 +5619,8 @@ function drawWalker(c,w){const [x,y]=iso(w.x,MH+1.3+(w.dir>0?0:.9));person(c,x,y
 function bubble(c,x,ty,m){c.font=`900 14px ${TF}`;const w=Math.max(34,c.measureText(m).width+16);c.fillStyle='#ffffff';c.beginPath();c.roundRect(x-w/2,ty-24,w,24,12);c.fill();c.beginPath();c.moveTo(x-5,ty);c.lineTo(x+5,ty);c.lineTo(x,ty+6);c.fill();
  if(/^[\d/ ✓?×]+$/.test(m)){c.fillStyle='#24304a';c.textAlign='center';c.textBaseline='middle';c.fillText(m,x,ty-12)}else emo(c,m,x,ty-12,16)}
 function drawDiner(c,d){const [x,y]=iso(d.x,d.y);
- if(d.state==='sit'||d.state==='eat'){const bob=Math.sin(d.ph*.4);c.fillStyle=d.col;c.beginPath();c.roundRect(x-11,y-30-bob,22,20,9);c.fill();emo(c,d.e,x,y-40-bob,28);
-  const ty=y-58;if(d.mood){bubble(c,x,ty,d.mood);return}
+ if(d.state==='sit'||d.state==='eat'){const bob=Math.sin(d.ph*.4),pc=shopPic('cust-'+CUST_KEY[d.e]);let ty=y-58;
+  if(pc){const h=44,w=h*pc.naturalWidth/pc.naturalHeight;c.drawImage(pc,x-w/2,y-6-h-bob,w,h);ty=y-6-h-bob-2}else{c.fillStyle=d.col;c.beginPath();c.roundRect(x-11,y-30-bob,22,20,9);c.fill();emo(c,d.e,x,y-40-bob,28)}if(d.mood){bubble(c,x,ty,d.mood);return}
   const left=Object.entries(d.want).map(([f,n])=>[f,n-(d.got[f]||0)]).filter(([,n])=>n>0);if(!left.length)return;
   const w=8+left.length*30;c.fillStyle='#ffffff';c.beginPath();c.roundRect(x-w/2,ty-26,w,26,10);c.fill();c.beginPath();c.moveTo(x-5,ty);c.lineTo(x+5,ty);c.lineTo(x,ty+6);c.fill();
   left.forEach(([f,n],k)=>{const bx=x-w/2+19+k*30;emo(c,FOOD[f],bx-3,ty-13,17);if(n>1){c.font=`900 11px ${TF}`;c.fillStyle='#e0533d';c.fillText(n,bx+10,ty-6)}});return}
@@ -5629,6 +5631,14 @@ function drawCust(c,p){const [x,y]=iso(p.x,p.y);const top=person(c,x,y,p.e,['#ff
  else if(p.sign){c.font=`800 13px ${TF}`;const t=`${p.sign[0]} ${p.sign[1]}`,w=Math.min(110,c.measureText(t).width+16);c.fillStyle='#ffffff';c.strokeStyle='#d8b26a';c.lineWidth=2;c.beginPath();c.roundRect(x-w/2,ty-26,w,24,8);c.fill();c.stroke();c.lineWidth=1;c.fillStyle='#24304a';c.textAlign='center';c.textBaseline='middle';c.fillText(t,x,ty-14,w-8);ty-=30}
  let m=p.mood;if(!m&&p.state==='wait'&&O&&!O.done&&front)m=O.t==='find'?`${O.got}/${O.need}`:O.t==='sort'?`${p.got.length} ✓`:O.t==='order'?`${O.next}/${O.need}`:O.t==='pair'?'❓':'🔬';
  if(m){bubble(c,x,ty,m);if(p.state==='wait'&&!p.mood){c.strokeStyle=`rgba(90,176,230,${.5+.5*Math.sin(Y.t*5)})`;c.lineWidth=3;c.beginPath();c.ellipse(x,y,20,10,0,0,TAU);c.stroke();c.lineWidth=1}}}
+// the shop sign stands on the sidewalk by the café entrance, facing the street along the right edge of the floor
+function drawSign(c){const y0=3.6,y1=7.4,x=MW+1.15,H=58,P=34,[ax,ay]=iso(x,y1),[bx,by]=iso(x,y0);
+ [[ax,ay],[bx,by]].forEach(([px,py])=>{c.fillStyle='rgba(0,0,0,.18)';c.beginPath();c.ellipse(px,py,9,4.5,0,0,TAU);c.fill();c.fillStyle='#b8323f';c.fillRect(px-3,py-P,6,P)});
+ const pts=[[ax,ay-P],[bx,by-P],[bx,by-P-H],[ax,ay-P-H]],dep=[[ax+6,ay-P+3],[bx+6,by-P+3],[bx+6,by-P-H+3],[ax+6,ay-P-H+3]];
+ poly(c,dep,'#b8323f');poly(c,pts,UN().sign?'#ffcf3a':'#ff5a6a');c.strokeStyle='#ffffff';c.lineWidth=3;poly(c,pts,null,'#ffffff');c.lineWidth=1;
+ c.save();c.translate((ax+bx)/2,(ay+by)/2-P-H/2);c.transform(1,-.5,0,1,0,0);c.font=`900 18px ${TF}`;c.textAlign='center';c.textBaseline='middle';c.fillStyle=UN().sign?'#e0533d':'#ffffff';c.fillText(L('과학 버거','Science Burger'),0,1,(bx-ax)-16);c.restore();
+ const [mx,my]=iso(x,(y0+y1)/2);emo(c,'🍔',mx-16,my-P-H-12,30);emo(c,'🍔',mx+18,my-P-H-26,30);
+ if(UN().sign&&Math.floor(Y.t*3)%2)emo(c,'✨',mx+40,my-P-H-30,16)}
 function drawFoe(c){const f=Y.foe,[x,y]=iso(f.x,f.y);shadow(c,x,y,26);const im=Y.im.foe;
  if(ok_(im)){const h=96,w=h*im.naturalWidth/im.naturalHeight;c.drawImage(im,x-w/2,y-h+Math.sin(f.ph)*3,w,h)}else emo(c,Y.ses.foe.icon,x,y-40,60)}
 

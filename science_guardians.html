@@ -890,6 +890,7 @@ main{width:min(980px,100%);margin:0 auto;padding:14px max(12px,env(safe-area-ins
 .journey i.boss.cur{background:linear-gradient(180deg,#ff8a95,var(--red));box-shadow:0 3px 0 var(--red-d)}
 .cards-album{margin:-4px 0 10px}
 @media (max-width:400px){.ty-order{font-size:14px;min-height:46px;padding:6px 8px}.ty-order .w{font-size:26px}.ty-cap{font-size:14.5px;padding:8px 10px;min-height:42px}.ty-prog{width:104px}}
+.ty-order .tx small{display:block;font-size:12px;color:var(--muted);font-weight:800;line-height:1.2}
 /*SHOPCSS:END*/
 </style>
 </head>
@@ -5133,24 +5134,31 @@ function lessonCards(ids,then){
  show(0);
 }
 /*SHOP:BEGIN*/
-// ---------------------------------------------------------------- science store tycoon: learn each new card by serving a customer
-// An isometric store to walk around in: drag anywhere to walk (or tap a spot). Customers queue at the counter with an
-// order built from a card's learning play (LEARN, authored in _src/learn). Stand in front of a shelf to pick its item
-// up and behind the counter to hand items over: right ones are taken, wrong ones come back with the reason, and
-// nothing is lost. Experiments happen at the lab table. Paid orders leave coins by the counter to scoop up, and coins
-// buy upgrades on the floor pads. When the day's customers are served the monster bursts in and the battle starts.
-const SHOP_LV=[[0,'🧺','작은 과학 가게|Little science store'],[8,'🛒','동네 과학 가게|Neighborhood science store'],[20,'🏪','인기 과학 가게|Popular science store'],[40,'🏬','과학 마트|Science mart'],[70,'🏰','과학 백화점|Science department store']];
+// ---------------------------------------------------------------- science burger shop: a walkable store tycoon where you learn
+// An isometric restaurant to walk around in (drag anywhere to walk, or tap a spot). Two halves:
+// · the burger café on the right: machines stack up burgers, fries and drinks, diners sit at tables and order, you (and
+//   hired helpers) carry food over, and paid tables leave coins to scoop up. This is the money game.
+// · the science corner on the left: science customers queue at the counter with an order built from a card's learning
+//   play (LEARN, authored in _src/learn). Stop at a stand to pick its item up and behind the counter to hand it over:
+//   right items are taken, wrong ones come back with the reason. Experiments happen at the lab table.
+// The day ends when every science customer is served; then the stage's monster bursts in and the battle starts.
+const SHOP_LV=[[0,'🧺','작은 과학 버거|Little Science Burger'],[8,'🛒','동네 과학 버거|Neighborhood Science Burger'],[20,'🏪','인기 과학 버거|Popular Science Burger'],[40,'🏬','과학 버거 본점|Science Burger HQ'],[70,'🏰','과학 버거 궁전|Science Burger Palace']];
 const SHOP_DAY_PAID=12;
 const shopLv=(n=S.shopX.served)=>SHOP_LV.reduce((a,x,k)=>n>=x[0]?k:a,0);
 const learnedOf=ids=>{const k=ids.filter(id=>S.cards[id]);return k.length>=2?k:ids};
+// floor pads: machines and tables are bought where they will stand; the rest use the free pad spots
 const UPG=[
- {id:'plant',ic:'🪴',name:'초록 화분|Green plants',price:40},
- {id:'bag',ic:'🛍️',name:'큰 장바구니|Big basket',price:90,perk:'한 번에 2개 더 들어요.|Carry 2 more at once.'},
- {id:'shoes',ic:'👟',name:'빠른 신발|Fast shoes',price:150,perk:'더 빨리 걸어요.|Walk faster.'},
- {id:'lights',ic:'💡',name:'반짝 전구|Twinkle lights',price:200},
- {id:'helper',ic:'🐾',name:'동전 줍는 짝꿍|Coin-picking buddy',price:260,perk:'짝꿍이 동전을 주워 와요.|Your buddy fetches coins.'},
- {id:'rug',ic:'🧶',name:'알록달록 카펫|Rainbow rug',price:320},
- {id:'fountain',ic:'⛲',name:'작은 분수|Little fountain',price:420},
+ {id:'fries',ic:'🍟',name:'감자튀김 기계|Fries machine',price:40,tile:[11,1]},
+ {id:'table2',ic:'🪑',name:'테이블 하나 더|Another table',price:70,tile:[10,6]},
+ {id:'plant',ic:'🪴',name:'초록 화분|Green plants',price:50},
+ {id:'bag',ic:'🛍️',name:'큰 쟁반|Big tray',price:100,perk:'한 번에 2개 더 들어요.|Carry 2 more at once.'},
+ {id:'staff',ic:'🧑‍🍳',name:'알바생 고용|Hire a helper',price:150,perk:'알바생이 음식을 날라 줘요.|A helper carries food for you.'},
+ {id:'drink',ic:'🥤',name:'음료 기계|Drink machine',price:180,tile:[12,1]},
+ {id:'table3',ic:'🪑',name:'테이블 하나 더|Another table',price:220,tile:[10,9]},
+ {id:'shoes',ic:'👟',name:'빠른 신발|Fast shoes',price:260,perk:'더 빨리 걸어요.|Walk faster.'},
+ {id:'fast',ic:'⚡',name:'빠른 기계|Faster machines',price:320,perk:'음식이 더 빨리, 더 높이 쌓여요.|Food stacks up faster and higher.'},
+ {id:'helper',ic:'🐾',name:'동전 줍는 짝꿍|Coin-picking buddy',price:380,perk:'짝꿍이 동전을 주워 와요.|Your buddy fetches coins.'},
+ {id:'staff2',ic:'🧑‍🍳',name:'알바생 한 명 더|Another helper',price:450},
  {id:'sign',ic:'🌟',name:'반짝 간판|Shiny sign',price:520}];
 let LS=null;
 // mode: 'stage' (a shop day before a battle), 'relearn' (missed cards before a retry) or 'review' (one card from the card book)
@@ -5162,7 +5170,7 @@ function shopOpen(ids,then,{mode='stage',grad,foe}={}){
  LS={list,i:0,then:after,mode,foe,grad:grad||'linear-gradient(135deg,#ffb347,#f0603c)',earned:0,from:VIEW};
  go('learn');Tyc.open(LS);
 }
-// paying for an order: new cards pay more, a clean serve adds a tip, and replays from the card book stop paying after 12 a day
+// paying for a science order: new cards pay more, a clean serve adds a tip, and replays from the card book stop paying after 12 a day
 function shopPay(id,miss){
  const ses=LS,isNew=!S.cards[id],sx=S.shopX;
  if(sx.day!==dayKey()){sx.day=dayKey();sx.today=0}
@@ -5170,7 +5178,7 @@ function shopPay(id,miss){
  const pay=paid?(isNew?10:5)+lv0*2:0,tip=paid&&!miss?(isNew?5:2):0;
  sx.today++;sx.served++;if(isNew)S.cards[id]={m:0,d:'',n:0,r:0,w:0};
  track('serve');save();
- const lv1=shopLv();if(lv1>lv0)setTimeout(()=>{SFX.level();toast(`${SHOP_LV[lv1][1]} ${L('가게가 커졌어요!','Your store grew!')} <b>${esc(T(SHOP_LV[lv1][2]))}</b>`)},1600);
+ const lv1=shopLv();if(lv1>lv0)setTimeout(()=>{SFX.level();toast(`${SHOP_LV[lv1][1]} ${L('가게가 커졌어요!','Your shop grew!')} <b>${esc(T(SHOP_LV[lv1][2]))}</b>`)},1600);
  return {pay,tip,isNew};
 }
 function shopCollect(n){if(n<=0)return 0;const r=grant({coins:n,xp:0});S.shopX.coins=(S.shopX.coins||0)+r.coins;if(LS)LS.earned+=r.coins;save();return r.coins}
@@ -5184,8 +5192,8 @@ function shopRecap(ses){
  const f=ses.foe;
  $('v-learn').innerHTML=`<div class="arena ls-arena" style="background:${ses.grad}">
   <div class="ls-top"><span>📒 ${L('오늘 배운 것','What I learned today')}</span><span class="ls-till">${COIN} +${ses.earned}</span></div>
-  <div class="ls-head">${f?`<span class="ls-foe">${pic(f.img,f.icon)}</span><div class="ls-bub">${L(`${esc(josa(f.name,'이','가'))} 가게에 쳐들어왔어요! 오늘 배운 과학으로 물리쳐요.`,`${esc(f.name)} burst into the store! Beat it with what you learned today.`)}</div>`:`<div class="ls-bub">${L('배운 걸 떠올리며 다시 도전해요!','Remember what you learned and try again!')}</div>`}</div></div>
- <div class="card ls-play"><p class="ls-rch">${L('손님들이 해 준 말을 한 번 더 읽어요. 누르면 들려줘요.','Read what the customers said once more. Tap to hear it.')}</p>
+  <div class="ls-head">${f?`<span class="ls-foe">${pic(f.img,f.icon)}</span><div class="ls-bub">${L(`${esc(josa(f.name,'이','가'))} 가게에 쳐들어왔어요! 오늘 배운 과학으로 물리쳐요.`,`${esc(f.name)} burst into the shop! Beat it with what you learned today.`)}</div>`:`<div class="ls-bub">${L('배운 걸 떠올리며 다시 도전해요!','Remember what you learned and try again!')}</div>`}</div></div>
+ <div class="card ls-play"><p class="ls-rch">${L('과학 손님들이 해 준 말을 한 번 더 읽어요. 누르면 들려줘요.','Read what the science customers said once more. Tap to hear it.')}</p>
   ${ses.list.map(id=>`<button class="ls-rc" type="button" data-l="rc" data-id="${id}"><span class="w">${LEARN[id].who}</span><span class="ci">${icon(CARD[id].icon)}</span><span class="t"><b>${esc(CARD[id].title)}</b><small>“${esc(T(LEARN[id].thanks))}”</small></span></button>`).join('')}
   <button class="btn green ls-go" type="button" data-l="go">⚔️ ${ses.mode==='relearn'?L('다시 도전!','Try again!'):L('출동!','Let’s go!')}</button></div>`;
  window.scrollTo({top:0});SFX.hint();speak(L('오늘 배운 것을 정리해요.','Let’s sum up what you learned today.'));
@@ -5198,45 +5206,54 @@ const firstQs=ids=>ids.map(id=>{const qs=QALL.filter(q=>q.c===id&&qOk(q));if(!qs
 
 const Tyc=(()=>{
 'use strict';
-const MW=9,MH=10,TW=64,TH=32,TAU=Math.PI*2;
+const MW=13,MH=11,TW=64,TH=32,TAU=Math.PI*2;
 const EF="'Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji',sans-serif",TF="system-ui,-apple-system,'Apple SD Gothic Neo','Noto Sans KR',sans-serif";
-// store plan in tiles: x runs down-right, y runs down-left; the walls are on the y=0 and x=0 edges
-// stands sit one tile apart so their name tags never overlap; you stand on the tile in front (y+1) to use one
-// the counter runs down the right side (x=7, y=5–7): you serve from x=6, customers stand at x=8.5 and queue toward the door
+// plan in tiles: x runs down-right, y runs down-left, walls on the y=0 and x=0 edges. Science corner on the left,
+// burger café on the right; the science counter runs down x=7 (you serve from x=6, customers queue at x=8.5)
 const SHELF=[[2,1],[4,1],[6,1],[1,4],[3,4],[5,4],[1,7],[3,7]].map(([x,y],i)=>({i,x,y,zx:x,zy:y+1}));
-const LAB={x:0,y:2,zx:1,zy:2},COUNTER=[[7,5],[7,6],[7,7]],CCOL=6,COINS={x:6,y:8},PADS=[[4,8],[1,9]],DOOR=[8.6,10.9];
-const SPOT1=[8.5,6.5],SPOT2=[[8.5,5.5],[8.5,7.5]],LINE=[[8.5,6.5],[8.5,7.65],[8.5,8.75],[8.5,9.8]];
-const BLOCK=new Set([...SHELF.map(s=>s.x+','+s.y),LAB.x+','+LAB.y,...COUNTER.map(c=>c[0]+','+c[1])]);
-const PALS=['🐻','🐰','🐼','🐨','🐯','🐷','🐮','🦁','🐵','🐧','🦉','🐢','🦝','🦔'];
+const LAB={x:0,y:2,zx:1,zy:2},COUNTER=[[7,5],[7,6],[7,7]],CCOL=6,COINS={x:6,y:8},DOOR=[8.6,11.8];
+const SPOT1=[8.5,6.5],SPOT2=[[8.5,5.5],[8.5,7.5]],LINE=[[8.5,6.5],[8.5,7.65],[8.5,8.8],[8.5,9.95]];
+const MACH=[{id:'burger',e:'🍔',x:9,y:0,price:5,top:'#ff6b4a',side:['#e0452a','#c93a22'],un:null},{id:'fries',e:'🍟',x:11,y:0,price:3,top:'#ffd23f',side:['#f0b400','#d89f00'],un:'fries'},{id:'drink',e:'🥤',x:12,y:0,price:2,top:'#5ab8ff',side:['#2f95e6','#2380cc'],un:'drink'}].map(m=>({...m,zx:m.x,zy:m.y+1}));
+const TABLES=[{x:10,y:3,un:null},{x:10,y:6,un:'table2'},{x:10,y:9,un:'table3'}].map((t,i)=>({...t,i,zx:9,zy:t.y,seats:[[10.5,t.y-.4],[10.5,t.y+1.4]]}));
+const PADFREE=[[4,9],[1,9],[5,10]];
+const PALS=['🐻','🐰','🐼','🐨','🐯','🐷','🐮','🦁','🐵','🐧','🦉','🐢','🦝','🦔','🐶','🐱','🐸','🐹'];
 const DECOR=['🧸','📒','🖍️','🧴','🔦','🎈','🧃','🪀'];
+const FOOD={burger:'🍔',fries:'🍟',drink:'🥤'};
 // pictures from images/ (step 14 of the prompt file): customers are waist-up like the player, legs are drawn here.
 // Add a key to SHOP_HAVE once its file is in images/; until then customers and furniture are drawn from emoji and boxes.
 const SHOP_HAVE=new Set([]);
 const CUST_KEY={'🐻':'bear','🐿️':'squirrel','🦊':'fox','🐢':'turtle','🦉':'owl','🐰':'bunny','🐇':'bunny','🐼':'panda','👩‍🔬':'scientist','🧑‍🔬':'scientist','🐶':'puppy','🧑‍🌾':'farmer','🦔':'hedgehog','🐧':'penguin','🐨':'koala','🦝':'raccoon','🐹':'hamster','🐸':'frog','🦦':'otter','🐷':'pig','🐯':'tiger','🐵':'monkey'};
 const PICS={};
-function shopPic(k){if(!SHOP_HAVE.has(k))return null;if(!PICS[k])PICS[k]=img(`images/sci-${k}.webp`);return ok_(PICS[k])?PICS[k]:null}
-const cl=(v,a,b)=>v<a?a:v>b?b:v;
+const cl=(v,a,b)=>v<a?a:v>b?b:v,rnd=(a,b)=>a+Math.random()*(b-a);
 const pk=a=>a[Math.floor(Math.random()*a.length)];
 let Y=null;
 
 function img(src){const m=new Image();m.src=src;return m}
 const ok_=m=>m&&m.complete&&m.naturalWidth;
+function shopPic(k){if(!SHOP_HAVE.has(k))return null;if(!PICS[k])PICS[k]=img(`images/sci-${k}.webp`);return ok_(PICS[k])?PICS[k]:null}
 function meSrc(){const map={'🐰':'bunny','🐻':'bear','🦊':'fox','🐼':'panda','🐨':'koala','🐯':'tiger','🦁':'lion','🐸':'frog','🐱':'cat','🐶':'puppy','🐥':'chick','🦄':'unicorn','🐙':'octopus','🐬':'dolphin','🦖':'dino','⭐':'star'};
  return `images/aq-me-${map[String(S.av||'').replace(/️/g,'')]||'kid'}.webp`}
+const UN=()=>S.shopX.un||(S.shopX.un={});
+const machOn=m=>!m.un||UN()[m.un],tableOn=t=>!t.un||UN()[t.un];
+function blocked(x,y){const k=x+','+y;if(Y.block.has(k))return true;return MACH.some(m=>machOn(m)&&m.x===x&&m.y===y)||TABLES.some(t=>tableOn(t)&&t.x===x&&t.y===y)}
 
 function open(ses){stop();
  const b=BUDDIES[S.equip.buddy]||BUDDIES.puppy;
- Y={ses,t:0,last:0,raf:0,k:1,cam:[-30,150],on:[],cust:[],pile:0,pileShow:0,pops:[],hold:[],cap:3+(S.shopX.un&&S.shopX.un.bag?2:0),
-  me:{x:4.5,y:6.4,dir:1,ph:0,moving:false,path:null},bd:{x:3.8,y:6.9,ph:0},
+ Y={ses,t:0,last:0,raf:0,k:1,cam:[40,170],on:[],cust:[],pile:0,pileShow:0,pops:[],hold:[],fly:[],confetti:[],
+  me:{x:5.5,y:6.4,dir:1,ph:0,moving:false,path:null},bd:{x:4.8,y:6.9,ph:0},
+  block:new Set([...SHELF.map(s=>s.x+','+s.y),LAB.x+','+LAB.y,...COUNTER.map(c=>c[0]+','+c[1])]),
   shelf:SHELF.map(s=>({...s,g:null,deco:pk(DECOR),glow:false})),zoneKey:'',zoneT:0,tick:0,O:null,oi:-1,
+  mach:MACH.map(m=>({...m,n:2,t:0})),tables:TABLES.map(t=>({...t,coins:0,coinShow:0})),diners:[],spawnT:2,staff:[],walkers:[],
   im:{me:img(meSrc()),buddy:img(b.img),foe:ses.foe&&ses.foe.img?img(ses.foe.img):null},bicon:b.icon,
-  joy:null,keys:{},phase:'open',dim:0,foe:null,blockCust:-1,padSnd:0,ripple:null};
- dom();resize();listen();
+  joy:null,keys:{},phase:'open',dim:0,foe:null,blockCust:-1,padSnd:0,ripple:null,stillT:0,idleSci:0};
+ for(let k=0;k<3;k++)Y.walkers.push({e:pk(PALS),x:rnd(-1,12),y:MH+.9,dir:Math.random()<.5?1:-1,sp:rnd(.6,1),ph:rnd(0,6)});
+ syncStaff();dom();resize();listen();
  Y.raf=requestAnimationFrame(frame);
- if(!S.shopX.tut)caption('👆',L('화면을 손가락으로 끌면 걸어요. 손님 주문을 보고, 알맞은 선반 앞에 서면 물건을 집어요!','Drag anywhere to walk. Check the order, then stand in front of the right shelf to pick things up!'),null,true);
+ if(!S.shopX.tut)caption('👆',L('화면을 손가락으로 끌면 걸어요. 과학 손님 주문을 보고, 알맞은 진열대 앞에 서면 물건을 집어요!','Drag anywhere to walk. Check the science order, then stand in front of the right stand to pick things up!'),null,true);
  setTimeout(()=>{if(Y)startOrder(0)},S.shopX.tut?500:3500);
 }
 function stop(){if(!Y)return;cancelAnimationFrame(Y.raf);for(const [t,ev,fn,o] of Y.on)t.removeEventListener(ev,fn,o);clearTimeout(Y.banT);Y=null}
+function syncStaff(){const want=(UN().staff?1:0)+(UN().staff2?1:0);while(Y.staff.length<want)Y.staff.push({x:9.5,y:1.6,hold:[],path:null,goal:null,ph:0,dir:1,moving:false,wait:0,e:Y.staff.length?'🧑‍🍳':'👩‍🍳'})}
 
 function dom(){
  $('v-learn').innerHTML=`<div class="ty" id="ty"><canvas class="ty-cv"></canvas>
@@ -5251,15 +5268,14 @@ function dom(){
  Y.ctx=Y.el.cv.getContext('2d');hud();handUI();
 }
 function resize(){if(!Y)return;const r=Y.el.ty.getBoundingClientRect(),cw=Math.max(1,r.width),ch=Math.max(1,r.height);
- Y.cw=cw;Y.ch=ch;Y.k=cl(Math.min(cw/330,ch/470),.8,1.6);
+ Y.cw=cw;Y.ch=ch;Y.k=cl(Math.min(cw/330,ch/600),.8,1.35);
  const dpr=Math.min(window.devicePixelRatio||1,2);Y.dpr=dpr;Y.el.cv.width=Math.round(cw*dpr);Y.el.cv.height=Math.round(ch*dpr)}
-// tile ↔ screen
 const iso=(x,y)=>[(x-y)*TW/2,(x+y)*TH/2];
 function toTile(px,py){const sx=(px-Y.cw/2)/Y.k+Y.cam[0],sy=(py-Y.ch*.5)/Y.k+Y.cam[1];return [(sy/(TH/2)+sx/(TW/2))/2,(sy/(TH/2)-sx/(TW/2))/2]}
-const free=(x,y)=>x>=.3&&y>=.3&&x<=MW-.3&&y<=MH-.3&&!BLOCK.has(Math.floor(x)+','+Math.floor(y));
+const free=(x,y)=>x>=.3&&y>=.3&&x<=MW-.3&&y<=MH-.3&&!blocked(Math.floor(x),Math.floor(y));
 const freeR=(x,y)=>{const r=.22;return free(x-r,y-r)&&free(x+r,y-r)&&free(x-r,y+r)&&free(x+r,y+r)};
 
-// ---------------------------------------------------------------- orders
+// ---------------------------------------------------------------- science orders
 function startOrder(i){if(!Y)return;const ses=Y.ses;if(i>=ses.list.length){closing();return}
  const id=ses.list[i],X=LEARN[id],p=X.play,t=p.t;Y.oi=i;ses.i=i;
  const O=Y.O={id,X,p,t,miss:0,wrong:0,next:0,got:0,need:0,done:false,lab:false,stack:[]};
@@ -5271,7 +5287,7 @@ function startOrder(i){if(!Y)return;const ses=Y.ses;if(i>=ses.list.length){closi
  O.need=t==='find'?goods.filter(g=>g.ok).length:t==='predict'||t==='explore'?1:goods.length;
  const slots=shuffle(SHELF.map((_,j)=>j));
  Y.shelf.forEach(s=>{s.g=null;s.glow=false;s.deco=pk(DECOR)});goods.forEach((g,j)=>{Y.shelf[slots[j]].g={...g,sold:false,tried:false,out:false}});
- Y.hold=[];handUI();Y.saidLab=Y.saidNoLab=Y.saidTried=Y.saidFull=Y.saidMid=0;
+ Y.hold=Y.hold.filter(h=>h.food);handUI();Y.saidLab=Y.saidNoLab=Y.saidTried=Y.saidFull=Y.saidMid=0;Y.idleSci=0;
  const used=new Set([X.who]),other=()=>{const c=PALS.filter(e=>!used.has(e));const e=pk(c.length?c:PALS);used.add(e);return e};
  if(t==='sort')Y.cust=p.bins.map((b,k)=>({e:k?other():X.who,bin:k,sign:[b[0],T(b[1])],spot:SPOT2[k]}));
  else if(t==='pair')Y.cust=p.pairs.map((q,k)=>({e:k?other():X.who,want:k,sign:[q[0],T(q[1])],spot:LINE[k]}));
@@ -5281,9 +5297,9 @@ function startOrder(i){if(!Y)return;const ses=Y.ses;if(i>=ses.list.length){closi
  setTimeout(()=>{if(!Y||Y.O!==O)return;caption(X.who,T(X.hook),null,true);
   if(!S.shopX.tut&&i===0)setTimeout(()=>{if(Y&&Y.O===O&&!O.got)caption('💡',hintFor(t),null,true)},5200)},1400);
 }
-function hintFor(t){return {find:L('맞는 물건이 있는 선반 앞에 서서 집고, 계산대 뒤 초록 칸에 서서 손님께 건네요.','Stand at the right shelves to pick things up, then stand on the green tiles behind the counter to hand them over.'),
+function hintFor(t){return {find:L('맞는 물건이 있는 진열대 앞에 서서 집고, 과학 계산대 뒤 초록 칸에 서서 손님께 건네요.','Stand at the right stands to pick things up, then stand on the green tiles behind the science counter to hand them over.'),
  sort:L('물건을 집어서, 알맞은 손님 앞 계산대 뒤에 서요. 손님 머리 위 팻말을 봐요!','Pick things up, then stand behind the counter in front of the right customer. Check their signs!'),
- order:L('순서대로 하나씩! 첫 번째 것을 집어서 계산대로 가져가요.','One at a time, in order! Bring the first one to the counter.'),
+ order:L('순서대로 하나씩! 첫 번째 것을 집어서 과학 계산대로 가져가요.','One at a time, in order! Bring the first one to the science counter.'),
  pair:L('맨 앞 손님 팻말을 보고, 짝꿍 물건을 하나 집어서 건네요.','Read the front customer’s sign, then bring the matching item.'),
  predict:L('왼쪽 벽의 실험대 앞에 서면 실험을 시작해요!','Stand at the lab table by the left wall to start the experiment!'),
  explore:L('왼쪽 벽의 실험대 앞에 서면 실험을 시작해요!','Stand at the lab table by the left wall to start the experiment!')}[t]}
@@ -5293,106 +5309,150 @@ function taskText(){const O=Y.O;if(!O)return '';const ask=esc(T(O.p.ask));
  if(O.t==='order')return `🍔 ${ask} <span class="ty-steps">${Array.from({length:O.need},(_,k)=>`<i class="${k<O.next?'on':''}">${k<O.next?O.stack[k]:k+1}</i>`).join('')}</span>`;
  if(O.t==='pair')return `🔗 ${ask} <b>${O.got}/${O.need}</b>`;
  return `🔬 ${ask}${O.lab?' <b>📋</b>':''}`}
-function orderUI(){if(!Y)return;const O=Y.O;Y.el.order.innerHTML=O?`<span class="w">${O.X.who}</span><span class="tx">${taskText()}</span><span class="sp">🔊</span>`:'';hud()}
-function hud(){if(!Y)return;const un=S.shopX.un||{},n=UPG.filter(u=>un[u.id]).length,lv=SHOP_LV[shopLv()],tot=Y.ses.list.length;
- Y.el.day.textContent=`${lv[1]} ${L(`${S.shopX.days||1}일째`,`Day ${S.shopX.days||1}`)} · ${L(`손님 ${Math.max(1,Math.min(Y.oi+1,tot))}/${tot}`,`Customer ${Math.max(1,Math.min(Y.oi+1,tot))}/${tot}`)}`;
- Y.el.bar.style.width=n/UPG.length*100+'%';Y.el.up.textContent=L(`가게 꾸미기 ${n}/${UPG.length}`,`Upgrades ${n}/${UPG.length}`)}
-function handUI(){if(!Y)return;Y.el.hand.innerHTML=Y.hold.length?`<b>🖐️</b>${Y.hold.map(h=>`<span>${h.e}<small>${esc(h.l)}</small></span>`).join('')}`:'';Y.el.hand.classList.toggle('hidden',!Y.hold.length)}
+function orderUI(){if(!Y)return;const O=Y.O;Y.el.order.innerHTML=O?`<span class="w">${O.X.who}</span><span class="tx"><small>🔬 ${L('과학 손님','Science customer')}</small>${taskText()}</span><span class="sp">🔊</span>`:'';hud()}
+function hud(){if(!Y)return;const un=UN(),n=UPG.filter(u=>un[u.id]).length,tot=Y.ses.list.length;
+ Y.el.day.textContent=`🍔 ${L(`${S.shopX.days||1}일째`,`Day ${S.shopX.days||1}`)} · 🔬 ${Math.max(0,Math.min(Y.oi,tot))+(Y.O&&Y.O.done?1:0)}/${tot}`;
+ Y.el.bar.style.width=n/UPG.length*100+'%';Y.el.up.textContent=L(`가게 키우기 ${n}/${UPG.length}`,`Shop upgrades ${n}/${UPG.length}`)}
+function handUI(){if(!Y)return;const sci=Y.hold.filter(h=>!h.food),fd={};Y.hold.filter(h=>h.food).forEach(h=>fd[h.e]=(fd[h.e]||0)+1);
+ Y.el.hand.innerHTML=Y.hold.length?`<b>🖐️</b>${sci.map(h=>`<span>${h.e}<small>${esc(h.l)}</small></span>`).join('')}${Object.entries(fd).map(([e,n])=>`<span>${e}<small>×${n}</small></span>`).join('')}`:'';Y.el.hand.classList.toggle('hidden',!Y.hold.length)}
 function caption(ic,txt,good,say){if(!Y)return;const c=Y.el.cap;c.className='ty-cap'+(good===true?' good':good===false?' bad':'');c.innerHTML=`<span class="ic">${ic}</span><span>${esc(txt)}</span>`;void c.offsetWidth;c.classList.add('in');if(say!==false)speak(txt)}
 function banner(html,ms){if(!Y)return;const b=Y.el.ban;b.innerHTML=html;b.classList.remove('hidden','in');void b.offsetWidth;b.classList.add('in');clearTimeout(Y.banT);Y.banT=setTimeout(()=>{if(Y)b.classList.add('hidden')},ms)}
 function mood(c,m,t=1.6){c.mood=m;c.moodT=t}
 function pop(x,y,txt,col){Y.pops.push({x,y,txt,col,t:0})}
+function burst(x,y){const cols=['#ff5a6a','#ffd23f','#33c46b','#4cb4ff','#a66bff'];for(let k=0;k<26;k++)Y.confetti.push({x,y,z:30,vx:rnd(-1.6,1.6),vy:rnd(-1.6,1.6),vz:rnd(70,150),c:pk(cols),t:0})}
+function fly(e,fx,fy,tx,ty){Y.fly.push({e,fx,fy,tx,ty,t:0})}
 
-// standing in a zone: shelves give items, the counter takes them, the lab runs the experiment
+// zones: you stand on a tile to use the thing next to it
 function zoneAt(){const me=Y.me,tx=Math.floor(me.x),ty=Math.floor(me.y);
  const s=Y.shelf.find(s=>s.zx===tx&&s.zy===ty);if(s)return {k:'shelf',s};
  if(tx===LAB.zx&&ty===LAB.zy)return {k:'lab'};
  if(tx===CCOL&&ty>=5&&ty<=7)return {k:'counter',col:ty};
  if(tx===COINS.x&&ty===COINS.y)return {k:'coins'};
- const pi=PADS.findIndex(([px,py])=>px===tx&&py===ty);if(pi>=0&&padUpg(pi))return {k:'pad',i:pi};
+ const m=Y.mach.find(m=>machOn(m)&&m.zx===tx&&m.zy===ty);if(m)return {k:'mach',m};
+ const t=Y.tables.find(t=>tableOn(t)&&t.zx===tx&&t.zy===ty);if(t)return {k:'table',t};
+ const pd=pads().find(p=>p.x===tx&&p.y===ty);if(pd)return {k:'pad',u:pd.u};
  return null}
-const zoneKey=z=>z?z.k+(z.s?z.s.i:'')+(z.col||'')+(z.i!=null?z.i:''):'';
-function padUpg(i){const un=S.shopX.un||{},left=UPG.filter(u=>!un[u.id]);return left[i]||null}
+const zoneKey=z=>z?z.k+(z.s?z.s.i:'')+(z.col||'')+(z.m?z.m.id:'')+(z.t?z.t.i:'')+(z.u?z.u.id:''):'';
+// the next three upgrades on sale, each on its own tile
+function pads(){const un=UN(),out=[];let f=0;for(const u of UPG){if(un[u.id])continue;if(out.length>=3)break;let t=u.tile;if(!t){if(f>=PADFREE.length)continue;t=PADFREE[f++]}out.push({u,x:t[0],y:t[1]})}return out}
 function custFor(col){const O=Y.O;if(!O)return null;const here=Y.cust.filter(c=>c.state==='wait');
  if(O.t==='sort')return here.find(c=>c.bin===(col<6?0:col>6?1:-1))||null;
  return here.sort((a,b)=>(a.want||0)-(b.want||0))[0]||null}
 function inZone(dt){const z=zoneAt(),key=zoneKey(z);if(key!==Y.zoneKey){Y.zoneKey=key;Y.zoneT=0;Y.tick=0;Y.blockCust=-1}
- if(!z)return;Y.zoneT+=dt;const still=Y.stillT,need={shelf:.3,counter:.2,lab:.25,pad:.6,coins:0}[z.k];if(Y.zoneT<.12||still<need)return;Y.tick-=dt;if(Y.tick>0)return;
+ if(!z)return;Y.zoneT+=dt;
+ if(z.k==='table'&&z.t.coins>0&&(Y.coinT=(Y.coinT||0)-dt)<0){Y.coinT=.07;scoopTable(z.t)}
+ const need={shelf:.3,counter:.2,lab:.25,pad:.6,coins:0,mach:.12,table:.1}[z.k];if(Y.zoneT<.1||Y.stillT<need)return;Y.tick-=dt;if(Y.tick>0)return;
  if(z.k==='shelf'){Y.tick=.42;takeFrom(z.s)}
  else if(z.k==='counter'){Y.tick=.6;handOver(z.col)}
  else if(z.k==='lab'){Y.tick=99;openLab()}
  else if(z.k==='coins'){Y.tick=.08;scoop()}
- else if(z.k==='pad'){Y.tick=.06;payPad(z.i)}}
+ else if(z.k==='mach'){Y.tick=.2;takeFood(z.m)}
+ else if(z.k==='table'){Y.tick=.3;serveTable(z.t,Y.me,Y.hold,true)}
+ else if(z.k==='pad'){Y.tick=.06;payPad(z.u)}}
+const capOf=()=>3+(UN().bag?2:0);
 function takeFrom(s){const O=Y.O;if(!O||O.done)return;const g=s.g;
- if(!g){if((O.t==='predict'||O.t==='explore')&&!O.lab&&!Y.saidLab){Y.saidLab=1;caption('🔬',L('이번 손님은 실험이 필요해요. 왼쪽 벽 실험대로 가요!','This customer needs an experiment. Go to the lab table on the left wall!'))}return}
+ if(!g){if((O.t==='predict'||O.t==='explore')&&!O.lab&&!Y.saidLab){Y.saidLab=1;caption('🔬',L('이번 과학 손님은 실험이 필요해요. 왼쪽 벽 실험대로 가요!','This science customer needs an experiment. Go to the lab table on the left wall!'))}return}
  if(g.sold||g.out)return;
  if(g.tried){if(Y.saidTried!==s.i+1){Y.saidTried=s.i+1;caption('🙅',L(`${g.l}: 손님이 이미 돌려준 거예요.`,`${g.l}: the customer already gave this back.`),null,false)}return}
- const cap=O.t==='order'||O.t==='pair'?1:Y.cap;
- if(Y.hold.some(h=>h.g===g))return;
- if(Y.hold.length>=cap){if(Y.saidFull!==Y.zoneKey){Y.saidFull=Y.zoneKey;caption('🖐️',cap===1?L('한 번에 하나씩! 계산대로 가져가요.','One at a time! Take it to the counter.'):L('손이 꽉 찼어요! 계산대로 가져가요.','Your hands are full! Take them to the counter.'),null,false)}return}
+ const sci=Y.hold.filter(h=>!h.food),cap=O.t==='order'||O.t==='pair'?1:capOf();
+ if(sci.some(h=>h.g===g))return;
+ if(sci.length>=cap||Y.hold.length>=capOf()+2){if(Y.saidFull!==Y.zoneKey){Y.saidFull=Y.zoneKey;caption('🖐️',cap===1?L('한 번에 하나씩! 과학 계산대로 가져가요.','One at a time! Take it to the science counter.'):L('손이 꽉 찼어요! 과학 계산대로 가져가요.','Your hands are full! Take them to the science counter.'),null,false)}return}
  if(O.t!=='find')g.out=true;
- Y.hold.push({e:g.e,l:g.l,g});SFX.click();pop(s.x+.5,s.y+.5,'+1','#2f9e5b');handUI();
- if(Y.hold.length===1)caption(g.e,`${g.l} ${L('— 다 고르면 계산대 뒤 초록 칸에 서요.','— when you’re ready, stand on the green tiles behind the counter.')}`,null,false)}
-function handOver(col){const O=Y.O;if(!O||O.done||!Y.hold.length)return;const c=custFor(col);
+ Y.hold.push({e:g.e,l:g.l,g});SFX.click();fly(g.e,s.x+.5,s.y+.5,'me');handUI();
+ if(sci.length===0)caption(g.e,`${g.l} ${L('— 다 고르면 과학 계산대 뒤 초록 칸에 서요.','— when you’re ready, stand on the green tiles behind the science counter.')}`,null,false)}
+const topSci=()=>{for(let k=Y.hold.length-1;k>=0;k--)if(!Y.hold[k].food)return k;return -1};
+function handOver(col){const O=Y.O;if(!O||O.done)return;const hi=topSci();if(hi<0)return;const c=custFor(col);
  if(!c){if(O.t==='sort'&&col===6&&!Y.saidMid){Y.saidMid=1;caption('👉',L('팻말을 보고, 알맞은 손님 바로 앞에 서요!','Read the signs and stand right in front of the matching customer!'),null,false)}return}
  const ci=Y.cust.indexOf(c);if(Y.blockCust===ci)return;
- const h=Y.hold[Y.hold.length-1],g=h.g;
- if(O.t==='predict'||O.t==='explore'){if(!h.result)return;Y.hold.pop();handUI();accept(c,h,T(O.X.thanks));O.got=1;finish();return}
+ const h=Y.hold[hi],g=h.g,take=()=>{Y.hold.splice(hi,1);handUI()};
+ if(O.t==='predict'||O.t==='explore'){if(!h.result)return;take();accept(c,h,T(O.X.thanks));O.got=1;finish();return}
  let ok=false;
  if(O.t==='find')ok=g.ok;else if(O.t==='sort')ok=g.b===c.bin;else if(O.t==='order')ok=g.k===O.next;else if(O.t==='pair')ok=g.k===c.want;
- if(ok){Y.hold.pop();handUI();g.sold=true;O.got++;O.wrong=0;Y.shelf.forEach(s=>s.glow=false);
+ if(ok){take();g.sold=true;O.got++;O.wrong=0;Y.shelf.forEach(s=>s.glow=false);
   if(O.t==='order'){O.stack.push(g.e);O.next++}
   accept(c,h,g.why);
   if(O.t==='pair'&&O.got<O.need){c.state='out';mood(c,'😋',3);setTimeout(()=>{if(Y)advanceLine()},300)}
   orderUI();if(O.got>=O.need)finish()}
  else{O.miss++;O.wrong++;SFX.oops();mood(c,'🤔');pop(c.x,c.y-1.2,'✖','#e0533d');
-  if(O.t==='find'){Y.hold.pop();g.tried=true;handUI();caption('💦',`${g.l}: ${g.why}`,false)}
+  if(O.t==='find'){take();g.tried=true;caption('💦',`${g.l}: ${g.why}`,false)}
   else if(O.t==='sort'){Y.blockCust=ci;caption('🤔',`${g.l}: ${g.why}`,false)}
-  else{Y.hold.pop();g.out=false;handUI();
+  else{take();g.out=false;
    caption('🤔',O.t==='order'?L(`${josa(g.l,'은','는')} ${O.next+1}번째가 아니에요. 먼저 올 것을 찾아봐요!`,`${g.l} isn’t step ${O.next+1}. Find what comes first!`):L(`${josa(g.l,'은','는')} 이 손님 짝꿍이 아니에요. 팻말을 다시 봐요!`,`${g.l} doesn’t match this customer. Read the sign again!`),false);
    if(O.wrong>=2){const want=O.t==='order'?O.next:c.want;Y.shelf.forEach(s=>s.glow=!!(s.g&&s.g.k===want&&!s.g.sold))}}}}
 function accept(c,h,why){SFX.good();mood(c,'😊');pop(c.x,c.y-1.2,'✓','#2f9e5b');c.got.push(h.e);caption('✅',why,true)}
 function advanceLine(){Y.cust.filter(c=>c.state==='wait'||c.state==='in').sort((a,b)=>a.want-b.want).forEach((c,k)=>{c.spot=LINE[k];c.state='in'})}
 function finish(){const O=Y.O;O.done=true;orderUI();const {pay,tip,isNew}=shopPay(O.id,O.miss),c=CARD[O.id];
  Y.cust.forEach(x=>{if(x.state==='gone')return;mood(x,'😋',4);setTimeout(()=>{if(Y&&x.state!=='gone')x.state='out'},1500)});
- Y.pile+=pay+tip;SFX.coin();setTimeout(()=>SFX.coin(),160);
+ Y.pile+=pay+tip;SFX.coin();setTimeout(()=>SFX.coin(),160);burst(SPOT1[0]-.6,SPOT1[1]-.6);
  if(pay)pop(COINS.x+.5,COINS.y+.3,`+${pay+tip}`,'#d99a00');
  banner(`<b>${isNew?'✨ '+L('새 과학 카드!','New science card!'):'📚 '+L('다시 배운 카드','Card reviewed')}</b><span class="ci">${icon(c.icon)}</span><span class="tt">${esc(c.title)}</span>${tip?`<em>✨ ${L('실수 없이 도왔어요! 팁','Perfect serve! Tip')} +${tip}</em>`:''}`,4200);
  setTimeout(()=>{if(Y&&Y.O===O)caption(O.X.who,T(O.X.thanks),true)},600);
  if(!S.shopX.tut){S.shopX.tut=1;save()}
  const wait=()=>{if(!Y||Y.O!==O)return;if(Y.cust.some(x=>x.state!=='gone')){setTimeout(wait,300);return}startOrder(Y.oi+1)};setTimeout(wait,3600)}
 function closing(){if(!Y)return;Y.O=null;Y.phase='closing';Y.cust=[];Y.el.order.classList.add('hidden');Y.shelf.forEach(s=>s.g=null);hud();
- if(Y.ses.mode==='review'){setTimeout(()=>{if(!Y)return;if(Y.pile)scoopAll();setTimeout(()=>{if(Y)shopNext()},700)},1600);return}
- caption('🌙',L('문 닫을 시간이에요!','Closing time!'),null,true);
- setTimeout(()=>{if(!Y)return;if(Y.pile)scoopAll();const f=Y.ses.foe;
+ Y.diners.forEach(d=>{if(d.state!=='gone')d.state='out'});
+ if(Y.ses.mode==='review'){setTimeout(()=>{if(!Y)return;scoopAll();setTimeout(()=>{if(Y)shopNext()},700)},1600);return}
+ caption('🌙',L('문 닫을 시간이에요! 동전을 챙겨요.','Closing time! Grab your coins.'),null,true);
+ setTimeout(()=>{if(!Y)return;scoopAll();const f=Y.ses.foe;
   if(!f){setTimeout(()=>{if(Y)shopNext()},900);return}
-  Y.phase='monster';Y.foe={x:DOOR[0],y:DOOR[1],ph:0};SFX.hurt();caption('😱',L(`앗! ${josa(f.name,'이','가')} 가게에 쳐들어왔어요!`,`Oh no! ${f.name} burst into the store!`),false,true);
-  setTimeout(()=>{if(Y)shopNext()},3000)},1800)}
+  Y.phase='monster';Y.foe={x:DOOR[0],y:DOOR[1],ph:0};SFX.hurt();caption('😱',L(`앗! ${josa(f.name,'이','가')} 가게에 쳐들어왔어요!`,`Oh no! ${f.name} burst into the shop!`),false,true);
+  setTimeout(()=>{if(Y)shopNext()},3000)},2200)}
 
-// coins by the counter, upgrade pads, the lab
+// ---------------------------------------------------------------- the burger café: machines, diners, helpers
+function takeFood(m){if(m.n<=0||Y.hold.length>=capOf()+2||Y.hold.filter(h=>h.food).length>=capOf())return;m.n--;Y.hold.push({e:m.e,food:m.id});SFX.click();fly(m.e,m.x+.5,m.y+.3,'me');handUI()}
+function serveTable(t,who,hold,mine){const ds=Y.diners.filter(d=>d.state==='sit'&&d.t===t.i);for(const d of ds)for(const [f,n] of Object.entries(d.want)){if((d.got[f]||0)>=n)continue;
+  const k=hold.findIndex(h=>h.food===f);if(k<0)continue;hold.splice(k,1);d.got[f]=(d.got[f]||0)+1;fly(FOOD[f],who.x,who.y,d);SFX.tick();if(mine)handUI();
+  if(Object.entries(d.want).every(([g,m])=>(d.got[g]||0)>=m)){d.state='eat';d.eatT=2.6;mood(d,'😋',2.6);SFX.good()}return true}return false}
+function spawnDiner(){const un=UN(),menu=['burger',...(un.fries?['fries']:[]),...(un.drink?['drink']:[])];
+ const seats=[];Y.tables.forEach(t=>{if(!tableOn(t))return;t.seats.forEach((s,k)=>{if(!Y.diners.some(d=>d.state!=='gone'&&d.t===t.i&&d.k===k))seats.push([t,k])})});
+ if(!seats.length)return;const [t,k]=pk(seats),want={},n=(S.shopX.days||1)<2?1:pk([1,1,2,2,3]);for(let j=0;j<n;j++){const f=pk(menu);want[f]=(want[f]||0)+1}
+ const [sx,sy]=t.seats[k];Y.diners.push({e:pk(PALS),t:t.i,k,x:MW+.8,y:sy,sx,sy,state:'in',want,got:{},ph:rnd(0,6),mood:'',moodT:0,col:pk(['#ff6a5a','#4cb4ff','#3cb878','#ffb020','#a66bff','#ff8ad8'])})}
+function stepDiners(dt){if(Y.phase==='open'&&Y.ses.mode!=='review'&&(Y.spawnT-=dt)<0){Y.spawnT=rnd(4.5,7.5);spawnDiner()}
+ for(const d of Y.diners){d.ph+=dt*3;if(d.moodT>0&&(d.moodT-=dt)<=0)d.mood='';
+  if(d.state==='in'||d.state==='out'){const tx=d.state==='in'?d.sx:MW+1.2,ty=d.sy,dx=tx-d.x,dy=ty-d.y,dd=Math.hypot(dx,dy);if(dd>.05){const v=Math.min(dd,1.8*dt);d.x+=dx/dd*v;d.y+=dy/dd*v;d.walk=true}else{d.walk=false;if(d.state==='in')d.state='sit';else d.state='gone'}}
+  else if(d.state==='eat'&&(d.eatT-=dt)<0){const t=Y.tables[d.t],sum=Object.entries(d.want).reduce((a,[f,n])=>a+n*MACH.find(m=>m.id===f).price,0)+shopLv();t.coins+=sum;pop(t.x+.5,t.y+.5,`+${sum}`,'#d99a00');SFX.coin();d.state='out';mood(d,'💖',2)}}
+ Y.diners=Y.diners.filter(d=>d.state!=='gone')}
+function stepMachines(dt){const fast=UN().fast,max=fast?10:6,rate=fast?.9:1.5;for(const m of Y.mach){if(!machOn(m))continue;if(m.n<max&&(m.t+=dt)>rate){m.t=0;m.n++}}}
+// helpers carry food: from the machine with what a seated diner still needs, to that table
+function stepStaff(dt){const sp=2.3;for(const s of Y.staff){s.ph+=dt*10;
+ if(!s.goal){const need=[];Y.diners.forEach(d=>{if(d.state!=='sit')return;for(const [f,n] of Object.entries(d.want)){const left=n-(d.got[f]||0)-Y.staff.filter(o=>o!==s&&o.for===d).length;if(left>0)need.push([d,f])}});
+  if(s.hold.length){const t=Y.tables.find(t=>Y.diners.some(d=>d.state==='sit'&&d.t===t.i&&s.hold.some(h=>(d.want[h.food]||0)>(d.got[h.food]||0))));if(t)s.goal={k:'table',t,x:t.zx+.5,y:t.zy+.5};else s.hold=[]}
+  else if(need.length){const [d,f]=need[0],m=Y.mach.find(m=>m.id===f&&machOn(m));if(m){s.goal={k:'mach',m,f,x:m.zx+.5,y:m.zy+.5};s.for=d}}
+  else{if((s.wait-=dt)<0){s.wait=2;s.goal={k:'idle',x:rnd(8.6,9.4),y:rnd(1.5,9.5)}}}}
+ if(s.goal){const dx=s.goal.x-s.x,dy=s.goal.y-s.y,d=Math.hypot(dx,dy);
+  if(d>.08){const v=Math.min(d,sp*dt);s.x+=dx/d*v;s.y+=dy/d*v;s.moving=true;const sx=dx-dy;if(Math.abs(sx)>.05)s.dir=sx>0?1:-1}
+  else{s.moving=false;const g=s.goal;
+   if(g.k==='mach'){if(g.m.n>0&&s.hold.length<3){g.m.n--;s.hold.push({e:g.m.e,food:g.m.id})}
+    const more=s.hold.length<2&&g.m.n>0&&Y.diners.some(d=>d.state==='sit'&&(d.want[g.f]||0)-(d.got[g.f]||0)>1);if(!more){s.goal=null;s.for=null}}
+   else if(g.k==='table'){if(!serveTable(g.t,s,s.hold,false))s.goal=null}
+   else s.goal=null}}}}
+function scoopTable(t){const n=Math.min(t.coins,Math.max(1,Math.ceil(t.coins/4)));t.coins-=n;shopCollect(n);SFX.coin();if(Math.random()<.4)coinFly(t.x+.5,t.y+.5)}
+
+// coins by the science counter, upgrade pads, the lab
 function scoop(){if(!Y.pile)return;const n=Math.min(Y.pile,Math.max(1,Math.ceil(Y.pile/5)));Y.pile-=n;shopCollect(n);SFX.coin();if(Math.random()<.5)coinFly(COINS.x+.5,COINS.y+.5)}
-function scoopAll(){const n=Y.pile;Y.pile=0;shopCollect(n);coinFly(COINS.x+.5,COINS.y+.5);SFX.coin()}
+function scoopAll(){let n=Y.pile;Y.pile=0;Y.tables.forEach(t=>{n+=t.coins;t.coins=0});if(n){shopCollect(n);coinFly(COINS.x+.5,COINS.y+.5);SFX.coin()}}
 function coinFly(x,y){const [sx,sy]=scr(x,y,30),r=Y.el.cv.getBoundingClientRect();flyCoins({getBoundingClientRect:()=>({left:r.left+sx,top:r.top+sy,width:0,height:0})},10)}
-function payPad(i){const u=padUpg(i);if(!u)return;const un=S.shopX.un=S.shopX.un||{},pd=S.shopX.pad=S.shopX.pad||{},have=pd[u.id]||0,need=u.price-have;
+function payPad(u){const un=UN(),pd=S.shopX.pad=S.shopX.pad||{},have=pd[u.id]||0,need=u.price-have;
  if(S.coins<=0){if(Y.saidBroke!==u.id){Y.saidBroke=u.id;caption('🪙',L('동전이 모자라요! 손님을 더 받고 다시 와요.','Not enough coins! Serve more customers and come back.'),null,false)}return}
  const n=Math.min(need,S.coins,Math.max(2,Math.round(u.price/40)));S.coins-=n;pd[u.id]=have+n;updateHud();if(Y.padSnd++%3===0)SFX.tick();
- if(pd[u.id]>=u.price){un[u.id]=true;delete pd[u.id];save();SFX.level();celebrate();if(u.id==='bag')Y.cap+=2;
+ if(pd[u.id]>=u.price){un[u.id]=true;delete pd[u.id];save();SFX.level();const t=u.tile||[Math.floor(Y.me.x),Math.floor(Y.me.y)];burst(t[0]+.5,t[1]+.5);syncStaff();
+  if(blocked(Math.floor(Y.me.x),Math.floor(Y.me.y))){Y.me.x-=1;}
   caption(u.ic,L(`${T(u.name)} 완성!`,`${T(u.name)} unlocked!`)+(u.perk?' '+T(u.perk):''),true);hud()}
  else if(Y.padSnd%20===0)save()}
 function openLab(){const O=Y.O;if(!O||O.done)return;
- if(O.t!=='predict'&&O.t!=='explore'){if(Y.saidNoLab!==O.id){Y.saidNoLab=O.id;caption('🔬',L('이번 손님은 실험이 필요 없어요. 선반에서 물건을 골라요!','No experiment needed this time. Pick things from the shelves!'),null,false)}return}
+ if(O.t!=='predict'&&O.t!=='explore'){if(Y.saidNoLab!==O.id){Y.saidNoLab=O.id;caption('🔬',L('이번 손님은 실험이 필요 없어요. 진열대에서 물건을 골라요!','No experiment needed this time. Pick things from the stands!'),null,false)}return}
  if(O.lab)return;const box=Y.el.lab;box.classList.remove('hidden');
  box.innerHTML=`<div class="ty-labin"><div class="ty-labh"><b>🔬 ${L('실험대','Lab table')}</b><button type="button" class="ty-x" data-tyx aria-label="${L('닫기','Close')}">✕</button></div><div class="ty-labb" id="tyLabBody"></div></div>`;
  const body=$('tyLabBody'),alive=()=>Y&&Y.O===O&&!box.classList.contains('hidden');
  const api={alive,fb(ic,txt,good){if(!alive())return;const f=$('lsFb');if(!f)return;f.className='ls-fb'+(good===true?' good':good===false?' bad':'');f.innerHTML=`<span class="ls-fi">${ic}</span><span>${esc(txt)}</span>`;void f.offsetWidth;f.classList.add('in');speak(txt)},
   miss(){O.miss++},done(){if(!alive()||body.querySelector('.ls-serve'))return;SFX.hint();const b=document.createElement('button');b.type='button';b.className='btn gold ls-serve';b.innerHTML='📋 '+L('결과 들고 손님께 가기','Take the result to the customer');
-   b.onclick=()=>{SFX.click();O.lab=true;box.classList.add('hidden');Y.hold=[{e:'📋',l:L('실험 결과','Result'),result:true}];handUI();orderUI();caption('📋',L('계산대 뒤 초록 칸에 서서 손님께 결과를 알려 줘요!','Stand on the green tiles behind the counter and tell the customer!'),null,true)};body.appendChild(b);setTimeout(()=>b.scrollIntoView({block:'nearest',behavior:'smooth'}),80)}};
+   b.onclick=()=>{SFX.click();O.lab=true;box.classList.add('hidden');Y.hold.push({e:'📋',l:L('실험 결과','Result'),result:true});handUI();orderUI();caption('📋',L('과학 계산대 뒤 초록 칸에 서서 손님께 결과를 알려 줘요!','Stand on the green tiles behind the science counter and tell the customer!'),null,true)};body.appendChild(b);setTimeout(()=>b.scrollIntoView({block:'nearest',behavior:'smooth'}),80)}};
  PLAYS[O.t](body,O.p,api)}
 
 // ---------------------------------------------------------------- loop
 function frame(ts){if(!Y)return;Y.raf=requestAnimationFrame(frame);if(document.hidden||$('modalRoot').innerHTML){Y.last=0;return}
  const dt=Y.last?Math.min(.05,(ts-Y.last)/1000):1/60;Y.last=ts;Y.t+=dt;update(dt);draw()}
-function update(dt){const me=Y.me,sp=S.shopX.un&&S.shopX.un.shoes?3.7:2.9;let vx=0,vy=0;
+function update(dt){const me=Y.me,sp=UN().shoes?3.7:2.9;let vx=0,vy=0;
  const labOpen=!Y.el.lab.classList.contains('hidden');
  if(!labOpen&&Y.phase!=='monster'){
   const kx=(Y.keys.r?1:0)-(Y.keys.l?1:0),ky=(Y.keys.d?1:0)-(Y.keys.u?1:0);
@@ -5401,25 +5461,31 @@ function update(dt){const me=Y.me,sp=S.shopX.un&&S.shopX.un.shoes?3.7:2.9;let vx
   else if(me.path&&me.path.length){const [px,py]=me.path[0],dx=px-me.x,dy=py-me.y,d=Math.hypot(dx,dy);if(d<.1)me.path.shift();else{const v=Math.min(sp,d/dt);vx=dx/d*v;vy=dy/d*v}}}
  const ox=me.x,oy=me.y;
  if(vx||vy){const nx=me.x+vx*dt,ny=me.y+vy*dt;if(freeR(nx,me.y))me.x=nx;if(freeR(me.x,ny))me.y=ny;const sx=vx-vy;if(Math.abs(sx)>.05)me.dir=sx>0?1:-1}
- me.moving=Math.hypot(me.x-ox,me.y-oy)>.004;if(me.moving){me.ph+=dt*11;Y.stillT=0}else Y.stillT=(Y.stillT||0)+dt;
- // the buddy trots behind you, or fetches coins once the helper is bought
- const bd=Y.bd,help=S.shopX.un&&S.shopX.un.helper&&Y.pile>0&&Y.phase==='open';let gx=me.x-.6*me.dir,gy=me.y+.55;if(help){gx=COINS.x+.5;gy=COINS.y+.5}
+ me.moving=Math.hypot(me.x-ox,me.y-oy)>.004;if(me.moving){me.ph+=dt*11;Y.stillT=0}else Y.stillT+=dt;
+ // the buddy trots behind you, or fetches coins once the coin buddy is bought
+ const bd=Y.bd,tc=UN().helper&&Y.phase==='open'?(Y.pile>0?{x:COINS.x+.5,y:COINS.y+.5,f:()=>scoop()}:(()=>{const t=Y.tables.find(t=>t.coins>0);return t?{x:t.zx+.5,y:t.zy+.5,f:()=>scoopTable(t)}:null})()):null;
+ let gx=me.x-.6*me.dir,gy=me.y+.55;if(tc){gx=tc.x;gy=tc.y}
  const ddx=gx-bd.x,ddy=gy-bd.y,dd=Math.hypot(ddx,ddy);if(dd>.12){const v=Math.min(dd,(1.6+dd*2.2)*dt);bd.x+=ddx/dd*v;bd.y+=ddy/dd*v;bd.ph+=dt*12}
- if(help&&dd<.4&&(Y.helpT=(Y.helpT||0)-dt)<0){Y.helpT=.25;scoop()}
+ if(tc&&dd<.4&&(Y.helpT=(Y.helpT||0)-dt)<0){Y.helpT=.25;tc.f()}
  if(!labOpen&&Y.phase==='open')inZone(dt);
+ stepMachines(dt);stepDiners(dt);stepStaff(dt);
+ // a nudge back to the science customer when the café keeps you busy
+ if(Y.O&&!Y.O.done&&Y.phase==='open'&&Y.cust.some(c=>c.state==='wait')){if(!Y.hold.some(h=>!h.food)&&(Y.idleSci+=dt)>35){Y.idleSci=0;caption(Y.O.X.who,L('과학 손님이 기다려요! ','Your science customer is waiting! ')+T(Y.O.p.ask),null,true)}}else Y.idleSci=0;
  for(const c of Y.cust){c.ph+=dt*3;if(c.moodT>0&&(c.moodT-=dt)<=0)c.mood='';if(c.state==='gone')continue;
   const [tx,ty]=c.state==='out'?DOOR:c.spot,dx=tx-c.x,dy=ty-c.y,d=Math.hypot(dx,dy);
   if(d>.05){const v=Math.min(d,1.9*dt);c.x+=dx/d*v;c.y+=dy/d*v;c.walk=true}else{c.walk=false;if(c.state==='in')c.state='wait';else if(c.state==='out')c.state='gone'}}
- if(Y.foe){const f=Y.foe,dx=4.6-f.x,dy=6.2-f.y,d=Math.hypot(dx,dy);if(d>.05){const v=Math.min(d,2.6*dt);f.x+=dx/d*v;f.y+=dy/d*v}f.ph+=dt*8;Y.dim=Math.min(.42,Y.dim+dt*.5)}
- Y.pileShow+=(Y.pile-Y.pileShow)*Math.min(1,dt*6);
- Y.pops=Y.pops.filter(p=>(p.t+=dt)<1.1)}
+ for(const w of Y.walkers){w.x+=w.dir*w.sp*dt;w.ph+=dt*9;if(w.x>MW+3){w.dir=-1;w.e=pk(PALS)}else if(w.x<-3){w.dir=1;w.e=pk(PALS)}}
+ if(Y.foe){const f=Y.foe,dx=5-f.x,dy=6.6-f.y,d=Math.hypot(dx,dy);if(d>.05){const v=Math.min(d,2.6*dt);f.x+=dx/d*v;f.y+=dy/d*v}f.ph+=dt*8;Y.dim=Math.min(.42,Y.dim+dt*.5)}
+ Y.pileShow+=(Y.pile-Y.pileShow)*Math.min(1,dt*6);Y.tables.forEach(t=>t.coinShow+=(t.coins-t.coinShow)*Math.min(1,dt*6));
+ Y.pops=Y.pops.filter(p=>(p.t+=dt)<1.1);Y.fly=Y.fly.filter(f=>(f.t+=dt*3)<1);
+ for(const p of Y.confetti){p.t+=dt;p.x+=p.vx*dt;p.y+=p.vy*dt;p.vz-=320*dt;p.z+=p.vz*dt}Y.confetti=Y.confetti.filter(p=>p.z>0&&p.t<2)}
 // A* on tiles for tap-to-walk
 function route(tx,ty){const me=Y.me,sx=Math.floor(me.x),sy=Math.floor(me.y);tx=cl(Math.floor(tx),0,MW-1);ty=cl(Math.floor(ty),0,MH-1);
- if(BLOCK.has(tx+','+ty)){let best=null,bd=9;for(const [a,b] of [[0,1],[1,0],[-1,0],[0,-1],[1,1],[-1,1],[1,-1],[-1,-1]]){const x=tx+a,y=ty+b;if(x<0||y<0||x>=MW||y>=MH||BLOCK.has(x+','+y))continue;const d=Math.hypot(x+.5-me.x,y+.5-me.y)+(a===0&&b===1?-.6:0);if(d<bd){bd=d;best=[x,y]}}if(!best)return;[tx,ty]=best}
+ if(blocked(tx,ty)){let best=null,bd=9;for(const [a,b] of [[0,1],[1,0],[-1,0],[0,-1],[1,1],[-1,1],[1,-1],[-1,-1]]){const x=tx+a,y=ty+b;if(x<0||y<0||x>=MW||y>=MH||blocked(x,y))continue;const d=Math.hypot(x+.5-me.x,y+.5-me.y)+(a===0&&b===1?-.6:0);if(d<bd){bd=d;best=[x,y]}}if(!best)return;[tx,ty]=best}
  const key=(x,y)=>y*MW+x,g=new Map([[key(sx,sy),0]]),came=new Map(),open=[[sx,sy]],done=new Set();
  while(open.length){open.sort((a,b)=>(g.get(key(...a))+Math.hypot(a[0]-tx,a[1]-ty))-(g.get(key(...b))+Math.hypot(b[0]-tx,b[1]-ty)));const [x,y]=open.shift();if(done.has(key(x,y)))continue;done.add(key(x,y));
   if(x===tx&&y===ty)break;
-  for(const [a,b] of [[1,0],[-1,0],[0,1],[0,-1],[1,1],[1,-1],[-1,1],[-1,-1]]){const nx=x+a,ny=y+b;if(nx<0||ny<0||nx>=MW||ny>=MH||BLOCK.has(nx+','+ny))continue;if(a&&b&&(BLOCK.has((x+a)+','+y)||BLOCK.has(x+','+(y+b))))continue;
+  for(const [a,b] of [[1,0],[-1,0],[0,1],[0,-1],[1,1],[1,-1],[-1,1],[-1,-1]]){const nx=x+a,ny=y+b;if(nx<0||ny<0||nx>=MW||ny>=MH||blocked(nx,ny))continue;if(a&&b&&(blocked(x+a,y)||blocked(x,y+b)))continue;
    const ng=g.get(key(x,y))+(a&&b?1.42:1);if(ng<(g.get(key(nx,ny))??1e9)){g.set(key(nx,ny),ng);came.set(key(nx,ny),[x,y]);open.push([nx,ny])}}}
  if(!(tx===sx&&ty===sy)&&!came.has(key(tx,ty)))return;
  const out=[];let cur=[tx,ty];while(cur&&!(cur[0]===sx&&cur[1]===sy)){out.unshift([cur[0]+.5,cur[1]+.5]);cur=came.get(key(...cur))}
@@ -5431,38 +5497,48 @@ function scr(x,y,z){const [a,b]=iso(x,y);return [(a-Y.cam[0])*Y.k+Y.cw/2,(b-z-Y.
 function poly(c,pts,fill,stroke){c.beginPath();pts.forEach(([x,y],i)=>i?c.lineTo(x,y):c.moveTo(x,y));c.closePath();if(fill){c.fillStyle=fill;c.fill()}if(stroke){c.strokeStyle=stroke;c.stroke()}}
 function box(c,x,y,w,d,h,top,left,right){const A=iso(x,y),B=iso(x+w,y),C=iso(x+w,y+d),D=iso(x,y+d),u=p=>[p[0],p[1]-h];
  poly(c,[D,C,u(C),u(D)],left);poly(c,[B,C,u(C),u(B)],right);poly(c,[u(A),u(B),u(C),u(D)],top)}
+const quad=(x0,y0,x1,y1)=>[iso(x0,y0),iso(x1,y0),iso(x1,y1),iso(x0,y1)];
 function tint(h,a){const n=parseInt(h.slice(1),16),r=n>>16,g=n>>8&255,b=n&255,f=v=>Math.round(a<0?v*(1+a):v+(255-v)*a);return `rgb(${f(r)},${f(g)},${f(b)})`}
 function emo(c,e,x,y,size){c.font=`${size}px ${EF}`;c.textAlign='center';c.textBaseline='middle';c.fillText(e,x,y)}
 function label(c,t,x,y,bg,fg='#24304a'){c.font=`800 13px ${TF}`;const w=Math.min(96,c.measureText(t).width+12);c.fillStyle=bg;c.beginPath();c.roundRect(x-w/2,y-10,w,20,9);c.fill();c.strokeStyle='rgba(0,0,0,.08)';c.stroke();c.fillStyle=fg;c.textAlign='center';c.textBaseline='middle';c.fillText(t,x,y+.5,w-8)}
-function draw(){const c=Y.ctx,me=Y.me,un=S.shopX.un||{},lvI=shopLv(),O=Y.O;
- // the camera follows you but keeps the store in view
- const hw=Y.cw/2/Y.k,hh=Y.ch/2/Y.k,[mx,my]=iso(me.x,me.y),x0=-MH*TW/2+hw-20,x1=MW*TW/2-hw+20,y0=-96+hh-90,y1=(MW+MH)*TH/2-hh+70;
+function wallQuad(c,x0,y0,x1,y1,h0,h1,fill){const a=iso(x0,y0),b=iso(x1,y1);poly(c,[[a[0],a[1]-h0],[b[0],b[1]-h0],[b[0],b[1]-h1],[a[0],a[1]-h1]],fill)}
+function draw(){const c=Y.ctx,me=Y.me,un=UN(),O=Y.O;
+ const hw=Y.cw/2/Y.k,hh=Y.ch/2/Y.k,[mx,my]=iso(me.x,me.y),x0=-MH*TW/2+hw-40,x1=MW*TW/2-hw+40,y0=-110+hh-90,y1=(MW+MH)*TH/2-hh+110;
  const wx=x0>x1?(x0+x1)/2:cl(mx,x0,x1),wy=y0>y1?(y0+y1)/2:cl(my,y0,y1);Y.cam[0]+=(wx-Y.cam[0])*.1;Y.cam[1]+=(wy-Y.cam[1])*.1;
- c.setTransform(Y.dpr,0,0,Y.dpr,0,0);const bg=c.createLinearGradient(0,0,0,Y.ch);bg.addColorStop(0,'#bfe6ff');bg.addColorStop(1,'#e4f6ff');c.fillStyle=bg;c.fillRect(0,0,Y.cw,Y.ch);
+ c.setTransform(Y.dpr,0,0,Y.dpr,0,0);c.fillStyle='#52c3ff';c.fillRect(0,0,Y.cw,Y.ch);
  c.setTransform(Y.dpr*Y.k,0,0,Y.dpr*Y.k,Y.dpr*(Y.cw/2-Y.cam[0]*Y.k),Y.dpr*(Y.ch*.5-Y.cam[1]*Y.k));
- // back walls
- const wall=['#a9d8f7','#b9e6c9','#ffd9a8','#f7c6dd','#d8c8ff'][lvI],wh=96;
- poly(c,[iso(0,0),iso(MW,0),[iso(MW,0)[0],iso(MW,0)[1]-wh],[iso(0,0)[0],iso(0,0)[1]-wh]],tint(wall,.1));
- poly(c,[iso(0,0),iso(0,MH),[iso(0,MH)[0],iso(0,MH)[1]-wh],[iso(0,0)[0],iso(0,0)[1]-wh]],tint(wall,-.08));
- poly(c,[[iso(0,0)[0],iso(0,0)[1]-wh],[iso(MW,0)[0],iso(MW,0)[1]-wh],[iso(MW,0)[0],iso(MW,0)[1]-wh-8],[iso(0,0)[0],iso(0,0)[1]-wh-8]],'#ffffff');
- poly(c,[[iso(0,0)[0],iso(0,0)[1]-wh],[iso(0,MH)[0],iso(0,MH)[1]-wh],[iso(0,MH)[0],iso(0,MH)[1]-wh-8],[iso(0,0)[0],iso(0,0)[1]-wh-8]],'#f2f2f2');
- const sg=iso(2.8,0);c.save();c.translate(sg[0],sg[1]-wh+34);c.transform(1,.5,0,1,0,0);c.fillStyle=un.sign?'#ffd23f':'#ffffff';c.beginPath();c.roundRect(-82,-17,164,32,10);c.fill();if(un.sign){c.strokeStyle='#ff9f1a';c.lineWidth=3;c.stroke();c.lineWidth=1}
- c.fillStyle='#e0533d';c.font=`900 15px ${TF}`;c.textAlign='center';c.textBaseline='middle';c.fillText(`${SHOP_LV[lvI][1]} ${T(SHOP_LV[lvI][2])}`,0,0,156);c.restore();
- if(un.lights)for(let k=0;k<13;k++){const [x,y]=iso(k*.68+.3,0);c.globalAlpha=(Math.floor(Y.t*3)+k)%3?1:.45;emo(c,'💡',x,y-wh+2,12);c.globalAlpha=1}
- // floor
- const fl=['#fff8e4','#fdf1d6'];for(let x=0;x<MW;x++)for(let y=0;y<MH;y++)poly(c,[iso(x,y),iso(x+1,y),iso(x+1,y+1),iso(x,y+1)],fl[(x+y)%2],'rgba(214,180,140,.32)');
- if(un.rug)poly(c,[iso(1.2,2.3),iso(6.8,2.3),iso(6.8,3.7),iso(1.2,3.7)],'rgba(255,128,170,.25)','rgba(255,128,170,.55)');
+ // street and sidewalk outside the open front edges
+ poly(c,[iso(-3,MH+.2),iso(MW+3.4,MH+.2),iso(MW+3.4,MH+2.6),iso(-3,MH+2.6)],'#e9e4da');poly(c,[iso(MW+.2,-3),iso(MW+2.6,-3),iso(MW+2.6,MH+.2),iso(MW+.2,MH+.2)],'#e9e4da');
+ poly(c,[iso(-3,MH+2.6),iso(MW+5,MH+2.6),iso(MW+5,MH+5),iso(-3,MH+5)],'#7c8796');poly(c,[iso(MW+2.6,-3),iso(MW+5,-3),iso(MW+5,MH+2.6),iso(MW+2.6,MH+2.6)],'#7c8796');
+ for(let k=-2;k<MW+4;k+=1.4)poly(c,quad(k,MH+3.7,k+.7,MH+3.9),'#f5f5f5');
+ // back walls with a menu board over the kitchen and science posters on the left
+ const wh=104;
+ wallQuad(c,0,0,MW,0,0,wh,'#ffd9b8');wallQuad(c,0,0,0,MH,0,wh,'#cfe8ff');
+ wallQuad(c,0,0,MW,0,wh,wh+10,'#ffffff');wallQuad(c,0,0,0,MH,wh,wh+10,'#f2f6fb');
+ wallQuad(c,0,0,MW,0,0,16,'#f0a76a');wallQuad(c,0,0,0,MH,0,16,'#8fbfe8');
+ const mb=iso(9.2,0);c.save();c.translate(mb[0],mb[1]-wh+28);c.transform(1,.5,0,1,0,0);c.fillStyle='#3a2b26';c.beginPath();c.roundRect(-4,-14,132,52,8);c.fill();
+ c.font=`22px ${EF}`;c.textBaseline='middle';c.textAlign='center';[['🍔',5],['🍟',3],['🥤',2]].forEach(([e,p],k)=>{c.fillText(e,18+k*44,4);c.font=`900 12px ${TF}`;c.fillStyle='#ffd23f';c.fillText(`🪙${p}`,18+k*44,27);c.font=`22px ${EF}`;c.fillStyle='#3a2b26'});c.restore();
+ const sg=iso(3.8,0);c.save();c.translate(sg[0],sg[1]-wh+30);c.transform(1,.5,0,1,0,0);c.fillStyle=un.sign?'#ffd23f':'#ffffff';c.beginPath();c.roundRect(-84,-18,168,34,12);c.fill();if(un.sign){c.strokeStyle='#ff9f1a';c.lineWidth=3;c.stroke();c.lineWidth=1}
+ c.fillStyle='#e0533d';c.font=`900 16px ${TF}`;c.textAlign='center';c.textBaseline='middle';c.fillText(`🍔 ${T(SHOP_LV[shopLv()][2])}`,0,0,160);c.restore();
+ [['🧲',0,3.2],['🌍',0,5.6],['🔬',0,8]].forEach(([e,x,y])=>{const p=iso(x,y);c.save();c.translate(p[0],p[1]-wh+46);c.transform(1,-.5,0,1,0,0);c.fillStyle='#ffffff';c.strokeStyle='#9fb6d6';c.lineWidth=3;c.beginPath();c.roundRect(-22,-26,44,50,6);c.fill();c.stroke();c.lineWidth=1;c.font=`26px ${EF}`;c.textAlign='center';c.textBaseline='middle';c.fillText(e,0,0);c.restore()});
+ if(un.sign||un.plant)for(let k=0;k<17;k++){const [x,y]=iso(k*.78+.2,0);c.globalAlpha=(Math.floor(Y.t*3)+k)%3?1:.45;emo(c,'💡',x,y-wh-2,12);c.globalAlpha=1}
+ // floors: tiles in the science corner, warm wood in the café
+ for(let x=0;x<MW;x++)for(let y=0;y<MH;y++){const cafe=x>=8;poly(c,quad(x,y,x+1,y+1),cafe?((x+y)%2?'#f6c58c':'#f9cf9b'):((x+y)%2?'#fff8e4':'#fdf0d4'),cafe?'rgba(180,110,50,.25)':'rgba(214,180,140,.3)')}
  // front edges
  box(c,0,MH,MW,.16,12,'#ffcf7a','#f39a2c','#f39a2c');box(c,MW,0,.16,MH,12,'#ffcf7a','#f39a2c','#f39a2c');
- // floor marks: upgrade pads, zones, tap ripple
- PADS.forEach((p,i)=>{const u=padUpg(i);if(!u)return;const [x,y]=p,pd=(S.shopX.pad||{})[u.id]||0,f=pd/u.price;
-  c.setLineDash([6,5]);c.lineWidth=2.5;poly(c,[iso(x+.08,y+.08),iso(x+.92,y+.08),iso(x+.92,y+.92),iso(x+.08,y+.92)],'rgba(255,255,255,.6)','#3a8ee6');c.setLineDash([]);c.lineWidth=1;
-  if(f>0)poly(c,[iso(x+.08,y+.08),iso(x+.08+.84*f,y+.08),iso(x+.08+.84*f,y+.92),iso(x+.08,y+.92)],'rgba(58,142,230,.35)');
-  const [cx,cy]=iso(x+.5,y+.5);emo(c,u.ic,cx,cy-8,24);label(c,`🪙 ${u.price-pd}`,cx,cy+11,'#ffffff')});
- const zl=(x,y,col)=>poly(c,[iso(x+.1,y+.1),iso(x+.9,y+.1),iso(x+.9,y+.9),iso(x+.1,y+.9)],col);
- Y.shelf.forEach(s=>{if(s.g&&!s.g.sold&&!s.g.tried)zl(s.zx,s.zy,'rgba(120,90,230,.12)')});
+ // floor marks: pads, zones, tap ripple
  const pulse=.5+.5*Math.sin(Y.t*5);
- for(let y=5;y<=7;y++)zl(CCOL,y,Y.hold.length?`rgba(51,196,107,${.22+.18*pulse})`:'rgba(51,196,107,.14)');
+ pads().forEach(({u,x,y})=>{const pd=(S.shopX.pad||{})[u.id]||0,f=pd/u.price,[cx,cy]=iso(x+.5,y+.5);
+  c.fillStyle='rgba(60,60,80,.28)';c.beginPath();c.ellipse(cx,cy+3,30,15,0,0,TAU);c.fill();
+  c.fillStyle='#ffffff';c.beginPath();c.ellipse(cx,cy,30,15,0,0,TAU);c.fill();
+  if(f>0){c.strokeStyle='#33c46b';c.lineWidth=5;c.beginPath();c.ellipse(cx,cy,27,13,0,-Math.PI/2,-Math.PI/2+TAU*f);c.stroke();c.lineWidth=1}
+  emo(c,u.ic,cx-12,cy-2,18);c.font=`900 14px ${TF}`;c.fillStyle='#24304a';c.textAlign='center';c.textBaseline='middle';c.fillText(String(u.price-pd),cx+10,cy)});
+ const zl=(x,y,col)=>poly(c,quad(x+.1,y+.1,x+.9,y+.9),col);
+ Y.shelf.forEach(s=>{if(s.g&&!s.g.sold&&!s.g.tried)zl(s.zx,s.zy,'rgba(120,90,230,.13)')});
+ const sciHold=Y.hold.some(h=>!h.food);
+ for(let y=5;y<=7;y++)zl(CCOL,y,sciHold?`rgba(51,196,107,${.22+.18*pulse})`:'rgba(51,196,107,.14)');
+ Y.mach.forEach(m=>{if(machOn(m))zl(m.zx,m.zy,'rgba(255,140,60,.16)')});
+ Y.tables.forEach(t=>{if(tableOn(t))zl(t.zx,t.zy,'rgba(255,140,60,.16)')});
  if(O&&(O.t==='predict'||O.t==='explore')&&!O.lab)zl(LAB.zx,LAB.zy,`rgba(160,100,255,${.2+.2*pulse})`);
  if(Y.ripple&&Y.t-Y.ripple.t<.6){const [x,y]=iso(Y.ripple.x,Y.ripple.y),k=(Y.t-Y.ripple.t)/.6;c.strokeStyle=`rgba(58,142,230,${1-k})`;c.lineWidth=2;c.beginPath();c.ellipse(x,y,6+k*26,3+k*13,0,0,TAU);c.stroke();c.lineWidth=1}
  // everything that stands up, back to front
@@ -5471,16 +5547,25 @@ function draw(){const c=Y.ctx,me=Y.me,un=S.shopX.un||{},lvI=shopLv(),O=Y.O;
  D.push([LAB.x+LAB.y+.9,()=>drawLab(c)]);
  D.push([7+7+.6,()=>drawCounter(c)]);
  D.push([COINS.x+COINS.y+1,()=>drawPile(c)]);
- if(un.plant)[[.5,9.5],[8.5,.5],[.5,.6]].forEach(([x,y])=>D.push([x+y,()=>{const [a,b]=iso(x,y);emo(c,'🪴',a,b-16,32)}]));
- if(un.fountain)D.push([8.4+3,()=>{const [a,b]=iso(8.4,3);emo(c,'⛲',a,b-20,42)}]);
+ Y.mach.forEach(m=>{if(machOn(m))D.push([m.x+m.y+.9,()=>drawMach(c,m)])});
+ Y.tables.forEach(t=>{if(tableOn(t))D.push([t.x+t.y+.95,()=>drawTable(c,t)])});
+ if(un.plant)[[.5,10.5],[12.5,.5],[.5,.6],[12.5,10.4]].forEach(([x,y])=>D.push([x+y,()=>{const [a,b]=iso(x,y);emo(c,'🪴',a,b-16,32)}]));
+ Y.diners.forEach(d=>D.push([d.x+d.y+(d.state==='sit'||d.state==='eat'?.02:0),()=>drawDiner(c,d)]));
  Y.cust.forEach(p=>{if(p.state!=='gone')D.push([p.x+p.y,()=>drawCust(c,p)])});
+ Y.staff.forEach(s=>D.push([s.x+s.y,()=>drawStaff(c,s)]));
+ Y.walkers.forEach(w=>D.push([w.x+MH+.9,()=>drawWalker(c,w)]));
  D.push([me.x+me.y,()=>drawMe(c)]);
  D.push([Y.bd.x+Y.bd.y,()=>drawBuddy(c)]);
  if(Y.foe)D.push([Y.foe.x+Y.foe.y,()=>drawFoe(c)]);
  D.sort((a,b)=>a[0]-b[0]).forEach(o=>o[1]());
- // guide arrow: to the counter with full hands, to the lab when an experiment waits, to the coins after a sale
- let ar=null;if(O&&!O.done){if(Y.hold.length&&!(O.t==='sort'&&Y.blockCust>=0))ar=[CCOL+.5,6.5];else if((O.t==='predict'||O.t==='explore')&&!O.lab)ar=[LAB.zx+.5,LAB.zy+.5]}else if(Y.pile>0&&Y.phase==='open')ar=[COINS.x+.5,COINS.y+.5];
+ // big entrance sign over the door
+ const [ex,ey]=iso(MW+1.5,5.2);c.fillStyle='#ff5a6a';c.fillRect(ex-62,ey-96,6,80);c.fillRect(ex+56,ey-96,6,80);c.beginPath();c.roundRect(ex-74,ey-118,148,34,14);c.fill();c.fillStyle='#ffd23f';c.font=`900 17px ${TF}`;c.textAlign='center';c.textBaseline='middle';c.fillText(L('🍔 과학 버거','🍔 Science Burger'),ex,ey-101,138);
+ // guide arrow
+ let ar=null;if(O&&!O.done){if(sciHold&&!(O.t==='sort'&&Y.blockCust>=0))ar=[CCOL+.5,6.5];else if((O.t==='predict'||O.t==='explore')&&!O.lab)ar=[LAB.zx+.5,LAB.zy+.5]}
  if(ar){const [x,y]=iso(...ar);emo(c,'⬇️',x,y-40+Math.sin(Y.t*6)*5,22)}
+ // food flying into hands and onto tables
+ for(const f of Y.fly){const [ax,ay]=iso(f.fx,f.fy),to=f.tx==='me'?iso(me.x,me.y):iso(f.tx.x,f.tx.y),bx=to[0],by=to[1]-50,k=f.t,x=ax+(bx-ax)*k,y=ay-30+(by-ay+30)*k-Math.sin(k*Math.PI)*40;emo(c,f.e,x,y,20)}
+ for(const p of Y.confetti){const [x,y]=iso(p.x,p.y);c.fillStyle=p.c;c.fillRect(x-3,y-p.z-2,6,4)}
  for(const p of Y.pops){const [x,y]=iso(p.x,p.y),a=1-p.t/1.1;c.globalAlpha=a;c.font=`900 19px ${TF}`;c.textAlign='center';c.lineWidth=4;c.strokeStyle='#fff';c.strokeText(p.txt,x,y-36-p.t*30);c.fillStyle=p.col;c.fillText(p.txt,x,y-36-p.t*30);c.globalAlpha=1;c.lineWidth=1}
  if(Y.dim){c.setTransform(Y.dpr,0,0,Y.dpr,0,0);c.fillStyle=`rgba(30,15,70,${Y.dim})`;c.fillRect(0,0,Y.cw,Y.ch);if(Y.foe){c.setTransform(Y.dpr*Y.k,0,0,Y.dpr*Y.k,Y.dpr*(Y.cw/2-Y.cam[0]*Y.k),Y.dpr*(Y.ch*.5-Y.cam[1]*Y.k));drawFoe(c)}}
 }
@@ -5492,38 +5577,58 @@ function drawShelf(c,s){const g=s.g,glow=s.glow&&Math.sin(Y.t*8)>0,[bx,by]=iso(s
  if(!g){c.globalAlpha=.5;emo(c,s.deco,x,y-40,22);c.globalAlpha=1;return}
  if(g.sold){emo(c,'✅',x,y-42,20);return}
  if(g.out){c.globalAlpha=.25;emo(c,g.e,x,y-42,26);c.globalAlpha=1}
- else{if(g.tried)c.globalAlpha=.35;emo(c,g.e,x-8,y-36,22);emo(c,g.e,x+6,y-44,28);c.globalAlpha=1;if(g.tried)emo(c,'✖️',x+16,y-54,14)}
- label(c,g.l,x,y-72,g.tried?'#ebecf0':s.glow?'#fff3b0':'#ffffff',g.tried?'#9aa0ad':'#24304a')}
+ else{if(g.tried)c.globalAlpha=.35;emo(c,g.e,x-9,y-36,22);emo(c,g.e,x+9,y-36,22);emo(c,g.e,x,y-48,26);c.globalAlpha=1;if(g.tried)emo(c,'✖️',x+16,y-58,14)}
+ label(c,g.l,x,y-76,g.tried?'#ebecf0':s.glow?'#fff3b0':'#ffffff',g.tried?'#9aa0ad':'#24304a')}
 function drawLab(c){const O=Y.O,need=O&&(O.t==='predict'||O.t==='explore')&&!O.lab,[bx,by]=iso(LAB.x+.5,LAB.y+1),pic_=furn(c,'lab',bx,by+4,80);
  if(!pic_)box(c,LAB.x+.07,LAB.y+.07,.86,.86,26,need?'#eadfff':'#ffffff','#c9d4e6','#b4c2da');
  const [x,y]=iso(LAB.x+.5,LAB.y+.5);if(!pic_){emo(c,'🔬',x-8,y-38,24);emo(c,'🧪',x+11,y-34,18)}label(c,L('실험대','Lab'),x,y-66,need?'#f1e8ff':'#ffffff')}
-function drawCounter(c){const [bx,by]=iso(7.5,8);if(!furn(c,'counter',bx-40,by+6,170)){box(c,7.1,5.04,.8,2.92,30,'#ffd98a','#f0a53a','#e08f22');
+function drawCounter(c){const [bx,by]=iso(7.5,8);if(!furn(c,'counter',bx-40,by+6,170)){box(c,7.1,5.04,.8,2.92,30,'#9fdcff','#5ab0e6','#4a9ad0');
  const [x,y]=iso(7.5,5.5);emo(c,'🧾',x,y-46,26)}
+ const [lx,ly]=iso(7.5,6.5);label(c,L('🔬 과학 계산대','🔬 Science counter'),lx,ly-58,'#e6f4ff');
  const O=Y.O;if(O&&O.t==='order'&&O.stack.length){const [a,b]=iso(7.5,7.4);O.stack.forEach((e,k)=>emo(c,e,a,b-46-k*15,22))}}
-function drawPile(c){const n=Math.round(Y.pileShow);if(n<=0)return;const [x,y]=iso(COINS.x+.5,COINS.y+.5),h=Math.min(14,2+Math.ceil(n/6));
- for(let k=0;k<h;k++){c.fillStyle=k%2?'#ffd23f':'#f4b400';c.beginPath();c.ellipse(x,y-k*4,16,8,0,0,TAU);c.fill();c.strokeStyle='#c98a00';c.stroke()}
- label(c,`🪙 ${n}`,x,y-h*4-16,'#fff6d0')}
+function coinStack(c,x,y,n){const h=Math.min(16,2+Math.ceil(n/5));for(let k=0;k<h;k++){c.fillStyle=k%2?'#ffd23f':'#f4b400';c.beginPath();c.ellipse(x,y-k*4,14,7,0,0,TAU);c.fill();c.strokeStyle='#c98a00';c.stroke()}return h}
+function drawPile(c){const n=Math.round(Y.pileShow);if(n<=0)return;const [x,y]=iso(COINS.x+.5,COINS.y+.5),h=coinStack(c,x,y,n);label(c,`🪙 ${n}`,x,y-h*4-16,'#fff6d0')}
+function drawMach(c,m){const fast=UN().fast,max=fast?10:6;box(c,m.x+.06,m.y+.06,.88,.88,34,m.top,m.side[0],m.side[1]);
+ const [x,y]=iso(m.x+.5,m.y+.5);c.fillStyle='#ffffff';c.beginPath();c.roundRect(x-20,y-36,40,10,4);c.fill();
+ for(let k=0;k<m.n;k++)emo(c,m.e,x,y-52-k*12,22);
+ if(m.n>=max){c.font=`900 13px ${TF}`;c.fillStyle='#e0533d';c.textAlign='center';c.lineWidth=3;c.strokeStyle='#fff';c.strokeText('MAX',x,y-64-m.n*12);c.fillText('MAX',x,y-64-m.n*12);c.lineWidth=1}}
+function drawTable(c,t){const [x,y]=iso(t.x+.5,t.y+.5);
+ c.fillStyle='#5ab0e6';c.fillRect(x-3,y-18,6,18);c.fillStyle='rgba(0,0,0,.12)';c.beginPath();c.ellipse(x,y,22,11,0,0,TAU);c.fill();
+ c.fillStyle='#ffffff';c.beginPath();c.ellipse(x,y-20,30,15,0,0,TAU);c.fill();c.strokeStyle='#dfe7f3';c.lineWidth=2;c.stroke();c.lineWidth=1;
+ const n=Math.round(t.coinShow);if(n>0){const h=coinStack(c,x+14,y-22,n);label(c,`🪙 ${n}`,x+14,y-38-h*4,'#fff6d0')}}
 function shadow(c,x,y,r){c.fillStyle='rgba(0,0,0,.16)';c.beginPath();c.ellipse(x,y,r,r/2,0,0,TAU);c.fill()}
 function legs(c,x,y,ph,moving,pants,shoe){const sw=moving?Math.sin(ph):0;
  [[-5,sw],[5,-sw]].forEach(([dx,s])=>{c.fillStyle=pants;c.beginPath();c.roundRect(x+dx-3.5,y-17+(s<0?-s*2:0),7,14,3.5);c.fill();c.fillStyle=shoe;c.beginPath();c.ellipse(x+dx+s*2,y-2+(s<0?s*2:0),5.5,3.4,0,0,TAU);c.fill()})}
+// a little person: legs, a round body, an emoji head (or a picture when there is one), and what they carry
+function person(c,x,y,e,col,ph,moving,carry){const bob=moving?Math.abs(Math.sin(ph))*2.5:Math.sin(ph*.3)*1;shadow(c,x,y,14);legs(c,x,y,ph,moving,'#3a4a7a','#ffffff');
+ const pc=shopPic('cust-'+CUST_KEY[e]);let top;
+ if(pc){const h=50,w=h*pc.naturalWidth/pc.naturalHeight;c.drawImage(pc,x-w/2,y-12-h-bob,w,h);top=y-12-h-bob}
+ else{c.fillStyle=col;c.beginPath();c.roundRect(x-11,y-34-bob,22,22,10);c.fill();emo(c,e,x,y-44-bob,30);top=y-60-bob}
+ (carry||[]).forEach((h,k)=>emo(c,h.e,x,top+2-k*13,20));return top}
 function drawMe(c){const me=Y.me,[x,y]=iso(me.x,me.y),bob=me.moving?Math.abs(Math.sin(me.ph))*2.5:0;shadow(c,x,y,16);
  const im=Y.im.me;let top;
  if(ok_(im)){legs(c,x,y,me.ph,me.moving,'#2f3d6b','#ffffff');const h=62,w=h*im.naturalWidth/im.naturalHeight;c.save();c.translate(x,0);if(me.dir<0)c.scale(-1,1);c.drawImage(im,-w/2,y-12-h-bob,w,h);c.restore();top=y-12-h-bob}
  else{emo(c,S.av||'🧒',x,y-26-bob,40);top=y-50-bob}
- Y.hold.forEach((h,k)=>emo(c,h.e,x,top-2-k*17,24))}
+ Y.hold.forEach((h,k)=>emo(c,h.e,x,top-2-k*14,h.food?22:24))}
 function drawBuddy(c){const b=Y.bd,[x,y]=iso(b.x,b.y),bob=Math.abs(Math.sin(b.ph))*2;shadow(c,x,y,11);const im=Y.im.buddy;
  if(ok_(im)){const h=36,w=h*im.naturalWidth/im.naturalHeight;c.drawImage(im,x-w/2,y-h-bob+3,w,h)}else emo(c,Y.bicon,x,y-14-bob,24)}
-function drawCust(c,p){const [x,y]=iso(p.x,p.y),bob=p.walk?Math.abs(Math.sin(p.ph*3))*3:Math.sin(p.ph)*1.2,col=['#ff6a5a','#4cb4ff','#3cb878','#ffb020','#a66bff'][(p.e.codePointAt(0)||0)%5];shadow(c,x,y,15);
- const pc=shopPic('cust-'+CUST_KEY[p.e]);let ty;
- if(pc){legs(c,x,y,p.ph*3,p.walk,'#4a5a8a','#ffffff');const h=54,w=h*pc.naturalWidth/pc.naturalHeight;c.drawImage(pc,x-w/2,y-12-h-bob,w,h);ty=y-12-h-bob-4}
- else{c.fillStyle=col;c.beginPath();c.roundRect(x-12,y-27-bob,24,24,10);c.fill();emo(c,p.e,x,y-38-bob,34);ty=y-64-bob}
- const front=!(Y.O&&Y.O.t==='pair')||p.spot===LINE[0];
+function drawStaff(c,s){const [x,y]=iso(s.x,s.y);person(c,x,y,s.e,'#ff5a6a',s.ph,s.moving,s.hold)}
+function drawWalker(c,w){const [x,y]=iso(w.x,MH+1.3+(w.dir>0?0:.9));person(c,x,y,w.e,'#7a8cff',w.ph,true,null)}
+function bubble(c,x,ty,m){c.font=`900 14px ${TF}`;const w=Math.max(34,c.measureText(m).width+16);c.fillStyle='#ffffff';c.beginPath();c.roundRect(x-w/2,ty-24,w,24,12);c.fill();c.beginPath();c.moveTo(x-5,ty);c.lineTo(x+5,ty);c.lineTo(x,ty+6);c.fill();
+ if(/^[\d/ ✓?×]+$/.test(m)){c.fillStyle='#24304a';c.textAlign='center';c.textBaseline='middle';c.fillText(m,x,ty-12)}else emo(c,m,x,ty-12,16)}
+function drawDiner(c,d){const [x,y]=iso(d.x,d.y);
+ if(d.state==='sit'||d.state==='eat'){const bob=Math.sin(d.ph*.4);c.fillStyle=d.col;c.beginPath();c.roundRect(x-11,y-30-bob,22,20,9);c.fill();emo(c,d.e,x,y-40-bob,28);
+  const ty=y-58;if(d.mood){bubble(c,x,ty,d.mood);return}
+  const left=Object.entries(d.want).map(([f,n])=>[f,n-(d.got[f]||0)]).filter(([,n])=>n>0);if(!left.length)return;
+  const w=8+left.length*30;c.fillStyle='#ffffff';c.beginPath();c.roundRect(x-w/2,ty-26,w,26,10);c.fill();c.beginPath();c.moveTo(x-5,ty);c.lineTo(x+5,ty);c.lineTo(x,ty+6);c.fill();
+  left.forEach(([f,n],k)=>{const bx=x-w/2+19+k*30;emo(c,FOOD[f],bx-3,ty-13,17);if(n>1){c.font=`900 11px ${TF}`;c.fillStyle='#e0533d';c.fillText(n,bx+10,ty-6)}});return}
+ person(c,x,y,d.e,d.col,d.ph*3,d.walk,null);if(d.mood)bubble(c,x,y-70,d.mood)}
+function drawCust(c,p){const [x,y]=iso(p.x,p.y);const top=person(c,x,y,p.e,['#ff6a5a','#4cb4ff','#3cb878','#ffb020','#a66bff'][(p.e.codePointAt(0)||0)%5],p.ph*3,p.walk,null);
+ let ty=top-6;const O=Y.O,front=!(O&&O.t==='pair')||p.spot===LINE[0];
  if(p.sign&&!front){emo(c,p.sign[0],x,ty-12,20);ty-=26}
  else if(p.sign){c.font=`800 13px ${TF}`;const t=`${p.sign[0]} ${p.sign[1]}`,w=Math.min(110,c.measureText(t).width+16);c.fillStyle='#ffffff';c.strokeStyle='#d8b26a';c.lineWidth=2;c.beginPath();c.roundRect(x-w/2,ty-26,w,24,8);c.fill();c.stroke();c.lineWidth=1;c.fillStyle='#24304a';c.textAlign='center';c.textBaseline='middle';c.fillText(t,x,ty-14,w-8);ty-=30}
- const O=Y.O;let m=p.mood;if(!m&&p.state==='wait'&&O&&!O.done&&front)m=O.t==='find'||O.t==='sort'?`${p.got.length||O.got}/${O.t==='sort'?'?':O.need}`:O.t==='order'?`${O.next}/${O.need}`:O.t==='pair'?'❓':'🔬';
- if(O&&O.t==='sort'&&!p.mood&&p.state==='wait')m=`${p.got.length} ✓`;
- if(m){c.font=`900 14px ${TF}`;const w=Math.max(34,c.measureText(m).width+16);c.fillStyle='#ffffff';c.beginPath();c.roundRect(x-w/2,ty-24,w,24,12);c.fill();c.beginPath();c.moveTo(x-5,ty);c.lineTo(x+5,ty);c.lineTo(x,ty+6);c.fill();
-  if(/^[\d/ ✓?]+$/.test(m)){c.fillStyle='#24304a';c.textAlign='center';c.textBaseline='middle';c.fillText(m,x,ty-12)}else emo(c,m,x,ty-12,16)}}
+ let m=p.mood;if(!m&&p.state==='wait'&&O&&!O.done&&front)m=O.t==='find'?`${O.got}/${O.need}`:O.t==='sort'?`${p.got.length} ✓`:O.t==='order'?`${O.next}/${O.need}`:O.t==='pair'?'❓':'🔬';
+ if(m){bubble(c,x,ty,m);if(p.state==='wait'&&!p.mood){c.strokeStyle=`rgba(90,176,230,${.5+.5*Math.sin(Y.t*5)})`;c.lineWidth=3;c.beginPath();c.ellipse(x,y,20,10,0,0,TAU);c.stroke();c.lineWidth=1}}}
 function drawFoe(c){const f=Y.foe,[x,y]=iso(f.x,f.y);shadow(c,x,y,26);const im=Y.im.foe;
  if(ok_(im)){const h=96,w=h*im.naturalWidth/im.naturalHeight;c.drawImage(im,x-w/2,y-h+Math.sin(f.ph)*3,w,h)}else emo(c,Y.ses.foe.icon,x,y-40,60)}
 

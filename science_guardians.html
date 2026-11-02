@@ -55,19 +55,19 @@ img{-webkit-user-drag:none}
 /* ---------------------------------------------------------------- top bar */
 .hud{position:sticky;top:0;z-index:30;display:flex;align-items:center;gap:8px;padding:max(8px,env(safe-area-inset-top)) max(12px,env(safe-area-inset-right)) 8px max(12px,env(safe-area-inset-left));
  background:linear-gradient(180deg,rgba(8,36,70,.94),rgba(8,36,70,.8));backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);box-shadow:0 6px 20px rgba(5,20,50,.35);color:#fff}
-.hud .back{flex:0 0 auto;width:42px;height:42px;border-radius:14px;border:0;background:rgba(255,255,255,.14);font-size:20px;display:grid;place-items:center;text-decoration:none;color:#fff}
+.hud .back{flex:0 0 auto;width:44px;height:44px;border-radius:14px;border:0;background:rgba(255,255,255,.14);font-size:20px;display:grid;place-items:center;text-decoration:none;color:#fff}
 .lvl{flex:1;min-width:0;overflow:hidden;display:flex;align-items:center;gap:8px;border:0;background:none;padding:0;text-align:left;color:#fff}
 .lvl .badge{flex:0 0 auto;width:42px;height:42px;border-radius:50%;display:grid;place-items:center;font-weight:900;font-size:15px;color:#3b2a00;
  background:radial-gradient(circle at 35% 30%,#fff6c9,#ffc83d 55%,#e09a00);box-shadow:0 0 0 3px rgba(255,255,255,.25),0 4px 10px rgba(0,0,0,.3)}
 .lvl .info{flex:1;min-width:0;overflow:hidden}
 .lvl .name{display:block;font-size:13px;font-weight:800;opacity:.94;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .lvl .name small{font-size:11.5px;opacity:.8;margin-left:4px}
-.xpbar{height:10px;border-radius:99px;background:rgba(255,255,255,.18);overflow:hidden;margin-top:3px;max-width:240px}
+.xpbar{display:block;height:10px;border-radius:99px;background:rgba(255,255,255,.18);overflow:hidden;margin-top:3px;max-width:240px}
 .xpbar i{display:block;height:100%;width:0;border-radius:99px;background:linear-gradient(90deg,#7cff9c,#3fd3ff);transition:width .6s cubic-bezier(.2,.9,.3,1.2)}
-.pill{flex:0 0 auto;display:flex;align-items:center;gap:6px;height:40px;padding:0 12px 0 8px;border-radius:99px;border:0;background:rgba(0,0,0,.28);color:#fff;font-weight:900;font-size:16px;box-shadow:inset 0 0 0 2px rgba(255,255,255,.12)}
+.pill{flex:0 0 auto;display:flex;align-items:center;gap:6px;height:44px;padding:0 12px 0 8px;border-radius:99px;border:0;background:rgba(0,0,0,.28);color:#fff;font-weight:900;font-size:16px;box-shadow:inset 0 0 0 2px rgba(255,255,255,.12)}
 .pill .ei{width:26px;height:26px}
 .pill.bump{animation:bump .35s}
-.gear{flex:0 0 auto;width:42px;height:42px;border-radius:14px;border:0;background:rgba(255,255,255,.14);font-size:20px}
+.gear{flex:0 0 auto;width:44px;height:44px;border-radius:14px;border:0;background:rgba(255,255,255,.14);font-size:20px}
 @keyframes bump{40%{transform:scale(1.18)}}
 
 /* ---------------------------------------------------------------- layout and buttons */
@@ -110,7 +110,7 @@ main{width:min(980px,100%);margin:0 auto;padding:14px max(12px,env(safe-area-ins
 .hero .t2{font-size:clamp(22px,5vw,28px);font-weight:900;letter-spacing:-.5px;line-height:1.15;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .hero .stats{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
 .hero .stats span,.hero .chip{background:rgba(255,255,255,.22);border-radius:99px;padding:4px 10px;font-size:13px;font-weight:800;border:0;color:#fff}
-.hero .chip{background:rgba(0,0,0,.22);box-shadow:inset 0 0 0 2px rgba(255,255,255,.35)}
+.hero .chip{background:rgba(0,0,0,.22);box-shadow:inset 0 0 0 2px rgba(255,255,255,.35);min-height:40px;padding:6px 12px}
 .hero .buddy{position:absolute;right:12px;top:10px;font-size:34px;z-index:1}
 .hero .buddy .ei{width:48px;height:48px}
 .cta{width:100%;min-height:76px;font-size:21px;border-radius:22px;flex-direction:column;gap:0}
@@ -268,7 +268,7 @@ main{width:min(980px,100%);margin:0 auto;padding:14px max(12px,env(safe-area-ins
 .ctag{font-size:13px;font-weight:900;background:#edf4ff;color:var(--brand-d);border-radius:99px;padding:4px 11px}
 .buddyh{margin-left:auto;font-size:26px;line-height:1}
 .buddyh .ei{width:34px;height:34px}
-.sayb{width:40px;height:40px;border-radius:12px;border:0;background:#fff4cc;font-size:19px;box-shadow:0 3px 0 #f0d78a;flex:0 0 auto}
+.sayb{width:44px;height:44px;border-radius:12px;border:0;background:#fff4cc;font-size:19px;box-shadow:0 3px 0 #f0d78a;flex:0 0 auto}
 .sayb.sm{width:32px;height:32px;font-size:15px;vertical-align:middle;margin-right:2px}
 .cbody{position:relative}
 .cbody.shake,.shake{animation:shake .4s}
@@ -540,7 +540,7 @@ main{width:min(980px,100%);margin:0 auto;padding:14px max(12px,env(safe-area-ins
 .modal p{margin:6px 0;font-weight:700;color:var(--muted)}
 .modal .row{display:flex;gap:10px;justify-content:center;margin-top:16px;flex-wrap:wrap}
 .modal .row .btn{flex:1;min-width:130px}
-.modal .x{position:absolute;top:10px;right:10px;width:38px;height:38px;border-radius:50%;border:0;background:#f0f3fa;font-size:18px;z-index:2}
+.modal .x{position:absolute;top:8px;right:8px;width:44px;height:44px;border-radius:50%;border:0;background:#f0f3fa;font-size:18px;z-index:2}
 @keyframes fadeIn{from{opacity:0}}
 @keyframes popIn{from{opacity:0;transform:scale(.7)}}
 .bossart{width:150px;height:150px;margin:4px auto 6px;border-radius:36px;display:grid;place-items:center;font-size:96px;box-shadow:0 12px 26px rgba(0,0,0,.25),inset 0 0 0 4px rgba(255,255,255,.35)}
@@ -600,7 +600,8 @@ main{width:min(980px,100%);margin:0 auto;padding:14px max(12px,env(safe-area-ins
 .switch::after{content:"";position:absolute;left:4px;top:4px;width:24px;height:24px;border-radius:50%;background:#fff;transition:left .18s;box-shadow:0 2px 4px rgba(0,0,0,.25)}
 .switch.on{background:var(--green)}
 .switch.on::after{left:30px}
-.diffs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
+.diffs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}.diffs.four{grid-template-columns:repeat(2,1fr)}.seg{display:inline-flex;background:#eef2fb;border-radius:14px;padding:3px;gap:3px}.seg button{min-height:44px;min-width:76px;border:0;border-radius:11px;background:none;font-weight:900;font-size:15px;color:var(--muted)}.seg button.on{background:#fff;color:var(--ink);box-shadow:0 2px 6px rgba(0,0,0,.12)}.copy{font-size:12.5px;font-weight:800;color:var(--muted);margin:12px 0 0}
+.gentle{background:#fff8d6;border-radius:16px;padding:10px 12px;margin:10px 0;text-align:center}.gentle p{margin:0 0 8px}@media (min-width:560px){.diffs.four{grid-template-columns:repeat(4,1fr)}}
 .diffs button{border:3px solid transparent;border-radius:18px;background:#f3f6ff;padding:10px 4px;display:flex;flex-direction:column;align-items:center;gap:2px;font-weight:900;box-shadow:0 4px 0 #cfdcf2}
 .diffs button span{font-size:30px}
 .diffs button small{font-size:12px;color:var(--muted);font-weight:800}
@@ -726,6 +727,45 @@ main{width:min(980px,100%);margin:0 auto;padding:14px max(12px,env(safe-area-ins
 .qbtns .flsamp{min-height:40px;font-size:14px}
 .qbtns .qn{display:inline-grid;place-items:center;width:20px;height:20px;border-radius:50%;background:#24305e;color:#fff;font-size:12px;margin-right:2px}
 .qbtns .flsamp.on .qn{background:#c49600}
+
+/* ---------------------------------------------------------------- chests and the sticker album */
+.stk{width:64px;height:64px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#ffffff,#eaf2ff 70%,#d4e2fb);border:4px solid #fff;box-shadow:0 4px 10px rgba(30,50,110,.22),inset 0 -4px 8px rgba(30,50,110,.08);display:inline-grid;place-items:center;font-size:36px;line-height:1;flex:none}
+.stk .ei{width:44px;height:44px}
+.stk.rare{border-color:#ffe07a;background:radial-gradient(circle at 35% 30%,#fffdf0,#ffeaa0 70%,#ffd04a);box-shadow:0 0 0 3px #ffb000,0 0 18px rgba(255,200,40,.75);animation:stkshine 2.2s ease-in-out infinite}
+.stk.miss{filter:grayscale(1) brightness(.35);opacity:.35;animation:none;box-shadow:none}
+.stk.coin{background:radial-gradient(circle at 35% 30%,#fff8d0,#ffd970)}
+.stk.mini{width:30px;height:30px;font-size:17px;border-width:2px;box-shadow:0 2px 4px rgba(30,50,110,.2)}
+@keyframes stkshine{50%{box-shadow:0 0 0 3px #ffb000,0 0 28px rgba(255,200,40,1)}}
+.chestwrap{text-align:center;margin:6px 0}
+.chestbox{font-size:110px;line-height:1.1;cursor:pointer;display:inline-block;animation:chestbob 1.3s ease-in-out infinite;filter:drop-shadow(0 10px 14px rgba(0,0,0,.25))}
+.chestbox.gold{filter:drop-shadow(0 0 18px rgba(255,200,40,.9)) drop-shadow(0 10px 14px rgba(0,0,0,.2))}
+.chestbox.shake{animation:chestshake .5s}
+.chestbox.pop{animation:chestpop .45s forwards}
+@keyframes chestbob{50%{transform:translateY(-8px) rotate(-3deg)}}
+@keyframes chestshake{20%{transform:rotate(-12deg)}40%{transform:rotate(12deg)}60%{transform:rotate(-8deg)}80%{transform:rotate(8deg)}}
+@keyframes chestpop{to{transform:scale(.6);opacity:.25}}
+.loot{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:-30px}
+.lootc{width:min(200px,44%);border:0;background:#fff;border-radius:18px;padding:12px 8px;display:flex;flex-direction:column;align-items:center;gap:4px;box-shadow:0 6px 16px rgba(30,50,110,.18);animation:lootin .5s cubic-bezier(.2,1.6,.4,1) backwards;font:inherit;color:inherit}
+.lootc.rare{background:linear-gradient(180deg,#fffbe6,#fff)}
+.lootc.small{width:auto;min-width:96px}
+.lootc b{font-size:16px}.lootc small{font-size:13px;color:var(--muted);font-weight:700;line-height:1.35}
+.lootc .nw{font-style:normal;font-weight:900;font-size:13px;color:#e8590c}.lootc .dup{font-style:normal;font-size:12px;color:var(--muted);font-weight:800}
+@keyframes lootin{from{transform:scale(.3) rotate(-10deg);opacity:0}}
+.stkrow{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin:8px 0}.stkrow .stk{width:48px;height:48px;font-size:26px}
+.atabs{display:flex;gap:6px;overflow-x:auto;padding:4px 2px 8px;scrollbar-width:thin}
+.atabs button{flex:none;min-width:52px;min-height:52px;border:0;border-radius:14px;background:#f1f5ff;font-size:24px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:4px 6px;box-shadow:0 3px 0 #d5e0f5}
+.atabs button small{font-size:12px;font-weight:900;color:var(--muted)}.atabs button.on{background:#fff3c4;box-shadow:0 3px 0 #f0c94a}.atabs button.lock{opacity:.45}
+.apage>b{display:block;margin:4px 0 8px;font-size:16px}.apage>b small{font-weight:800;color:var(--muted);font-size:13px}
+.agrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.aslot{position:relative;border:0;background:#f7f9ff;border-radius:16px;padding:8px 4px;display:flex;flex-direction:column;align-items:center;gap:4px;min-height:96px;font:inherit;color:inherit}
+.aslot small{font-size:12px;font-weight:800;text-align:center;line-height:1.2}.aslot i{position:absolute;top:4px;right:6px;font-style:normal;font-size:12px;font-weight:900;color:var(--muted)}
+.afact{margin-top:10px;background:#f2fbf4;border-radius:14px;padding:10px 12px;font-size:15px;line-height:1.45;min-height:48px}
+.tile.t-album{grid-column:1/-1;flex-direction:row;justify-content:flex-start;text-align:left;gap:12px;min-height:84px;background:linear-gradient(135deg,#fff7e0,#ffe3f1)}
+.tile.t-album>div{flex:1;min-width:0}.tile.t-album .abar{display:block;height:8px;border-radius:5px;background:#f3e4c8;margin-top:6px;overflow:hidden}.tile.t-album .abar i{display:block;height:100%;background:linear-gradient(90deg,#ffb000,#ff6aa8);border-radius:5px}
+.tile.t-album .arow{display:flex;gap:2px;flex:none}
+@media (max-width:520px){.tile.t-album .arow{display:none}}
+.btn.next.auto{position:relative;overflow:hidden}.btn.next.auto::after{content:'';position:absolute;left:0;bottom:0;height:5px;width:100%;background:rgba(255,255,255,.75);transform-origin:left;animation:autonext 1.9s linear forwards}
+@keyframes autonext{from{transform:scaleX(0)}to{transform:scaleX(1)}}
 </style>
 </head>
 <body>
@@ -2893,11 +2933,17 @@ const LABS=[];
 for(const q of QALL){if(q.t!=='sim')continue;let lab=LABS.find(x=>x.id===q.sim);if(!lab){lab={id:q.sim,icon:SIM_NAMES[q.sim][0],name:T(SIM_NAMES[q.sim][1]),w:CARD[q.c].w,items:[]};LABS.push(lab)}lab.w=Math.min(lab.w,CARD[q.c].w);lab.items.push(q)}
 const DIFFS=[null,
  {id:1,icon:'🌱',name:L('쉬움','Easy'),grade:L('1~2학년','Grades 1–2'),hearts:4,mon:4,boss:9,fin:12,mult:1,speed:75},
- {id:2,icon:'🌿',name:L('보통','Normal'),grade:L('3~4학년','Grades 3–4'),hearts:3,mon:5,boss:11,fin:14,mult:1.2,speed:60},
+ {id:2,icon:'🌿',name:L('보통 2','Normal 2'),grade:L('3학년 후반~4학년','Late grade 3 to 4'),hearts:3,mon:5,boss:11,fin:14,mult:1.2,speed:60},
  {id:3,icon:'🌳',name:L('어려움','Hard'),grade:L('5~6학년','Grades 5–6'),hearts:3,mon:6,boss:13,fin:16,mult:1.4,speed:50}];
-const D=()=>DIFFS[S.diff]||DIFFS[2];
+// "Normal 1" sits between Easy and Normal 2 for children starting grade 3: grade 3–4 cards open, but grade 1–2 questions still
+// come up about half the time, and battles keep Easy's helpers (3 choices, 4 hearts, slower timers, gentler labs).
+const DIFF_G={id:'g',icon:'🍀',name:L('보통 1','Normal 1'),grade:L('3학년 시작','Starting grade 3'),hearts:4,mon:4,boss:10,fin:13,mult:1.1,speed:70};
+const isGentle=p=>!!(p&&p.gentle&&p.diff===2);
+const diffOf=p=>isGentle(p)?DIFF_G:DIFFS[p.diff]||DIFFS[2];
+const DIFF_LIST=()=>[DIFFS[1],DIFF_G,DIFFS[2],DIFFS[3]];
+const D=()=>diffOf(S);
 // How often each question level comes up at each difficulty: mostly your own grade, a little review from below
-const LW=[null,[0,1],[0,.7,1.8],[0,.25,1,3]];
+const LW=[null,[0,1],[0,.7,1.8],[0,.25,1,3]],LW_G=[0,1.3,1];
 const TIER=[{icon:'🆕',name:L('새 카드','New')},{icon:'🥉',name:L('브론즈','Bronze')},{icon:'🥈',name:L('실버','Silver')},{icon:'🥇',name:L('골드','Gold')}];
 const tierOf=m=>m>=9?3:m>=5?2:m>=2?1:0;
 const INTERVAL=[1,1,2,4];
@@ -2957,12 +3003,29 @@ const MISSIONS=[
  {id:'daily',goal:1,icon:'📅',text:L('오늘의 실험 성공하기','Win the daily experiment')},
  {id:'star3',goal:1,icon:'⭐',text:L('별 3개로 스테이지 깨기','Clear a stage with 3 stars')},
  {id:'card',goal:1,icon:'📚',text:L('과학 카드 1장 승급시키기','Level up a science card')},
+ {id:'sticker',goal:2,icon:'📒',text:L('새 스티커 2장 모으기','Collect 2 new stickers')},
 ];
 const MISSION_COINS=40;
+// ---------------------------------------------------------------- science sticker album: 8 stickers per world (2 rare), each teaches one short fact
+const STK_RAW=[
+ [['🧭','나침반|Compass','나침반 바늘의 빨간 쪽은 북쪽을 가리켜요.|The red end of a compass needle points north.'],['🗺️','지도|Map','지도에서는 보통 위쪽이 북쪽이에요.|On most maps, north is at the top.'],['🌞','해|Sun','해는 동쪽에서 떠서 서쪽으로 져요.|The sun rises in the east and sets in the west.'],['📍','지도 기호|Map pin','지도 기호는 실제 장소를 간단한 그림으로 나타내요.|Map symbols are simple pictures of real places.'],['🏔️','산|Mountain','지도의 등고선이 촘촘할수록 땅이 가팔라요.|Where contour lines are close together, the land is steep.'],['🌙','달|Moon','달은 스스로 빛을 내지 않고 햇빛을 반사해요.|The Moon makes no light of its own. It reflects sunlight.'],['⭐','북극성|North Star','북극성은 밤하늘에서 거의 움직이지 않아서 북쪽을 알려 줘요.|The North Star barely moves in the night sky, so it shows the way north.',1],['🛰️','인공위성|Satellite','휴대폰 지도는 인공위성 신호로 내 위치를 찾아요.|Phone maps use satellite signals to find where you are.',1]],
+ [['🔦','손전등|Flashlight','빛은 곧게 나아가요. 그래서 그림자가 생겨요.|Light travels in straight lines, so shadows form.'],['⛱️','파라솔|Beach umbrella','햇빛을 가리면 그늘이 생겨요.|Blocking sunlight makes shade.'],['🕛','한낮|Midday','한낮에는 해가 높아서 그림자가 가장 짧아요.|At midday the sun is high, so shadows are shortest.'],['🌇','저녁 해|Evening sun','해가 낮은 아침과 저녁에는 그림자가 길어요.|When the sun is low in the morning and evening, shadows are long.'],['🪞','거울|Mirror','거울은 빛을 반사해서 모습을 비춰요.|A mirror reflects light to show your picture.'],['🕶️','선글라스|Sunglasses','선글라스는 눈에 들어오는 강한 빛을 줄여 줘요.|Sunglasses cut down strong light reaching your eyes.'],['🌈','무지개|Rainbow','햇빛이 물방울을 지나며 여러 색으로 나뉘면 무지개가 돼요.|A rainbow appears when sunlight splits into colours in raindrops.',1],['🖐️','손 그림자|Hand shadow','손을 빛 가까이 가져갈수록 그림자가 커져요.|The closer your hand is to the light, the bigger its shadow.',1]],
+ [['🚌','버스|Bus','버스가 갑자기 서면 몸이 앞으로 쏠려요. 관성 때문이에요.|When a bus stops suddenly you lean forward. That is inertia.'],['🎢','롤러코스터|Roller coaster','높은 곳에서 내려올수록 더 빨라져요.|Coming down from higher up makes it go faster.'],['⚽','축구공|Soccer ball','공을 세게 찰수록 더 멀리 날아가요.|The harder you kick a ball, the farther it goes.'],['🛷','썰매|Sled','얼음 위는 마찰이 적어서 잘 미끄러져요.|Ice has little friction, so things slide easily.'],['🚲','자전거|Bicycle','브레이크는 마찰로 바퀴를 멈춰요.|Brakes stop the wheels using friction.'],['⚖️','균형|Balance','시소에서 무거운 사람이 가운데 가까이 앉으면 균형을 맞출 수 있어요.|On a seesaw, the heavier person can balance by sitting closer to the middle.'],['🪂','낙하산|Parachute','낙하산은 공기가 밀어 주는 힘 때문에 천천히 떨어져요.|A parachute falls slowly because the air pushes back on it.',1],['🚀','로켓|Rocket','로켓은 가스를 아래로 세게 내뿜어서 위로 올라가요.|A rocket pushes gas down hard, so it goes up.',1]],
+ [['🧲','자석|Magnet','자석은 철을 끌어당기고, 같은 극끼리는 밀어내요.|Magnets pull iron, and like poles push each other away.'],['📎','클립|Paper clip','철로 된 클립은 자석에 붙어요.|Steel paper clips stick to magnets.'],['🔩','나사|Bolt','철 나사는 자석에 붙지만 플라스틱은 붙지 않아요.|Iron bolts stick to magnets, but plastic doesn’t.'],['🔋','건전지|Battery','건전지에는 +극과 −극이 있어요.|A battery has a + end and a − end.'],['💡','전구|Light bulb','전기가 끊기지 않고 한 바퀴 돌아야 전구에 불이 켜져요.|A bulb lights only when electricity can flow all the way around a loop.'],['🔌','플러그|Plug','젖은 손으로 콘센트를 만지면 위험해요.|Never touch a socket with wet hands.'],['🚄','자기 부상 열차|Maglev train','자기 부상 열차는 자석의 힘으로 떠서 달려요.|A maglev train floats and runs using magnets.',1],['⚡','번개|Lightning','번개는 구름에 모인 전기가 한꺼번에 흐르는 거예요.|Lightning is electricity from the clouds flowing all at once.',1]],
+ [['🧊','얼음|Ice','물이 얼면 부피가 커져요.|Water takes up more space when it freezes.'],['💧','물방울|Water drop','차가운 컵 겉면의 물방울은 공기 속 수증기가 맺힌 거예요.|Drops on a cold cup come from water vapour in the air.'],['♨️','김|Steam','물이 끓으면 기체인 수증기가 돼요.|Boiling water turns into a gas called water vapour.'],['🧂','소금|Salt','소금이 물에 녹으면 눈에 보이지 않아요.|When salt dissolves in water, you can’t see it anymore.'],['🍋','레몬|Lemon','레몬즙은 산성이에요.|Lemon juice is an acid.'],['🍫','초콜릿|Chocolate','초콜릿은 따뜻하면 녹고 식으면 다시 굳어요.|Chocolate melts when warm and hardens again when cool.'],['🧪','양배추 지시약|Cabbage indicator','보라색 양배추 물은 산성에서 붉게, 염기성에서 초록빛으로 변해요.|Purple cabbage water turns red in acids and green in bases.',1],['🥤','탄산음료|Fizzy drink','탄산음료의 거품은 이산화 탄소예요.|The bubbles in fizzy drinks are carbon dioxide.',1]],
+ [['🌱','새싹|Sprout','씨앗이 싹 트려면 물과 알맞은 온도가 필요해요.|Seeds need water and the right warmth to sprout.'],['🌻','해바라기|Sunflower','식물은 햇빛을 받아 스스로 양분을 만들어요.|Plants use sunlight to make their own food.'],['🍄','버섯|Mushroom','버섯은 식물이 아니라 균류예요.|Mushrooms are not plants. They are fungi.'],['🐛','애벌레|Caterpillar','나비는 알, 애벌레, 번데기를 거쳐 어른벌레가 돼요.|A butterfly grows from egg to caterpillar to pupa to adult.'],['🐝','꿀벌|Honeybee','꿀벌은 꽃가루를 옮겨 열매가 맺히게 도와요.|Bees carry pollen, which helps flowers make fruit.'],['🍂','낙엽|Fallen leaves','많은 나무가 겨울을 나려고 가을에 잎을 떨어뜨려요.|Many trees drop their leaves in fall to get through winter.'],['🐸','개구리|Frog','올챙이는 자라면서 다리가 생기고 꼬리가 없어져요.|As a tadpole grows, it grows legs and loses its tail.',1],['🌵','선인장|Cactus','선인장은 굵은 줄기에 물을 저장해요.|A cactus stores water in its thick stem.',1]],
+ [['☁️','구름|Cloud','구름은 아주 작은 물방울이나 얼음 알갱이가 모인 거예요.|Clouds are made of tiny water drops or bits of ice.'],['🌧️','비|Rain','구름 속 물방울이 커지고 무거워지면 비가 돼요.|When the drops in a cloud grow big and heavy, they fall as rain.'],['❄️','눈송이|Snowflake','눈송이는 대부분 여섯 갈래 모양이에요.|Most snowflakes have six sides.'],['🌡️','온도계|Thermometer','온도계로 공기가 얼마나 따뜻한지 재요.|A thermometer measures how warm the air is.'],['🌍','지구|Earth','지구가 하루에 한 바퀴 돌아서 낮과 밤이 생겨요.|Earth spins once a day, which makes day and night.'],['🌪️','회오리바람|Tornado','회오리바람은 아주 빠르게 빙빙 도는 공기예요.|A tornado is air spinning around very fast.'],['🪐','토성|Saturn','토성의 고리는 얼음과 돌 조각으로 되어 있어요.|Saturn’s rings are made of bits of ice and rock.',1],['🌠','별똥별|Shooting star','별똥별은 우주 먼지가 공기와 부딪쳐 타며 빛나는 거예요.|A shooting star is space dust burning up in the air.',1]],
+ [['🦷','이|Tooth','이를 잘 닦으면 충치를 막을 수 있어요.|Brushing your teeth well helps stop cavities.'],['🧼','비누|Soap','비누로 20초 넘게 손을 씻으면 세균이 많이 없어져요.|Washing with soap for 20 seconds gets rid of lots of germs.'],['🥦','브로콜리|Broccoli','채소에는 몸에 좋은 비타민과 섬유질이 많아요.|Vegetables are full of vitamins and fibre.'],['💤','잠|Sleep','푹 자야 몸과 뇌가 쑥쑥 자라요.|Good sleep helps your body and brain grow.'],['🫀','심장|Heart','심장은 하루 종일 피를 온몸으로 보내요.|Your heart pumps blood around your body all day long.'],['🦴','뼈|Bone','어른의 몸에는 뼈가 200개가 넘어요.|An adult’s body has more than 200 bones.'],['🧠','뇌|Brain','뇌는 몸 곳곳에 신호를 보내 움직임을 조절해요.|Your brain sends signals that control how you move.',1],['🫁','폐|Lungs','숨을 들이쉬면 폐가 산소를 받아들여요.|When you breathe in, your lungs take in oxygen.',1]],
+ [['🦕','공룡 화석|Dinosaur fossil','공룡 화석은 아주 오래전 생물이 남긴 흔적이에요.|Dinosaur fossils are traces of living things from long, long ago.'],['🐚','조개 화석|Shell fossil','산에서 조개 화석이 나오면 그곳이 옛날에 바다였다는 뜻이에요.|Shell fossils on a mountain mean it was once under the sea.'],['🪨','돌|Rock','돌 알갱이는 크기에 따라 자갈, 모래, 진흙으로 나눠요.|Rock bits are sorted by size into gravel, sand and mud.'],['🌋','화산|Volcano','화산이 폭발하면 뜨거운 마그마가 용암이 되어 흘러나와요.|When a volcano erupts, hot magma flows out as lava.'],['⛏️','곡괭이|Pickaxe','화석은 부서지지 않게 아주 조심조심 파내요.|Fossils are dug out very gently so they don’t break.'],['💎','보석|Gem','보석은 땅속에서 오랜 시간에 걸쳐 만들어진 광물이에요.|Gems are minerals formed underground over a very long time.'],['🦖','티라노사우루스|T. rex','티라노사우루스는 고기를 먹는 공룡이었어요.|Tyrannosaurus rex was a meat-eating dinosaur.',1],['🦣','매머드|Mammoth','매머드는 빙하기에 살던 털이 많은 코끼리의 친척이에요.|Mammoths were hairy relatives of elephants from the Ice Age.',1]]];
+const STK=STK_RAW.map((page,w)=>page.map(([e,n,f,r],j)=>({id:w+'-'+j,w,e,name:T(n),fact:T(f),r:!!r})));
+const STK_ALL=STK.flat();
+const stkCount=()=>STK_ALL.filter(x=>S.stk[x.id]).length;
+const stkPage=w=>STK[w].filter(x=>S.stk[x.id]).length;
+
 
 // ---------------------------------------------------------------- save: several players on one device
 const SAVE_KEY='scienceGuardians.v1';
-const fresh=()=>({name:L('수호대원','Guardian'),av:'🧑‍🔬',diff:2,coins:150,earned:0,xp:0,lvl:1,
+const fresh=()=>({stk:{},stkGift:{},name:L('수호대원','Guardian'),av:'🧑‍🔬',diff:2,coins:150,earned:0,xp:0,lvl:1,
  stars:{},bossWins:[],finalWin:false,cards:{},weak:{},seenQ:{},correct:0,answered:0,wins:0,battles:0,bestCombo:0,sims:0,beaten:0,
  speedBest:0,speedPlays:0,lab:{day:'',coins:0},labPlays:0,purchases:0,
  inv:{hint:3,potion:1,shield:1,power:1,freeze:1},shieldOn:true,
@@ -3059,7 +3122,7 @@ document.addEventListener('pointerdown',()=>{const t=pendingSay;pendingSay=null;
 function speak(text){
  if(!ROOT.opt.voice||!('speechSynthesis' in window)||!text)return;
  saySeq++;if(navigator.userActivation&&!navigator.userActivation.hasBeenActive){pendingSay=text;return}
- try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(speakable(text));const v=bestVoice();if(v)u.voice=v;u.lang=LANG==='en'?'en-US':'ko-KR';u.rate=S.diff===1?.95:1.02;u.pitch=(BUDDIES[S.equip.buddy]||BUDDIES.puppy).pitch;speechSynthesis.speak(u)}catch(e){}
+ try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(speakable(text));const v=bestVoice();if(v)u.voice=v;u.lang=LANG==='en'?'en-US':'ko-KR';u.rate=S.diff===1||isGentle(S)?.95:1.02;u.pitch=(BUDDIES[S.equip.buddy]||BUDDIES.puppy).pitch;speechSynthesis.speak(u)}catch(e){}
 }
 const stopVoice=()=>{try{speechSynthesis.cancel()}catch(e){}};
 
@@ -3082,6 +3145,7 @@ function nextModal(){
  if(m.onOpen)m.onOpen($('modalRoot').querySelector('.box'));
 }
 function closeModal(after){const m=CUR;CUR=null;$('modalRoot').innerHTML='';if(m&&m.onClose)m.onClose();if(after){if(MQ.length)DEFER=after;else{nextModal();after();return}}nextModal()}
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&CUR&&CUR.closable!==false)closeModal()});
 $('modalRoot').addEventListener('click',e=>{
  const b=e.target.closest('[data-act]');
  if(!b){if(e.target.classList.contains('modal')&&CUR&&CUR.closable!==false)closeModal();return}
@@ -3234,6 +3298,7 @@ function renderHome(){
   ${tile('cards','t-cards','📚',L('과학 카드','Science cards'),`${Object.keys(S.cards).length}/${CARDS.length}`)}
   ${tile('shop','t-shop',COIN,L('상점','Shop'),`${num(S.coins)} ${L('코인','coins')}`)}
   ${tile('trophy','t-trophy','🏆',L('업적','Trophies'),`${S.ach.length}/${ACH.length}`,claim)}
+  <button class="tile t-album" type="button" data-go="album"><span class="ic">📒</span><div><b>${L('과학 스티커 앨범','Science sticker album')}</b><small>${stkCount()}/${STK_ALL.length} · ${L('이기면 보물상자!','win for a chest!')}</small><span class="abar"><i style="width:${stkCount()/STK_ALL.length*100}%"></i></span></div><span class="arow">${STK_ALL.filter(x=>S.stk[x.id]).slice(-6).map(x=>`<span class="stk mini ${x.r?'rare':''}">${x.e}</span>`).join('')}</span></button>
  </div>
  <div class="card missions"><div class="panelhead"><h2 class="h2" style="margin:0">📋 ${L('오늘의 임무','Today’s missions')}</h2><span class="sub">${L('매일 새로 바뀌어요','New every day')}</span></div>
   ${ms.map(({m,def})=>`<div class="row"><span class="ic">${def.icon}</span><div class="txt">${esc(def.text)}<div class="mbar"><i style="width:${m.n/def.goal*100}%"></i></div></div>
@@ -3241,7 +3306,7 @@ function renderHome(){
   <div class="chest"><span class="big">${S.missions.chest?'📭':'🎁'}</span><div class="txt" style="flex:1;font-weight:800">${S.missions.chest?L('오늘의 보물상자를 열었어요. 내일 또 만나요!','You opened today’s chest. See you tomorrow!'):L('임무 3개를 모두 끝내면 보물상자를 열 수 있어요!','Finish all 3 missions to open the treasure chest!')}</div>
    ${!S.missions.chest?`<button class="btn small ${allGot?'gold':''}" type="button" data-chest ${allGot?'':'disabled'}>${L('열기','Open')}</button>`:''}</div>
  </div>
- <p class="foot">${L('모든 문제와 그림, 소리는 이 게임을 위해 직접 만들었어요','All questions, pictures and sounds were made for this game')} · <a href="index.html?lang=${LANG}">${L('게임 목록','All games')}</a></p>
+ <p class="foot">© 2026 Dongsun Moon. ${L('모든 권리 보유.','All rights reserved.')}<br>${L('모든 문제와 그림, 소리는 이 게임을 위해 직접 만들었어요.','All questions, pictures and sounds were made for this game.')}</p>
  </div>`;
 }
 $('v-home').addEventListener('click',e=>{
@@ -3251,6 +3316,7 @@ $('v-home').addEventListener('click',e=>{
  if(!g)return;SFX.click();const v=g.dataset.go;
  if(v==='continue'){const nx=nextStage();if(nx.final)finalIntro();else if(nx.boss)bossIntro(nx.w);else{mapWorld=nx.w;startStage(nx.w,nx.s)}}
  else if(v==='speed')speedIntro();
+ else if(v==='album')openAlbum(Math.max(0,...openWorldIds().filter(i=>i<=nextStage().w)));
  else if(v==='review')startReview();
  else if(v==='daily')startDaily();
  else if(v==='players')openPlayers();
@@ -3319,13 +3385,13 @@ function cardHTML(c,big=true){
 }
 // show the new cards of a stage one by one, then run then()
 function lessonCards(ids,then){
- const list=ids.filter(id=>!S.cards[id]);
+ const list=ids.filter(id=>!S.cards[id]).slice(0,2);
  if(!list.length){then&&then();return}
  const show=i=>{const c=CARD[list[i]];S.cards[c.id]={m:0,d:'',n:0,r:0,w:0};save();
   const last=i===list.length-1;
   modal(`<div class="newcard">✨ ${L('새 과학 카드!','New science card!')} <small>${i+1}/${list.length}</small></div>${cardHTML(c)}
-   <div class="row"><button class="btn ghost" type="button" data-act="say">🔊 ${L('읽어 주세요','Read it to me')}</button><button class="btn green" type="button" data-act="next">${last?L('알겠어요, 출발!','Got it, let’s go!'):L('다음 카드 ▶','Next card ▶')}</button></div>`,
-  {closable:false,cls:'lesson',acts:{say:()=>{speak(c.title+'. '+c.text+' '+c.life);return false},next:()=>()=>{if(last)then&&then();else show(i+1)}},onOpen:()=>{SFX.hint();speak(c.title+'. '+c.text)}});
+   <div class="row"><button class="btn ghost" type="button" data-act="say">🔊 ${L('읽어 주세요','Read it to me')}</button>${last?'':`<button class="btn ghost" type="button" data-act="skip">⏩ ${L('바로 출동','Skip')}</button>`}<button class="btn green" type="button" data-act="next">${last?L('알겠어요, 출발!','Got it, let’s go!'):L('다음 카드 ▶','Next card ▶')}</button></div>`,
+  {closable:false,cls:'lesson',acts:{say:()=>{speak(c.title+'. '+c.text+' '+c.life);return false},skip:()=>()=>{then&&then()},next:()=>()=>{if(last)then&&then();else show(i+1)}},onOpen:()=>{SFX.hint();speak(c.title+'. '+c.text)}});
  };
  show(0);
 }
@@ -3417,7 +3483,8 @@ function pickItem(){
  let pool=PS.pool.filter(q=>!PS.used.has(q.k));
  if(!pool.length){PS.used.clear();pool=PS.pool.slice()}
  const rage=PS.foe&&PS.foe.boss&&PS.hp<=PS.maxHp/2&&!PS.rageDone;
- const w=pool.map(q=>{let x=1;x*=LW[S.diff][q.l]||1;if(S.weak[q.c])x*=2.2;if(PS.fresh&&PS.fresh.includes(q.c))x*=1.5;if(q.t==='sim')x*=rage?5:1.5;if(q.t===PS.lastT)x*=.25;if(q.c===PS.lastC)x*=.35;x/=1+.35*(S.seenQ[q.k]||0);if(PS.mode==='review'&&S.weak[q.c])x*=2;return x});
+ const lw=isGentle(S)?LW_G:LW[S.diff],low=Math.min(...pool.map(q=>q.l));
+ const w=pool.map(q=>{let x=1;x*=lw[q.l]||1;if(q.l>low){if((PS.miss||0)>=2)x*=.3;else if(PS.combo>=4)x*=1.3}if(S.weak[q.c])x*=2.2;if(PS.fresh&&PS.fresh.includes(q.c))x*=1.5;if(q.t==='sim')x*=rage?5:1.5;if(q.t===PS.lastT)x*=.25;if(q.c===PS.lastC)x*=.35;x/=1+.35*(S.seenQ[q.k]||0);if(PS.mode==='review'&&S.weak[q.c])x*=2;return x});
  let r=Math.random()*w.reduce((a,b)=>a+b,0);for(let i=0;i<pool.length;i++){r-=w[i];if(r<=0){if(rage&&pool[i].t==='sim')PS.rageDone=true;return pool[i]}}return pool[pool.length-1];
 }
 function renderPlay(){
@@ -3450,7 +3517,7 @@ function setFoeSay(t,voice=true){const e=$('foeSay');if(!e)return;e.textContent=
 function nextTurn(){
  if(!PS||PS.over)return;
  const q=pickItem();PS.used.add(q.k);PS.lastT=q.t;PS.lastC=q.c;PS.turn++;S.seenQ[q.k]=(S.seenQ[q.k]||0)+1;
- const ctx={diff:S.diff,lab:PS.mode==='lab',tries:PS.mode==='lab'?3:S.diff===3?1:2};
+ const ctx={diff:isGentle(S)?1:S.diff,lab:PS.mode==='lab',tries:PS.mode==='lab'?3:S.diff===3?1:2};
  const ch=CH[q.t](q,ctx);ch.q=q;PS.cur=ch;PS.hintUsed=false;
  $('ctag').innerHTML=`${ch.tag[0]} ${esc(ch.tag[1])}`;
  const old=$('cbody'),box=document.createElement('div');box.className='cbody';box.id='cbody';old.replaceWith(box);
@@ -3499,13 +3566,13 @@ function answer(ok,info){
  S.answered++;learn(q.c,ok);PS.cardsHit.add(q.c);
  let blocked=false,dmg=0,crit=false;
  if(ok){
-  PS.right++;PS.combo++;PS.maxCombo=Math.max(PS.maxCombo,PS.combo);S.correct++;track('correct');if(sim){S.sims++;track('sim')}
+  PS.right++;PS.miss=0;PS.combo++;PS.maxCombo=Math.max(PS.maxCombo,PS.combo);S.correct++;track('correct');if(sim){S.sims++;track('sim')}
   if(PS.combo>S.bestCombo)S.bestCombo=PS.combo;if(PS.combo===5)track('combo');
   if(PS.foe){crit=PS.mode!=='review'&&PS.combo>=(S.equip.buddy==='owl'?2:3);dmg=PS.mode==='review'?1:(crit?2:1)*(PS.power?2:1);if(PS.power&&PS.mode!=='review')PS.power--;
    SFX.good();const P=PS;beamFly(()=>{if(PS!==P)return;SFX.hit();const fi=$('foeImg');if(fi){fi.classList.remove('hit');void fi.offsetWidth;fi.classList.add('hit')}popOver(fi,crit?`💥 −${dmg} <small>${L('크리티컬!','CRITICAL!')}</small>`:`−${dmg}`,crit?'crit':'');PS.hp=Math.max(0,PS.hp-dmg);drawStatus();if(PS.hp<=0){PS.over=true;PS.won=true;const f=$('foe');if(f)f.classList.add('down')}else if(PS.foe.boss&&PS.hp<=PS.maxHp/2&&!PS.ragedSaid){PS.ragedSaid=true;setFoeSay(L('으으… 화났다! 이제 실험 문제로 간다!','Grr… now I’m mad! Here come the lab challenges!'))}showFeedback(true,info,{dmg,crit})})}
   else{PS.score++;SFX.good();if(S.lab.day!==dayKey())S.lab={day:dayKey(),coins:0};if(S.lab.coins<60){S.lab.coins+=3;grant({coins:3,xp:3})}else grant({xp:2});showFeedback(true,info,{})}
  }else{
-  PS.wrong++;PS.combo=0;PS.mistakes.push({q,ch,info});
+  PS.wrong++;PS.miss=(PS.miss||0)+1;PS.combo=0;PS.mistakes.push({q,ch,info});
   if(PS.foe){
    if(PS.guard){PS.guard--;blocked=true}else if(S.shieldOn&&S.inv.shield>0){S.inv.shield--;blocked=true}
    if(blocked)PS.blocked++;else PS.hearts--;
@@ -3531,6 +3598,7 @@ function showFeedback(ok,info,{dmg=0,crit=false,blocked=false}){
  $('fb').classList.remove('hidden');
  const fb=$('fb');setTimeout(()=>{if(fb.isConnected)fb.scrollIntoView({block:'nearest',behavior:'smooth'})},60);
  if(ok)speak(praise);else speak(praise+' '+why);
+ if(ok&&PS.foe&&!PS.over){const P=PS,ch=PS.cur,nb=fb.querySelector('[data-next]');if(nb)nb.classList.add('auto');setTimeout(()=>{if(PS===P&&PS.cur===ch&&!PS.over&&fb.isConnected&&!fb.classList.contains('hidden')){stopVoice();nextTurn()}},1900)}
 }
 function askQuit(){
  if(!PS||PS.over||!PS.foe){if(PS&&!PS.foe){finish();return}go(backView());return}
@@ -3550,14 +3618,16 @@ function finish(){
    <div class="row"><button class="btn green" type="button" data-act="again">🔁 ${L('한 번 더','Again')}</button><button class="btn ghost" type="button" data-act="out">${L('실험실 목록','All labs')}</button></div>`,
   {closable:false,acts:{again:()=>()=>startLab(P.lab.id),out:()=>()=>go('labs')}});return}
  if(!P.won){
+  S.lossRun=(S.lossRun||0)+1;S.easyRun=0;const offer=S.diff===2&&!S.gentle&&S.lossRun>=2;
   SFX.lose();save();
   modal(`<div class="bossart sm" style="background:${P.grad}">${pic(P.foe.img,P.foe.icon)}</div><h2>${L('아쉽게 졌어요…','So close…')}</h2><p>${L('괜찮아요! 틀린 문제의 설명을 보고 다시 도전하면 꼭 이길 수 있어요.','That’s okay! Read the explanations below and try again. You can do it!')}</p>${mistakesHTML(P.mistakes)}
+   ${offer?`<div class="gentle"><p>🍀 ${L('조금 어렵게 느껴지면 <b>보통 1 (3학년 시작)</b>으로 바꿔 볼까요? 보기 3개, 하트 4개로 시작하고, 3학년 내용과 복습 문제가 섞여 나와요.','Feeling tricky? Try <b>Normal 1 (starting grade 3)</b>: 3 choices, 4 hearts, and grade 3 ideas mixed with review.')}</p><button class="btn gold" type="button" data-act="gentle">🍀 ${L('보통 1로 바꾸고 다시 도전','Switch to Normal 1 and retry')}</button></div>`:''}
    <div class="row"><button class="btn ghost" type="button" data-act="out">${L('나가기','Leave')}</button><button class="btn green" type="button" data-act="again">🔁 ${L('다시 도전','Try again')}</button></div>`,
-  {closable:false,acts:{again:()=>()=>retry(P),out:()=>()=>go(backView2(P))},onOpen:()=>speak(L('괜찮아요! 설명을 보고 다시 도전해요!','That’s okay! Read the explanations and try again!'))});
+  {closable:false,acts:{again:()=>()=>retry(P),gentle:()=>{setDiff('g');S.lossRun=0;save();return ()=>retry(P)},out:()=>()=>go(backView2(P))},onOpen:()=>speak(L('괜찮아요! 설명을 보고 다시 도전해요!','That’s okay! Read the explanations and try again!'))});
   return;
  }
  S.wins++;track('win');SFX.win();celebrate();
- const mistakes=P.wrong-P.blocked,stars=mistakes<=0?3:mistakes===1?2:1;
+ const mistakes=P.wrong-P.blocked,stars=mistakes<=0?3:mistakes===1?2:1;S.lossRun=0;S.easyRun=S.diff===1&&stars===3?(S.easyRun||0)+1:0;const goUp=S.diff===1&&S.easyRun>=3;
  let coins=0,xp=20+P.right*5,extra='',title=L('승리!','Victory!'),sub='',next=null;
  if(P.mode==='stage'){const key=P.w+'-'+P.s,prev=S.stars[key]||0;coins=Math.round((15+stars*10)*mult)+(prev?0:30);if(stars>prev)S.stars[key]=stars;if(stars===3)track('star3');
   next=P.s<STAGES-1?{label:L('다음 스테이지 ▶','Next stage ▶'),fn:()=>startStage(P.w,P.s+1)}:{label:L('보스에게 도전! ▶','Fight the boss! ▶'),fn:()=>bossIntro(P.w)};sub=L(`스테이지 ${P.w+1}-${P.s+1} 클리어`,`Stage ${P.w+1}-${P.s+1} cleared`)}
@@ -3571,15 +3641,17 @@ function finish(){
  const starRow=(P.mode==='stage')?`<div class="bigstars">${[0,1,2].map(i=>`<span class="${i<stars?'':'dim'}">⭐</span>`).join('')}</div>`:'';
  modal(`<div class="bossart sm down" style="background:${P.grad}">${pic(P.foe.img,P.foe.icon)}</div><h2>${title}</h2>${sub?`<p>${sub}</p>`:''}${starRow}
   <p class="sub">${L(`정답 ${P.right} · 오답 ${P.wrong} · 최고 콤보 ${P.maxCombo}`,`${P.right} right · ${P.wrong} wrong · best combo ${P.maxCombo}`)}</p>
-  ${rewardChips(r,extra)}${newCards.length?`<div class="mons sm">${newCards.slice(0,10).map(id=>`<span>${icon(CARD[id].icon)}</span>`).join('')}</div><p class="sub">${L(`이번에 연습한 과학 카드 ${newCards.length}장`,`${newCards.length} science card${newCards.length===1?'':'s'} practiced`)}</p>`:''}${mistakesHTML(P.mistakes)}
+  ${rewardChips(r,extra)}${goUp?`<div class="gentle"><p>🍀 ${L('쉬움 단계를 척척 깨고 있어요! 한 단계 위 <b>보통 1 (3학년 시작)</b>에 도전해 볼까요?','You’re breezing through Easy! Ready for <b>Normal 1 (starting grade 3)</b>?')}</p><button class="btn gold" type="button" data-act="up">🍀 ${L('보통 1로 올리기','Move up to Normal 1')}</button></div>`:''}${newCards.length?`<div class="mons sm">${newCards.slice(0,10).map(id=>`<span>${icon(CARD[id].icon)}</span>`).join('')}</div><p class="sub">${L(`이번에 연습한 과학 카드 ${newCards.length}장`,`${newCards.length} science card${newCards.length===1?'':'s'} practiced`)}</p>`:''}${mistakesHTML(P.mistakes)}
   <div class="row">${next?`<button class="btn ghost" type="button" data-act="out">${L('지도','Map')}</button><button class="btn green" type="button" data-act="next">${next.label}</button>`:`<button class="btn ghost" type="button" data-act="again">🔁 ${L('다시 하기','Play again')}</button><button class="btn green" type="button" data-act="out">${L('좋아요!','Great!')}</button>`}</div>`,
- {closable:false,acts:{next:()=>()=>next.fn(),out:()=>()=>go(backView2(P)),again:()=>()=>retry(P)},onOpen:b=>{if(P.mode==='stage')b.querySelectorAll('.bigstars span').forEach((s,i)=>{if(i<stars)setTimeout(()=>{s.classList.add('in');SFX.star(i)},300+i*260)});if(r.coins)setTimeout(()=>flyCoins(b.querySelector('.rewards'),r.coins),500);speak(title+' '+(P.foe.lose||''))}});
+ {closable:false,acts:{next:()=>()=>chestThen(P,stars,()=>next.fn()),out:()=>()=>chestThen(P,stars,()=>go(backView2(P))),again:()=>()=>chestThen(P,stars,()=>retry(P)),up:b=>{setDiff('g');S.easyRun=0;save();b.closest('.gentle').innerHTML=`<p>🍀 ${L('보통 1로 바꿨어요! 다음 판부터 새 문제가 나와요.','Switched to Normal 1! New questions from the next battle.')}</p>`;return false}},onOpen:b=>{if(P.mode==='stage')b.querySelectorAll('.bigstars span').forEach((s,i)=>{if(i<stars)setTimeout(()=>{s.classList.add('in');SFX.star(i)},300+i*260)});if(r.coins)setTimeout(()=>flyCoins(b.querySelector('.rewards'),r.coins),500);speak(title+' '+(P.foe.lose||''))}});
  if(P.firstFinal)modal(`<div class="cert"><div class="ct">🏅 ${L('과학 수호대 수료증','Science Guardian Certificate')}</div><div class="cn">${avatarHTML()}<b>${esc(S.name)}</b></div>
   <p>${L(`위 대원은 진짜 과학으로 헷갈 박사를 막고 ${WORLDS.length}개 지역을 모두 지켜 냈기에 이 수료증을 드립니다.`,`For stopping Dr. Mix-Up with real science and protecting all ${WORLDS.length} worlds, this certificate is proudly given to the guardian above.`)}</p>
   <div class="cd">${dayKey()} · ${D().icon} ${esc(D().name)}</div></div><p>${L('이제 더 어려운 난이도로 골드 카드를 모아 보세요!','Next, try a harder level and collect gold cards!')}</p><div class="row"><button class="btn gold" type="button" data-act="close">🎉 ${L('만세!','Hooray!')}</button></div>`,{onOpen:()=>{celebrate('fireworks');speak(L(`${S.name} 대원, 축하해요! 진짜 과학 수호대가 되었어요!`,`Congratulations, ${S.name}! You are a true Science Guardian!`))}});
  levelModals(r.levels);checkTrophies();save();
 }
 const backView2=P=>P.mode==='stage'||P.mode==='boss'||P.mode==='final'?'map':P.mode==='card'?'cards':'home';
+// review and card practice are quick drills, so they skip the chest; everything else won ends with one
+function chestThen(P,stars,then){if(P.mode==='review'||P.mode==='card'){then();return}openChest(P,stars,then)}
 function retry(P){if(P.mode==='stage')startStage(P.w,P.s);else if(P.mode==='boss')bossIntro(P.w);else if(P.mode==='final')finalIntro();else if(P.mode==='review')startReview();else if(P.mode==='daily')startDaily();else if(P.mode==='card')startCardPractice(P.cards[0]);else go('home')}
 
 // ---------------------------------------------------------------- Lightning true-or-false (timed)
@@ -3674,15 +3746,64 @@ function renderTrophies(){
 }
 $('v-trophy').addEventListener('click',e=>{const b=e.target.closest('[data-ach]');if(!b)return;const a=ACH.find(x=>x.id===b.dataset.ach);if(!a||S.ach.includes(a.id)||!a.test(S))return;S.ach.push(a.id);const r=grant({coins:a.coins,xp:20});flyCoins(b,r.coins);SFX.win();celebrate('stars');renderTrophies()});
 
+
+// ---------------------------------------------------------------- treasure chests after every win, and the sticker album
+// A won battle opens a chest: a wooden one, or a golden one for 3 stars and bosses. Stickers come mostly from the world you
+// fought in; new ones are favoured, duplicates turn into coins, and finishing a world's page gives a cape or a beam.
+function rollSticker(w,gold){const rare=Math.random()<(gold?.3:.14);let pool=STK[w].filter(x=>x.r===rare);const miss=pool.filter(x=>!S.stk[x.id]);if(miss.length&&Math.random()<.65)pool=miss;return pick(pool)}
+function openChest(P,stars,then){
+ const gold=P.mode==='boss'||P.mode==='final'||stars===3,ws=openWorldIds(),home=P.w!=null?P.w:pick(ws);
+ const loot=[];let coins=Math.round((gold?40:20)+Math.random()*(gold?30:15));
+ for(let k=0;k<(gold?2:1);k++){const w=Math.random()<.7?home:pick(ws),st=rollSticker(w,gold),isNew=!S.stk[st.id];S.stk[st.id]=(S.stk[st.id]||0)+1;if(isNew)track('sticker');else coins+=15;loot.push({st,isNew})}
+ let item=null;if(Math.random()<(gold?.6:.3)){item=pick(['hint','potion','power','shield'])}
+ const r=grant({coins,items:item?{[item]:1}:{}},true);save();
+ const done=[...new Set(loot.map(x=>x.st.w))].filter(w=>stkPage(w)===STK[w].length&&!S.stkGift[w]);
+ const box=`<div class="chestwrap"><div class="chestbox ${gold?'gold':''}" id="chestBox">${gold?'🎁':'🧰'}</div><p class="sub" id="chestHint">${gold?L('황금 상자예요! 눌러서 열어 봐요!','A golden chest! Tap to open it!'):L('보물상자! 눌러서 열어 봐요!','A treasure chest! Tap to open it!')}</p><div class="loot hidden" id="loot"></div></div>`;
+ modal(`<h2>${gold?L('✨ 황금 보물상자','✨ Golden chest'):L('🧰 보물상자','🧰 Treasure chest')}</h2>${box}<div class="row hidden" id="chestBtns"><button class="btn ghost" type="button" data-act="album">📒 ${L('앨범 보기','Album')}</button><button class="btn green" type="button" data-act="go">${L('좋아요! ▶','Great! ▶')}</button></div>`,
+ {closable:false,cls:'chestm',onOpen:b=>{let opened=false;const cb=b.querySelector('#chestBox');
+   const open=()=>{if(opened)return;opened=true;SFX.click();cb.classList.add('shake');setTimeout(()=>{cb.classList.remove('shake');cb.classList.add('pop');SFX.win();celebrate();
+     const lt=b.querySelector('#loot');b.querySelector('#chestHint').classList.add('hidden');lt.classList.remove('hidden');
+     lt.innerHTML=loot.map(({st,isNew},i)=>`<button type="button" class="lootc ${st.r?'rare':''}" style="animation-delay:${.15+i*.35}s" data-fact="${esc(st.name+'. '+st.fact)}"><span class="stk ${st.r?'rare':''}">${st.e}</span><b>${esc(st.name)}</b>${isNew?`<i class="nw">${st.r?L('✨ 희귀 새 스티커!','✨ Rare new sticker!'):L('🆕 새 스티커!','🆕 New sticker!')}</i>`:`<i class="dup">${L('있는 스티커 → 🪙15','Duplicate → 🪙15')}</i>`}<small>${esc(st.fact)}</small></button>`).join('')+
+      `<div class="lootc small" style="animation-delay:${.15+loot.length*.35}s"><span class="stk coin">🪙</span><b>+${r.coins}</b></div>`+(item?`<div class="lootc small" style="animation-delay:${.3+loot.length*.35}s"><span class="stk">${pic(ITEMS[item].img,ITEMS[item].icon)}</span><b>${esc(ITEMS[item].name)} +1</b></div>`:'');
+     loot.forEach((x,i)=>setTimeout(()=>{(x.st.r?SFX.level:SFX.star)(i);},250+i*350));
+     b.querySelector('#chestBtns').classList.remove('hidden');const first=loot.find(x=>x.isNew)||loot[0];setTimeout(()=>speak(first.st.name+'! '+first.st.fact),500)},520)};
+   cb.addEventListener('click',open);b.querySelector('#chestHint').addEventListener('click',open);
+   b.addEventListener('click',e=>{const f=e.target.closest('[data-fact]');if(f){SFX.click();speak(f.dataset.fact)}})},
+  acts:{go:()=>()=>afterChest(done,then),album:()=>()=>afterChest(done,()=>openAlbum(home,then))}});
+}
+// a finished page: a cape or beam the child doesn't have yet (or coins when they own everything)
+function afterChest(done,then){if(!done.length){then&&then();return}const w=done[0];S.stkGift[w]=true;
+ const gift=SUITS.find(x=>x.price&&!S.owned.suit.includes(x.id))?{k:'suit',d:SUITS.find(x=>x.price&&!S.owned.suit.includes(x.id))}:BEAMS.find(x=>x.price&&!S.owned.beam.includes(x.id))?{k:'beam',d:BEAMS.find(x=>x.price&&!S.owned.beam.includes(x.id))}:null;
+ if(gift)S.owned[gift.k].push(gift.d.id);const r=grant({coins:gift?100:400,xp:40},true);save();SFX.level();
+ modal(`<div style="font-size:60px">📒🎉</div><h2>${L(`${WORLDS[w].name} 스티커 완성!`,`${WORLDS[w].name} page complete!`)}</h2><div class="stkrow">${STK[w].map(x=>`<span class="stk ${x.r?'rare':''}">${x.e}</span>`).join('')}</div>
+  <p>${gift?L(`완성 선물: <b>${esc(gift.d.name)}</b>! 상점에서 바로 쓸 수 있어요.`,`You got <b>${esc(gift.d.name)}</b> as a gift! Equip it in the shop.`):L('모든 망토와 광선을 이미 가졌어요! 대신 코인을 많이 줄게요.','You already own every cape and beam! Have lots of coins instead.')}</p>${rewardChips(r,'')}
+  <div class="row"><button class="btn green" type="button" data-act="ok">${L('최고예요!','Awesome!')}</button></div>`,{closable:false,acts:{ok:()=>()=>afterChest(done.slice(1),then)},onOpen:()=>{celebrate('fireworks');speak(L('스티커 한 쪽을 모두 모았어요! 정말 대단해요!','You filled a whole page of stickers! Amazing!'))}});
+}
+let albumW=0;
+function openAlbum(w,then){if(w!=null)albumW=w;const ws=openWorldIds();
+ const draw=()=>{const page=STK[albumW],open=worldOpen(albumW),got=stkPage(albumW);
+  return `<h2>📒 ${L('과학 스티커 앨범','Science sticker album')}</h2><p class="sub">${L(`모은 스티커 ${stkCount()}/${STK_ALL.length} · 전투에서 이기면 보물상자에서 나와요`,`${stkCount()}/${STK_ALL.length} collected · win battles to open chests`)}</p>
+   <div class="atabs">${WORLDS.map((W,i)=>`<button type="button" data-act="w" data-w="${i}" class="${i===albumW?'on':''} ${worldOpen(i)?'':'lock'}">${W.icon}<small>${stkPage(i)}/8</small></button>`).join('')}</div>
+   <div class="apage"><b>${WORLDS[albumW].icon} ${esc(WORLDS[albumW].name)} <small>${got}/8${S.stkGift[albumW]?' · 🎁 '+L('완성 선물 받음','gift claimed'):` · ${L('다 모으면 망토나 광선 선물!','fill it for a cape or beam!')}`}</small></b>
+    <div class="agrid">${page.map(x=>{const n=S.stk[x.id]||0;return `<button type="button" class="aslot ${n?'':'miss'}" data-act="s" data-id="${x.id}"><span class="stk ${x.r?'rare':''} ${n?'':'miss'}">${x.e}</span><small>${n?esc(x.name):x.r?L('희귀','Rare'):'?'}</small>${n>1?`<i>×${n}</i>`:''}</button>`}).join('')}</div>
+    <div class="afact" id="afact">${open?L('스티커를 누르면 과학 이야기를 들려줘요.','Tap a sticker to hear its science fact.'):L('🔒 이 지역은 아직 열리지 않았어요. 모험을 계속해요!','🔒 This world isn’t open yet. Keep adventuring!')}</div></div>`};
+ modal(draw(),{cls:'albumm',onClose:()=>{if(then)setTimeout(then,0)},acts:{
+  w:b=>{albumW=+b.dataset.w;SFX.click();const box=$('modalRoot').querySelector('.box');const x=box.querySelector('.x');box.innerHTML=(x?x.outerHTML:'')+draw();return false},
+  s:b=>{const x=STK_ALL.find(y=>y.id===b.dataset.id),f=$('afact');if(!S.stk[x.id]){f.textContent=x.r?L('희귀 스티커예요! 황금 상자에서 더 잘 나와요.','A rare sticker! Golden chests drop them more often.'):L('아직 못 모은 스티커예요. 이 지역에서 이기면 나와요!','Not collected yet. Win battles in this world to find it!');return false}f.innerHTML=`<b>${x.e} ${esc(x.name)}</b> ${esc(x.fact)}`;speak(x.name+'. '+x.fact);return false}}});
+}
+
 // ---------------------------------------------------------------- players, difficulty, settings
-function diffButtons(cur){return `<div class="diffs">${DIFFS.slice(1).map(d=>`<button type="button" data-act="d${d.id}" class="${d.id===cur?'on':''}"><span>${d.icon}</span><b>${esc(d.name)}</b><small>${esc(d.grade)}</small></button>`).join('')}</div>`}
+function diffButtons(cur){return `<div class="diffs four">${DIFF_LIST().map(d=>`<button type="button" data-act="d${d.id}" class="${d.id===cur?'on':''}"><span>${d.icon}</span><b>${esc(d.name)}</b><small>${esc(d.grade)}</small></button>`).join('')}</div>`}
+const diffKey=p=>isGentle(p)?'g':p.diff;
+function setDiff(k){S.diff=k==='g'?2:k;S.gentle=k==='g';S.gentleOffered=true;save();const d=D();toast(`${d.icon} ${d.name} · ${d.grade}`);updateHud();if(VIEW==='home')renderHome();else if(VIEW==='map')renderMap();else if(VIEW==='cards')renderCards()}
 function openDifficulty(){
- modal(`<h2>🎚️ ${L('난이도','Difficulty')}</h2><p>${L('학년에 맞춰 문제와 실험이 달라져요. 언제든 바꿀 수 있어요.','Questions and labs change to fit your grade. You can switch any time.')}</p>${diffButtons(S.diff)}
-  <p class="sub">${L('쉬움: 보기 3개·하트 4개 / 보통: 더 깊은 문제 / 어려움: 5~6학년 내용, 실험 기회 1번','Easy: 3 choices, 4 hearts · Normal: deeper questions · Hard: grade 5–6 ideas, one try in labs')}</p>`,
- {acts:Object.fromEntries([1,2,3].map(i=>['d'+i,()=>{S.diff=i;save();toast(`${DIFFS[i].icon} ${DIFFS[i].name} · ${DIFFS[i].grade}`);if(VIEW==='home')renderHome();else if(VIEW==='map')renderMap();else if(VIEW==='cards')renderCards()}]))});
+ modal(`<h2>🎚️ ${L('난이도','Difficulty')}</h2><p>${L('학년에 맞춰 문제와 실험이 달라져요. 언제든 바꿀 수 있어요.','Questions and labs change to fit your grade. You can switch any time.')}</p>${diffButtons(diffKey(S))}
+  <p class="sub">${L('🌱 쉬움: 1~2학년 내용, 보기 3개·하트 4개<br>🍀 보통 1: 3학년 내용을 1~2학년 복습과 섞어서, 보기 3개·하트 4개<br>🌿 보통 2: 3~4학년 깊은 문제, 보기 4개·하트 3개<br>🌳 어려움: 5~6학년 내용, 실험 기회 1번','🌱 Easy: grade 1–2 ideas, 3 choices, 4 hearts<br>🍀 Normal 1: grade 3 ideas mixed with grade 1–2 review, 3 choices, 4 hearts<br>🌿 Normal 2: deeper grade 3–4 questions, 4 choices, 3 hearts<br>🌳 Hard: grade 5–6 ideas, one try in labs')}</p>
+  <p class="sub">${L('틀린 문제가 두 번 이어지면 다음 문제는 조금 쉬워져요.','After two misses in a row, the next question gets a little easier.')}</p>`,
+ {acts:Object.fromEntries(['1','g','2','3'].map(k=>['d'+k,()=>{setDiff(k==='g'?'g':+k)}]))});
 }
 function playerForm(p,{isNew}){
- let av=p.av,diff=p.diff;
+ let av=p.av,diff=diffKey(p);
  modal(`<h2>${isNew?L('🧑‍🚀 새 수호대원','🧑‍🚀 New guardian'):L('✏️ 내 정보','✏️ My profile')}</h2>
   ${MGP.me?`<p class="center" style="font-size:40px;margin:4px 0">${esc(MGP.me.av)}</p><p class="center"><b>${esc(MGP.me.name)}</b></p>`:`<label class="field"><span>${L('이름','Name')}</span><input id="pName" maxlength="12" value="${esc(p.name)}" autocomplete="off"></label>
   <div class="avs">${AVATARS.map(a=>`<button type="button" data-act="av" data-a="${a}" class="${a===av?'on':''}">${a}</button>`).join('')}</div>`}
@@ -3690,11 +3811,11 @@ function playerForm(p,{isNew}){
   <div class="row">${!isNew&&ROOT.order.length>1&&!MGP.me?`<button class="btn small red" type="button" data-act="del">🗑️ ${L('삭제','Delete')}</button>`:''}<button class="btn green" type="button" data-act="ok">${isNew?L('시작!','Start!'):L('저장','Save')}</button></div>`,
  {closable:!(isNew&&!S.intro&&ROOT.order.length===1),acts:{
   av:b=>{av=b.dataset.a;document.querySelectorAll('.avs button').forEach(x=>x.classList.toggle('on',x===b));return false},
-  ...Object.fromEntries([1,2,3].map(i=>['d'+i,b=>{diff=i;b.parentElement.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));return false}])),
+  ...Object.fromEntries(['1','g','2','3'].map(k=>['d'+k,b=>{diff=k==='g'?'g':+k;b.parentElement.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));return false}])),
   del:b=>{if(!b.dataset.arm){b.dataset.arm=1;b.textContent=L('정말요? 한 번 더','Really? Tap again');return false}const id=ROOT.cur;delete ROOT.P[id];ROOT.order=ROOT.order.filter(x=>x!==id);ROOT.cur=ROOT.order[0];S=merge(ROOT.P[ROOT.cur]);save();go('home');return},
   ok:()=>{const name=MGP.me?MGP.me.name:($('pName').value||'').trim()||p.name;if(MGP.me)av=MGP.me.av;
    if(isNew&&p!==S){save();const id='p'+Date.now().toString(36);ROOT.order.push(id);ROOT.cur=id;S=fresh();}
-   S.name=name;S.av=av;S.diff=diff;save();updateHud();
+   S.name=name;S.av=av;S.diff=diff==='g'?2:diff;S.gentle=diff==='g';S.gentleOffered=true;save();updateHud();
    if(VIEW==='home')renderHome();
    if(!S.intro)return ()=>introStory();go('home')}}});
 }
@@ -3703,27 +3824,30 @@ function openPlayers(){
  if(MGP.me){modal(`<div class="center"><p style="font-size:46px;margin:0">${esc(MGP.me.av)}</p><h2>${esc(MGP.me.name)}</h2><p>${L('플레이하는 사람은 첫 화면에서 바꿔요.','Switch players on the main page.')}</p></div>
   <div class="row"><button class="btn ghost" type="button" data-act="edit">🎚️ ${L('학년 바꾸기','Change grade')}</button><button class="btn green" type="button" data-act="home">🏠 ${L('첫 화면으로','Main page')}</button></div>`,{acts:{edit:()=>()=>playerForm(S,{isNew:false}),home:()=>{location.href='index.html?lang='+LANG}}});return}
  modal(`<h2>👥 ${L('수호대원 바꾸기','Switch player')}</h2><p>${L('형제자매가 각자 기록을 따로 가질 수 있어요.','Brothers and sisters can each keep their own progress.')}</p>
-  <div class="plist">${ROOT.order.map(id=>{const p=id===ROOT.cur?S:merge(ROOT.P[id]);return `<button type="button" class="pl ${id===ROOT.cur?'on':''}" data-act="p_${id}">${avatarHTML(p)}<span><b>${esc(p.name)}</b><small>Lv.${p.lvl} · ${DIFFS[p.diff].icon} ${esc(DIFFS[p.diff].grade)} · 📚 ${Object.keys(p.cards).length}</small></span>${id===ROOT.cur?'<em>✅</em>':''}</button>`}).join('')}</div>
+  <div class="plist">${ROOT.order.map(id=>{const p=id===ROOT.cur?S:merge(ROOT.P[id]);return `<button type="button" class="pl ${id===ROOT.cur?'on':''}" data-act="p_${id}">${avatarHTML(p)}<span><b>${esc(p.name)}</b><small>Lv.${p.lvl} · ${diffOf(p).icon} ${esc(diffOf(p).grade)} · 📚 ${Object.keys(p.cards).length}</small></span>${id===ROOT.cur?'<em>✅</em>':''}</button>`}).join('')}</div>
   <div class="row"><button class="btn ghost" type="button" data-act="edit">✏️ ${L('내 정보 고치기','Edit my profile')}</button>${ROOT.order.length<6?`<button class="btn green" type="button" data-act="add">➕ ${L('새 대원','New player')}</button>`:''}</div>`,
  {acts:{...Object.fromEntries(ROOT.order.map(id=>['p_'+id,()=>{if(id!==ROOT.cur){save();ROOT.cur=id;S=merge(ROOT.P[id]);save();quietTrophies();toast(`${S.av} ${L(`${S.name} 대원, 반가워요!`,`Welcome back, ${S.name}!`)}`)}go('home');dailyLogin()}])),
   edit:()=>()=>playerForm(S,{isNew:false}),add:()=>()=>playerForm({...fresh(),name:L('새 대원','New guardian')},{isNew:true})}});
 }
 function openSettings(){
- const sw=(id,on,label)=>`<div class="row"><span>${label}</span><button class="switch ${on?'on':''}" type="button" data-act="${id}" aria-pressed="${on}"></button></div>`;
- let resetArm=false;const d=D();
+ const sw=(id,on,label)=>`<div class="row"><span>${label}</span><button class="switch ${on?'on':''}" type="button" data-act="${id}" aria-pressed="${on}" aria-label="${esc(label.replace(/^\S+\s/,''))}"></button></div>`;
+ const d=D();
  modal(`<h2>⚙️ ${L('설정','Settings')}</h2><div class="settings">${sw('snd',ROOT.opt.sound,L('🔊 효과음','🔊 Sound effects'))}${sw('voice',ROOT.opt.voice,L('🗣️ 읽어 주는 목소리','🗣️ Read-aloud voice'))}${sw('shield',S.shieldOn,L('🛡️ 실수 방패 자동 사용','🛡️ Use the shield automatically'))}
   <div class="row"><span>🎚️ ${L('난이도','Difficulty')}</span><button class="btn small ghost" type="button" data-act="diff">${d.icon} ${esc(d.name)} · ${esc(d.grade)}</button></div>
   <div class="row"><span>👥 ${L('수호대원','Players')}</span><button class="btn small ghost" type="button" data-act="players">${esc(S.av)} ${esc(S.name)}</button></div>
-  <div class="row"><span>🌐 ${L('언어','Language')}</span><button class="btn small ghost" type="button" data-act="lang">${LANG==='en'?'한국어':'English'}</button></div>
-  <div class="row"><span>🗑️ ${L('이 대원 처음부터','Restart this player')}</span><button class="btn small red" type="button" data-act="reset">${L('초기화','Reset')}</button></div></div>
-  <p style="font-size:12.5px;margin-top:14px">${L('모든 문제, 설명, 그림, 소리는 초등 과학 교과 내용(한국·캐나다)을 바탕으로 이 게임을 위해 직접 만들었어요. 기록은 이 기기에만 저장돼요.','All questions, explanations, pictures and sounds were written for this game, based on elementary science topics from Korea and Canada. Progress is saved only on this device.')}</p>`,
+  <div class="row"><span>🌐 ${L('언어','Language')}</span><span class="seg"><button type="button" data-act="ko" class="${LANG==='ko'?'on':''}">한국어</button><button type="button" data-act="en" class="${LANG==='en'?'on':''}">English</button></span></div>
+  ${MGP.me?`<p class="sub" style="margin:6px 0 0">👤 ${L(`${esc(MGP.me.name)}의 기록이에요. 플레이어는 첫 화면에서 바꿔요.`,`This is ${esc(MGP.me.name)}’s progress. Switch players on the main page.`)}</p>`:''}
+  <div class="row"><span>🗑️ ${L('이 게임 기록 지우기','Erase this game’s progress')}</span><button class="btn small red" type="button" data-act="reset">${L('지우기','Erase')}</button></div></div>
+  <p class="copy">© 2026 Dongsun Moon. ${L('모든 권리 보유.','All rights reserved.')}</p>
+  <p style="font-size:12.5px;margin-top:6px">${L('모든 문제, 설명, 그림, 소리는 초등 과학 교과 내용(한국·캐나다)을 바탕으로 이 게임을 위해 직접 만들었어요. 기록은 이 기기에만 저장돼요.','All questions, explanations, pictures and sounds were written for this game, based on elementary science topics from Korea and Canada. Progress is saved only on this device.')}</p>`,
  {acts:{
   snd:b=>{ROOT.opt.sound=!ROOT.opt.sound;b.classList.toggle('on',ROOT.opt.sound);save();if(ROOT.opt.sound)SFX.click();return false},
   voice:b=>{ROOT.opt.voice=!ROOT.opt.voice;b.classList.toggle('on',ROOT.opt.voice);save();if(!ROOT.opt.voice)stopVoice();else speak(L('읽어 주는 목소리를 켰어요!','The read-aloud voice is on!'));return false},
   shield:b=>{S.shieldOn=!S.shieldOn;b.classList.toggle('on',S.shieldOn);save();if(PS)drawItems();return false},
   diff:()=>()=>openDifficulty(),players:()=>()=>openPlayers(),
-  lang:()=>{save();setLang(LANG==='en'?'ko':'en');return false},
-  reset:b=>{if(!resetArm){resetArm=true;b.textContent=L('정말요? 한 번 더','Really? Tap again');return false}const keep={name:S.name,av:S.av,diff:S.diff};S={...fresh(),...keep};save();location.reload();return false},
+  ko:()=>{if(LANG!=='ko'){save();setLang('ko')}return false},en:()=>{if(LANG!=='en'){save();setLang('en')}return false},
+  reset:()=>()=>modal(`<div style="font-size:54px">🗑️</div><h2>${L('정말 지울까요?','Really erase?')}</h2><p>${L(`<b>${esc(S.name)}</b>의 꼬마 과학 수호대 기록만 지워져요. 다른 게임과 다른 플레이어 기록은 그대로예요. 되돌릴 수 없어요.`,`Only <b>${esc(S.name)}</b>’s Little Science Guardians progress is erased. Other games and players keep theirs. This can’t be undone.`)}</p>
+   <div class="row"><button class="btn ghost" type="button" data-act="close">${L('취소','Cancel')}</button><button class="btn red" type="button" data-act="yes">${L('지우기','Erase')}</button></div>`,{acts:{yes:()=>{const keep={name:S.name,av:S.av,diff:S.diff,gentle:S.gentle,gentleOffered:true};S={...fresh(),...keep};save();location.reload();return false}}}),
  }});
 }
 
@@ -3751,6 +3875,8 @@ function introStory(){
 applyLang();updateHud();ensureMissions();quietTrophies();$('homeLink').href='index.html?lang='+LANG;
 go('home');
 if(!S.intro)playerForm(S,{isNew:true});
+else if(S.diff<=2&&!S.gentle&&!S.gentleOffered){S.gentleOffered=true;save();modal(`<div style="font-size:56px">🍀</div><h2>${L('새 난이도: 보통 1','New level: Normal 1')}</h2><p>${S.diff===1?L('쉬움이 너무 쉬웠나요? <b>보통 1</b>은 3학년을 시작하는 친구를 위한 단계예요. 3학년 내용과 복습 문제가 섞여 나오고, 보기 3개·하트 4개로 도와줘요.','Is Easy too easy? <b>Normal 1</b> is for children starting grade 3: grade 3 ideas mixed with review, with 3 choices and 4 hearts.'):L('보통이 조금 어려웠나요? <b>보통 1</b>은 3학년을 시작하는 친구를 위한 단계예요. 3학년 내용과 복습 문제가 섞여 나오고, 보기 3개·하트 4개로 도와줘요.','Is Normal a bit hard? <b>Normal 1</b> is for children starting grade 3: grade 3 ideas mixed with review, with 3 choices and 4 hearts.')}</p>
+  <div class="row"><button class="btn ghost" type="button" data-act="close">${L('지금 그대로','Keep my level')}</button><button class="btn gold" type="button" data-act="g">🍀 ${L('보통 1로 하기','Use Normal 1')}</button></div>`,{acts:{g:()=>{setDiff('g')}}})}
 else{if(ROOT.order.length>1)toast(`${esc(S.av)} ${esc(L(`${S.name} 대원으로 시작해요. 얼굴을 누르면 바꿀 수 있어요`,`Playing as ${S.name}. Tap the face to switch`))}`);dailyLogin()}
 window.addEventListener('beforeunload',()=>save());
 

@@ -899,6 +899,8 @@ main{width:min(980px,100%);margin:0 auto;padding:14px max(12px,env(safe-area-ins
 .ty-give .t{display:flex;flex-direction:column;min-width:0}
 .ty-give b{font-size:15.5px;font-weight:900;line-height:1.25}
 .ty-give small{font-size:12.5px;font-weight:800;opacity:.92}
+.ty-give.food{background:linear-gradient(180deg,#ffbf5e,#ff8a1f);box-shadow:0 5px 0 #d66a00,0 10px 18px rgba(214,106,0,.3)}
+.ty-give.food:active{box-shadow:0 2px 0 #d66a00}
 .ty-give:nth-child(2){background:linear-gradient(180deg,#6cc4ff,var(--brand));box-shadow:0 5px 0 var(--brand-d),0 10px 18px rgba(23,100,184,.3)}
 /*SHOPCSS:END*/
 </style>
@@ -5284,6 +5286,17 @@ function resize(){if(!Y)return;const r=Y.el.ty.getBoundingClientRect(),cw=Math.m
  Y.cw=cw;Y.ch=ch;Y.k=cl(Math.min(cw/330,ch/600),.8,1.35);
  const dpr=Math.min(window.devicePixelRatio||1,2);Y.dpr=dpr;Y.el.cv.width=Math.round(cw*dpr);Y.el.cv.height=Math.round(ch*dpr)}
 const iso=(x,y)=>[(x-y)*TW/2,(x+y)*TH/2];
+// a tap on a picture means that thing: the frontmost table, seated diner, machine, stand or lab under the finger
+function thingAt(px,py){const sx=(px-Y.cw/2)/Y.k+Y.cam[0],sy=(py-Y.ch*.5)/Y.k+Y.cam[1],hits=[];
+ const box=(x,y,hw,top,bot,o)=>{const [cx,cy]=iso(x,y);if(Math.abs(sx-cx)<hw&&sy>cy-top&&sy<cy+bot)hits.push([x+y,o])};
+ Y.tables.forEach(t=>{if(tableOn(t))box(t.x+.5,t.y+.5,44,74,16,{k:'table',t})});
+ Y.diners.forEach(d=>{if(d.state==='sit'||d.state==='eat')box(d.x,d.y,22,70,4,{k:'table',t:Y.tables[d.t]})});
+ // a machine is its body plus the thin stack of food on top
+ Y.mach.forEach(m=>{if(!machOn(m))return;box(m.x+.5,m.y+.5,36,58,22,{k:'mach',m});box(m.x+.5,m.y+.5,14,66+m.n*12,0,{k:'mach',m})});
+ Y.shelf.forEach(s=>box(s.x+.5,s.y+.5,38,86,22,{k:'shelf',s}));
+ box(LAB.x+.5,LAB.y+.5,42,76,22,{k:'lab'});
+ hits.sort((a,b)=>b[0]-a[0]);return hits.length?hits[0][1]:null}
+function goThing(o){const [x,y]=o.k==='table'?[o.t.x,o.t.y]:o.k==='mach'?[o.m.zx,o.m.zy]:o.k==='shelf'?[o.s.zx,o.s.zy]:[LAB.zx,LAB.zy];route(x+.5,y+.5)}
 function toTile(px,py){const sx=(px-Y.cw/2)/Y.k+Y.cam[0],sy=(py-Y.ch*.5)/Y.k+Y.cam[1];return [(sy/(TH/2)+sx/(TW/2))/2,(sy/(TH/2)-sx/(TW/2))/2]}
 const free=(x,y)=>x>=.3&&y>=.3&&x<=MW-.3&&y<=MH-.3&&!blocked(Math.floor(x),Math.floor(y));
 const freeR=(x,y)=>{const r=.22;return free(x-r,y-r)&&free(x+r,y-r)&&free(x-r,y+r)&&free(x+r,y+r)};
@@ -5341,6 +5354,8 @@ function actsUI(){if(!Y)return;const O=Y.O,box=Y.el.acts;let html='';
  if(O&&!O.done&&Y.phase==='open'&&topSci()>=0){const wait=Y.cust.filter(c=>c.state==='wait');
   if(O.t==='sort')html=wait.sort((a,b)=>a.bin-b.bin).map(c=>`<button type="button" class="ty-give" data-give="${Y.cust.indexOf(c)}"><span class="w">${c.e}</span><span class="t"><b>${richE(c.sign[0])} ${esc(c.sign[1])}</b><small>${L('이 손님께 주기','Give it to this customer')}</small></span></button>`).join('');
   else{const c=custFor(6);if(c)html=`<button type="button" class="ty-give one" data-give="${Y.cust.indexOf(c)}"><span class="w">${c.e}</span><span class="t"><b>${O.t==='predict'||O.t==='explore'?L('📋 손님께 결과 알려 주기','📋 Tell the customer the result'):L('🛎️ 손님께 건네기','🛎️ Hand it to the customer')}</b>${c.sign?`<small>${richE(c.sign[0])} ${esc(c.sign[1])}</small>`:''}</span></button>`}}
+ if(!html&&Y.phase==='open'){const t=foodTable();if(t&&!atTable(t)){const fd=Y.hold.filter(h=>h.food).map(h=>h.food),d=Y.diners.find(d=>d.state==='sit'&&d.t===t.i&&fd.some(f=>(d.want[f]||0)>(d.got[f]||0)));
+  html=`<button type="button" class="ty-give one food" data-food="${t.i}"><span class="w">${d.e}</span><span class="t"><b>${L('🍽️ 손님께 음식 갖다 주기','🍽️ Take the food to the diner')}</b><small>${[...new Set(fd.filter(f=>(d.want[f]||0)>(d.got[f]||0)))].map(f=>FOOD[f]).join(' ')} ${L('기다리는 손님이 있어요','A diner is waiting')}</small></span></button>`}}
  if(html!==Y.actsHtml){Y.actsHtml=html;box.innerHTML=html;box.classList.toggle('hidden',!html)}}
 function caption(ic,txt,good,say){if(!Y)return;const c=Y.el.cap;c.className='ty-cap'+(good===true?' good':good===false?' bad':'');c.innerHTML=`<span class="ic">${richE(ic)}</span><span>${esc(txt)}</span>`;void c.offsetWidth;c.classList.add('in');if(say!==false)speak(txt)}
 function banner(html,ms){if(!Y)return;const b=Y.el.ban;b.innerHTML=html;b.classList.remove('hidden','in');void b.offsetWidth;b.classList.add('in');clearTimeout(Y.banT);Y.banT=setTimeout(()=>{if(Y)b.classList.add('hidden')},ms)}
@@ -5355,9 +5370,11 @@ function zoneAt(){const me=Y.me,tx=Math.floor(me.x),ty=Math.floor(me.y);
  if(tx===LAB.zx&&ty===LAB.zy)return {k:'lab'};
  if(tx===CCOL&&ty>=5&&ty<=7)return {k:'counter',col:ty};
  if(tx===COINS.x&&ty===COINS.y)return {k:'coins'};
- const m=Y.mach.find(m=>machOn(m)&&m.zx===tx&&m.zy===ty);if(m)return {k:'mach',m};
- const t=Y.tables.find(t=>tableOn(t)&&t.zx===tx&&t.zy===ty);if(t)return {k:'table',t};
  const pd=pads().find(p=>p.x===tx&&p.y===ty);if(pd)return {k:'pad',u:pd.u};
+ // in the café any spot right beside a machine or a table works
+ const near=(list,r)=>{let best=null,bd=r;for(const o of list){const d=Math.hypot(o.x+.5-me.x,o.y+.5-me.y);if(d<bd){bd=d;best=o}}return best};
+ const m=near(Y.mach.filter(machOn),1.3);if(m)return {k:'mach',m};
+ const t=near(Y.tables.filter(tableOn),1.65);if(t)return {k:'table',t};
  return null}
 const zoneKey=z=>z?z.k+(z.s?z.s.i:'')+(z.col||'')+(z.m?z.m.id:'')+(z.t?z.t.i:'')+(z.u?z.u.id:''):'';
 // the next three upgrades on sale, each on its own tile
@@ -5426,7 +5443,19 @@ function closing(){if(!Y)return;Y.O=null;Y.phase='closing';Y.cust=[];Y.el.order.
   setTimeout(()=>{if(Y)shopNext()},3000)},2200)}
 
 // ---------------------------------------------------------------- the burger café: machines, diners, helpers
-function takeFood(m){if(m.n<=0||Y.hold.length>=capOf()+2||Y.hold.filter(h=>h.food).length>=capOf())return;m.n--;Y.hold.push({e:m.e,food:m.id});SFX.click();fly(m.e,m.x+.5,m.y+.3,'me');handUI()}
+// the nearest table with a seated diner who wants food you carry
+function foodTable(){const fd=Y.hold.filter(h=>h.food);if(!fd.length)return null;let best=null,bd=1e9;
+ for(const d of Y.diners){if(d.state!=='sit'||!fd.some(h=>(d.want[h.food]||0)>(d.got[h.food]||0)))continue;const t=Y.tables[d.t],dist=Math.hypot(t.x+.5-Y.me.x,t.y+.5-Y.me.y);if(dist<bd){bd=dist;best=t}}return best}
+const atTable=t=>Math.hypot(t.x+.5-Y.me.x,t.y+.5-Y.me.y)<1.65;
+// how many more of a food the diners still need, after what you and the helpers already carry
+function foodNeed(f){let n=0;Y.diners.forEach(d=>{if(d.state==='sit'||d.state==='in')n+=Math.max(0,(d.want[f]||0)-(d.got[f]||0))});
+ Y.staff.forEach(s=>s.hold.forEach(h=>{if(h.food===f)n--}));Y.hold.forEach(h=>{if(h.food===f)n--});return n}
+function takeFood(m){const need=foodNeed(m.id),max=UN().fast?10:6;
+ if(need<0){const k=Y.hold.findIndex(h=>h.food===m.id);if(k<0)return;Y.hold.splice(k,1);m.n=Math.min(max,m.n+1);SFX.tick();fly(m.e,Y.me.x,Y.me.y,{x:m.x+.5,y:m.y+.3});handUI();return}
+ if(need===0){if(Y.saidFood!==Y.zoneKey&&Y.tookAt!==Y.zoneKey){Y.saidFood=Y.zoneKey;caption(m.e,L('지금은 이 음식을 기다리는 손님이 없어요. 손님 말풍선을 보세요!','No diner is waiting for this right now. Check the diners’ bubbles!'),null,false)}return}
+ if(m.n<=0)return;
+ if(Y.hold.length>=capOf()+2||Y.hold.filter(h=>h.food).length>=capOf()){if(Y.saidFood!==Y.zoneKey){Y.saidFood=Y.zoneKey;caption('🖐️',L('손이 꽉 찼어요! 먼저 테이블에 음식을 갖다 줘요.','Your hands are full! Take the food to a table first.'),null,false)}return}
+ m.n--;Y.hold.push({e:m.e,food:m.id});Y.tookAt=Y.zoneKey;SFX.click();fly(m.e,m.x+.5,m.y+.3,'me');handUI()}
 function serveTable(t,who,hold,mine){const ds=Y.diners.filter(d=>d.state==='sit'&&d.t===t.i);for(const d of ds)for(const [f,n] of Object.entries(d.want)){if((d.got[f]||0)>=n)continue;
   const k=hold.findIndex(h=>h.food===f);if(k<0)continue;hold.splice(k,1);d.got[f]=(d.got[f]||0)+1;fly(FOOD[f],who.x,who.y,d);SFX.tick();if(mine)handUI();
   if(Object.entries(d.want).every(([g,m])=>(d.got[g]||0)>=m)){d.state='eat';d.eatT=2.6;mood(d,'😋',2.6);SFX.good()}return true}return false}
@@ -5435,14 +5464,16 @@ function spawnDiner(){const un=UN(),menu=['burger',...(un.fries?['fries']:[]),..
  if(!seats.length)return;const [t,k]=pk(seats),want={},n=(S.shopX.days||1)<2?1:pk([1,1,2,2,3]);for(let j=0;j<n;j++){const f=pk(menu);want[f]=(want[f]||0)+1}
  const [sx,sy]=t.seats[k];Y.diners.push({e:pk(PALS),t:t.i,k,x:MW+.8,y:sy,sx,sy,state:'in',want,got:{},ph:rnd(0,6),mood:'',moodT:0,col:pk(['#ff6a5a','#4cb4ff','#3cb878','#ffb020','#a66bff','#ff8ad8'])})}
 function stepDiners(dt){if(Y.phase==='open'&&Y.ses.mode!=='review'&&(Y.spawnT-=dt)<0){Y.spawnT=rnd(4.5,7.5);spawnDiner()}
- for(const d of Y.diners){d.ph+=dt*3;if(d.moodT>0&&(d.moodT-=dt)<=0)d.mood='';
+ for(const d of Y.diners){d.ph+=dt*3;if(d.moodT>0&&(d.moodT-=dt)<=0)d.mood='';if(d.state==='sit')d.sitT=(d.sitT||0)+dt;
   if(d.state==='in'||d.state==='out'){const tx=d.state==='in'?d.sx:MW+1.2,ty=d.sy,dx=tx-d.x,dy=ty-d.y,dd=Math.hypot(dx,dy);if(dd>.05){const v=Math.min(dd,1.8*dt);d.x+=dx/dd*v;d.y+=dy/dd*v;d.walk=true}else{d.walk=false;if(d.state==='in')d.state='sit';else d.state='gone'}}
   else if(d.state==='eat'&&(d.eatT-=dt)<0){const t=Y.tables[d.t],sum=Object.entries(d.want).reduce((a,[f,n])=>a+n*MACH.find(m=>m.id===f).price,0)+shopLv();t.coins+=sum;pop(t.x+.5,t.y+.5,`+${sum}`,'#d99a00');SFX.coin();d.state='out';mood(d,'💖',2)}}
  Y.diners=Y.diners.filter(d=>d.state!=='gone')}
 function stepMachines(dt){const fast=UN().fast,max=fast?10:6,rate=fast?.9:1.5;for(const m of Y.mach){if(!machOn(m))continue;if(m.n<max&&(m.t+=dt)>rate){m.t=0;m.n++}}}
-// helpers carry food: from the machine with what a seated diner still needs, to that table
+// helpers carry food: from the machine with what a seated diner still needs, to that table.
+// They leave a new diner to you for a few seconds, so the café stays yours to run.
 function stepStaff(dt){const sp=2.3;for(const s of Y.staff){s.ph+=dt*10;
- if(!s.goal){const need=[];Y.diners.forEach(d=>{if(d.state!=='sit')return;for(const [f,n] of Object.entries(d.want)){const left=n-(d.got[f]||0)-Y.staff.filter(o=>o!==s&&o.for===d).length;if(left>0)need.push([d,f])}});
+ if(!s.goal){const need=[],mine={};Y.hold.forEach(h=>{if(h.food)mine[h.food]=(mine[h.food]||0)+1});
+  Y.diners.forEach(d=>{if(d.state!=='sit'||(d.sitT||0)<4)return;for(const [f,n] of Object.entries(d.want)){let left=n-(d.got[f]||0)-Y.staff.filter(o=>o!==s&&o.for===d).length;while(left>0&&mine[f]>0){mine[f]--;left--}if(left>0)need.push([d,f])}});
   if(s.hold.length){const t=Y.tables.find(t=>Y.diners.some(d=>d.state==='sit'&&d.t===t.i&&s.hold.some(h=>(d.want[h.food]||0)>(d.got[h.food]||0))));if(t)s.goal={k:'table',t,x:t.zx+.5,y:t.zy+.5};else s.hold=[]}
   else if(need.length){const [d,f]=need[0],m=Y.mach.find(m=>m.id===f&&machOn(m));if(m){s.goal={k:'mach',m,f,x:m.zx+.5,y:m.zy+.5};s.for=d}}
   else{if((s.wait-=dt)<0){s.wait=2;s.goal={k:'idle',x:rnd(8.6,9.4),y:rnd(1.5,9.5)}}}}
@@ -5572,7 +5603,7 @@ function draw(){const c=Y.ctx,me=Y.me,un=UN(),O=Y.O;c.lineJoin='round';
  const sciHold=Y.hold.some(h=>!h.food);
  for(let y=5;y<=7;y++)zl(CCOL,y,sciHold?`rgba(51,196,107,${.22+.18*pulse})`:'rgba(51,196,107,.14)');
  Y.mach.forEach(m=>{if(machOn(m))zl(m.zx,m.zy,'rgba(255,140,60,.16)')});
- Y.tables.forEach(t=>{if(tableOn(t))zl(t.zx,t.zy,'rgba(255,140,60,.16)')});
+ const ft=foodTable();Y.tables.forEach(t=>{if(!tableOn(t))return;const [x,y]=iso(t.x+.5,t.y+.5);c.fillStyle=t===ft?`rgba(255,150,40,${.25+.2*pulse})`:'rgba(255,140,60,.12)';c.beginPath();c.ellipse(x,y,66,33,0,0,TAU);c.fill()});
  if(O&&(O.t==='predict'||O.t==='explore')&&!O.lab)zl(LAB.zx,LAB.zy,`rgba(160,100,255,${.2+.2*pulse})`);
  if(Y.ripple&&Y.t-Y.ripple.t<.6){const [x,y]=iso(Y.ripple.x,Y.ripple.y),k=(Y.t-Y.ripple.t)/.6;c.strokeStyle=`rgba(58,142,230,${1-k})`;c.lineWidth=2;c.beginPath();c.ellipse(x,y,6+k*26,3+k*13,0,0,TAU);c.stroke();c.lineWidth=1}
  // everything that stands up, back to front
@@ -5595,7 +5626,8 @@ function draw(){const c=Y.ctx,me=Y.me,un=UN(),O=Y.O;c.lineJoin='round';
  D.sort((a,b)=>a[0]-b[0]).forEach(o=>o[1]());
  // guide arrow
  let ar=null;if(O&&!O.done){if(sciHold&&!(O.t==='sort'&&Y.blockCust>=0))ar=[CCOL+.5,6.5];else if((O.t==='predict'||O.t==='explore')&&!O.lab)ar=[LAB.zx+.5,LAB.zy+.5]}
- if(ar){const [x,y]=iso(...ar);emo(c,'⬇️',x,y-40+Math.sin(Y.t*6)*5,22)}
+ if(!ar){const t=foodTable();if(t&&!atTable(t))ar=[t.x+.5,t.y+.5,104]}
+ if(ar){const [x,y]=iso(ar[0],ar[1]);emo(c,'⬇️',x,y-(ar[2]||40)+Math.sin(Y.t*6)*5,22)}
  // food flying into hands and onto tables
  for(const f of Y.fly){const [ax,ay]=iso(f.fx,f.fy),to=f.tx==='me'?iso(me.x,me.y):iso(f.tx.x,f.tx.y),bx=to[0],by=to[1]-50,k=f.t,x=ax+(bx-ax)*k,y=ay-30+(by-ay+30)*k-Math.sin(k*Math.PI)*40;emo(c,f.e,x,y,20)}
  for(const p of Y.confetti){const [x,y]=iso(p.x,p.y);c.fillStyle=p.c;c.fillRect(x-3,y-p.z-2,6,4)}
@@ -5685,9 +5717,9 @@ function listen(){const cv=Y.el.cv,on=(t,ev,fn,o)=>{t.addEventListener(ev,fn,o);
   if(j.on){const m=Math.min(d,46);j.dx=dx/(d||1)*m/46;j.dy=dy/(d||1)*m/46;Y.el.joy.firstChild.style.transform=`translate(${j.dx*30}px,${j.dy*30}px)`}});
  const up=e=>{const j=Y&&Y.joy;if(!j||j.id!==e.pointerId)return;if(!j.on&&performance.now()-j.t0<450&&Y.phase==='open'){
   const hit=Y.cust.filter(c=>c.state==='wait').find(c=>{const [sx,sy]=scr(c.x,c.y,30);return Math.hypot(sx-j.px,sy-j.py)<30*Y.k});
-  if(hit)giveTo(hit);else{const [tx,ty]=toTile(j.px,j.py);route(tx,ty)}}Y.joy=null;Y.el.joy.classList.add('hidden')};
+  if(hit)giveTo(hit);else{const o=thingAt(j.px,j.py);if(o){SFX.click();goThing(o)}else{const [tx,ty]=toTile(j.px,j.py);route(tx,ty)}}}Y.joy=null;Y.el.joy.classList.add('hidden')};
  on(cv,'pointerup',up);on(cv,'pointercancel',up);
- on(Y.el.acts,'click',e=>{const b=e.target.closest('[data-give]');if(b&&Y)giveTo(Y.cust[+b.dataset.give])});
+ on(Y.el.acts,'click',e=>{const b=e.target.closest('[data-give]');if(b&&Y)giveTo(Y.cust[+b.dataset.give]);const f=e.target.closest('[data-food]');if(f&&Y){SFX.click();const t=Y.tables[+f.dataset.food];route(t.x+.5,t.y+.5)}});
  on(Y.el.order,'click',()=>{const O=Y&&Y.O;if(!O)return;SFX.click();caption(O.X.who,T(O.X.hook)+' '+T(O.p.ask),null,true)});
  on(Y.el.lab,'click',e=>{if(e.target.closest('[data-tyx]')){SFX.click();Y.el.lab.classList.add('hidden');Y.zoneKey='x';stopVoice()}});
  on(Y.el.ban,'click',()=>{const O=Y&&Y.O;if(!O)return;const c=CARD[O.id];speak(c.title+'. '+c.text)});

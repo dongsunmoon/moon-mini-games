@@ -5234,7 +5234,7 @@ const DECOR=['🧸','📒','🖍️','🧴','🔦','🎈','🧃','🪀'];
 const FOOD={burger:'🍔',fries:'🍟',drink:'🥤'};
 // pictures from images/ (step 14 of the prompt file): customers are waist-up like the player, legs are drawn here.
 // Add a key to SHOP_HAVE once its file is in images/; until then customers and furniture are drawn from emoji and boxes.
-const SHOP_HAVE=new Set(['shop-stand','shop-counter','shop-lab',...['bear','squirrel','fox','turtle','owl','bunny','panda','scientist','puppy','farmer','hedgehog','penguin','koala','raccoon','hamster','frog','otter','pig','tiger','monkey'].map(k=>'cust-'+k)]);
+const SHOP_HAVE=new Set(['shop-stand','shop-counter','shop-lab','shop-grill','shop-fries','shop-drink','shop-table',...['bear','squirrel','fox','turtle','owl','bunny','panda','scientist','puppy','farmer','hedgehog','penguin','koala','raccoon','hamster','frog','otter','pig','tiger','monkey'].map(k=>'cust-'+k)]);
 const CUST_KEY={'🐻':'bear','🐿️':'squirrel','🦊':'fox','🐢':'turtle','🦉':'owl','🐰':'bunny','🐇':'bunny','🐼':'panda','👩‍🔬':'scientist','🧑‍🔬':'scientist','🐶':'puppy','🧑‍🌾':'farmer','🦔':'hedgehog','🐧':'penguin','🐨':'koala','🦝':'raccoon','🐹':'hamster','🐸':'frog','🦦':'otter','🐷':'pig','🐯':'tiger','🐵':'monkey'};
 const PICS={};
 const cl=(v,a,b)=>v<a?a:v>b?b:v,rnd=(a,b)=>a+Math.random()*(b-a);
@@ -5529,12 +5529,14 @@ function tint(h,a){const n=parseInt(h.slice(1),16),r=n>>16,g=n>>8&255,b=n&255,f=
 // emoji, or a picture for @name (the 3D one once it is in images/, the drawn icon until then)
 const ICO={};
 function icoImg(n){if(!ICO[n]){const svg=(ICON_SVG[n]||'').replace('<svg ','<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" ');ICO[n]=img(ICO_HAVE.has(n)?`images/sci-ico-${n}.webp`:'data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg))}return ok_(ICO[n])?ICO[n]:null}
-function emo(c,e,x,y,size){if(e&&e.includes('@')){const parts=e.split(/(@[a-z]+)/).filter(Boolean);let w=0;const ws=parts.map(p=>{let v;if(p[0]==='@')v=size;else{c.font=`${size}px ${EF}`;v=c.measureText(p).width}w+=v;return v});let px=x-w/2;
+// color emoji take the alpha of the current fill color, so draw them with an opaque one and put it back after
+function emo(c,e,x,y,size){const fs=c.fillStyle;c.fillStyle='#000';emo_(c,e,x,y,size);c.fillStyle=fs}
+function emo_(c,e,x,y,size){if(e&&e.includes('@')){const parts=e.split(/(@[a-z]+)/).filter(Boolean);let w=0;const ws=parts.map(p=>{let v;if(p[0]==='@')v=size;else{c.font=`${size}px ${EF}`;v=c.measureText(p).width}w+=v;return v});let px=x-w/2;
   parts.forEach((p,k)=>{if(p[0]==='@'){const im=icoImg(p.slice(1));if(im)c.drawImage(im,px,y-size/2,size,size)}else{c.font=`${size}px ${EF}`;c.textAlign='left';c.textBaseline='middle';c.fillText(p,px,y)}px+=ws[k]});return}
  c.font=`${size}px ${EF}`;c.textAlign='center';c.textBaseline='middle';c.fillText(e,x,y)}
 function label(c,t,x,y,bg,fg='#24304a'){c.font=`800 13px ${TF}`;const w=Math.min(96,c.measureText(t).width+12);c.fillStyle=bg;c.beginPath();c.roundRect(x-w/2,y-10,w,20,9);c.fill();c.strokeStyle='rgba(0,0,0,.08)';c.stroke();c.fillStyle=fg;c.textAlign='center';c.textBaseline='middle';c.fillText(t,x,y+.5,w-8)}
 function wallQuad(c,x0,y0,x1,y1,h0,h1,fill){const a=iso(x0,y0),b=iso(x1,y1);poly(c,[[a[0],a[1]-h0],[b[0],b[1]-h0],[b[0],b[1]-h1],[a[0],a[1]-h1]],fill)}
-function draw(){const c=Y.ctx,me=Y.me,un=UN(),O=Y.O;
+function draw(){const c=Y.ctx,me=Y.me,un=UN(),O=Y.O;c.lineJoin='round';
  const hw=Y.cw/2/Y.k,hh=Y.ch/2/Y.k,[mx,my]=iso(me.x,me.y),x0=-MH*TW/2+hw-40,x1=MW*TW/2-hw+40,y0=-110+hh-90,y1=(MW+MH)*TH/2-hh+110;
  const wx=x0>x1?(x0+x1)/2:cl(mx,x0,x1),wy=y0>y1?(y0+y1)/2:cl(my,y0,y1);Y.cam[0]+=(wx-Y.cam[0])*.1;Y.cam[1]+=(wy-Y.cam[1])*.1;
  c.setTransform(Y.dpr,0,0,Y.dpr,0,0);c.fillStyle='#52c3ff';c.fillRect(0,0,Y.cw,Y.ch);
@@ -5581,7 +5583,7 @@ function draw(){const c=Y.ctx,me=Y.me,un=UN(),O=Y.O;
  D.push([COINS.x+COINS.y+1,()=>drawPile(c)]);
  Y.mach.forEach(m=>{if(machOn(m))D.push([m.x+m.y+.9,()=>drawMach(c,m)])});
  Y.tables.forEach(t=>{if(tableOn(t))D.push([t.x+t.y+.95,()=>drawTable(c,t)])});
- if(un.plant)[[.5,10.5],[12.5,.5],[.5,.6],[12.5,10.4]].forEach(([x,y])=>D.push([x+y,()=>{const [a,b]=iso(x,y);emo(c,'🪴',a,b-16,32)}]));
+ if(un.plant)[[.5,10.5],[10.5,.5],[.5,.6],[12.5,10.4]].forEach(([x,y])=>D.push([x+y,()=>{const [a,b]=iso(x,y);emo(c,'🪴',a,b-16,32)}]));
  Y.diners.forEach(d=>D.push([d.x+d.y+(d.state==='sit'||d.state==='eat'?.02:0),()=>drawDiner(c,d)]));
  Y.cust.forEach(p=>{if(p.state!=='gone')D.push([p.x+p.y,()=>drawCust(c,p)])});
  Y.staff.forEach(s=>D.push([s.x+s.y,()=>drawStaff(c,s)]));
@@ -5626,7 +5628,7 @@ function drawMach(c,m){const fast=UN().fast,max=fast?10:6,[x,y]=iso(m.x+.5,m.y+.
  for(let k=0;k<m.n;k++)emo(c,m.e,x,y-52-k*12,22);
  if(m.n>=max){c.font=`900 13px ${TF}`;c.fillStyle='#e0533d';c.textAlign='center';c.lineWidth=3;c.strokeStyle='#fff';c.strokeText('MAX',x,y-64-m.n*12);c.fillText('MAX',x,y-64-m.n*12);c.lineWidth=1}}
 function drawTable(c,t){const [x,y]=iso(t.x+.5,t.y+.5),[,by]=iso(t.x+1,t.y+1);
- if(furn(c,'table',x,by+4,72)){const n=Math.round(t.coinShow);if(n>0){const h=coinStack(c,x+14,y-22,n);label(c,`🪙 ${n}`,x+14,y-38-h*4,'#fff6d0')}return}
+ if(furn(c,'table',x,by-1,88)){const n=Math.round(t.coinShow);if(n>0){const h=coinStack(c,x+14,y-22,n);label(c,`🪙 ${n}`,x+14,y-38-h*4,'#fff6d0')}return}
  c.fillStyle='#5ab0e6';c.fillRect(x-3,y-18,6,18);c.fillStyle='rgba(0,0,0,.12)';c.beginPath();c.ellipse(x,y,22,11,0,0,TAU);c.fill();
  c.fillStyle='#ffffff';c.beginPath();c.ellipse(x,y-20,30,15,0,0,TAU);c.fill();c.strokeStyle='#dfe7f3';c.lineWidth=2;c.stroke();c.lineWidth=1;
  const n=Math.round(t.coinShow);if(n>0){const h=coinStack(c,x+14,y-22,n);label(c,`🪙 ${n}`,x+14,y-38-h*4,'#fff6d0')}}
@@ -5652,7 +5654,8 @@ function bubble(c,x,ty,m){c.font=`900 14px ${TF}`;const w=Math.max(34,c.measureT
  if(/^[\d/ ✓?×]+$/.test(m)){c.fillStyle='#24304a';c.textAlign='center';c.textBaseline='middle';c.fillText(m,x,ty-12)}else emo(c,m,x,ty-12,16)}
 function drawDiner(c,d){const [x,y]=iso(d.x,d.y);
  if(d.state==='sit'||d.state==='eat'){const bob=Math.sin(d.ph*.4),pc=shopPic('cust-'+CUST_KEY[d.e]);let ty=y-58;
-  if(pc){const h=44,w=h*pc.naturalWidth/pc.naturalHeight;c.drawImage(pc,x-w/2,y-6-h-bob,w,h);ty=y-6-h-bob-2}else{c.fillStyle=d.col;c.beginPath();c.roundRect(x-11,y-30-bob,22,20,9);c.fill();emo(c,d.e,x,y-40-bob,28)}if(d.mood){bubble(c,x,ty,d.mood);return}
+  // with the table picture the diner sits up on its stool
+  const up=shopPic('shop-table')?18:6;if(pc){const h=44,w=h*pc.naturalWidth/pc.naturalHeight;c.drawImage(pc,x-w/2,y-up-h-bob,w,h);ty=y-up-h-bob-2}else{c.fillStyle=d.col;c.beginPath();c.roundRect(x-11,y-30-bob,22,20,9);c.fill();emo(c,d.e,x,y-40-bob,28)}if(d.mood){bubble(c,x,ty,d.mood);return}
   const left=Object.entries(d.want).map(([f,n])=>[f,n-(d.got[f]||0)]).filter(([,n])=>n>0);if(!left.length)return;
   const w=8+left.length*30;c.fillStyle='#ffffff';c.beginPath();c.roundRect(x-w/2,ty-26,w,26,10);c.fill();c.beginPath();c.moveTo(x-5,ty);c.lineTo(x+5,ty);c.lineTo(x,ty+6);c.fill();
   left.forEach(([f,n],k)=>{const bx=x-w/2+19+k*30;emo(c,FOOD[f],bx-3,ty-13,17);if(n>1){c.font=`900 11px ${TF}`;c.fillStyle='#e0533d';c.fillText(n,bx+10,ty-6)}});return}

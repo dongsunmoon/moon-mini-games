@@ -5286,16 +5286,18 @@ function resize(){if(!Y)return;const r=Y.el.ty.getBoundingClientRect(),cw=Math.m
  Y.cw=cw;Y.ch=ch;Y.k=cl(Math.min(cw/330,ch/600),.8,1.35);
  const dpr=Math.min(window.devicePixelRatio||1,2);Y.dpr=dpr;Y.el.cv.width=Math.round(cw*dpr);Y.el.cv.height=Math.round(ch*dpr)}
 const iso=(x,y)=>[(x-y)*TW/2,(x+y)*TH/2];
-// a tap on a picture means that thing: the frontmost table, seated diner, machine, stand or lab under the finger
-function thingAt(px,py){const sx=(px-Y.cw/2)/Y.k+Y.cam[0],sy=(py-Y.ch*.5)/Y.k+Y.cam[1],hits=[];
- const box=(x,y,hw,top,bot,o)=>{const [cx,cy]=iso(x,y);if(Math.abs(sx-cx)<hw&&sy>cy-top&&sy<cy+bot)hits.push([x+y,o])};
+// a tap on a picture means that thing: a table, seated diner, machine, stand with goods or the lab.
+// Pictures overlap (the lab sits right behind a stand), so of all boxes under the finger the one whose
+// middle is closest wins, and the lab always wins while the order needs an experiment.
+function thingAt(px,py){const sx=(px-Y.cw/2)/Y.k+Y.cam[0],sy=(py-Y.ch*.5)/Y.k+Y.cam[1],hits=[],O=Y.O;
+ const box=(x,y,hw,top,bot,o,first)=>{const [cx,cy]=iso(x,y);if(Math.abs(sx-cx)<hw&&sy>cy-top&&sy<cy+bot)hits.push([Math.hypot((sx-cx)/hw,(sy-cy-(bot-top)/2)/((top+bot)/2))-(first?9:0),o])};
  Y.tables.forEach(t=>{if(tableOn(t))box(t.x+.5,t.y+.5,44,74,16,{k:'table',t})});
  Y.diners.forEach(d=>{if(d.state==='sit'||d.state==='eat')box(d.x,d.y,22,70,4,{k:'table',t:Y.tables[d.t]})});
  // a machine is its body plus the thin stack of food on top
  Y.mach.forEach(m=>{if(!machOn(m))return;box(m.x+.5,m.y+.5,36,58,22,{k:'mach',m});box(m.x+.5,m.y+.5,14,66+m.n*12,0,{k:'mach',m})});
- Y.shelf.forEach(s=>box(s.x+.5,s.y+.5,38,86,22,{k:'shelf',s}));
- box(LAB.x+.5,LAB.y+.5,42,76,22,{k:'lab'});
- hits.sort((a,b)=>b[0]-a[0]);return hits.length?hits[0][1]:null}
+ Y.shelf.forEach(s=>{if(s.g&&!s.g.sold&&!s.g.out)box(s.x+.5,s.y+.5,38,86,22,{k:'shelf',s})});
+ box(LAB.x+.5,LAB.y+.5,42,76,22,{k:'lab'},O&&!O.done&&(O.t==='predict'||O.t==='explore')&&!O.lab);
+ hits.sort((a,b)=>a[0]-b[0]);return hits.length?hits[0][1]:null}
 function goThing(o){const [x,y]=o.k==='table'?[o.t.x,o.t.y]:o.k==='mach'?[o.m.zx,o.m.zy]:o.k==='shelf'?[o.s.zx,o.s.zy]:[LAB.zx,LAB.zy];route(x+.5,y+.5)}
 function toTile(px,py){const sx=(px-Y.cw/2)/Y.k+Y.cam[0],sy=(py-Y.ch*.5)/Y.k+Y.cam[1];return [(sy/(TH/2)+sx/(TW/2))/2,(sy/(TH/2)-sx/(TW/2))/2]}
 const free=(x,y)=>x>=.3&&y>=.3&&x<=MW-.3&&y<=MH-.3&&!blocked(Math.floor(x),Math.floor(y));
@@ -5726,7 +5728,7 @@ function listen(){const cv=Y.el.cv,on=(t,ev,fn,o)=>{t.addEventListener(ev,fn,o);
  const key=e=>{if(!Y||$('modalRoot').innerHTML)return;const m={ArrowLeft:'l',ArrowRight:'r',ArrowUp:'u',ArrowDown:'d'}[e.key];if(!m)return;Y.keys[m]=e.type==='keydown';e.preventDefault()};
  on(window,'keydown',key);on(window,'keyup',key);on(window,'blur',()=>{if(Y)Y.keys={}});
  let rt=0;on(window,'resize',()=>{clearTimeout(rt);rt=setTimeout(resize,100)})}
-return {open,stop,get _y(){return Y},_route:(x,y)=>route(x,y),_tile:()=>Y&&[Y.me.x,Y.me.y]};
+return {open,stop,get _y(){return Y},_route:(x,y)=>route(x,y),_tile:()=>Y&&[Y.me.x,Y.me.y],_step:dt=>update(dt),_free:(x,y)=>freeR(x,y),_thing:(x,y)=>thingAt(x,y)};
 })();
 
 // The lab plays (shown on the lab table). Each gets its box, its data and api {fb, miss, done, alive}.

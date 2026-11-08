@@ -16,6 +16,11 @@
 /* Language: ?lang=ko|en, then the saved choice, then the device language. Shared by every page on this site. */
 const LANG=(()=>{let q=null,s=null;try{q=new URLSearchParams(location.search).get('lang')}catch(e){}try{s=localStorage.getItem('moonGames.lang')}catch(e){}const l=q==='ko'||q==='en'?q:s==='ko'||s==='en'?s:/^ko/i.test(navigator.language||'')?'ko':'en';if(q===l){try{localStorage.setItem('moonGames.lang',l)}catch(e){}}document.documentElement.lang=l;return l})();
 const L=(ko,en)=>LANG==='en'?en:ko;
+// Coach Moon, the maker's character, adds one cheering line to the biggest moments only
+const COACH={up:['clap',[['꾸준히 한 덕분이에요. 정말 멋져요!','Your steady practice paid off. Awesome!'],['어제보다 오늘 더 잘하고 있어요!','You’re doing even better than yesterday!'],['계속 도전해서 여기까지 왔어요!','You kept trying, and look how far you’ve come!']]],
+ big:['medal',[['정말 대단해요! 이 메달 받아요 🏅','Amazing! This medal is yours 🏅'],['최고예요! 오늘의 주인공이에요 🏅','The best! You’re the star today 🏅']]],
+ try:['go',[['괜찮아요! 연습하면 다음엔 메달이에요.','That’s okay! Keep practicing and a medal is next.'],['끝까지 해낸 게 멋져요. 다음에 또 해 봐요!','You finished, and that’s great. Let’s try again next time!']]]};
+const coachLine=k=>{const [pose,ls]=COACH[k],t=ls[Math.random()*ls.length|0];return `<div class="mcoach"><img src="images/coach-moon-${pose}.webp" alt="" width="58" height="70" onerror="this.parentNode.remove()"><p><b>${L('문 코치','Coach Moon')}</b>${L(t[0],t[1])}</p></div>`};
 function applyLang(){if(LANG!=='en')return;document.querySelectorAll('[data-en]').forEach(el=>{el.textContent=el.dataset.en});document.querySelectorAll('[data-en-html]').forEach(el=>{el.innerHTML=el.dataset.enHtml});for(const a of ['aria-label','placeholder','title'])document.querySelectorAll('[data-en-'+a+']').forEach(el=>el.setAttribute(a,el.getAttribute('data-en-'+a)))}
 function setLang(next){try{localStorage.setItem('moonGames.lang',next)}catch(e){}try{speechSynthesis.cancel()}catch(e){}const u=new URL(location.href);u.searchParams.set('lang',next);location.replace(u.href)}
 function wireLangTools(){const b=document.getElementById('langBtn');if(b){b.textContent=LANG==='en'?'🌐 한국어':'🌐 English';b.setAttribute('aria-label',LANG==='en'?'한국어로 바꾸기':'Switch to English');b.addEventListener('click',()=>setLang(LANG==='en'?'ko':'en'))}const h=document.getElementById('homeLink');if(h)h.href='index.html?lang='+LANG}
@@ -184,6 +189,11 @@ button,input,select{font:inherit}button{cursor:pointer;touch-action:manipulation
 @media(max-width:400px){.logo{display:none}.brand h1{font-size:19px}.me-chip{font-size:14px;padding-right:10px}.topbar-in{gap:8px}}
 @media(hover:none) and (pointer:coarse){.keys-hint{display:none}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{transition-duration:.01ms!important;animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important}.confetti-layer{display:none}}
+/* Coach Moon cheers inside the biggest moments */
+.mcoach{display:flex;align-items:flex-end;gap:8px;margin:10px auto 6px;max-width:330px;text-align:left}
+.mcoach img{width:58px;height:70px;object-fit:contain;object-position:50% 100%;flex:0 0 58px}
+.mcoach p{margin:0 0 6px;flex:1;background:#f2f5ff;border:1px solid #dfe5f7;border-radius:14px;padding:7px 11px;font-size:14px;font-weight:700;line-height:1.4;color:#34407a}
+.mcoach b{display:block;font-size:11.5px;font-weight:900;color:#5b6cff}
 </style>
 </head>
 <body>
@@ -820,14 +830,14 @@ function showResults(){
  const myKo=ME?esc(ME.name)+'의 구슬':'내 구슬',myEn=ME?esc(ME.name)+"'s marble":'Your marble';
  mineStats.races++;if(won)mineStats.wins++;
  const fmt=t=>{const s=Math.max(0,t);return `${Math.floor(s/60)}:${(s%60).toFixed(1).padStart(4,'0')}`};
- let table='',actions='',title,leagueDone=false,hero=champ.id,heroText=L(`${nameOf(champ.id)} 우승!`,`${nameOf(champ.id)} wins!`),heroSub='',mineLine=won?L(`🎉 ${myKo} ${esc(nameOf(mine))}이 우승했어요! 응원 대성공!`,`🎉 ${myEn} ${esc(nameOf(mine))} won! Great cheering!`):L(`${esc(MY)} ${myKo} ${esc(nameOf(mine))}은 ${myRank}위! 다음엔 1등 할 수 있어요!`,`${esc(MY)} ${myEn} ${esc(nameOf(mine))} came ${ord(myRank)}. It could win next time!`);
+ let table='',actions='',coachHtml='',title,leagueDone=false,hero=champ.id,heroText=L(`${nameOf(champ.id)} 우승!`,`${nameOf(champ.id)} wins!`),heroSub='',mineLine=won?L(`🎉 ${myKo} ${esc(nameOf(mine))}이 우승했어요! 응원 대성공!`,`🎉 ${myEn} ${esc(nameOf(mine))} won! Great cheering!`):L(`${esc(MY)} ${myKo} ${esc(nameOf(mine))}은 ${myRank}위! 다음엔 1등 할 수 있어요!`,`${esc(MY)} ${myEn} ${esc(nameOf(mine))} came ${ord(myRank)}. It could win next time!`);
  if(mode==='league'&&league&&!league.done){
   const pts=Array(numBalls).fill(0);rank.forEach((m,i)=>{pts[m.id]=POINTS[i]||0;league.total[m.id]+=POINTS[i]||0});league.last=pts;
   const k=league.race,order=[...Array(numBalls).keys()].sort((a,b)=>league.total[b]-league.total[a]||pts[b]-pts[a]);
   leagueDone=k>=LEAGUE_RACES;title=leagueDone?L('🏆 리그 최종 결과','🏆 Final league standings'):L(`리그 ${k}/${LEAGUE_RACES}경기 결과`,`League race ${k}/${LEAGUE_RACES}`);
   table=`<table class="standings"><tr><th></th><th style="text-align:left">${L('구슬','Marble')}</th><th>${L('이번','Race')}</th><th>${L('합계','Total')}</th></tr>${order.map((id,i)=>`<tr class="${id===mine?'mine':''}"><td>${i<3?['🥇','🥈','🥉'][i]:i+1}</td><td class="nm"><span class="dot" style="background:${PALETTE[id][1]}"></span>${esc(nameOf(id))}${id===mine?' '+esc(MY):''}</td><td class="pts">${pts[id]?'+'+pts[id]:'-'}</td><td class="tot">${league.total[id]}</td></tr>`).join('')}</table>`;
   if(leagueDone){league.done=true;const lc=order[0],lr=order.indexOf(mine)+1;hero=lc;heroText=L(`${nameOf(lc)} 리그 챔피언!`,`${nameOf(lc)} is the league champion!`);heroSub=L(`리그 합계 ${league.total[lc]}점`,`${league.total[lc]} league points`);
-   mineLine=lc===mine?L(`👑 ${myKo} ${esc(nameOf(mine))}이 리그 챔피언이에요!`,`👑 ${myEn} ${esc(nameOf(mine))} is the league champion!`):L(`${esc(MY)} ${myKo} ${esc(nameOf(mine))}은 리그 ${lr}위 (${league.total[mine]}점)!`,`${esc(MY)} ${myEn} ${esc(nameOf(mine))} finished the league ${ord(lr)} (${league.total[mine]} points)!`);setTimeout(()=>speak(fill(T.champ,lc),true),2600);
+   mineLine=lc===mine?L(`👑 ${myKo} ${esc(nameOf(mine))}이 리그 챔피언이에요!`,`👑 ${myEn} ${esc(nameOf(mine))} is the league champion!`):L(`${esc(MY)} ${myKo} ${esc(nameOf(mine))}은 리그 ${lr}위 (${league.total[mine]}점)!`,`${esc(MY)} ${myEn} ${esc(nameOf(mine))} finished the league ${ord(lr)} (${league.total[mine]} points)!`);if(lc===mine)coachHtml=coachLine('big');setTimeout(()=>speak(fill(T.champ,lc),true),2600);
    actions=`<div class="result-actions one"><button class="primary" type="button" data-act="newLeague">${L('🔁 새 리그 시작','🔁 New league')}</button></div>`}
   else{league.race++;setTimeout(()=>speak(fill(T.leagueNext,order[0],{k}),false),2600);
    actions=`<div class="result-actions one"><button class="primary" type="button" data-act="next">${L(`▶ 다음 경기 (${league.race}/${LEAGUE_RACES})`,`▶ Next race (${league.race}/${LEAGUE_RACES})`)}</button></div>`}
@@ -838,7 +848,7 @@ function showResults(){
  }
  $('resultCard').innerHTML=`<div class="trophy">🏆</div><h2>${title}</h2>${photo?`<span class="photo">📸 ${L('사진 판정','Photo finish')}</span>`:''}<div class="champ" style="background:${PALETTE[hero][1]};--c:${PALETTE[hero][1]}">${hero+1}</div>
   <div class="win-text" style="color:${PALETTE[hero][1]}">${esc(heroText)}</div><p class="win-sub">${heroSub?esc(heroSub)+' · ':''}${esc(theme.name)} · ${fmt((champ.finishTime||st.t)-st.raceT0)} · ${L(`역전 ${leadChanges}회`,`${leadChanges} lead change${leadChanges===1?'':'s'}`)}</p>
-  <p class="mine-result">${mineLine}<span class="mine-stats">${ME?esc(MY)+' '+L(esc(ME.name)+' · ',''):''}${L(`응원한 구슬 우승 ${mineStats.wins}번 / ${mineStats.races}경기`,`${myEn} won ${mineStats.wins} of ${mineStats.races} race${mineStats.races===1?'':'s'}`)}</span></p>${table}${actions}`;
+  <p class="mine-result">${mineLine}<span class="mine-stats">${ME?esc(MY)+' '+L(esc(ME.name)+' · ',''):''}${L(`응원한 구슬 우승 ${mineStats.wins}번 / ${mineStats.races}경기`,`${myEn} won ${mineStats.wins} of ${mineStats.races} race${mineStats.races===1?'':'s'}`)}</span></p>${coachHtml}${table}${actions}`;
  $('resultOverlay').classList.remove('hidden');confetti();if(won)setTimeout(jingle,600);
  save();setControls();updateLeagueUI();
  setCaption(L(`🏆 ${nameOf(champ.id)} 우승! 축하해요!`,`🏆 ${nameOf(champ.id)} wins! Congratulations!`));

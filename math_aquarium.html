@@ -16,6 +16,11 @@
 /* Language: ?lang=ko|en, then the saved choice, then the device language. Shared by every page on this site. */
 const LANG=(()=>{let q=null,s=null;try{q=new URLSearchParams(location.search).get('lang')}catch(e){}try{s=localStorage.getItem('moonGames.lang')}catch(e){}const l=q==='ko'||q==='en'?q:s==='ko'||s==='en'?s:/^ko/i.test(navigator.language||'')?'ko':'en';if(q===l){try{localStorage.setItem('moonGames.lang',l)}catch(e){}}document.documentElement.lang=l;return l})();
 const L=(ko,en)=>LANG==='en'?en:ko;
+// Coach Moon, the maker's character, adds one cheering line to the biggest moments only
+const COACH={up:['clap',[['꾸준히 한 덕분이에요. 정말 멋져요!','Your steady practice paid off. Awesome!'],['어제보다 오늘 더 잘하고 있어요!','You’re doing even better than yesterday!'],['계속 도전해서 여기까지 왔어요!','You kept trying, and look how far you’ve come!']]],
+ big:['medal',[['정말 대단해요! 이 메달 받아요 🏅','Amazing! This medal is yours 🏅'],['최고예요! 오늘의 주인공이에요 🏅','The best! You’re the star today 🏅']]],
+ try:['go',[['괜찮아요! 연습하면 다음엔 메달이에요.','That’s okay! Keep practicing and a medal is next.'],['끝까지 해낸 게 멋져요. 다음에 또 해 봐요!','You finished, and that’s great. Let’s try again next time!']]]};
+const coachLine=k=>{const [pose,ls]=COACH[k],t=ls[Math.random()*ls.length|0];return `<div class="mcoach"><img src="images/coach-moon-${pose}.webp" alt="" width="58" height="70" onerror="this.parentNode.remove()"><p><b>${L('문 코치','Coach Moon')}</b>${L(t[0],t[1])}</p></div>`};
 function applyLang(){if(LANG!=='en')return;document.querySelectorAll('[data-en]').forEach(el=>{el.textContent=el.dataset.en});for(const a of ['aria-label','placeholder','title'])document.querySelectorAll('[data-en-'+a+']').forEach(el=>el.setAttribute(a,el.getAttribute('data-en-'+a)))}
 function setLang(next){try{localStorage.setItem('moonGames.lang',next)}catch(e){}try{speechSynthesis.cancel()}catch(e){}const u=new URL(location.href);u.searchParams.set('lang',next);location.replace(u.href)}
 </script>
@@ -325,6 +330,9 @@ main{width:min(780px,100%);margin:0 auto;padding:10px max(12px,env(safe-area-ins
 .diploma{position:relative;border:6px double #d8a62a;border-radius:18px;padding:18px 14px;background:radial-gradient(circle at 50% 0,#fffbe8,#fff4cc);margin-bottom:10px}
 .dribbon{font-size:44px}.dname{font-size:28px;font-weight:900;color:#8a5a00;margin:4px 0}.dstats{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;font-weight:800;font-size:13px}.dstats span{background:#fff;border-radius:10px;padding:4px 8px}
 .dfish{display:flex;flex-direction:column;align-items:center;margin-top:8px}.dfish img{width:150px}.dstamp{margin-top:8px;font-size:12px;color:#a08040;font-weight:700}
+.dsign{display:flex;align-items:flex-end;justify-content:flex-end;gap:4px;margin:6px 4px 0;font-family:'Snell Roundhand','Brush Script MT',cursive;font-size:18px;font-weight:700;color:#8a5a00}
+.dsign img{width:46px;height:56px;object-fit:contain;object-position:50% 100%}
+.dsign span{border-bottom:1.5px solid #d8a62a;padding:0 6px 2px}
 .toasts{position:fixed;left:50%;bottom:calc(var(--nav) + env(safe-area-inset-bottom) + 10px);transform:translateX(-50%);z-index:70;display:flex;flex-direction:column;gap:6px;align-items:center;pointer-events:none;width:min(92vw,420px)}
 .toast{background:#1f2b55ee;color:#fff;border-radius:16px;padding:10px 14px;font-weight:800;font-size:14px;box-shadow:0 8px 20px rgba(0,0,0,.25);animation:rise2 .25s;text-align:center}.toast.out{opacity:0;transform:translateY(10px);transition:all .4s}
 body.staged .toasts{bottom:calc(14px + env(safe-area-inset-bottom))}
@@ -434,6 +442,11 @@ button:focus-visible,a:focus-visible,[tabindex]:focus-visible{outline:3px solid 
 .cl-land .cl-mv[data-c="l"]{position:absolute;left:max(14px,env(safe-area-inset-left));bottom:calc(16px + env(safe-area-inset-bottom))}
 .cl-land .cl-mv[data-c="r"]{position:absolute;left:calc(max(14px,env(safe-area-inset-left)) + 70px);bottom:calc(16px + env(safe-area-inset-bottom))}
 .cl-land .cl-drop{position:absolute;right:max(14px,env(safe-area-inset-right));bottom:calc(16px + env(safe-area-inset-bottom))}
+/* Coach Moon cheers inside the biggest moments */
+.mcoach{display:flex;align-items:flex-end;gap:8px;margin:10px auto 6px;max-width:330px;text-align:left}
+.mcoach img{width:58px;height:70px;object-fit:contain;object-position:50% 100%;flex:0 0 58px}
+.mcoach p{margin:0 0 6px;flex:1;background:#f2f5ff;border:1px solid #dfe5f7;border-radius:14px;padding:7px 11px;font-size:14px;font-weight:700;line-height:1.4;color:#34407a}
+.mcoach b{display:block;font-size:11.5px;font-weight:900;color:#5b6cff}
 </style>
 </head>
 <body>
@@ -9358,7 +9371,7 @@ const xpNeed=l=>50+l*35;
 const TITLES=[[1,'🐣','견습 사육사','Trainee keeper'],[3,'🐟','사육사','Keeper'],[6,'🐠','수석 사육사','Head keeper'],[10,'🎫','부관장','Deputy director'],[15,'🏛️','관장','Director'],[22,'🧮','수학 관장','Math director'],[30,'🌊','바다 박사','Ocean doctor'],[40,'👑','전설의 관장','Legendary director']];
 const titleOf=l=>{let t=TITLES[0];for(const x of TITLES)if(l>=x[0])t=x;return {icon:t[1],name:L(t[2],t[3])}};
 function addXP(n){S.xp+=n;let up=false;while(S.xp>=xpNeed(S.lvl)){S.xp-=xpNeed(S.lvl);S.lvl++;S.sp++;up=true}
- if(up){const t=titleOf(S.lvl);sfx('level');modal(`<div class="big">🎉</div><h2>${L(`관장 레벨 ${S.lvl}!`,`Director level ${S.lvl}!`)}</h2><p>${t.icon} ${esc(t.name)}</p><p>${L('스킬 포인트 1개를 받았어요. 본부에서 스킬을 올려 보세요!','You got 1 skill point. Level up a skill at headquarters!')}</p>`,{acts:{}});say(L(`레벨 ${S.lvl}! 정말 잘 크고 있어요!`,`Level ${S.lvl}! You are growing so fast!`));logEvent('🎉',`관장 레벨 ${S.lvl}`,`Director level ${S.lvl}`)}
+ if(up){const t=titleOf(S.lvl);sfx('level');modal(`<div class="big">🎉</div><h2>${L(`관장 레벨 ${S.lvl}!`,`Director level ${S.lvl}!`)}</h2><p>${t.icon} ${esc(t.name)}</p><p>${L('스킬 포인트 1개를 받았어요. 본부에서 스킬을 올려 보세요!','You got 1 skill point. Level up a skill at headquarters!')}</p>${coachLine(S.lvl%5===0?'big':'up')}`,{acts:{}});say(L(`레벨 ${S.lvl}! 정말 잘 크고 있어요!`,`Level ${S.lvl}! You are growing so fast!`));logEvent('🎉',`관장 레벨 ${S.lvl}`,`Director level ${S.lvl}`)}
  updateHud()}
 function earn(c,o={}){c=Math.round(c);if(!c)return;S.coins+=c;S.stats.earned+=c;if(o.pop!==false)popAt(o.at,`+${short(c)} ${COIN}`);updateHud()}
 const spend=(c,kind='coins')=>{if((S[kind]||0)<c){toast(kind==='coins'?L(`${COIN} 코인이 조금 모자라요`,`Not quite enough ${COIN} coins`):L(`${PEARL} 진주가 모자라요`,`Not enough ${PEARL} pearls`));sfx('bad');return false}S[kind]-=c;updateHud();save(true);return true};
@@ -10145,7 +10158,8 @@ function graduation(g){const gd=S.G[g];gd.grad=dayKey();const t=tier(g,19),coins
  const stars=gd.aq.reduce((x,a)=>x+a.best,0),probs=SKILLS.filter(s=>s.id.startsWith(`g${g}-`)).reduce((x,s)=>x+(S.sk[s.id]?S.sk[s.id].c:0),0);
  logEvent('🎓',`${g}학년 수학 마스터! 졸업!`,`Grade ${g} math mastered! Graduated!`);checkAch();save();sfx('fanfare');celebrate('confetti',70);setTimeout(()=>celebrate('stars',40),900);
  modal(`<div class="diploma"><div class="dribbon">🎓</div><h2>${L(`${g}학년 수학 마스터 인증서`,`Grade ${g} Math Master Certificate`)}</h2><p class="dname">${esc(S.name)}</p><p>${L(`위 관장님은 꼬마 수학 아쿠아리움에서 ${g}학년 수학 단원 20개를 모두 마스터하였기에 이 인증서를 드립니다.`,`This certifies that our director mastered all 20 Grade ${g} math skills at Little Math Aquarium.`)}</p>
-  <div class="dstats"><span>⭐ ${stars}/60</span><span>✏️ ${num(probs)}</span><span>📅 ${gd.started||''} → ${gd.grad}</span></div><div class="dfish">${fishImgTag(leg,'big')}<b>${esc(fishName(leg))}</b><small>${L('전설의 물고기가 찾아왔어요!','A legendary fish came to you!')}</small></div><div class="dstamp">© Little Math Aquarium · ${dayKey()}</div></div>
+  <div class="dstats"><span>⭐ ${stars}/60</span><span>✏️ ${num(probs)}</span><span>📅 ${gd.started||''} → ${gd.grad}</span></div><div class="dfish">${fishImgTag(leg,'big')}<b>${esc(fishName(leg))}</b><small>${L('전설의 물고기가 찾아왔어요!','A legendary fish came to you!')}</small></div><div class="dsign"><img src="images/coach-moon-medal.webp" alt="" width="46" height="56" onerror="this.remove()"><span>${L('문 코치','Coach Moon')}</span></div><div class="dstamp">© Little Math Aquarium · game.dongsunmoon.com · ${dayKey()}</div></div>
+  ${coachLine('big')}
   <div class="rew"><span>${COIN} +${short(coins)}</span><span>${PEARL} +20</span><span>${TICKET} +5</span><span>⚡ +2</span></div>
   ${g<6?`<button class="btn wide gold" data-act="next">${L(`${g+1}학년 바다로 출발!`,`Off to the Grade ${g+1} sea!`)} 🚗</button>`:`<p><b>${L('🎉 초등 수학 1~6학년을 모두 마스터했어요! 정말 대단해요!','🎉 You mastered all of elementary math, grades 1–6! Incredible!')}</b></p><button class="btn wide" data-act="close">${L('최고!','The best!')}</button>`}`,{cls:'wide',closable:g===6,acts:{next:()=>()=>{S.grade=g+1;startDrive({kind:'move',g:g+1,from:aqDef(g,19).name,to:aqDef(g+1,curIndex(g+1)).name,after:()=>arrive(g+1,curIndex(g+1))})}}});
  say(L(`축하해요! ${g}학년 수학을 모두 마스터했어요! 정말 자랑스러워요!`,`Congratulations! You mastered all of grade ${g} math! I’m so proud of you!`),{raw:true})}

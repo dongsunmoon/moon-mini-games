@@ -51,8 +51,25 @@ a{color:inherit}
 .lang button{font:inherit;font-size:14px;font-weight:800;border:0;border-radius:999px;padding:9px 15px;min-height:40px;background:transparent;color:var(--muted);cursor:pointer}
 .lang button[aria-pressed="true"]{background:var(--brand);color:var(--brand-ink)}
 .lang button:focus-visible,.card:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
-.hello{margin:22px 0 18px;font-size:clamp(16px,3.6vw,20px);font-weight:800;line-height:1.45}
-.hello span{color:var(--muted);font-weight:700;font-size:.82em;display:block;margin-top:2px}
+.hello{margin:0 0 14px;color:var(--muted);font-size:14px;font-weight:700}
+/* Coach Moon: the maker's character greets the player and cheers on progress since the last visit */
+.coach{display:flex;align-items:flex-end;gap:10px;margin:16px 0 10px}
+.co-pic{flex:0 0 112px;width:112px;height:136px;padding:0;border:0;background:none;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.co-pic img{width:100%;height:100%;object-fit:contain;object-position:50% 100%;display:block;filter:drop-shadow(0 8px 12px rgba(40,60,140,.2));transform-origin:50% 100%}
+.co-pic.pop img{animation:coIn .5s cubic-bezier(.2,1.5,.4,1)}
+.co-talk{position:relative;flex:1;min-width:0;background:#fff;border:1px solid var(--line);border-radius:22px;padding:11px 16px 14px;box-shadow:var(--shadow);margin-bottom:16px}
+.co-talk::before{content:"";position:absolute;left:-9px;bottom:24px;width:16px;height:16px;background:#fff;border-left:1px solid var(--line);border-bottom:1px solid var(--line);transform:rotate(45deg)}
+.co-name{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:13px;font-weight:900;color:var(--brand)}
+.co-say{font:inherit;font-size:18px;border:0;border-radius:12px;background:#f0f3ff;min-width:40px;min-height:36px;cursor:pointer}
+.co-msg{margin:2px 0 0;font-size:clamp(16px,3.8vw,19px);font-weight:800;line-height:1.45;overflow-wrap:anywhere}
+.co-acts:empty{display:none}
+.co-acts{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.co-go{display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:0 16px;border-radius:14px;background:var(--brand);color:#fff;text-decoration:none;font-weight:900;font-size:15.5px;box-shadow:0 5px 0 #3f4fd8}
+.co-go:active{transform:translateY(3px);box-shadow:0 2px 0 #3f4fd8}
+.co-go:focus-visible,.co-pic:focus-visible,.co-say:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+@keyframes coIn{0%{transform:scale(.7) translateY(12px);opacity:.2}100%{transform:none;opacity:1}}
+@media (max-width:480px){.co-pic{flex-basis:88px;width:88px;height:108px}.co-talk{padding:10px 13px 12px}}
+@media (prefers-reduced-motion:reduce){.co-pic.pop img{animation:none}}
 .games{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:18px}
 .card{display:flex;flex-direction:column;text-decoration:none;background:var(--card);border-radius:26px;overflow:hidden;border:1px solid var(--line);box-shadow:var(--shadow);transition:transform .18s ease,box-shadow .18s ease}
 .card:hover{transform:translateY(-4px);box-shadow:0 20px 40px rgba(54,72,160,.2)}
@@ -175,7 +192,15 @@ footer{margin-top:22px;text-align:center;color:#8a93b8;font-size:12px}
 
   <section class="who" id="who"></section>
 
-  <p class="hello"><b id="helloT">오늘은 어떤 게임을 해 볼까요? 🎮</b><span data-en="Tap a card to start right away.">카드를 누르면 바로 시작해요.</span></p>
+  <section class="coach" aria-label="문 코치" data-en-aria-label="Coach Moon">
+    <button type="button" class="co-pic" id="coPic" aria-label="문 코치에게 다른 이야기 듣기" data-en-aria-label="Ask Coach Moon for another tip"><img id="coImg" src="images/coach-moon-hi.webp" alt="" width="112" height="136"></button>
+    <div class="co-talk">
+      <div class="co-name"><span data-en="Coach Moon">문 코치</span><button type="button" class="co-say" id="coSay" aria-label="소리로 듣기" data-en-aria-label="Read aloud">🔊</button></div>
+      <p class="co-msg" id="coMsg" aria-live="polite"></p>
+      <div class="co-acts" id="coActs"></div>
+    </div>
+  </section>
+  <p class="hello" data-en="Tap a card to start right away.">카드를 누르면 바로 시작해요.</p>
 
   <main class="games" id="games" aria-label="게임 목록" data-en-aria-label="Games"></main>
 
@@ -188,7 +213,7 @@ footer{margin-top:22px;text-align:center;color:#8a93b8;font-size:12px}
     <img class="mk-photo" src="images/dm-profile.webp" alt="Dongsun Moon" width="84" height="84" loading="lazy">
     <div class="mk-text">
       <b data-en="Made by Dongsun Moon">만든 사람 · Dongsun Moon</b>
-      <p data-en="Hi, I'm Dongsun Moon. I'm making games one at a time where kids can have fun while they learn.">안녕하세요, Dongsun Moon이에요. 아이들이 즐겁게 배우며 놀 수 있는 게임을 하나씩 만들고 있어요.</p>
+      <p data-en="Hi, I'm Dongsun Moon, the real Coach Moon. I'm making games one at a time where kids can have fun while they learn.">안녕하세요, Dongsun Moon이에요. 게임에 나오는 문 코치가 바로 저예요. 아이들이 즐겁게 배우며 놀 수 있는 게임을 하나씩 만들고 있어요.</p>
     </div>
     <img class="mk-logo" src="images/dm-logo.webp" alt="" aria-hidden="true" width="60" height="60" loading="lazy">
   </section>
@@ -283,11 +308,11 @@ function renderGames(){document.getElementById('games').innerHTML=GAMES.map(g=>`
       <span class="play">▶ ${L('플레이','Play')}</span>
     </div>
   </a>`).join('');
- const m=me();$('helloT').textContent=m?L(`${m.name}, 오늘은 어떤 게임을 해 볼까요? 🎮`,`${m.name}, which game today? 🎮`):L('오늘은 어떤 게임을 해 볼까요? 🎮','Which game do you want to play today? 🎮')}
+ renderCoach()}
 function renderWho(){const el=$('who');
  if(!PROF.list.length){el.innerHTML=`<div class="psetup"><b>👨‍👩‍👧 ${L('프로필을 만들면 형제자매가 모든 게임 기록을 따로 가질 수 있어요!','Make a profile for each player so everyone keeps their own progress in every game!')}</b><button type="button" class="pbtn" data-pa="add">➕ ${L('프로필 만들기','Make a profile')}</button></div>`}
  else el.innerHTML=`<div class="pbar"><span class="plabel">🎮 ${L('지금 플레이하는 사람 (눌러서 바꿔요)','Now playing (tap to switch)')}</span><div class="pchips">${PROF.list.map(p=>`<button type="button" class="pchip ${p.id===PROF.cur?'on':''}" data-pid="${p.id}"><span class="pav">${esc(p.av)}</span><b>${esc(p.name)}</b></button>`).join('')}<button type="button" class="pchip add" data-pa="add" aria-label="${esc(L('프로필 추가','Add a profile'))}">➕</button><button type="button" class="pchip edit" data-pa="manage" aria-label="${esc(L('프로필 고치기','Edit profiles'))}">✏️</button></div></div>`}
-function choose(id){PROF.cur=id;saveProf();try{sessionStorage.setItem('moonGames.picked','1')}catch(e){}closeP();renderWho();renderGames()}
+function choose(id){PROF.cur=id;coachWait=false;saveProf();try{sessionStorage.setItem('moonGames.picked','1')}catch(e){}closeP();renderWho();renderGames()}
 // ---- small dialogs
 function openP(html,bind){$('pm').innerHTML=`<div class="pmask"><div class="pmodal" role="dialog">${html}</div></div>`;bind&&bind($('pm').querySelector('.pmodal'))}
 function closeP(){$('pm').innerHTML=''}
@@ -310,7 +335,7 @@ function manage(){openP(`<h2>✏️ ${L('프로필 고치기','Edit profiles')}<
 function confirmDelete(p){openP(`<h2>🗑️ ${L(`${esc(p.name)} 프로필을 지울까요?`,`Delete ${esc(p.name)}?`)}</h2><p>${L('이 프로필의 모든 게임 기록이 사라지고 되돌릴 수 없어요. 다른 프로필의 기록은 그대로 남아요.','All game progress for this profile will be gone for good. Other profiles keep theirs.')}</p>
  <div class="prow3"><button type="button" class="pbtn ghost" data-pa="cancel">${L('아니요','No')}</button><button type="button" class="pbtn red" data-pa="yes">${L('지울래요','Delete')}</button></div>`,
  box=>box.addEventListener('click',e=>{const b=e.target.closest('[data-pa]');if(!b)return;if(b.dataset.pa==='cancel'){manage();return}
-  GAME_KEYS.forEach(([k])=>{try{localStorage.removeItem(k+'@'+p.id)}catch(e){}});PROF.list=PROF.list.filter(x=>x!==p);if(PROF.cur===p.id)PROF.cur=null;saveProf();renderWho();renderGames();if(PROF.list.length&&!me())picker();else closeP()}))}
+  GAME_KEYS.forEach(([k])=>{try{localStorage.removeItem(k+'@'+p.id)}catch(e){}});try{localStorage.removeItem(CKEY+'@'+p.id)}catch(e){}PROF.list=PROF.list.filter(x=>x!==p);if(PROF.cur===p.id)PROF.cur=null;saveProf();renderWho();renderGames();if(PROF.list.length&&!me())picker();else closeP()}))}
 // ---- progress saved before profiles existed: let the family hand it to the right player once
 function legacyOffers(np){const done=getJ(LKEY,{moved:{},names:{}}),out=[];
  GAME_KEYS.forEach(([k,ic,nm])=>{if(done.moved[k])return;const raw=localStorage.getItem(k);if(raw==null)return;let d=null;try{d=JSON.parse(raw)}catch(e){}
@@ -337,11 +362,85 @@ function onAct(e){const b=e.target.closest('[data-pid],[data-pa]');if(!b)return;
  if(a==='add'){profileForm(null);return}if(a==='manage'){manage();return}if(a==='cancel'){closeP();return}
  if(a==='edit'){profileForm(PROF.list.find(p=>p.id===b.dataset.pid));return}
  if(b.dataset.pid)choose(b.dataset.pid)}
-$('who').addEventListener('click',onAct);
-renderWho();renderGames();
+// ---------------------------------------------------------------- Coach Moon
+// The maker's character says hello, praises what changed in each game since the last visit and suggests a learning game.
+// He only ever praises: days away are never mentioned. Notes live per profile in "moonGames.coach@profileId".
+const CKEY='moonGames.coach';
+const today=()=>new Date().toLocaleDateString('en-CA');
+const gname=f=>pick(GAMES.find(g=>g.file===f).title);
+// per game: what to read from its save (lv = level, n = count praised when it grows, m = count for milestones, default n)
+const CPROG={
+ 'science_guardians.html':{get:()=>{const r=readSave('scienceGuardians.v1'),d=r&&r.P&&r.P[r.cur];return d&&d.correct>0?{lv:+d.lvl||0,n:Object.keys(d.cards||{}).length}:null},
+  more:d=>L(`과학 카드를 ${d}장 더 모았어요!`,`You collected ${d} more science card${d>1?'s':''}!`),big:[25,50,100,150],bigMsg:n=>L(`과학 카드 ${n}장 돌파!`,`${n} science cards collected!`)},
+ 'math_aquarium.html':{get:()=>{const d=readSave('mathAquarium.v1');if(!d||!d.stats||!d.stats.correct)return null;return {lv:+d.lvl||0,n:+d.stats.correct||0,m:Object.values(d.G||{}).reduce((t,g)=>t+(g.aq||[]).filter(a=>a&&a.done).length,0)}},
+  more:d=>L(`수학 문제를 ${d}개 더 맞혔어요!`,`You got ${d} more math question${d>1?'s':''} right!`),big:[5,10,20,40,60,80,100,120],bigMsg:n=>L(`수학 단원 ${n}개 마스터!`,`${n} math skills mastered!`)},
+ 'music_academy.html':{get:()=>{const r=readSave('musicAcademy.v1'),d=r&&r.P&&r.P[r.cur];return d&&d.stats&&d.stats.plays>0?{lv:+d.lvl||0,n:+(d.streak&&d.streak.n)||0}:null},
+  more:(d,n)=>L(`음악 연습 ${n}일 연속이에요!`,`${n} days of music practice in a row!`),big:[7,14,30,60,100],bigMsg:n=>L(`음악 연습 ${n}일 연속!`,`A ${n}-day music streak!`)},
+ 'chess_knights.html':{get:()=>{const d=readSave('chessKnights.v1');return d&&d.solved>0?{lv:+d.lvl||0,n:+d.solved||0}:null},
+  more:d=>L(`체스 퍼즐을 ${d}개 더 풀었어요!`,`You solved ${d} more chess puzzle${d>1?'s':''}!`),big:[25,50,100,200,500,1000],bigMsg:n=>L(`체스 퍼즐 ${n}개 돌파!`,`${n} chess puzzles solved!`)},
+ 'detective_game.html':{get:()=>{const d=readSave('little-detective-v3');return d&&d.caught>0?{lv:+d.level||0,n:+d.caught||0}:null},
+  more:d=>L(`사건을 ${d}개 더 해결했어요!`,`You solved ${d} more case${d>1?'s':''}!`),big:[10,25,50,100,200],bigMsg:n=>L(`해결한 사건 ${n}개 돌파!`,`${n} cases solved!`)},
+ 'marble_rush_3d.html':{get:()=>{const m=(readSave('marbleRush.v2')||readSave('marble3dsettings'))?.mineStats;return m&&m.races>0?{lv:0,n:+m.wins||0}:null},
+  more:d=>L(`내 구슬이 ${d}번 더 우승했어요!`,`Your marble won ${d} more race${d>1?'s':''}!`),big:[5,10,25,50,100],bigMsg:n=>L(`내 구슬 우승 ${n}번!`,`Your marble has won ${n} races!`)}
+};
+// the learning games the coach suggests, least recently opened first
+const CREC=['science_guardians.html','math_aquarium.html','music_academy.html','chess_knights.html','detective_game.html'];
+const CTIPS=[
+ ['과학 가게에 실험 주문이 오면 실험대를 눌러 봐요. 직접 실험하고 배워요!','When a science shop order needs an experiment, tap the lab table and try it yourself!'],
+ ['과학 퀴즈에서 이기면 상자가 열려요. 스티커 앨범을 채워 봐요!','Win a science quiz battle to open a chest, and fill up your sticker album!'],
+ ['수학 아쿠아리움에서 문제를 맞히면 새 수조가 열리고 손님이 와요.','In the Math Aquarium, right answers open new tanks and bring visitors.'],
+ ['음악은 매일 조금씩 연습하면 🔥 연속 기록이 쌓여요.','Practice music a little every day and your 🔥 streak grows.'],
+ ['체스 퍼즐은 먼저 체크, 잡을 수 있는 말, 공격을 찾아봐요!','In chess puzzles, look for checks, captures and attacks first!'],
+ ['탐정 놀이는 목격자 단서를 잘 듣고, 아닌 사람을 하나씩 지워 봐요.','As a detective, listen to the clues and rule people out one by one.'],
+ ['마블 레이스에서는 내 구슬을 골라 응원해요. 리그 우승에 도전!','In Marble Rush, pick your marble and cheer it on to win the league!']];
+const CGO=[
+ ['조금씩 매일 하는 게 최고예요. 오늘도 한 판 해 볼까요?','A little every day works best. Shall we play one round?'],
+ ['틀려도 괜찮아요. 틀린 문제에서 제일 많이 배워요!','Mistakes are fine. They’re where we learn the most!'],
+ ['어려우면 쉬운 단계부터 다시 해도 돼요. 천천히 해요!','If it’s hard, go back to an easier level. Take your time!'],
+ ['눈이 피곤하면 잠깐 쉬어요. 쉬는 것도 실력이에요!','If your eyes get tired, take a little break. Resting is a skill too!']];
+// the coach waits while "who's playing?" is open, and says one thing per player per page view
+let CMSG='',CN=null,CDONE={};
+function coachSay(pose,text,rec){CMSG=text;const pic=$('coPic'),img=$('coImg');img.src=`images/coach-moon-${pose}.webp`;pic.classList.remove('pop');void pic.offsetWidth;pic.classList.add('pop');
+ $('coMsg').textContent=text;
+ $('coActs').innerHTML=rec?`<a class="co-go" href="${esc(rec)}?lang=${LANG}">▶ ${esc(L(`${gname(rec)} 하러 가기`,`Play ${gname(rec)}`))}</a>`:''}
+function coachRec(st){const d=st.day.replace(/-/g,'')|0;return CREC.map((f,i)=>[f,st.open[f]||'',(i+d)%CREC.length]).sort((a,b)=>a[1]<b[1]?-1:a[1]>b[1]?1:a[2]-b[2])[0][0]}
+function renderCoach(){const m=me();
+ if(!m||coachWait){CN=null;coachSay('hi',PROF.list.length?L('안녕하세요! 저는 문 코치예요. 누가 놀지 골라 주세요.','Hi! I’m Coach Moon. Pick who’s playing.'):L('안녕하세요! 저는 문 코치예요. 위에서 프로필을 만들면 게임마다 내 기록이 따로 저장돼요.','Hi! I’m Coach Moon. Make a profile above and every game keeps your own progress.'));return}
+ const done=CDONE[m.id+'|'+m.name];if(done){CN=getJ(CKEY+'@'+m.id,{});coachSay(...done);return}
+ const say=(...a)=>{CDONE[m.id+'|'+m.name]=a;coachSay(...a)};
+ const k=CKEY+'@'+m.id,st=getJ(k,{}),first=!st.snap,now={};st.open=st.open||{};
+ for(const f in CPROG){let v=null;try{v=CPROG[f].get()}catch(e){}if(v)now[f]=v}
+ // what grew since last time: milestones first, then level-ups, then plain progress
+ const ev=[];if(!first)for(const f in now){const a=st.snap[f],b=now[f],P=CPROG[f];
+  if(!a){ev.push([1,'clap',L(`${gname(f)}에서 첫 기록이 생겼어요!`,`Your first progress in ${gname(f)}!`)]);continue}
+  const ma=a.m!=null?a.m:a.n,mb=b.m!=null?b.m:b.n,big=P.big.filter(t=>ma<t&&mb>=t).pop();
+  if(big)ev.push([3,'medal',P.bigMsg(big)]);
+  else if(b.lv>a.lv)ev.push([b.lv%5===0?3:2,b.lv%5===0?'medal':'clap',L(`${gname(f)} 레벨 ${b.lv} 달성!`,`Level ${b.lv} in ${gname(f)}!`)]);
+  else if(b.n>a.n)ev.push([1,'clap',P.more(b.n-a.n,b.n)])}
+ ev.sort((x,y)=>y[0]-x[0]);
+ const newDay=st.day!==today();st.day=today();st.views=newDay?1:(st.views||0)+1;st.snap=now;
+ const rec=coachRec(st),nm=m.name;CN=st;setJ(k,st);
+ if(first){say('hi',L(`${nm}, 안녕하세요! 저는 문 코치예요. 잘한 일이 생기면 여기서 꼭 칭찬해 줄게요. 오늘은 ${gname(rec)} 어때요?`,`Hi ${nm}! I’m Coach Moon. Whenever you do something great, I’ll cheer for you right here. How about ${gname(rec)} today?`),rec);return}
+ if(ev.length){const [lvl,pose,txt]=ev[0];say(pose,`${nm}, ${txt} `+(lvl===3?L('정말 대단해요! 🏅','That’s amazing! 🏅'):L('잘했어요! 👏','Great job! 👏'))+(ev.length>1?L(' 다른 게임에서도 열심히 했네요.',' You worked hard in other games too.'):''),rec);return}
+ if(newDay){say('hi',L(`${nm}, 반가워요! 오늘은 ${gname(rec)} 어때요?`,`Hi ${nm}! How about ${gname(rec)} today?`),rec);return}
+ if(st.views%2)say('idea',nextTip(),rec);else{const g=CGO[st.views/2%CGO.length|0];say('go',L(g[0],g[1]),rec)}}
+function nextTip(){const st=CN||{};st.tip=((st.tip|0)+1)%CTIPS.length;if(CN&&me())setJ(CKEY+'@'+me().id,CN);const t=CTIPS[st.tip];return L(t[0],t[1])}
+function coachTip(){coachSay('idea',nextTip(),CN&&me()?coachRec(CN):null)}
+// read aloud with a natural voice (never the macOS novelty voices)
+const NOVELTY=/albert|bad news|bahh|bells|boing|bubbles|cellos|good news|jester|organ|superstar|trinoids|whisper|wobble|zarvox|deranged|hysterical|grandma|grandpa|eddy|flo\b|reed|rocko|sandy|shelley/i;
+function coachSpeak(){if(!('speechSynthesis' in window)||!CMSG)return;try{speechSynthesis.cancel();const vs=speechSynthesis.getVoices().filter(v=>(v.lang||'').toLowerCase().startsWith(LANG)&&!NOVELTY.test(v.name)),v=vs.find(v=>/google|yuna|sora|samantha|ava|allison|natural|premium|enhanced|siri/i.test(v.name))||vs[0];
+ const u=new SpeechSynthesisUtterance(CMSG.replace(/[\u{1F300}-\u{1FAFF}☀-➿]/gu,''));if(v)u.voice=v;u.lang=LANG==='en'?'en-US':'ko-KR';speechSynthesis.speak(u)}catch(e){}}
+$('coSay').addEventListener('click',coachSpeak);
+$('coPic').addEventListener('click',()=>{coachTip();coachSpeak()});
+// remember which game was opened today so the coach can suggest a different one next time
+function coachOpened(e){const a=e.target.closest('a[href]');const m=me();if(!a||!m)return;const k=CKEY+'@'+m.id,st=getJ(k,{});st.open=st.open||{};st.open[a.getAttribute('href').split('?')[0]]=today();setJ(k,st)}
+$('games').addEventListener('click',coachOpened);$('coActs').addEventListener('click',coachOpened);
 // with profiles, ask who is playing whenever the site is opened in a new tab
 let picked=false;try{picked=!!sessionStorage.getItem('moonGames.picked')}catch(e){}
-if(PROF.list.length&&(!picked||!me()))picker();
+let coachWait=!!(PROF.list.length&&(!picked||!me()));
+$('who').addEventListener('click',onAct);
+renderWho();renderGames();
+if(coachWait)picker();
 applyLang();
 document.querySelectorAll('[data-lang]').forEach(b=>{
   b.setAttribute('aria-pressed',String(b.dataset.lang===LANG));

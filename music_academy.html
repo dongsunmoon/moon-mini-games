@@ -16,6 +16,11 @@
 /* Language: ?lang=ko|en, then the saved choice, then the device language. Shared by every page on this site. */
 const LANG=(()=>{let q=null,s=null;try{q=new URLSearchParams(location.search).get('lang')}catch(e){}try{s=localStorage.getItem('moonGames.lang')}catch(e){}const l=q==='ko'||q==='en'?q:s==='ko'||s==='en'?s:/^ko/i.test(navigator.language||'')?'ko':'en';if(q===l){try{localStorage.setItem('moonGames.lang',l)}catch(e){}}document.documentElement.lang=l;return l})();
 const L=(ko,en)=>LANG==='en'?en:ko;
+// Coach Moon, the maker's character, adds one cheering line to the biggest moments only
+const COACH={up:['clap',[['꾸준히 한 덕분이에요. 정말 멋져요!','Your steady practice paid off. Awesome!'],['어제보다 오늘 더 잘하고 있어요!','You’re doing even better than yesterday!'],['계속 도전해서 여기까지 왔어요!','You kept trying, and look how far you’ve come!']]],
+ big:['medal',[['정말 대단해요! 이 메달 받아요 🏅','Amazing! This medal is yours 🏅'],['최고예요! 오늘의 주인공이에요 🏅','The best! You’re the star today 🏅']]],
+ try:['go',[['괜찮아요! 연습하면 다음엔 메달이에요.','That’s okay! Keep practicing and a medal is next.'],['끝까지 해낸 게 멋져요. 다음에 또 해 봐요!','You finished, and that’s great. Let’s try again next time!']]]};
+const coachLine=k=>{const [pose,ls]=COACH[k],t=ls[Math.random()*ls.length|0];return `<div class="mcoach"><img src="images/coach-moon-${pose}.webp" alt="" width="58" height="70" onerror="this.parentNode.remove()"><p><b>${L('문 코치','Coach Moon')}</b>${L(t[0],t[1])}</p></div>`};
 function applyLang(){if(LANG!=='en')return;document.querySelectorAll('[data-en]').forEach(el=>{el.textContent=el.dataset.en});for(const a of ['aria-label','placeholder','title'])document.querySelectorAll('[data-en-'+a+']').forEach(el=>el.setAttribute(a,el.getAttribute('data-en-'+a)))}
 function setLang(next){try{localStorage.setItem('moonGames.lang',next)}catch(e){}try{speechSynthesis.cancel()}catch(e){}const u=new URL(location.href);u.searchParams.set('lang',next);location.replace(u.href)}
 </script>
@@ -571,6 +576,11 @@ button.setrow{flex-wrap:nowrap}
 .vc .iimg,.vc .isvg{width:34px;height:34px}
 .cic .ei{width:56px;height:56px;border-radius:14px;object-fit:cover}
 .poster .cic .ei{width:120px;height:120px;border-radius:20px}
+/* Coach Moon cheers inside the biggest moments */
+.mcoach{display:flex;align-items:flex-end;gap:8px;margin:10px auto 6px;max-width:330px;text-align:left}
+.mcoach img{width:58px;height:70px;object-fit:contain;object-position:50% 100%;flex:0 0 58px}
+.mcoach p{margin:0 0 6px;flex:1;background:#f2f5ff;border:1px solid #dfe5f7;border-radius:14px;padding:7px 11px;font-size:14px;font-weight:700;line-height:1.4;color:#34407a}
+.mcoach b{display:block;font-size:11.5px;font-weight:900;color:#5b6cff}
 </style>
 </head>
 <body>
@@ -2166,7 +2176,7 @@ function celebrate(kind='confetti'){const fx=$('fx'),em=kind==='stars'?['⭐','�
 // ---------------------------------------------------------------- rewards, levels, stickers, streaks, trophies
 function grant({xp=0,coins=0}={}){S.xp+=xp;S.coins+=coins;if(coins>0)S.earned+=coins;const ups=[];while(S.xp>=xpNeed(S.lvl)){S.xp-=xpNeed(S.lvl);S.lvl++;ups.push(S.lvl)}save();updateHud();
  if(coins>0){$('coinPill').classList.remove('bump');void $('coinPill').offsetWidth;$('coinPill').classList.add('bump')}
- ups.forEach(l=>{const t=titleOf(l),newT=TITLES.find(x=>x[0]===l);modal(`<div class="lvup"><div class="big">🎉</div><h2>${L(`레벨 ${l}!`,`Level ${l}!`)}</h2>${newT?`<p class="newtitle">${t.icon} ${esc(t.name)}</p><p>${L('새로운 칭호를 얻었어요!','You earned a new title!')}</p>`:`<p>${L('연습한 만큼 쑥쑥 자라고 있어요!','You’re growing with every practice!')}</p>`}</div><div class="row"><button class="btn gold" data-act="close" type="button">${L('신나요!','Yay!')}</button></div>`,{cls:'pop',onOpen:()=>{SFX.level();celebrate();speak(L(`레벨 ${l}! 정말 대단해요!`,`Level ${l}! Amazing!`))}})});
+ ups.forEach(l=>{const t=titleOf(l),newT=TITLES.find(x=>x[0]===l);modal(`<div class="lvup"><div class="big">🎉</div><h2>${L(`레벨 ${l}!`,`Level ${l}!`)}</h2>${newT?`<p class="newtitle">${t.icon} ${esc(t.name)}</p><p>${L('새로운 칭호를 얻었어요!','You earned a new title!')}</p>`:`<p>${L('연습한 만큼 쑥쑥 자라고 있어요!','You’re growing with every practice!')}</p>`}${coachLine(newT?'big':'up')}</div><div class="row"><button class="btn gold" data-act="close" type="button">${L('신나요!','Yay!')}</button></div>`,{cls:'pop',onOpen:()=>{SFX.level();celebrate();speak(L(`레벨 ${l}! 정말 대단해요!`,`Level ${l}! Amazing!`))}})});
  return ups}
 function giveSticker(pref){const left=STICKERS.filter(s=>!S.stickers.includes(s));if(!left.length){grant({coins:30});return null}const s=pref&&left.includes(pref)?pref:pick(left);S.stickers.push(s);save();return s}
 // any finished practice counts for the streak; a rest-day pass covers one missed day
@@ -2517,7 +2527,7 @@ function ceremony(){CT.over=true;const c=CT.c,host=$('host'),n=CT.accs.length,me
  SFX.roll(2);const reveal=p=>{const el=host.querySelector(`.pod[data-p="${p}"]`);if(el){el.classList.remove('hide');SFX.star(3-p)}};
  setTimeout(()=>reveal(3),1700);setTimeout(()=>reveal(2),2600);setTimeout(()=>{reveal(1);host.querySelector('.drumroll').classList.add('hide');
   const rival=all.find(x=>!x.me&&x.id),rv=rival?RIVALS[rival.id]:null,msg=place===1?L('🥇 1등! 우승이에요! 정말 대단해요!','🥇 1st place! You won! Amazing!'):place===2?L('🥈 2등! 정말 아슬아슬했어요!','🥈 2nd place! That was so close!'):place===3?L('🥉 3등! 메달을 땄어요!','🥉 3rd place! You won a medal!'):L('🎗️ 참가 리본! 다음엔 꼭 메달!','🎗️ Participation ribbon! A medal is next!');
-  const fm=host.querySelector('.finalmsg');fm.innerHTML=`<b>${msg}</b>${rv?`<p>${esc(rival.ic)} “${esc(T(place===1?rv.lose:rv.win))}”</p>`:''}`;fm.classList.remove('hide');host.querySelector('.rewards').classList.remove('hide');$('cerBtns').classList.remove('hide');
+  const fm=host.querySelector('.finalmsg');fm.innerHTML=`<b>${msg}</b>${rv?`<p>${esc(rival.ic)} “${esc(T(place===1?rv.lose:rv.win))}”</p>`:''}${coachLine(place===1?'big':place<=3?'up':'try')}`;fm.classList.remove('hide');host.querySelector('.rewards').classList.remove('hide');$('cerBtns').classList.remove('hide');
   if(place===1){SFX.win();setTimeout(SFX.cheer,300);celebrate()}else if(place<=3){SFX.fanfare();celebrate('stars')}else SFX.good();speak(msg.replace(/^\S+\s/,''));
   grant({coins,xp:30+medal*15});checkTrophies()},3600);
  host.addEventListener('click',e=>{if(e.target.id==='ctAgain'){CT={c,i:0,accs:[],riv:c.rivals.map(()=>[])};contestRound()}if(e.target.id==='ctOut')go('contests')})}

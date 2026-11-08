@@ -16,6 +16,11 @@
 /* Language: ?lang=ko|en, then the saved choice, then the device language. Shared by every page on this site. */
 const LANG=(()=>{let q=null,s=null;try{q=new URLSearchParams(location.search).get('lang')}catch(e){}try{s=localStorage.getItem('moonGames.lang')}catch(e){}const l=q==='ko'||q==='en'?q:s==='ko'||s==='en'?s:/^ko/i.test(navigator.language||'')?'ko':'en';if(q===l){try{localStorage.setItem('moonGames.lang',l)}catch(e){}}document.documentElement.lang=l;return l})();
 const L=(ko,en)=>LANG==='en'?en:ko;
+// Coach Moon, the maker's character, adds one cheering line to the biggest moments only
+const COACH={up:['clap',[['꾸준히 한 덕분이에요. 정말 멋져요!','Your steady practice paid off. Awesome!'],['어제보다 오늘 더 잘하고 있어요!','You’re doing even better than yesterday!'],['계속 도전해서 여기까지 왔어요!','You kept trying, and look how far you’ve come!']]],
+ big:['medal',[['정말 대단해요! 이 메달 받아요 🏅','Amazing! This medal is yours 🏅'],['최고예요! 오늘의 주인공이에요 🏅','The best! You’re the star today 🏅']]],
+ try:['go',[['괜찮아요! 연습하면 다음엔 메달이에요.','That’s okay! Keep practicing and a medal is next.'],['끝까지 해낸 게 멋져요. 다음에 또 해 봐요!','You finished, and that’s great. Let’s try again next time!']]]};
+const coachLine=k=>{const [pose,ls]=COACH[k],t=ls[Math.random()*ls.length|0];return `<div class="mcoach"><img src="images/coach-moon-${pose}.webp" alt="" width="58" height="70" onerror="this.parentNode.remove()"><p><b>${L('문 코치','Coach Moon')}</b>${L(t[0],t[1])}</p></div>`};
 function applyLang(){if(LANG!=='en')return;document.querySelectorAll('[data-en]').forEach(el=>{el.textContent=el.dataset.en});document.querySelectorAll('[data-en-html]').forEach(el=>{el.innerHTML=el.dataset.enHtml});for(const a of ['aria-label','placeholder','title'])document.querySelectorAll('[data-en-'+a+']').forEach(el=>el.setAttribute(a,el.getAttribute('data-en-'+a)))}
 function setLang(next){try{localStorage.setItem('moonGames.lang',next)}catch(e){}try{speechSynthesis.cancel()}catch(e){}const u=new URL(location.href);u.searchParams.set('lang',next);location.replace(u.href)}
 </script>
@@ -902,7 +907,74 @@ main{width:min(980px,100%);margin:0 auto;padding:14px max(12px,env(safe-area-ins
 .ty-give.food{background:linear-gradient(180deg,#ffbf5e,#ff8a1f);box-shadow:0 5px 0 #d66a00,0 10px 18px rgba(214,106,0,.3)}
 .ty-give.food:active{box-shadow:0 2px 0 #d66a00}
 .ty-give:nth-child(2){background:linear-gradient(180deg,#6cc4ff,var(--brand));box-shadow:0 5px 0 var(--brand-d),0 10px 18px rgba(23,100,184,.3)}
+/* café upgrades: the progress box is a button that glows when something is affordable; the board lists every upgrade */
+button.ty-prog{pointer-events:auto;border:0;text-align:left;font:inherit;color:var(--ink);cursor:pointer;display:block}
+button.ty-prog:active{transform:translateY(2px)}
+.ty-prog.can{background:#fffbe6;box-shadow:0 0 0 3px #ffcf3a,0 6px 16px rgba(0,0,0,.14);animation:lsGlow 1.3s ease-in-out infinite}
+.ty-prog.can small{color:#b45f00}
+.ty-board .ty-labin{max-width:620px}
+.ty-bcoin{margin-left:auto;margin-right:8px;font-weight:900;font-size:15px;background:#fff6d0;border-radius:12px;padding:4px 10px;white-space:nowrap}
+.ty-bsum{font-size:13px;font-weight:800;color:var(--muted)}
+.ty-bsum .ty-bar{margin-top:4px}
+.ty-btoast{margin:8px 0 2px;background:#e9fbef;border-radius:14px;padding:8px 10px;font-weight:900;font-size:14.5px;line-height:1.4;animation:lsFb .35s}
+.ty-boardin h4{margin:12px 2px 6px;font-size:14px;color:var(--muted)}
+.ty-up{display:flex;align-items:center;gap:10px;background:#f6f8ff;border-radius:16px;padding:8px 10px;margin-bottom:6px;border:2px solid transparent}
+.ty-up.can{border-color:#7fdc9c;background:#f0fff4}
+.ty-up.max{opacity:.72}
+.ty-up.up{animation:tyUp .8s}
+@keyframes tyUp{30%{transform:scale(1.03);background:#fff3b0}}
+.ty-up .ic{font-size:30px;flex:none;width:38px;text-align:center}
+.ty-up .tx{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
+.ty-up b{font-size:15.5px;line-height:1.25}
+.ty-up .lv{font-size:12px;background:#ffe9a8;color:#8a5a00;border-radius:8px;padding:1px 6px;margin-left:2px;vertical-align:1px}
+.ty-up .pips{display:flex;gap:3px}
+.ty-up .pips i{width:16px;height:6px;border-radius:3px;background:#dfe5f2}
+.ty-up .pips i.on{background:linear-gradient(90deg,#ffb000,#ff7a2f)}
+.ty-up small.ch{font-size:13px;font-weight:800;color:#2f3d6b;line-height:1.35}
+.ty-up small.nx{font-size:12px;font-weight:800;color:var(--muted)}
+.ty-ubtn{flex:none;min-width:88px;min-height:52px;border:0;border-radius:14px;font:inherit;font-weight:900;font-size:15px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;padding:4px 8px;color:var(--ink);background:#e8ecf5}
+.ty-ubtn small{font-size:11.5px;font-weight:800;opacity:.92;white-space:nowrap}
+.ty-ubtn.buy{background:linear-gradient(180deg,#5ee08f,var(--green));color:#fff;box-shadow:0 4px 0 var(--green-d)}
+.ty-ubtn.buy:active,.ty-ubtn.pad:active{transform:translateY(3px);box-shadow:none}
+.ty-ubtn.no{background:#eef1f7;color:#8a94ab}
+.ty-ubtn.pad{background:#e7f1ff;color:var(--brand-d);box-shadow:0 4px 0 #c5d9f5}
+.ty-ubtn.pad.can{background:linear-gradient(180deg,#6cc4ff,var(--brand));color:#fff;box-shadow:0 4px 0 var(--brand-d)}
+.ty-ubtn.max{background:transparent;font-size:20px}
+.ty-ubtn.lock{background:#f3f3f6;color:#9aa0ad;font-size:18px}
+.ty-give.wipe{background:linear-gradient(180deg,#8de0ff,#36a9e8);box-shadow:0 5px 0 #1f86c2,0 10px 18px rgba(31,134,194,.3)}
+@media (max-width:400px){.ty-up{gap:8px;padding:7px 8px}.ty-up .ic{font-size:26px;width:32px}.ty-ubtn{min-width:80px}}
+@media (prefers-reduced-motion:reduce){.ty-prog.can,.ty-up.up{animation:none}}
+/* the card before every purchase: what it is, what it does, before → after, and the button */
+.ty-pv{position:absolute;left:0;right:0;bottom:0;padding:10px;display:flex;justify-content:center;pointer-events:none}
+.ty-pvin{pointer-events:auto;width:100%;max-width:460px;background:#fff;border-radius:22px;padding:12px 14px 14px;box-shadow:0 -6px 24px rgba(0,0,0,.25);animation:lsSlide .3s cubic-bezier(.3,1.2,.5,1)}
+.ty-pvh{display:flex;align-items:center;gap:10px}
+.ty-pvh .pic{width:60px;height:60px;flex:none;display:grid;place-items:center;font-size:40px;background:#fff7e0;border-radius:16px;overflow:hidden}
+.ty-pvh .pic img{max-width:56px;max-height:56px;object-fit:contain}
+.ty-pvh .t{min-width:0}
+.ty-pvh b{display:block;font-size:19px;line-height:1.25}
+.ty-pvh small{font-size:13px;font-weight:800;color:var(--muted)}
+.ty-pvh em{font-style:normal;color:#e07000}
+.ty-pvw{margin:8px 0 6px;font-weight:800;font-size:15.5px;line-height:1.45}
+.ty-pvc{list-style:none;margin:0;padding:0;display:grid;gap:4px}
+.ty-pvc li{display:flex;justify-content:space-between;align-items:center;gap:8px;background:#f3f6ff;border-radius:12px;padding:7px 10px;font-weight:800;font-size:14.5px}
+.ty-pvc .v{white-space:nowrap}
+.ty-pvc s{color:#9aa3b8}
+.ty-pvc b{color:#1f9a4f;font-size:16px}
+.ty-pvx{margin:6px 0 0;font-weight:800;font-size:14px}
+.ty-pvb{display:flex;gap:8px;margin-top:10px}
+.ty-pvno{flex:0 0 32%;min-height:58px;border:0;border-radius:16px;background:#eef1f7;box-shadow:0 4px 0 #d5dbe8;font:inherit;font-weight:900;font-size:16px;color:var(--ink)}
+.ty-pvgo{flex:1;min-height:58px;border:0;border-radius:16px;background:linear-gradient(180deg,#ffd75a,#ff9f1a);box-shadow:0 5px 0 #d97a00;font:inherit;font-weight:900;font-size:19px;color:#5a2d00;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;animation:lsGlow 1.3s ease-in-out infinite}
+.ty-pvgo small{font-size:13.5px;font-weight:900}
+.ty-pvno:active,.ty-pvgo:active{transform:translateY(3px);box-shadow:none}
+.ty-pvneed{flex:1;min-height:58px;border-radius:16px;background:#fff3e6;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-weight:900;color:#b45f00;text-align:center;padding:4px 8px}
+.ty-pvneed small{font-size:13px;font-weight:800}
+@media (prefers-reduced-motion:reduce){.ty-pvgo{animation:none}}
 /*SHOPCSS:END*/
+/* Coach Moon cheers inside the biggest moments */
+.mcoach{display:flex;align-items:flex-end;gap:8px;margin:10px auto 6px;max-width:330px;text-align:left}
+.mcoach img{width:58px;height:70px;object-fit:contain;object-position:50% 100%;flex:0 0 58px}
+.mcoach p{margin:0 0 6px;flex:1;background:#f2f5ff;border:1px solid #dfe5f7;border-radius:14px;padding:7px 11px;font-size:14px;font-weight:700;line-height:1.4;color:#34407a}
+.mcoach b{display:block;font-size:11.5px;font-weight:900;color:#5b6cff}
 </style>
 </head>
 <body>
@@ -1934,7 +2006,7 @@ const ICON_SVG={
  tadpole:'<svg viewBox="0 0 64 64"><path d="M30 34q14 -2 22 6q-6 -2 -10 2q-4 4 -12 -2z" fill="#3a4a3a"/><ellipse cx="22" cy="32" rx="13" ry="10" fill="#3a4a3a"/><circle cx="17" cy="29" r="2.4" fill="#fff"/><circle cx="16.5" cy="29" r="1.2" fill="#000"/></svg>',
  froglet:'<svg viewBox="0 0 64 64"><path d="M34 32q12 -1 20 6q-6 -2 -9 2q-4 3 -11 -3z" fill="#4c7a3a"/><path d="M22 40l-6 10m0 0l-5 1m5-1l1 5M30 40l5 9m0 0l5 0m-5 0l-1 5" stroke="#4c7a3a" stroke-width="3" fill="none" stroke-linecap="round"/><ellipse cx="25" cy="32" rx="14" ry="11" fill="#5f9a46"/><circle cx="20" cy="27" r="3.4" fill="#fff"/><circle cx="20" cy="27" r="1.6" fill="#000"/><circle cx="30" cy="27" r="3.4" fill="#fff"/><circle cx="30" cy="27" r="1.6" fill="#000"/></svg>',
 };
-const ICO_HAVE=new Set([]);
+const ICO_HAVE=new Set(['seed','frogspawn','tadpole','froglet','chrysalis']);
 const icon=(s,cls='')=>s&&s[0]==='@'?(ICO_HAVE.has(s.slice(1))?`<img class="svgi ${cls}" src="images/sci-ico-${s.slice(1)}.webp" alt="" draggable="false">`:`<span class="svgi ${cls}">${ICON_SVG[s.slice(1)]||''}</span>`):esc(s);
 // a run of emoji that may hold @name pictures, e.g. '💧@tadpole'
 const richE=s=>esc(s).replace(/@([a-z]+)/g,(m,n)=>ICON_SVG[n]||ICO_HAVE.has(n)?icon('@'+n):m);
@@ -4959,6 +5031,7 @@ const levelModals=levels=>levels.forEach(l=>modal(levelHTML(l),{cls:'levelup',on
 function levelHTML(l){
  return `<div class="rays"></div><div class="lbl">LEVEL UP!</div><div class="num">${l.lvl}</div>
  ${l.newTitle?`<h2>${l.newTitle.icon} ${esc(l.newTitle.name)}</h2><p>${L('새 칭호를 얻었어요!','You earned a new title!')}</p>`:`<p>${L('과학 실력이 쑥쑥 자라고 있어요!','Your science powers are growing!')}</p>`}
+ ${coachLine(l.newTitle?'big':'up')}
  <div class="rewards"><span class="coin">${COIN} +${num(l.gift.coins)}</span>${Object.entries(l.gift.items).map(([k,v])=>`<span class="item">${pic(ITEMS[k].img,ITEMS[k].icon)} ${esc(ITEMS[k].name)} +${v}</span>`).join('')}</div>
  <div class="row"><button class="btn gold" type="button" data-act="close">${L('좋아요!','Awesome!')}</button></div>`;
 }
@@ -5152,7 +5225,9 @@ function lessonCards(ids,then){
 // ---------------------------------------------------------------- science burger shop: a walkable store tycoon where you learn
 // An isometric restaurant to walk around in (drag anywhere to walk, or tap a spot). Two halves:
 // · the burger café on the right: machines stack up burgers, fries and drinks, diners sit at tables and order, you (and
-//   hired helpers) carry food over, and paid tables leave coins to scoop up. This is the money game.
+//   hired helpers) carry food over, and paid tables leave coins to scoop up. This is the money game. Coins buy café
+//   upgrades in levels, always through a card that shows what changes (floor pads for machines and tables, the 🛠️
+//   board for the rest).
 // · the science corner on the left: science customers queue at the counter with an order built from a card's learning
 //   play (LEARN, authored in _src/learn). Stop at a stand to pick its item up and behind the counter to hand it over:
 //   right items are taken, wrong ones come back with the reason. Experiments happen at the lab table.
@@ -5161,20 +5236,55 @@ const SHOP_LV=[[0,'🧺','작은 과학 버거|Little Science Burger'],[8,'🛒'
 const SHOP_DAY_PAID=12;
 const shopLv=(n=S.shopX.served)=>SHOP_LV.reduce((a,x,k)=>n>=x[0]?k:a,0);
 const learnedOf=ids=>{const k=ids.filter(id=>S.cards[id]);return k.length>=2?k:ids};
-// floor pads: machines and tables are bought where they will stand; the rest use the free pad spots
+// Café upgrades come in levels (0 = not bought yet). price[L] buys level L, about 1.5× the level before, so early on
+// something new is in reach about every day and later every few days. Things that stand on the floor (machines and
+// tables) are bought on a floor pad where they will stand; everything else on the upgrade board (🛠️ button, top right).
+const MLV=[null,[1.5,6],[1.3,7],[1.1,8],[.9,10],[.7,12]];// machine level → [seconds to make one, most it holds]
+const UPG_CAT=['🍳 주방|🍳 Kitchen','🍽️ 손님 자리|🍽️ Dining room','🧑‍🍳 직원|🧑‍🍳 Staff','🙋 나|🙋 Me'];
+const DECOR_LV=['','🪴 화분|🪴 Plants','💡 반짝 전구|💡 Twinkle lights','🎈 풍선과 그림|🎈 Balloons and a picture','🎶 신나는 음악|🎶 Happy music'];
+const SIGN_LV=['','🌟 반짝 간판|🌟 Shiny sign','💡 전구 간판|💡 Light-up sign','⭐ 별 간판|⭐ Star sign'];
+// act: the short words on the pad and the card ("what you are buying"); what: one plain sentence of what it does
 const UPG=[
- {id:'fries',ic:'🍟',name:'감자튀김 기계|Fries machine',price:40,tile:[11,1]},
- {id:'table2',ic:'🪑',name:'테이블 하나 더|Another table',price:70,tile:[10,6]},
- {id:'plant',ic:'🪴',name:'초록 화분|Green plants',price:50},
- {id:'bag',ic:'🛍️',name:'큰 쟁반|Big tray',price:100,perk:'한 번에 2개 더 들어요.|Carry 2 more at once.'},
- {id:'staff',ic:'🧑‍🍳',name:'알바생 고용|Hire a helper',price:150,perk:'알바생이 음식을 날라 줘요.|A helper carries food for you.'},
- {id:'drink',ic:'🥤',name:'음료 기계|Drink machine',price:180,tile:[12,1]},
- {id:'table3',ic:'🪑',name:'테이블 하나 더|Another table',price:220,tile:[10,9]},
- {id:'shoes',ic:'👟',name:'빠른 신발|Fast shoes',price:260,perk:'더 빨리 걸어요.|Walk faster.'},
- {id:'fast',ic:'⚡',name:'빠른 기계|Faster machines',price:320,perk:'음식이 더 빨리, 더 높이 쌓여요.|Food stacks up faster and higher.'},
- {id:'helper',ic:'🐾',name:'동전 줍는 짝꿍|Coin-picking buddy',price:380,perk:'짝꿍이 동전을 주워 와요.|Your buddy fetches coins.'},
- {id:'staff2',ic:'🧑‍🍳',name:'알바생 한 명 더|Another helper',price:450},
- {id:'sign',ic:'🌟',name:'반짝 간판|Shiny sign',price:520}];
+ {id:'burger',cat:0,ic:'🍔',pic:'shop-grill',name:'버거 기계|Burger machine',act:'버거 기계 빠르게|Faster burger machine',start:1,price:[0,0,100,170,300,520],what:'버거를 더 빨리 굽고, 더 많이 쌓아 둬요.|Grills burgers faster and keeps more ready.'},
+ {id:'fries',cat:0,ic:'🍟',pic:'shop-fries',name:'감자튀김 기계|Fries machine',act:'감자튀김 기계 빠르게|Faster fries machine',act1:'감자튀김 기계 놓기|Add a fries machine',price:[0,40,130,230,400,700],pad:[null,[11,1]],what:'감자튀김을 더 빨리 튀기고, 더 많이 쌓아 둬요.|Fries faster and keeps more ready.',first:'감자튀김(🪙3)도 팔아요. 손님이 감자튀김도 주문해요!|Sell fries (🪙3) too. Diners will order them!'},
+ {id:'drink',cat:0,ic:'🥤',pic:'shop-drink',name:'음료 기계|Drink machine',act:'음료 기계 빠르게|Faster drink machine',act1:'음료 기계 놓기|Add a drink machine',price:[0,190,220,380,650,1100],pad:[null,[12,1]],what:'음료를 더 빨리 따르고, 더 많이 쌓아 둬요.|Pours drinks faster and keeps more ready.',first:'음료(🪙2)도 팔아요. 손님이 음료도 주문해요!|Sell drinks (🪙2) too. Diners will order them!'},
+ {id:'tables',cat:1,ic:'🪑',pic:'shop-table',name:'테이블|Tables',act:'테이블 추가|Add a table',start:1,price:[0,0,90,250,520,950,1600],pad:[null,null,[10,6],[10,9],[12,3],[12,6],[12,9]],what:'테이블이 하나 더 생겨서 손님이 더 자주 와요.|One more table, so diners come more often.'},
+ {id:'sign',cat:1,ic:'🌟',name:'가게 간판|Shop sign',act:'간판 바꾸기|Better sign',price:[0,520,950,1650],what:'간판이 눈에 잘 띄어서 손님이 더 자주 와요.|A bright sign brings diners more often.',names:SIGN_LV},
+ {id:'decor',cat:1,ic:'🪴',name:'예쁜 꾸미기|Decorations',act:'가게 꾸미기|Decorate the café',price:[0,60,320,680,1250],what:'가게가 예뻐지면 손님이 팁을 더 줘요.|Diners tip more in a pretty café.',names:DECOR_LV},
+ {id:'staff',cat:2,ic:'🧑‍🍳',name:'알바생|Helpers',act:'알바생 고용|Hire a helper',price:[0,180,700,1650],what:'알바생이 기계에서 음식을 받아 손님께 날라 줘요.|A helper carries food from the machines to the diners.'},
+ {id:'train',cat:2,ic:'🎓',name:'알바생 교육|Helper training',act:'알바생 교육|Train the helpers',price:[0,400,780,1400],need:'staff',what:'알바생이 더 빨리 걸어서 음식을 빨리 날라요.|Helpers walk faster and bring food sooner.'},
+ {id:'buddy',cat:2,ic:'🐾',name:'동전 줍는 짝꿍|Coin-picking buddy',act:'동전 짝꿍|Coin buddy',price:[0,600],what:'짝꿍이 테이블에 놓인 동전을 주워 와요.|Your buddy picks up the coins left on tables.'},
+ {id:'tray',cat:3,ic:'🛍️',name:'큰 쟁반|Big tray',act:'쟁반 키우기|Bigger tray',price:[0,110,380,850],what:'쟁반이 커져서 음식을 한 번에 더 많이 들어요.|A bigger tray carries more food at once.'},
+ {id:'shoes',cat:3,ic:'👟',name:'빠른 신발|Fast shoes',act:'신발 바꾸기|Faster shoes',price:[0,320,680,1200],what:'내가 더 빨리 걸어요.|You walk faster.'}];
+const upAct=(u,v)=>T(v===1&&u.act1?u.act1:u.act);
+// the level step in words a child reads at a glance: "새로!", "2개 → 3개", "1명 → 2명", else "Lv.2→3"
+const upStep=(u,v)=>u.id==='tables'?L(`${v-1}개 → ${v}개`,`${v-1} → ${v}`):u.id==='staff'?L(`${v-1}명 → ${v}명`,`${v-1} → ${v}`):v===1?L('✨ 새로!','✨ New!'):`Lv.${v-1}→${v}`;
+// Saves from before levels kept a yes/no per upgrade in shopX.un: turn them into levels once (old "faster machines" =
+// every machine at level 4, the same speed as before) and give back coins put into a half-paid pad.
+function shopLvs(){const x=S.shopX;if(x.lv)return x.lv;const un=x.un||{},lv={burger:1,fries:un.fries?1:0,drink:un.drink?1:0,
+  tables:1+(un.table2?1:0)+(un.table3?1:0),sign:un.sign?1:0,decor:un.plant?1:0,staff:(un.staff?1:0)+(un.staff2?1:0),train:0,buddy:un.helper?1:0,tray:un.bag?1:0,shoes:un.shoes?1:0};
+ if(un.fast){x.fast4=1;for(const k of ['burger','fries','drink'])if(lv[k])lv[k]=4}
+ const back=Object.values(x.pad||{}).reduce((a,v)=>a+(+v||0),0);if(back>0)S.coins+=back;x.pad={};x.lv=lv;save();if(back>0)updateHud();return lv}
+const lvOf=id=>shopLvs()[id]||0;
+const upMax=u=>u.price.length-1;
+const upHave=()=>UPG.reduce((a,u)=>a+lvOf(u.id)-(u.start||0),0),upAll=()=>UPG.reduce((a,u)=>a+upMax(u)-(u.start||0),0);
+// average seconds between new diners: more tables and a better sign bring them more often
+const arriveSec=(t=lvOf('tables'),g=lvOf('sign'))=>30/(t+2)/(1+.15*g);
+const capAt=L=>[3,5,6,8][L],staffSp=L=>2.3+.4*L,shoeSp=L=>[2.9,3.7,4.2,4.6][L];
+// what a level does, as [icon, label, value], so the board and the card can show "before → after"
+function upVals(u,v){const sec=x=>L(`${x}초`,`${x} s`),cnt=x=>L(`${x}개`,`${x}`);
+ if(u.id==='burger'||u.id==='fries'||u.id==='drink')return v?[['⏱️',L('1개 만드는 시간','Time to make one'),sec(MLV[v][0])],['📦',L('쌓아 두는 수','Most it keeps ready'),cnt(MLV[v][1])]]:null;
+ if(u.id==='tables')return [['🪑',L('테이블','Tables'),cnt(v)],['🚶',L('새 손님 오는 간격','A new diner every'),sec(arriveSec(v).toFixed(1))]];
+ if(u.id==='sign')return [['🚶',L('새 손님 오는 간격','A new diner every'),sec(arriveSec(undefined,v).toFixed(1))]];
+ if(u.id==='decor')return [['💝',L('손님 1명의 팁','Tip from each diner'),`+${v}`]];
+ if(u.id==='staff')return [['🧑‍🍳',L('알바생','Helpers'),L(`${v}명`,`${v}`)]];
+ if(u.id==='train')return [['🏃',L('알바생 걷는 빠르기','Helper walking speed'),L(`1초에 ${staffSp(v).toFixed(1)}칸`,`${staffSp(v).toFixed(1)} tiles/s`)]];
+ if(u.id==='tray')return [['🖐️',L('한 번에 드는 수','Carry at once'),cnt(capAt(v))]];
+ if(u.id==='shoes')return [['👟',L('내 걷는 빠르기','Your walking speed'),L(`1초에 ${shoeSp(v)}칸`,`${shoeSp(v)} tiles/s`)]];
+ return null}
+// compact for a list line and toasts: "⏱️ 1.5초 → 1.3초 · 📦 6개 → 7개"; lines=true gives [icon, label, before, after] rows
+function upChange(u,a,b,lines){const x=upVals(u,a),y=upVals(u,b);if(!x||!y)return lines?[]:T(b===1&&u.first?u.first:u.what);
+ return lines?y.map((v,i)=>[v[0],v[1],x[i][2],v[2]]):y.map((v,i)=>`${v[0]} ${x[i][2]} → ${v[2]}`).join(' · ')}
 let LS=null;
 // mode: 'stage' (a shop day before a battle), 'relearn' (missed cards before a retry) or 'review' (one card from the card book)
 function shopOpen(ids,then,{mode='stage',grad,foe}={}){
@@ -5221,6 +5331,7 @@ const firstQs=ids=>ids.map(id=>{const qs=QALL.filter(q=>q.c===id&&qOk(q));if(!qs
 
 const Tyc=(()=>{
 'use strict';
+const MESS=true;// Dr. Mix-Up sometimes leaves a harmless mess on an empty table: wiping it gives a small bonus. false turns it off.
 const MW=13,MH=11,TW=64,TH=32,TAU=Math.PI*2;
 const EF="'Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji',sans-serif",TF="system-ui,-apple-system,'Apple SD Gothic Neo','Noto Sans KR',sans-serif";
 // plan in tiles: x runs down-right, y runs down-left, walls on the y=0 and x=0 edges. Science corner on the left,
@@ -5228,9 +5339,13 @@ const EF="'Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji',sans-serif",TF
 const SHELF=[[2,1],[4,1],[6,1],[1,4],[3,4],[5,4],[1,7],[3,7]].map(([x,y],i)=>({i,x,y,zx:x,zy:y+1}));
 const LAB={x:0,y:2,zx:1,zy:2},COUNTER=[[7,5],[7,6],[7,7]],CCOL=6,COINS={x:6,y:8},DOOR=[8.6,11.8];
 const SPOT1=[8.5,6.5],SPOT2=[[8.5,5.5],[8.5,7.5]],LINE=[[8.5,6.5],[8.5,7.65],[8.5,8.8],[8.5,9.95]];
-const MACH=[{id:'burger',e:'🍔',x:9,y:0,price:5,top:'#ff6b4a',side:['#e0452a','#c93a22'],un:null},{id:'fries',e:'🍟',x:11,y:0,price:3,top:'#ffd23f',side:['#f0b400','#d89f00'],un:'fries'},{id:'drink',e:'🥤',x:12,y:0,price:2,top:'#5ab8ff',side:['#2f95e6','#2380cc'],un:'drink'}].map(m=>({...m,zx:m.x,zy:m.y+1}));
-const TABLES=[{x:10,y:3,un:null},{x:10,y:6,un:'table2'},{x:10,y:9,un:'table3'}].map((t,i)=>({...t,i,zx:9,zy:t.y,seats:[[10.5,t.y-.4],[10.5,t.y+1.4]]}));
-const PADFREE=[[4,9],[1,9],[5,10]];
+const MACH=[{id:'burger',e:'🍔',x:9,y:0,price:5,top:'#ff6b4a',side:['#e0452a','#c93a22']},{id:'fries',e:'🍟',x:11,y:0,price:3,top:'#ffd23f',side:['#f0b400','#d89f00']},{id:'drink',e:'🥤',x:12,y:0,price:2,top:'#5ab8ff',side:['#2f95e6','#2380cc']}].map(m=>({...m,zx:m.x,zy:m.y+1}));
+// tables in the order they are bought: a column at x=10, then one at x=12 by the street. Helpers serve a table from the
+// walkway on its left (zx); diners for the inner column come in along an aisle so they never walk through the outer one.
+const TABLES=[[10,3],[10,6],[10,9],[12,3],[12,6],[12,9]].map(([x,y],i)=>({x,y,i,n:i+1,zx:x-1,zy:y,seats:[[x+.5,y-.4],[x+.5,y+1.4]]}));
+const AISLES=[1.6,5,8];
+// helpers wear the same crew outfit as you, so they are the '나' pictures you did not pick
+const CREW=['cat','panda','puppy','koala','bunny','chick','frog','tiger','bear','fox','lion','kid'];
 const PALS=['🐻','🐰','🐼','🐨','🐯','🐷','🐵','🐧','🦉','🐢','🦝','🦔','🐶','🐸','🐹','🦊','🐿️','🦦'];
 const DECOR=['🧸','📒','🖍️','🧴','🔦','🎈','🧃','🪀'];
 const FOOD={burger:'🍔',fries:'🍟',drink:'🥤'};
@@ -5246,21 +5361,25 @@ let Y=null;
 function img(src){const m=new Image();m.src=src;return m}
 const ok_=m=>m&&m.complete&&m.naturalWidth;
 function shopPic(k){if(!SHOP_HAVE.has(k))return null;if(!PICS[k])PICS[k]=img(`images/sci-${k}.webp`);return ok_(PICS[k])?PICS[k]:null}
-function meSrc(){const map={'🐰':'bunny','🐻':'bear','🦊':'fox','🐼':'panda','🐨':'koala','🐯':'tiger','🦁':'lion','🐸':'frog','🐱':'cat','🐶':'puppy','🐥':'chick','🦄':'unicorn','🐙':'octopus','🐬':'dolphin','🦖':'dino','⭐':'star'};
- return `images/aq-me-${map[String(S.av||'').replace(/️/g,'')]||'kid'}.webp`}
-const UN=()=>S.shopX.un||(S.shopX.un={});
-const machOn=m=>!m.un||UN()[m.un],tableOn=t=>!t.un||UN()[t.un];
+function meKey(){const map={'🐰':'bunny','🐻':'bear','🦊':'fox','🐼':'panda','🐨':'koala','🐯':'tiger','🦁':'lion','🐸':'frog','🐱':'cat','🐶':'puppy','🐥':'chick','🦄':'unicorn','🐙':'octopus','🐬':'dolphin','🦖':'dino','⭐':'star'};
+ return map[String(S.av||'').replace(/️/g,'')]||'kid'}
+const meSrc=()=>`images/aq-me-${meKey()}.webp`;
+const machOn=m=>lvOf(m.id)>0,tableOn=t=>lvOf('tables')>=t.n;
+const mlv=m=>MLV[Math.max(1,lvOf(m.id))],mstep=m=>Math.min(12,90/mlv(m)[1]);
 function blocked(x,y){const k=x+','+y;if(Y.block.has(k))return true;return MACH.some(m=>machOn(m)&&m.x===x&&m.y===y)||TABLES.some(t=>tableOn(t)&&t.x===x&&t.y===y)}
 
-function open(ses){stop();
+function open(ses){stop();shopLvs();
  const b=BUDDIES[S.equip.buddy]||BUDDIES.puppy;
  Y={ses,t:0,last:0,raf:0,k:1,cam:[40,170],on:[],cust:[],pile:0,pileShow:0,pops:[],hold:[],fly:[],confetti:[],
   me:{x:5.5,y:6.4,dir:1,ph:0,moving:false,path:null},bd:{x:4.8,y:6.9,ph:0},
   block:new Set([...SHELF.map(s=>s.x+','+s.y),LAB.x+','+LAB.y,...COUNTER.map(c=>c[0]+','+c[1])]),
   shelf:SHELF.map(s=>({...s,g:null,deco:pk(DECOR),glow:false})),zoneKey:'',zoneT:0,tick:0,O:null,oi:-1,
   mach:MACH.map(m=>({...m,n:2,t:0})),tables:TABLES.map(t=>({...t,coins:0,coinShow:0})),diners:[],spawnT:2,staff:[],walkers:[],
-  im:{me:img(meSrc()),buddy:img(b.img),foe:ses.foe&&ses.foe.img?img(ses.foe.img):null},bicon:b.icon,
-  joy:null,keys:{},phase:'open',dim:0,foe:null,blockCust:-1,padSnd:0,ripple:null,stillT:0,idleSci:0};
+  im:{me:img(meSrc()),buddy:img(b.img),foe:ses.foe&&ses.foe.img?img(ses.foe.img):null,mix:img('images/sci-boss-mixup.webp')},bicon:b.icon,
+  crew:CREW.filter(k=>k!==meKey()).slice(0,3).map(k=>img(`images/aq-me-${k}.webp`)),
+  joy:null,keys:{},phase:'open',dim:0,foe:null,blockCust:-1,ripple:null,stillT:0,idleSci:0,board:false,
+  // Dr. Mix-Up's harmless table mess: at most once a day, from the fourth day on
+  mess:null,messAt:MESS&&ses.mode!=='review'&&(S.shopX.days||0)>=4&&Math.random()<.6?rnd(45,110):-1};
  for(let k=0;k<3;k++)Y.walkers.push({e:pk(PALS),x:rnd(-1,12),y:MH+.9,dir:Math.random()<.5?1:-1,sp:rnd(.6,1),ph:rnd(0,6)});
  syncStaff();dom();resize();listen();
  Y.raf=requestAnimationFrame(frame);
@@ -5268,18 +5387,20 @@ function open(ses){stop();
  setTimeout(()=>{if(Y)startOrder(0)},S.shopX.tut?500:3500);
 }
 function stop(){if(!Y)return;cancelAnimationFrame(Y.raf);for(const [t,ev,fn,o] of Y.on)t.removeEventListener(ev,fn,o);clearTimeout(Y.banT);Y=null}
-function syncStaff(){const want=(UN().staff?1:0)+(UN().staff2?1:0);while(Y.staff.length<want)Y.staff.push({x:9.5,y:1.6,hold:[],path:null,goal:null,ph:0,dir:1,moving:false,wait:0,e:Y.staff.length?'🧑‍🍳':'👩‍🍳'})}
+function syncStaff(){const want=lvOf('staff');while(Y.staff.length<want)Y.staff.push({x:9.5+Y.staff.length,y:1.6,hold:[],wp:[],goal:null,ph:0,dir:1,moving:false,wait:0,k:Y.staff.length,e:'🧑‍🍳'})}
 
 function dom(){
  $('v-learn').innerHTML=`<div class="ty" id="ty"><canvas class="ty-cv"></canvas>
   <div class="ty-top"><button type="button" class="ty-order hidden" id="tyOrder"></button>
-   <div class="ty-prog"><b id="tyDay"></b><div class="ty-bar"><i id="tyBar"></i></div><small id="tyUp"></small></div></div>
+   <button type="button" class="ty-prog" id="tyUpBtn"><b id="tyDay"></b><div class="ty-bar"><i id="tyBar"></i></div><small id="tyUp"></small></button></div>
   <div class="ty-ban hidden" id="tyBan"></div>
   <div class="ty-bot"><div class="ty-acts hidden" id="tyActs"></div><div class="ty-hand hidden" id="tyHand"></div><div class="ty-cap" id="tyCap"></div></div>
   <div class="ty-joy hidden" id="tyJoy"><i></i></div>
-  <div class="ty-lab hidden" id="tyLab"></div></div>`;
+  <div class="ty-lab hidden" id="tyLab"></div>
+  <div class="ty-lab ty-board hidden" id="tyBoard"></div>
+  <div class="ty-pv hidden" id="tyPv"></div></div>`;
  const q=s=>$('ty').querySelector(s);
- Y.el={ty:$('ty'),cv:q('canvas'),order:q('#tyOrder'),day:q('#tyDay'),bar:q('#tyBar'),up:q('#tyUp'),ban:q('#tyBan'),hand:q('#tyHand'),acts:q('#tyActs'),cap:q('#tyCap'),joy:q('#tyJoy'),lab:q('#tyLab')};
+ Y.el={ty:$('ty'),cv:q('canvas'),order:q('#tyOrder'),day:q('#tyDay'),bar:q('#tyBar'),up:q('#tyUp'),ban:q('#tyBan'),hand:q('#tyHand'),acts:q('#tyActs'),cap:q('#tyCap'),joy:q('#tyJoy'),lab:q('#tyLab'),upBtn:q('#tyUpBtn'),board:q('#tyBoard'),pv:q('#tyPv')};
  Y.ctx=Y.el.cv.getContext('2d');hud();handUI();
 }
 function resize(){if(!Y)return;const r=Y.el.ty.getBoundingClientRect(),cw=Math.max(1,r.width),ch=Math.max(1,r.height);
@@ -5294,13 +5415,15 @@ function thingAt(px,py){const sx=(px-Y.cw/2)/Y.k+Y.cam[0],sy=(py-Y.ch*.5)/Y.k+Y.
  Y.tables.forEach(t=>{if(tableOn(t))box(t.x+.5,t.y+.5,44,74,16,{k:'table',t})});
  Y.diners.forEach(d=>{if(d.state==='sit'||d.state==='eat')box(d.x,d.y,22,70,4,{k:'table',t:Y.tables[d.t]})});
  // a machine is its body plus the thin stack of food on top
- Y.mach.forEach(m=>{if(!machOn(m))return;box(m.x+.5,m.y+.5,36,58,22,{k:'mach',m});box(m.x+.5,m.y+.5,14,66+m.n*12,0,{k:'mach',m})});
+ Y.mach.forEach(m=>{if(!machOn(m))return;box(m.x+.5,m.y+.5,36,58,22,{k:'mach',m});box(m.x+.5,m.y+.5,14,66+m.n*mstep(m),0,{k:'mach',m})});
  Y.shelf.forEach(s=>{if(s.g&&!s.g.sold&&!s.g.out)box(s.x+.5,s.y+.5,38,86,22,{k:'shelf',s})});
  box(LAB.x+.5,LAB.y+.5,42,76,22,{k:'lab'},O&&!O.done&&(O.t==='predict'||O.t==='explore')&&!O.lab);
+ pads().forEach(p=>{box(p.x+.5,p.y+.5,36,44,18,{k:'pad',p});const m=Y.mach.find(m=>m.id===p.u.id);if(m)box(m.x+.5,m.y+.5,36,58,22,{k:'pad',p})});
  hits.sort((a,b)=>a[0]-b[0]);return hits.length?hits[0][1]:null}
-function goThing(o){const [x,y]=o.k==='table'?[o.t.x,o.t.y]:o.k==='mach'?[o.m.zx,o.m.zy]:o.k==='shelf'?[o.s.zx,o.s.zy]:[LAB.zx,LAB.zy];route(x+.5,y+.5)}
+function goThing(o){if(o.k==='pad'){openCard(o.p.u,o.p.v,'tap');return}const [x,y]=o.k==='table'?[o.t.x,o.t.y]:o.k==='mach'?[o.m.zx,o.m.zy]:o.k==='shelf'?[o.s.zx,o.s.zy]:[LAB.zx,LAB.zy];route(x+.5,y+.5)}
 function toTile(px,py){const sx=(px-Y.cw/2)/Y.k+Y.cam[0],sy=(py-Y.ch*.5)/Y.k+Y.cam[1];return [(sy/(TH/2)+sx/(TW/2))/2,(sy/(TH/2)-sx/(TW/2))/2]}
-const free=(x,y)=>x>=.3&&y>=.3&&x<=MW-.3&&y<=MH-.3&&!blocked(Math.floor(x),Math.floor(y));
+// .25 from the edge, so with the .22 body radius you can still stand in the middle of an edge tile (x=12, by the street)
+const free=(x,y)=>x>=.25&&y>=.25&&x<=MW-.25&&y<=MH-.25&&!blocked(Math.floor(x),Math.floor(y));
 const freeR=(x,y)=>{const r=.22;return free(x-r,y-r)&&free(x+r,y-r)&&free(x-r,y+r)&&free(x+r,y+r)};
 // if something appears where you stand (a table you just bought), step to the nearest free tile so you never get stuck
 function unstick(){const me=Y.me;if(freeR(me.x,me.y))return;let best=null,bd=1e9;
@@ -5342,9 +5465,14 @@ function taskText(){const O=Y.O;if(!O)return '';const ask=esc(T(O.p.ask));
  if(O.t==='pair')return `🔗 ${ask} <b>${O.got}/${O.need}</b>`;
  return `🔬 ${ask}${O.lab?' <b>📋</b>':''}`}
 function orderUI(){if(!Y)return;const O=Y.O;Y.el.order.innerHTML=O?`<span class="w">${O.X.who}</span><span class="tx"><small>🔬 ${L('과학 손님','Science customer')}</small>${taskText()}</span><span class="sp">🔊</span>`:'';hud()}
-function hud(){if(!Y)return;const un=UN(),n=UPG.filter(u=>un[u.id]).length,tot=Y.ses.list.length;
+function hud(){if(!Y)return;const n=upHave(),all=upAll(),tot=Y.ses.list.length;
  Y.el.day.textContent=`🍔 ${L(`${S.shopX.days||1}일째`,`Day ${S.shopX.days||1}`)} · 🔬 ${Math.max(0,Math.min(Y.oi,tot))+(Y.O&&Y.O.done?1:0)}/${tot}`;
- Y.el.bar.style.width=n/UPG.length*100+'%';Y.el.up.textContent=L(`가게 키우기 ${n}/${UPG.length}`,`Shop upgrades ${n}/${UPG.length}`)}
+ Y.el.bar.style.width=n/all*100+'%';Y.el.up.textContent=`🛠️ ${L('업그레이드','Upgrades')} ${n}/${all}`;canUI()}
+// the next thing you can afford (board or floor pad), so the upgrade button can glow
+const nextBuy=()=>UPG.find(u=>{const v=lvOf(u.id);return v<upMax(u)&&!(u.need&&!lvOf(u.need))&&u.price[v+1]<=S.coins});
+function canUI(){if(!Y)return;const can=!!nextBuy();Y.el.upBtn.classList.toggle('can',can);
+ // the tip waits for a quiet moment, so it never covers what a science customer just explained
+ if(can&&!S.shopX.boardTip&&!Y.saidBoard&&S.shopX.tut&&Y.t>8&&Y.t-(Y.capAt||-99)>6&&Y.phase==='open'&&!(Y.O&&!Y.O.done&&Y.hold.some(h=>!h.food))){Y.saidBoard=1;caption('🛠️',L('동전이 모였어요! 오른쪽 위 🛠️ 업그레이드를 눌러 가게를 키워 봐요.','You have coins! Tap 🛠️ Upgrades at the top right to grow your café.'),null,true)}}
 function handUI(){if(!Y)return;actsUI();const sci=Y.hold.filter(h=>!h.food),fd={};Y.hold.filter(h=>h.food).forEach(h=>fd[h.e]=(fd[h.e]||0)+1);
  Y.el.hand.innerHTML=Y.hold.length?`<b>🖐️</b>${sci.map(h=>`<span>${richE(h.e)}<small>${esc(h.l)}</small></span>`).join('')}${Object.entries(fd).map(([e,n])=>`<span>${e}<small>×${n}</small></span>`).join('')}`:'';Y.el.hand.classList.toggle('hidden',!Y.hold.length)}
 // Handing over: once you hold a science item, a big button names the customer (one per customer when sorting).
@@ -5358,8 +5486,9 @@ function actsUI(){if(!Y)return;const O=Y.O,box=Y.el.acts;let html='';
   else{const c=custFor(6);if(c)html=`<button type="button" class="ty-give one" data-give="${Y.cust.indexOf(c)}"><span class="w">${c.e}</span><span class="t"><b>${O.t==='predict'||O.t==='explore'?L('📋 손님께 결과 알려 주기','📋 Tell the customer the result'):L('🛎️ 손님께 건네기','🛎️ Hand it to the customer')}</b>${c.sign?`<small>${richE(c.sign[0])} ${esc(c.sign[1])}</small>`:''}</span></button>`}}
  if(!html&&Y.phase==='open'){const t=foodTable();if(t&&!atTable(t)){const fd=Y.hold.filter(h=>h.food).map(h=>h.food),d=Y.diners.find(d=>d.state==='sit'&&d.t===t.i&&fd.some(f=>(d.want[f]||0)>(d.got[f]||0)));
   html=`<button type="button" class="ty-give one food" data-food="${t.i}"><span class="w">${d.e}</span><span class="t"><b>${L('🍽️ 손님께 음식 갖다 주기','🍽️ Take the food to the diner')}</b><small>${[...new Set(fd.filter(f=>(d.want[f]||0)>(d.got[f]||0)))].map(f=>FOOD[f]).join(' ')} ${L('기다리는 손님이 있어요','A diner is waiting')}</small></span></button>`}}
+ if(!html&&Y.phase==='open'&&Y.mess&&!atTable(Y.mess.t))html=`<button type="button" class="ty-give one wipe" data-wipe="1"><span class="w">🧽</span><span class="t"><b>${L('테이블 닦으러 가기','Go wipe the table')}</b><small>${L('헷갈 박사가 어질러 놓았어요. 닦으면 보너스!','Dr. Mix-Up made a mess. Wipe it for a bonus!')}</small></span></button>`;
  if(html!==Y.actsHtml){Y.actsHtml=html;box.innerHTML=html;box.classList.toggle('hidden',!html)}}
-function caption(ic,txt,good,say){if(!Y)return;const c=Y.el.cap;c.className='ty-cap'+(good===true?' good':good===false?' bad':'');c.innerHTML=`<span class="ic">${richE(ic)}</span><span>${esc(txt)}</span>`;void c.offsetWidth;c.classList.add('in');if(say!==false)speak(txt)}
+function caption(ic,txt,good,say){if(!Y)return;Y.capAt=Y.t;const c=Y.el.cap;c.className='ty-cap'+(good===true?' good':good===false?' bad':'');c.innerHTML=`<span class="ic">${richE(ic)}</span><span>${esc(txt)}</span>`;void c.offsetWidth;c.classList.add('in');if(say!==false)speak(txt)}
 function banner(html,ms){if(!Y)return;const b=Y.el.ban;b.innerHTML=html;b.classList.remove('hidden','in');void b.offsetWidth;b.classList.add('in');clearTimeout(Y.banT);Y.banT=setTimeout(()=>{if(Y)b.classList.add('hidden')},ms)}
 function mood(c,m,t=1.6){c.mood=m;c.moodT=t}
 function pop(x,y,txt,col){Y.pops.push({x,y,txt,col,t:0})}
@@ -5372,20 +5501,24 @@ function zoneAt(){const me=Y.me,tx=Math.floor(me.x),ty=Math.floor(me.y);
  if(tx===LAB.zx&&ty===LAB.zy)return {k:'lab'};
  if(tx===CCOL&&ty>=5&&ty<=7)return {k:'counter',col:ty};
  if(tx===COINS.x&&ty===COINS.y)return {k:'coins'};
- const pd=pads().find(p=>p.x===tx&&p.y===ty);if(pd)return {k:'pad',u:pd.u};
+ const pd=pads().find(p=>p.x===tx&&p.y===ty);if(pd)return {k:'pad',u:pd.u,p:pd};
  // in the café any spot right beside a machine or a table works
- const near=(list,r)=>{let best=null,bd=r;for(const o of list){const d=Math.hypot(o.x+.5-me.x,o.y+.5-me.y);if(d<bd){bd=d;best=o}}return best};
+ const dist=o=>Math.hypot(o.x+.5-me.x,o.y+.5-me.y),near=(list,r)=>{let best=null,bd=r;for(const o of list){const d=dist(o);if(d<bd){bd=d;best=o}}return best};
  const m=near(Y.mach.filter(machOn),1.3);if(m)return {k:'mach',m};
- const t=near(Y.tables.filter(tableOn),1.65);if(t)return {k:'table',t};
+ // between two tables, the one whose diner wants what you carry wins, then a messy one to wipe, then the nearer one
+ const ts=Y.tables.filter(t=>tableOn(t)&&dist(t)<1.65).sort((a,b)=>dist(a)-dist(b)),fd=Y.hold.filter(h=>h.food).map(h=>h.food);
+ const t=ts.find(t=>Y.diners.some(d=>d.state==='sit'&&d.t===t.i&&fd.some(f=>(d.want[f]||0)>(d.got[f]||0))))||ts.find(t=>Y.mess&&Y.mess.t===t)||ts[0];
+ if(t)return Y.mess&&Y.mess.t===t?{k:'clean',t}:{k:'table',t};
  return null}
 const zoneKey=z=>z?z.k+(z.s?z.s.i:'')+(z.col||'')+(z.m?z.m.id:'')+(z.t?z.t.i:'')+(z.u?z.u.id:''):'';
-// the next three upgrades on sale, each on its own tile
-function pads(){const un=UN(),out=[];let f=0;for(const u of UPG){if(un[u.id])continue;if(out.length>=3)break;let t=u.tile;if(!t){if(f>=PADFREE.length)continue;t=PADFREE[f++]}out.push({u,x:t[0],y:t[1]})}return out}
+// floor pads: the machines you don't have yet and the next table, each where it will stand
+function pads(){const out=[];for(const u of UPG){if(!u.pad)continue;const v=lvOf(u.id)+1,t=u.pad[v];if(t&&v<=upMax(u))out.push({u,v,x:t[0],y:t[1],price:u.price[v]})}return out}
 function custFor(col){const O=Y.O;if(!O)return null;const here=Y.cust.filter(c=>c.state==='wait');
  if(O.t==='sort')return here.find(c=>c.bin===(col<6?0:col>6?1:-1))||null;
  return here.sort((a,b)=>(a.want||0)-(b.want||0))[0]||null}
-function inZone(dt){const z=zoneAt(),key=zoneKey(z);if(key!==Y.zoneKey){Y.zoneKey=key;Y.zoneT=0;Y.tick=0;Y.blockCust=-1}
+function inZone(dt){const z=zoneAt(),key=zoneKey(z);Y.nearPad=z&&z.k==='pad'?z.p:null;if(key!==Y.zoneKey){Y.zoneKey=key;Y.zoneT=0;Y.tick=0;Y.blockCust=-1}
  if(!z)return;Y.zoneT+=dt;
+ if(z.k==='clean'){if(Y.zoneT>.15)wipe(z.t,dt,'me');return}
  if(z.k==='table'&&z.t.coins>0&&(Y.coinT=(Y.coinT||0)-dt)<0){Y.coinT=.07;scoopTable(z.t)}
  const need={shelf:.3,counter:.2,lab:.25,pad:.6,coins:0,mach:.12,table:.1}[z.k];if(Y.zoneT<.1||Y.stillT<need)return;Y.tick-=dt;if(Y.tick>0)return;
  if(z.k==='shelf'){Y.tick=.42;takeFrom(z.s)}
@@ -5394,8 +5527,8 @@ function inZone(dt){const z=zoneAt(),key=zoneKey(z);if(key!==Y.zoneKey){Y.zoneKe
  else if(z.k==='coins'){Y.tick=.08;scoop()}
  else if(z.k==='mach'){Y.tick=.2;takeFood(z.m)}
  else if(z.k==='table'){Y.tick=.3;serveTable(z.t,Y.me,Y.hold,true)}
- else if(z.k==='pad'){Y.tick=.06;payPad(z.u)}}
-const capOf=()=>3+(UN().bag?2:0);
+ else if(z.k==='pad'){Y.tick=99;openCard(z.u,z.p.v,'pad')}}
+const capOf=()=>capAt(lvOf('tray'));
 function takeFrom(s){const O=Y.O;if(!O||O.done)return;const g=s.g;
  if(!g){if((O.t==='predict'||O.t==='explore')&&!O.lab&&!Y.saidLab){Y.saidLab=1;caption('🔬',L('이번 과학 손님은 실험이 필요해요. 왼쪽 벽 실험대로 가요!','This science customer needs an experiment. Go to the lab table on the left wall!'))}return}
  if(g.sold||g.out)return;
@@ -5435,8 +5568,8 @@ function finish(){const O=Y.O;O.done=true;orderUI();const {pay,tip,isNew}=shopPa
  setTimeout(()=>{if(Y&&Y.O===O)caption(O.X.who,T(O.X.thanks),true)},600);
  if(!S.shopX.tut){S.shopX.tut=1;save()}
  const wait=()=>{if(!Y||Y.O!==O)return;if(Y.cust.some(x=>x.state!=='gone')){setTimeout(wait,300);return}startOrder(Y.oi+1)};setTimeout(wait,3600)}
-function closing(){if(!Y)return;Y.O=null;Y.phase='closing';Y.cust=[];Y.el.order.classList.add('hidden');Y.shelf.forEach(s=>s.g=null);hud();
- Y.diners.forEach(d=>{if(d.state!=='gone')d.state='out'});
+function closing(){if(!Y)return;closeCard();closeBoard();Y.O=null;Y.phase='closing';Y.cust=[];Y.el.order.classList.add('hidden');Y.shelf.forEach(s=>s.g=null);hud();
+ Y.diners.forEach(d=>{if(d.state!=='gone'&&d.state!=='out')leave(d)});Y.mess=null;Y.messAt=-1;
  if(Y.ses.mode==='review'){setTimeout(()=>{if(!Y)return;scoopAll();setTimeout(()=>{if(Y)shopNext()},700)},1600);return}
  caption('🌙',L('문 닫을 시간이에요! 동전을 챙겨요.','Closing time! Grab your coins.'),null,true);
  setTimeout(()=>{if(!Y)return;scoopAll();const f=Y.ses.foe;
@@ -5452,7 +5585,7 @@ const atTable=t=>Math.hypot(t.x+.5-Y.me.x,t.y+.5-Y.me.y)<1.65;
 // how many more of a food the diners still need, after what you and the helpers already carry
 function foodNeed(f){let n=0;Y.diners.forEach(d=>{if(d.state==='sit'||d.state==='in')n+=Math.max(0,(d.want[f]||0)-(d.got[f]||0))});
  Y.staff.forEach(s=>s.hold.forEach(h=>{if(h.food===f)n--}));Y.hold.forEach(h=>{if(h.food===f)n--});return n}
-function takeFood(m){const need=foodNeed(m.id),max=UN().fast?10:6;
+function takeFood(m){const need=foodNeed(m.id),max=mlv(m)[1];
  if(need<0){const k=Y.hold.findIndex(h=>h.food===m.id);if(k<0)return;Y.hold.splice(k,1);m.n=Math.min(max,m.n+1);SFX.tick();fly(m.e,Y.me.x,Y.me.y,{x:m.x+.5,y:m.y+.3});handUI();return}
  if(need===0){if(Y.saidFood!==Y.zoneKey&&Y.tookAt!==Y.zoneKey){Y.saidFood=Y.zoneKey;caption(m.e,L('지금은 이 음식을 기다리는 손님이 없어요. 손님 말풍선을 보세요!','No diner is waiting for this right now. Check the diners’ bubbles!'),null,false)}return}
  if(m.n<=0)return;
@@ -5461,44 +5594,100 @@ function takeFood(m){const need=foodNeed(m.id),max=UN().fast?10:6;
 function serveTable(t,who,hold,mine){const ds=Y.diners.filter(d=>d.state==='sit'&&d.t===t.i);for(const d of ds)for(const [f,n] of Object.entries(d.want)){if((d.got[f]||0)>=n)continue;
   const k=hold.findIndex(h=>h.food===f);if(k<0)continue;hold.splice(k,1);d.got[f]=(d.got[f]||0)+1;fly(FOOD[f],who.x,who.y,d);SFX.tick();if(mine)handUI();
   if(Object.entries(d.want).every(([g,m])=>(d.got[g]||0)>=m)){d.state='eat';d.eatT=2.6;mood(d,'😋',2.6);SFX.good()}return true}return false}
-function spawnDiner(){const un=UN(),menu=['burger',...(un.fries?['fries']:[]),...(un.drink?['drink']:[])];
- const seats=[];Y.tables.forEach(t=>{if(!tableOn(t))return;t.seats.forEach((s,k)=>{if(!Y.diners.some(d=>d.state!=='gone'&&d.t===t.i&&d.k===k))seats.push([t,k])})});
+function spawnDiner(){const menu=['burger',...(lvOf('fries')?['fries']:[]),...(lvOf('drink')?['drink']:[])];
+ const seats=[];Y.tables.forEach(t=>{if(!tableOn(t)||(Y.mess&&Y.mess.t===t))return;t.seats.forEach((s,k)=>{if(!Y.diners.some(d=>d.state!=='gone'&&d.t===t.i&&d.k===k))seats.push([t,k])})});
  if(!seats.length)return;const [t,k]=pk(seats),want={},n=(S.shopX.days||1)<2?1:pk([1,1,2,2,3]);for(let j=0;j<n;j++){const f=pk(menu);want[f]=(want[f]||0)+1}
- const [sx,sy]=t.seats[k];Y.diners.push({e:pk(PALS),t:t.i,k,x:MW+.8,y:sy,sx,sy,state:'in',want,got:{},ph:rnd(0,6),mood:'',moodT:0,col:pk(['#ff6a5a','#4cb4ff','#3cb878','#ffb020','#a66bff','#ff8ad8'])})}
-function stepDiners(dt){if(Y.phase==='open'&&Y.ses.mode!=='review'&&(Y.spawnT-=dt)<0){Y.spawnT=rnd(4.5,7.5);spawnDiner()}
+ // with tables by the street, diners for the inner tables come in along an aisle and down the walkway at x=11.5
+ const [sx,sy]=t.seats[k],far=t.x<12&&lvOf('tables')>3,ay=far?AISLES.reduce((a,b)=>Math.abs(b-sy)<Math.abs(a-sy)?b:a):sy;
+ Y.diners.push({e:pk(PALS),t:t.i,k,x:MW+.8,y:ay,sx,sy,ay,far,route:far?[[11.5,ay],[11.5,sy],[sx,sy]]:[[sx,sy]],state:'in',want,got:{},ph:rnd(0,6),mood:'',moodT:0,col:pk(['#ff6a5a','#4cb4ff','#3cb878','#ffb020','#a66bff','#ff8ad8'])})}
+function leave(d){d.state='out';d.route=d.far&&d.x<11.6?[[11.5,d.y],[11.5,d.ay],[MW+1.2,d.ay]]:[[MW+1.2,d.y]]}
+function stepDiners(dt){if(Y.phase==='open'&&Y.ses.mode!=='review'&&(Y.spawnT-=dt)<0){Y.spawnT=arriveSec()*rnd(.75,1.25);spawnDiner()}
  for(const d of Y.diners){d.ph+=dt*3;if(d.moodT>0&&(d.moodT-=dt)<=0)d.mood='';if(d.state==='sit')d.sitT=(d.sitT||0)+dt;
-  if(d.state==='in'||d.state==='out'){const tx=d.state==='in'?d.sx:MW+1.2,ty=d.sy,dx=tx-d.x,dy=ty-d.y,dd=Math.hypot(dx,dy);if(dd>.05){const v=Math.min(dd,1.8*dt);d.x+=dx/dd*v;d.y+=dy/dd*v;d.walk=true}else{d.walk=false;if(d.state==='in')d.state='sit';else d.state='gone'}}
-  else if(d.state==='eat'&&(d.eatT-=dt)<0){const t=Y.tables[d.t],sum=Object.entries(d.want).reduce((a,[f,n])=>a+n*MACH.find(m=>m.id===f).price,0)+shopLv();t.coins+=sum;pop(t.x+.5,t.y+.5,`+${sum}`,'#d99a00');SFX.coin();d.state='out';mood(d,'💖',2)}}
+  if(d.state==='in'||d.state==='out'){const [tx,ty]=d.route[0],dx=tx-d.x,dy=ty-d.y,dd=Math.hypot(dx,dy);if(dd>.05){const v=Math.min(dd,1.8*dt);d.x+=dx/dd*v;d.y+=dy/dd*v;d.walk=true}else if(d.route.length>1)d.route.shift();else{d.walk=false;if(d.state==='in')d.state='sit';else d.state='gone'}}
+  else if(d.state==='eat'&&(d.eatT-=dt)<0){const t=Y.tables[d.t],tip=lvOf('decor'),sum=Object.entries(d.want).reduce((a,[f,n])=>a+n*MACH.find(m=>m.id===f).price,0)+shopLv()+tip;t.coins+=sum;pop(t.x+.5,t.y+.5,tip?`+${sum} 💝`:`+${sum}`,'#d99a00');SFX.coin();leave(d);mood(d,'💖',2)}}
  Y.diners=Y.diners.filter(d=>d.state!=='gone')}
-function stepMachines(dt){const fast=UN().fast,max=fast?10:6,rate=fast?.9:1.5;for(const m of Y.mach){if(!machOn(m))continue;if(m.n<max&&(m.t+=dt)>rate){m.t=0;m.n++}}}
+// each machine makes one thing every few seconds (faster at higher levels) and puffs a little steam when it does
+function stepMachines(dt){for(const m of Y.mach){if(!machOn(m))continue;const [cook,max]=mlv(m);if(m.n<max){if((m.t+=dt)>cook){m.t=0;m.n++;(m.puff=m.puff||[]).push(0)}}else m.t=0;if(m.puff)m.puff=m.puff.map(t=>t+dt).filter(t=>t<1.2)}}
 // helpers carry food: from the machine with what a seated diner still needs, to that table.
 // They leave a new diner to you for a few seconds, so the café stays yours to run.
-function stepStaff(dt){const sp=2.3;for(const s of Y.staff){s.ph+=dt*10;
+function stepStaff(dt){const sp=staffSp(lvOf('train'));for(const s of Y.staff){s.ph+=dt*10;
  if(!s.goal){const need=[],mine={};Y.hold.forEach(h=>{if(h.food)mine[h.food]=(mine[h.food]||0)+1});
   Y.diners.forEach(d=>{if(d.state!=='sit'||(d.sitT||0)<4)return;for(const [f,n] of Object.entries(d.want)){let left=n-(d.got[f]||0)-Y.staff.filter(o=>o!==s&&o.for===d).length;while(left>0&&mine[f]>0){mine[f]--;left--}if(left>0)need.push([d,f])}});
-  if(s.hold.length){const t=Y.tables.find(t=>Y.diners.some(d=>d.state==='sit'&&d.t===t.i&&s.hold.some(h=>(d.want[h.food]||0)>(d.got[h.food]||0))));if(t)s.goal={k:'table',t,x:t.zx+.5,y:t.zy+.5};else s.hold=[]}
-  else if(need.length){const [d,f]=need[0],m=Y.mach.find(m=>m.id===f&&machOn(m));if(m){s.goal={k:'mach',m,f,x:m.zx+.5,y:m.zy+.5};s.for=d}}
-  else{if((s.wait-=dt)<0){s.wait=2;s.goal={k:'idle',x:rnd(8.6,9.4),y:rnd(1.5,9.5)}}}}
- if(s.goal){const dx=s.goal.x-s.x,dy=s.goal.y-s.y,d=Math.hypot(dx,dy);
+  if(s.hold.length){const t=Y.tables.find(t=>Y.diners.some(d=>d.state==='sit'&&d.t===t.i&&s.hold.some(h=>(d.want[h.food]||0)>(d.got[h.food]||0))));if(t)goal(s,{k:'table',t,x:t.zx+.5,y:t.zy+.5});else s.hold=[]}
+  else if(need.length){const [d,f]=need[0],m=Y.mach.find(m=>m.id===f&&machOn(m));if(m){goal(s,{k:'mach',m,f,x:m.zx+.5,y:m.zy+.5});s.for=d}}
+  else if(Y.mess&&!Y.mess.by&&Y.t-Y.mess.t0>20){const t=Y.mess.t;Y.mess.by=s;goal(s,{k:'clean',t,x:t.zx+.5,y:t.zy+.5})}
+  else{if((s.wait-=dt)<0){s.wait=2;goal(s,{k:'idle',x:rnd(8.6,9.4),y:rnd(1.5,9.5)})}}}
+ if(s.goal){const [gx,gy]=s.wp.length?s.wp[0]:[s.goal.x,s.goal.y],dx=gx-s.x,dy=gy-s.y,d=Math.hypot(dx,dy);
   if(d>.08){const v=Math.min(d,sp*dt);s.x+=dx/d*v;s.y+=dy/d*v;s.moving=true;const sx=dx-dy;if(Math.abs(sx)>.05)s.dir=sx>0?1:-1}
+  else if(s.wp.length)s.wp.shift();
   else{s.moving=false;const g=s.goal;
    if(g.k==='mach'){if(g.m.n>0&&s.hold.length<3){g.m.n--;s.hold.push({e:g.m.e,food:g.m.id})}
     const more=s.hold.length<2&&g.m.n>0&&Y.diners.some(d=>d.state==='sit'&&(d.want[g.f]||0)-(d.got[g.f]||0)>1);if(!more){s.goal=null;s.for=null}}
    else if(g.k==='table'){if(!serveTable(g.t,s,s.hold,false))s.goal=null}
+   else if(g.k==='clean'){if(Y.mess&&Y.mess.t===g.t)wipe(g.t,dt,s);else s.goal=null}
    else s.goal=null}}}}
+// helpers change columns along the free row by the machines, then walk straight down the walkway
+function goal(s,g){s.goal=g;s.wp=Math.abs(s.x-g.x)>.3?[[s.x,1.5],[g.x,1.5]]:[]}
+// Dr. Mix-Up's mess: once in a day he splats an empty table. Nobody sits there until it is wiped (by you, or by a
+// helper after a while); wiping it puts a small bonus on the table. Nothing is ever broken and no coins are lost.
+function stepMess(){if(Y.messAt<0||Y.phase!=='open'||Y.t<Y.messAt||Y.mess)return;
+ const ok=Y.tables.filter(t=>tableOn(t)&&!Y.diners.some(d=>d.state!=='gone'&&d.t===t.i));if(!ok.length){Y.messAt=Y.t+5;return}
+ Y.messAt=-1;Y.mess={t:pk(ok),kind:pk(['slime','sauce']),prog:0,t0:Y.t,by:null};SFX.oops();
+ caption('🦹',L('앗! 헷갈 박사가 빈 테이블에 장난을 쳤어요. 가서 닦아 주면 보너스를 받아요!','Oops! Dr. Mix-Up made a mess on an empty table. Wipe it clean for a bonus!'),null,true)}
+function wipe(t,dt,who){const M=Y.mess;if(!M||M.t!==t)return;M.prog+=dt/1.4;if((Y.wipeT=(Y.wipeT||0)+dt)>.3){Y.wipeT=0;SFX.tick()}if(M.prog<1)return;
+ Y.mess=null;const bonus=10+2*lvOf('tables');t.coins+=bonus;burst(t.x+.5,t.y+.5);pop(t.x+.5,t.y+.5,`+${bonus} ✨`,'#2f9e5b');SFX.good();
+ caption('🧽',L(`반짝반짝! 비누 거품은 끈적한 얼룩을 감싸서 물에 씻겨 나가게 해요. 보너스 +${bonus}`,`Sparkling! Soap bubbles wrap around sticky mess so water can wash it away. Bonus +${bonus}`),true,who==='me')}
 function scoopTable(t){const n=Math.min(t.coins,Math.max(1,Math.ceil(t.coins/4)));t.coins-=n;shopCollect(n);SFX.coin();if(Math.random()<.4)coinFly(t.x+.5,t.y+.5)}
 
 // coins by the science counter, upgrade pads, the lab
 function scoop(){if(!Y.pile)return;const n=Math.min(Y.pile,Math.max(1,Math.ceil(Y.pile/5)));Y.pile-=n;shopCollect(n);SFX.coin();if(Math.random()<.5)coinFly(COINS.x+.5,COINS.y+.5)}
 function scoopAll(){let n=Y.pile;Y.pile=0;Y.tables.forEach(t=>{n+=t.coins;t.coins=0});if(n){shopCollect(n);coinFly(COINS.x+.5,COINS.y+.5);SFX.coin()}}
 function coinFly(x,y){const [sx,sy]=scr(x,y,30),r=Y.el.cv.getBoundingClientRect();flyCoins({getBoundingClientRect:()=>({left:r.left+sx,top:r.top+sy,width:0,height:0})},10)}
-function payPad(u){const un=UN(),pd=S.shopX.pad=S.shopX.pad||{},have=pd[u.id]||0,need=u.price-have;
- if(S.coins<=0){if(Y.saidBroke!==u.id){Y.saidBroke=u.id;caption('🪙',L('동전이 모자라요! 손님을 더 받고 다시 와요.','Not enough coins! Serve more customers and come back.'),null,false)}return}
- const n=Math.min(need,S.coins,Math.max(2,Math.round(u.price/40)));S.coins-=n;pd[u.id]=have+n;updateHud();if(Y.padSnd++%3===0)SFX.tick();
- if(pd[u.id]>=u.price){un[u.id]=true;delete pd[u.id];save();SFX.level();const t=u.tile||[Math.floor(Y.me.x),Math.floor(Y.me.y)];burst(t[0]+.5,t[1]+.5);syncStaff();
-  unstick();
-  caption(u.ic,L(`${T(u.name)} 완성!`,`${T(u.name)} unlocked!`)+(u.perk?' '+T(u.perk):''),true);hud()}
- else if(Y.padSnd%20===0)save()}
+// Buying always goes through a card: what it is in words, one sentence of what it does, before → after, the price, and
+// an "Upgrade!" button. Standing on a floor pad, tapping a pad or picking a line on the board opens it; nothing is ever
+// bought without the button. While the card is open the café pauses and the map shows where the change will happen.
+// where an upgrade shows on the map: the spots to ring, the first one is where the camera looks
+function upSpots(u,v){const m=Y.mach.find(m=>m.id===u.id);if(m)return [[m.x+.5,m.y+.5]];
+ if(u.id==='tables'){const t=Y.tables[v-1];return [[t.x+.5,t.y+.5]]}
+ if(u.id==='staff')return [[9.5+(v-1),1.6]];
+ if(u.id==='train')return Y.staff.length?Y.staff.map(s=>[s.x,s.y]):[[9.5,1.6]];
+ if(u.id==='sign')return [[MW+1.05,-.45]];
+ if(u.id==='decor')return v===1?[[10.5,.5],[.5,10.5],[.5,.6]]:v===2?Y.tables.filter(tableOn).map(t=>[t.x+.5,t.y+.5]):v===3?[[8.35,.45],[8.45,0],[12.75,10.75]]:[[12.75,0]];
+ if(u.id==='buddy')return [[Y.bd.x,Y.bd.y]];return [[Y.me.x,Y.me.y]]}
+function openCard(u,v,from){if(!Y||Y.card||v>upMax(u))return;if(Y.board)closeBoard();
+ Y.card={u,v,from};Y.joy=null;Y.keys={};Y.el.joy.classList.add('hidden');Y.focus=upSpots(u,v)[0];SFX.hint();cardUI();Y.el.pv.classList.remove('hidden');
+ speak(`${upAct(u,v)}. ${T(v===1&&u.first?u.first:u.what)}`)}
+function cardUI(){const C=Y&&Y.card;if(!C)return;const {u,v}=C,p=u.price[v],can=S.coins>=p,rows=upChange(u,v-1,v,true);
+ const pic=u.pic?`<img src="images/sci-${u.pic}.webp" alt="" onerror="this.replaceWith('${u.ic}')">`:u.id==='staff'&&Y.crew[v-1]?`<img src="${Y.crew[v-1].src}" alt="">`:u.ic;
+ Y.el.pv.innerHTML=`<div class="ty-pvin" role="dialog" aria-label="${esc(upAct(u,v))}"><div class="ty-pvh"><span class="pic">${pic}</span><div class="t"><b>${esc(upAct(u,v))}</b><small>${esc(T(u.name))} · <em>${esc(upStep(u,v))}</em></small></div></div>
+  <p class="ty-pvw">${esc(T(v===1&&u.first?u.first:u.what))}</p>
+  ${rows.length?`<ul class="ty-pvc">${rows.map(r=>`<li><span class="k">${r[0]} ${esc(r[1])}</span><span class="v"><s>${esc(r[2])}</s> → <b>${esc(r[3])}</b></span></li>`).join('')}</ul>`:''}
+  ${u.names?`<p class="ty-pvx">✨ ${L('새로 생겨요','You get')}: <b>${esc(T(u.names[v]))}</b></p>`:''}
+  <div class="ty-pvb"><button type="button" class="ty-pvno" data-pv="no">${L('나중에','Later')}</button>${can?`<button type="button" class="ty-pvgo" data-pv="buy">⬆️ ${L('업그레이드!','Upgrade!')}<small>${COIN} ${p}</small></button>`
+   :`<div class="ty-pvneed"><b>${COIN} ${p}</b><small>${L(`${p-S.coins}개 더 모으면 살 수 있어요`,`${p-S.coins} more coins needed`)}</small></div>`}</div></div>`}
+function closeCard(){if(!Y||!Y.card)return;Y.card=null;Y.el.pv.classList.add('hidden');Y.el.pv.innerHTML='';if(!(Y.focusT>0))Y.focus=null;Y.last=0;stopVoice()}
+function buyCard(){const C=Y&&Y.card;if(!C)return;const {u,v}=C,p=u.price[v];if(lvOf(u.id)!==v-1||S.coins<p){cardUI();return}
+ S.coins-=p;updateHud();Y.focusT=2.2;Y.lastUp={u,v};closeCard();levelUp(u,v)}
+function levelUp(u,v){if(S.shopX.fast4&&v===1&&Y.mach.some(m=>m.id===u.id))v=4;// old saves with "faster machines" get new ones fast too
+ shopLvs()[u.id]=v;save();SFX.level();syncStaff();unstick();
+ upSpots(u,v).forEach(([x,y],k)=>{if(k<3)burst(x,y)});const [x,y]=upSpots(u,v)[0];pop(x,y-.6,`Lv.${v}!`,'#ff7a00');
+ caption(u.ic,`${T(u.name)} Lv.${v}! ${upChange(u,v-1,v)}`,true);hud()}
+// The upgrade board: every upgrade with its level, what the next level changes (before → after) and its price.
+// Picking a line opens the card for it.
+function openBoard(){if(!Y||Y.board||Y.card)return;Y.board=true;Y.joy=null;Y.keys={};Y.el.joy.classList.add('hidden');SFX.click();
+ if(!S.shopX.boardTip){S.shopX.boardTip=1;save()}Y.el.board.classList.remove('hidden');boardUI()}
+function closeBoard(){if(!Y||!Y.board)return;Y.board=false;Y.el.board.classList.add('hidden');Y.el.board.innerHTML='';Y.last=0}
+function boardRow(u){const v=lvOf(u.id),mx=upMax(u),st=u.start||0,max=v>=mx,lock=!max&&u.need&&!lvOf(u.need),p=max?0:u.price[v+1],can=!max&&!lock&&S.coins>=p;
+ const pips=Array.from({length:mx-st},(_,k)=>`<i class="${k<v-st?'on':''}"></i>`).join('');
+ const btn=max?`<span class="ty-ubtn max">✅<small>${L('최고 레벨','Max level')}</small></span>`
+  :lock?`<span class="ty-ubtn lock">🔒<small>${L('알바생 먼저','Hire first')}</small></span>`
+  :`<button type="button" class="ty-ubtn ${can?'buy':'no'}" data-up="${u.id}">${COIN} ${p}<small>${can?L('올리기 ›','Upgrade ›'):L(`${p-S.coins} 더 모아요`,`${p-S.coins} more`)}</small></button>`;
+ return `<div class="ty-up${can?' can':''}${max?' max':''}" data-u="${u.id}"><span class="ic">${u.ic}</span><div class="tx"><b>${esc(max?T(u.name):upAct(u,v+1))} <span class="lv">${max?`Lv.${v}`:esc(upStep(u,v+1))}</span></b><span class="pips">${pips}</span><small class="ch">${esc(max?T(u.what):upChange(u,v,v+1))}</small></div>${btn}</div>`}
+function boardUI(){if(!Y||!Y.board)return;const box=Y.el.board,sc=box.querySelector('.ty-labin'),top=sc?sc.scrollTop:0,n=upHave(),all=upAll();
+ box.innerHTML=`<div class="ty-labin ty-boardin"><div class="ty-labh"><b>🛠️ ${L('가게 업그레이드','Café upgrades')}</b><span class="ty-bcoin">${COIN} ${S.coins.toLocaleString()}</span><button type="button" class="ty-x" data-bx aria-label="${L('닫기','Close')}">✕</button></div>
+  <div class="ty-bsum"><span>${L(`가게 키우기 ${n}/${all} · 줄을 누르면 자세히 보여요`,`Upgrades ${n}/${all} · tap one to see it`)}</span><div class="ty-bar"><i style="width:${n/all*100}%"></i></div></div>
+  ${UPG_CAT.map((c,i)=>`<h4>${esc(T(c))}</h4>${UPG.filter(u=>u.cat===i).map(boardRow).join('')}`).join('')}</div>`;
+ box.querySelector('.ty-labin').scrollTop=top}
 function openLab(){const O=Y.O;if(!O||O.done)return;
  if(O.t!=='predict'&&O.t!=='explore'){if(Y.saidNoLab!==O.id){Y.saidNoLab=O.id;caption('🔬',L('이번 손님은 실험이 필요 없어요. 진열대에서 물건을 골라요!','No experiment needed this time. Pick things from the stands!'),null,false)}return}
  if(O.lab)return;const box=Y.el.lab;box.classList.remove('hidden');
@@ -5511,8 +5700,9 @@ function openLab(){const O=Y.O;if(!O||O.done)return;
 
 // ---------------------------------------------------------------- loop
 function frame(ts){if(!Y)return;Y.raf=requestAnimationFrame(frame);if(document.hidden||$('modalRoot').innerHTML){Y.last=0;return}
- const dt=Y.last?Math.min(.05,(ts-Y.last)/1000):1/60;Y.last=ts;Y.t+=dt;update(dt);draw()}
-function update(dt){const me=Y.me,sp=UN().shoes?3.7:2.9;let vx=0,vy=0;
+ const dt=Y.last?Math.min(.05,(ts-Y.last)/1000):1/60;Y.last=ts;if(Y.board||Y.card){Y.hl=(Y.hl||0)+dt;draw();return}Y.t+=dt;Y.hl=(Y.hl||0)+dt;
+ if(Y.focusT>0&&(Y.focusT-=dt)<=0)Y.focus=null;update(dt);draw()}
+function update(dt){const me=Y.me,sp=shoeSp(lvOf('shoes'));let vx=0,vy=0;
  const labOpen=!Y.el.lab.classList.contains('hidden');
  if(!labOpen&&Y.phase!=='monster'){
   const kx=(Y.keys.r?1:0)-(Y.keys.l?1:0),ky=(Y.keys.d?1:0)-(Y.keys.u?1:0);
@@ -5522,13 +5712,14 @@ function update(dt){const me=Y.me,sp=UN().shoes?3.7:2.9;let vx=0,vy=0;
  unstick();const ox=me.x,oy=me.y;
  if(vx||vy){const nx=me.x+vx*dt,ny=me.y+vy*dt;if(freeR(nx,me.y))me.x=nx;if(freeR(me.x,ny))me.y=ny;const sx=vx-vy;if(Math.abs(sx)>.05)me.dir=sx>0?1:-1}
  me.moving=Math.hypot(me.x-ox,me.y-oy)>.004;if(me.moving){me.ph+=dt*11;Y.stillT=0}else Y.stillT+=dt;
+ if(me.path&&me.path.length&&Y.stillT>.4)me.path.shift();// a step you can't reach is dropped, so a tap-walk never hangs
  // the buddy trots behind you, or fetches coins once the coin buddy is bought
- const bd=Y.bd,tc=UN().helper&&Y.phase==='open'?(Y.pile>0?{x:COINS.x+.5,y:COINS.y+.5,f:()=>scoop()}:(()=>{const t=Y.tables.find(t=>t.coins>0);return t?{x:t.zx+.5,y:t.zy+.5,f:()=>scoopTable(t)}:null})()):null;
+ const bd=Y.bd,tc=lvOf('buddy')&&Y.phase==='open'?(Y.pile>0?{x:COINS.x+.5,y:COINS.y+.5,f:()=>scoop()}:(()=>{const t=Y.tables.find(t=>t.coins>0);return t?{x:t.zx+.5,y:t.zy+.5,f:()=>scoopTable(t)}:null})()):null;
  let gx=me.x-.6*me.dir,gy=me.y+.55;if(tc){gx=tc.x;gy=tc.y}
  const ddx=gx-bd.x,ddy=gy-bd.y,dd=Math.hypot(ddx,ddy);if(dd>.12){const v=Math.min(dd,(1.6+dd*2.2)*dt);bd.x+=ddx/dd*v;bd.y+=ddy/dd*v;bd.ph+=dt*12}
  if(tc&&dd<.4&&(Y.helpT=(Y.helpT||0)-dt)<0){Y.helpT=.25;tc.f()}
  if(!labOpen&&Y.phase==='open')inZone(dt);
- stepMachines(dt);stepDiners(dt);stepStaff(dt);if((Y.actsT=(Y.actsT||0)-dt)<0){Y.actsT=.25;actsUI()}
+ stepMachines(dt);stepDiners(dt);stepStaff(dt);stepMess();if((Y.actsT=(Y.actsT||0)-dt)<0){Y.actsT=.25;actsUI()}if((Y.canT=(Y.canT||0)-dt)<0){Y.canT=.5;canUI()}
  // a nudge back to the science customer when the café keeps you busy
  if(Y.O&&!Y.O.done&&Y.phase==='open'&&Y.cust.some(c=>c.state==='wait')){if(!Y.hold.some(h=>!h.food)&&(Y.idleSci+=dt)>35){Y.idleSci=0;caption(Y.O.X.who,L('과학 손님이 기다려요! ','Your science customer is waiting! ')+T(Y.O.p.ask),null,true)}}else Y.idleSci=0;
  for(const c of Y.cust){c.ph+=dt*3;if(c.moodT>0&&(c.moodT-=dt)<=0)c.mood='';if(c.state==='gone')continue;
@@ -5569,8 +5760,8 @@ function emo_(c,e,x,y,size){if(e&&e.includes('@')){const parts=e.split(/(@[a-z]+
  c.font=`${size}px ${EF}`;c.textAlign='center';c.textBaseline='middle';c.fillText(e,x,y)}
 function label(c,t,x,y,bg,fg='#24304a'){c.font=`800 13px ${TF}`;const w=Math.min(96,c.measureText(t).width+12);c.fillStyle=bg;c.beginPath();c.roundRect(x-w/2,y-10,w,20,9);c.fill();c.strokeStyle='rgba(0,0,0,.08)';c.stroke();c.fillStyle=fg;c.textAlign='center';c.textBaseline='middle';c.fillText(t,x,y+.5,w-8)}
 function wallQuad(c,x0,y0,x1,y1,h0,h1,fill){const a=iso(x0,y0),b=iso(x1,y1);poly(c,[[a[0],a[1]-h0],[b[0],b[1]-h0],[b[0],b[1]-h1],[a[0],a[1]-h1]],fill)}
-function draw(){const c=Y.ctx,me=Y.me,un=UN(),O=Y.O;c.lineJoin='round';
- const hw=Y.cw/2/Y.k,hh=Y.ch/2/Y.k,[mx,my]=iso(me.x,me.y),x0=-MH*TW/2+hw-40,x1=MW*TW/2-hw+40,y0=-110+hh-90,y1=(MW+MH)*TH/2-hh+110;
+function draw(){const c=Y.ctx,me=Y.me,O=Y.O,dec=lvOf('decor'),sg=lvOf('sign');c.lineJoin='round';
+ const hw=Y.cw/2/Y.k,hh=Y.ch/2/Y.k,[mx,my0]=iso(...(Y.focus||[me.x,me.y])),my=Y.focus?my0+hh*.42:my0,x0=-MH*TW/2+hw-40,x1=MW*TW/2-hw+120,y0=-110+hh-90,y1=(MW+MH)*TH/2-hh+110+(Y.focus?hh*.9:0);
  const wx=x0>x1?(x0+x1)/2:cl(mx,x0,x1),wy=y0>y1?(y0+y1)/2:cl(my,y0,y1);Y.cam[0]+=(wx-Y.cam[0])*.1;Y.cam[1]+=(wy-Y.cam[1])*.1;
  c.setTransform(Y.dpr,0,0,Y.dpr,0,0);c.fillStyle='#52c3ff';c.fillRect(0,0,Y.cw,Y.ch);
  c.setTransform(Y.dpr*Y.k,0,0,Y.dpr*Y.k,Y.dpr*(Y.cw/2-Y.cam[0]*Y.k),Y.dpr*(Y.ch*.5-Y.cam[1]*Y.k));
@@ -5585,21 +5776,30 @@ function draw(){const c=Y.ctx,me=Y.me,un=UN(),O=Y.O;c.lineJoin='round';
  wallQuad(c,0,0,MW,0,0,16,'#f0a76a');wallQuad(c,0,0,0,MH,0,16,'#8fbfe8');
  const mb=iso(9.2,0);c.save();c.translate(mb[0],mb[1]-wh+28);c.transform(1,.5,0,1,0,0);c.fillStyle='#3a2b26';c.beginPath();c.roundRect(-4,-14,132,52,8);c.fill();
  c.font=`22px ${EF}`;c.textBaseline='middle';c.textAlign='center';[['🍔',5],['🍟',3],['🥤',2]].forEach(([e,p],k)=>{c.fillText(e,18+k*44,4);c.font=`900 12px ${TF}`;c.fillStyle='#ffd23f';c.fillText(`🪙${p}`,18+k*44,27);c.font=`22px ${EF}`;c.fillStyle='#3a2b26'});c.restore();
- const sg=iso(3.8,0);c.save();c.translate(sg[0],sg[1]-wh+30);c.transform(1,.5,0,1,0,0);c.fillStyle=un.sign?'#ffd23f':'#ffffff';c.beginPath();c.roundRect(-84,-18,168,34,12);c.fill();if(un.sign){c.strokeStyle='#ff9f1a';c.lineWidth=3;c.stroke();c.lineWidth=1}
+ const sp=iso(3.8,0);c.save();c.translate(sp[0],sp[1]-wh+30);c.transform(1,.5,0,1,0,0);c.fillStyle=sg?'#ffd23f':'#ffffff';c.beginPath();c.roundRect(-84,-18,168,34,12);c.fill();if(sg){c.strokeStyle='#ff9f1a';c.lineWidth=3;c.stroke();c.lineWidth=1}
  c.fillStyle='#e0533d';c.font=`900 16px ${TF}`;c.textAlign='center';c.textBaseline='middle';c.fillText(`🍔 ${T(SHOP_LV[shopLv()][2])}`,0,0,160);c.restore();
  [['🧲',0,3.2],['🌍',0,5.6],['🔬',0,8]].forEach(([e,x,y])=>{const p=iso(x,y);c.save();c.translate(p[0],p[1]-wh+46);c.transform(1,-.5,0,1,0,0);c.fillStyle='#ffffff';c.strokeStyle='#9fb6d6';c.lineWidth=3;c.beginPath();c.roundRect(-22,-26,44,50,6);c.fill();c.stroke();c.lineWidth=1;c.font=`26px ${EF}`;c.textAlign='center';c.textBaseline='middle';c.fillText(e,0,0);c.restore()});
- if(un.sign||un.plant)for(let k=0;k<17;k++){const [x,y]=iso(k*.78+.2,0);c.globalAlpha=(Math.floor(Y.t*3)+k)%3?1:.45;emo(c,'💡',x,y-wh-2,12);c.globalAlpha=1}
+ // decorations: a picture on the café wall, then a radio playing music
+ if(dec>=3){const p=iso(8.45,0);c.save();c.translate(p[0],p[1]-wh+52);c.transform(1,.5,0,1,0,0);c.fillStyle='#ffffff';c.strokeStyle='#e0a33a';c.lineWidth=4;c.beginPath();c.roundRect(-18,-20,36,36,4);c.fill();c.stroke();c.lineWidth=1;c.font=`22px ${EF}`;c.textAlign='center';c.textBaseline='middle';c.fillStyle='#000';c.fillText('🌈',0,-2);c.restore()}
+ if(dec>=4){const p=iso(12.75,0);emo(c,'📻',p[0],p[1]-wh+64,26);for(let k=0;k<3;k++){const a=(Y.t*.5+k/3)%1;c.globalAlpha=1-a;emo(c,k%2?'🎵':'🎶',p[0]-10-a*26+Math.sin(a*9+k)*6,p[1]-wh+52-a*44,14);c.globalAlpha=1}}
+ if(sg||dec)for(let k=0;k<17;k++){const [x,y]=iso(k*.78+.2,0);c.globalAlpha=(Math.floor(Y.t*3)+k)%3?1:.45;emo(c,'💡',x,y-wh-2,12);c.globalAlpha=1}
  // floors: tiles in the science corner, warm wood in the café
  for(let x=0;x<MW;x++)for(let y=0;y<MH;y++){const cafe=x>=8;poly(c,quad(x,y,x+1,y+1),cafe?((x+y)%2?'#f6c58c':'#f9cf9b'):((x+y)%2?'#fff8e4':'#fdf0d4'),cafe?'rgba(180,110,50,.25)':'rgba(214,180,140,.3)')}
  // front edges
  box(c,0,MH,MW,.16,12,'#ffcf7a','#f39a2c','#f39a2c');box(c,MW,0,.16,MH,12,'#ffcf7a','#f39a2c','#f39a2c');
  // floor marks: pads, zones, tap ripple
  const pulse=.5+.5*Math.sin(Y.t*5);
- pads().forEach(({u,x,y})=>{const pd=(S.shopX.pad||{})[u.id]||0,f=pd/u.price,[cx,cy]=iso(x+.5,y+.5);
-  c.fillStyle='rgba(60,60,80,.28)';c.beginPath();c.ellipse(cx,cy+3,30,15,0,0,TAU);c.fill();
-  c.fillStyle='#ffffff';c.beginPath();c.ellipse(cx,cy,30,15,0,0,TAU);c.fill();
-  if(f>0){c.strokeStyle='#33c46b';c.lineWidth=5;c.beginPath();c.ellipse(cx,cy,27,13,0,-Math.PI/2,-Math.PI/2+TAU*f);c.stroke();c.lineWidth=1}
-  emo(c,u.ic,cx-12,cy-2,18);c.font=`900 14px ${TF}`;c.fillStyle='#24304a';c.textAlign='center';c.textBaseline='middle';c.fillText(String(u.price-pd),cx+10,cy)});
+ // what the card (or the pad you stand on, or what you just bought) is about
+ const hu=Y.card||(Y.nearPad&&{u:Y.nearPad.u,v:Y.nearPad.v})||(Y.focusT>0&&Y.lastUp)||null;
+ // pads: a see-through picture of what will stand there, and a dashed ring (its words are on a tag drawn on top later)
+ pads().forEach(p=>{const {u,v,x,y}=p,[cx,cy]=iso(x+.5,y+.5),m=Y.mach.find(m=>m.id===u.id);
+  c.globalAlpha=hu&&hu.u===u?.62:.36+.08*pulse;if(m){const [gx]=iso(m.x+.5,m.y+.5),[,gy]=iso(m.x+1,m.y+1);furn(c,{burger:'grill',fries:'fries',drink:'drink'}[m.id],gx,gy+6,80)}else{const t=Y.tables[v-1],[gx]=iso(t.x+.5,t.y+.5),[,gy]=iso(t.x+1,t.y+1);furn(c,'table',gx,gy-1,88)}c.globalAlpha=1;
+  c.fillStyle='rgba(60,60,80,.28)';c.beginPath();c.ellipse(cx,cy+3,32,16,0,0,TAU);c.fill();
+  c.fillStyle=S.coins>=p.price?'#eafff0':'#ffffff';c.beginPath();c.ellipse(cx,cy,32,16,0,0,TAU);c.fill();
+  c.strokeStyle=`rgba(51,196,107,${.35+.3*pulse})`;c.lineWidth=2;c.setLineDash([5,4]);c.beginPath();c.ellipse(cx,cy,32,16,0,0,TAU);c.stroke();c.setLineDash([]);c.lineWidth=1;
+  emo(c,u.ic,cx,cy-1,22)});
+ // gold rings where it will happen
+ if(hu){const k=.5+.5*Math.sin(Y.hl*6);upSpots(hu.u,hu.v).forEach(([x,y])=>{const [a,b]=iso(x,y);c.fillStyle=`rgba(255,214,60,${.18+.12*k})`;c.beginPath();c.ellipse(a,b,42+6*k,21+3*k,0,0,TAU);c.fill();c.strokeStyle=`rgba(255,170,0,${.65+.35*k})`;c.lineWidth=4;c.stroke();c.lineWidth=1})}
  const zl=(x,y,col)=>poly(c,quad(x+.1,y+.1,x+.9,y+.9),col);
  Y.shelf.forEach(s=>{if(s.g&&!s.g.sold&&!s.g.tried)zl(s.zx,s.zy,'rgba(120,90,230,.13)')});
  const sciHold=Y.hold.some(h=>!h.food);
@@ -5608,34 +5808,52 @@ function draw(){const c=Y.ctx,me=Y.me,un=UN(),O=Y.O;c.lineJoin='round';
  const ft=foodTable();Y.tables.forEach(t=>{if(!tableOn(t))return;const [x,y]=iso(t.x+.5,t.y+.5);c.fillStyle=t===ft?`rgba(255,150,40,${.25+.2*pulse})`:'rgba(255,140,60,.12)';c.beginPath();c.ellipse(x,y,66,33,0,0,TAU);c.fill()});
  if(O&&(O.t==='predict'||O.t==='explore')&&!O.lab)zl(LAB.zx,LAB.zy,`rgba(160,100,255,${.2+.2*pulse})`);
  if(Y.ripple&&Y.t-Y.ripple.t<.6){const [x,y]=iso(Y.ripple.x,Y.ripple.y),k=(Y.t-Y.ripple.t)/.6;c.strokeStyle=`rgba(58,142,230,${1-k})`;c.lineWidth=2;c.beginPath();c.ellipse(x,y,6+k*26,3+k*13,0,0,TAU);c.stroke();c.lineWidth=1}
- // everything that stands up, back to front
- const D=[];
+ // everything that stands up, back to front. The science counter is one long picture (x 7–8, y 5–8) sorted by its
+ // middle, so anyone on its customer side (x ≥ 8) beside it is moved just in front of it; you behind it stay behind.
+ const D=[],ck=(x,y,k)=>x>=8&&y>4.4&&y<8.6?Math.max(k,14.65):k;
  Y.shelf.forEach(s=>D.push([s.x+s.y+.9,()=>drawShelf(c,s)]));
  D.push([LAB.x+LAB.y+.9,()=>drawLab(c)]);
- D.push([7+7+.6,()=>drawCounter(c)]);
+ D.push([7+7+.6,()=>drawCounter(c),'counter']);
  D.push([COINS.x+COINS.y+1,()=>drawPile(c)]);
  Y.mach.forEach(m=>{if(machOn(m))D.push([m.x+m.y+.9,()=>drawMach(c,m)])});
  Y.tables.forEach(t=>{if(tableOn(t))D.push([t.x+t.y+.95,()=>drawTable(c,t)])});
- if(un.plant)[[.5,10.5],[10.5,.5],[.5,.6],[12.5,10.4]].forEach(([x,y])=>D.push([x+y,()=>{const [a,b]=iso(x,y);emo(c,'🪴',a,b-16,32)}]));
- Y.diners.forEach(d=>D.push([d.x+d.y+(d.state==='sit'||d.state==='eat'?.02:0),()=>drawDiner(c,d)]));
- Y.cust.forEach(p=>{if(p.state!=='gone')D.push([p.x+p.y,()=>drawCust(c,p)])});
- Y.staff.forEach(s=>D.push([s.x+s.y,()=>drawStaff(c,s)]));
+ if(dec)[[.5,10.5],[10.5,.5],[.5,.6]].forEach(([x,y])=>D.push([x+y,()=>{const [a,b]=iso(x,y);emo(c,'🪴',a,b-16,32)}]));
+ if(dec>=3)[[8.35,.45],[12.75,10.75]].forEach(([x,y],k)=>D.push([x+y,()=>{const [a,b]=iso(x,y),w=Math.sin(Y.t*2+k)*3;c.strokeStyle='#9aa4b8';c.beginPath();c.moveTo(a,b);c.lineTo(a+w,b-42);c.stroke();emo(c,'🎈',a+w-7,b-54,24);emo(c,'🎈',a+w+8,b-60,22)}]));
+ Y.diners.forEach(d=>D.push([ck(d.x,d.y,d.x+d.y+(d.state==='sit'||d.state==='eat'?.02:0)),()=>drawDiner(c,d),'diner']));
+ Y.cust.forEach((p,k)=>{if(p.state!=='gone')D.push([ck(p.x,p.y,p.x+p.y),()=>drawCust(c,p),'cust'+k])});
+ Y.staff.forEach(s=>D.push([ck(s.x,s.y,s.x+s.y),()=>drawStaff(c,s),'staff']));
  Y.walkers.forEach(w=>D.push([w.x+MH+.9,()=>drawWalker(c,w)]));
- D.push([me.x+me.y,()=>drawMe(c)]);
- D.push([Y.bd.x+Y.bd.y,()=>drawBuddy(c)]);
+ D.push([ck(me.x,me.y,me.x+me.y),()=>drawMe(c),'me']);
+ D.push([ck(Y.bd.x,Y.bd.y,Y.bd.x+Y.bd.y),()=>drawBuddy(c),'buddy']);
  if(Y.foe)D.push([Y.foe.x+Y.foe.y,()=>drawFoe(c)]);
- D.push([MW+1.2+5.5,()=>drawSign(c)]);
- D.sort((a,b)=>a[0]-b[0]).forEach(o=>o[1]());
+ D.push([MW+1.05-.45,()=>drawSign(c),'sign']);
+ D.sort((a,b)=>a[0]-b[0]).forEach(o=>o[1]());if(Y.dbg)Y.order=D.map(o=>o[2]||'');
+ padTags(c);
+ if(hu){const [x0,y0]=upSpots(hu.u,hu.v)[0],[a,b]=iso(x0,y0);
+  if(hu.u.id==='staff'&&Y.card){const im=Y.crew[hu.v-1];if(ok_(im)){const h=56,w=h*im.naturalWidth/im.naturalHeight;c.globalAlpha=.55;c.drawImage(im,a-w/2,b-12-h,w,h);c.globalAlpha=1}}
+  emo(c,'⬇️',a,b-({burger:118,fries:118,drink:118,sign:150,tables:92}[hu.u.id]||84)+Math.sin(Y.hl*6)*5,24)}
  // guide arrow
  let ar=null;if(O&&!O.done){if(sciHold&&!(O.t==='sort'&&Y.blockCust>=0))ar=[CCOL+.5,6.5];else if((O.t==='predict'||O.t==='explore')&&!O.lab)ar=[LAB.zx+.5,LAB.zy+.5]}
  if(!ar){const t=foodTable();if(t&&!atTable(t))ar=[t.x+.5,t.y+.5,104]}
+ if(!ar&&Y.mess&&!atTable(Y.mess.t))ar=[Y.mess.t.x+.5,Y.mess.t.y+.5,112]
  if(ar){const [x,y]=iso(ar[0],ar[1]);emo(c,'⬇️',x,y-(ar[2]||40)+Math.sin(Y.t*6)*5,22)}
  // food flying into hands and onto tables
  for(const f of Y.fly){const [ax,ay]=iso(f.fx,f.fy),to=f.tx==='me'?iso(me.x,me.y):iso(f.tx.x,f.tx.y),bx=to[0],by=to[1]-50,k=f.t,x=ax+(bx-ax)*k,y=ay-30+(by-ay+30)*k-Math.sin(k*Math.PI)*40;emo(c,f.e,x,y,20)}
  for(const p of Y.confetti){const [x,y]=iso(p.x,p.y);c.fillStyle=p.c;c.fillRect(x-3,y-p.z-2,6,4)}
+ if(Y.mess&&Y.t-Y.mess.t0<2.4){const k=Y.t-Y.mess.t0,t=Y.mess.t,[x,y]=iso(t.x+.5,t.y+.5),a=Math.min(1,k/.3,(2-k)/.3);
+  if(a>0){c.globalAlpha=a;const im=Y.im.mix,h=74,hop=Math.abs(Math.sin(k*7))*6;if(ok_(im))c.drawImage(im,x-h/2,y-58-h-hop,h,h);else emo(c,'🦹',x,y-90-hop,48);bubble(c,x+46,y-110-hop,L('히히!','Hee hee!'));c.globalAlpha=1}
+  if(k>1.7)emo(c,'💨',x,y-80,30+(k-1.7)*40)}
  for(const p of Y.pops){const [x,y]=iso(p.x,p.y),a=1-p.t/1.1;c.globalAlpha=a;c.font=`900 19px ${TF}`;c.textAlign='center';c.lineWidth=4;c.strokeStyle='#fff';c.strokeText(p.txt,x,y-36-p.t*30);c.fillStyle=p.col;c.fillText(p.txt,x,y-36-p.t*30);c.globalAlpha=1;c.lineWidth=1}
  if(Y.dim){c.setTransform(Y.dpr,0,0,Y.dpr,0,0);c.fillStyle=`rgba(30,15,70,${Y.dim})`;c.fillRect(0,0,Y.cw,Y.ch);if(Y.foe){c.setTransform(Y.dpr*Y.k,0,0,Y.dpr*Y.k,Y.dpr*(Y.cw/2-Y.cam[0]*Y.k),Y.dpr*(Y.ch*.5-Y.cam[1]*Y.k));drawFoe(c)}}
 }
+// a two-line tag under each pad (above it stands the see-through picture): what you buy in words, then the step
+// and the price, green when you can afford it. Tags that would overlap are stacked downward.
+function padTags(c){const done=[],hid=(Y.card&&Y.card.u)||(Y.nearPad&&Y.nearPad.u);pads().forEach(p=>{if(p.u===hid)return;const [x,y0]=iso(p.x+.5,p.y+.5),can=S.coins>=p.price,l1=`${p.u.ic} ${upAct(p.u,p.v)}`,l2=`${upStep(p.u,p.v)} · 🪙${p.price}`;
+ c.font=`900 13px ${TF}`;const w1=c.measureText(l1).width;c.font=`800 12px ${TF}`;const w=Math.min(160,Math.max(w1,c.measureText(l2).width)+18);let y=y0+56;
+ for(let k=0;k<4&&done.some(r=>Math.abs(r[0]-x)<(r[1]+w)/2&&Math.abs(r[2]-y)<40);k++)y+=40;done.push([x,w,y]);
+ c.fillStyle=can?'#eafff0':'#ffffff';c.strokeStyle=can?'#33c46b':'#b9c6dc';c.lineWidth=2;c.beginPath();c.roundRect(x-w/2,y-36,w,36,10);c.fill();c.stroke();c.lineWidth=1;
+ if(y===y0+56){c.beginPath();c.moveTo(x-6,y-35);c.lineTo(x+6,y-35);c.lineTo(x,y-42);c.fill()}
+ c.textAlign='center';c.textBaseline='middle';c.fillStyle='#24304a';c.font=`900 13px ${TF}`;c.fillText(l1,x,y-25,w-10);c.fillStyle=can?'#1f9a4f':'#5f6b8f';c.font=`800 12px ${TF}`;c.fillText(l2,x,y-10,w-10)})}
 function furn(c,k,cx,by,w){const im=shopPic('shop-'+k);if(!im)return false;const h=w*im.naturalHeight/im.naturalWidth;c.drawImage(im,cx-w/2,by-h,w,h);return true}
 function drawShelf(c,s){const g=s.g,glow=s.glow&&Math.sin(Y.t*8)>0,[bx]=iso(s.x+.5,s.y+.5),[,by]=iso(s.x+1,s.y+1);
  if(!furn(c,'stand',bx,by+6,76))box(c,s.x+.07,s.y+.07,.86,.86,28,glow?'#ffe27a':'#c5b2ff','#9a82ea','#8468da');
@@ -5657,14 +5875,28 @@ function drawCounter(c){const [cx]=iso(7.5,6.5),[,cy]=iso(8,8);if(!furn(c,'count
  const O=Y.O;if(O&&O.t==='order'&&O.stack.length){const [a,b]=iso(7.5,7.4);O.stack.forEach((e,k)=>emo(c,e,a,b-46-k*15,22))}}
 function coinStack(c,x,y,n){const h=Math.min(16,2+Math.ceil(n/5));for(let k=0;k<h;k++){c.fillStyle=k%2?'#ffd23f':'#f4b400';c.beginPath();c.ellipse(x,y-k*4,14,7,0,0,TAU);c.fill();c.strokeStyle='#c98a00';c.stroke()}return h}
 function drawPile(c){const n=Math.round(Y.pileShow);if(n<=0)return;const [x,y]=iso(COINS.x+.5,COINS.y+.5),h=coinStack(c,x,y,n);label(c,`🪙 ${n}`,x,y-h*4-16,'#fff6d0')}
-function drawMach(c,m){const fast=UN().fast,max=fast?10:6,[x,y]=iso(m.x+.5,m.y+.5),[,by]=iso(m.x+1,m.y+1);
+// a machine shows its level: a glow on the floor (bronze, silver, gold, then rainbow), stars on the front,
+// a ring filling up for the next one and a puff of steam each time one is made
+function drawMach(c,m){const v=lvOf(m.id),[cook,max]=MLV[v],[x,y]=iso(m.x+.5,m.y+.5),[,by]=iso(m.x+1,m.y+1);
+ if(v>=2){c.globalAlpha=.5+.15*Math.sin(Y.t*4);c.fillStyle=['','','#e8a46a','#cfdaea','#ffd23f'][v]||`hsl(${Y.t*90%360},95%,62%)`;c.beginPath();c.ellipse(x,by-14,46,23,0,0,TAU);c.fill();c.globalAlpha=1}
  if(!furn(c,{burger:'grill',fries:'fries',drink:'drink'}[m.id],x,by+6,80)){box(c,m.x+.06,m.y+.06,.88,.88,34,m.top,m.side[0],m.side[1]);c.fillStyle='#ffffff';c.beginPath();c.roundRect(x-20,y-36,40,10,4);c.fill()}
- for(let k=0;k<m.n;k++)emo(c,m.e,x,y-52-k*12,22);
- if(m.n>=max){c.font=`900 13px ${TF}`;c.fillStyle='#e0533d';c.textAlign='center';c.lineWidth=3;c.strokeStyle='#fff';c.strokeText('MAX',x,y-64-m.n*12);c.fillText('MAX',x,y-64-m.n*12);c.lineWidth=1}}
+ (m.puff||[]).forEach(t=>{c.globalAlpha=Math.max(0,.75-t*.6);c.fillStyle='#ffffff';c.beginPath();c.arc(x+22+Math.sin(t*7)*3,y-46-t*38,4+t*7,0,TAU);c.fill()});c.globalAlpha=1;
+ const st=mstep(m);for(let k=0;k<m.n;k++)emo(c,m.e,x,y-52-k*st,22);
+ const ty=y-52-m.n*st;
+ if(m.n<max){c.lineWidth=3.5;c.strokeStyle='rgba(255,255,255,.85)';c.beginPath();c.arc(x,ty,7,0,TAU);c.stroke();c.strokeStyle='#33c46b';c.beginPath();c.arc(x,ty,7,-Math.PI/2,-Math.PI/2+TAU*Math.min(1,m.t/cook));c.stroke();c.lineWidth=1}
+ else{c.font=`900 13px ${TF}`;c.fillStyle='#e0533d';c.textAlign='center';c.lineWidth=3;c.strokeStyle='#fff';c.strokeText('MAX',x,ty-4);c.fillText('MAX',x,ty-4);c.lineWidth=1}
+ label(c,'★'.repeat(v),x,by-8,v>=4?'#fff3b0':'#ffffff',v>=4?'#e08a00':'#f0a400')}
 function drawTable(c,t){const [x,y]=iso(t.x+.5,t.y+.5),[,by]=iso(t.x+1,t.y+1);
- if(furn(c,'table',x,by-1,88)){const n=Math.round(t.coinShow);if(n>0){const h=coinStack(c,x+14,y-22,n);label(c,`🪙 ${n}`,x+14,y-38-h*4,'#fff6d0')}return}
- c.fillStyle='#5ab0e6';c.fillRect(x-3,y-18,6,18);c.fillStyle='rgba(0,0,0,.12)';c.beginPath();c.ellipse(x,y,22,11,0,0,TAU);c.fill();
- c.fillStyle='#ffffff';c.beginPath();c.ellipse(x,y-20,30,15,0,0,TAU);c.fill();c.strokeStyle='#dfe7f3';c.lineWidth=2;c.stroke();c.lineWidth=1;
+ if(!furn(c,'table',x,by-1,88)){c.fillStyle='#5ab0e6';c.fillRect(x-3,y-18,6,18);c.fillStyle='rgba(0,0,0,.12)';c.beginPath();c.ellipse(x,y,22,11,0,0,TAU);c.fill();
+  c.fillStyle='#ffffff';c.beginPath();c.ellipse(x,y-20,30,15,0,0,TAU);c.fill();c.strokeStyle='#dfe7f3';c.lineWidth=2;c.stroke();c.lineWidth=1}
+ if(lvOf('decor')>=2)emo(c,'🌷',x-13,y-34,16);
+ const M=Y.mess&&Y.mess.t===t?Y.mess:null;
+ if(M){// a cute splat of slime or sauce on the table top, fading as it is wiped
+  const col=M.kind==='slime'?'#78dc3c':'#ec4a32',a=1-M.prog*.85;c.globalAlpha=a;c.fillStyle=col;c.beginPath();c.ellipse(x+2,y-26,20,9,0,0,TAU);c.fill();
+  [[-14,-22,6],[16,-21,5],[4,-15,4]].forEach(([dx,dy,r])=>{c.beginPath();c.arc(x+dx,y+dy,r,0,TAU);c.fill()});
+  c.fillStyle='rgba(255,255,255,.75)';c.beginPath();c.ellipse(x-4,y-29,6,2.5,0,0,TAU);c.fill();c.globalAlpha=1;
+  const by2=y-62+Math.sin(Y.t*5)*2;bubble(c,x,by2,'🧽');
+  if(M.prog>0){c.lineWidth=4;c.strokeStyle='#33c46b';c.beginPath();c.arc(x,by2-12,17,-Math.PI/2,-Math.PI/2+TAU*M.prog);c.stroke();c.lineWidth=1;emo(c,'🧽',x+Math.sin(Y.t*18)*10,y-34,20)}}
  const n=Math.round(t.coinShow);if(n>0){const h=coinStack(c,x+14,y-22,n);label(c,`🪙 ${n}`,x+14,y-38-h*4,'#fff6d0')}}
 function shadow(c,x,y,r){c.fillStyle='rgba(0,0,0,.16)';c.beginPath();c.ellipse(x,y,r,r/2,0,0,TAU);c.fill()}
 function legs(c,x,y,ph,moving,pants,shoe){const sw=moving?Math.sin(ph):0;
@@ -5675,14 +5907,22 @@ function person(c,x,y,e,col,ph,moving,carry){const bob=moving?Math.abs(Math.sin(
  if(pc){const h=50,w=h*pc.naturalWidth/pc.naturalHeight;c.drawImage(pc,x-w/2,y-12-h-bob,w,h);top=y-12-h-bob}
  else{c.fillStyle=col;c.beginPath();c.roundRect(x-11,y-34-bob,22,22,10);c.fill();emo(c,e,x,y-44-bob,30);top=y-60-bob}
  (carry||[]).forEach((h,k)=>emo(c,h.e,x,top+2-k*13,20));return top}
-function drawMe(c){const me=Y.me,[x,y]=iso(me.x,me.y),bob=me.moving?Math.abs(Math.sin(me.ph))*2.5:0;shadow(c,x,y,16);
+function drawMe(c){const me=Y.me,[x,y]=iso(me.x,me.y),bob=me.moving?Math.abs(Math.sin(me.ph))*2.5:0;shadow(c,x,y,16);if(me.moving&&lvOf('shoes'))dust(c,x,y,me.dir,me.ph);
  const im=Y.im.me;let top;
  if(ok_(im)){legs(c,x,y,me.ph,me.moving,'#2f3d6b','#ffffff');const h=62,w=h*im.naturalWidth/im.naturalHeight;c.save();c.translate(x,0);if(me.dir<0)c.scale(-1,1);c.drawImage(im,-w/2,y-12-h-bob,w,h);c.restore();top=y-12-h-bob}
  else{emo(c,S.av||'🧒',x,y-26-bob,40);top=y-50-bob}
+ // a big tray under what you carry
+ if(lvOf('tray')&&Y.hold.length){c.fillStyle='#c98a3a';c.beginPath();c.ellipse(x,top+8,17+lvOf('tray')*2,5,0,0,TAU);c.fill();c.fillStyle='#e6ad5c';c.beginPath();c.ellipse(x,top+6,15+lvOf('tray')*2,4,0,0,TAU);c.fill()}
  Y.hold.forEach((h,k)=>emo(c,h.e,x,top-2-k*14,h.food?22:24))}
 function drawBuddy(c){const b=Y.bd,[x,y]=iso(b.x,b.y),bob=Math.abs(Math.sin(b.ph))*2;shadow(c,x,y,11);const im=Y.im.buddy;
  if(ok_(im)){const h=36,w=h*im.naturalWidth/im.naturalHeight;c.drawImage(im,x-w/2,y-h-bob+3,w,h)}else emo(c,Y.bicon,x,y-14-bob,24)}
-function drawStaff(c,s){const [x,y]=iso(s.x,s.y);person(c,x,y,s.e,'#ff5a6a',s.ph,s.moving,s.hold)}
+// helpers are drawn like you: legs, their '나' picture facing where they walk, and the food they carry.
+// Trained helpers kick up a little dust.
+function drawStaff(c,s){const [x,y]=iso(s.x,s.y),im=Y.crew[s.k%Y.crew.length];if(!ok_(im)){person(c,x,y,s.e,'#ff5a6a',s.ph,s.moving,s.hold);return}
+ const bob=s.moving?Math.abs(Math.sin(s.ph))*2.5:0,h=56,w=h*im.naturalWidth/im.naturalHeight;shadow(c,x,y,14);if(s.moving&&lvOf('train'))dust(c,x,y,s.dir,s.ph);
+ legs(c,x,y,s.ph,s.moving,'#2f3d6b','#ffffff');c.save();c.translate(x,0);if(s.dir<0)c.scale(-1,1);c.drawImage(im,-w/2,y-12-h-bob,w,h);c.restore();
+ const top=y-12-h-bob;s.hold.forEach((f,k)=>emo(c,f.e,x,top+2-k*13,20))}
+function dust(c,x,y,dir,ph){c.fillStyle='#ffffff';for(let k=0;k<2;k++){const a=(ph*.08+k*.5)%1;c.globalAlpha=.55*(1-a);c.beginPath();c.arc(x-dir*(10+a*16),y-3-a*5,3+a*3,0,TAU);c.fill()}c.globalAlpha=1}
 function drawWalker(c,w){const [x,y]=iso(w.x,MH+1.3+(w.dir>0?0:.9));person(c,x,y,w.e,'#7a8cff',w.ph,true,null)}
 function bubble(c,x,ty,m){c.font=`900 14px ${TF}`;const w=Math.max(34,c.measureText(m).width+16);c.fillStyle='#ffffff';c.beginPath();c.roundRect(x-w/2,ty-24,w,24,12);c.fill();c.beginPath();c.moveTo(x-5,ty);c.lineTo(x+5,ty);c.lineTo(x,ty+6);c.fill();
  if(/^[\d/ ✓?×]+$/.test(m)){c.fillStyle='#24304a';c.textAlign='center';c.textBaseline='middle';c.fillText(m,x,ty-12)}else emo(c,m,x,ty-12,16)}
@@ -5701,13 +5941,15 @@ function drawCust(c,p){const [x,y]=iso(p.x,p.y),O0=Y.O,sortN=O0&&O0.t==='sort'&&
  let m=p.mood;if(!m&&p.state==='wait'&&O&&!O.done&&front&&O.t!=='sort')m=O.t==='find'?`${O.got}/${O.need}`:O.t==='order'?`${O.next}/${O.need}`:O.t==='pair'?'❓':'🔬';
  if(m){bubble(c,x,ty,m);if(p.state==='wait'&&!p.mood){c.strokeStyle=`rgba(90,176,230,${.5+.5*Math.sin(Y.t*5)})`;c.lineWidth=3;c.beginPath();c.ellipse(x,y,20,10,0,0,TAU);c.stroke();c.lineWidth=1}}}
 // the shop sign stands on the sidewalk by the café entrance, facing the street along the right edge of the floor
-function drawSign(c){const y0=3.6,y1=7.4,x=MW+1.15,H=58,P=34,[ax,ay]=iso(x,y1),[bx,by]=iso(x,y0);
+function drawSign(c){const y0=-1.8,y1=.9,x=MW+1.05,H=54,P=30,[ax,ay]=iso(x,y1),[bx,by]=iso(x,y0);
  [[ax,ay],[bx,by]].forEach(([px,py])=>{c.fillStyle='rgba(0,0,0,.18)';c.beginPath();c.ellipse(px,py,9,4.5,0,0,TAU);c.fill();c.fillStyle='#b8323f';c.fillRect(px-3,py-P,6,P)});
  const pts=[[ax,ay-P],[bx,by-P],[bx,by-P-H],[ax,ay-P-H]],dep=[[ax+6,ay-P+3],[bx+6,by-P+3],[bx+6,by-P-H+3],[ax+6,ay-P-H+3]];
- poly(c,dep,'#b8323f');poly(c,pts,UN().sign?'#ffcf3a':'#ff5a6a');c.strokeStyle='#ffffff';c.lineWidth=3;poly(c,pts,null,'#ffffff');c.lineWidth=1;
- c.save();c.translate((ax+bx)/2,(ay+by)/2-P-H/2);c.transform(1,-.5,0,1,0,0);c.font=`900 18px ${TF}`;c.textAlign='center';c.textBaseline='middle';c.fillStyle=UN().sign?'#e0533d':'#ffffff';c.fillText(L('과학 버거','Science Burger'),0,1,(bx-ax)-16);c.restore();
+ const sv=lvOf('sign');poly(c,dep,'#b8323f');poly(c,pts,sv?'#ffcf3a':'#ff5a6a');c.strokeStyle='#ffffff';c.lineWidth=3;poly(c,pts,null,'#ffffff');c.lineWidth=1;
+ c.save();c.translate((ax+bx)/2,(ay+by)/2-P-H/2);c.transform(1,-.5,0,1,0,0);c.font=`900 18px ${TF}`;c.textAlign='center';c.textBaseline='middle';c.fillStyle=sv?'#e0533d':'#ffffff';c.fillText(L('과학 버거','Science Burger'),0,1,(bx-ax)-16);c.restore();
+ if(sv>=2)for(let k=0;k<=8;k++){const f=k/8,on=(Math.floor(Y.t*4)+k)%2;[[ax+(bx-ax)*f,ay+(by-ay)*f-P],[ax+(bx-ax)*f,ay+(by-ay)*f-P-H]].forEach(([px,py])=>{c.fillStyle=on?'#fff7b0':'#ff9f1a';c.beginPath();c.arc(px,py,3.2,0,TAU);c.fill()})}
  const [mx,my]=iso(x,(y0+y1)/2);emo(c,'🍔',mx-16,my-P-H-12,30);emo(c,'🍔',mx+18,my-P-H-26,30);
- if(UN().sign&&Math.floor(Y.t*3)%2)emo(c,'✨',mx+40,my-P-H-30,16)}
+ if(sv>=3){const b=Math.sin(Y.t*3)*4;c.globalAlpha=.35+.2*Math.sin(Y.t*5);c.fillStyle='#fff3a0';c.beginPath();c.arc(mx+2,my-P-H-58+b,26,0,TAU);c.fill();c.globalAlpha=1;emo(c,'⭐',mx+2,my-P-H-58+b,36)}
+ if(sv&&Math.floor(Y.t*3)%2)emo(c,'✨',mx+40,my-P-H-30,16)}
 function drawFoe(c){const f=Y.foe,[x,y]=iso(f.x,f.y);shadow(c,x,y,26);const im=Y.im.foe;
  if(ok_(im)){const h=96,w=h*im.naturalWidth/im.naturalHeight;c.drawImage(im,x-w/2,y-h+Math.sin(f.ph)*3,w,h)}else emo(c,Y.ses.foe.icon,x,y-40,60)}
 
@@ -5721,14 +5963,21 @@ function listen(){const cv=Y.el.cv,on=(t,ev,fn,o)=>{t.addEventListener(ev,fn,o);
   const hit=Y.cust.filter(c=>c.state==='wait').find(c=>{const [sx,sy]=scr(c.x,c.y,30);return Math.hypot(sx-j.px,sy-j.py)<30*Y.k});
   if(hit)giveTo(hit);else{const o=thingAt(j.px,j.py);if(o){SFX.click();goThing(o)}else{const [tx,ty]=toTile(j.px,j.py);route(tx,ty)}}}Y.joy=null;Y.el.joy.classList.add('hidden')};
  on(cv,'pointerup',up);on(cv,'pointercancel',up);
- on(Y.el.acts,'click',e=>{const b=e.target.closest('[data-give]');if(b&&Y)giveTo(Y.cust[+b.dataset.give]);const f=e.target.closest('[data-food]');if(f&&Y){SFX.click();const t=Y.tables[+f.dataset.food];route(t.x+.5,t.y+.5)}});
+ on(Y.el.acts,'click',e=>{const b=e.target.closest('[data-give]');if(b&&Y)giveTo(Y.cust[+b.dataset.give]);const f=e.target.closest('[data-food]');if(f&&Y){SFX.click();const t=Y.tables[+f.dataset.food];route(t.x+.5,t.y+.5)}
+  const w=e.target.closest('[data-wipe]');if(w&&Y&&Y.mess){SFX.click();const t=Y.mess.t;route(t.x+.5,t.y+.5)}});
+ on(Y.el.upBtn,'click',()=>openBoard());
+ on(Y.el.board,'click',e=>{if(!Y)return;if(e.target.closest('[data-bx]')||e.target===Y.el.board){SFX.click();closeBoard();return}
+  const b=e.target.closest('[data-up]');if(b){const u=UPG.find(x=>x.id===b.dataset.up);if(u)openCard(u,lvOf(u.id)+1,'board')}});
+ on(Y.el.pv,'click',e=>{const b=e.target.closest('[data-pv]');if(!b||!Y)return;if(b.dataset.pv==='buy')buyCard();else{SFX.click();closeCard()}});
  on(Y.el.order,'click',()=>{const O=Y&&Y.O;if(!O)return;SFX.click();caption(O.X.who,T(O.X.hook)+' '+T(O.p.ask),null,true)});
  on(Y.el.lab,'click',e=>{if(e.target.closest('[data-tyx]')){SFX.click();Y.el.lab.classList.add('hidden');Y.zoneKey='x';stopVoice()}});
  on(Y.el.ban,'click',()=>{const O=Y&&Y.O;if(!O)return;const c=CARD[O.id];speak(c.title+'. '+c.text)});
- const key=e=>{if(!Y||$('modalRoot').innerHTML)return;const m={ArrowLeft:'l',ArrowRight:'r',ArrowUp:'u',ArrowDown:'d'}[e.key];if(!m)return;Y.keys[m]=e.type==='keydown';e.preventDefault()};
+ const key=e=>{if(!Y||$('modalRoot').innerHTML)return;if(Y.board||Y.card){if(e.key==='Escape'&&e.type==='keydown'){closeCard();closeBoard()}return}const m={ArrowLeft:'l',ArrowRight:'r',ArrowUp:'u',ArrowDown:'d'}[e.key];if(!m)return;Y.keys[m]=e.type==='keydown';e.preventDefault()};
  on(window,'keydown',key);on(window,'keyup',key);on(window,'blur',()=>{if(Y)Y.keys={}});
  let rt=0;on(window,'resize',()=>{clearTimeout(rt);rt=setTimeout(resize,100)})}
-return {open,stop,get _y(){return Y},_route:(x,y)=>route(x,y),_tile:()=>Y&&[Y.me.x,Y.me.y],_step:dt=>update(dt),_free:(x,y)=>freeR(x,y),_thing:(x,y)=>thingAt(x,y)};
+return {open,stop,get _y(){return Y},_route:(x,y)=>route(x,y),_tile:()=>Y&&[Y.me.x,Y.me.y],_step:dt=>update(dt),_free:(x,y)=>freeR(x,y),_thing:(x,y)=>thingAt(x,y),
+ _board:openBoard,_unboard:closeBoard,_card:id=>{const u=UPG.find(x=>x.id===id);openCard(u,lvOf(id)+1,'test')},_cardBuy:()=>buyCard(),_cardClose:()=>closeCard(),
+ _buy:id=>{const u=UPG.find(x=>x.id===id);openCard(u,lvOf(id)+1,'test');buyCard()},_pads:()=>pads(),_mess:()=>{if(Y){Y.messAt=Y.t+.01}},_spawn:()=>spawnDiner()};
 })();
 
 // The lab plays (shown on the lab table). Each gets its box, its data and api {fb, miss, done, alive}.

@@ -78,7 +78,7 @@ function wireLangTools(){const b=document.getElementById('langBtn');if(b){b.text
    so players never share progress and resetting one game leaves every other game alone. */
 const MGP=(()=>{let P=null;try{P=JSON.parse(localStorage.getItem('moonGames.profiles')||'null')}catch(e){}
  const me=P&&Array.isArray(P.list)&&P.list.find(x=>x&&x.id===P.cur)||null;
- if(me){const S=Storage.prototype,g=S.getItem,s=S.setItem,r=S.removeItem,own=/^(little-detective-|marbleRush\.|marble3dsettings|chessKnights\.|scienceGuardians\.|musicAcademy\.|mathAquarium\.)/,k=x=>{x=String(x);return own.test(x)&&!x.includes('@')?x+'@'+me.id:x};
+ if(me){const S=Storage.prototype,g=S.getItem,s=S.setItem,r=S.removeItem,own=/^(little-detective-|marbleRush\.|marble3dsettings|chessKnights\.|scienceGuardians\.|musicAcademy\.|mathAquarium\.|pythonIsland\.)/,k=x=>{x=String(x);return own.test(x)&&!x.includes('@')?x+'@'+me.id:x};
   S.getItem=function(x){return g.call(this,k(x))};S.setItem=function(x,v){return s.call(this,k(x),v)};S.removeItem=function(x){return r.call(this,k(x))}}
  return {me}})();
 </script>
@@ -237,6 +237,69 @@ button,input,select{font:inherit}button{cursor:pointer;touch-action:manipulation
 @media(max-width:400px){.logo{display:none}.brand h1{font-size:19px}.me-chip{font-size:14px;padding-right:10px}.topbar-in{gap:8px}}
 @media(hover:none) and (pointer:coarse){.keys-hint{display:none}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{transition-duration:.01ms!important;animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important}.confetti-layer{display:none}}
+/* builder, lab, workshop, badges */
+.fun-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.fun-btn{display:flex;align-items:center;gap:8px;min-height:52px;border:1px solid #4b5f86;border-radius:14px;background:linear-gradient(160deg,#21345a,#172743);color:#fff;font-size:15px;font-weight:900;padding:8px 10px;text-align:left;box-shadow:0 3px 0 #050a16;line-height:1.2;transition:transform .08s,box-shadow .08s}
+.fun-btn span{font-size:24px;line-height:1;flex:0 0 auto}.fun-btn:active:not(:disabled){transform:translateY(2px);box-shadow:0 1px 0 #050a16}
+.map-em{width:48px;height:48px;flex:0 0 48px;border-radius:10px;display:grid;place-items:center;font-size:28px;background:#20304e}
+.map.custom{border-color:#ffd84a66}.map.add{border-style:dashed;background:#101a2e}
+.lab-only{display:none}.lab-on .lab-only{display:block}.lab-on .race-only{display:none}
+.lab-scene .minimap,.lab-scene .rank-board,.lab-scene .hud-tools,.lab-scene .race-dots,.lab-scene .section-chip{display:none}
+.replay-skip{position:absolute;right:10px;bottom:92px;z-index:5}
+.modal-card.wide{width:min(640px,100%)}
+.modal-card h3{font-size:16px;margin:16px 0 8px;color:#cfe0ff}.modal-card h3 small{color:#9fb6d8;font-weight:800;margin-left:6px}
+.chip{min-height:44px;border:1px solid #3b5073;background:#1a2a47;color:#e6efff;border-radius:999px;padding:8px 14px;font-size:14px;font-weight:800;display:inline-flex;align-items:center;gap:6px;box-shadow:0 2px 0 #050a16}
+.chip.on{background:#0d6f88;border-color:#55e0ff;color:#fff}.chip i{width:16px;height:16px;border-radius:50%;background:linear-gradient(135deg,var(--a),var(--b));border:1px solid #fff8}
+.b-saved{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:10px}.b-saved>span{font-weight:800;color:#a8c0ec;font-size:14px}
+.b-name{display:flex;align-items:center;gap:10px;font-weight:800;font-size:15px}.b-name input{flex:1;min-width:0;min-height:44px;background:#0c172b;color:#fff;border:1px solid #3b567d;border-radius:12px;padding:8px 10px;font-size:16px}
+.b-pieces{display:grid;grid-template-columns:repeat(auto-fill,minmax(132px,1fr));gap:7px}
+.piece{display:grid;grid-template-columns:auto 1fr;grid-template-rows:auto auto;column-gap:7px;align-items:center;text-align:left;min-height:56px;border:1px solid #33486e;background:#132240;color:#fff;border-radius:12px;padding:6px 8px;box-shadow:0 2px 0 #050a16}
+.piece .pi{grid-row:1/3;font-size:24px}.piece b{font-size:14px;line-height:1.2}.piece small{font-size:12px;color:#a9bbd8;line-height:1.25}
+.piece:active:not(:disabled){transform:translateY(2px)}
+.b-track{list-style:none;margin:0;padding:0;display:grid;gap:5px}
+.b-track li{display:flex;align-items:center;gap:8px;background:#0f1d36;border:1px solid #2b3d61;border-radius:12px;padding:4px 6px 4px 10px;min-height:52px;font-size:15px}
+.b-track li.fixed{min-height:36px;justify-content:center;color:#9fb6d8;font-weight:800;background:transparent;border-style:dashed}
+.bt-n{width:24px;height:24px;border-radius:50%;background:#ffd84a;color:#2b2100;font-weight:900;font-size:13px;display:grid;place-items:center;flex:0 0 24px}.bt-ic{font-size:22px}
+.b-track b{flex:1;min-width:0}.bt-tools{display:flex;gap:4px}.bt-tools .mini-btn{padding:0;width:44px}
+.b-themes{display:flex;flex-wrap:wrap;gap:6px}
+.b-tip{font-size:14px;color:#cfe0ff;background:#0c172bcc;border:1px solid #283957;border-radius:12px;padding:9px 12px;margin:14px 0 10px;line-height:1.5}
+.b-msg{color:#ffd84a;font-weight:800;font-size:14px;margin:0 0 10px}.b-del{margin-top:10px}
+.lab-steps{list-style:none;padding:0;margin:0 0 10px;display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.lab-steps li{background:#0f1d36;border:1px solid #2b3d61;border-radius:12px;padding:8px;font-size:14px;text-align:center;line-height:1.35}.lab-steps b{display:block}.lab-steps span{font-size:12.5px;color:#a9bbd8}
+.lab-ok{font-size:14px;color:#cfe0ff;margin:0 0 10px;line-height:1.5}
+.lab-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}.lab-grid.compact{grid-template-columns:1fr}
+.lab-card{display:flex;align-items:center;gap:9px;text-align:left;min-height:60px;border:1px solid #33486e;background:#132240;color:#fff;border-radius:14px;padding:8px 10px;box-shadow:0 2px 0 #050a16}
+.lab-card.on{border-color:#ffd84a;background:#2a2a18}.lc-ic{font-size:28px;flex:0 0 auto}.lc-tx{flex:1;min-width:0}.lc-tx b{display:block;font-size:15px}.lc-tx small{display:block;font-size:12.5px;color:#a9bbd8;line-height:1.3;margin-top:2px}
+.lab-grid.compact .lc-tx small{display:none}.lc-done{font-size:13px;font-weight:900;color:#7df9c8;white-space:nowrap}
+.lab-head{font-size:15px;font-weight:900;color:#ffd84a;margin-bottom:6px}
+.lab-q{font-size:18px;font-weight:900;line-height:1.45;margin:4px 0 8px}
+.lab-diff{font-size:14px;color:#d9faff;background:#0c2a40;border:1px solid #2c6a8a;border-radius:12px;padding:7px 10px;margin:0 0 8px;line-height:1.45}
+.lab-lanes{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:6px}.lab-lanes span{font-size:14px;font-weight:800;background:#0f1d36;border-radius:999px;padding:5px 12px}
+.lab-lanes i{font-style:normal;color:#7df9ff;margin-right:6px}.lab-lanes span+span i{color:#ffd84a}
+.lab-ask{font-size:16px;font-weight:900;margin:10px 0 8px}.lab-opts{display:grid;gap:8px;margin-bottom:10px}.lab-opt{font-size:16px}
+.lab-note{font-size:13px;color:#a9bbd8;margin:0 0 12px}
+.lab-result{font-size:21px;font-weight:1000;color:#fff;margin:4px 0}.lab-detail{font-size:15px;color:#c8d6ee;margin:0 0 10px;font-weight:800}
+.lab-fb{border-radius:12px;padding:9px 12px;font-size:15px;font-weight:800;line-height:1.45;margin:0 0 10px}.lab-fb.ok{background:#173f2c;border:1px solid #3fcf8e}.lab-fb.new{background:#3a2f12;border:1px solid #f0b43c}
+.lab-fb small{display:block;font-size:13px;color:#cfd8e8;font-weight:700;margin-top:3px}
+.lab-why{text-align:left;background:#0f1d36;border:1px solid #2b3d61;border-radius:12px;padding:10px 12px;font-size:15px;line-height:1.55;margin-bottom:8px}.lab-why b{display:block;color:#ffd84a;margin-bottom:2px}
+.lab-life{font-size:14px;color:#cfe0ff;margin:0 0 6px;line-height:1.5}
+.result-actions.three{grid-template-columns:1fr 1fr 1fr}
+.result-overlay.lab-ov{background:linear-gradient(transparent 35%,#061326b3);-webkit-backdrop-filter:none;backdrop-filter:none;align-items:flex-end}.lab-ov .result-card{max-height:74%;padding:16px 18px}
+.replay-btn{width:100%;margin:-4px 0 10px}
+.skin-top{display:flex;flex-direction:column;align-items:center;gap:6px}.skin-top canvas{width:220px;height:132px;background:radial-gradient(ellipse at 50% 60%,#26406c,#0c172b);border-radius:16px;border:1px solid #33486e}
+.skin-top p{margin:0;font-size:14px;color:#cfe0ff;text-align:center;line-height:1.45}
+.opts{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:7px}
+.opt{display:flex;flex-direction:column;align-items:center;gap:2px;min-height:76px;border:1px solid #33486e;background:#132240;color:#fff;border-radius:14px;padding:7px 4px;font-size:13px;box-shadow:0 2px 0 #050a16}
+.opt .oi{font-size:26px;line-height:1.1}.opt b{font-size:13px}.opt small{font-size:11.5px;color:#a9bbd8;line-height:1.2;text-align:center}
+.opt.on{border-color:#ffd84a;box-shadow:0 0 0 2px #ffd84a,0 2px 0 #050a16}.opt[aria-disabled="true"]{opacity:.7;background:#0e1830}
+.badge-sum{font-size:14px;color:#cfe0ff;margin:0 0 10px}
+.badges{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:8px}
+.badge{background:#101c33;border:1px solid #2b3d61;border-radius:14px;padding:9px 10px;display:flex;flex-direction:column;gap:3px;opacity:.85}
+.badge.got{background:linear-gradient(160deg,#3a3315,#1c2236);border-color:#ffd84a;opacity:1}.badge .bi{font-size:28px;filter:grayscale(.9)}.badge.got .bi{filter:none}
+.badge b{font-size:15px}.badge small{font-size:12.5px;color:#b9c8e2;line-height:1.35}.badge .bp{font-weight:800}
+.badge .bar{height:8px;border-radius:99px;background:#263551;overflow:hidden;margin:3px 0}.badge .bar i{display:block;height:100%;background:linear-gradient(90deg,#65dbf8,#7df9c8)}
+@media(max-width:520px){.lab-ov .lab-lanes,.lab-ov .lab-note{display:none}.lab-ov .lab-opts{grid-template-columns:repeat(3,1fr);gap:6px}.lab-ov .lab-opt{font-size:14px;padding:8px 5px;min-height:58px;line-height:1.25}.lab-ov .lab-diff{font-size:13px;padding:6px 9px}.lab-ov .lab-ask{margin:6px 0}.lab-ov .result-card{padding:12px}
+ .lab-grid{grid-template-columns:1fr}.lab-steps{grid-template-columns:1fr}.lab-steps li{display:flex;gap:6px;align-items:baseline;text-align:left}.result-actions.three{grid-template-columns:1fr}.replay-skip{bottom:150px}.lab-q{font-size:16px}}
 /*COACH:BEGIN*/
 /* Coach Moon: one line inside result windows (.mcoach) and a corner bubble at good moments (#coachPop, never takes taps) */
 .mcoach{display:flex;align-items:flex-end;gap:8px;margin:10px auto 6px;max-width:330px;text-align:left}
@@ -274,17 +337,21 @@ button,input,select{font:inherit}button{cursor:pointer;touch-action:manipulation
    <div class="event-flash" id="eventFlash"></div>
    <div class="start-banner" id="startBanner"></div>
    <button class="cheer-btn hidden" id="cheerBtn" type="button">📣</button>
+   <button class="mini-btn replay-skip hidden" id="replaySkip" type="button" data-en="⏭ Skip">⏭ 건너뛰기</button>
+   <button class="mini-btn replay-skip hidden" id="peekBack" type="button" data-en="📋 Back to the answer">📋 설명 다시 보기</button>
    <div class="subtitle" aria-live="polite"><span class="speaker">🎙️</span><span id="caption"></span></div>
    <div class="result-overlay hidden" id="resultOverlay"><div class="result-card" id="resultCard"></div></div>
    <div id="confettiLayer" class="confetti-layer"></div>
   </main>
   <section class="panel action-panel" aria-label="경기 진행" data-en-aria-label="Race controls"><button class="primary" id="startBtn" type="button">🏁 레이스 시작!</button><div class="controls"><button class="control" id="pauseBtn" type="button" disabled>⏸ 일시정지</button><button class="control" id="resetBtn" type="button" data-en="↻ Reset">↻ 다시 준비</button></div>
+   <div class="fun-row"><button class="fun-btn" id="buildBtn" type="button" data-en-html="<span>🛠️</span>Build a course"><span>🛠️</span>코스 만들기</button><button class="fun-btn" id="labBtn" type="button"><span>🔬</span>구슬 실험실</button><button class="fun-btn" id="skinBtn" type="button" data-en-html="<span>🎨</span>Decorate"><span>🎨</span>구슬 꾸미기</button><button class="fun-btn" id="badgeBtn" type="button"><span>🏅</span>배지</button></div>
    <p class="hint keys-hint" data-en="Keys: Space = pause · C = cheer · V = camera">단축키: 스페이스 = 일시정지 · C = 응원 · V = 카메라</p></section>
   <aside class="panel sidebar">
-   <section class="map-section"><h2 class="label" data-en="🌎 Choose a world">🌎 레이스 월드</h2><div class="maps" id="maps"></div></section>
-   <section class="mode-section"><h2 class="label" data-en="🏆 Race type">🏆 경기 방식</h2><div class="seg" id="modeSeg"><button type="button" data-mode="single" data-en="Single race">단판 경기</button><button type="button" data-mode="league" data-en="League · 5 races">리그 5경기</button></div><p class="hint" id="leagueInfo"></p></section>
-   <section><div class="field-line"><h2 class="label" style="margin:0" data-en="🔮 Marbles">🔮 출전하는 공</h2><div class="count-box"><input id="ballCount" aria-label="공 개수" data-en-aria-label="Number of marbles" type="number" inputmode="numeric" min="2" max="16" value="8"></div></div><input id="ballRange" class="range" aria-label="공 개수 조절" data-en-aria-label="Adjust the number of marbles" type="range" min="2" max="16" value="8"></section>
-   <section class="mine-section"><h2 class="label" id="mineLabel" data-en="💖 Pick your marble">💖 응원할 내 구슬</h2><div class="mine-picker" id="minePicker"></div>
+   <section class="lab-only"><h2 class="label" data-en="🔬 Lab notebook">🔬 실험 노트</h2><div class="lab-grid compact" id="labList"></div><p class="hint" data-en="Pick an experiment. Guess first, then watch!">실험을 골라요. 먼저 예상하고, 그다음 지켜봐요!</p></section>
+   <section class="map-section race-only"><h2 class="label" data-en="🌎 Choose a world">🌎 레이스 월드</h2><div class="maps" id="maps"></div></section>
+   <section class="mode-section race-only"><h2 class="label" data-en="🏆 Race type">🏆 경기 방식</h2><div class="seg" id="modeSeg"><button type="button" data-mode="single" data-en="Single race">단판 경기</button><button type="button" data-mode="league" data-en="League · 5 races">리그 5경기</button></div><p class="hint" id="leagueInfo"></p></section>
+   <section class="race-only"><div class="field-line"><h2 class="label" style="margin:0" data-en="🔮 Marbles">🔮 출전하는 공</h2><div class="count-box"><input id="ballCount" aria-label="공 개수" data-en-aria-label="Number of marbles" type="number" inputmode="numeric" min="2" max="16" value="8"></div></div><input id="ballRange" class="range" aria-label="공 개수 조절" data-en-aria-label="Adjust the number of marbles" type="range" min="2" max="16" value="8"></section>
+   <section class="mine-section race-only"><h2 class="label" id="mineLabel" data-en="💖 Pick your marble">💖 응원할 내 구슬</h2><div class="mine-picker" id="minePicker"></div>
     <p class="hint" data-en="During the race, press 📣 Cheer to give it a push (3 times)!">레이스 중 📣 응원 버튼으로 3번 힘을 줄 수 있어요!</p>
     <button type="button" class="small-btn" id="namesBtn" style="margin-top:10px" data-en="✏️ Name the marbles">✏️ 구슬 이름 짓기</button><div class="names-panel hidden" id="namesPanel"></div></section>
   </aside>
@@ -293,6 +360,22 @@ button,input,select{font:inherit}button{cursor:pointer;touch-action:manipulation
   <p class="footer-note" data-en="One HTML file, no downloads. The voice depends on the voices installed on your device.">한 개의 HTML 파일로 실행돼요. 음성은 기기에 설치된 목소리에 따라 달라요.</p>
   <p class="copy">© 2026 Dongsun Moon. <span data-en="All rights reserved.">모든 권리 보유.</span></p>
  </footer>
+</div>
+<div class="modal hidden" id="buildModal" role="dialog" aria-modal="true" aria-labelledby="buildTitle">
+ <div class="modal-card wide"><button class="modal-x" type="button" data-close aria-label="닫기" data-en-aria-label="Close">✕</button>
+  <h2 id="buildTitle" data-en="🛠️ Build your own course">🛠️ 나만의 코스 만들기</h2><div id="buildBody" class="build-body"></div></div>
+</div>
+<div class="modal hidden" id="labModal" role="dialog" aria-modal="true" aria-labelledby="labTitle">
+ <div class="modal-card wide"><button class="modal-x" type="button" data-close aria-label="닫기" data-en-aria-label="Close">✕</button>
+  <h2 id="labTitle" data-en="🔬 Marble lab">🔬 구슬 실험실</h2><div id="labBody"></div></div>
+</div>
+<div class="modal hidden" id="skinModal" role="dialog" aria-modal="true" aria-labelledby="skinTitle">
+ <div class="modal-card wide"><button class="modal-x" type="button" data-close aria-label="닫기" data-en-aria-label="Close">✕</button>
+  <h2 id="skinTitle" data-en="🎨 My marble's look">🎨 내 구슬 꾸미기</h2><div id="skinBody"></div></div>
+</div>
+<div class="modal hidden" id="badgeModal" role="dialog" aria-modal="true" aria-labelledby="badgeTitle">
+ <div class="modal-card wide"><button class="modal-x" type="button" data-close aria-label="닫기" data-en-aria-label="Close">✕</button>
+  <h2 id="badgeTitle" data-en="🏅 Badge book">🏅 배지 수첩</h2><div id="badgeBody"></div><p class="copy">© 2026 Dongsun Moon. <span data-en="All rights reserved.">모든 권리 보유.</span></p></div>
 </div>
 <div class="modal hidden" id="settingsModal" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
  <div class="modal-card">
@@ -325,12 +408,12 @@ const Sim=(()=>{
 const W=720,R=9,T=5,G=1500,LW=30,RW=690,TAU=Math.PI*2,MAXV=1050,SUB=1/240,CELL=48;
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 
-function build(mods,rng){
+function build(mods,rng,labKind,labCfg){
  rng=rng||Math.random;
- const shapes=[],segs=[],pegs=[],spinners=[],decor=[],guide=[],sections=[],slots=[];
- let y=0,x=0,gate=null,finishY=0,finishX=0,chute=null;
+ const shapes=[],segs=[],pegs=[],spinners=[],decor=[],guide=[],sections=[],slots=[],winds=[],gates=[],poles=[LW,RW];
+ let y=0,x=0,gate=null,finishY=0,finishX=0,chute=null,lab=null;
  const poly=(pts,o={})=>{
-  const s={pts,style:o.style||'track',e:o.e??.3,k:o.k??.6,boost:o.boost||null,on:true,tint:o.tint};
+  const s={pts,style:o.style||'track',e:o.e??.3,k:o.k??.6,boost:o.boost||null,kick:o.kick||0,on:true,tint:o.tint,flash:-9};
   let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;for(const [px,py] of pts){x0=Math.min(x0,px);y0=Math.min(y0,py);x1=Math.max(x1,px);y1=Math.max(y1,py)}
   s.box=[x0-16,y0-16,x1+16,y1+16];shapes.push(s);
   for(let i=0;i<pts.length-1;i++){const [ax,ay]=pts[i],[bx,by]=pts[i+1],dx=bx-ax,dy=by-ay;segs.push({ax,ay,dx,dy,len2:dx*dx+dy*dy||1,shape:s})}
@@ -340,7 +423,7 @@ function build(mods,rng){
  const panel=(x0,y0,x1,y1)=>decor.push({t:'panel',x0,y0,x1,y1});
  const unit=(dx,dy)=>{const l=Math.hypot(dx,dy)||1;return [dx/l,dy/l]};
  // funnel walls from the frame to an opening at xo; the last 46px are steep so marbles never arch over the neck
- function hopper(xo,yt,h){poly([[LW,yt],[xo-46,yt+h],[xo-18,yt+h+52]]);poly([[RW,yt],[xo+46,yt+h],[xo+18,yt+h+52]]);return yt+h+52}
+ function hopper(xo,yt,h,o){poly([[LW,yt],[xo-46,yt+h],[xo-18,yt+h+52]],o);poly([[RW,yt],[xo+46,yt+h],[xo+18,yt+h+52]],o);return yt+h+52}
  // funnel everything above into an opening centred at xo
  function collect(xo){const h=Math.max(30,.42*Math.max(xo-46-LW,RW-(xo+46)));const yb=hopper(xo,y,h);gp(x,y);gp(xo,yb);y=yb+14;x=xo}
  function start(){
@@ -353,15 +436,15 @@ function build(mods,rng){
   gp(150,shelfY(150)-14);gp(640,shelfY(640)-14);
   x=666;y=shelfY(640)+40;
  }
- function ramps(n,boostIdx,wash){
-  sec(wash?'wash':'ramps');const top=y;let dir=x>W/2?-1:1;
+ function ramps(n,boostIdx,wash,o={}){
+  sec(o.sec||(wash?'wash':'ramps'));const top=y;let dir=x>W/2?-1:1;
   for(let i=0;i<n;i++){
-   const hx=dir>0?LW:RW,lx=dir>0?RW-52:LW+52,y0=y+18,len=Math.abs(lx-hx),drop=wash?Math.floor((len-2)/40)*(40*.06+10)+12:.11*len,y1=y0+drop;
+   const hx=dir>0?LW:RW,lx=dir>0?RW-52:LW+52,y0=y+18,len=Math.abs(lx-hx),drop=wash?Math.floor((len-2)/40)*(40*.06+10)+12:(o.slope||.11)*len,y1=y0+drop;
    let pts;
    if(wash){pts=[[hx,y0]];const step=38,rise=10;let px=hx,py=y0;while(Math.abs(lx-px)>step+2){px+=dir*step;py+=step*.06;pts.push([px,py]);py+=rise;pts.push([px+dir*2,py])}pts.push([lx,py+Math.abs(lx-px)*.06])}
    else pts=[[hx,y0],[lx,y1]];
    const [ux,uy]=unit(lx-hx,drop);
-   poly(pts,i===boostIdx?{style:'boost',boost:{ux,uy,acc:900,max:600}}:{style:wash?'wash':'track'});
+   poly(pts,i===boostIdx?{style:'boost',boost:{ux,uy,acc:900,max:600}}:{style:wash?'wash':o.style||'track',k:o.k});
    gp(hx+dir*24,y0-14);gp(lx,y1-14);
    y=y1+34;dir=-dir;
   }
@@ -370,7 +453,7 @@ function build(mods,rng){
  }
  function pegField(){
   sec('pegs');const top=y,rows=8,sp=44;
-  for(let r=0;r<rows;r++){const py=top+40+r*sp,off=r%2?25:0;for(let px=LW+32+off;px<RW-20;px+=50)pegs.push({x:px+(rng()-.5)*4,y:py,r:5,e:.45,kind:'peg'})}
+  for(let r=0;r<rows;r++){const py=top+40+r*sp,off=r%2?25:0;for(let px=LW+32+off;px<RW-40;px+=50)pegs.push({x:px+(rng()-.5)*4,y:py,r:5,e:.45,kind:'peg'})}
   const yb=top+40+rows*sp,xo=[200,360,520][Math.floor(rng()*3)],h=Math.max(30,.4*Math.max(xo-46-LW,RW-(xo+46))),ye=hopper(xo,yb,h);
   panel(LW,top,RW,ye+10);gp(x,top+10);gp(360,top+40+rows*sp/2);gp(xo,ye);
   x=xo;y=ye+16;
@@ -439,9 +522,78 @@ function build(mods,rng){
   gp(120,yf-30);gp(120,cy);gp(cx,cy+rc);gp(end-10,fl(end-10)-14);
   y=fl(end)+90;
  }
+
+ // 🚀 cliff jump: a steep run-up ends at a lip; fast marbles fly over the gap to the landing ramp, slower ones drop into the safety net
+ function jump(){
+  sec('jump');collect(120);const top=y;
+  poly([[LW,top-4],[330,top+160],[372,top+168]]);
+  poly([[505,top+240],[650,top+284]]);
+  decor.push({t:'sign',x:200,y:top+18,text:'JUMP'},{t:'jumpgap',x0:372,x1:505,y:top+168});
+  const yb=top+316,xo=360,h=Math.max(30,.42*(xo-46-LW)),ye=hopper(xo,yb,h,{style:'net',e:.12,k:1.2});
+  panel(LW,top,RW,ye+10);gp(120,top-10);gp(330,top+150);gp(470,top+200);gp(640,top+272);gp(xo,ye);
+  x=xo;y=ye+16;
+ }
+ // 🤸 trampolines: springy pads always throw a marble back up, so they bounce from side to side on the way down
+ function tramp(){
+  sec('tramp');collect(170);const top=y;
+  // the first pad sits well below the hopper so a bounce can never trap a marble under the hopper wall
+  for(const [ax,ay,bx,by] of [[95,top+120,285,top+172],[625,top+236,445,top+288],[95,top+352,285,top+404],[625,top+468,445,top+520]])poly([[ax,ay],[bx,by]],{style:'tramp',e:.9,k:.2,kick:420});
+  const yb=top+566,xo=rng()<.5?220:500,h=Math.max(30,.4*Math.max(xo-46-LW,RW-(xo+46))),ye=hopper(xo,yb,h);
+  panel(LW,top,RW,ye+10);gp(170,top);gp(285,top+172);gp(445,top+288);gp(285,top+404);gp(360,top+530);gp(xo,ye);
+  x=xo;y=ye+16;
+ }
+ // 🌬️ wind tunnel: fans blow up the shaft, so the air holds the marbles back and they float down slowly, swaying
+ function fanShaft(){
+  sec('fan');collect(360);const top=y,xl=246,xr=474,H=380;
+  poly([[xl,top-6],[xl,top+H]]);poly([[xr,top-6],[xr,top+H]]);
+  winds.push({x0:xl,x1:xr,y0:top+30,y1:top+H-10,wx:0,wy:-290,kx:2,ky:4,sway:90});
+  decor.push({t:'fan',x0:xl,x1:xr,y0:top,y1:top+H});
+  panel(xl-22,top-10,xr+22,top+H+10);gp(360,top);gp(360,top+H);
+  y=top+H+8;x=360;
+ }
+ // ---- marble lab: two lanes side by side that differ in exactly one thing (a fair test)
+ // Lane A is x 30–360, lane B the same shapes moved 330 to the right. Each lane gets a gate and a finish rule.
+ function labCourse(kind,cfg){
+  const lanes=[],G=330;poles.push(360);poly([[360,-60],[360,700]],{style:'frame'});
+  const gateAt=(gx,yTop,yBot)=>{const g=poly([[gx,yTop],[gx,yBot]],{style:'gate'});gates.push(g);return g};
+  const trap=(cx,yy)=>{const g=poly([[cx-16,yy],[cx+16,yy]],{style:'gate',e:0,k:2});gates.push(g);return g};
+  for(let l=0;l<2;l++){const o=l*G,c=cfg[l]||{},L0={off:o};lanes.push(L0);
+   if(kind==='race'){ // one straight ramp; the finish is a line across the lane near its end
+    const x0=o+40,x1=o+330,y0=110,drop=c.drop||140,rampY=xx=>y0+(xx-x0)*drop/(x1-x0);
+    poly([[x0,y0-30],[x0,y0],[x1,y0+drop]],{style:c.style||'track',k:c.k});
+    const gx=o+86;gateAt(gx,rampY(gx)-30,rampY(gx)-2);const sx=gx-T-R-1.5;slots.push([sx,rampY(sx)-T-R-.5]);
+    poly([[o+40,440],[o+350,440]],{style:'tray',e:.05,k:6});L0.finX=o+300;L0.finY=rampY(o+300);L0.startX=sx;L0.floorY=440;
+   }else if(kind==='curve'){ // same start and end height: straight line or a curve that drops steeply first
+    const sx0=o+55,sy0=120,ex=o+295,ey=285;
+    // the curve is a cycloid (the fastest slide between two points), started a little past its vertical tip so the marble stays on it
+    let path;if(c.curve){const t0=.45,th=2.95,X=t=>t-Math.sin(t),Y=t=>1-Math.cos(t),sx=(ex-sx0)/(X(th)-X(t0)),sy=(ey-sy0)/(Y(th)-Y(t0));path=[];for(let i=0;i<=72;i++){const t=t0+(th-t0)*i/72;path.push([sx0+sx*(X(t)-X(t0)),sy0+sy*(Y(t)-Y(t0))])}}
+    else path=[[sx0,sy0],[ex,ey]];
+    poly([[o+36,sy0-36],[o+36,sy0-8],...path,[o+340,ey+8]],{style:'track',k:.02});
+    gateAt(sx0+2,sy0-40,sy0-6);const sx=sx0+2-T-R-1.5;slots.push([sx,sy0-8+(sx-o-36)*8/(sx0-o-36)-T-R-1]);
+    poly([[o+40,440],[o+350,440]],{style:'tray',e:.05,k:6});L0.finX=ex;L0.finY=ey;L0.startX=sx;L0.floorY=440;
+   }else if(kind==='bounce'){ // a trapdoor drops the ball straight onto a hard floor
+    const cx=o+180;trap(cx,110);slots.push([cx,110-T-R-.5]);
+    poly([[o+40,520],[o+350,520]],{style:'track',e:.55,k:.3});L0.floorY=520;L0.dropY=110;L0.cx=cx;
+   }else if(kind==='wind'){ // the ball falls through a side wind and lands on soft sand
+    const cx=o+70;trap(cx,110);slots.push([cx,110-T-R-.5]);
+    winds.push({x0:o+30,x1:o+360,y0:170,y1:470,wx:520,wy:0,kx:4,ky:0,sway:0});
+    decor.push({t:'sidefan',x:o+44,y0:170,y1:470});
+    poly([[o+40,560],[o+350,560]],{style:'sand',e:.02,k:12});L0.floorY=560;L0.startX=cx;
+   }else if(kind==='crash'){ // a ball rolls down and hits a ball that is standing still on the carpet
+    const x0=o+40,y0=150,x1=o+150,y1=330,rampY=xx=>y0+(xx-x0)*(y1-y0)/(x1-x0);
+    poly([[x0,y0-30],[x0,y0],[x1,y1]],{style:'track',k:.6});poly([[x1,y1],[o+346,y1]],{style:'carpet',e:.1,k:3.5});poly([[o+346,y1-50],[o+346,y1]]);
+    const gx=o+72;gateAt(gx,rampY(gx)-30,rampY(gx)-2);const sx=gx-T-R-1.5;slots.push([sx,rampY(sx)-T-R-.5]);
+    L0.targetX=o+196;L0.floorY=y1;
+   }
+  }
+  if(kind==='crash')for(const L0 of lanes)slots.push([L0.targetX,L0.floorY-T-R-.5]);
+  gate=gates[0];lab={kind,lanes};sections.push({type:'lab',y0:0});
+  y=kind==='bounce'?560:kind==='wind'?600:kind==='crash'?380:480;gp(360,0);gp(360,y);
+ }
  const MOD={ramps2:()=>ramps(2,-1),ramps3:()=>ramps(3,-1),ramps2b:()=>ramps(2,1),ramps3b:()=>ramps(3,1),wash2:()=>ramps(2,-1,true),
-  pegs:pegField,zigzag,funnels2:()=>funnels(2),funnels3:()=>funnels(3),funnels4:()=>funnels(4),spinner:spinnerShaft,bumpers:bumperField,split};
- start();for(const m of mods)MOD[m]();finish();
+  pegs:pegField,zigzag,funnels2:()=>funnels(2),funnels3:()=>funnels(3),funnels4:()=>funnels(4),spinner:spinnerShaft,bumpers:bumperField,split,
+  ice:()=>ramps(3,-1,false,{sec:'ice',style:'ice',k:.03,slope:.1}),honey:()=>ramps(2,-1,false,{sec:'honey',style:'honey',k:2.2,slope:.22}),jump,tramp,fan:fanShaft};
+ if(labKind){labCourse(labKind,labCfg||[])}else{start();for(const m of mods)if(MOD[m])MOD[m]();finish()}
  const H=y;
  poly([[LW,-400],[LW,H]],{style:'frame'});poly([[RW,-400],[RW,H]],{style:'frame'});poly([[LW,H],[RW,H]],{style:'frame'});
  // guide polyline with cumulative length, used for ranking and the minimap
@@ -451,31 +603,32 @@ function build(mods,rng){
  for(const s of segs){const x0=Math.min(s.ax,s.ax+s.dx)-reach,x1=Math.max(s.ax,s.ax+s.dx)+reach,y0=Math.min(s.ay,s.ay+s.dy)-reach,y1=Math.max(s.ay,s.ay+s.dy)+reach;
   for(let cx=Math.floor(x0/CELL);cx<=Math.floor(x1/CELL);cx++)for(let cy=Math.floor(y0/CELL);cy<=Math.floor(y1/CELL);cy++)add(cx+','+cy,s)}
  for(const p of pegs){const rr=p.r+R+2;for(let cx=Math.floor((p.x-rr)/CELL);cx<=Math.floor((p.x+rr)/CELL);cx++)for(let cy=Math.floor((p.y-rr)/CELL);cy<=Math.floor((p.y+rr)/CELL);cy++)add(cx+','+cy,p)}
- return {W,H,shapes,segs,pegs,spinners,decor,guide,cum,total:cum[cum.length-1],sections,slots,gate,finishY,finishX,chute,grid};
+ return {W,H,shapes,segs,pegs,spinners,decor,guide,cum,total:cum[cum.length-1],sections,slots,gate,gates,winds,poles,lab,finishY:lab?1e9:finishY,finishX,chute,grid};
 }
 
 function createState(course,n,order){
  const marbles=[];
- for(let i=0;i<n;i++){const [sx,sy]=course.slots[order[i]];marbles.push({id:i,x:sx,y:sy,vx:0,vy:0,ang:Math.random()*TAU,done:false,finishTime:0,progress:0,gi:0,bestP:0,lastGain:0,stuck:0,nudges:0,rescues:0,boosted:-9})}
+ for(let i=0;i<n;i++){const [sx,sy]=course.slots[order[i]];marbles.push({id:i,x:sx,y:sy,vx:0,vy:0,ang:Math.random()*TAU,done:false,finishTime:0,progress:0,gi:0,bestP:0,lastGain:0,stuck:0,nudges:0,rescues:0,boosted:-9,mass:1,bounce:0})}
  return {course,marbles,t:0,finishers:[],events:[],gateOpen:false};
 }
-function openGate(st){st.course.gate.on=false;st.gateOpen=true;st.gateT=st.t;for(const m of st.marbles){m.lastGain=st.t}}
+function openGate(st){st.course.gate.on=false;for(const g of st.course.gates||[])g.on=false;st.gateOpen=true;st.gateT=st.t;for(const m of st.marbles){m.lastGain=st.t}}
 
 function hitSeg(m,s,h,st){
  const sh=s.shape;if(!sh.on)return;
  const t=clamp(((m.x-s.ax)*s.dx+(m.y-s.ay)*s.dy)/s.len2,0,1),px=s.ax+t*s.dx,py=s.ay+t*s.dy;
  let nx=m.x-px,ny=m.y-py;const d2=nx*nx+ny*ny,rr=R+T;if(d2>=rr*rr)return;
  const d=Math.sqrt(d2)||1e-6;nx/=d;ny/=d;m.x+=nx*(rr-d);m.y+=ny*(rr-d);
- const vn=m.vx*nx+m.vy*ny;
- if(vn<0){m.vx-=(1+sh.e)*vn*nx;m.vy-=(1+sh.e)*vn*ny;if(vn<-260)st.events.push({t:'hit',x:px,y:py,v:-vn,id:m.id})}
+ const vn=m.vx*nx+m.vy*ny,e=clamp(sh.e+(m.bounce||0),0,1.1);
+ if(vn<0){m.vx-=(1+e)*vn*nx;m.vy-=(1+e)*vn*ny;if(sh.kick){const out=m.vx*nx+m.vy*ny;if(out<sh.kick){m.vx+=nx*(sh.kick-out);m.vy+=ny*(sh.kick-out)}if(st.t-sh.flash>.15)st.events.push({t:'tramp',x:px,y:py,id:m.id});sh.flash=st.t}
+  else if(vn<-260)st.events.push({t:'hit',x:px,y:py,v:-vn,id:m.id})}
  const tx=-ny,ty=nx,vt=m.vx*tx+m.vy*ty,dec=vt*(1-Math.exp(-sh.k*h));m.vx-=tx*dec;m.vy-=ty*dec;
  if(sh.boost){const b=sh.boost;if(m.vx*b.ux+m.vy*b.uy<b.max){m.vx+=b.ux*b.acc*h;m.vy+=b.uy*b.acc*h}if(st.t-m.boosted>1.5)st.events.push({t:'boost',id:m.id,x:m.x,y:m.y});m.boosted=st.t}
 }
 function hitPeg(m,p,st){
  let nx=m.x-p.x,ny=m.y-p.y;const d2=nx*nx+ny*ny,rr=R+p.r;if(d2>=rr*rr)return;
  const d=Math.sqrt(d2)||1e-6;nx/=d;ny/=d;m.x=p.x+nx*rr;m.y=p.y+ny*rr;
- const vn=m.vx*nx+m.vy*ny;
- if(vn<0){m.vx-=(1+p.e)*vn*nx;m.vy-=(1+p.e)*vn*ny;
+ const vn=m.vx*nx+m.vy*ny,e=clamp(p.e+(m.bounce||0),0,1.1);
+ if(vn<0){m.vx-=(1+e)*vn*nx;m.vy-=(1+e)*vn*ny;
   if(p.kind==='bumper'){const out=m.vx*nx+m.vy*ny;if(out<300){m.vx+=nx*(300-out);m.vy+=ny*(300-out)}p.flash=st.t;st.events.push({t:'bumper',x:p.x,y:p.y,id:m.id})}
   else if(vn<-260)st.events.push({t:'hit',x:m.x-nx*R,y:m.y-ny*R,v:-vn,id:m.id})}
  else{const tx=-ny,ty=nx,vt=m.vx*tx+m.vy*ty;m.vx-=tx*vt*.002;m.vy-=ty*vt*.002}
@@ -494,10 +647,14 @@ function hitSpinner(m,sp,st){
 }
 function substep(st,h){
  const ms=st.marbles,c=st.course;st.t+=h;
- for(const m of ms){m.vy+=G*h;const f=1-.05*h;m.vx*=f;m.vy*=f;const sp=Math.hypot(m.vx,m.vy);if(sp>MAXV){m.vx*=MAXV/sp;m.vy*=MAXV/sp}m.x+=m.vx*h;m.y+=m.vy*h;m.ang+=m.vx*h/R}
+ for(const m of ms){m.vy+=G*h;const f=1-.05*h;m.vx*=f;m.vy*=f;
+  // wind: the air drags a marble toward the wind's speed; a heavier marble is pushed less (same push, more mass)
+  for(const w of c.winds||[])if(m.x>w.x0&&m.x<w.x1&&m.y>w.y0&&m.y<w.y1){const im=1/(m.mass||1),wx=w.wx+(w.sway?Math.sin(m.y*.035+st.t*2.2)*w.sway:0);m.vx+=(wx-m.vx)*Math.min(1,w.kx*im*h);m.vy+=(w.wy-m.vy)*Math.min(1,w.ky*im*h)}
+ const sp=Math.hypot(m.vx,m.vy);if(sp>MAXV){m.vx*=MAXV/sp;m.vy*=MAXV/sp}m.x+=m.vx*h;m.y+=m.vy*h;m.ang+=m.vx*h/R}
  for(let i=0;i<ms.length;i++)for(let j=i+1;j<ms.length;j++){const a=ms[i],b=ms[j],dx=b.x-a.x,dy=b.y-a.y,d2=dx*dx+dy*dy;
-  if(d2<4*R*R&&d2>1e-9){const d=Math.sqrt(d2),nx=dx/d,ny=dy/d,p=(2*R-d)/2;a.x-=nx*p;a.y-=ny*p;b.x+=nx*p;b.y+=ny*p;
-   const rv=(b.vx-a.vx)*nx+(b.vy-a.vy)*ny;if(rv<0){const jj=-1.6*rv/2;a.vx-=jj*nx;a.vy-=jj*ny;b.vx+=jj*nx;b.vy+=jj*ny;if(rv<-220)st.events.push({t:'clack',x:(a.x+b.x)/2,y:(a.y+b.y)/2,v:-rv})}}}
+  if(d2<4*R*R&&d2>1e-9){const d=Math.sqrt(d2),nx=dx/d,ny=dy/d,wa=1/(a.mass||1),wb=1/(b.mass||1),ws=wa+wb,p=2*R-d;a.x-=nx*p*wa/ws;a.y-=ny*p*wa/ws;b.x+=nx*p*wb/ws;b.y+=ny*p*wb/ws;
+   // a heavier marble pushes harder and is pushed less (momentum); equal marbles behave exactly as before
+   const rv=(b.vx-a.vx)*nx+(b.vy-a.vy)*ny;if(rv<0){const jj=-1.6*rv/ws;a.vx-=jj*wa*nx;a.vy-=jj*wa*ny;b.vx+=jj*wb*nx;b.vy+=jj*wb*ny;if(rv<-220)st.events.push({t:'clack',x:(a.x+b.x)/2,y:(a.y+b.y)/2,v:-rv})}}}
  for(const m of ms){
   const list=c.grid.get(Math.floor(m.x/CELL)+','+Math.floor(m.y/CELL));
   if(list)for(const o of list){if(o.shape)hitSeg(m,o,h,st);else hitPeg(m,o,st)}
@@ -505,7 +662,7 @@ function substep(st,h){
  }
 }
 function updateProgress(st){
- const c=st.course,g=c.guide,cum=c.cum;
+ const c=st.course,g=c.guide,cum=c.cum;if(c.lab)return;
  for(const m of st.marbles){
   if(m.done)continue;
   let best=1e18,bi=m.gi,bt=0;
@@ -518,7 +675,8 @@ function updateProgress(st){
   if(m.progress>m.bestP+4){m.bestP=m.progress;m.lastGain=st.t}
   else{
    const idle=st.t-m.lastGain,slow=Math.hypot(m.vx,m.vy)<25,blocked=st.marbles.some(o=>o!==m&&!o.done&&(o.x-m.x)**2+(o.y-m.y)**2<(2*R+3)**2);
-   if(idle>9&&!blocked){const target=m.progress+60;let k=m.gi;while(k<g.length-2&&cum[k+1]<target)k++;m.x=g[k][0];m.y=g[k][1]-4;m.vx=0;m.vy=0;m.lastGain=st.t;m.rescues++;st.events.push({t:'rescue',id:m.id})}
+   // a marble rescued again and again is carried a little further each time, so it can never loop on one spot
+   if(idle>9&&!blocked){const target=m.progress+60+50*Math.min(6,m.rescues);let k=m.gi;while(k<g.length-2&&cum[k+1]<target)k++;m.x=g[k][0];m.y=g[k][1]-4;m.vx=0;m.vy=0;m.lastGain=st.t;m.rescues++;st.events.push({t:'rescue',id:m.id})}
    else if(idle>3.2&&slow&&(!blocked||idle>4.5)&&st.t-(m.lastNudge||0)>1.5){m.vx+=(Math.random()-.5)*160;m.vy-=110;m.lastNudge=st.t;m.nudges++}
   }
  }
@@ -557,17 +715,108 @@ const WORLDS=[
  {id:'space',name:L('우주 스피드웨이','Space Speedway'),desc:L('은빛 레일 · 범퍼 · 바람개비','Silver rails · Bumpers · Spinners'),mods:['bumpers','ramps2b','spinner','funnels3','zigzag','pegs'],
   bg:['#050b24','#1b2a62'],deco:'space',panel:'rgba(22,34,78,.55)',panelEdge:'rgba(169,194,255,.5)',rail:'#8299d0',railDark:'#2b3c6e',railLight:'#eef3ff',glow:'#7df9ff',peg:'#c59bff',pegTop:'#efe4ff',bumper:'#7df9ff',bowl:'#7df9ff',accent:'#7df9ff',label:'#dfe9ff'},
  {id:'chaos',name:L('카오스 랜덤','Chaos Random'),desc:L('매번 코스가 바뀌어요!','A new course every race!'),mods:null,
-  bg:['#371259','#d6559f'],deco:'chaos',panel:'rgba(255,255,255,.16)',panelEdge:'rgba(255,255,255,.45)',rail:'#ffffff',railDark:'#2a1450',railLight:'#ffffff',glow:'#ffe36e',peg:'#ffe36e',pegTop:'#fff7c8',bumper:'#36e0c0',bowl:'#ff8a3d',accent:'#ffe36e',label:'#ffffff'}
+  bg:['#371259','#d6559f'],deco:'chaos',panel:'rgba(255,255,255,.16)',panelEdge:'rgba(255,255,255,.45)',rail:'#ffffff',railDark:'#2a1450',railLight:'#ffffff',glow:'#ffe36e',peg:'#ffe36e',pegTop:'#fff7c8',bumper:'#36e0c0',bowl:'#ff8a3d',accent:'#ffe36e',label:'#ffffff'},
+ {id:'park',em:'🎡',name:L('과학 놀이공원','Science Park'),desc:L('점프 · 트램펄린 · 바람 터널','Jumps · Trampolines · Wind tunnel'),mods:['ramps2b','jump','tramp','fan','ice','bumpers'],
+  bg:['#ff9f80','#ffe9b8'],deco:'park',panel:'rgba(255,255,255,.55)',panelEdge:'rgba(255,255,255,.9)',rail:'#ffffff',railDark:'#d23f72',railLight:'#ffffff',glow:null,peg:'#ff5c8a',pegTop:'#ffc2d4',bumper:'#2fbaf5',bowl:'#ffa21f',accent:'#ff4f86',label:'#7a2346'}
 ];
+// the clean look used by the marble lab
+const LAB_THEME={id:'lab',name:L('구슬 실험실','Marble Lab'),bg:['#0f2c4c','#25507a'],deco:'lab',panel:'rgba(255,255,255,.07)',panelEdge:'rgba(255,255,255,.3)',rail:'#e8eef7',railDark:'#56688a',railLight:'#ffffff',glow:null,peg:'#ffd84a',pegTop:'#fff3b0',bumper:'#ff6b8b',bowl:'#ffb020',accent:'#ffd84a',label:'#ffffff'};
 const CHAOS_POOL=['ramps3b','pegs','funnels3','wash2','zigzag','bumpers','spinner','split','ramps2b','funnels2'];
-const SECTION={start:['🚦',L('출발대','Start gate')],ramps:['↩️',L('지그재그 경사로','Switchback ramps')],wash:['🪜',L('덜컹덜컹 계단길','Bumpy stairs')],pegs:['🎯',L('핀볼 숲','Peg forest')],zigzag:['🗼',L('지그재그 탑','Zigzag tower')],funnels:['🌀',L('깔때기 그릇','Funnel bowls')],spinner:['🎡',L('바람개비 통로','Spinner shaft')],bumpers:['💥',L('통통 범퍼','Bumper zone')],split:['🔀',L('갈림길','Split paths')],finish:['🏁',L('결승 레인','Finish lane')]};
+const SECTION={start:['🚦',L('출발대','Start gate')],ramps:['↩️',L('지그재그 경사로','Switchback ramps')],wash:['🪜',L('덜컹덜컹 계단길','Bumpy stairs')],pegs:['🎯',L('핀볼 숲','Peg forest')],zigzag:['🗼',L('지그재그 탑','Zigzag tower')],funnels:['🌀',L('깔때기 그릇','Funnel bowls')],spinner:['🎡',L('바람개비 통로','Spinner shaft')],bumpers:['💥',L('통통 범퍼','Bumper zone')],split:['🔀',L('갈림길','Split paths')],finish:['🏁',L('결승 레인','Finish lane')],
+ ice:['❄️',L('얼음 미끄럼틀','Ice slide')],honey:['🍯',L('꿀 언덕','Honey hill')],jump:['🚀',L('점프 절벽','Cliff jump')],tramp:['🤸',L('트램펄린','Trampolines')],fan:['🌬️',L('바람 터널','Wind tunnel')],lab:['🔬',L('실험','Experiment')]};
 const POINTS=[12,9,7,5,3,1],LEAGUE_RACES=5,CHEERS=3;
+// ---------------------------------------------------------------- course pieces, lab experiments, marble looks, badges
+// Pieces the child can stack into their own course (ids are Sim.build modules). The short line names the physics at work.
+const PIECES=[
+ ['ramps3','↩️',L('지그재그 경사로','Switchback ramps'),L('왔다 갔다 내려가요','Back and forth, down and down')],
+ ['ramps2b','⚡',L('터보 경사로','Turbo ramps'),L('부스터가 휙 밀어 줘요','A booster gives a push')],
+ ['wash2','🪜',L('계단길','Bumpy stairs'),L('덜컹덜컹 튀어요','Bump, bump, bump')],
+ ['pegs','🎯',L('핀볼 숲','Peg forest'),L('핀에 부딪혀 순서가 바뀌어요','Pegs shuffle the order')],
+ ['zigzag','🗼',L('지그재그 탑','Zigzag tower'),L('좁은 탑을 오르락내리락','Down a narrow tower')],
+ ['funnels3','🌀',L('깔때기 그릇','Funnel bowls'),L('빙글빙글 돌다가 쏙!','Round and round, then down')],
+ ['spinner','🎡',L('바람개비','Spinners'),L('돌아가는 팔이 툭 쳐요','Spinning arms whack them')],
+ ['bumpers','💥',L('범퍼','Bumpers'),L('퉁퉁 튕겨 나가요','Boing, boing!')],
+ ['split','🔀',L('갈림길','Split paths'),L('어느 길이 빠를까?','Which way is faster?')],
+ ['ice','❄️',L('얼음 미끄럼틀','Ice slide'),L('마찰이 작아서 쌩쌩!','Little friction, so it zooms')],
+ ['honey','🍯',L('꿀 언덕','Honey hill'),L('마찰이 커서 느릿느릿','Lots of friction, slow and sticky')],
+ ['jump','🚀',L('점프 절벽','Cliff jump'),L('빠른 구슬은 날아서 건너요','Fast marbles fly across')],
+ ['tramp','🤸',L('트램펄린','Trampolines'),L('통통 높이 튀어 올라요','Bouncy pads')],
+ ['fan','🌬️',L('바람 터널','Wind tunnel'),L('바람이 받쳐서 둥실둥실','The air holds them up')]];
+const PIECE_IDS=PIECES.map(p=>p[0]),PIECE_BY=Object.fromEntries(PIECES.map(p=>[p[0],p])),MAX_PIECES=8,MAX_CUSTOMS=6;
+// Lab materials: same size, different weight (mass) or springiness (bounce)
+const MATS={glass:{ic:'🔮',n:L('유리구슬','glass marble'),mass:1,bounce:0,c:'#4cb4ff'},steel:{ic:'⚙️',n:L('쇠구슬','steel ball'),mass:3,bounce:0,c:'#c6d0de',metal:1},
+ rubber:{ic:'🔴',n:L('고무공','rubber ball'),mass:1,bounce:.35,c:'#ff4f6d'},clay:{ic:'🟤',n:L('찰흙공','clay ball'),mass:1,bounce:-.45,c:'#b07a52',matte:1}};
+for(const k in MATS){const m=MATS[k];m.lite=mix(m.c,'#ffffff',.55);m.dark=mix(m.c,'#000000',.45)}
+// Predict → observe → explain. Two lanes differ in exactly one thing; every guess is welcome.
+// measure: 'time' (who reaches the finish first), 'up' (bounce height), 'far' (how far it is pushed / rolls)
+const EXPS=[
+ {id:'weight',ic:'⚖️',kind:'race',measure:'time',t:L('무게 경주','Heavy vs light'),
+  q:L('무거운 쇠구슬과 가벼운 유리구슬이 똑같은 미끄럼틀을 내려와요. 누가 먼저 도착할까요?','A heavy steel ball and a light glass marble roll down the same slide. Which one arrives first?'),
+  diff:L('다른 점은 딱 하나: 무게예요 (쇠구슬이 3배 무거워요)','Only one thing is different: the weight (the steel ball is 3 times heavier)'),
+  lanes:[{mat:'steel',name:L('⚙️ 쇠구슬','⚙️ Steel ball')},{mat:'glass',name:L('🔮 유리구슬','🔮 Glass marble')}],
+  opts:[['A',L('쇠구슬이 먼저','Steel first')],['B',L('유리구슬이 먼저','Glass first')],['same',L('거의 동시에','About the same time')]],ans:'same',
+  why:L('무게가 달라도 굴러 내려오는 빠르기는 같아요! 옛날 과학자 갈릴레이가 알아낸 놀라운 사실이에요.','Heavy or light, they roll down just as fast! A scientist named Galileo found this out long ago.'),
+  life:L('깃털이나 종이처럼 가볍고 넓은 것만 공기에 막혀서 천천히 떨어져요.','Only light, wide things like feathers fall slowly, because the air holds them back.')},
+ {id:'slope',ic:'⛰️',kind:'race',measure:'time',t:L('가파른 길, 완만한 길','Steep or gentle'),
+  q:L('가파른 미끄럼틀과 완만한 미끄럼틀이 있어요. 누가 먼저 끝에 도착할까요?','One slide is steep and one is gentle. Which marble reaches the end first?'),
+  diff:L('다른 점은 딱 하나: 기울기예요','Only one thing is different: how steep the slide is'),
+  lanes:[{mat:'glass',drop:210,name:L('⛰️ 가파른 길','⛰️ Steep slide')},{mat:'glass',drop:60,name:L('🌄 완만한 길','🌄 Gentle slide')}],
+  opts:[['A',L('가파른 길','The steep slide')],['B',L('완만한 길','The gentle slide')],['same',L('거의 동시에','About the same time')]],ans:'A',
+  why:L('경사가 가파를수록 구슬을 아래로 끌어내리는 힘이 커서 더 빨리 내려와요.','The steeper the slope, the harder gravity pulls the marble down it, so it goes faster.'),
+  life:L('그래서 가파른 미끄럼틀이 더 짜릿해요!','That is why steep slides feel more exciting!')},
+ {id:'friction',ic:'🧊',kind:'race',measure:'time',t:L('얼음길과 카펫길','Ice or carpet'),
+  q:L('매끈한 얼음길과 보송보송한 카펫길이 있어요. 누가 먼저 도착할까요?','One slide is smooth ice and one is fuzzy carpet. Which marble gets there first?'),
+  diff:L('다른 점은 딱 하나: 길의 표면이에요','Only one thing is different: the surface of the slide'),
+  lanes:[{mat:'glass',drop:120,style:'ice',k:.02,name:L('🧊 얼음길','🧊 Ice slide')},{mat:'glass',drop:120,style:'carpet',k:3,name:L('🧶 카펫길','🧶 Carpet slide')}],
+  opts:[['A',L('얼음길','The ice slide')],['B',L('카펫길','The carpet slide')],['same',L('거의 동시에','About the same time')]],ans:'A',
+  why:L('카펫은 마찰력이 커서 구슬을 붙잡아요. 매끈한 얼음은 마찰력이 작아서 쌩쌩 달려요.','Carpet has lots of friction, which holds the marble back. Smooth ice has very little, so the marble zooms.'),
+  life:L('겨울 빙판길이 미끄러운 것도 마찰력이 작기 때문이에요.','Icy sidewalks are slippery in winter for the same reason: very little friction.')},
+ {id:'bounce',ic:'🏀',kind:'bounce',measure:'up',t:L('통통 튀기','Bounce test'),
+  q:L('고무공과 찰흙공을 같은 높이에서 떨어뜨려요. 누가 더 높이 튀어 오를까요?','A rubber ball and a clay ball drop from the same height. Which one bounces higher?'),
+  diff:L('다른 점은 딱 하나: 공의 재료예요','Only one thing is different: what the ball is made of'),
+  lanes:[{mat:'rubber',name:L('🔴 고무공','🔴 Rubber ball')},{mat:'clay',name:L('🟤 찰흙공','🟤 Clay ball')}],
+  opts:[['A',L('고무공','The rubber ball')],['B',L('찰흙공','The clay ball')],['same',L('똑같이 튀어요','The same height')]],ans:'A',
+  why:L('고무는 눌렸다가 다시 펴지는 성질(탄성)이 커서 높이 튀어요. 찰흙은 눌린 채로 있어서 거의 안 튀어요.','Rubber springs back after it is squashed (it is elastic), so it bounces high. Clay stays squashed, so it hardly bounces.'),
+  life:L('농구공과 탱탱볼이 잘 튀는 것도 탄성 덕분이에요.','Basketballs and bouncy balls bounce well because they are elastic.')},
+ {id:'wind',ic:'🌬️',kind:'wind',measure:'far',t:L('바람 실험','Wind test'),
+  q:L('떨어지는 공에 옆에서 바람이 불어요. 어느 쪽이 더 멀리 밀려날까요?','Wind blows from the side while the balls fall. Which one gets pushed farther?'),
+  diff:L('다른 점은 딱 하나: 무게예요 (크기는 같아요)','Only one thing is different: the weight (they are the same size)'),
+  lanes:[{mat:'steel',name:L('⚙️ 무거운 쇠구슬','⚙️ Heavy steel ball')},{mat:'glass',name:L('🔮 가벼운 유리구슬','🔮 Light glass marble')}],
+  opts:[['A',L('무거운 쇠구슬','The heavy steel ball')],['B',L('가벼운 유리구슬','The light glass marble')],['same',L('똑같이 밀려요','The same distance')]],ans:'B',
+  why:L('같은 바람이 밀어도 가벼운 구슬이 훨씬 많이 밀려요. 무거운 물체일수록 움직임을 바꾸기 어려워요.','The same wind pushes the light marble much farther. The heavier something is, the harder it is to change how it moves.'),
+  life:L('바람 부는 날 비닐봉지는 날아가도 돌멩이는 그대로인 것과 같아요.','On a windy day a plastic bag flies away, but a stone stays put.')},
+ {id:'crash',ic:'🎳',kind:'crash',measure:'far',t:L('쾅! 부딪치기','Crash test'),
+  q:L('굴러온 구슬이 가만히 있는 구슬을 쾅 쳐요. 맞은 구슬은 어느 쪽이 더 멀리 굴러갈까요?','A rolling ball crashes into a ball that is standing still. On which side does the hit ball roll farther?'),
+  diff:L('다른 점은 딱 하나: 어느 구슬이 무거운지예요','Only one thing is different: which ball is the heavy one'),
+  lanes:[{mat:'steel',target:'glass',name:L('⚙️→🔮 쇠구슬이 쳐요','⚙️→🔮 Steel hits glass')},{mat:'glass',target:'steel',name:L('🔮→⚙️ 유리구슬이 쳐요','🔮→⚙️ Glass hits steel')}],
+  opts:[['A',L('쇠구슬이 친 쪽','Where steel hits')],['B',L('유리구슬이 친 쪽','Where glass hits')],['same',L('똑같이 굴러가요','The same distance')]],ans:'A',
+  why:L('무거운 구슬이 부딪치면 힘이 크게 전해져서 맞은 구슬이 멀리 굴러가요. 가벼운 구슬은 무거운 구슬을 조금밖에 못 밀어요.','A heavy ball hits harder, so the ball it hits rolls far. A light ball can only push a heavy one a little.'),
+  life:L('볼링공이 무거운 덕분에 핀을 시원하게 쓰러뜨려요.','A bowling ball is heavy, so it sends the pins flying.')},
+ {id:'curve',ic:'🎢',kind:'curve',measure:'time',t:L('지름길의 비밀','The shortcut secret'),
+  q:L('곧은 길과 휘어진 길이 같은 곳에서 출발해 같은 곳에 도착해요. 누가 먼저 도착할까요?','A straight path and a curved path start and end at the same places. Which marble arrives first?'),
+  diff:L('다른 점은 딱 하나: 길의 모양이에요 (곧은 길이 더 짧아요)','Only one thing is different: the shape of the path (the straight one is shorter)'),
+  lanes:[{mat:'glass',name:L('📏 곧은 길','📏 Straight path')},{mat:'glass',curve:true,name:L('🎢 휘어진 길','🎢 Curved path')}],
+  opts:[['A',L('곧은 길 (더 짧아요)','The straight path (shorter)')],['B',L('휘어진 길','The curved path')],['same',L('거의 동시에','About the same time')]],ans:'B',
+  why:L('휘어진 길은 처음에 가파르게 떨어져서 금방 빨라져요. 길이 더 길어도 먼저 도착해요!','The curved path drops steeply first, so the marble speeds up early. It wins even though its path is longer!'),
+  life:L('롤러코스터 첫 내리막이 아주 가파른 것도 빨리 속도를 내기 위해서예요.','Roller coasters start with a very steep drop to build up speed fast.')}];
+const EXP_IDS=EXPS.map(e=>e.id),UNIT=30;  // distances are counted in "칸" (squares) of 30 px, like a ruler
+// My marble's looks. Each one is earned by a badge for something the child did (never bought, never random).
+const PATTERNS=[['plain','⚪',L('기본','Classic')],['stripe','🦓',L('줄무늬','Stripes')],['face','😊',L('웃는 얼굴','Smiley')],['rainbow','🌈',L('무지개','Rainbow')],['galaxy','🌌',L('은하수','Galaxy')],['fire','🔥',L('불꽃','Flame')],['star','⭐',L('별','Star')]];
+const TRAILS=[['none','✖️',L('없음','None')],['sparkle','✨',L('반짝이','Sparkles')],['bubbles','💧',L('비눗방울','Bubbles')],['rainbow','🌈',L('무지개 꼬리','Rainbow tail')],['stars','🌟',L('별똥별','Shooting stars')],['fire','🔥',L('불꽃 꼬리','Flame tail')]];
 
 // ---------------------------------------------------------------- settings
 let worldIdx=0,numBalls=8,voiceOn=true,sfxOn=true,mine=0,mineStats={races:0,wins:0},voicePick={},names=Array(16).fill(''),mode='single',league=null;
-function save(){try{localStorage.setItem('marbleRush.v2',JSON.stringify({worldIdx,numBalls,voiceOn,sfxOn,mine,mineStats,voicePick,names,mode,league}))}catch(e){}}
+// added later: my own courses, my marble's look, badge progress (cheers, worlds raced, experiments done…)
+const freshStats=()=>({cheers:0,worlds:[],builds:0,customRaces:0,labs:{},leagues:0,replays:0});
+let customs=[],skin={pat:'plain',trail:'none'},stats=freshStats(),badges=[];
+function save(){try{localStorage.setItem('marbleRush.v2',JSON.stringify({worldIdx,numBalls,voiceOn,sfxOn,mine,mineStats,voicePick,names,mode,league,customs,skin,stats,badges}))}catch(e){}}
 (function load(){try{const d=JSON.parse(localStorage.getItem('marbleRush.v2')||'null')||JSON.parse(localStorage.getItem('marble3dsettings')||'{}');
- worldIdx=clamp(Number(d.worldIdx??d.mapIndex)||0,0,WORLDS.length-1);numBalls=clamp(Number(d.numBalls)||8,2,16);voiceOn=d.voiceOn!==false;sfxOn=d.sfxOn!==false;mine=clamp(Number(d.mine)||0,0,numBalls-1);
+ const nn=(v,max=1e6)=>Math.max(0,Math.min(max,Math.floor(Number(v)||0)));
+ if(Array.isArray(d.customs))customs=d.customs.filter(c=>c&&Array.isArray(c.mods)).slice(0,6).map(c=>({name:String(c.name||'').replace(/[<>]/g,'').slice(0,12)||L('나의 코스','My course'),theme:clamp(nn(c.theme),0,WORLDS.length-1),mods:c.mods.filter(m=>PIECE_IDS.includes(m)).slice(0,8)})).filter(c=>c.mods.length);
+ if(d.skin&&typeof d.skin==='object')skin={pat:String(d.skin.pat||'plain'),trail:String(d.skin.trail||'none')};
+ if(d.stats&&typeof d.stats==='object'){const x=d.stats;stats={cheers:nn(x.cheers),worlds:Array.isArray(x.worlds)?x.worlds.filter(w=>WORLDS.some(W=>W.id===w)):[],builds:nn(x.builds),customRaces:nn(x.customRaces),labs:{},leagues:nn(x.leagues),replays:nn(x.replays)};if(x.labs&&typeof x.labs==='object')for(const k in x.labs)if(EXP_IDS.includes(k))stats.labs[k]={n:nn(x.labs[k]?.n),right:nn(x.labs[k]?.right)}}
+ if(Array.isArray(d.badges))badges=d.badges.filter(b=>typeof b==='string');
+ worldIdx=clamp(Number(d.worldIdx??d.mapIndex)||0,0,WORLDS.length+customs.length-1);numBalls=clamp(Number(d.numBalls)||8,2,16);voiceOn=d.voiceOn!==false;sfxOn=d.sfxOn!==false;mine=clamp(Number(d.mine)||0,0,numBalls-1);
  mineStats={races:Math.max(0,Number(d.mineStats?.races)||0),wins:Math.max(0,Number(d.mineStats?.wins)||0)};voicePick=d.voicePick&&typeof d.voicePick==='object'?d.voicePick:{};
  if(Array.isArray(d.names))names=Array.from({length:16},(_,i)=>String(d.names[i]||'').replace(/[<>]/g,'').slice(0,10));mode=d.mode==='league'?'league':'single';
  if(d.league&&Array.isArray(d.league.worlds)&&d.league.n===numBalls)league=d.league}catch(e){}})();
@@ -609,6 +858,11 @@ const T=L({
  leagueNext:'Race {k} is done! {N} leads the league!',champ:'{N} is the league champion! Amazing!'
 });
 if(ME){T.winMine=L(` ${ME.name}의 구슬이에요!`,` That is ${ME.name}'s marble!`);T.mineUp=L(`${ME.name}의 {n}이 {r}위까지 올라왔어요!`,T.mineUp)}
+// commentary for the new pieces, plus a few true science facts mixed into the chatter
+Object.assign(T.sec,L({ice:'얼음 미끄럼틀! 마찰이 작아서 쌩쌩 미끄러져요!',honey:'꿀 언덕이에요! 끈적끈적, 마찰이 커서 느려져요!',jump:'점프 절벽! 빠른 구슬은 하늘을 날아요!',tramp:'트램펄린 구간! 통통 높이 튀어 올라요!',fan:'바람 터널! 바람이 받쳐 줘서 둥실둥실 내려와요!'},
+ {ice:'The ice slide! Hardly any friction, so they zoom!',honey:'Honey hill! Sticky and slow: lots of friction!',jump:'The cliff jump! Fast marbles fly through the air!',tramp:'Trampolines! Boing, way up high!',fan:'The wind tunnel! The air holds them up, so they float down!'}));
+T.general.push(...L(['구슬은 내려갈수록 빨라져요. 중력이 계속 끌어당기거든요!','범퍼에 부딪히면 방향이 확 바뀌어요. 힘을 받으면 움직임이 바뀌어요!','경사가 가파를수록 구슬이 더 빨라져요!'],['Marbles speed up on the way down. Gravity keeps pulling!','Hit a bumper and the direction changes. A push changes how things move!','The steeper the slope, the faster the marble!']));
+const LOSE_LINES=[['끝까지 응원한 마음이 멋져요! 구슬도 힘이 났을 거예요 🌙','Cheering to the very end was great! Your marble felt it 🌙'],['레이스는 매번 결과가 달라요. 그래서 더 재밌어요! 🌙','Every race turns out different. That is what makes it fun! 🌙'],['다음 레이스도 같이 응원해요! 🌙','Let’s cheer together in the next race too! 🌙']];
 const fill=(s,i,extra={})=>s.replace('{n}',sayName(i)).replace('{N}',sayName(i,true)).replace('{r}',String(extra.r??'')).replace('{k}',String(extra.k??''));
 
 // ---------------------------------------------------------------- race state
@@ -616,21 +870,25 @@ const panelEl=$('scenePanel'),C=$('scene'),ctx=C.getContext('2d'),MM=$('minimap'
 let vw=1,vh=1,dpr=1,course=null,st=null,theme=WORLDS[0],phase='ready',paused=false,raceRate=1,timeScale=1,slowTarget=1,clock=0;
 let shownCount=-1,countdownT=0,cheersLeft=CHEERS,leaderId=-1,leadChanges=0,lastLeadTalk=-99,secIdx=-1,winnerT=null,photo=false,sparks=[],rings=[],mineBestRank=99,mineTalk=-99,lastHud=0,flashUntil=0,slowShown=false,raceWorld=0;
 const cam={x:360,y:120,z:1,mode:0};
-function raceWorldIdx(){return mode==='league'&&league?league.worlds[league.race-1]:worldIdx}
+function raceWorldIdx(){return clamp(mode==='league'&&league?league.worlds[league.race-1]:worldIdx,0,WORLDS.length+customs.length-1)}
 function prepare(){
  if('speechSynthesis' in window)speechSynthesis.cancel();
- raceWorld=raceWorldIdx();theme=WORLDS[raceWorld];mine=clamp(mine,0,numBalls-1);
- const mods=theme.mods||shuffle(CHAOS_POOL.slice()).slice(0,6);
- course=Sim.build(mods);
- if(theme.id==='chaos'){const hues=['#ff6b6b','#ffd93d','#6bcb77','#4d96ff','#c77dff','#ff9f1c'];course.shapes.forEach((s,i)=>{if(s.style!=='frame'&&s.style!=='glass'&&s.style!=='gate')s.tint=hues[i%hues.length]})}
- st=Sim.createState(course,numBalls,shuffle([...Array(numBalls).keys()]));
- for(let i=0;i<40;i++)Sim.step(st,1/60);
+ rec=[];recEnd=Infinity;replay=null;trail.length=0;mine=clamp(mine,0,numBalls-1);
+ if(labMode&&labExp)setupLab();
+ else{raceWorld=raceWorldIdx();theme=worldAt(raceWorld);
+  const mods=theme.mods||shuffle(CHAOS_POOL.slice()).slice(0,6);
+  course=Sim.build(mods);
+  if(theme.id==='chaos'){const hues=['#ff6b6b','#ffd93d','#6bcb77','#4d96ff','#c77dff','#ff9f1c'];course.shapes.forEach((s,i)=>{if(!['frame','glass','gate','tramp','net'].includes(s.style))s.tint=hues[i%hues.length]})}
+  st=Sim.createState(course,numBalls,shuffle([...Array(numBalls).keys()]));
+  for(let i=0;i<40;i++)Sim.step(st,1/60)}
  phase='ready';paused=false;timeScale=1;slowTarget=1;cheersLeft=CHEERS;leaderId=-1;leadChanges=0;secIdx=-1;winnerT=null;photo=false;sparks=[];rings=[];mineBestRank=99;slowShown=false;
- $('resultOverlay').classList.add('hidden');$('confettiLayer').innerHTML='';$('slowmo').classList.add('hidden');
- $('startBanner').innerHTML=`<h2>${esc(L('준비됐나요?','READY?'))}</h2><p>${esc(L('출발 버튼을 누르면 문이 열려요!','Press Start to open the gate!'))}</p>`;$('startBanner').classList.remove('hidden');
+ $('resultOverlay').classList.add('hidden');$('confettiLayer').innerHTML='';$('slowmo').classList.add('hidden');$('slowmo').textContent=L('🎬 슬로모션','🎬 SLOW MOTION');$('replaySkip').classList.add('hidden');$('peekBack').classList.add('hidden');
+ $('startBanner').innerHTML=labMode?`<h2>🔬</h2><p>${esc(L('예상을 고르면 실험이 시작돼요!','Pick your guess to start the experiment!'))}</p>`:`<h2>${esc(L('준비됐나요?','READY?'))}</h2><p>${esc(L('출발 버튼을 누르면 문이 열려요!','Press Start to open the gate!'))}</p>`;$('startBanner').classList.remove('hidden');
+ $('scenePanel').classList.toggle('lab-scene',labMode);document.querySelector('.layout').classList.toggle('lab-on',labMode);if(labMode)$('labList').innerHTML=labListHTML();
  buildMinimap();updateCamera(0,true);renderMaps();renderMinePicker();renderNames();updateLeagueUI();setControls();updateHud(true);
 }
 function startRace(){
+ if(labMode){if(phase!=='ready')prepare();if(!labPred){labPredictCard();return}$('resultOverlay').classList.add('hidden');phase='countdown';countdownT=0;shownCount=-1;setControls();speak(L('실험 준비! 두 구슬을 잘 지켜봐요.','Get ready! Watch both lanes closely.'),true);tone(400,140);scrollToScene();return}
  if(phase==='countdown'||phase==='running'){prepare()}
  if(mode==='league'&&(!league||league.done)){startLeague();prepare()}
  else if(phase!=='ready')prepare();
@@ -643,7 +901,7 @@ function beginRunning(){
  st.raceT0=st.t;
 }
 function cheer(){
- const m=st&&st.marbles[mine];if(phase!=='running'||paused||cheersLeft<=0||!m||m.done)return;cheersLeft--;
+ const m=st&&st.marbles[mine];if(labMode||phase!=='running'||paused||cheersLeft<=0||!m||m.done)return;cheersLeft--;stats.cheers++;
  const sp=Math.hypot(m.vx,m.vy);if(sp>60){m.vx+=m.vx/sp*230;m.vy+=m.vy/sp*230}else{m.vx+=rand(-90,90);m.vy-=200}
  for(let i=0;i<22;i++)sparks.push({x:m.x,y:m.y,vx:rand(-160,160),vy:rand(-220,60),life:rand(.4,.9),c:PALETTE[mine][1]});
  rings.push({x:m.x,y:m.y,t:clock,c:'#ffe16b'});
@@ -656,6 +914,7 @@ function handleEvents(){
  for(const e of st.events){
   if(e.t==='hit'||e.t==='clack'){if(e.v>420&&sparks.length<160)for(let i=0;i<3;i++)sparks.push({x:e.x,y:e.y,vx:rand(-120,120),vy:rand(-160,20),life:rand(.2,.45),c:'#fff6c8'});if(phase==='running'&&inView(e.x,e.y))tick(e.v)}
   else if(e.t==='bumper'){rings.push({x:e.x,y:e.y,t:clock,c:theme.bumper});if(inView(e.x,e.y)){tone(420,70,'sine',.05);tone(640,90,'sine',.04)}}
+  else if(e.t==='tramp'){rings.push({x:e.x,y:e.y,t:clock,c:theme.bumper});if(inView(e.x,e.y)){tone(300,60,'sine',.05);tone(600,120,'sine',.04)}}
   else if(e.t==='boost'){if(e.id===mine||e.id===leaderId){flash(L('⚡ 터보 부스터!','⚡ Turbo boost!'),theme.accent);tone(760,80,'sawtooth',.03)}}
   else if(e.t==='finish'){onFinish(e.id)}
  }
@@ -663,7 +922,7 @@ function handleEvents(){
 }
 function onFinish(id){
  const t=st.t-st.raceT0;
- if(winnerT===null){winnerT=st.t;jingle();flash(L(`🏆 ${nameOf(id)} 우승!`,`🏆 ${nameOf(id)} wins!`),PALETTE[id][1]);
+ if(winnerT===null){winnerT=st.t;recEnd=st.t+1.2;jingle();flash(L(`🏆 ${nameOf(id)} 우승!`,`🏆 ${nameOf(id)} wins!`),PALETTE[id][1]);
   speak(fill(T.win,id)+(id===mine?T.winMine:''),true);for(let i=0;i<40;i++)sparks.push({x:course.finishX,y:course.finishY,vx:rand(-260,260),vy:rand(-320,40),life:rand(.6,1.2),c:pick(PALETTE)[1]})}
  else if(st.finishers.length===2&&st.t-winnerT<.35){photo=true;flash(L('📸 사진 판정!','📸 Photo finish!'),'#fff');setTimeout(()=>speak(T.photo,true),900)}
  tone(1046+st.finishers.length*40,90,'triangle',.05);
@@ -693,7 +952,10 @@ function updateCamera(dt,instant){
  const {zFit,zMax}=zRange();let tx,ty,tz;
  const chuteView=()=>{const c=course.chute;tx=(c.tl+c.end)/2;ty=c.yf+30;tz=Math.min(zMax,vw/(c.end-c.tl+150),vh/260)};
  if(!st){return}
- if(phase==='ready'||phase==='countdown'){tx=300;ty=course.slots[0][1]-10;tz=Math.min(zMax,vw/560,vh/320)}
+ if(course.lab){tz=Math.min(zMax,vw/770,vh/(course.H+60));tx=360;ty=course.H/2-6+Math.max(0,vh/tz-course.H-90)/2}  // the bench sits at the top; cards and captions use the space below
+ else if(phase==='replay'){const top=st.finishers.slice(0,3);let x0=1e9,x1=-1e9,y0=1e9,y1=-1e9;for(const m of top.length?top:st.marbles){x0=Math.min(x0,m.x);x1=Math.max(x1,m.x);y0=Math.min(y0,m.y);y1=Math.max(y1,m.y)}
+  tz=clamp(Math.min(vw/Math.max(300,x1-x0+240),vh/Math.max(240,y1-y0+260)),Math.min(zFit,.62),zMax);tx=(x0+x1)/2;ty=(y0+y1)/2+40/tz}
+ else if(phase==='ready'||phase==='countdown'){tx=300;ty=course.slots[0][1]-10;tz=Math.min(zMax,vw/560,vh/320)}
  else{
   const rank=Sim.ranking(st),open=rank.filter(m=>!m.done),me=st.marbles[mine];
   if(slowTarget<1){tx=course.finishX+40;ty=course.finishY-50;tz=Math.min(zMax,vw/300,vh/300)}
@@ -729,6 +991,13 @@ function drawBackground(){
   else{ctx.fillStyle='#120a2c';for(let i=0;i<12;i++){const w=vw/10,h=vh*(.2+((i*37)%10)/22),x=i*w-((par*.05)%w);ctx.fillRect(x,vh-h,w-6,h);ctx.fillStyle='#ffd86b44';for(let r=0;r<h/18-1;r++)for(let c=0;c<3;c++)if((i+r+c)%3)ctx.fillRect(x+6+c*(w-18)/3,vh-h+8+r*18,6,8);ctx.fillStyle='#120a2c'}}
  }else if(theme.deco==='jungle'){
   for(const b of BLOBS){const side=b.k%2?vw-20:20,y=wrap(b.y*vh*2-par*.22,vh+260)-130;ctx.save();ctx.translate(side,y);ctx.rotate((b.k%2?-1:1)*(.6+b.s*.4));ctx.fillStyle=b.k%3?'#2f8a4ccc':'#3fa65acc';ctx.beginPath();ctx.ellipse(0,0,90*b.s,30*b.s,0,0,TAU);ctx.fill();ctx.strokeStyle='#1f5e33';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(-80*b.s,0);ctx.lineTo(80*b.s,0);ctx.stroke();ctx.restore()}
+ }else if(theme.deco==='lab'){
+  ctx.strokeStyle='rgba(255,255,255,.07)';ctx.lineWidth=1;const s=40*cam.z,ox=wrap(vw/2-cam.x*cam.z,s),oy=wrap(vh/2-cam.y*cam.z,s);
+  for(let x=ox;x<vw;x+=s){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,vh);ctx.stroke()}for(let y=oy;y<vh;y+=s){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(vw,y);ctx.stroke()}
+ }else if(theme.deco==='park'){
+  const cx=vw*.8,cy=vh*.62-wrap(par*.03,vh*.4),rad=Math.min(vw,vh)*.3;ctx.strokeStyle='rgba(255,255,255,.45)';ctx.lineWidth=3;ctx.beginPath();ctx.arc(cx,cy,rad,0,TAU);ctx.stroke();
+  for(let k=0;k<10;k++){const a=clock*.15+k*TAU/10,ex=cx+Math.cos(a)*rad,ey=cy+Math.sin(a)*rad;ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(ex,ey);ctx.stroke();ctx.fillStyle=['#ff5c8a','#2fbaf5','#ffd23f','#7ed957'][k%4]+'99';ctx.beginPath();ctx.arc(ex,ey,8,0,TAU);ctx.fill()}
+  for(const b of BLOBS){const x=wrap(b.x*vw+Math.sin(clock*.6+b.k)*14,vw),y=wrap(b.y*vh*2-clock*22*b.s-par*.15,vh+120)-60;ctx.strokeStyle='rgba(120,60,60,.35)';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(x,y+14*b.s);ctx.lineTo(x+3,y+40*b.s);ctx.stroke();ctx.fillStyle=['#ff5c8a','#2fbaf5','#ffd23f','#7ed957','#b06bff'][b.k%5]+'aa';ctx.beginPath();ctx.ellipse(x,y,11*b.s,14*b.s,0,0,TAU);ctx.fill()}
  }else if(theme.deco==='lava'){
   const lg=ctx.createLinearGradient(0,vh*.7,0,vh);lg.addColorStop(0,'rgba(255,90,30,0)');lg.addColorStop(1,'rgba(255,120,40,.45)');ctx.fillStyle=lg;ctx.fillRect(0,vh*.7,vw,vh*.3);
   for(const s of STARS.slice(0,50)){const x=s.x*vw+Math.sin(clock*s.d*3+s.y*9)*10,y=wrap(s.y*vh-clock*30*s.d-par*.1,vh);ctx.fillStyle=`rgba(255,${150+s.d*80|0},60,${.35+s.d*.5})`;ctx.beginPath();ctx.arc(x,y,s.r+.6,0,TAU);ctx.fill()}
@@ -743,15 +1012,21 @@ function drawWorld(){
  // mounting boards
  for(const d of course.decor)if(d.t==='panel'&&visible([d.x0,d.y0,d.x1,d.y1],v)){ctx.fillStyle=theme.panel;ctx.strokeStyle=theme.panelEdge;ctx.lineWidth=2;rr(d.x0-6,d.y0,d.x1-d.x0+12,d.y1-d.y0,14);ctx.fill();ctx.stroke();ctx.fillStyle=theme.panelEdge;for(const [px,py] of [[d.x0+6,d.y0+10],[d.x1-6,d.y0+10],[d.x0+6,d.y1-10],[d.x1-6,d.y1-10]]){ctx.beginPath();ctx.arc(px,py,3,0,TAU);ctx.fill()}}
  // support poles (PVC frame)
- for(const x of [Sim.LW,Sim.RW]){const y0=Math.max(v[1]-20,-200),y1=Math.min(v[3]+20,course.H);ctx.fillStyle='rgba(0,0,0,.2)';ctx.fillRect(x-6,y0,16,y1-y0);const pg=ctx.createLinearGradient(x-8,0,x+8,0);pg.addColorStop(0,'#c9d2e0');pg.addColorStop(.45,'#ffffff');pg.addColorStop(1,'#9aa6ba');ctx.fillStyle=pg;ctx.fillRect(x-8,y0,16,y1-y0);
+ for(const x of course.poles||[Sim.LW,Sim.RW]){const y0=Math.max(v[1]-20,-200),y1=Math.min(v[3]+20,course.H);ctx.fillStyle='rgba(0,0,0,.2)';ctx.fillRect(x-6,y0,16,y1-y0);const pg=ctx.createLinearGradient(x-8,0,x+8,0);pg.addColorStop(0,'#c9d2e0');pg.addColorStop(.45,'#ffffff');pg.addColorStop(1,'#9aa6ba');ctx.fillStyle=pg;ctx.fillRect(x-8,y0,16,y1-y0);
   for(let y=Math.ceil(y0/260)*260;y<y1;y+=260){ctx.fillStyle='#8592a8';rr(x-11,y-7,22,14,4);ctx.fill()}}
  // section labels, signs, bowls, finish decorations (behind the rails)
  ctx.textBaseline='middle';
- for(const s of course.sections){if(s.type==='start'||s.y0<v[1]-60||s.y0>v[3]+20)continue;const [em,lab]=SECTION[s.type];ctx.font='800 15px system-ui';const t=`${em} ${lab}`,w=ctx.measureText(t).width+20;ctx.fillStyle='rgba(0,0,0,.28)';rr(46,s.y0+4,w,26,13);ctx.fill();ctx.fillStyle='#ffffff';ctx.fillText(t,56,s.y0+17)}
+ for(const s of course.sections){if(s.type==='start'||s.type==='lab'||s.y0<v[1]-60||s.y0>v[3]+20)continue;const [em,lab]=SECTION[s.type];ctx.font='800 15px system-ui';const t=`${em} ${lab}`,w=ctx.measureText(t).width+20;ctx.fillStyle='rgba(0,0,0,.28)';rr(46,s.y0+4,w,26,13);ctx.fill();ctx.fillStyle='#ffffff';ctx.fillText(t,56,s.y0+17)}
  for(const d of course.decor){
   if(d.t==='bowl'){if(d.cy+d.Rb<v[1]-40||d.cy>v[3]+40)continue;ctx.save();ctx.beginPath();for(let a=-d.A;a<=d.A+1e-6;a+=.05)ctx.lineTo(d.cx+d.Rb*Math.sin(a),d.cy+d.Rb*Math.cos(a));ctx.closePath();const bg=ctx.createLinearGradient(0,d.cy+d.Rb*Math.cos(d.A),0,d.cy+d.Rb);bg.addColorStop(0,'rgba(255,255,255,.12)');bg.addColorStop(1,mix(theme.bowl,'#ffffff',.25)+'66');ctx.fillStyle=bg;ctx.fill();ctx.restore();
    const rx=d.cx+d.Rb*Math.sin(d.A)+26,ry=d.cy+d.Rb*Math.cos(d.A)-30;ctx.fillStyle=theme.bowl;rr(rx-15,ry-15,30,30,7);ctx.fill();ctx.strokeStyle='#fff';ctx.lineWidth=2.5;ctx.stroke();ctx.fillStyle='#fff';ctx.font='900 19px system-ui';ctx.textAlign='center';ctx.fillText(d.n,rx,ry+1);ctx.textAlign='left'}
-  else if(d.t==='sign'&&d.y>v[1]-80&&d.y<v[3]+40){ctx.fillStyle='#ffffff';rr(d.x-80,d.y-26,160,46,10);ctx.fill();ctx.strokeStyle='#2c55d6';ctx.lineWidth=4;ctx.stroke();ctx.fillStyle='#2c55d6';ctx.font='1000 30px system-ui';ctx.textAlign='center';ctx.fillText(d.text==='START'?L('출발','START'):d.text,d.x,d.y-1);ctx.textAlign='left'}
+  else if(d.t==='sign'&&d.y>v[1]-80&&d.y<v[3]+40){ctx.fillStyle='#ffffff';rr(d.x-80,d.y-26,160,46,10);ctx.fill();ctx.strokeStyle='#2c55d6';ctx.lineWidth=4;ctx.stroke();ctx.fillStyle='#2c55d6';ctx.font='1000 30px system-ui';ctx.textAlign='center';ctx.fillText(d.text==='START'?L('출발','START'):d.text==='JUMP'?L('점프!','JUMP!'):d.text,d.x,d.y-1);ctx.textAlign='left'}
+  else if(d.t==='jumpgap'&&d.y>v[1]-140&&d.y<v[3]+140){ctx.setLineDash([4,7]);ctx.strokeStyle=theme.accent;ctx.lineWidth=2.5;ctx.beginPath();ctx.moveTo(d.x0+6,d.y-16);ctx.quadraticCurveTo((d.x0+d.x1)/2,d.y-80,d.x1+34,d.y+50);ctx.stroke();ctx.setLineDash([]);ctx.font='22px system-ui';ctx.textAlign='center';ctx.fillText('🚀',(d.x0+d.x1)/2,d.y-66);ctx.font='800 12px system-ui';ctx.fillStyle=theme.label;ctx.fillText(L('안전 그물','safety net'),(d.x0+d.x1)/2,d.y+130);ctx.textAlign='left'}
+  else if(d.t==='fan'&&d.y1>v[1]-40&&d.y0<v[3]+40){
+   ctx.strokeStyle='rgba(255,255,255,.6)';ctx.lineWidth=2;const H=d.y1-d.y0-50;for(let k=0;k<7;k++){const xx=d.x0+24+k*(d.x1-d.x0-48)/6,yy=d.y1-34-((clock*170+k*67)%H);ctx.globalAlpha=.3+.3*Math.sin(k+clock*2);ctx.beginPath();ctx.moveTo(xx,yy);ctx.lineTo(xx+Math.sin(yy*.05)*4,yy-26);ctx.stroke()}ctx.globalAlpha=1;
+   for(const fx of [d.x0+30,d.x1-30]){ctx.save();ctx.translate(fx,d.y1-22);ctx.fillStyle='rgba(0,0,0,.28)';ctx.beginPath();ctx.arc(0,0,21,0,TAU);ctx.fill();ctx.rotate(clock*14);ctx.fillStyle=theme.accent;for(let k=0;k<4;k++){ctx.rotate(TAU/4);ctx.beginPath();ctx.ellipse(10,0,10,4.5,0,0,TAU);ctx.fill()}ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(0,0,4,0,TAU);ctx.fill();ctx.restore()}}
+  else if(d.t==='sidefan'){const my=(d.y0+d.y1)/2;ctx.font='36px system-ui';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('🌬️',d.x+4,my);ctx.textBaseline='alphabetic';ctx.textAlign='left';
+   ctx.strokeStyle='rgba(255,255,255,.5)';ctx.lineWidth=2;for(let k=0;k<6;k++){const yy=d.y0+20+k*(d.y1-d.y0-40)/5,xx=d.x+30+((clock*260+k*53)%270);ctx.globalAlpha=.25+.3*Math.sin(k*2+clock*3);ctx.beginPath();ctx.moveTo(xx,yy);ctx.lineTo(xx+24,yy+Math.sin(xx*.05)*2);ctx.stroke()}ctx.globalAlpha=1}
   else if(d.t==='finish'&&d.y>v[1]-200&&d.y<v[3]+120){const ch=course.chute;
    for(let i=0;i<8;i++){ctx.fillStyle=i%2?'#111':'#fff';ctx.fillRect(98+i*5.5,d.y-3,5.5,3);ctx.fillStyle=i%2?'#fff':'#111';ctx.fillRect(98+i*5.5,d.y,5.5,3)}
    ctx.fillStyle='#e6e9f0';ctx.fillRect(78,d.y-120,8,120);ctx.fillRect(154,d.y-120,8,120);for(let i=0;i<16;i++){ctx.fillStyle=(i+(i>7?1:0))%2?'#111':'#fff';ctx.fillRect(70+(i%8)*12.5,d.y-142+(i>7?11:0),12.5,11)}
@@ -761,7 +1036,7 @@ function drawWorld(){
  // rails
  const t=clock;
  for(const s of course.shapes){if(s.style==='frame'||s.style==='gate'||!visible(s.box,v))continue;drawShape(s,t)}
- drawGate();
+ drawGate();if(course.lab)drawLab();
  // pegs, bumpers, spinners
  for(const p of course.pegs){if(p.x<v[0]-30||p.x>v[2]+30||p.y<v[1]-30||p.y>v[3]+30)continue;
   if(p.kind==='bumper'){const f=Math.max(0,1-(st.t-p.flash)/.3);ctx.fillStyle='rgba(0,0,0,.25)';ctx.beginPath();ctx.arc(p.x+3,p.y+5,p.r,0,TAU);ctx.fill();ctx.fillStyle=f>0?mix(theme.bumper,'#ffffff',f*.6):theme.bumper;ctx.beginPath();ctx.arc(p.x,p.y,p.r+f*3,0,TAU);ctx.fill();ctx.fillStyle='#ffffffcc';ctx.beginPath();ctx.arc(p.x,p.y,p.r*.55,0,TAU);ctx.fill();ctx.fillStyle=theme.bumper;ctx.font='900 14px system-ui';ctx.textAlign='center';ctx.fillText('★',p.x,p.y+1);ctx.textAlign='left'}
@@ -771,18 +1046,25 @@ function drawWorld(){
   for(const [ex,ey] of arms){ctx.strokeStyle=mix(theme.accent,'#000000',.35);ctx.lineWidth=11;ctx.beginPath();ctx.moveTo(sp.x,sp.y);ctx.lineTo(ex,ey);ctx.stroke();ctx.strokeStyle=theme.accent;ctx.lineWidth=7;ctx.stroke()}
   ctx.fillStyle='#ffffff';ctx.beginPath();ctx.arc(sp.x,sp.y,11,0,TAU);ctx.fill();ctx.fillStyle=theme.accent;ctx.beginPath();ctx.arc(sp.x,sp.y,5,0,TAU);ctx.fill()}
  // marbles: mine last so it is never hidden
+ trailDraw(ctx,trail,skin.trail,clock);
  const order=st.marbles.slice().sort((a,b)=>(a.id===mine)-(b.id===mine));
  for(const m of order)if(m.x>v[0]-20&&m.x<v[2]+20&&m.y>v[1]-20&&m.y<v[3]+20)drawMarble(m);
  // effects
  for(let i=sparks.length-1;i>=0;i--){const s=sparks[i];ctx.globalAlpha=Math.max(0,Math.min(1,s.life*2));ctx.fillStyle=s.c;ctx.beginPath();ctx.arc(s.x,s.y,2.2,0,TAU);ctx.fill()}ctx.globalAlpha=1;
  for(const r of rings){const a=(clock-r.t)/.45;if(a>1)continue;ctx.strokeStyle=r.c;ctx.globalAlpha=1-a;ctx.lineWidth=3;ctx.beginPath();ctx.arc(r.x,r.y,18+a*30,0,TAU);ctx.stroke()}ctx.globalAlpha=1;
- drawMarkers();
+ if(!course.lab)drawMarkers();
  ctx.setTransform(dpr,0,0,dpr,0,0);
 }
-function railColors(s){return s.tint?{body:s.tint,dark:mix(s.tint,'#000000',.45),lite:mix(s.tint,'#ffffff',.6)}:{body:theme.rail,dark:theme.railDark,lite:theme.railLight}}
+function railColors(s){return s.style==='ice'?{body:'#c9f1ff',dark:'#4fa8cc',lite:'#ffffff'}:s.style==='honey'?{body:'#ffbf3c',dark:'#a8650a',lite:'#ffe7a3'}:s.tint?{body:s.tint,dark:mix(s.tint,'#000000',.45),lite:mix(s.tint,'#ffffff',.6)}:{body:theme.rail,dark:theme.railDark,lite:theme.railLight}}
 function drawShape(s,t){
  ctx.lineCap='round';ctx.lineJoin='round';const c=railColors(s);
  if(s.style==='glass'){pathOf(s.pts);ctx.strokeStyle='rgba(190,225,255,.35)';ctx.lineWidth=10;ctx.stroke();ctx.strokeStyle='rgba(255,255,255,.7)';ctx.lineWidth=2;ctx.stroke();return}
+ if(s.style==='net'){pathOf(s.pts);ctx.strokeStyle='rgba(255,255,255,.22)';ctx.lineWidth=12;ctx.stroke();ctx.setLineDash([3,6]);ctx.strokeStyle=theme.accent;ctx.lineWidth=3;ctx.stroke();ctx.setLineDash([]);return}
+ if(s.style==='tray'||s.style==='sand'||s.style==='carpet'){const col={tray:['#8a96ab','#d6deea'],sand:['#b8873d','#f3d9a0'],carpet:['#7d2440','#e0607e']}[s.style];pathOf(s.pts);ctx.strokeStyle=col[0];ctx.lineWidth=12;ctx.stroke();ctx.strokeStyle=col[1];ctx.lineWidth=7;ctx.stroke();
+  if(s.style!=='tray'){ctx.setLineDash(s.style==='sand'?[2,5]:[6,4]);ctx.strokeStyle=col[0];ctx.lineWidth=3;ctx.stroke();ctx.setLineDash([])}return}
+ if(s.style==='tramp'){const [ax,ay]=s.pts[0],[bx,by]=s.pts[1],sq=Math.max(0,1-(st.t-s.flash)/.25)*4;
+  ctx.strokeStyle='#9aa6ba';ctx.lineWidth=2;for(const f of [.2,.5,.8]){const px=ax+(bx-ax)*f,py=ay+(by-ay)*f;ctx.beginPath();for(let k=0;k<=6;k++)ctx.lineTo(px+(k%2?5:-5),py+5+k*3+sq*.5);ctx.stroke()}
+  ctx.save();ctx.translate(0,sq);ctx.beginPath();ctx.moveTo(ax,ay);ctx.lineTo(bx,by);ctx.strokeStyle=mix(theme.bumper,'#000000',.35);ctx.lineWidth=11;ctx.stroke();ctx.strokeStyle=theme.bumper;ctx.lineWidth=7;ctx.stroke();ctx.translate(0,-2);ctx.strokeStyle='#ffffffaa';ctx.lineWidth=2;ctx.stroke();ctx.restore();return}
  const w=s.style==='bowl'?14:11;
  ctx.save();ctx.translate(3,5);pathOf(s.pts);ctx.strokeStyle='rgba(0,0,0,.24)';ctx.lineWidth=w+2;ctx.stroke();ctx.restore();
  if(theme.glow){pathOf(s.pts);ctx.strokeStyle=theme.glow+'33';ctx.lineWidth=w+12;ctx.stroke()}
@@ -791,21 +1073,17 @@ function drawShape(s,t){
  ctx.strokeStyle=c.dark;ctx.lineWidth=w;ctx.stroke();ctx.strokeStyle=s.style==='sling'?theme.bumper:c.body;ctx.lineWidth=w-4;ctx.stroke();
  ctx.save();ctx.translate(0,-2.4);pathOf(s.pts);ctx.strokeStyle=c.lite;ctx.globalAlpha=.85;ctx.lineWidth=2;ctx.stroke();ctx.restore();
  if(theme.glow){pathOf(s.pts);ctx.setLineDash([10,14]);ctx.lineDashOffset=-t*60;ctx.strokeStyle=theme.glow;ctx.lineWidth=2.2;ctx.stroke();ctx.setLineDash([])}
+ if(s.style==='ice'||s.style==='honey'){const [ax,ay]=s.pts[0],[bx,by]=s.pts[s.pts.length-1],len=Math.hypot(bx-ax,by-ay);for(let u=14;u<len;u+=34){const px=ax+(bx-ax)*u/len,py=ay+(by-ay)*u/len;
+  if(s.style==='ice'){ctx.globalAlpha=.5+.5*Math.sin(t*4+u);ctx.fillStyle='#fff';ctx.fillRect(px-1.2,py-4,2.4,2.4);ctx.globalAlpha=1}else{ctx.fillStyle='#e8921a';ctx.beginPath();ctx.ellipse(px,py+6+(u*7)%5,2.6,3.6+(u*3)%3,0,0,TAU);ctx.fill()}}}
  if(s.style==='boost'){const [ax,ay]=s.pts[0],[bx,by]=s.pts[s.pts.length-1],len=Math.hypot(bx-ax,by-ay),ux=(bx-ax)/len,uy=(by-ay)/len;ctx.strokeStyle=theme.accent;ctx.lineWidth=3;
   for(let u=(t*140)%26;u<len;u+=26){const px=ax+ux*u,py=ay+uy*u-10;ctx.beginPath();ctx.moveTo(px-ux*6-uy*5,py-uy*6+ux*5);ctx.lineTo(px,py);ctx.lineTo(px-ux*6+uy*5,py-uy*6-ux*5);ctx.stroke()}}
  if(s.style==='shelf'){const [ex,ey]=s.pts[s.pts.length-1],[px,py]=s.pts[s.pts.length-2],l=Math.hypot(ex-px,ey-py),ux=(ex-px)/l,uy=(ey-py)/l;ctx.lineWidth=w-3;ctx.lineCap='butt';ctx.strokeStyle='#1b1b1b';ctx.beginPath();ctx.moveTo(ex-ux*26,ey-uy*26);ctx.lineTo(ex,ey);ctx.stroke();ctx.setLineDash([5,5]);ctx.strokeStyle='#ffd21f';ctx.stroke();ctx.setLineDash([]);ctx.lineCap='round'}
 }
-function drawGate(){const g=course.gate,[ax,ay]=g.pts[0],[,by]=g.pts[1];let lift=0;if(!g.on){lift=Math.min(1,(st.t-(st.gateT||st.t))/.5);if(lift>=1)return}
- const y0=ay-lift*70,y1=by-lift*70;ctx.lineCap='butt';ctx.strokeStyle='#1b1b1b';ctx.lineWidth=11;ctx.beginPath();ctx.moveTo(ax,y0);ctx.lineTo(ax,y1);ctx.stroke();ctx.setLineDash([7,7]);ctx.strokeStyle='#ffd21f';ctx.stroke();ctx.setLineDash([])}
-function drawMarble(m){
- const c=PALETTE[m.id][1],sh=SHADE[m.id];
- ctx.fillStyle='rgba(0,0,0,.25)';ctx.beginPath();ctx.ellipse(m.x+3,m.y+5,R,R*.9,0,0,TAU);ctx.fill();
- const g=ctx.createRadialGradient(m.x-R*.38,m.y-R*.42,R*.1,m.x,m.y,R*1.05);g.addColorStop(0,'#ffffff');g.addColorStop(.28,sh.lite);g.addColorStop(.72,c);g.addColorStop(1,sh.dark);
- ctx.fillStyle=g;ctx.beginPath();ctx.arc(m.x,m.y,R,0,TAU);ctx.fill();
- ctx.save();ctx.beginPath();ctx.arc(m.x,m.y,R*.93,0,TAU);ctx.clip();ctx.translate(m.x,m.y);ctx.rotate(m.ang);ctx.fillStyle='rgba(255,255,255,.32)';ctx.beginPath();ctx.ellipse(0,0,R,R*.3,0,0,TAU);ctx.fill();ctx.restore();
- ctx.fillStyle='rgba(255,255,255,.9)';ctx.beginPath();ctx.ellipse(m.x-R*.36,m.y-R*.42,R*.28,R*.17,-.6,0,TAU);ctx.fill();
- if(R*cam.z>=9){ctx.fillStyle='#fff';ctx.font=`900 ${R*1.05}px system-ui`;ctx.textAlign='center';ctx.lineWidth=2.4;ctx.strokeStyle='rgba(0,0,0,.55)';ctx.strokeText(m.id+1,m.x,m.y+.6);ctx.fillText(m.id+1,m.x,m.y+.6);ctx.textAlign='left'}
-}
+function drawGate(){for(const g of course.gates&&course.gates.length?course.gates:[course.gate]){const [ax,ay]=g.pts[0],[bx,by]=g.pts[1],p=g.on?0:Math.min(1,(st.t-(st.gateT||st.t))/(ay===by?.3:.5));if(p>=1)continue;
+ ctx.lineCap='butt';ctx.strokeStyle='#1b1b1b';ctx.lineWidth=11;ctx.beginPath();
+ if(ay===by){const h=(bx-ax)/2,a=p*Math.PI/2;ctx.moveTo(ax,ay);ctx.lineTo(ax+Math.cos(a)*h,ay+Math.sin(a)*h);ctx.moveTo(bx,by);ctx.lineTo(bx-Math.cos(a)*h,by+Math.sin(a)*h)}  // a trapdoor: two flaps swing down
+ else{ctx.moveTo(ax,ay-p*70);ctx.lineTo(ax,by-p*70)}
+ ctx.stroke();ctx.setLineDash([7,7]);ctx.strokeStyle='#ffd21f';ctx.stroke();ctx.setLineDash([])}}
 function drawMarkers(){
  const s=1/cam.z,me=st.marbles[mine];ctx.textAlign='center';
  const lead=Sim.ranking(st)[0];
@@ -826,7 +1104,7 @@ function buildMinimap(){
  mmImg.sx=sx;mmImg.sy=sy;
 }
 function drawMinimap(){
- if(!mmImg)return;const w=MM.width/dpr,h=MM.height/dpr,sx=mmImg.sx,sy=mmImg.sy;mctx.setTransform(1,0,0,1,0,0);mctx.clearRect(0,0,MM.width,MM.height);mctx.drawImage(mmImg,0,0);mctx.setTransform(dpr,0,0,dpr,0,0);mctx.translate(5,7);
+ if(!mmImg||course.lab)return;const w=MM.width/dpr,h=MM.height/dpr,sx=mmImg.sx,sy=mmImg.sy;mctx.setTransform(1,0,0,1,0,0);mctx.clearRect(0,0,MM.width,MM.height);mctx.drawImage(mmImg,0,0);mctx.setTransform(dpr,0,0,dpr,0,0);mctx.translate(5,7);
  const vy0=(cam.y-vh/2/cam.z)*sy,vy1=(cam.y+vh/2/cam.z)*sy;mctx.strokeStyle='rgba(255,255,255,.75)';mctx.lineWidth=1.2;mctx.strokeRect(-3,vy0,w-4,Math.max(6,vy1-vy0));
  for(const m of st.marbles){if(m.id===mine)continue;mctx.fillStyle=PALETTE[m.id][1];mctx.beginPath();mctx.arc(m.x*sx,m.y*sy,2.6,0,TAU);mctx.fill()}
  const me=st.marbles[mine];if(me){mctx.fillStyle=PALETTE[mine][1];mctx.strokeStyle='#ffe16b';mctx.lineWidth=2;mctx.beginPath();mctx.arc(me.x*sx,me.y*sy,4.2,0,TAU);mctx.fill();mctx.stroke()}
@@ -835,6 +1113,7 @@ function drawMinimap(){
 // ---------------------------------------------------------------- HUD
 function updateHud(force){
  if(!force&&clock-lastHud<.25)return;lastHud=clock;
+ if(course.lab){$('sectionChip').classList.add('hidden');return}
  const rank=Sim.ranking(st),n=rank.length,show=window.innerWidth<=520||window.innerHeight<=520?(window.innerHeight<=420?3:5):8;let rows='';
  const row=(m,i)=>`<div class="rk${m.id===mine?' mine':''}"><span class="no">${i<3&&(phase!=='ready'&&phase!=='countdown')?['🥇','🥈','🥉'][i]:i+1}</span><span class="dot" style="background:${PALETTE[m.id][1]}"></span><span class="nm">${esc(nameOf(m.id))}${m.id===mine?' '+esc(MY):''}</span><span class="st">${m.done?'🏁':''}</span></div>`;
  rank.slice(0,show).forEach((m,i)=>rows+=row(m,i));
@@ -854,12 +1133,12 @@ function updateLeagueUI(){
 }
 function setControls(){
  const running=phase==='running'||phase==='countdown';
- $('startBtn').textContent=mode==='league'&&league&&!league.done&&phase!=='running'?L(`🏁 ${league.race}경기 시작!`,`🏁 Start race ${league.race}!`):running?L('🏁 새 레이스','🏁 New race'):L('🏁 레이스 시작!','🏁 Start race!');
+ $('startBtn').textContent=labMode?(running?L('🔬 실험 다시 시작','🔬 Restart experiment'):phase==='finished'?L('🔁 다시 실험','🔁 Run it again'):L('🔬 예상하고 실험 시작!','🔬 Guess, then run it!')):mode==='league'&&league&&!league.done&&phase!=='running'?L(`🏁 ${league.race}경기 시작!`,`🏁 Start race ${league.race}!`):running?L('🏁 새 레이스','🏁 New race'):L('🏁 레이스 시작!','🏁 Start race!');
  $('pauseBtn').disabled=phase!=='running';$('pauseBtn').textContent=paused?L('▶ 이어하기','▶ Resume'):L('⏸ 일시정지','⏸ Pause');
  for(const [id,on] of [['voiceToggle',voiceOn],['sfxToggle',sfxOn]]){$(id).classList.toggle('on',on);$(id).setAttribute('aria-checked',String(on))}
  $('voiceSelect').disabled=!voiceOn||!langVoices().length;
  $('ballCount').value=numBalls;$('ballRange').value=numBalls;$('ballRange').style.setProperty('--p',((numBalls-2)/14*100).toFixed(1)+'%');
- const cb=$('cheerBtn');cb.classList.toggle('hidden',phase!=='running');cb.disabled=cheersLeft<=0||paused||!!st?.marbles[mine]?.done;cb.textContent=L(`📣 응원! ×${cheersLeft}`,`📣 Cheer! ×${cheersLeft}`);
+ const cb=$('cheerBtn');cb.classList.toggle('hidden',phase!=='running'||labMode);cb.disabled=cheersLeft<=0||paused||!!st?.marbles[mine]?.done;cb.textContent=L(`📣 응원! ×${cheersLeft}`,`📣 Cheer! ×${cheersLeft}`);
  $('cameraBtn').textContent=[L('🎥 자동','🎥 Auto'),`${MY} ${L('내 구슬','Mine')}`,L('🗺️ 전체','🗺️ All')][cam.mode];
  $('cameraBtn').setAttribute('aria-label',L('카메라 바꾸기: ','Change camera: ')+$('cameraBtn').textContent);$('speedBtn').setAttribute('aria-label',L(`경기 속도 ${raceRate}배`,`Race speed ${raceRate}×`));
  $('speedBtn').textContent=`⚡ ${raceRate}×`;
@@ -868,9 +1147,16 @@ function setControls(){
  $('ballCount').disabled=$('ballRange').disabled=!!lock;
  document.querySelectorAll('#maps .map').forEach(b=>b.disabled=running||mode==='league');
  document.querySelectorAll('#modeSeg button').forEach(b=>b.disabled=running);
+ // builder, lab, workshop and badge buttons
+ $('buildBtn').disabled=running;$('labBtn').disabled=running&&!labMode;
+ $('labBtn').innerHTML=labMode?`<span>🏁</span>${L('레이스로','Races')}`:`<span>🔬</span>${L('구슬 실험실','Marble lab')}`;
+ $('badgeBtn').innerHTML=`<span>🏅</span>${L('배지','Badges')} ${badges.length}/${BADGES.length}`;
 }
 function renderMaps(){
- $('maps').innerHTML=WORLDS.map((w,i)=>`<button type="button" class="map${i===raceWorld?' active':''}" data-world="${i}"><img src="images/world-${w.id}.webp" alt="" onerror="this.style.visibility='hidden'"><span><b>${esc(w.name)}</b><small>${esc(w.desc)}</small></span></button>`).join('');
+ const all=[...WORLDS.map((w,i)=>[w,i]),...customs.map((c,k)=>[customTheme(c),WORLDS.length+k])];
+ // a world without a picture yet shows its emoji (the image takes over once images/world-<id>.webp exists)
+ $('maps').innerHTML=all.map(([w,i])=>`<button type="button" class="map${i===raceWorld&&!labMode?' active':''}${w.custom?' custom':''}" data-world="${i}">${w.custom?'<span class="map-em" aria-hidden="true">🛠️</span>':`<img src="images/world-${w.id}.webp" alt="" onerror="${w.em?`this.outerHTML='<span class=&quot;map-em&quot; aria-hidden=&quot;true&quot;>${w.em}</span>'`:"this.style.visibility='hidden'"}">`}<span><b>${esc(w.name)}</b><small>${esc(w.desc)}</small></span></button>`).join('')
+  +`<button type="button" class="map add" data-build="1"><span class="map-em" aria-hidden="true">➕</span><span><b>${L('코스 만들기','Build a course')}</b><small>${L('조각을 쌓아 나만의 코스를!','Stack pieces into your own course!')}</small></span></button>`;
 }
 function renderMinePicker(){if(mine>=numBalls)mine=numBalls-1;$('minePicker').innerHTML=PALETTE.slice(0,numBalls).map((c,i)=>`<button type="button" class="mine-chip${i===mine?' on':''}" data-mine="${i}" title="${esc(nameOf(i))}" style="background:radial-gradient(circle at 32% 28%,#fff 0 9%,${c[1]} 42%,${SHADE[i].dark})" aria-label="${esc(L(`${nameOf(i)} 응원하기`,`Cheer for ${nameOf(i)}`))}" aria-pressed="${i===mine}">${i+1}</button>`).join('')}
 function renderNames(){
@@ -881,18 +1167,19 @@ function renderNames(){
 // ---------------------------------------------------------------- results & league
 function startLeague(){const order=shuffle([...Array(WORLDS.length).keys()]);league={race:1,n:numBalls,worlds:order.slice(0,LEAGUE_RACES),total:Array(numBalls).fill(0),last:[],done:false};save()}
 function showResults(){
- phase='finished';$('slowmo').classList.add('hidden');slowTarget=1;
+ phase='finished';$('slowmo').classList.add('hidden');slowTarget=1;$('resultOverlay').classList.remove('lab-ov');
  const rank=Sim.ranking(st),champ=rank[0],me=st.marbles[mine],myRank=rank.findIndex(m=>m.id===mine)+1,won=champ.id===mine;
  const myKo=ME?esc(ME.name)+'의 구슬':'내 구슬',myEn=ME?esc(ME.name)+"'s marble":'Your marble';
  mineStats.races++;if(won)mineStats.wins++;
+ const wId=theme.custom?null:WORLDS[raceWorld]?.id;if(wId&&!stats.worlds.includes(wId))stats.worlds.push(wId);if(theme.custom)stats.customRaces++;
  const fmt=t=>{const s=Math.max(0,t);return `${Math.floor(s/60)}:${(s%60).toFixed(1).padStart(4,'0')}`};
- let table='',actions='',coachHtml=won?coachLine('race'):'',title,leagueDone=false,hero=champ.id,heroText=L(`${nameOf(champ.id)} 우승!`,`${nameOf(champ.id)} wins!`),heroSub='',mineLine=won?L(`🎉 ${myKo} ${esc(nameOf(mine))}이 우승했어요! 응원 대성공!`,`🎉 ${myEn} ${esc(nameOf(mine))} won! Great cheering!`):L(`${esc(MY)} ${myKo} ${esc(nameOf(mine))}은 ${myRank}위! 다음엔 1등 할 수 있어요!`,`${esc(MY)} ${myEn} ${esc(nameOf(mine))} came ${ord(myRank)}. It could win next time!`);
+ let table='',actions='',coachHtml=won?coachLine('race'):theme.custom?coachHere('clap','내가 만든 코스가 멋지게 굴러갔어요! 고쳐 보고 또 달려 봐요. 그게 엔지니어의 방법이에요 🌙','Your own course rolled beautifully! Tweak it and race again: that is how engineers work 🌙'):Math.random()<.6?coachHere('go',...pick(LOSE_LINES)):'',title,leagueDone=false,hero=champ.id,heroText=L(`${nameOf(champ.id)} 우승!`,`${nameOf(champ.id)} wins!`),heroSub='',mineLine=won?L(`🎉 ${myKo} ${esc(nameOf(mine))}이 우승했어요! 응원 대성공!`,`🎉 ${myEn} ${esc(nameOf(mine))} won! Great cheering!`):L(`${esc(MY)} ${myKo} ${esc(nameOf(mine))}은 ${myRank}위! 다음엔 1등 할 수 있어요!`,`${esc(MY)} ${myEn} ${esc(nameOf(mine))} came ${ord(myRank)}. It could win next time!`);
  if(mode==='league'&&league&&!league.done){
   const pts=Array(numBalls).fill(0);rank.forEach((m,i)=>{pts[m.id]=POINTS[i]||0;league.total[m.id]+=POINTS[i]||0});league.last=pts;
   const k=league.race,order=[...Array(numBalls).keys()].sort((a,b)=>league.total[b]-league.total[a]||pts[b]-pts[a]);
   leagueDone=k>=LEAGUE_RACES;title=leagueDone?L('🏆 리그 최종 결과','🏆 Final league standings'):L(`리그 ${k}/${LEAGUE_RACES}경기 결과`,`League race ${k}/${LEAGUE_RACES}`);
   table=`<table class="standings"><tr><th></th><th style="text-align:left">${L('구슬','Marble')}</th><th>${L('이번','Race')}</th><th>${L('합계','Total')}</th></tr>${order.map((id,i)=>`<tr class="${id===mine?'mine':''}"><td>${i<3?['🥇','🥈','🥉'][i]:i+1}</td><td class="nm"><span class="dot" style="background:${PALETTE[id][1]}"></span>${esc(nameOf(id))}${id===mine?' '+esc(MY):''}</td><td class="pts">${pts[id]?'+'+pts[id]:'-'}</td><td class="tot">${league.total[id]}</td></tr>`).join('')}</table>`;
-  if(leagueDone){league.done=true;const lc=order[0],lr=order.indexOf(mine)+1;hero=lc;heroText=L(`${nameOf(lc)} 리그 챔피언!`,`${nameOf(lc)} is the league champion!`);heroSub=L(`리그 합계 ${league.total[lc]}점`,`${league.total[lc]} league points`);
+  if(leagueDone){league.done=true;stats.leagues++;const lc=order[0],lr=order.indexOf(mine)+1;hero=lc;heroText=L(`${nameOf(lc)} 리그 챔피언!`,`${nameOf(lc)} is the league champion!`);heroSub=L(`리그 합계 ${league.total[lc]}점`,`${league.total[lc]} league points`);
    mineLine=lc===mine?L(`👑 ${myKo} ${esc(nameOf(mine))}이 리그 챔피언이에요!`,`👑 ${myEn} ${esc(nameOf(mine))} is the league champion!`):L(`${esc(MY)} ${myKo} ${esc(nameOf(mine))}은 리그 ${lr}위 (${league.total[mine]}점)!`,`${esc(MY)} ${myEn} ${esc(nameOf(mine))} finished the league ${ord(lr)} (${league.total[mine]} points)!`);if(lc===mine)coachHtml=coachLine('big');setTimeout(()=>speak(fill(T.champ,lc),true),2600);
    actions=`<div class="result-actions one"><button class="primary" type="button" data-act="newLeague">${L('🔁 새 리그 시작','🔁 New league')}</button></div>`}
   else{league.race++;setTimeout(()=>speak(fill(T.leagueNext,order[0],{k}),false),2600);
@@ -900,14 +1187,14 @@ function showResults(){
  }else{
   title=L('오늘의 우승자!',"Today's winner!");
   table=`<table class="standings">${rank.slice(0,3).map((m,i)=>`<tr class="${m.id===mine?'mine':''}"><td>${['🥇','🥈','🥉'][i]}</td><td class="nm"><span class="dot" style="background:${PALETTE[m.id][1]}"></span>${esc(nameOf(m.id))}${m.id===mine?' '+esc(MY):''}</td><td>${m.done?fmt(m.finishTime-st.raceT0):L('추격 중','racing')}</td></tr>`).join('')}</table>`;
-  actions=`<div class="result-actions"><button class="control" type="button" data-act="again">${L('🔁 다시 대결','🔁 Race again')}</button><button class="primary" type="button" data-act="nextWorld">${L('🌍 다음 월드','🌍 Next world')}</button></div>`;
+  actions=theme.custom?`<div class="result-actions"><button class="control" type="button" data-act="again">${L('🔁 다시 대결','🔁 Race again')}</button><button class="primary" type="button" data-act="edit">${L('🛠️ 코스 고치기','🛠️ Improve my course')}</button></div>`:`<div class="result-actions"><button class="control" type="button" data-act="again">${L('🔁 다시 대결','🔁 Race again')}</button><button class="primary" type="button" data-act="nextWorld">${L('🌍 다음 월드','🌍 Next world')}</button></div>`;
  }
  $('resultCard').innerHTML=`<div class="trophy">🏆</div><h2>${title}</h2>${photo?`<span class="photo">📸 ${L('사진 판정','Photo finish')}</span>`:''}<div class="champ" style="background:${PALETTE[hero][1]};--c:${PALETTE[hero][1]}">${hero+1}</div>
   <div class="win-text" style="color:${PALETTE[hero][1]}">${esc(heroText)}</div><p class="win-sub">${heroSub?esc(heroSub)+' · ':''}${esc(theme.name)} · ${fmt((champ.finishTime||st.t)-st.raceT0)} · ${L(`역전 ${leadChanges}회`,`${leadChanges} lead change${leadChanges===1?'':'s'}`)}</p>
-  <p class="mine-result">${mineLine}<span class="mine-stats">${ME?esc(MY)+' '+L(esc(ME.name)+' · ',''):''}${L(`응원한 구슬 우승 ${mineStats.wins}번 / ${mineStats.races}경기`,`${myEn} won ${mineStats.wins} of ${mineStats.races} race${mineStats.races===1?'':'s'}`)}</span></p>${coachHtml}${table}${actions}`;
+  <p class="mine-result">${mineLine}<span class="mine-stats">${ME?esc(MY)+' '+L(esc(ME.name)+' · ',''):''}${L(`응원한 구슬 우승 ${mineStats.wins}번 / ${mineStats.races}경기`,`${myEn} won ${mineStats.wins} of ${mineStats.races} race${mineStats.races===1?'':'s'}`)}</span></p>${coachHtml}${table}${rec.length>20?`<button class="small-btn replay-btn" type="button" data-act="replay">📺 ${L('결승 장면 다시 보기 (슬로모션)','Watch the finish again (slow motion)')}</button>`:''}${actions}`;
  $('resultOverlay').classList.remove('hidden');confetti();if(won)setTimeout(jingle,600);
  save();setControls();updateLeagueUI();
- setCaption(L(`🏆 ${nameOf(champ.id)} 우승! 축하해요!`,`🏆 ${nameOf(champ.id)} wins! Congratulations!`));
+ setCaption(L(`🏆 ${nameOf(champ.id)} 우승! 축하해요!`,`🏆 ${nameOf(champ.id)} wins! Congratulations!`));checkBadges();
 }
 function confetti(){const root=$('confettiLayer');root.innerHTML='';for(let i=0;i<80;i++){const el=document.createElement('div');el.className='confetti';el.style.left=rand(1,99)+'%';el.style.background=PALETTE[i%16][1];el.style.setProperty('--d',rand(2,4)+'s');el.style.setProperty('--dl',rand(0,.8)+'s');el.style.setProperty('--sx',rand(-140,140)+'px');root.appendChild(el)}setTimeout(()=>root.innerHTML='',5200)}
 
@@ -918,27 +1205,251 @@ function frame(now){
  const dt=Math.min(.05,(now-(lastFrame||now))/1000);lastFrame=now;clock+=dt;
  if(st&&!paused){
   if(phase==='countdown'){countdownT+=dt;const n=3-Math.floor(countdownT);if(countdownT>=3.2)beginRunning();else if(n!==shownCount){shownCount=n;$('startBanner').innerHTML=`<h2>${n}</h2><p>${esc(L('곧 문이 열려요!','The gate opens soon!'))}</p>`;tone(350+80*(3-n),120)}}
-  timeScale+=(slowTarget-timeScale)*Math.min(1,dt*5);
-  Sim.step(st,dt*(phase==='running'?raceRate*timeScale:1));handleEvents();stepEffects(dt);
-  if(phase==='running')raceLogic();
+  if(phase==='replay')stepReplay(dt);
+  else{timeScale+=(slowTarget-timeScale)*Math.min(1,dt*5);
+   Sim.step(st,dt*(phase==='running'?(labMode?.75:raceRate)*timeScale:1));handleEvents();
+   if(phase==='running'){if(labMode)labLogic();else{raceLogic();recordFrame()}}}
+  stepEffects(dt);stepTrail();
  }
  if(st){updateCamera(dt,false);ctx.setTransform(dpr,0,0,dpr,0,0);drawBackground();drawWorld();drawMinimap();updateHud(false)}
  if(flashUntil&&clock>flashUntil){$('eventFlash').classList.remove('show');flashUntil=0}
  requestAnimationFrame(frame);
 }
 
+// ---------------------------------------------------------------- Coach Moon, badges
+// Coach Moon's line in a result card, written for this moment (same look as coachLine)
+const coachHere=(pose,ko,en)=>`<div class="mcoach"><img src="images/coach-moon-${pose}.webp" alt="" width="58" height="70" onerror="this.parentNode.remove()"><p><b>${L('문 코치','Coach Moon')}</b>${esc(L(ko,en))}</p></div>`;
+const coachTell=(pose,ko,en,o={})=>{try{if(typeof coachPop==='function')coachPop(pose,ko,en,o)}catch(e){}};
+// Badges reward things the child did (watching, cheering, building, experimenting), not luck; each one opens a new look.
+const BADGES=[
+ {id:'first',ic:'🏁',n:L('첫 출발','First race'),d:L('레이스 1번 보기','Watch 1 race'),goal:1,val:()=>mineStats.races,prize:['pat','stripe']},
+ {id:'cheer',ic:'📣',n:L('응원단장','Head cheerleader'),d:L('응원 버튼 20번 누르기','Press Cheer 20 times'),goal:20,val:()=>stats.cheers,prize:['trail','sparkle']},
+ {id:'builder',ic:'🛠️',n:L('꼬마 설계사','Little designer'),d:L('내가 만든 코스로 레이스 1번','Race once on a course you built'),goal:1,val:()=>stats.customRaces,prize:['pat','rainbow']},
+ {id:'scientist',ic:'🔬',n:L('꼬마 과학자','Little scientist'),d:L('서로 다른 실험 3가지 하기','Do 3 different experiments'),goal:3,val:()=>Object.keys(stats.labs).length,prize:['pat','face']},
+ {id:'director',ic:'🎬',n:L('다시보기 감독','Replay director'),d:L('결승 장면 다시 보기 1번','Watch a finish replay once'),goal:1,val:()=>stats.replays,prize:['trail','bubbles']},
+ {id:'engineer',ic:'🏗️',n:L('꼬마 엔지니어','Little engineer'),d:L('코스 3개 만들기','Build 3 courses'),goal:3,val:()=>stats.builds,prize:['trail','rainbow']},
+ {id:'travel',ic:'🗺️',n:L('월드 여행가','World traveller'),d:L(`월드 ${WORLDS.length}곳에서 모두 레이스`,`Race in all ${WORLDS.length} worlds`),goal:WORLDS.length,val:()=>stats.worlds.length,prize:['pat','galaxy']},
+ {id:'league',ic:'🏟️',n:L('리그 완주','League finisher'),d:L('리그 5경기를 끝까지 보기','Finish a 5-race league'),goal:1,val:()=>stats.leagues,prize:['pat','fire']},
+ {id:'professor',ic:'🧪',n:L('실험 박사','Lab professor'),d:L(`실험 ${EXPS.length}가지 모두 하기`,`Do all ${EXPS.length} experiments`),goal:EXPS.length,val:()=>Object.keys(stats.labs).length,prize:['trail','stars']},
+ {id:'marathon',ic:'🌟',n:L('레이스 30번','30 races'),d:L('레이스 30번 보기','Watch 30 races'),goal:30,val:()=>mineStats.races,prize:['pat','star']},
+ {id:'lucky',ic:'🏆',n:L('첫 우승','First win'),d:L('응원한 구슬이 1등 하기','Your marble wins a race'),goal:1,val:()=>mineStats.wins,prize:['trail','fire']}];
+const lookName=([k,id])=>((k==='pat'?PATTERNS:TRAILS).find(x=>x[0]===id)||['','',''])[2];
+const lookIcon=([k,id])=>((k==='pat'?PATTERNS:TRAILS).find(x=>x[0]===id)||['','',''])[1];
+const badgeFor=(k,id)=>BADGES.find(b=>b.prize[0]===k&&b.prize[1]===id);
+const unlocked=(k,id)=>(k==='pat'&&id==='plain')||(k==='trail'&&id==='none')||badges.includes(badgeFor(k,id)?.id);
+function checkBadges(quiet){
+ const got=[];for(const b of BADGES)if(!badges.includes(b.id)&&b.val()>=b.goal){badges.push(b.id);got.push(b)}
+ if(got.length){save();if(!quiet){const b=got[0],pr=lookIcon(b.prize)+' '+lookName(b.prize);tone(988,120,'triangle',.08);setTimeout(()=>tone(1319,180,'triangle',.08),120);
+  setTimeout(()=>coachTell('medal',`새 배지 ${b.ic} ${b.n}! 꾸준히 해서 얻었어요. 상으로 「${pr}」 꾸미기가 열렸어요 🌙`,`New badge ${b.ic} ${b.n}! You earned it by sticking with it. The “${pr}” look is now open 🌙`,{gap:4000,ms:6500}),1400)}}
+ if(!skinOk())skin={pat:'plain',trail:'none'};setControls();return got}
+const skinOk=()=>unlocked('pat',skin.pat)&&unlocked('trail',skin.trail);
+
+// ---------------------------------------------------------------- marble painting (patterns) and my marble's trail
+function paintBall(g,x,y,r,c,sh,ang,pat,time){
+ const base=pat==='galaxy'?['#d9ccff','#5a3fc0','#120c3a']:pat==='fire'?['#fff6c0','#ffb347','#d8341a']:pat==='metal'?['#ffffff','#eef2f7','#7d8798']:[sh.lite,c,sh.dark];
+ const gr=g.createRadialGradient(x-r*.38,y-r*.42,r*.1,x,y,r*1.05);gr.addColorStop(0,pat==='matte'?sh.lite:'#ffffff');gr.addColorStop(.28,base[0]);gr.addColorStop(.72,base[1]);gr.addColorStop(1,base[2]);
+ g.fillStyle=gr;g.beginPath();g.arc(x,y,r,0,TAU);g.fill();
+ g.save();g.beginPath();g.arc(x,y,r*.93,0,TAU);g.clip();g.translate(x,y);
+ if(pat==='face'){g.fillStyle='#fff';for(const s of [-1,1]){g.beginPath();g.ellipse(s*r*.34,-r*.14,r*.2,r*.25,0,0,TAU);g.fill()}g.fillStyle='#1b1b2a';for(const s of [-1,1]){g.beginPath();g.arc(s*r*.34+Math.sin(time*2)*r*.05,-r*.1,r*.11,0,TAU);g.fill()}
+  g.strokeStyle='#1b1b2a';g.lineWidth=Math.max(1,r*.09);g.lineCap='round';g.beginPath();g.arc(0,r*.12,r*.32,.25*Math.PI,.75*Math.PI);g.stroke();g.fillStyle='#ff8fb0aa';for(const s of [-1,1]){g.beginPath();g.arc(s*r*.6,r*.2,r*.12,0,TAU);g.fill()}}
+ else{g.rotate(ang);
+  if(pat==='stripe'){g.fillStyle='rgba(255,255,255,.75)';for(const k of [-.55,0,.55])g.fillRect(-r,k*r-r*.09,2*r,r*.18)}
+  else if(pat==='star'){g.fillStyle='rgba(255,255,255,.92)';g.beginPath();for(let k=0;k<10;k++){const a=k*Math.PI/5-Math.PI/2,rr=k%2?r*.25:r*.62;g.lineTo(Math.cos(a)*rr,Math.sin(a)*rr)}g.fill()}
+  else if(pat==='galaxy'){g.fillStyle='#fff';for(let k=0;k<14;k++){const a=k*2.4,d=r*(.15+.06*k);g.beginPath();g.arc(Math.cos(a)*d,Math.sin(a)*d*.8,r*(k%4?.05:.09),0,TAU);g.fill()}g.strokeStyle='rgba(255,160,255,.45)';g.lineWidth=r*.12;g.beginPath();g.ellipse(0,0,r*.75,r*.25,.5,0,TAU);g.stroke()}
+  else if(pat==='rainbow'){['#ff5d5d','#ffa53d','#ffe45c','#5ee38a','#4fb7ff','#8a6cff'].forEach((cc,k)=>{g.fillStyle=cc+'cc';g.fillRect(-r,-r+k*r/3,2*r,r/3)})}
+  else if(pat==='fire'){g.fillStyle='rgba(255,240,150,.8)';for(let k=0;k<3;k++){g.rotate(TAU/3);g.beginPath();g.moveTo(0,r*.1);g.quadraticCurveTo(r*.45,-r*.2,0,-r*.85);g.quadraticCurveTo(-r*.2,-r*.3,0,r*.1);g.fill()}}
+  else if(pat==='plain'||pat==='metal'){g.fillStyle=pat==='metal'?'rgba(255,255,255,.55)':'rgba(255,255,255,.32)';g.beginPath();g.ellipse(0,0,r,r*.3,0,0,TAU);g.fill()}}
+ g.restore();
+ if(pat!=='matte'){g.fillStyle='rgba(255,255,255,.9)';g.beginPath();g.ellipse(x-r*.36,y-r*.42,r*.28,r*.17,-.6,0,TAU);g.fill()}
+}
+function drawMarble(m){
+ const look=m.look,c=look?look.c:PALETTE[m.id][1],sh=look||SHADE[m.id],pat=look?(look.metal?'metal':look.matte?'matte':'plain'):m.id===mine?skin.pat:'plain';
+ ctx.fillStyle='rgba(0,0,0,.25)';ctx.beginPath();ctx.ellipse(m.x+3,m.y+5,R,R*.9,0,0,TAU);ctx.fill();
+ paintBall(ctx,m.x,m.y,R,c,sh,m.ang,pat,clock);
+ if(!look&&pat!=='face'&&R*cam.z>=9){ctx.fillStyle='#fff';ctx.font=`900 ${R*1.05}px system-ui`;ctx.textAlign='center';ctx.lineWidth=2.4;ctx.strokeStyle='rgba(0,0,0,.55)';ctx.strokeText(m.id+1,m.x,m.y+.6);ctx.fillText(m.id+1,m.x,m.y+.6);ctx.textAlign='left'}
+}
+// the trail behind my marble: points in world units, newest last
+function trailDraw(g,pts,kind,now,s=1){
+ if(kind==='none'||pts.length<2)return;
+ for(let i=0;i<pts.length;i++){const p=pts[i],a=1-(now-p.t)/.7;if(a<=0)continue;
+  if(kind==='sparkle'){g.fillStyle=i%3?'#fff8c8':'#ffffff';g.globalAlpha=a;const j=Math.sin(i*12.9)*4*s;g.beginPath();g.arc(p.x+j,p.y-j*.5,(1+a*2.2)*s,0,TAU);g.fill()}
+  else if(kind==='bubbles'){if(i%2)continue;g.strokeStyle='#bfefff';g.globalAlpha=a*.9;g.lineWidth=1.2*s;g.beginPath();g.arc(p.x+Math.sin(i)*3*s,p.y-(1-a)*10*s,(2+(1-a)*5)*s,0,TAU);g.stroke()}
+  else if(kind==='rainbow'&&i>0){const q=pts[i-1];g.strokeStyle=`hsl(${(i*24+now*200)%360},95%,62%)`;g.globalAlpha=a;g.lineWidth=(2+a*6)*s;g.lineCap='round';g.beginPath();g.moveTo(q.x,q.y);g.lineTo(p.x,p.y);g.stroke()}
+  else if(kind==='stars'){if(i%3)continue;g.globalAlpha=a;g.fillStyle='#ffe16b';g.font=`${Math.round((7+a*7)*s)}px system-ui`;g.textAlign='center';g.fillText('★',p.x,p.y+4*s)}
+  else if(kind==='fire'){g.globalAlpha=a*.85;g.fillStyle=a>.6?'#fff3a0':a>.3?'#ffa53d':'#ff4d2e';g.beginPath();g.arc(p.x,p.y-(1-a)*6*s,(1.5+a*5)*s,0,TAU);g.fill()}}
+ g.globalAlpha=1;g.textAlign='left';g.lineCap='round'}
+function stepTrail(){if(skin.trail==='none'||!st||course.lab){trail.length=0;return}const me=st.marbles[mine];if(!me)return;const last=trail[trail.length-1];if(!last||Math.hypot(me.x-last.x,me.y-last.y)>2.5)trail.push({x:me.x,y:me.y,t:clock});while(trail.length&&clock-trail[0].t>.7)trail.shift()}
+
+// ---------------------------------------------------------------- replay: the last seconds before the winner, again in slow motion
+let rec=[],recEnd=Infinity,replay=null,trail=[];
+function recordFrame(){if(st.t>recEnd)return;const n=st.marbles.length,p=new Float32Array(n*3);for(let i=0;i<n;i++){const m=st.marbles[i];p[i*3]=m.x;p[i*3+1]=m.y;p[i*3+2]=m.ang}rec.push({t:st.t,p});const keep=winnerT===null?st.t-4:winnerT-3.2;while(rec.length>2&&rec[0].t<keep)rec.shift()}
+function startReplay(){
+ if(rec.length<20||phase!=='finished')return;
+ replay={t:rec[0].t,snap:st.marbles.map(m=>[m.x,m.y,m.ang]),st:st.t,said:false};phase='replay';trail.length=0;
+ $('resultOverlay').classList.add('hidden');$('slowmo').textContent=L('📺 다시 보기 · 슬로모션','📺 REPLAY · SLOW MOTION');$('slowmo').classList.remove('hidden');$('replaySkip').classList.remove('hidden');
+ speak(L('결승 장면을 느리게 다시 볼게요!','Here is the finish again, in slow motion!'),true);stats.replays++;save();setControls()}
+function stepReplay(dt){
+ replay.t+=dt*.38;const end=rec[rec.length-1].t;if(replay.t>=end){endReplay();return}
+ let j=0;while(j<rec.length-2&&rec[j+1].t<=replay.t)j++;const A=rec[j],B=rec[j+1],f=clamp((replay.t-A.t)/((B.t-A.t)||1),0,1);
+ st.marbles.forEach((m,i)=>{m.x=A.p[i*3]+(B.p[i*3]-A.p[i*3])*f;m.y=A.p[i*3+1]+(B.p[i*3+1]-A.p[i*3+1])*f;m.ang=A.p[i*3+2]+(B.p[i*3+2]-A.p[i*3+2])*f});st.t=replay.t;
+ if(!replay.said&&winnerT!==null&&replay.t>=winnerT){replay.said=true;const w=st.finishers[0];flash(L(`🏁 바로 이 순간! ${nameOf(w.id)}!`,`🏁 This is the moment! ${nameOf(w.id)}!`),PALETTE[w.id][1]);jingle()}}
+function endReplay(){if(!replay)return;st.marbles.forEach((m,i)=>{[m.x,m.y,m.ang]=replay.snap[i]});st.t=replay.st;replay=null;phase='finished';
+ $('slowmo').classList.add('hidden');$('slowmo').textContent=L('🎬 슬로모션','🎬 SLOW MOTION');$('replaySkip').classList.add('hidden');$('resultOverlay').classList.remove('hidden');setControls();checkBadges()}
+
+// ---------------------------------------------------------------- my own courses (builder)
+const worldAt=i=>i<WORLDS.length?WORLDS[i]:customTheme(customs[i-WORLDS.length]||{name:'',theme:0,mods:['ramps3']});
+function customTheme(c){const b=WORLDS[c.theme]||WORLDS[0];return {...b,name:c.name,desc:c.mods.map(m=>PIECE_BY[m]?.[1]||'').join(''),mods:c.mods.slice(),custom:true}}
+let draft=null,buildMsg='';
+function openBuilder(idx,opener){
+ if(phase==='countdown'||phase==='running')return;
+ draft=idx!=null&&customs[idx]?{...customs[idx],mods:customs[idx].mods.slice(),idx}:{name:L(`나의 코스 ${customs.length+1}`,`My course ${customs.length+1}`),theme:customs.length%6,mods:['ramps3','jump','pegs'],idx:null};
+ buildMsg='';renderBuilder();openModal('buildModal',opener||$('buildBtn'))}
+function renderBuilder(){
+ const d=draft,full=d.mods.length>=MAX_PIECES;
+ $('buildBody').innerHTML=`${customs.length?`<div class="b-saved"><span>${L('내 코스','My courses')}:</span>${customs.map((c,i)=>`<button type="button" class="chip${d.idx===i?' on':''}" data-b="edit" data-i="${i}">🛠️ ${esc(c.name)}</button>`).join('')}<button type="button" class="chip" data-b="new">➕ ${L('새 코스','New')}</button></div>`:''}
+  <label class="b-name"><span>🏷️ ${L('코스 이름','Course name')}</span><input id="bName" type="text" maxlength="12" value="${esc(d.name)}" aria-label="${L('코스 이름','Course name')}"></label>
+  <h3>① ${L('조각을 눌러 코스에 넣어요','Tap a piece to add it')} <small>${d.mods.length}/${MAX_PIECES}</small></h3>
+  <div class="b-pieces">${PIECES.map(([id,ic,n,desc])=>`<button type="button" class="piece" data-b="add" data-p="${id}" ${full?'disabled':''}><span class="pi">${ic}</span><b>${esc(n)}</b><small>${esc(desc)}</small></button>`).join('')}</div>
+  <h3>② ${L('내 코스 순서','Your course, top to bottom')}</h3>
+  <ol class="b-track"><li class="fixed">🚦 ${L('출발','Start')}</li>${d.mods.map((m,i)=>{const [,ic,n]=PIECE_BY[m];return `<li><span class="bt-n">${i+1}</span><span class="bt-ic">${ic}</span><b>${esc(n)}</b><span class="bt-tools"><button type="button" class="mini-btn" data-b="up" data-i="${i}" ${i?'':'disabled'} aria-label="${L('위로','Move up')}">▲</button><button type="button" class="mini-btn" data-b="down" data-i="${i}" ${i<d.mods.length-1?'':'disabled'} aria-label="${L('아래로','Move down')}">▼</button><button type="button" class="mini-btn" data-b="del" data-i="${i}" aria-label="${L('빼기','Remove')}">✕</button></span></li>`}).join('')}<li class="fixed">🏁 ${L('결승','Finish')}</li></ol>
+  <h3>③ ${L('경기장 꾸미기','Pick a look')}</h3>
+  <div class="b-themes">${WORLDS.map((w,i)=>`<button type="button" class="chip${d.theme===i?' on':''}" data-b="theme" data-i="${i}" style="--a:${w.bg[0]};--b:${w.bg[1]}"><i></i>${esc(w.name)}</button>`).join('')}</div>
+  <p class="b-tip">💡 ${L('엔지니어처럼 해 봐요: 만들기 → 달려 보기 → 고치기! 어떤 조각이 재밌을지 예상해 보세요.','Work like an engineer: build → test → improve! Guess which pieces will be the most fun.')}</p>
+  ${buildMsg?`<p class="b-msg" role="status">${esc(buildMsg)}</p>`:''}
+  <div class="modal-actions"><button class="control" type="button" data-b="random">🎲 ${L('랜덤으로 채우기','Fill randomly')}</button><button class="primary" type="button" data-b="go" ${d.mods.length<2?'disabled':''}>🏁 ${L('저장하고 달리기!','Save and race!')}</button></div>
+  ${d.idx!=null?`<button class="danger-btn b-del" type="button" data-b="remove">🗑️ ${L('이 코스 지우기','Delete this course')}</button>`:''}`;
+ $('bName').addEventListener('input',e=>{draft.name=e.target.value.replace(/[<>]/g,'').slice(0,12)})}
+function builderAct(b){
+ const d=draft,a=b.dataset.b,i=+b.dataset.i;buildMsg='';
+ if(a==='add'){if(d.mods.length>=MAX_PIECES){buildMsg=L(`조각은 ${MAX_PIECES}개까지 넣을 수 있어요.`,`You can use up to ${MAX_PIECES} pieces.`)}else{d.mods.push(b.dataset.p);tone(660+d.mods.length*40,70,'triangle',.06)}}
+ else if(a==='up'&&i>0)[d.mods[i-1],d.mods[i]]=[d.mods[i],d.mods[i-1]];
+ else if(a==='down'&&i<d.mods.length-1)[d.mods[i+1],d.mods[i]]=[d.mods[i],d.mods[i+1]];
+ else if(a==='del'){d.mods.splice(i,1);tone(330,70)}
+ else if(a==='theme')d.theme=i;
+ else if(a==='random'){d.mods=shuffle(PIECE_IDS.slice()).slice(0,5);tone(880,80,'triangle',.06)}
+ else if(a==='edit'){draft={...customs[i],mods:customs[i].mods.slice(),idx:i}}
+ else if(a==='new'){if(customs.length>=MAX_CUSTOMS)buildMsg=L(`코스는 ${MAX_CUSTOMS}개까지 저장돼요. 하나를 지우고 만들어요.`,`You can keep ${MAX_CUSTOMS} courses. Delete one to make a new one.`);else draft={name:L(`나의 코스 ${customs.length+1}`,`My course ${customs.length+1}`),theme:customs.length%6,mods:[],idx:null}}
+ else if(a==='remove'){askConfirm({title:L('🗑️ 코스를 지울까요?','🗑️ Delete this course?'),text:L(`“${d.name}” 코스가 사라져요.`,`“${d.name}” will be gone.`),no:L('아니요','No'),yes:L('지울래요','Delete'),opener:b,onYes:()=>{const k=d.idx;customs.splice(k,1);const ci=WORLDS.length+k;if(worldIdx===ci)worldIdx=0;else if(worldIdx>ci)worldIdx--;save();draft={name:L(`나의 코스 ${customs.length+1}`,`My course ${customs.length+1}`),theme:0,mods:['ramps3','jump','pegs'],idx:null};renderBuilder();renderMaps()}});return}
+ else if(a==='go'){saveDraftAndRace();return}
+ renderBuilder();const f=$('buildBody').querySelector(`[data-b="${a}"][data-i="${a==='up'?i-1:a==='down'?i+1:i}"]`)||$('buildBody').querySelector(`[data-b="${a}"]`);if(f&&!f.disabled)try{f.focus({preventScroll:true})}catch(e){}}
+function saveDraftAndRace(){
+ const d=draft;if(d.mods.length<2)return;const c={name:(d.name||'').trim()||L('나의 코스','My course'),theme:d.theme,mods:d.mods.slice()};
+ let k=d.idx;if(k!=null&&customs[k])customs[k]=c;else{if(customs.length>=MAX_CUSTOMS){buildMsg=L(`코스는 ${MAX_CUSTOMS}개까지 저장돼요. 하나를 지우고 만들어요.`,`You can keep ${MAX_CUSTOMS} courses. Delete one first.`);renderBuilder();return}customs.push(c);k=customs.length-1;stats.builds++}
+ worldIdx=WORLDS.length+k;if(mode==='league')mode='single';if(labMode){labMode=false;labExp=null}save();closeModal('buildModal');prepare();checkBadges();startRace();
+ coachTell('clap',`직접 설계한 코스로 출발! 만들고, 시험하고, 고치는 게 진짜 엔지니어의 방법이에요 🌙`,`Off we go on the course you designed! Build, test, improve: that's how real engineers work 🌙`,{gap:20000})}
+
+// ---------------------------------------------------------------- marble lab: predict → observe → explain
+let labMode=false,labExp=null,labPred=null,labRes=[{},{}],labStart=[],labEndAt=0;
+function setupLab(){
+ const ex=labExp;course=Sim.build(null,null,ex.kind,ex.lanes);theme=LAB_THEME;
+ const n=ex.kind==='crash'?4:2,mats=ex.kind==='crash'?[ex.lanes[0].mat,ex.lanes[1].mat,ex.lanes[0].target,ex.lanes[1].target]:ex.lanes.map(l=>l.mat);
+ st=Sim.createState(course,n,[...Array(n).keys()]);st.marbles.forEach((m,i)=>{const M=MATS[mats[i]];m.mass=M.mass;m.bounce=M.bounce;m.look=M;m.ang=0});
+ for(let i=0;i<40;i++)Sim.step(st,1/60);labStart=st.marbles.map(m=>m.x);labRes=[{},{}];labEndAt=0}
+function labListHTML(){return EXPS.map(e=>{const r=stats.labs[e.id];return `<button type="button" class="lab-card${labExp&&labExp.id===e.id&&labMode?' on':''}" data-exp="${e.id}"><span class="lc-ic">${e.ic}</span><span class="lc-tx"><b>${esc(e.t)}</b><small>${esc(e.q)}</small></span><span class="lc-done">${r?'✅'+(r.n>1?' ×'+r.n:''):''}</span></button>`}).join('')}
+function openLabPicker(opener){
+ if(phase==='countdown'||phase==='running')return;
+ const done=Object.keys(stats.labs).length;
+ $('labBody').innerHTML=`<ol class="lab-steps"><li>🤔 <b>${L('예상하기','Predict')}</b> <span>${L('어떻게 될까?','What will happen?')}</span></li><li>👀 <b>${L('실험 보기','Watch')}</b> <span>${L('두 길을 나란히 비교해요','Two lanes side by side')}</span></li><li>💡 <b>${L('이유 알기','Explain')}</b> <span>${L('왜 그럴까?','Why did it happen?')}</span></li></ol>
+  <p class="lab-ok">${L('예상이 틀려도 괜찮아요! 틀린 예상에서 더 많이 배워요.','It is fine to guess wrong! Wrong guesses teach us the most.')} · ${L(`실험 노트 ${done}/${EXPS.length}`,`Lab notebook ${done}/${EXPS.length}`)}</p>
+  <div class="lab-grid">${labListHTML()}</div>`;
+ openModal('labModal',opener||$('labBtn'))}
+function enterLab(id){const ex=EXPS.find(e=>e.id===id);if(!ex)return;labMode=true;labExp=ex;labPred=null;closeModal('labModal');prepare();labPredictCard();scrollToScene()}
+function exitLab(){labMode=false;labExp=null;labPred=null;prepare();setCaption(L('🏁 레이스로 돌아왔어요! 출발 버튼을 눌러요.','🏁 Back to racing! Press Start.'))}
+function labPredictCard(){
+ const ex=labExp;phase='ready';
+ $('resultCard').innerHTML=`<div class="lab-head">${ex.ic} ${esc(ex.t)}</div><p class="lab-q">${esc(ex.q)}</p><p class="lab-diff">🔎 ${esc(ex.diff)}</p>
+  <div class="lab-lanes">${ex.lanes.map((l,i)=>`<span><i>${'AB'[i]}</i>${esc(l.name)}</span>`).join('')}</div>
+  <p class="lab-ask">🤔 ${L('어떻게 될지 예상해 보세요!','What do you think will happen?')}</p>
+  <div class="lab-opts">${ex.opts.map(([k,t])=>`<button type="button" class="primary lab-opt" data-act="pred" data-k="${k}">${k==='same'?'🤝':k==='A'?'🅰️':'🅱️'} ${esc(t)}</button>`).join('')}</div>
+  <p class="lab-note">${L('틀려도 괜찮아요. 예상해 보는 것이 과학자의 첫걸음이에요!','Any guess is fine. Guessing first is how scientists start!')}</p>
+  <div class="result-actions"><button class="control" type="button" data-act="labList">🔬 ${L('다른 실험','Other experiments')}</button><button class="control" type="button" data-act="labExit">🏁 ${L('레이스로','Back to races')}</button></div>`;
+ $('resultOverlay').classList.add('lab-ov');$('resultOverlay').classList.remove('hidden');speak(ex.q,true);setControls()}
+function labLogic(){
+ const ex=labExp,lanes=course.lab.lanes,t=st.t-st.raceT0,floor=Sim.T+R;let slow=false;
+ for(let l=0;l<2;l++){const m=st.marbles[l],L0=lanes[l],r=labRes[l];
+  if(ex.measure==='time'){if(r.v==null&&m.x>=L0.finX){r.v=t;tone(1046+l*120,120,'triangle',.08)}else if(r.v==null&&m.x>L0.finX-80)slow=true}
+  else if(ex.kind==='bounce'){if(!r.hit&&m.y>=L0.floorY-floor-4&&m.vy<0){r.hit=1;tone(l?220:520,90,'sine',.07)}if(r.hit===1){r.peak=Math.min(r.peak??1e9,m.y);if(m.vy>0){r.hit=2;r.v=Math.max(0,L0.floorY-floor-r.peak)}}}
+  else if(ex.kind==='wind'){if(r.v==null&&m.y>=L0.floorY-floor-1){r.v=Math.max(0,m.x-L0.startX);r.x=m.x;tone(300+l*80,80,'sine',.06)}}
+  else if(ex.kind==='crash'){const tg=st.marbles[2+l],moved=Math.abs(tg.x-labStart[2+l]);if(!r.hit&&moved>1.5){r.hit=1;tone(l?400:180,110,'square',.05)}if(!r.hit&&tg.x-m.x<70)slow=true;r.x=tg.x;if(r.hit&&r.v==null&&Math.hypot(tg.vx,tg.vy)<4&&t>.8)r.v=moved}}
+ slowTarget=slow?.35:1;$('slowmo').classList.toggle('hidden',!slow);
+ if(!labEndAt&&(labRes.every(r=>r.v!=null)||t>7))labEndAt=clock+(ex.measure==='time'?1.1:.9);
+ if(labEndAt&&clock>labEndAt)labExplain()}
+function labOutcome(){const ex=labExp,v=labRes.map(r=>r.v??(ex.measure==='time'?99:0));let win;
+ if(ex.measure==='time')win=Math.abs(v[0]-v[1])<.03?'same':v[0]<v[1]?'A':'B';
+ else{const mx=Math.max(v[0],v[1],1);win=Math.abs(v[0]-v[1])<mx*.12?'same':v[0]>v[1]?'A':'B'}return {win,v}}
+const sq=v=>Math.round(v/UNIT);
+function labExplain(){
+ const ex=labExp,{win,v}=labOutcome(),right=labPred===win,nmOf=k=>ex.lanes['AB'.indexOf(k)]?.name||'';phase='finished';slowTarget=1;$('slowmo').classList.add('hidden');
+ const f=x=>x>=99?'—':x.toFixed(2);
+ const head=ex.measure==='time'?(win==='same'?L('🤝 거의 동시에 도착!','🤝 They arrived together!'):`🏁 ${L('먼저 도착','First to arrive')}: ${nmOf(win)}`):ex.measure==='up'?(win==='same'?L('🤝 비슷하게 튀었어요!','🤝 About the same bounce!'):`↕️ ${L('더 높이','Higher')}: ${nmOf(win)}`):(win==='same'?L('🤝 비슷하게 갔어요!','🤝 About the same distance!'):`↔️ ${L('더 멀리','Farther')}: ${nmOf(win)}`);
+ const detail=ex.measure==='time'?`A ${f(v[0])}${L('초','s')} · B ${f(v[1])}${L('초','s')}`:`A ${sq(v[0])}${L('칸',' squares')} · B ${sq(v[1])}${L('칸',' squares')}`;
+ const r=stats.labs[ex.id]||{n:0,right:0};r.n++;if(right)r.right++;stats.labs[ex.id]=r;save();
+ const predTxt=ex.opts.find(o=>o[0]===labPred)?.[1]||'';
+ $('resultCard').innerHTML=`<div class="lab-head">${ex.ic} ${esc(ex.t)}</div><div class="lab-result">${esc(head)}</div><p class="lab-detail">${esc(detail)}</p>
+  <p class="lab-fb ${right?'ok':'new'}">${right?L('🎯 예상이 맞았어요! 과학자처럼 생각했어요.','🎯 Your guess was right! You thought like a scientist.'):L('🔍 예상과 달랐어요! 그래서 실험이 재밌어요. 과학자들도 이렇게 새로 알게 돼요.','🔍 Not what you guessed! That is what makes experiments fun. Scientists learn new things exactly like this.')}<small>${L('내 예상','My guess')}: ${esc(predTxt)}</small></p>
+  <div class="lab-why"><b>💡 ${L('왜 그럴까요?','Why?')}</b>${esc(ex.why)}</div><p class="lab-life">🏠 ${esc(ex.life)}</p>
+  ${right?coachHere('clap','예상하고, 지켜보고, 확인까지! 진짜 과학자의 방법이에요 🌙','Predict, watch, check: that is exactly how real scientists work 🌙'):coachHere('idea','예상이 달라도 괜찮아요. 왜 그런지 알게 된 게 더 멋진 일이에요 🌙','A different result is okay. Finding out why is the best part 🌙')}
+  <button class="small-btn replay-btn" type="button" data-act="peek">👀 ${L('실험 장면 다시 보기','Look at the experiment')}</button>
+  <div class="result-actions three"><button class="control" type="button" data-act="labAgain">🔁 ${L('다시 실험','Run again')}</button><button class="primary" type="button" data-act="labNext">🔬 ${L('다음 실험','Next experiment')}</button><button class="control" type="button" data-act="labExit">🏁 ${L('레이스로','Back to races')}</button></div>`;
+ $('resultOverlay').classList.add('lab-ov');$('resultOverlay').classList.remove('hidden');speak(head.replace(/[🤝🏁↕️↔️]/gu,'')+'. '+ex.why,true);setControls();checkBadges()}
+function drawLab(){
+ const ex=labExp,lab=course.lab,k=Math.max(1,1/cam.z*.9),F=(w,px)=>`${w} ${Math.round(px*k)}px system-ui`;ctx.textAlign='center';ctx.textBaseline='middle';
+ lab.lanes.forEach((L0,l)=>{const cx=L0.off+195,lane=ex.lanes[l],r=labRes[l];
+  ctx.font=F(900,15);const t=`${'AB'[l]} · ${lane.name}`,w=Math.min(326,ctx.measureText(t).width+24*k),hh=28*k;ctx.fillStyle='rgba(6,16,36,.82)';rr(cx-w/2,22,w,hh,hh/2);ctx.fill();ctx.fillStyle=l?'#ffd84a':'#7df9ff';ctx.fillText(t,cx,22+hh/2+.5);
+  if(ex.measure==='time'){const fy=L0.finY;for(let k=0;k<8;k++){ctx.fillStyle=k%2?'#111':'#fff';ctx.fillRect(L0.finX-3,fy-60+k*9,6,9)}
+   if(r.v!=null){const other=labRes[1-l].v,first=other==null||r.v<=other-.03,tie=other!=null&&Math.abs(r.v-other)<.03;ctx.font=F(900,14);const lab2=`${tie?L('동시!','Tie!'):first?L('1등!','1st!'):L('2등','2nd')} ${r.v.toFixed(2)}${L('초','s')}`,w2=ctx.measureText(lab2).width+16*k,h2=24*k;ctx.fillStyle=tie?'#7df9c8':first?'#ffd84a':'#c8d4ea';rr(Math.min(L0.finX-w2/2,L0.off+352-w2),fy-70-h2,w2,h2,h2/2);ctx.fill();ctx.fillStyle='#14203a';ctx.fillText(lab2,Math.min(L0.finX,L0.off+352-w2/2),fy-70-h2/2)}}
+  else if(ex.kind==='bounce'){const top=L0.floorY-Sim.T-R,x=L0.off+300;ctx.strokeStyle='rgba(255,255,255,.55)';ctx.fillStyle='rgba(255,255,255,.75)';ctx.font=F(700,11);ctx.lineWidth=1.5;
+   for(let q=0,yy=top;yy>L0.dropY;q++,yy-=UNIT){ctx.beginPath();ctx.moveTo(x,yy);ctx.lineTo(x+(q%5?8:14),yy);ctx.stroke();if(q&&q%5===0)ctx.fillText(q,x+20+8*k,yy)}
+   if(r.peak!=null){const py=r.peak;ctx.setLineDash([6,5]);ctx.strokeStyle=l?'#ffd84a':'#7df9ff';ctx.lineWidth=2.5;ctx.beginPath();ctx.moveTo(L0.off+70,py);ctx.lineTo(x,py);ctx.stroke();ctx.setLineDash([]);if(r.v!=null){ctx.font=F(900,15);ctx.fillStyle=l?'#ffd84a':'#7df9ff';ctx.fillText(`↕ ${sq(r.v)}${L('칸',' sq')}`,L0.off+120,py-14*k)}}}
+  else{const fy=L0.floorY+16,x0=ex.kind==='crash'?labStart[2+l]:L0.startX;ctx.strokeStyle='rgba(255,255,255,.6)';ctx.lineWidth=1.5;ctx.fillStyle='rgba(255,255,255,.75)';ctx.font=F(700,11);
+   for(let q=0,xx=x0;xx<L0.off+346;q++,xx+=UNIT){ctx.beginPath();ctx.moveTo(xx,fy);ctx.lineTo(xx,fy+(q%5?6:11));ctx.stroke();if(q&&q%5===0)ctx.fillText(q,xx,fy+14+6*k)}
+   const xe=r.x;if(xe!=null&&(ex.kind!=='crash'||r.hit)){ctx.strokeStyle=l?'#ffd84a':'#7df9ff';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(x0,fy-6);ctx.lineTo(xe,fy-6);ctx.stroke();if(r.v!=null){ctx.font=F(900,15);ctx.fillStyle=l?'#ffd84a':'#7df9ff';ctx.fillText(`↔ ${sq(r.v)}${L('칸',' sq')}`,(x0+xe)/2,fy+22+16*k)}}
+   if(ex.kind==='crash'){ctx.setLineDash([3,4]);ctx.strokeStyle='rgba(255,255,255,.5)';ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(x0,L0.floorY-Sim.T-R,R+3,0,TAU);ctx.stroke();ctx.setLineDash([])}}
+ });
+ // a ring and the material's emoji follow each ball, so it stays easy to spot on a small phone screen
+ st.marbles.forEach((m,i)=>{if(!m.look)return;const lane=i%2;ctx.strokeStyle=lane?'#ffd84a':'#7df9ff';ctx.globalAlpha=.85;ctx.lineWidth=2*k;ctx.beginPath();ctx.arc(m.x,m.y,R+5*k,0,TAU);ctx.stroke();ctx.globalAlpha=1;ctx.font=`${Math.round(13*k)}px system-ui`;ctx.fillText(m.look.ic,m.x,m.y-R-11*k)});
+ ctx.textAlign='left';ctx.textBaseline='alphabetic'}
+
+// ---------------------------------------------------------------- workshop (my marble's look) and badge book
+let skinRaf=0;
+function openSkins(opener){renderSkins();openModal('skinModal',opener||$('skinBtn'));cancelAnimationFrame(skinRaf);const pts=[];const loop=now=>{const cv=$('skinPreview');if(!cv||$('skinModal').classList.contains('hidden'))return;const g=cv.getContext('2d'),w=cv.width,h=cv.height,tt=now/1000,s=w/150;
+  g.setTransform(1,0,0,1,0,0);g.clearRect(0,0,w,h);const x=w/2+Math.cos(tt*1.6)*w*.24,y=h/2+Math.sin(tt*3.2)*h*.12;pts.push({x,y,t:tt});while(pts.length&&tt-pts[0].t>.7)pts.shift();
+  trailDraw(g,pts,skin.trail,tt,s*1.6);const c=PALETTE[mine][1];paintBall(g,x,y,26*s,c,SHADE[mine],tt*3,skin.pat,tt);skinRaf=requestAnimationFrame(loop)};skinRaf=requestAnimationFrame(loop)}
+function renderSkins(){
+ const grid=(k,list)=>list.map(([id,ic,n])=>{const ok=unlocked(k,id),b=badgeFor(k,id),on=(k==='pat'?skin.pat:skin.trail)===id;
+  return `<button type="button" class="opt${on?' on':''}" data-look="${k}" data-id="${id}" ${ok?'':'aria-disabled="true"'} aria-pressed="${on}"><span class="oi">${ok?ic:'🔒'}</span><b>${esc(n)}</b>${ok?'':`<small>${b?esc(b.ic+' '+b.n):''}</small>`}</button>`}).join('');
+ $('skinBody').innerHTML=`<div class="skin-top"><canvas id="skinPreview" width="300" height="180" aria-label="${L('내 구슬 미리 보기','Preview of my marble')}"></canvas><p>${esc(MY)} ${esc(nameOf(mine))} · ${L('배지를 모으면 새 꾸미기가 열려요!','Collect badges to open new looks!')}</p></div>
+  <h3>🎨 ${L('무늬','Pattern')}</h3><div class="opts">${grid('pat',PATTERNS)}</div><h3>💫 ${L('꼬리','Trail')}</h3><div class="opts">${grid('trail',TRAILS)}</div>`}
+function renderBadges(){
+ const n=badges.length;
+ $('badgeBody').innerHTML=`<p class="badge-sum">${L(`모은 배지 ${n}/${BADGES.length} · 배지마다 구슬 꾸미기가 하나씩 열려요!`,`${n}/${BADGES.length} badges · each badge opens a new marble look!`)}</p><div class="badges">${BADGES.map(b=>{const v=Math.min(b.goal,b.val()),got=badges.includes(b.id);
+  return `<div class="badge${got?' got':''}"><span class="bi">${b.ic}</span><b>${esc(b.n)}</b><small>${esc(b.d)}</small><div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="${b.goal}" aria-valuenow="${v}"><i style="width:${v/b.goal*100}%"></i></div><small class="bp">${got?'✅ '+L('받았어요!','Earned!'):`${v}/${b.goal}`} · ${L('상','Prize')}: ${lookIcon(b.prize)} ${esc(lookName(b.prize))}</small></div>`}).join('')}</div>`}
+function scrollToScene(){if(matchMedia('(max-width:860px)').matches)$('scenePanel').scrollIntoView({behavior:RM?'auto':'smooth',block:'start'})}
+
 // ---------------------------------------------------------------- wiring
 function togglePause(){if(phase!=='running')return;paused=!paused;setControls();try{paused?speechSynthesis.pause():speechSynthesis.resume()}catch(e){}setCaption(paused?L('⏸ 일시정지! 이어하기를 눌러 주세요.','⏸ Paused. Press Resume to keep going.'):L('▶ 다시 출발!','▶ Back to the race!'))}
 function setCount(v){const n=clamp(parseInt(v,10)||8,2,16);if(n===numBalls)return;numBalls=n;if(league&&!league.done){league=null;setCaption(L('구슬 수가 바뀌어서 리그를 새로 시작해요.','The number of marbles changed, so the league starts over.'))}save();prepare()}
-$('maps').addEventListener('click',e=>{const b=e.target.closest('[data-world]');if(!b||b.disabled)return;worldIdx=+b.dataset.world;save();prepare();speak(L(`${WORLDS[worldIdx].name} 코스예요! 출발대에 구슬들이 줄을 섰어요.`,`Welcome to ${WORLDS[worldIdx].name}! The marbles are lined up at the gate.`),true)});
+$('maps').addEventListener('click',e=>{if(e.target.closest('[data-build]')){const b=e.target.closest('[data-build]');if(!b.disabled)openBuilder(null,b);return}const b=e.target.closest('[data-world]');if(!b||b.disabled)return;worldIdx=+b.dataset.world;if(labMode){labMode=false;labExp=null}save();prepare();const w=worldAt(worldIdx);speak(L(`${w.name} 코스예요! 출발대에 구슬들이 줄을 섰어요.`,`Welcome to ${w.name}! The marbles are lined up at the gate.`),true)});
 $('modeSeg').addEventListener('click',e=>{const b=e.target.closest('[data-mode]');if(!b||b.disabled)return;mode=b.dataset.mode;if(mode==='league'&&(!league||league.done))startLeague();save();prepare()});
 $('ballCount').addEventListener('change',e=>setCount(e.target.value));$('ballRange').addEventListener('input',e=>setCount(e.target.value));
 $('minePicker').addEventListener('click',e=>{const b=e.target.closest('[data-mine]');if(!b||b.disabled)return;mine=+b.dataset.mine;save();renderMinePicker();updateHud(true);setCaption(L(`💖 ${nameOf(mine)} 구슬을 응원해요! 레이스 중 📣 응원 버튼을 눌러 힘을 주세요.`,`💖 You're cheering for ${nameOf(mine)}! Press 📣 Cheer during the race to give it a push.`));tone(660,80,'triangle',.07);setTimeout(()=>tone(990,110,'triangle',.07),80)});
 $('namesBtn').addEventListener('click',()=>{$('namesPanel').classList.toggle('hidden');renderNames()});
 $('namesPanel').addEventListener('input',e=>{const i=e.target.dataset.name;if(i==null)return;names[+i]=e.target.value.replace(/[<>]/g,'').slice(0,10);save();renderMinePicker();updateHud(true)});
 $('startBtn').addEventListener('click',startRace);$('pauseBtn').addEventListener('click',togglePause);
-$('resetBtn').addEventListener('click',()=>{prepare();setCaption(L('↻ 다시 준비했어요. 출발 버튼을 눌러 주세요!','↻ Reset. Press Start when you are ready!'))});
+$('resetBtn').addEventListener('click',()=>{prepare();if(labMode){labPred=null;labPredictCard();return}setCaption(L('↻ 다시 준비했어요. 출발 버튼을 눌러 주세요!','↻ Reset. Press Start when you are ready!'))});
 $('cheerBtn').addEventListener('click',cheer);
+$('buildBtn').addEventListener('click',e=>openBuilder(worldIdx>=WORLDS.length&&!labMode?worldIdx-WORLDS.length:null,e.currentTarget));
+$('labBtn').addEventListener('click',e=>{if(labMode)exitLab();else openLabPicker(e.currentTarget)});
+$('skinBtn').addEventListener('click',e=>openSkins(e.currentTarget));
+$('badgeBtn').addEventListener('click',e=>{renderBadges();openModal('badgeModal',e.currentTarget)});
+$('replaySkip').addEventListener('click',endReplay);
+$('peekBack').addEventListener('click',()=>{$('peekBack').classList.add('hidden');$('resultOverlay').classList.remove('hidden')});
+$('buildBody').addEventListener('click',e=>{const b=e.target.closest('[data-b]');if(b&&!b.disabled)builderAct(b)});
+$('labBody').addEventListener('click',e=>{const b=e.target.closest('[data-exp]');if(b)enterLab(b.dataset.exp)});
+$('labList').addEventListener('click',e=>{const b=e.target.closest('[data-exp]');if(b&&phase!=='running'&&phase!=='countdown')enterLab(b.dataset.exp)});
+$('skinBody').addEventListener('click',e=>{const b=e.target.closest('[data-look]');if(!b)return;const k=b.dataset.look,id=b.dataset.id;
+ if(!unlocked(k,id)){const bd=badgeFor(k,id);setCaption(L(`🔒 ${bd?bd.ic+' '+bd.n+' 배지('+bd.d+')를 받으면 열려요!':'아직 잠겨 있어요.'}`,`🔒 ${bd?'Earn the '+bd.ic+' '+bd.n+' badge ('+bd.d+') to open it!':'Still locked.'}`));const sb=$('skinBody').querySelector('.skin-top p');if(sb)sb.textContent=$('caption').textContent;tone(260,90);return}
+ if(k==='pat')skin.pat=id;else skin.trail=id;save();tone(880,70,'triangle',.07);renderSkins();const f=$('skinBody').querySelector(`[data-look="${k}"][data-id="${id}"]`);if(f)f.focus({preventScroll:true})});
 $('cameraBtn').addEventListener('click',()=>{cam.mode=(cam.mode+1)%3;setControls()});
 $('speedBtn').addEventListener('click',()=>{raceRate=raceRate===1?1.5:raceRate===1.5?2:1;setControls()});
 $('voiceToggle').addEventListener('click',()=>{voiceOn=!voiceOn;save();setControls();if(!voiceOn){try{speechSynthesis.cancel()}catch(e){}setCaption(L('해설 목소리를 껐어요. 자막은 계속 나와요.','The commentary voice is off. Captions keep showing.'))}else speak(L('해설 목소리를 켰어요! 신나는 레이스를 즐겨요!','The commentary voice is on! Enjoy the race!'),true)});
@@ -947,6 +1458,10 @@ $('stopVoice').addEventListener('click',()=>{try{speechSynthesis.cancel()}catch(
 $('voiceSelect').addEventListener('change',e=>{voicePick[LANG]=e.target.value;save();speak(L('안녕하세요! 오늘 구슬 레이스 중계를 맡았습니다.','Hello! I am your marble race announcer today.'),true)});
 $('resultCard').addEventListener('click',e=>{const a=e.target.closest('[data-act]')?.dataset.act;if(!a)return;
  if(a==='again'){prepare();startRace()}else if(a==='nextWorld'){worldIdx=(worldIdx+1)%WORLDS.length;save();prepare();startRace()}
+ else if(a==='replay')startReplay();else if(a==='peek'){$('resultOverlay').classList.add('hidden');$('peekBack').classList.remove('hidden');try{$('peekBack').focus({preventScroll:true})}catch(e){}}else if(a==='edit')openBuilder(worldIdx-WORLDS.length,e.target.closest('[data-act]'));
+ else if(a==='pred'){labPred=e.target.closest('[data-k]').dataset.k;tone(700,80,'triangle',.07);coachTell('idea','좋은 예상이에요! 이제 실험으로 확인해 봐요 🌙','Great guess! Now let’s test it 🌙',{gap:45000,ms:3500});startRace()}
+ else if(a==='labAgain'){prepare();startRace()}else if(a==='labList')openLabPicker(e.target.closest('[data-act]'));else if(a==='labExit')exitLab();
+ else if(a==='labNext'){const k=EXPS.indexOf(labExp),nx=EXPS.find((x,i)=>i>k&&!stats.labs[x.id])||EXPS.find(x=>!stats.labs[x.id])||EXPS[(k+1)%EXPS.length];enterLab(nx.id)}
  else if(a==='next'){prepare();startRace()}else if(a==='newLeague'){startLeague();prepare();startRace()}});
 // ---------------------------------------------------------------- top bar, settings and confirm windows
 const modalStack=[];let confirmYes=null,confirmNo=null;
@@ -975,21 +1490,22 @@ function resetGame(){
  // MGP keeps this player's copy under "key@profileId", so this clears only this game for this player
  try{localStorage.removeItem('marbleRush.v2');localStorage.removeItem('marble3dsettings')}catch(e){}
  worldIdx=0;numBalls=8;voiceOn=true;sfxOn=true;mine=0;mineStats={races:0,wins:0};voicePick={};names=Array(16).fill('');mode='single';league=null;
+ customs=[];skin={pat:'plain',trail:'none'};stats=freshStats();badges=[];labMode=false;labExp=null;labPred=null;
  $('namesPanel').classList.add('hidden');fillVoiceSelect();prepare();closeModal('settingsModal');
  setCaption(L('🗑️ 마블 레이스 기록을 지웠어요. 처음부터 다시 시작해요!','🗑️ Marble Rush records erased. A fresh start!'))}
 $('resetDataBtn').addEventListener('click',e=>askConfirm({title:L('🗑️ 정말 지울까요?','🗑️ Really erase?'),
- text:L(`${ME?ME.name+'의 ':''}마블 레이스 기록(응원 기록, 구슬 이름, 리그 점수, 설정)만 지워져요. 다른 게임${ME?'과 다른 플레이어':''} 기록은 그대로예요. 되돌릴 수 없어요.`,`Only ${ME?ME.name+"'s ":''}Marble Rush records (cheering record, marble names, league points, settings) are erased. Other games${ME?' and other players':''} keep theirs. This cannot be undone.`),
+ text:L(`${ME?ME.name+'의 ':''}마블 레이스 기록(응원 기록, 구슬 이름, 리그 점수, 내 코스, 배지, 실험 노트, 설정)만 지워져요. 다른 게임${ME?'과 다른 플레이어':''} 기록은 그대로예요. 되돌릴 수 없어요.`,`Only ${ME?ME.name+"'s ":''}Marble Rush records (cheering record, marble names, league points, courses, badges, lab notebook, settings) are erased. Other games${ME?' and other players':''} keep theirs. This cannot be undone.`),
  no:L('아니요','No'),yes:L('지울래요','Erase'),opener:e.currentTarget,onYes:resetGame}));
 if(ME){$('meAv').textContent=ME.av;$('meName').textContent=ME.name;$('meChip').title=L(`플레이어: ${ME.name}`,`Player: ${ME.name}`);$('meChip').classList.remove('hidden');$('mineLabel').textContent=L(`${ME.av} ${ME.name}의 응원 구슬`,`${ME.av} ${ME.name}'s marble`)}
 window.addEventListener('keydown',e=>{if(modalStack.length||['INPUT','SELECT','TEXTAREA'].includes(e.target.tagName))return;if(e.code==='Space'){e.preventDefault();togglePause()}else if(e.code==='KeyC')cheer();else if(e.code==='KeyV'){cam.mode=(cam.mode+1)%3;setControls()}});
 window.addEventListener('resize',resize);
 if('speechSynthesis' in window){speechSynthesis.getVoices();speechSynthesis.addEventListener?.('voiceschanged',fillVoiceSelect)}
 fillVoiceSelect();setTimeout(fillVoiceSelect,600);
-resize();prepare();setCaption(L('환영합니다! 응원할 구슬을 고르고 출발 버튼을 눌러요!','Welcome! Pick your marble and press Start!'));
-window.__marble={get:()=>({phase,st,course,cam,league,mode,timeScale}),start:startRace,prepare,cheer,showResults,setMine:i=>{mine=i}};
+checkBadges(true);resize();prepare();setCaption(L('환영합니다! 응원할 구슬을 고르고 출발 버튼을 눌러요!','Welcome! Pick your marble and press Start!'));
+window.__marble={get:()=>({phase,st,course,cam,league,mode,timeScale,labMode,lab:labExp&&labExp.id,labPred,labRes,stats,badges,skin,customs,worldIdx,rec:rec.length}),start:startRace,prepare,cheer,showResults,setMine:i=>{mine=i}};
 requestAnimationFrame(frame);
 })();
 </script>
-<script>/* Coach Moon says hello once a day, shares a tip and suggests a break after a long session */try{coachStart(["오늘은 어떤 구슬을 응원할까요?", "Which marble will you cheer for today?"],[["구슬마다 이름을 지어 주면 응원이 더 신나요!", "Give the marbles names. Cheering is more fun!"], ["리그는 5경기 점수를 모두 더해요. 끝까지 응원해요!", "A league adds up all 5 races. Cheer to the end!"]])}catch(e){}</script>
+<script>/* Coach Moon says hello once a day, shares a tip and suggests a break after a long session */try{coachStart(["오늘은 어떤 구슬을 응원할까요?", "Which marble will you cheer for today?"],[["구슬마다 이름을 지어 주면 응원이 더 신나요!", "Give the marbles names. Cheering is more fun!"], ["리그는 5경기 점수를 모두 더해요. 끝까지 응원해요!", "A league adds up all 5 races. Cheer to the end!"], ["🛠️ 코스 만들기로 나만의 코스를 설계해 봐요. 달려 보고 고치면 더 멋져져요!", "🛠️ Design your own course. Test it, then make it even better!"], ["🔬 구슬 실험실에서 먼저 예상하고 실험해 봐요. 틀린 예상도 멋진 공부예요!", "🔬 In the marble lab, guess first, then test. Wrong guesses teach a lot too!"]])}catch(e){}</script>
 </body>
 </html>

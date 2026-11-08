@@ -16,11 +16,45 @@
 /* Language: ?lang=ko|en, then the saved choice, then the device language. Shared by every page on this site. */
 const LANG=(()=>{let q=null,s=null;try{q=new URLSearchParams(location.search).get('lang')}catch(e){}try{s=localStorage.getItem('moonGames.lang')}catch(e){}const l=q==='ko'||q==='en'?q:s==='ko'||s==='en'?s:/^ko/i.test(navigator.language||'')?'ko':'en';if(q===l){try{localStorage.setItem('moonGames.lang',l)}catch(e){}}document.documentElement.lang=l;return l})();
 const L=(ko,en)=>LANG==='en'?en:ko;
-// Coach Moon, the maker's character, adds one cheering line to the biggest moments only
-const COACH={up:['clap',[['꾸준히 한 덕분이에요. 정말 멋져요!','Your steady practice paid off. Awesome!'],['어제보다 오늘 더 잘하고 있어요!','You’re doing even better than yesterday!'],['계속 도전해서 여기까지 왔어요!','You kept trying, and look how far you’ve come!']]],
- big:['medal',[['정말 대단해요! 이 메달 받아요 🏅','Amazing! This medal is yours 🏅'],['최고예요! 오늘의 주인공이에요 🏅','The best! You’re the star today 🏅']]],
- try:['go',[['괜찮아요! 연습하면 다음엔 메달이에요.','That’s okay! Keep practicing and a medal is next.'],['끝까지 해낸 게 멋져요. 다음에 또 해 봐요!','You finished, and that’s great. Let’s try again next time!']]]};
-const coachLine=k=>{const [pose,ls]=COACH[k],t=ls[Math.random()*ls.length|0];return `<div class="mcoach"><img src="images/coach-moon-${pose}.webp" alt="" width="58" height="70" onerror="this.parentNode.remove()"><p><b>${L('문 코치','Coach Moon')}</b>${L(t[0],t[1])}</p></div>`};
+/*COACH:BEGIN*/
+// Coach Moon, the maker's character, cheers the player on in every game, in two ways:
+// · coachLine(kind) puts one line inside result and level-up windows (kinds: up, big, good, try, race).
+// · coachPop(pose,ko,en) shows a small bubble in the corner at good moments. It never blocks a tap and
+//   waits between appearances, so he never nags. He only praises and encourages.
+// Source: _src/coach/coach.js, copied into every game by _src/coach/inject.py.
+const coachEsc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const coachNm=()=>{try{return MGP.me&&MGP.me.name||''}catch(e){return ''}};
+const coachPick=a=>a[Math.random()*a.length|0];
+const coachSay_=t=>{const nm=coachNm(),ok=t.filter(x=>nm||!/\{nm\}/.test(x[0])),x=coachPick(ok.length?ok:t);return L(x[0],x[1]).replace(/\{nm\}/g,coachEsc(nm))};
+const COACH={
+ up:['clap',[['꾸준히 한 덕분이에요. 정말 멋져요!','Your steady practice paid off. Awesome!'],['어제보다 오늘 더 잘하고 있어요!','You’re doing even better than yesterday!'],['계속 도전해서 여기까지 왔어요!','You kept trying, and look how far you’ve come!'],['{nm}의 노력이 반짝반짝 빛나요 ✨','Your hard work is shining, {nm} ✨'],['문 코치가 박수 쳐요! 짝짝짝 👏','Coach Moon is clapping for you! 👏'],['이 기세 그대로 가 봐요! 🌙','Keep this going! 🌙']]],
+ big:['medal',[['정말 대단해요! 이 메달 받아요 🏅','Amazing! This medal is yours 🏅'],['최고예요! 오늘의 주인공이에요 🏅','The best! You’re the star today 🏅'],['{nm}, 문 코치가 정말 자랑스러워요! 🏅','I’m so proud of you, {nm}! 🏅'],['완벽해요! 멋진 실력이에요 🌟','Perfect! What great skills 🌟']]],
+ try:['go',[['괜찮아요! 연습하면 다음엔 더 잘할 거예요.','That’s okay! With practice you’ll do even better next time.'],['끝까지 해낸 게 멋져요. 다음에 또 해 봐요!','You finished, and that’s great. Let’s try again next time!'],['틀린 문제에서 제일 많이 배워요. 문 코치가 응원해요 🌙','We learn the most from mistakes. Coach Moon is cheering for you 🌙'],['{nm}, 할 수 있어요! 한 번 더 해 봐요 🌙','You can do it, {nm}! One more try 🌙']]],
+ good:['go',[['잘했어요! 조금만 더 연습하면 별 3개예요 ⭐','Nice work! A little more practice and it’s 3 stars ⭐'],['좋아요! 한 번 더 하면 더 잘할 거예요 🌙','Good job! One more go and you’ll do even better 🌙'],['실력이 쑥쑥 자라고 있어요! 문 코치가 응원해요 🌙','Your skills are growing fast! Coach Moon is cheering 🌙'],['{nm}, 점점 더 잘하고 있어요!','You’re getting better and better, {nm}!']]],
+ race:['clap',[['응원한 보람이 있어요! 정말 신나요!','Your cheering paid off! So exciting!'],['끝까지 응원한 게 최고예요!','Cheering to the very end was the best!'],['와, 우승이에요! 문 코치도 같이 응원했어요 🎉','A win! Coach Moon was cheering too 🎉']]]};
+function coachLine(k){const [pose,ls]=COACH[k];return `<div class="mcoach"><img src="images/coach-moon-${pose}.webp" alt="" width="58" height="70" onerror="this.parentNode.remove()"><p><b>${L('문 코치','Coach Moon')}</b>${coachSay_(ls)}</p></div>`}
+let coachAt=0,coachRun=0,coachMiss=0;
+// true while a game window (dialog) is open, so the bubble never covers one
+const coachBusy=()=>[...document.querySelectorAll('[role="dialog"],[aria-modal="true"]')].some(e=>e.getAttribute('aria-hidden')!=='true'&&e.getClientRects().length&&getComputedStyle(e).visibility!=='hidden');
+function coachLater(fn,left=180){if(!coachBusy()){fn();return}if(left>0)setTimeout(()=>coachLater(fn,left-1),1000)}
+function coachPop(pose,ko,en,o={}){const now=Date.now();if(!o.force&&now-coachAt<(o.gap||60000))return false;if(!o.force&&coachBusy())return false;coachAt=now;
+ let el=document.getElementById('coachPop');if(!el){el=document.createElement('div');el.id='coachPop';el.setAttribute('role','status');document.body.appendChild(el)}
+ el.innerHTML=`<img src="images/coach-moon-${pose}.webp" alt="" onerror="this.remove()"><p><b>${L('문 코치','Coach Moon')}</b>${L(ko,en)}</p>`;
+ el.classList.remove('show');void el.offsetWidth;el.classList.add('show');clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove('show'),o.ms||4500);return true}
+// call with every final answer: praise runs of right answers, and help after two misses in a row
+function coachAnswer(ok){
+ if(ok){coachRun++;coachMiss=0;if(![3,5,10,15,20,30].includes(coachRun))return;const n=coachRun,t=coachPick([[`${n}번 연속 성공! 집중력이 대단해요 🌙`,`${n} in a row! Amazing focus 🌙`],[`와, ${n}번 연속이에요! 문 코치가 박수 쳐요 👏`,`Wow, ${n} in a row! Coach Moon is clapping 👏`],[`${n}번 연속! 오늘 머리가 반짝반짝해요 ✨`,`${n} straight! Your brain is sparkling today ✨`]]);coachPop('clap',t[0],t[1],{gap:20000});return}
+ coachRun=0;coachMiss++;if(coachMiss!==2)return;const nm=coachEsc(coachNm()),t=coachPick([['괜찮아요! 틀리면서 배우는 거예요. 천천히 다시 봐요 🌙','That’s okay! Mistakes help us learn. Take another look 🌙'],[nm?`${nm}, 할 수 있어요! 문 코치가 응원해요 🌙`:'할 수 있어요! 문 코치가 응원해요 🌙',nm?`You can do it, ${nm}! Coach Moon is cheering 🌙`:'You can do it! Coach Moon is cheering 🌙'],['실수는 배움의 친구예요. 한 번 더 해 봐요!','Mistakes are friends of learning. One more try!']]);coachPop('go',t[0],t[1],{gap:30000})}
+// Once a day per game he says hello, a few minutes in he shares a tip, and after 20 minutes he suggests a little rest.
+// Each day a game is opened is noted for the main page's praise-stamp board.
+function coachStart(hello,tips){const game=(location.pathname.split('/').pop()||'index').replace(/\.html$/,''),k='moonGames.coach'+(MGP.me?'@'+MGP.me.id:''),d=new Date().toLocaleDateString('en-CA');
+ const notes=f=>{let st={};try{st=JSON.parse(localStorage.getItem(k)||'{}')||{}}catch(e){}f(st);try{localStorage.setItem(k,JSON.stringify(st))}catch(e){}return st};
+ const st=notes(st=>{st.played=(st.played||[]).filter(x=>x!==d).concat(d).slice(-14)}),nm=coachEsc(coachNm());
+ // the hello counts as said only once it has really been shown
+ if((st.hello||{})[game]!==d)setTimeout(()=>coachLater(()=>setTimeout(()=>{if(coachPop('hi',`${hello[0]} ${nm?`문 코치는 언제나 ${nm} 편이에요 🌙`:'문 코치가 응원해요 🌙'}`,`${hello[1]} ${nm?`Coach Moon is always on your side, ${nm} 🌙`:'Coach Moon is cheering for you 🌙'}`,{force:true,ms:6000}))notes(st=>{(st.hello=st.hello||{})[game]=d})},900)),2500);
+ if(tips&&tips.length)setTimeout(()=>{const t=coachPick(tips);coachPop('idea',t[0],t[1],{ms:6000})},4*60000);
+ setTimeout(()=>coachLater(()=>coachPop('go','벌써 20분이나 열심히 했어요! 눈이 피곤하면 잠깐 쉬어도 좋아요 🌙','20 minutes of hard work already! Rest your eyes for a bit if they’re tired 🌙',{force:true,ms:7000})),20*60000)}
+/*COACH:END*/
 function applyLang(){if(LANG!=='en')return;document.querySelectorAll('[data-en]').forEach(el=>{el.textContent=el.dataset.en});document.querySelectorAll('[data-en-html]').forEach(el=>{el.innerHTML=el.dataset.enHtml});for(const a of ['aria-label','placeholder','title'])document.querySelectorAll('[data-en-'+a+']').forEach(el=>el.setAttribute(a,el.getAttribute('data-en-'+a)))}
 function setLang(next){try{localStorage.setItem('moonGames.lang',next)}catch(e){}try{speechSynthesis.cancel()}catch(e){}const u=new URL(location.href);u.searchParams.set('lang',next);location.replace(u.href)}
 function wireLangTools(){const b=document.getElementById('langBtn');if(b){b.textContent=LANG==='en'?'🌐 한국어':'🌐 English';b.setAttribute('aria-label',LANG==='en'?'한국어로 바꾸기':'Switch to English');b.addEventListener('click',()=>setLang(LANG==='en'?'ko':'en'))}const h=document.getElementById('homeLink');if(h)h.href='index.html?lang='+LANG}
@@ -189,11 +223,19 @@ button,input,select{font:inherit}button{cursor:pointer;touch-action:manipulation
 @media(max-width:400px){.logo{display:none}.brand h1{font-size:19px}.me-chip{font-size:14px;padding-right:10px}.topbar-in{gap:8px}}
 @media(hover:none) and (pointer:coarse){.keys-hint{display:none}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{transition-duration:.01ms!important;animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important}.confetti-layer{display:none}}
-/* Coach Moon cheers inside the biggest moments */
+/*COACH:BEGIN*/
+/* Coach Moon: one line inside result windows (.mcoach) and a corner bubble at good moments (#coachPop, never takes taps) */
 .mcoach{display:flex;align-items:flex-end;gap:8px;margin:10px auto 6px;max-width:330px;text-align:left}
 .mcoach img{width:58px;height:70px;object-fit:contain;object-position:50% 100%;flex:0 0 58px}
 .mcoach p{margin:0 0 6px;flex:1;background:#f2f5ff;border:1px solid #dfe5f7;border-radius:14px;padding:7px 11px;font-size:14px;font-weight:700;line-height:1.4;color:#34407a}
 .mcoach b{display:block;font-size:11.5px;font-weight:900;color:#5b6cff}
+#coachPop{position:fixed;left:max(8px,env(safe-area-inset-left));top:calc(var(--coach-top,62px) + env(safe-area-inset-top));z-index:2147483000;display:flex;align-items:flex-start;gap:4px;max-width:min(320px,calc(100vw - 16px));pointer-events:none;opacity:0;transform:translateY(-14px) scale(.92);transform-origin:0 0;transition:opacity .25s ease,transform .4s cubic-bezier(.2,1.5,.4,1);font-family:system-ui,-apple-system,'Apple SD Gothic Neo','Noto Sans KR',sans-serif;text-align:left}
+#coachPop.show{opacity:1;transform:none}
+#coachPop img{width:54px;height:64px;flex:0 0 54px;object-fit:contain;object-position:50% 0;filter:drop-shadow(0 4px 8px rgba(0,0,0,.28))}
+#coachPop p{margin:8px 0 0;background:#fff;border:2px solid #c9d4ff;border-radius:4px 16px 16px 16px;padding:6px 11px;font-size:13.5px;font-weight:700;line-height:1.38;color:#2a3470;box-shadow:0 8px 20px rgba(20,30,80,.22)}
+#coachPop b{display:block;font-size:11px;font-weight:900;color:#5b6cff}
+@media (prefers-reduced-motion:reduce){#coachPop{transition:opacity .2s;transform:none}}
+/*COACH:END*/
 </style>
 </head>
 <body>
@@ -830,7 +872,7 @@ function showResults(){
  const myKo=ME?esc(ME.name)+'의 구슬':'내 구슬',myEn=ME?esc(ME.name)+"'s marble":'Your marble';
  mineStats.races++;if(won)mineStats.wins++;
  const fmt=t=>{const s=Math.max(0,t);return `${Math.floor(s/60)}:${(s%60).toFixed(1).padStart(4,'0')}`};
- let table='',actions='',coachHtml='',title,leagueDone=false,hero=champ.id,heroText=L(`${nameOf(champ.id)} 우승!`,`${nameOf(champ.id)} wins!`),heroSub='',mineLine=won?L(`🎉 ${myKo} ${esc(nameOf(mine))}이 우승했어요! 응원 대성공!`,`🎉 ${myEn} ${esc(nameOf(mine))} won! Great cheering!`):L(`${esc(MY)} ${myKo} ${esc(nameOf(mine))}은 ${myRank}위! 다음엔 1등 할 수 있어요!`,`${esc(MY)} ${myEn} ${esc(nameOf(mine))} came ${ord(myRank)}. It could win next time!`);
+ let table='',actions='',coachHtml=won?coachLine('race'):'',title,leagueDone=false,hero=champ.id,heroText=L(`${nameOf(champ.id)} 우승!`,`${nameOf(champ.id)} wins!`),heroSub='',mineLine=won?L(`🎉 ${myKo} ${esc(nameOf(mine))}이 우승했어요! 응원 대성공!`,`🎉 ${myEn} ${esc(nameOf(mine))} won! Great cheering!`):L(`${esc(MY)} ${myKo} ${esc(nameOf(mine))}은 ${myRank}위! 다음엔 1등 할 수 있어요!`,`${esc(MY)} ${myEn} ${esc(nameOf(mine))} came ${ord(myRank)}. It could win next time!`);
  if(mode==='league'&&league&&!league.done){
   const pts=Array(numBalls).fill(0);rank.forEach((m,i)=>{pts[m.id]=POINTS[i]||0;league.total[m.id]+=POINTS[i]||0});league.last=pts;
   const k=league.race,order=[...Array(numBalls).keys()].sort((a,b)=>league.total[b]-league.total[a]||pts[b]-pts[a]);
@@ -934,5 +976,6 @@ window.__marble={get:()=>({phase,st,course,cam,league,mode,timeScale}),start:sta
 requestAnimationFrame(frame);
 })();
 </script>
+<script>/* Coach Moon says hello once a day, shares a tip and suggests a break after a long session */try{coachStart(["오늘은 어떤 구슬을 응원할까요?", "Which marble will you cheer for today?"],[["구슬마다 이름을 지어 주면 응원이 더 신나요!", "Give the marbles names. Cheering is more fun!"], ["리그는 5경기 점수를 모두 더해요. 끝까지 응원해요!", "A league adds up all 5 races. Cheer to the end!"]])}catch(e){}</script>
 </body>
 </html>

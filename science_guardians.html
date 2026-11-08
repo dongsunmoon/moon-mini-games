@@ -16,11 +16,45 @@
 /* Language: ?lang=ko|en, then the saved choice, then the device language. Shared by every page on this site. */
 const LANG=(()=>{let q=null,s=null;try{q=new URLSearchParams(location.search).get('lang')}catch(e){}try{s=localStorage.getItem('moonGames.lang')}catch(e){}const l=q==='ko'||q==='en'?q:s==='ko'||s==='en'?s:/^ko/i.test(navigator.language||'')?'ko':'en';if(q===l){try{localStorage.setItem('moonGames.lang',l)}catch(e){}}document.documentElement.lang=l;return l})();
 const L=(ko,en)=>LANG==='en'?en:ko;
-// Coach Moon, the maker's character, adds one cheering line to the biggest moments only
-const COACH={up:['clap',[['꾸준히 한 덕분이에요. 정말 멋져요!','Your steady practice paid off. Awesome!'],['어제보다 오늘 더 잘하고 있어요!','You’re doing even better than yesterday!'],['계속 도전해서 여기까지 왔어요!','You kept trying, and look how far you’ve come!']]],
- big:['medal',[['정말 대단해요! 이 메달 받아요 🏅','Amazing! This medal is yours 🏅'],['최고예요! 오늘의 주인공이에요 🏅','The best! You’re the star today 🏅']]],
- try:['go',[['괜찮아요! 연습하면 다음엔 메달이에요.','That’s okay! Keep practicing and a medal is next.'],['끝까지 해낸 게 멋져요. 다음에 또 해 봐요!','You finished, and that’s great. Let’s try again next time!']]]};
-const coachLine=k=>{const [pose,ls]=COACH[k],t=ls[Math.random()*ls.length|0];return `<div class="mcoach"><img src="images/coach-moon-${pose}.webp" alt="" width="58" height="70" onerror="this.parentNode.remove()"><p><b>${L('문 코치','Coach Moon')}</b>${L(t[0],t[1])}</p></div>`};
+/*COACH:BEGIN*/
+// Coach Moon, the maker's character, cheers the player on in every game, in two ways:
+// · coachLine(kind) puts one line inside result and level-up windows (kinds: up, big, good, try, race).
+// · coachPop(pose,ko,en) shows a small bubble in the corner at good moments. It never blocks a tap and
+//   waits between appearances, so he never nags. He only praises and encourages.
+// Source: _src/coach/coach.js, copied into every game by _src/coach/inject.py.
+const coachEsc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const coachNm=()=>{try{return MGP.me&&MGP.me.name||''}catch(e){return ''}};
+const coachPick=a=>a[Math.random()*a.length|0];
+const coachSay_=t=>{const nm=coachNm(),ok=t.filter(x=>nm||!/\{nm\}/.test(x[0])),x=coachPick(ok.length?ok:t);return L(x[0],x[1]).replace(/\{nm\}/g,coachEsc(nm))};
+const COACH={
+ up:['clap',[['꾸준히 한 덕분이에요. 정말 멋져요!','Your steady practice paid off. Awesome!'],['어제보다 오늘 더 잘하고 있어요!','You’re doing even better than yesterday!'],['계속 도전해서 여기까지 왔어요!','You kept trying, and look how far you’ve come!'],['{nm}의 노력이 반짝반짝 빛나요 ✨','Your hard work is shining, {nm} ✨'],['문 코치가 박수 쳐요! 짝짝짝 👏','Coach Moon is clapping for you! 👏'],['이 기세 그대로 가 봐요! 🌙','Keep this going! 🌙']]],
+ big:['medal',[['정말 대단해요! 이 메달 받아요 🏅','Amazing! This medal is yours 🏅'],['최고예요! 오늘의 주인공이에요 🏅','The best! You’re the star today 🏅'],['{nm}, 문 코치가 정말 자랑스러워요! 🏅','I’m so proud of you, {nm}! 🏅'],['완벽해요! 멋진 실력이에요 🌟','Perfect! What great skills 🌟']]],
+ try:['go',[['괜찮아요! 연습하면 다음엔 더 잘할 거예요.','That’s okay! With practice you’ll do even better next time.'],['끝까지 해낸 게 멋져요. 다음에 또 해 봐요!','You finished, and that’s great. Let’s try again next time!'],['틀린 문제에서 제일 많이 배워요. 문 코치가 응원해요 🌙','We learn the most from mistakes. Coach Moon is cheering for you 🌙'],['{nm}, 할 수 있어요! 한 번 더 해 봐요 🌙','You can do it, {nm}! One more try 🌙']]],
+ good:['go',[['잘했어요! 조금만 더 연습하면 별 3개예요 ⭐','Nice work! A little more practice and it’s 3 stars ⭐'],['좋아요! 한 번 더 하면 더 잘할 거예요 🌙','Good job! One more go and you’ll do even better 🌙'],['실력이 쑥쑥 자라고 있어요! 문 코치가 응원해요 🌙','Your skills are growing fast! Coach Moon is cheering 🌙'],['{nm}, 점점 더 잘하고 있어요!','You’re getting better and better, {nm}!']]],
+ race:['clap',[['응원한 보람이 있어요! 정말 신나요!','Your cheering paid off! So exciting!'],['끝까지 응원한 게 최고예요!','Cheering to the very end was the best!'],['와, 우승이에요! 문 코치도 같이 응원했어요 🎉','A win! Coach Moon was cheering too 🎉']]]};
+function coachLine(k){const [pose,ls]=COACH[k];return `<div class="mcoach"><img src="images/coach-moon-${pose}.webp" alt="" width="58" height="70" onerror="this.parentNode.remove()"><p><b>${L('문 코치','Coach Moon')}</b>${coachSay_(ls)}</p></div>`}
+let coachAt=0,coachRun=0,coachMiss=0;
+// true while a game window (dialog) is open, so the bubble never covers one
+const coachBusy=()=>[...document.querySelectorAll('[role="dialog"],[aria-modal="true"]')].some(e=>e.getAttribute('aria-hidden')!=='true'&&e.getClientRects().length&&getComputedStyle(e).visibility!=='hidden');
+function coachLater(fn,left=180){if(!coachBusy()){fn();return}if(left>0)setTimeout(()=>coachLater(fn,left-1),1000)}
+function coachPop(pose,ko,en,o={}){const now=Date.now();if(!o.force&&now-coachAt<(o.gap||60000))return false;if(!o.force&&coachBusy())return false;coachAt=now;
+ let el=document.getElementById('coachPop');if(!el){el=document.createElement('div');el.id='coachPop';el.setAttribute('role','status');document.body.appendChild(el)}
+ el.innerHTML=`<img src="images/coach-moon-${pose}.webp" alt="" onerror="this.remove()"><p><b>${L('문 코치','Coach Moon')}</b>${L(ko,en)}</p>`;
+ el.classList.remove('show');void el.offsetWidth;el.classList.add('show');clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove('show'),o.ms||4500);return true}
+// call with every final answer: praise runs of right answers, and help after two misses in a row
+function coachAnswer(ok){
+ if(ok){coachRun++;coachMiss=0;if(![3,5,10,15,20,30].includes(coachRun))return;const n=coachRun,t=coachPick([[`${n}번 연속 성공! 집중력이 대단해요 🌙`,`${n} in a row! Amazing focus 🌙`],[`와, ${n}번 연속이에요! 문 코치가 박수 쳐요 👏`,`Wow, ${n} in a row! Coach Moon is clapping 👏`],[`${n}번 연속! 오늘 머리가 반짝반짝해요 ✨`,`${n} straight! Your brain is sparkling today ✨`]]);coachPop('clap',t[0],t[1],{gap:20000});return}
+ coachRun=0;coachMiss++;if(coachMiss!==2)return;const nm=coachEsc(coachNm()),t=coachPick([['괜찮아요! 틀리면서 배우는 거예요. 천천히 다시 봐요 🌙','That’s okay! Mistakes help us learn. Take another look 🌙'],[nm?`${nm}, 할 수 있어요! 문 코치가 응원해요 🌙`:'할 수 있어요! 문 코치가 응원해요 🌙',nm?`You can do it, ${nm}! Coach Moon is cheering 🌙`:'You can do it! Coach Moon is cheering 🌙'],['실수는 배움의 친구예요. 한 번 더 해 봐요!','Mistakes are friends of learning. One more try!']]);coachPop('go',t[0],t[1],{gap:30000})}
+// Once a day per game he says hello, a few minutes in he shares a tip, and after 20 minutes he suggests a little rest.
+// Each day a game is opened is noted for the main page's praise-stamp board.
+function coachStart(hello,tips){const game=(location.pathname.split('/').pop()||'index').replace(/\.html$/,''),k='moonGames.coach'+(MGP.me?'@'+MGP.me.id:''),d=new Date().toLocaleDateString('en-CA');
+ const notes=f=>{let st={};try{st=JSON.parse(localStorage.getItem(k)||'{}')||{}}catch(e){}f(st);try{localStorage.setItem(k,JSON.stringify(st))}catch(e){}return st};
+ const st=notes(st=>{st.played=(st.played||[]).filter(x=>x!==d).concat(d).slice(-14)}),nm=coachEsc(coachNm());
+ // the hello counts as said only once it has really been shown
+ if((st.hello||{})[game]!==d)setTimeout(()=>coachLater(()=>setTimeout(()=>{if(coachPop('hi',`${hello[0]} ${nm?`문 코치는 언제나 ${nm} 편이에요 🌙`:'문 코치가 응원해요 🌙'}`,`${hello[1]} ${nm?`Coach Moon is always on your side, ${nm} 🌙`:'Coach Moon is cheering for you 🌙'}`,{force:true,ms:6000}))notes(st=>{(st.hello=st.hello||{})[game]=d})},900)),2500);
+ if(tips&&tips.length)setTimeout(()=>{const t=coachPick(tips);coachPop('idea',t[0],t[1],{ms:6000})},4*60000);
+ setTimeout(()=>coachLater(()=>coachPop('go','벌써 20분이나 열심히 했어요! 눈이 피곤하면 잠깐 쉬어도 좋아요 🌙','20 minutes of hard work already! Rest your eyes for a bit if they’re tired 🌙',{force:true,ms:7000})),20*60000)}
+/*COACH:END*/
 function applyLang(){if(LANG!=='en')return;document.querySelectorAll('[data-en]').forEach(el=>{el.textContent=el.dataset.en});document.querySelectorAll('[data-en-html]').forEach(el=>{el.innerHTML=el.dataset.enHtml});for(const a of ['aria-label','placeholder','title'])document.querySelectorAll('[data-en-'+a+']').forEach(el=>el.setAttribute(a,el.getAttribute('data-en-'+a)))}
 function setLang(next){try{localStorage.setItem('moonGames.lang',next)}catch(e){}try{speechSynthesis.cancel()}catch(e){}const u=new URL(location.href);u.searchParams.set('lang',next);location.replace(u.href)}
 </script>
@@ -970,11 +1004,19 @@ button.ty-prog:active{transform:translateY(2px)}
 .ty-pvneed small{font-size:13px;font-weight:800}
 @media (prefers-reduced-motion:reduce){.ty-pvgo{animation:none}}
 /*SHOPCSS:END*/
-/* Coach Moon cheers inside the biggest moments */
+/*COACH:BEGIN*/
+/* Coach Moon: one line inside result windows (.mcoach) and a corner bubble at good moments (#coachPop, never takes taps) */
 .mcoach{display:flex;align-items:flex-end;gap:8px;margin:10px auto 6px;max-width:330px;text-align:left}
 .mcoach img{width:58px;height:70px;object-fit:contain;object-position:50% 100%;flex:0 0 58px}
 .mcoach p{margin:0 0 6px;flex:1;background:#f2f5ff;border:1px solid #dfe5f7;border-radius:14px;padding:7px 11px;font-size:14px;font-weight:700;line-height:1.4;color:#34407a}
 .mcoach b{display:block;font-size:11.5px;font-weight:900;color:#5b6cff}
+#coachPop{position:fixed;left:max(8px,env(safe-area-inset-left));top:calc(var(--coach-top,62px) + env(safe-area-inset-top));z-index:2147483000;display:flex;align-items:flex-start;gap:4px;max-width:min(320px,calc(100vw - 16px));pointer-events:none;opacity:0;transform:translateY(-14px) scale(.92);transform-origin:0 0;transition:opacity .25s ease,transform .4s cubic-bezier(.2,1.5,.4,1);font-family:system-ui,-apple-system,'Apple SD Gothic Neo','Noto Sans KR',sans-serif;text-align:left}
+#coachPop.show{opacity:1;transform:none}
+#coachPop img{width:54px;height:64px;flex:0 0 54px;object-fit:contain;object-position:50% 0;filter:drop-shadow(0 4px 8px rgba(0,0,0,.28))}
+#coachPop p{margin:8px 0 0;background:#fff;border:2px solid #c9d4ff;border-radius:4px 16px 16px 16px;padding:6px 11px;font-size:13.5px;font-weight:700;line-height:1.38;color:#2a3470;box-shadow:0 8px 20px rgba(20,30,80,.22)}
+#coachPop b{display:block;font-size:11px;font-weight:900;color:#5b6cff}
+@media (prefers-reduced-motion:reduce){#coachPop{transition:opacity .2s;transform:none}}
+/*COACH:END*/
 </style>
 </head>
 <body>
@@ -5667,7 +5709,8 @@ function cardUI(){const C=Y&&Y.card;if(!C)return;const {u,v}=C,p=u.price[v],can=
    :`<div class="ty-pvneed"><b>${COIN} ${p}</b><small>${L(`${p-S.coins}개 더 모으면 살 수 있어요`,`${p-S.coins} more coins needed`)}</small></div>`}</div></div>`}
 function closeCard(){if(!Y||!Y.card)return;Y.card=null;Y.el.pv.classList.add('hidden');Y.el.pv.innerHTML='';if(!(Y.focusT>0))Y.focus=null;Y.last=0;stopVoice()}
 function buyCard(){const C=Y&&Y.card;if(!C)return;const {u,v}=C,p=u.price[v];if(lvOf(u.id)!==v-1||S.coins<p){cardUI();return}
- S.coins-=p;updateHud();Y.focusT=2.2;Y.lastUp={u,v};closeCard();levelUp(u,v)}
+ S.coins-=p;updateHud();Y.focusT=2.2;Y.lastUp={u,v};closeCard();levelUp(u,v);
+ if(typeof coachPop==='function')setTimeout(()=>coachPop('clap','가게가 한층 멋져졌어요! 사장님 최고예요 🌙','Your café just got better! Great job, boss 🌙',{gap:45000}),1600)}
 function levelUp(u,v){if(S.shopX.fast4&&v===1&&Y.mach.some(m=>m.id===u.id))v=4;// old saves with "faster machines" get new ones fast too
  shopLvs()[u.id]=v;save();SFX.level();syncStaff();unstick();
  upSpots(u,v).forEach(([x,y],k)=>{if(k<3)burst(x,y)});const [x,y]=upSpots(u,v)[0];pop(x,y-.6,`Lv.${v}!`,'#ff7a00');
@@ -6219,6 +6262,7 @@ function popOver(el,html,cls){if(!el)return;const r=el.getBoundingClientRect(),d
 function answer(ok,info){
  const ch=PS.cur,q=ch.q,c=CARD[q.c],sim=q.t==='sim';
  if(!ok&&PS.foe&&!sim&&!ch.second){secondChance(ch);return}
+ coachAnswer(ok);
  // keep a running accuracy so pickItem can steer toward about 4 right answers in 5
  S.acc=(S.acc==null?.8:S.acc)*.9+(ok?(ch.second?.6:1):0)*.1;
  S.answered++;if(!(ok&&ch.second))learn(q.c,ok);PS.cardsHit.add(q.c);PS.byCard[q.c]=(PS.byCard[q.c]||'')+(ok?(ch.second?'r':'o'):'x');
@@ -6278,13 +6322,13 @@ function finish(){
  const P=PS;if(!P)return;P.over=true;stopVoice();
  const mult=D().mult,newCards=[...P.cardsHit].filter(id=>S.cards[id]);
  if(!P.foe){S.labPlays++;save();checkTrophies();
-  modal(`<div style="font-size:64px">🔬</div><h2>${L('실험 끝!','Lab finished!')}</h2><p>${L(`성공한 실험 ${P.right}개 · 실패 ${P.wrong}개`,`${P.right} solved · ${P.wrong} missed`)}</p>${S.lab.coins>=60?`<p class="sub">${L('오늘 실험실 코인은 다 받았어요. 내일 또 받을 수 있어요!','You’ve collected today’s lab coins. More tomorrow!')}</p>`:''}${mistakesHTML(P.mistakes)}
+  modal(`<div style="font-size:64px">🔬</div><h2>${L('실험 끝!','Lab finished!')}</h2><p>${L(`성공한 실험 ${P.right}개 · 실패 ${P.wrong}개`,`${P.right} solved · ${P.wrong} missed`)}</p>${S.lab.coins>=60?`<p class="sub">${L('오늘 실험실 코인은 다 받았어요. 내일 또 받을 수 있어요!','You’ve collected today’s lab coins. More tomorrow!')}</p>`:''}${coachLine(P.wrong?'up':'big')}${mistakesHTML(P.mistakes)}
    <div class="row"><button class="btn green" type="button" data-act="again">🔁 ${L('한 번 더','Again')}</button><button class="btn ghost" type="button" data-act="out">${L('실험실 목록','All labs')}</button></div>`,
   {closable:false,acts:{again:()=>()=>startLab(P.lab.id),out:()=>()=>go('labs')}});return}
  if(!P.won){
   S.lossRun=(S.lossRun||0)+1;S.easyRun=0;const offer=S.diff===2&&!S.gentle&&S.lossRun>=2;
   SFX.lose();save();
-  modal(`<div class="bossart sm" style="background:${P.grad}">${pic(P.foe.img,P.foe.icon)}</div><h2>${L('아쉽게 졌어요…','So close…')}</h2><p>${L('괜찮아요! 헷갈린 카드를 가게에서 한 번 더 배우고 도전하면 꼭 이길 수 있어요.','That’s okay! Learn the tricky cards once more in the shop, then try again. You can do it!')}</p>${learnCheckHTML(P)}${mistakesHTML(P.mistakes)}
+  modal(`<div class="bossart sm" style="background:${P.grad}">${pic(P.foe.img,P.foe.icon)}</div><h2>${L('아쉽게 졌어요…','So close…')}</h2><p>${L('괜찮아요! 헷갈린 카드를 가게에서 한 번 더 배우고 도전하면 꼭 이길 수 있어요.','That’s okay! Learn the tricky cards once more in the shop, then try again. You can do it!')}</p>${coachLine('try')}${learnCheckHTML(P)}${mistakesHTML(P.mistakes)}
    ${offer?`<div class="gentle"><p>🍀 ${L('조금 어렵게 느껴지면 <b>3학년</b> 단계로 바꿔 볼까요? 3학년 내용과 복습 문제가 나오고, 보기 3개·하트 4개로 도와줘요.','Feeling tricky? Try the <b>Grade 3</b> level: grade 3 ideas and review, with 3 choices and 4 hearts.')}</p><button class="btn gold" type="button" data-act="gentle">🍀 ${L('3학년으로 바꾸고 다시 도전','Switch to Grade 3 and retry')}</button></div>`:''}
    <div class="row"><button class="btn ghost" type="button" data-act="out">${L('나가기','Leave')}</button>${missedCards(P).length?`<button class="btn ghost" type="button" data-act="again">🔁 ${L('바로 도전','Retry now')}</button><button class="btn green" type="button" data-act="relearn">🏪 ${L('다시 배우고 도전','Learn again, then retry')}</button>`:`<button class="btn green" type="button" data-act="again">🔁 ${L('다시 도전','Try again')}</button>`}</div>`,
   {closable:false,acts:{again:()=>()=>retry(P),relearn:()=>()=>shopOpen(missedCards(P),()=>retry(P),{mode:'relearn',grad:P.grad,foe:P.foe}),gentle:()=>{setDiff('g');S.lossRun=0;save();return ()=>retry(P)},out:()=>()=>go(backView2(P))},onOpen:()=>speak(L('괜찮아요! 설명을 보고 다시 도전해요!','That’s okay! Read the explanations and try again!'))});
@@ -6304,14 +6348,14 @@ function finish(){
  const r=grant({coins,xp},true);
  const starRow=(P.mode==='stage')?`<div class="bigstars">${[0,1,2].map(i=>`<span class="${i<stars?'':'dim'}">⭐</span>`).join('')}</div>`:'';
  modal(`<div class="bossart sm down" style="background:${P.grad}">${pic(P.foe.img,P.foe.icon)}</div><h2>${title}</h2>${sub?`<p>${sub}</p>`:''}${starRow}
-  <p class="sub">${L(`정답 ${P.right} · 오답 ${P.wrong} · 최고 콤보 ${P.maxCombo}`,`${P.right} right · ${P.wrong} wrong · best combo ${P.maxCombo}`)}</p>
+  <p class="sub">${L(`정답 ${P.right} · 오답 ${P.wrong} · 최고 콤보 ${P.maxCombo}`,`${P.right} right · ${P.wrong} wrong · best combo ${P.maxCombo}`)}</p>${coachLine(P.mode==='boss'||P.mode==='final'?'big':'up')}
   ${rewardChips(r,extra)}${goUp?`<div class="gentle"><p>🍀 ${L('1~2학년 단계를 척척 깨고 있어요! 한 단계 위 <b>3학년</b>에 도전해 볼까요?','You’re breezing through grades 1–2! Ready for <b>Grade 3</b>?')}</p><button class="btn gold" type="button" data-act="up">🍀 ${L('3학년으로 올리기','Move up to Grade 3')}</button></div>`:''}${newCards.length&&!learnCheckHTML(P)?`<div class="mons sm">${newCards.slice(0,10).map(id=>`<span>${icon(CARD[id].icon)}</span>`).join('')}</div><p class="sub">${L(`이번에 연습한 과학 카드 ${newCards.length}장`,`${newCards.length} science card${newCards.length===1?'':'s'} practiced`)}</p>`:''}${learnCheckHTML(P)}${mistakesHTML(P.mistakes)}
   ${missedCards(P).length&&P.mode!=='review'?`<button class="btn ghost small ls-again" type="button" data-act="relearn">🏪 ${L('헷갈린 카드 가게에서 다시 배우기','Relearn the tricky cards in the shop')}</button>`:''}
   <div class="row">${next?`<button class="btn ghost" type="button" data-act="out">${L('지도','Map')}</button><button class="btn green" type="button" data-act="next">${next.label}</button>`:`<button class="btn ghost" type="button" data-act="again">🔁 ${L('다시 하기','Play again')}</button><button class="btn green" type="button" data-act="out">${L('좋아요!','Great!')}</button>`}</div>`,
  {closable:false,acts:{relearn:()=>()=>chestThen(P,stars,()=>shopOpen(missedCards(P),()=>go(backView2(P)),{mode:'review',grad:P.grad})),next:()=>()=>chestThen(P,stars,()=>next.fn()),out:()=>()=>chestThen(P,stars,()=>go(backView2(P))),again:()=>()=>chestThen(P,stars,()=>retry(P)),up:b=>{setDiff('g');S.easyRun=0;save();b.closest('.gentle').innerHTML=`<p>🍀 ${L('3학년으로 바꿨어요! 다음 판부터 새 문제가 나와요.','Switched to Grade 3! New questions from the next battle.')}</p>`;return false}},onOpen:b=>{if(P.mode==='stage')b.querySelectorAll('.bigstars span').forEach((s,i)=>{if(i<stars)setTimeout(()=>{s.classList.add('in');SFX.star(i)},300+i*260)});if(r.coins)setTimeout(()=>flyCoins(b.querySelector('.rewards'),r.coins),500);speak(title+' '+(P.foe.lose||''))}});
  if(P.firstFinal)modal(`<div class="cert"><div class="ct">🏅 ${L('과학 수호대 수료증','Science Guardian Certificate')}</div><div class="cn">${avatarHTML()}<b>${esc(S.name)}</b></div>
   <p>${L(`위 대원은 진짜 과학으로 헷갈 박사를 막고 ${WORLDS.length}개 지역을 모두 지켜 냈기에 이 수료증을 드립니다.`,`For stopping Dr. Mix-Up with real science and protecting all ${WORLDS.length} worlds, this certificate is proudly given to the guardian above.`)}</p>
-  <div class="cd">${dayKey()} · ${D().icon} ${esc(D().name)}</div></div><p>${S.diff===3?L('이제 모든 카드를 골드로 만들어 보세요!','Next, turn every card gold!'):L('이제 다음 학년 단계에도 도전해 보세요!','Next, try the next grade up!')}</p><div class="row"><button class="btn gold" type="button" data-act="close">🎉 ${L('만세!','Hooray!')}</button></div>`,{onOpen:()=>{celebrate('fireworks');speak(L(`${S.name} 대원, 축하해요! 진짜 과학 수호대가 되었어요!`,`Congratulations, ${S.name}! You are a true Science Guardian!`))}});
+  <div class="cd">${dayKey()} · ${D().icon} ${esc(D().name)}</div></div>${coachLine('big')}<p>${S.diff===3?L('이제 모든 카드를 골드로 만들어 보세요!','Next, turn every card gold!'):L('이제 다음 학년 단계에도 도전해 보세요!','Next, try the next grade up!')}</p><div class="row"><button class="btn gold" type="button" data-act="close">🎉 ${L('만세!','Hooray!')}</button></div>`,{onOpen:()=>{celebrate('fireworks');speak(L(`${S.name} 대원, 축하해요! 진짜 과학 수호대가 되었어요!`,`Congratulations, ${S.name}! You are a true Science Guardian!`))}});
  levelModals(r.levels);checkTrophies();save();
 }
 const backView2=P=>P.mode==='stage'||P.mode==='boss'||P.mode==='final'?'map':P.mode==='card'?'cards':'home';
@@ -6552,5 +6596,6 @@ window.__sciTest={get:()=>S,root:()=>ROOT,set:o=>{Object.assign(S,o);save();upda
  solve:()=>{if(!PS||!PS.cur||PS.cur.answered)return false;PS.cur.answered=true;answer(true,{});return true},miss:()=>{if(!PS||!PS.cur||PS.cur.answered)return false;PS.cur.answered=true;answer(false,{});return true},next:()=>{if(PS){if(PS.over)finish();else nextTurn()}},
  show:k=>{if(!PS)return false;PS.fixed=[QALL[k]];PS.over=false;nextTurn();return QALL[k]}};
 </script>
+<script>/* Coach Moon says hello once a day, shares a tip and suggests a break after a long session */try{coachStart(["오늘도 과학 수호대 출동!", "Science Guardians, let’s go!"],[["헷갈린 카드는 가게에서 다시 배우면 꼭 맞힐 수 있어요.", "Relearn tricky cards in the shop and you’ll get them next time."], ["틀린 문제는 설명을 읽으면 다음엔 맞힐 수 있어요!", "Read the explanation for a miss and you’ll get it next time!"], ["과학은 “왜 그럴까?” 하고 궁금해하는 데서 시작해요.", "Science starts with wondering “why?”"]])}catch(e){}</script>
 </body>
 </html>

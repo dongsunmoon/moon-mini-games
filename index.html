@@ -67,9 +67,18 @@ a{color:inherit}
 .co-go{display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:0 16px;border-radius:14px;background:var(--brand);color:#fff;text-decoration:none;font-weight:900;font-size:15.5px;box-shadow:0 5px 0 #3f4fd8}
 .co-go:active{transform:translateY(3px);box-shadow:0 2px 0 #3f4fd8}
 .co-go:focus-visible,.co-pic:focus-visible,.co-say:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+.co-stamps{display:flex;align-items:center;flex-wrap:wrap;gap:6px 8px;margin-top:10px;font-size:12.5px;font-weight:900;color:var(--muted)}
+.co-stamps[hidden]{display:none}
+.cs-row{display:flex;gap:4px}
+.cs{width:26px;height:26px;border-radius:50%;border:2px dashed #cdd5f0;display:grid;place-items:center;font-style:normal;font-size:14px;line-height:1}
+.cs.on{border:2px solid #e8475b;background:#fff1f2;transform:rotate(-12deg);box-shadow:inset 0 0 0 2px #fff}
+.cs.on::after{content:"🌙"}
+.cs.new{animation:stampIn .55s cubic-bezier(.2,1.6,.4,1) both}
+.cs-med{color:#8a5a00;background:#fff0c9;border-radius:999px;padding:3px 8px}
+@keyframes stampIn{0%{transform:scale(2.4) rotate(-40deg);opacity:0}100%{transform:scale(1) rotate(-12deg);opacity:1}}
 @keyframes coIn{0%{transform:scale(.7) translateY(12px);opacity:.2}100%{transform:none;opacity:1}}
 @media (max-width:480px){.co-pic{flex-basis:88px;width:88px;height:108px}.co-talk{padding:10px 13px 12px}}
-@media (prefers-reduced-motion:reduce){.co-pic.pop img{animation:none}}
+@media (prefers-reduced-motion:reduce){.co-pic.pop img,.cs.new{animation:none}}
 .games{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:18px}
 .card{display:flex;flex-direction:column;text-decoration:none;background:var(--card);border-radius:26px;overflow:hidden;border:1px solid var(--line);box-shadow:var(--shadow);transition:transform .18s ease,box-shadow .18s ease}
 .card:hover{transform:translateY(-4px);box-shadow:0 20px 40px rgba(54,72,160,.2)}
@@ -198,6 +207,7 @@ footer{margin-top:22px;text-align:center;color:#8a93b8;font-size:12px}
       <div class="co-name"><span data-en="Coach Moon">문 코치</span><button type="button" class="co-say" id="coSay" aria-label="소리로 듣기" data-en-aria-label="Read aloud">🔊</button></div>
       <p class="co-msg" id="coMsg" aria-live="polite"></p>
       <div class="co-acts" id="coActs"></div>
+      <div class="co-stamps" id="coStamps" hidden></div>
     </div>
   </section>
   <p class="hello" data-en="Tap a card to start right away.">카드를 누르면 바로 시작해요.</p>
@@ -406,7 +416,7 @@ function coachSay(pose,text,rec){CMSG=text;const pic=$('coPic'),img=$('coImg');i
 function coachRec(st){const d=st.day.replace(/-/g,'')|0;return CREC.map((f,i)=>[f,st.open[f]||'',(i+d)%CREC.length]).sort((a,b)=>a[1]<b[1]?-1:a[1]>b[1]?1:a[2]-b[2])[0][0]}
 function renderCoach(){const m=me();
  if(!m||coachWait){CN=null;coachSay('hi',PROF.list.length?L('안녕하세요! 저는 문 코치예요. 누가 놀지 골라 주세요.','Hi! I’m Coach Moon. Pick who’s playing.'):L('안녕하세요! 저는 문 코치예요. 위에서 프로필을 만들면 게임마다 내 기록이 따로 저장돼요.','Hi! I’m Coach Moon. Make a profile above and every game keeps your own progress.'));return}
- const done=CDONE[m.id+'|'+m.name];if(done){CN=getJ(CKEY+'@'+m.id,{});coachSay(...done);return}
+ const done=CDONE[m.id+'|'+m.name];if(done){CN=getJ(CKEY+'@'+m.id,{});coachSay(...done);coachStamps(CN,0);return}
  const say=(...a)=>{CDONE[m.id+'|'+m.name]=a;coachSay(...a)};
  const k=CKEY+'@'+m.id,st=getJ(k,{}),first=!st.snap,now={};st.open=st.open||{};
  for(const f in CPROG){let v=null;try{v=CPROG[f].get()}catch(e){}if(v)now[f]=v}
@@ -418,12 +428,20 @@ function renderCoach(){const m=me();
   else if(b.lv>a.lv)ev.push([b.lv%5===0?3:2,b.lv%5===0?'medal':'clap',L(`${gname(f)} 레벨 ${b.lv} 달성!`,`Level ${b.lv} in ${gname(f)}!`)]);
   else if(b.n>a.n)ev.push([1,'clap',P.more(b.n-a.n,b.n)])}
  ev.sort((x,y)=>y[0]-x[0]);
+ // praise stamps: every day a game was played earns one, seven make a Coach Moon medal (missed days never cost anything)
+ const nd=(st.played||[]).filter(d=>d>(st.stampLast||'')).sort();let fresh=0;if(nd.length){fresh=nd.length;st.stamps=(st.stamps|0)+fresh;st.stampLast=nd[nd.length-1]}
+ const full=fresh&&Math.floor(st.stamps/7)>Math.floor((st.stamps-fresh)/7),stp=fresh?L(` 칭찬 도장 쾅! 🌙`,` Praise stamp! 🌙`):'';
  const newDay=st.day!==today();st.day=today();st.views=newDay?1:(st.views||0)+1;st.snap=now;
- const rec=coachRec(st),nm=m.name;CN=st;setJ(k,st);
- if(first){say('hi',L(`${nm}, 안녕하세요! 저는 문 코치예요. 잘한 일이 생기면 여기서 꼭 칭찬해 줄게요. 오늘은 ${gname(rec)} 어때요?`,`Hi ${nm}! I’m Coach Moon. Whenever you do something great, I’ll cheer for you right here. How about ${gname(rec)} today?`),rec);return}
- if(ev.length){const [lvl,pose,txt]=ev[0];say(pose,`${nm}, ${txt} `+(lvl===3?L('정말 대단해요! 🏅','That’s amazing! 🏅'):L('잘했어요! 👏','Great job! 👏'))+(ev.length>1?L(' 다른 게임에서도 열심히 했네요.',' You worked hard in other games too.'):''),rec);return}
+ const rec=coachRec(st),nm=m.name;CN=st;setJ(k,st);coachStamps(st,fresh);
+ if(full){say('medal',L(`${nm}, 칭찬 도장 7개를 다 모았어요! 🏅 문 코치 메달을 줄게요. 문 코치는 언제나 ${nm} 편이에요!`,`${nm}, you filled all 7 praise stamps! 🏅 Here’s a Coach Moon medal. Coach Moon is always on your side!`),rec);return}
+ if(first){say('hi',L(`${nm}, 안녕하세요! 저는 문 코치예요. 잘한 일이 생기면 여기서 꼭 칭찬해 줄게요. 문 코치는 언제나 ${nm} 편이에요!`,`Hi ${nm}! I’m Coach Moon. Whenever you do something great, I’ll cheer for you right here. Coach Moon is always on your side!`)+(fresh?L(' 오늘 첫 칭찬 도장도 쾅! 🌙',' And here’s your first praise stamp! 🌙'):L(` 오늘은 ${gname(rec)} 어때요?`,` How about ${gname(rec)} today?`)),rec);return}
+ if(ev.length){const [lvl,pose,txt]=ev[0];say(pose,`${nm}, ${txt} `+(lvl===3?L('정말 대단해요! 🏅','That’s amazing! 🏅'):L('잘했어요! 👏','Great job! 👏'))+(ev.length>1?L(' 다른 게임에서도 열심히 했네요.',' You worked hard in other games too.'):'')+stp,rec);return}
+ if(fresh){say('clap',(st.stamps===1?L(`${nm}, 첫 칭찬 도장이에요! 게임을 한 날마다 하나씩 찍어 줄게요. 7개를 모으면 문 코치 메달! 🌙`,`${nm}, your first praise stamp! You get one for every day you play. Collect 7 for a Coach Moon medal! 🌙`):fresh>1?L(`${nm}, 그동안 열심히 했네요! 칭찬 도장 ${fresh}개 쾅! 🌙`,`${nm}, you’ve been working hard! ${fresh} praise stamps! 🌙`):L(`${nm}, 오늘도 열심히 했네요! 칭찬 도장 쾅! 🌙`,`${nm}, you worked hard today! Praise stamp! 🌙`)),rec);return}
  if(newDay){say('hi',L(`${nm}, 반가워요! 오늘은 ${gname(rec)} 어때요?`,`Hi ${nm}! How about ${gname(rec)} today?`),rec);return}
  if(st.views%2)say('idea',nextTip(),rec);else{const g=CGO[st.views/2%CGO.length|0];say('go',L(g[0],g[1]),rec)}}
+function coachStamps(st,fresh){const el=$('coStamps'),n=st.stamps|0;if(!n){el.hidden=true;return}el.hidden=false;
+ const on=n%7||(fresh?7:0),medals=Math.floor(n/7);
+ el.innerHTML=`<span>🌙 ${L('칭찬 도장','Praise stamps')} ${on}/7</span><span class="cs-row">${[...Array(7)].map((_,i)=>`<i class="cs${i<on?' on':''}${i<on&&i>=on-fresh?' new':''}" style="animation-delay:${.25+(i-(on-fresh))*.18}s"></i>`).join('')}</span>${medals?`<span class="cs-med">🏅 ${L('문 코치 메달','Coach Moon medal')} ×${medals}</span>`:''}`}
 function nextTip(){const st=CN||{};st.tip=((st.tip|0)+1)%CTIPS.length;if(CN&&me())setJ(CKEY+'@'+me().id,CN);const t=CTIPS[st.tip];return L(t[0],t[1])}
 function coachTip(){coachSay('idea',nextTip(),CN&&me()?coachRec(CN):null)}
 // read aloud with a natural voice (never the macOS novelty voices)

@@ -297,8 +297,8 @@ const GAMES=[
     thumb:'<div class="thumb t-py" aria-hidden="true"><img class="cover" src="images/cover-python.webp" alt="" onerror="this.remove()"><div class="isle"></div><span class="ic big" style="left:40%;top:30%">🐍</span><span class="ic" style="left:12%;top:16%">🐢</span><span class="ic" style="left:76%;top:12%">🍎</span><span class="code" style="left:8%;top:58%">for i in range(3):</span><span class="code" style="left:58%;top:62%">print("안녕!")</span></div>',
     title:['꼬마 파이썬 섬','Little Python Island'],
     age:['6~12세','Ages 6–12'],
-    desc:['아기 뱀 파이와 진짜 파이썬을 차근차근! 명령, 반복, 조건, 함수부터 리스트·딕셔너리·세트·클래스까지 12개 섬에서 그림을 그리고 가게를 열며 배워요.','Real Python, one step at a time, with Py the baby snake! From commands, loops and functions to lists, dicts, sets and classes, across 12 islands of drawing, gardens and shops.'],
-    tags:[['🐍 진짜 파이썬','🐍 Real Python'],['🏝️ 미션 84개','🏝️ 84 missions'],['🐞 친절한 버그 안내','🐞 Friendly bug help']],
+    desc:['버그 군단이 고장 낸 파이 마을을 진짜 파이썬으로 고쳐요! 문 코치와 배우고, 레스토랑 레시피와 놀이기구를 코딩하고, 버그 보스를 물리치고, 마을을 꾸며요.','Bugs broke Py’s village, so fix it with real Python! Learn with Coach Moon, code restaurant recipes and rides, beat bug bosses and decorate the village.'],
+    tags:[['🐍 진짜 파이썬','🐍 Real Python'],['⚔️ 버그 보스 13','⚔️ 13 bug bosses'],['🎡 놀이기구 미니게임','🎡 Ride mini-games']],
     stat:()=>{const d=readSave('pythonIsland.v1');const n=d&&d.done?Object.keys(d.done).length:0;return n?L(`🐍 Lv.${d.lvl} · 마친 미션 ${n}개 · 고친 버그 ${(d.stats&&d.stats.fixed)||0}개`,`🐍 Lv.${d.lvl} · ${n} mission${n===1?'':'s'} · ${(d.stats&&d.stats.fixed)||0} bugs fixed`):''}
   }
 ];

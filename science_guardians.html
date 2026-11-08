@@ -54,6 +54,20 @@ function coachStart(hello,tips){const game=(location.pathname.split('/').pop()||
  if((st.hello||{})[game]!==d)setTimeout(()=>coachLater(()=>setTimeout(()=>{if(coachPop('hi',`${hello[0]} ${nm?`문 코치는 언제나 ${nm} 편이에요 🌙`:'문 코치가 응원해요 🌙'}`,`${hello[1]} ${nm?`Coach Moon is always on your side, ${nm} 🌙`:'Coach Moon is cheering for you 🌙'}`,{force:true,ms:6000}))notes(st=>{(st.hello=st.hello||{})[game]=d})},900)),2500);
  if(tips&&tips.length)setTimeout(()=>{const t=coachPick(tips);coachPop('idea',t[0],t[1],{ms:6000})},4*60000);
  setTimeout(()=>coachLater(()=>coachPop('go','벌써 20분이나 열심히 했어요! 눈이 피곤하면 잠깐 쉬어도 좋아요 🌙','20 minutes of hard work already! Rest your eyes for a bit if they’re tired 🌙',{force:true,ms:7000})),20*60000)}
+// Chrome's read-aloud voice can freeze: it says it is speaking, but no sentence ever starts and every later one waits behind it.
+// Starting a sentence the instant after cancel() is a common trigger, so a sentence that follows a cancel waits a moment.
+// A sentence that has not started after 3 seconds is cancelled and tried once more; if that try is stuck too,
+// Coach Moon says once how to get the voice back, instead of the game going quiet with no reason.
+(()=>{const ss=window.speechSynthesis;if(!ss||ss.__mgGuard||typeof SpeechSynthesisUtterance!=='function')return;ss.__mgGuard=1;
+ const speak0=ss.speak.bind(ss),cancel0=ss.cancel.bind(ss),live=new Set();let gen=0,cutAt=0,told=false;
+ ss.cancel=()=>{gen++;if(ss.speaking||ss.pending)cutAt=performance.now();live.clear();cancel0()};
+ const send=(u,my,retry)=>{if(my!==gen)return;const watch=!live.size;let started=false;live.add(u);
+  u.addEventListener('start',()=>{started=true});['end','error'].forEach(e=>u.addEventListener(e,()=>live.delete(u)));
+  try{if(ss.paused)ss.resume()}catch(e){}speak0(u);if(!watch)return;
+  setTimeout(()=>{if(started||my!==gen||!live.has(u))return;live.delete(u);cancel0();
+   if(!retry){const c=new SpeechSynthesisUtterance(u.text);['lang','voice','rate','pitch','volume'].forEach(k=>{try{c[k]=u[k]}catch(e){}});setTimeout(()=>send(c,my,true),200)}
+   else if(!told){told=true;if(typeof coachPop==='function')coachPop('idea','목소리가 잠깐 멈췄어요. 브라우저를 완전히 껐다 켜면 다시 들려요 🌙','The voice got stuck. Close the browser fully and open it again to hear it 🌙',{force:true,ms:8000})}},3000)};
+ ss.speak=u=>{const my=gen,wait=cutAt+150-performance.now();if(wait>0)setTimeout(()=>send(u,my,false),wait);else send(u,my,false)}})();
 /*COACH:END*/
 function applyLang(){if(LANG!=='en')return;document.querySelectorAll('[data-en]').forEach(el=>{el.textContent=el.dataset.en});document.querySelectorAll('[data-en-html]').forEach(el=>{el.innerHTML=el.dataset.enHtml});for(const a of ['aria-label','placeholder','title'])document.querySelectorAll('[data-en-'+a+']').forEach(el=>el.setAttribute(a,el.getAttribute('data-en-'+a)))}
 function setLang(next){try{localStorage.setItem('moonGames.lang',next)}catch(e){}try{speechSynthesis.cancel()}catch(e){}const u=new URL(location.href);u.searchParams.set('lang',next);location.replace(u.href)}

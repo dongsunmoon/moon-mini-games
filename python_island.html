@@ -8,7 +8,7 @@
 <meta property="og:title" content="꼬마 파이썬 섬 · Little Python Island">
 <meta property="og:description" content="코드로 파이를 움직이고, 그림을 그리고, 가게를 열어요! 진짜 파이썬을 차근차근. Move Py, draw pictures and run a shop with real Python!">
 <meta property="og:type" content="website">
-<meta property="og:image" content="https://game.dongsunmoon.com/images/og-image.jpg">
+<meta property="og:image" content="https://game.dongsunmoon.com/images/og-python.jpg">
 <meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐍</text></svg>">
@@ -2147,8 +2147,8 @@ const ACCS={'':['','없음|None',0],glasses:['👓','안경|Glasses',25],shades:
 const WORLD_PRIZE={4:['acc','star'],8:['hat','chef'],12:['hat','grad'],11:['color','gold']};
 // 3D pictures of Py (images/py-<pose>.webp) are used once they are listed here; until then Py is drawn in SVG.
 // The wardrobe colours then become a hue filter on the picture.
-const PY_HAVE=new Set([]),PY_POSE={happy:'hi',wow:'wow',think:'think',oops:'oops'};
-const PY_TINT={leaf:'',sky:'hue-rotate(95deg)',berry:'hue-rotate(205deg) saturate(1.2)',grape:'hue-rotate(150deg)',sun:'hue-rotate(-55deg) saturate(1.3) brightness(1.1)',mint:'hue-rotate(40deg)',coral:'hue-rotate(-100deg) saturate(1.3)',night:'hue-rotate(120deg) brightness(.85)',rainbow:'',gold:'sepia(1) saturate(2.5) hue-rotate(-12deg) brightness(1.05)'};
+const PY_HAVE=new Set(['hi','wow','think','oops']),PY_POSE={happy:'hi',wow:'wow',think:'think',oops:'oops'};
+const PY_TINT={leaf:'',sky:'hue-rotate(130deg) saturate(1.15)',berry:'hue-rotate(255deg) saturate(1.1)',grape:'hue-rotate(200deg) saturate(1.05)',sun:'hue-rotate(-25deg) saturate(1.2) brightness(1.05)',mint:'hue-rotate(90deg)',coral:'hue-rotate(-60deg) saturate(1.25)',night:'hue-rotate(160deg) brightness(.82) saturate(1.2)',rainbow:'',gold:'sepia(1) saturate(2.5) hue-rotate(-12deg) brightness(1.05)'};
 let pyN=0;
 function pySVG(mood='happy',o={}){const pose=PY_POSE[mood]||'hi';
  if(PY_HAVE.has(pose)){const col=o.color||S.wear.color,hat=HATS[o.hat??S.wear.hat]||HATS[''],acc=ACCS[o.acc??S.wear.acc]||ACCS[''];

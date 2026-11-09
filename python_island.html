@@ -647,6 +647,7 @@ button.vm{border:0;background:none;padding:0;display:flex;flex-direction:column;
 @media (min-width:860px){.dv-box .chest{width:76px;height:64px}}
 @media (prefers-reduced-motion:reduce){.sp-stars,.dv-sea::before,.fs-me,.fs-py,.fs-card .fs-pic::before,.fs-card .fs-pic img{animation:none}}
 .fs-ic.pgi{display:inline-block;width:24px;height:24px;vertical-align:middle}.fs-book .fs-ic.pgi{width:32px;height:32px;margin:auto}.fs-book{display:grid;place-items:center;padding:4px}
+.pg-big .pg-hero.pgi{width:120px;height:120px;margin:0 auto 2px}
 /* ================================================================ boss battles */
 .stage.boss{background:#1b1440}
 .bb{position:absolute;inset:0;display:flex;flex-direction:column;color:#fff;overflow:hidden;background:linear-gradient(180deg,#2c1f63 0%,#171035 70%)}
@@ -3685,7 +3686,7 @@ function fishGame(){const play=shell(LIST[0].name,'🎣','fish'),lv=level(),rod=
  function rodSum(){const c=rodFill(tier,vals),bs=tier===5?[...(/baits = \[(.*)\]/.exec(c)||['',''])[1].matchAll(/"(\w+)"/g)].map(m=>m[1]):[(/"(\w+)"/.exec(c)||['','worm'])[1]],d=/depth = (\d)/.exec(c),n=/range\((\d)\)/.exec(c);
   return bs.map(b=>(BAIT[b]||['🎣'])[0]).join('')+(d?` 📏${d[1]}`:'')+(n?` 🔁${n[1]}`:tier===5?' 🔁3':'')+(tier>=4?' ❓':'')}
  function rodRender(){const filled=rodFill(tier,vals).split('\n'),capOn=typeof captOn==='function'?captOn():true;
-  rodTab.innerHTML=`<span class="fs-tt">🎣 ${L('낚싯대 코드','Rod code')}</span><span class="fs-sum">${esc(rodSum())}</span><span class="arr">▲</span>`;
+  rodTab.innerHTML=`<span class="fs-tt">${img('pg-fish-rod','🎣','fs-ic')} ${L('낚싯대 코드','Rod code')}</span><span class="fs-sum">${esc(rodSum())}</span><span class="arr">▲</span>`;
   rodTab.setAttribute('aria-expanded',rodEl.classList.contains('open')?'true':'false');
   rodBody.innerHTML=`<p class="fs-rtip">${tx(RODTIP[tier])}</p>`+codeHTML(ROD[tier].join('\n'),{cls:'fs-codebox',
    slot:(k,op)=>{const v=op[vals[k]]??op[0],bk=/^"(\w+)"$/.exec(v);return `<button type="button" class="slot fs-slot ${/^\d+$/.test(v)?'num':''}" data-k="${k}">${hl(v)}${bk&&BAIT[bk[1]]?`<i>${BAIT[bk[1]][0]}</i>`:''}</button>`},
@@ -3889,7 +3890,7 @@ function fishGame(){const play=shell(LIST[0].name,'🎣','fish'),lv=level(),rod=
   state:()=>({ph:st.ph,tries:tries(),total,tier,queue:st.queue.length,loopN:st.loopN,cur:st.cur&&{id:st.cur.f.id,big:st.cur.f.big,bait:st.cur.bait,depth:st.cur.depth,mode:st.cur.mode,cm:st.cur.cm},
    ten:+st.ten.toFixed(3),dist:+st.dist.toFixed(3),wanted:wanted.id,wantedGot:st.wantedGot,caught:st.caught.map(c=>c.id),code:rodFill(tier,vals),busy:st.ph!=='ready'})};
  size();hud();rodRender();if(tier>=2&&(book.seenTier||0)<tier){rodOpen(true);book.seenTier=tier}draw(performance.now()/1000);pySay('꾹 눌렀다가 떼면 휙! 던져요|Hold, then let go to cast!');
- howTo('🎣',LIST[0].name,['화면을 꾹 누르면 힘이 모여요. 떼면 휙! 던져요.|Hold the screen to build power, then let go to cast!','찌가 톡톡 흔들리면 기다려요. 쏙! 들어가며 ❗가 뜨면 바로 탭!|Wait while the bobber wiggles. When it dips and ❗ pops up, tap!','꾹 눌러서 감아요. 줄이 빨개지면 잠깐 떼요.|Hold to reel. Let go for a moment when the line turns red.',
+ howTo(img('pg-fisher','🎣','pg-hero'),LIST[0].name,['화면을 꾹 누르면 힘이 모여요. 떼면 휙! 던져요.|Hold the screen to build power, then let go to cast!','찌가 톡톡 흔들리면 기다려요. 쏙! 들어가며 ❗가 뜨면 바로 탭!|Wait while the bobber wiggles. When it dips and ❗ pops up, tap!','꾹 눌러서 감아요. 줄이 빨개지면 잠깐 떼요.|Hold to reel. Let go for a moment when the line turns red.',
    tier===1?'🎯 찾는 물고기는 좋아하는 미끼로! 아래 🎣 낚싯대 코드에서 미끼를 바꿔요.|Use the 🎯 wanted fish’s favourite bait. Change it in the 🎣 rod code below!':'🎯 찾는 물고기는 좋아하는 미끼와 깊이로! 아래 🎣 낚싯대 코드에서 바꿔요.|Set the 🎯 wanted fish’s favourite bait and depth in the 🎣 rod code below!'],
   '꾹 눌렀다 떼서 던지고, 찌가 쏙! 들어가면 톡! 낚싯대 코드를 바꾸면 다른 물고기가 와요.|Hold and let go to cast, then tap when the bobber dips! Change the rod code to call other fish.',()=>{size();frames(tick)})}
 
@@ -3983,7 +3984,7 @@ function shootGame(){const play=shell(LIST[2].name,'🚀','shoot'),lv=level(),sh
  listen(window,'resize',size);
  G.test={answer:ok=>{const m=mets.find(x=>x.state==='fall');if(!m)return false;const zapIt=ok?m.q.bad:!m.q.bad;if(zapIt){cool=0;fire(m)}else{m.y=H;landed(m)}return true},state:()=>({spawned,resolved,total,shields,on:mets.filter(m=>m.state==='fall').map(m=>m.q)})};
  size();drawShields();placeShip();
- howTo('🚀',LIST[2].name,['코드 운석이 떨어져요. 줄을 잘 읽어요.|Code meteors fall. Read each line.','🐞 버그가 있는 줄을 눌러서 디버그 광선을 쏴요!|Tap a line with a 🐞 bug to fire the debug beam!','버그 없는 바른 줄은 쏘지 말고 별로 받아요 ⭐|Let correct lines through — they become stars ⭐'],
+ howTo(img('pg-rocket','🚀','pg-hero'),LIST[2].name,['코드 운석이 떨어져요. 줄을 잘 읽어요.|Code meteors fall. Read each line.','🐞 버그가 있는 줄을 눌러서 디버그 광선을 쏴요!|Tap a line with a 🐞 bug to fire the debug beam!','버그 없는 바른 줄은 쏘지 말고 별로 받아요 ⭐|Let correct lines through — they become stars ⭐'],
   '틀린 곳이 보이면 쏘고, 바른 코드는 지켜 줘요. 따옴표, 괄호, 콜론(:)을 잘 봐요!|Zap what’s broken, keep what’s right. Watch quotes, brackets and colons!',()=>{spawnT=.4;frames(tick)})}
 
 // ================================================================ 🤿 Treasure Dive Pool — a list of chests: swim to the one the code points at
@@ -4014,7 +4015,7 @@ function diveGame(){const play=shell(LIST[3].name,'🤿','dive'),lv=level(),suit
  listen(window,'resize',()=>{size();home()});
  G.test={answer:ok=>{if(busy||!q)return;const i=ok?q.pos:(q.pos+1)%q.items.length,b=floor.querySelector(`[data-i="${i}"]`);if(b)swim(i,b)},state:()=>({qn,total,q:q&&{kind:q.kind,code:q.code,ask:q.ask,ans:q.ans,pos:q.pos},busy})};
  size();home();
- howTo('🤿',LIST[3].name,['위의 코드는 보물 상자 리스트예요.|The code above is a list of treasure chests.','칸 번호는 0부터 세요! 맞는 상자를 눌러 헤엄쳐 가요.|Positions start at 0! Tap the right chest to swim there.','공기 🫧가 떨어지기 전에 찾아요.|Find it before your air 🫧 runs out.'],
+ howTo(img('pg-diver','🤿','pg-hero'),LIST[3].name,['위의 코드는 보물 상자 리스트예요.|The code above is a list of treasure chests.','칸 번호는 0부터 세요! 맞는 상자를 눌러 헤엄쳐 가요.|Positions start at 0! Tap the right chest to swim there.','공기 🫧가 떨어지기 전에 찾아요.|Find it before your air 🫧 runs out.'],
   '리스트는 기차처럼 0번 칸부터 시작해요. 손가락으로 0, 1, 2 세어 봐요!|A list starts at car 0, like a train. Count 0, 1, 2 with your finger!',()=>{size();next();frames(tick)})}
 
 // ---------------------------------------------------------------- the ride list and the entry points the app calls

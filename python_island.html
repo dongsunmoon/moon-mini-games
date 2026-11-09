@@ -470,6 +470,7 @@ button.vm{border:0;background:none;padding:0;display:flex;flex-direction:column;
 .cl.cur .lcap{background:#ffe7a3;color:#7a5200}.cl.err .lcap{display:none}
 .tile,.ocard{display:inline-flex;flex-direction:column;align-items:flex-start;gap:2px}.ocard{align-items:stretch}
 .tcap{font-family:system-ui,-apple-system,'Apple SD Gothic Neo',sans-serif;font-size:12.5px;font-weight:800;color:#5d6f8c;white-space:normal;line-height:1.25}
+.ridecard.pic{padding:8px 8px 12px}.ridecard .rimg{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:14px;margin-bottom:4px;box-shadow:0 3px 8px rgba(0,0,0,.12)}
 /* ================================================================ Little Python Island · park rides */
 .pg{position:absolute;inset:0;display:flex;flex-direction:column;overflow:hidden;color:var(--ink);user-select:none;-webkit-user-select:none;touch-action:manipulation}
 .pg-top{position:relative;z-index:6;display:flex;align-items:center;gap:8px;padding:6px max(8px,env(safe-area-inset-right)) 6px max(10px,env(safe-area-inset-left));background:rgba(255,255,255,.88);box-shadow:0 2px 10px rgba(0,0,0,.12)}
@@ -645,6 +646,7 @@ button.vm{border:0;background:none;padding:0;display:flex;flex-direction:column;
 .dv-sea .qn{position:absolute;right:10px;top:8px;font-weight:900;color:#fff;background:#0b5f5a99;border-radius:10px;padding:2px 8px}
 @media (min-width:860px){.dv-box .chest{width:76px;height:64px}}
 @media (prefers-reduced-motion:reduce){.sp-stars,.dv-sea::before,.fs-me,.fs-py,.fs-card .fs-pic::before,.fs-card .fs-pic img{animation:none}}
+.fs-ic.pgi{display:inline-block;width:24px;height:24px;vertical-align:middle}.fs-book .fs-ic.pgi{width:32px;height:32px;margin:auto}.fs-book{display:grid;place-items:center;padding:4px}
 /* ================================================================ boss battles */
 .stage.boss{background:#1b1440}
 .bb{position:absolute;inset:0;display:flex;flex-direction:column;color:#fff;overflow:hidden;background:linear-gradient(180deg,#2c1f63 0%,#171035 70%)}
@@ -779,6 +781,9 @@ button.rbm:hover{border-color:#ffb020}.rbm b{font-size:14px;line-height:1.25}.rb
 @media (max-width:420px){.rb-cap{font-size:14px;padding:8px 10px}.rb-lv b{font-size:13.5px}.rb-up{padding:6px 9px;font-size:14px}}
 @media (prefers-reduced-motion:reduce){.rb-up.can,.rb-cap.show,.rbc-in{animation:none}}
 .modal .big .vill.big{width:110px;height:110px;flex:none;display:inline-block;vertical-align:middle}
+.rb-cv{cursor:pointer}
+.rbc-img{width:64px;height:64px;object-fit:contain;display:block;margin:0 auto}.rbb-img{width:46px;height:46px;object-fit:contain;display:block}
+.rbb span{display:grid;place-items:center;min-height:46px}
 /*COACH:BEGIN*/
 /* Coach Moon: one line inside result windows (.mcoach) and a corner bubble at good moments (#coachPop, never takes taps) */
 .mcoach{display:flex;align-items:flex-end;gap:8px;margin:10px auto 6px;max-width:330px;text-align:left}
@@ -3452,7 +3457,7 @@ const out=code=>{const r=PY.run(code,{maxTrace:1,vars:false});return r.err||r.ne
 const fails=code=>{const r=PY.run(code,{maxTrace:1,vars:false});return !!(r.err||r.need)};
 const FRUIT=['🍎','🍌','🍇','🍓','🍒','🍑','🍉','🍋'],PETS=['🐶','🐱','🐰','🐻','🐼','🐸','🦊','🐯'],GEMS=['💎','🐚','👑','⭐','🪙','🔮','🧸','🎁'];
 // optional pictures (emoji/canvas until they are in images/)
-const GAME_IMG=new Set([]);
+const GAME_IMG=new Set(['pg-chest','pg-diver','pg-rocket','pg-fisher','pg-bucket','pg-fish-bg','pg-fish-pier','pg-fish-bobber','pg-fish-book','pg-fish-rod']);
 const img=(k,fb,cls='')=>GAME_IMG.has(k)?`<img class="pgi ${cls}" src="images/${k}.webp" alt="" draggable="false">`:`<span class="pge ${cls}">${fb}</span>`;
 
 // ---------------------------------------------------------------- questions whose answer is one short value (kart)
@@ -3634,7 +3639,7 @@ function fishGame(){const play=shell(LIST[0].name,'🎣','fish'),lv=level(),rod=
  play.innerHTML=`<div class="fs-scene"><canvas class="fs-cv"></canvas>
    <div class="fs-me"><img src="images/aq-me-${meKey()}.webp" alt="" draggable="false"></div><div class="fs-rail"></div>
    <div class="fs-py"><img src="images/py-hi.webp" alt="" draggable="false"></div><div class="fs-say"></div><div class="fs-power"><i></i></div></div>
-  <div class="fs-hud"><div class="fs-want"></div><div class="fs-side"><span class="fs-n"></span><span class="fs-bucket">🪣 <b>0</b></span><button type="button" class="fs-book" aria-label="${L('물고기 도감','Fish book')}">📖</button></div></div>
+  <div class="fs-hud"><div class="fs-want"></div><div class="fs-side"><span class="fs-n"></span><span class="fs-bucket">${img('pg-bucket','🪣','fs-ic')} <b>0</b></span><button type="button" class="fs-book" aria-label="${L('물고기 도감','Fish book')}">${img('pg-fish-book','📖','fs-ic')}</button></div></div>
   <div class="fs-run"></div><div class="fs-reel" aria-hidden="true"><em>💥</em><div class="fs-ten"><i></i></div><em>🎣</em></div>
   <div class="fs-rod"><button type="button" class="fs-tab"></button><div class="fs-body"></div></div><div class="fs-reveal hidden"></div>`;
  const $q=s=>play.querySelector(s),scene=$q('.fs-scene'),cv=$q('.fs-cv'),cx=cv.getContext('2d'),meEl=$q('.fs-me'),pyEl=$q('.fs-py'),sayEl=$q('.fs-say'),powEl=$q('.fs-power'),
@@ -3809,18 +3814,26 @@ function fishGame(){const play=shell(LIST[0].name,'🎣','fish'),lv=level(),rod=
   draw(now/1000);return !G.done}
  // ---- drawing
  const FIMG={};const fimg=id=>FIMG[id]||(FIMG[id]=Object.assign(new Image(),{src:`images/aq-fish-${id}.webp`}));
+ const ART={};for(const k of ['pg-fish-bg','pg-fish-pier','pg-fish-bobber'])if(GAME_IMG.has(k))ART[k]=Object.assign(new Image(),{src:`images/${k}.webp`});
+ const art=k=>{const m=ART[k];return m&&m.complete&&m.naturalWidth?m:null};
+ // the painted lagoon: scaled so its horizon (22.6% down the picture) sits on the game's horizon and it covers the scene
+ function paintBg(c,m){const iw=m.naturalWidth,ih=m.naturalHeight,hf=.226,s=Math.max(W/iw,hz/(hf*ih),(H-hz)/((1-hf)*ih));c.drawImage(m,(W-iw*s)/2,hz-hf*ih*s,iw*s,ih*s)}
  function shadow(x,y,s,left,alpha,ph,gold){const c=cx;c.save();c.translate(x,y);if(left)c.scale(-1,1);c.globalAlpha=alpha;c.fillStyle=gold?'#ffd54a':'#06294a';if(gold){c.shadowColor='#fff3a0';c.shadowBlur=16}
   c.beginPath();c.ellipse(0,0,s,s*.42,0,0,7);c.fill();const w=Math.sin(ph)*s*.2;c.beginPath();c.moveTo(-s*.75,0);c.lineTo(-s*1.45,-s*.4+w);c.lineTo(-s*1.45,s*.4+w);c.closePath();c.fill();c.restore()}
  function cloud(x,y,s){const c=cx;c.fillStyle='rgba(255,255,255,.92)';c.beginPath();c.ellipse(x,y,34*s,13*s,0,0,7);c.ellipse(x-20*s,y+3*s,20*s,10*s,0,0,7);c.ellipse(x+14*s,y-8*s,20*s,14*s,0,0,7);c.fill()}
  function draw(t){const c=cx;c.setTransform(dpr,0,0,dpr,0,0);c.clearRect(0,0,W,H);
-  let g=c.createLinearGradient(0,0,0,hz);g.addColorStop(0,'#74c9ff');g.addColorStop(1,'#d8f3ff');c.fillStyle=g;c.fillRect(0,0,W,hz);
+  const bgI=art('pg-fish-bg');let g;
+  if(bgI)paintBg(c,bgI);else{
+  g=c.createLinearGradient(0,0,0,hz);g.addColorStop(0,'#74c9ff');g.addColorStop(1,'#d8f3ff');c.fillStyle=g;c.fillRect(0,0,W,hz);
   const sx=W*.86,sy=hz*.36,sr=Math.min(30,W*.06);g=c.createRadialGradient(sx,sy,sr*.4,sx,sy,sr*2.4);g.addColorStop(0,'rgba(255,246,170,.9)');g.addColorStop(1,'rgba(255,246,170,0)');c.fillStyle=g;c.fillRect(sx-sr*2.4,sy-sr*2.4,sr*4.8,sr*4.8);
   c.fillStyle='#fff3a6';c.beginPath();c.arc(sx,sy,sr,0,7);c.fill();
   for(const k of st.clouds)cloud(((k.x+t*k.v)%(W+160))-80,k.y,k.s*big);
   c.fillStyle='#86cf8e';c.beginPath();c.ellipse(W*.72,hz+2,Math.max(70,W*.14),hz*.13,0,Math.PI,0);c.fill();c.fillStyle='#6dbb78';c.beginPath();c.ellipse(W*.8,hz+2,Math.max(50,W*.09),hz*.09,0,Math.PI,0);c.fill();
   c.font=`${Math.round(26*big)}px serif`;c.textAlign='center';c.textBaseline='alphabetic';c.fillText('🌴',W*.71,hz-hz*.1);
   g=c.createLinearGradient(0,hz,0,H);g.addColorStop(0,'#5cc9f2');g.addColorStop(.38,'#2a90d2');g.addColorStop(1,'#0b3a73');c.fillStyle=g;c.fillRect(0,hz,W,H-hz);
-  c.save();c.globalAlpha=.07;c.fillStyle='#fff';for(let i=0;i<4;i++){const x=W*(.25+i*.2)+Math.sin(t*.4+i*2)*24;c.beginPath();c.moveTo(x-18,hz);c.lineTo(x+18,hz);c.lineTo(x+80,floor);c.lineTo(x+10,floor);c.fill()}c.restore();
+  c.save();c.globalAlpha=.07;c.fillStyle='#fff';for(let i=0;i<4;i++){const x=W*(.25+i*.2)+Math.sin(t*.4+i*2)*24;c.beginPath();c.moveTo(x-18,hz);c.lineTo(x+18,hz);c.lineTo(x+80,floor);c.lineTo(x+10,floor);c.fill()}c.restore()}
+  // deeper water darkens a little toward the floor, so the depth bands still read on the painted lagoon
+  if(bgI){g=c.createLinearGradient(0,hz,0,floor);g.addColorStop(0,'rgba(10,60,120,0)');g.addColorStop(1,'rgba(10,50,110,.35)');c.fillStyle=g;c.fillRect(0,hz,W,floor-hz)}
   c.save();c.setLineDash([6,8]);c.strokeStyle='rgba(255,255,255,.18)';c.lineWidth=2;for(const d of [1,2]){const y=hz+16+(floor-hz-40)*d/3;c.beginPath();c.moveTo(pierW*.2,y);c.lineTo(W,y);c.stroke()}c.restore();
   c.font='bold 12px system-ui,sans-serif';c.textAlign='left';c.textBaseline='middle';for(const d of [1,2,3]){const y=bandY(d),lb=`📏 ${d} ${L(DEPTHW[d][0],DEPTHW[d][1])}`,w=c.measureText(lb).width+14;c.fillStyle='rgba(6,41,74,.45)';roundRect(c,6,y-11,w,22,11);c.fill();c.fillStyle='#e8f7ff';c.fillText(lb,13,y+1)}
   c.fillStyle='#e9d39a';c.beginPath();c.moveTo(0,floor);for(let x=0;x<=W;x+=20)c.lineTo(x,floor-8-Math.sin(x*.03)*5);c.lineTo(W,H);c.lineTo(0,H);c.fill();
@@ -3828,10 +3841,12 @@ function fishGame(){const play=shell(LIST[0].name,'🎣','fish'),lv=level(),rod=
   for(const a of st.amb)shadow(a.x,bandY(a.d)+a.dy*(floor-hz)/4,a.s,a.vx<0,.2,a.ph);
   const tg=st.tgt;if(tg&&st.ph!=='reel'&&st.ph!=='land')shadow(tg.x,tg.y,tg.s,st.ph==='lost'||st.ph==='spook'?tg.side<0:tg.side>0,.38,tg.ph,tg.gold);
   if(st.ph==='reel'){const f=fishAt();shadow(f.x,f.y,f.s,false,.45,st.t*16,tg&&tg.gold)}
-  c.fillStyle='#7b4a22';for(let x=14;x<pierW-6;x+=Math.max(48,pierW/4)){c.fillRect(x,deck+12,9,hz-deck+34);c.fillStyle='rgba(123,74,34,.45)';c.fillRect(x,hz+30,9,24);c.fillStyle='#7b4a22'}
+  const pierI=art('pg-fish-pier');
+  if(!pierI){c.fillStyle='#7b4a22';for(let x=14;x<pierW-6;x+=Math.max(48,pierW/4)){c.fillRect(x,deck+12,9,hz-deck+34);c.fillStyle='rgba(123,74,34,.45)';c.fillRect(x,hz+30,9,24);c.fillStyle='#7b4a22'}}
   c.strokeStyle='rgba(255,255,255,.55)';c.lineWidth=2;c.beginPath();for(let x=pierW-6;x<=W;x+=8){const y=hz+Math.sin(x*.05+t*2)*1.6;x===pierW-6?c.moveTo(x,y):c.lineTo(x,y)}c.stroke();
-  g=c.createLinearGradient(0,deck,0,deck+14);g.addColorStop(0,'#d39a5c');g.addColorStop(1,'#a8692f');c.fillStyle=g;roundRect(c,-8,deck,pierW+8,14,5);c.fill();
-  c.strokeStyle='rgba(90,50,20,.45)';c.lineWidth=1.5;for(let x=24;x<pierW;x+=28){c.beginPath();c.moveTo(x,deck+2);c.lineTo(x,deck+12);c.stroke()}
+  if(pierI){const w=pierW+Math.max(24,pierW*.08),h=w*pierI.naturalHeight/pierI.naturalWidth;c.drawImage(pierI,-Math.max(14,pierW*.06),deck+8-h*.45,w,h)}
+  else{g=c.createLinearGradient(0,deck,0,deck+14);g.addColorStop(0,'#d39a5c');g.addColorStop(1,'#a8692f');c.fillStyle=g;roundRect(c,-8,deck,pierW+8,14,5);c.fill();
+  c.strokeStyle='rgba(90,50,20,.45)';c.lineWidth=1.5;for(let x=24;x<pierW;x+=28){c.beginPath();c.moveTo(x,deck+2);c.lineTo(x,deck+12);c.stroke()}}
   for(const r of st.ripples){c.strokeStyle=`rgba(255,255,255,${r.a})`;c.lineWidth=2;c.beginPath();c.ellipse(r.x,hz+1,r.r*r.k,r.r*.3*r.k,0,0,7);c.stroke()}
   // the rod and the line
   const tip=rodTip(),bendK=st.ph==='reel'?st.ten*26:6,mx=(hand.x+tip.x)/2,my=(hand.y+tip.y)/2;
@@ -3857,7 +3872,9 @@ function fishGame(){const play=shell(LIST[0].name,'🎣','fish'),lv=level(),rod=
    {c.save();c.translate(x,y);c.rotate((1-p)*-.9+Math.sin(t*20)*.15);if(im.complete&&im.naturalWidth){const w=j.s,h=w*im.naturalHeight/im.naturalWidth;c.drawImage(im,-w/2,-h/2,w,h)}else{c.font='40px serif';c.textAlign='center';c.textBaseline='middle';c.fillText('🐟',0,0)}c.restore()}}
   for(const d of st.drops){c.fillStyle=`rgba(225,246,255,${Math.min(1,d.life*1.6)})`;c.beginPath();c.arc(d.x,d.y,2.6,0,7);c.fill()}}
  function jumpAt(){const j=st.jump,p=Math.min(1,st.t);return {p,x:lerp(j.x0,j.x1,p),y:lerp(j.y0,j.y1,p)-Math.sin(p*Math.PI)*110}}
- function bob(x,y,under){const c=cx,r=7*big;c.save();c.translate(x,y);if(under)c.globalAlpha=.4;c.fillStyle='#fff';c.beginPath();c.arc(0,0,r,0,Math.PI);c.fill();c.fillStyle='#ff3b3b';c.beginPath();c.arc(0,0,r,Math.PI,0);c.fill();
+ function bob(x,y,under){const c=cx,r=7*big,bi=art('pg-fish-bobber');
+  if(bi){const w=r*3.4,h=w*bi.naturalHeight/bi.naturalWidth;c.save();if(under)c.globalAlpha=.45;c.drawImage(bi,x-w/2,y-h*.62,w,h);c.restore();return}
+  c.save();c.translate(x,y);if(under)c.globalAlpha=.4;c.fillStyle='#fff';c.beginPath();c.arc(0,0,r,0,Math.PI);c.fill();c.fillStyle='#ff3b3b';c.beginPath();c.arc(0,0,r,Math.PI,0);c.fill();
   c.strokeStyle='#33414f';c.lineWidth=1.2;c.beginPath();c.arc(0,0,r,0,7);c.stroke();c.fillStyle='#33414f';c.fillRect(-1,-r-6,2,6);c.restore()}
  listen(window,'resize',()=>{size();draw(performance.now()/1000)});
  G.test={answer:ok=>{if(G.paused||G.done)return false;if(st.ph==='reveal')closeReveal();if(st.ph==='ready'||st.ph==='charge')doCast(.6);
@@ -4031,7 +4048,7 @@ return {list:LIST,start,stop,__test}})();
 // every right answer fires Py's colourful "debug beam", every wrong one makes the bug throw a harmless glitch.
 // Beating the bug never hurts it: it turns into a ladybug friend who gets a job at that ride. Losing costs nothing —
 // the bug stays tired (keeps its lost HP) and Coach Moon helps you try again.
-const BOSS_IMG=new Set([]);   // boss-<id>.webp / ladybug-friend.webp once the pictures are in images/
+const BOSS_IMG=new Set(['tangle','hushy','swappy','loopy','dither','nonstop','forgetty','mixy','snatchy','doubly','squishy','jumbly','king','ladybug-friend']);   // boss-<id>.webp / ladybug-friend.webp once the pictures are in images/
 const BOSSES=[
  {n:1,id:'tangle',emoji:'🐛',color:'#5fbf4a',hp:4,name:'엉킴이|Tangle',title:'순서를 뒤섞는 애벌레|The order-mixing caterpillar',ride:{emoji:'🚂',name:'꼬마 기차|Tiny Train'},
   intro:['boss:헤헤! 기차 명령을 뒤죽박죽 섞었지롱! 이제 기차가 거꾸로 가요~|Hehe! I mixed up the train’s commands! Now it goes backwards~','py:우리 꼬마 기차를 돌려줘!|Give us back our Tiny Train!','coach:코드는 위에서부터 한 줄씩 차례대로 해요. 파이 눈으로 하나씩 따라가 봐요.|Code runs one line at a time, from the top. Follow along with Py’s eyes.','boss:어디 한번 맞혀 봐~!|Go on, try to beat me~!'],
@@ -4234,9 +4251,9 @@ const SPOT={kitchen:{xy:[79,70],icon:'🍔',name:'파이 레스토랑|Py’s Res
 const RIDE_POS={fish:[87,56],race:[25,44],shoot:[57,22],dive:[86,8]};
 const KING_POS=[78,2.5];
 const PLOTS=[[9,96],[88,93],[42,88],[7,66],[69,58],[38,53],[93,47],[7,38],[61,29],[38,24],[9,8],[34,4]];
-const MAP_IMG=new Set([]);   // add 'map' once images/py-map.webp exists
-const PLACE_IMG=new Set([]); // add world numbers once images/py-place-<n>.webp exist
-const SPOT_IMG=new Set([]);  // add 'kitchen' / 'wheel' once images/py-spot-<id>.webp exist
+const MAP_IMG=new Set(['map']);   // add 'map' once images/py-map.webp exists
+const PLACE_IMG=new Set([1,2,3,4,5,6,7,8,9,10,11,12]); // add world numbers once images/py-place-<n>.webp exist
+const SPOT_IMG=new Set(['kitchen','wheel']);  // add 'kitchen' / 'wheel' once images/py-spot-<id>.webp exist
 const bossOn=()=>typeof startBoss==='function'&&typeof BOSSES!=='undefined';
 const allDone=w=>worldDone(w)===w.missions.length;
 const restored=n=>{const w=WORLDS[n-1];return w&&(bossOn()?!!S.boss.won[n]:allDone(w))};
@@ -4297,7 +4314,7 @@ RENDER.school=()=>{markDay();refreshReqs();const d=daily();
 let VILLAGE_SCROLLED=false,VC_AT=0;
 // Coach Moon suggests the next step when the child comes back to the map (at most once a minute)
 function villageCoach(){if(now()-VC_AT<60000||modalOpen())return;VC_AT=now();const d=daily(),nm=nextMission();
- setTimeout(()=>{if(VIEW!=='school'||modalOpen())return;
+ setTimeout(()=>{if(VIEW!=='school'||modalOpen()||document.body.classList.contains('staged'))return;
   if(dailyDone()&&!d.got)return coachTalk('medal','오늘 목표를 다 했어요! 🎁 상자를 열어 봐요!|Today’s goals are done! Open the 🎁 chest!',{acts:[{t:'🎁 열기|🎁 Open',f:openDailyChest},{t:'나중에|Later'}]});
   const b=LIVE().find(w=>bossReady(w.n));if(b)return coachTalk('go',`⚔️ ${T(b.name)}에 버그 보스가 나타났어요! 배운 코드로 같이 물리쳐요!|⚔️ A bug boss appeared at ${T(b.name)}! Let’s beat it with code!`,{acts:[{t:'⚔️ 도전!|⚔️ Fight!',f:()=>startBossFlow(b.n)},{t:'나중에|Later'}]});
   if(!S.tut.req&&(S.reqs||[]).length){S.tut.req=1;save(true);return coachTalk('idea','주민들이 부탁하러 왔어요! 머리 위 ❗를 누르면 코드로 도와줄 수 있어요.|Villagers came with requests! Tap the ❗ to help them with code.')}
@@ -4364,12 +4381,12 @@ const POWER={shield:['🛡️','방패|Shield','보스의 버그 공격을 한 �
 const GEAR={rod:['🎣','낚싯대|Fishing rod','fish','물고기가 천천히 헤엄치고 힌트가 늘어요|Fish swim slower and you get more hints'],kart:['🏎️','카트 엔진|Kart engine','race','더 빨리 출발하고 잘 꺾여요|Faster starts and sharper turns'],
  ship:['🚀','로켓 레이저|Rocket laser','shoot','레이저가 빨라지고 방패가 늘어요|Faster laser and an extra shield'],suit:['🤿','잠수복|Diving suit','dive','숨을 더 오래 참아요|Hold your breath longer']};
 const GEAR_PRICE=[40,80,150];
-const ITEM_IMG=new Set([]);   // add 'shield','bolt','heart','card','rod','kart','ship','suit' once images/py-item-<id>.webp exist
+const ITEM_IMG=new Set(['shield','bolt','heart','card','rod','kart','ship','suit']);   // add 'shield','bolt','heart','card','rod','kart','ship','suit' once images/py-item-<id>.webp exist
 const itemPic=(id,em)=>ITEM_IMG.has(id)?`<img src="images/py-item-${id}.webp" alt="">`:em;
 const DECOS={tree:['🌳','큰 나무|Big tree',20],flowers:['🌷','꽃밭|Flower bed',15],bench:['🪑','벤치|Bench',15],lamp:['🏮','등불|Lantern',25],bike:['🚲','자전거|Bicycle',30],balloon:['🎈','풍선 가게|Balloon stand',50],
  fountain:['⛲','분수|Fountain',60],cafe:['☕','카페|Café',70],icecream:['🍦','아이스크림 카트|Ice-cream cart',70],house:['🏡','파이의 집|Py’s house',80],rainbow:['🌈','무지개 아치|Rainbow arch',90],
  sail:['⛵','요트|Sailboat',100],carousel:['🎠','회전목마|Carousel',120],tent:['🎪','서커스 텐트|Circus tent',150],tower:['🗼','전망대|Lookout tower',180],castle:['🏰','성|Castle',250]};
-const DECO_IMG=new Set([]);   // add ids once images/py-deco-<id>.webp exist
+const DECO_IMG=new Set(['balloon','bench','bike','cafe','carousel','castle','flowers','fountain','house','icecream','lamp','rainbow','sail','tent','tower','tree']);   // add ids once images/py-deco-<id>.webp exist
 const decoPic=id=>DECO_IMG.has(id)?`<img src="images/py-deco-${id}.webp" alt="">`:DECOS[id][0];
 function placeDeco(id){S.deco=S.deco||[];if(S.deco.includes(id))return;const i=PLOTS.findIndex((_,k)=>!S.deco[k]);if(i<0)return false;S.deco[i]=id;checkTrophies();return true}
 // more looks for Py (added to the wardrobe lists in core.js)
@@ -4406,10 +4423,11 @@ function dressItem(id){const own=S.owned[DRESS],set=DRESS==='color'?COLORS:DRESS
  S.wear[DRESS]=id;save();updateHud();RENDER[VIEW]()}
 
 // ---------------------------------------------------------------- funpark: the rides (mini-games), park requests and the free coding playground
+const RIDE_IMG=new Set(['fish','race','shoot','dive']);   // card pictures images/pg-ride-<id>.webp
 RENDER.arcade=()=>{const games=typeof PYGAMES!=='undefined'?PYGAMES.list:[];
  $('v-arcade').innerHTML=`<h2 class="vtitle">🎡 ${L('파이 놀이공원','Py’s Funpark')} <span class="have">🎟️ ${S.tickets}</span></h2>
   <p class="muted">${L('놀이기구는 🎟️ 티켓 1장으로 타요. 티켓은 미션, 주민 부탁, 보스전, 오늘의 상자에서 받아요.','Each ride costs one 🎟️ ticket. Missions, requests, bosses and the daily chest give tickets.')}</p>
-  <div class="rides">${games.map(g=>{const on=rideOpen(g),best=(S.games.best||{})[g.id];return `<button type="button" class="ridecard ${on?'':'locked'}" data-a="ride" data-g="${g.id}"><span class="ric">${g.icon}</span><b>${tx(g.name)}</b><small>${tx(g.desc||'')}</small><span class="rmeta">${on?`🎟️ 1${best?` · 🏆 ${best}`:''}`:`🔒 ${L(`${g.world}번 장소를 반쯤 배우면 열려요`,`Opens after place ${g.world}`)}`}</span></button>`}).join('')||`<p class="muted">${L('놀이기구를 짓는 중이에요!','Rides are being built!')}</p>`}</div>
+  <div class="rides">${games.map(g=>{const on=rideOpen(g),best=(S.games.best||{})[g.id];return `<button type="button" class="ridecard ${on?'':'locked'} ${RIDE_IMG.has(g.id)?'pic':''}" data-a="ride" data-g="${g.id}">${RIDE_IMG.has(g.id)?`<img class="rimg" src="images/pg-ride-${g.id}.webp" alt="" draggable="false">`:`<span class="ric">${g.icon}</span>`}<b>${tx(g.name)}</b><small>${tx(g.desc||'')}</small><span class="rmeta">${on?`🎟️ 1${best?` · 🏆 ${best}`:''}`:`🔒 ${L(`${g.world}번 장소를 반쯤 배우면 열려요`,`Opens after place ${g.world}`)}`}</span></button>`}).join('')||`<p class="muted">${L('놀이기구를 짓는 중이에요!','Rides are being built!')}</p>`}</div>
   <h3>🎨 ${L('코딩 놀이터','Coding playground')}</h3><button type="button" class="ridecard wide" data-a="lab"><span class="ric">🎨</span><b>${L('마음대로 코딩하기','Code anything')}</b><small>${L('그림판, 게시판, 정원에서 자유롭게 만들고 작품으로 저장해요.','Draw, print and move Py freely, and save your works.')}</small></button>
   ${COPYRIGHT()}`};
 function startRide(id){if(typeof PYGAMES==='undefined')return;const g=PYGAMES.list.find(x=>x.id===id);if(!g)return;
@@ -4443,7 +4461,7 @@ function drawThumbs(){S.works.forEach((w,i)=>{const host=$('th'+i);if(!host)retu
 // and change a robot's code (debugging); new menu items, robots, tables and decorations come with the shop's growth.
 // Same controls as the science café the kids already know: drag anywhere for a joystick, tap a spot or a thing to walk
 // there, arrow keys. Isometric tiles: x runs down-right, y runs down-left, walls on the y=0 and x=0 edges.
-const RB_ART=new Set([]);   // add 'robot' once images/rb-robot-1..4.webp exist (see the prompt file, step 20)
+const RB_ART=new Set(['robot']);   // dedicated chef robots (images/rb-robot-1..4.webp, step 20 of the prompt file)
 const robotSrc=i=>RB_ART.has('robot')?`images/rb-robot-${i%4+1}.webp`:`images/${['mission-robot','chess-bot-robot'][i%2]}.webp`;
 const RB=(()=>{
 'use strict';
@@ -4504,8 +4522,16 @@ const SKILL={for:{ic:'🔁',name:'반복 칩|Loop chip',world:4,lessons:['w4-1',
 function hasSkill(k){const s=SKILL[k];if(st().skills[k])return true;const w=WORLDS[s.world-1];return !!w&&worldDone(w)>=worldNeed(w)}
 
 // ---------------------------------------------------------------- pictures
+// painted pictures for the upgrades and the special burgers (emoji until they load)
+const PAD_ART={tables:'rb-table',motor:'rb-motor',chip:'rb-chip',shoes:'rb-shoes',tray:'rb-tray',buddy:'py-hi',decor:'py-deco-flowers',sign:'rb-sign'};
+const padSrc=id=>id==='robot'?robotSrc(lvOf('robot')):`images/${PAD_ART[id]}.webp`;
+const BURGER_ART={tower:'rb-burger-tower',fish:'rb-burger-fish',rainbow:'rb-burger-rainbow'};
 const PICS={};function img(src){if(!PICS[src]){const m=new Image();m.src=src;PICS[src]=m}return PICS[src]}
 const ok_=m=>m&&m.complete&&m.naturalWidth;
+// a burger on the canvas: its painted picture when there is one, else the menu emoji; 🤢 for a buggy mess
+function dish(c,k,x,y,size){const a=BURGER_ART[k],m=a&&img(`images/${a}.webp`);if(ok_(m)){const h=size*1.25,w=h*m.naturalWidth/m.naturalHeight;c.drawImage(m,x-w/2,y-h/2,w,h);return}emo(c,MENU[k]?MENU[k].e:'🤢',x,y,size)}
+// an upgrade's picture inside HTML (cards and the board)
+const padImg=(id,cls)=>`<img class="${cls}" src="${padSrc(id)}" alt="" draggable="false" onerror="this.replaceWith('${UPN[id][1]}')">`;
 function meKey(){const map={'🐰':'bunny','🐻':'bear','🦊':'fox','🐼':'panda','🐨':'koala','🐯':'tiger','🦁':'lion','🐸':'frog','🐱':'cat','🐶':'puppy','🐥':'chick','🦄':'unicorn','🐙':'octopus','🐬':'dolphin','🦖':'dino','⭐':'star'};return map[String(S.av||'').replace(/️/g,'')]||'kid'}
 
 // ---------------------------------------------------------------- open / close
@@ -4531,7 +4557,8 @@ function greet(){setTimeout(()=>{if(!Y||VIEW!=='home'||modalOpen())return;const 
  else if(empty>=0)caption('🤖',empty===0&&!s.tut.taught?L('1번 로봇은 아직 요리를 몰라요! 반짝이는 로봇을 눌러서 🍔 클래식 버거 만드는 코드를 가르쳐 줘요.','Robot 1 can’t cook yet! Tap the glowing robot and teach it the code for a 🍔 classic burger.'):L(`${empty+1}번 로봇이 일을 기다려요. 눌러서 버거를 가르쳐 줘요!`,`Robot ${empty+1} is waiting for a job. Tap it and teach it a burger!`),null,true);
  else if(!s.tut.walk){s.tut.walk=1;save(true);caption('👆',L('화면을 끌면 걸어요. 로봇 앞 주황색 바닥에서 버거를 받아, 손님 테이블로 가져다줘요!','Drag to walk. Pick up burgers on the orange floor by a robot and carry them to the diners!'),null,true)}},600)}
 function stop(){if(!Y)return;cancelAnimationFrame(Y.raf);for(const [t,ev,fn,o] of Y.on)t.removeEventListener(ev,fn,o);Y=null}
-function resize(){if(!Y)return;const r=Y.host.getBoundingClientRect(),cw=Math.max(1,r.width),ch=Math.max(1,r.height);Y.cw=cw;Y.ch=ch;Y.k=cl(Math.min(cw/330,ch/600),.8,1.35);
+// measure the canvas itself: the shop box is centred and capped in width, so it is often narrower than its section
+function resize(){if(!Y)return;const r=Y.el.cv.getBoundingClientRect(),cw=Math.max(1,r.width),ch=Math.max(1,r.height);Y.cw=cw;Y.ch=ch;Y.k=cl(Math.min(cw/330,ch/600),.8,1.35);
  const dpr=Math.min(window.devicePixelRatio||1,2);Y.dpr=dpr;Y.el.cv.width=Math.round(cw*dpr);Y.el.cv.height=Math.round(ch*dpr)}
 const iso=(x,y)=>[(x-y)*TW/2,(x+y)*TH/2];
 
@@ -4638,14 +4665,14 @@ function upWhat(id){const v=lvOf(id);switch(id){
  case 'buddy':return L('파이가 테이블의 사과를 주워 와요.','Py picks up the apples from tables.');case 'decor':return L('가게가 예뻐지고 손님이 더 자주 와요.','The shop looks lovelier and diners come more often.');
  case 'sign':return L('반짝 간판으로 손님이 더 자주 와요.','A shiny sign brings diners more often.')}return ''}
 function openCard(id,from='pad'){if(!Y)return;const u=UPN[id],v=lvOf(id),p=u[3][v],can=S.apples>=p;Y.card={id,from};
- Y.el.card.innerHTML=`<div class="rbc-in"><span class="rbc-ic">${u[1]}</span><b>${T(u[2])} ${v>0?L(`${v+1}단계`,`lv ${v+1}`):''}</b><p>${esc(upWhat(id))}</p>
+ Y.el.card.innerHTML=`<div class="rbc-in"><span class="rbc-ic">${padImg(id,'rbc-img')}</span><b>${T(u[2])} ${v>0?L(`${v+1}단계`,`lv ${v+1}`):''}</b><p>${esc(upWhat(id))}</p>
   <div class="row"><button type="button" class="btn ghost small" data-c="x">${L('나중에','Later')}</button><button type="button" class="btn small" data-c="buy" ${can?'':'disabled'}>🍎 ${p} ${L('사기','Buy')}</button></div>${can?'':`<small class="muted">${L(`사과가 ${p-S.apples}개 더 필요해요`,`${p-S.apples} more apples needed`)}</small>`}</div>`;
  Y.el.card.classList.remove('hidden')}
 function closeCard(){if(!Y)return;Y.card=null;Y.el.card.classList.add('hidden');Y.el.card.innerHTML=''}
 function buy(id){const p=price(id);if(!canBuy(id)){sfx('oops');return}S.apples-=p;st().up[id]=lvOf(id)+1;st();save();updateHud();sfx('fanfare');celebrate(24);closeCard();hud();
  caption(UPN[id][1],id==='robot'?L(`${lvOf('robot')}번 로봇이 왔어요! 로봇을 눌러서 버거 만드는 코드를 가르쳐 줘요.`,`Robot ${lvOf('robot')} is here! Tap it and teach it a burger.`):upWhat(id).replace(/ \(.*\)/,'')+' ✨',true,false);checkTrophies()}
 function board(){const rows=UP.map(u=>{const v=lvOf(u[0]),max=v>=u[3].length,need=!max&&shopLv()<u[4][v],p=max?0:u[3][v];
-  return `<button type="button" class="rbb ${max?'max':''} ${need?'lock':''}" data-up="${u[0]}" ${max||need||!p?'disabled':''}><span>${u[1]}</span><b>${T(u[2])}</b><small>${max?L('최고!','Max!'):need?L(`🔒 가게 ${u[4][v]+1}단계부터`,`🔒 from shop level ${u[4][v]+1}`):p?`🍎 ${p}`:''}</small></button>`}).join('');
+  return `<button type="button" class="rbb ${max?'max':''} ${need?'lock':''}" data-up="${u[0]}" ${max||need||!p?'disabled':''}><span>${padImg(u[0],'rbb-img')}</span><b>${T(u[2])}</b><small>${max?L('최고!','Max!'):need?L(`🔒 가게 ${u[4][v]+1}단계부터`,`🔒 from shop level ${u[4][v]+1}`):p?`🍎 ${p}`:''}</small></button>`}).join('');
  modal(`<h2>🛠️ ${L('가게 업그레이드','Shop upgrades')}</h2><p class="muted">${L('바닥의 초록 발판에 서도 살 수 있어요.','You can also stand on the green floor pads to buy.')}</p><div class="rbbs">${rows}</div>`,{cls:'wide',acts:{}});
  setTimeout(()=>{const box=document.querySelector('.rbbs');if(box)box.addEventListener('click',e=>{const b=e.target.closest('[data-up]');if(!b)return;closeModal();openCard(b.dataset.up,'board')})},50)}
 
@@ -4856,7 +4883,7 @@ function draw(){const c=Y.ctx,me=Y.me,dec=lvOf('decor'),sg=lvOf('sign');c.lineJo
  // pass-through counter between kitchen and dining room
  box(c,7.1,4.04,.8,3.92,30,'#b4e2d6','#79c3b1','#62ad9c');
  const pulse=.5+.5*Math.sin(Y.t*5);
- pads().forEach(p=>{const [cx,cy]=iso(p.x,p.y),can=S.apples>=price(p.id);c.fillStyle=can?'#eafff0':'#ffffff';c.beginPath();c.ellipse(cx,cy,30,15,0,0,TAU);c.fill();c.strokeStyle=`rgba(51,196,107,${.35+.3*pulse})`;c.lineWidth=2;c.setLineDash([5,4]);c.beginPath();c.ellipse(cx,cy,30,15,0,0,TAU);c.stroke();c.setLineDash([]);c.lineWidth=1;emo(c,p.u[1],cx,cy-2,20);label(c,`🍎${price(p.id)}`,cx,cy+22,can?'#eafff0':'#ffffff',can?'#1f9a4f':'#5f6b8f')});
+ pads().forEach(p=>{const [cx,cy]=iso(p.x,p.y),can=S.apples>=price(p.id);c.fillStyle=can?'#eafff0':'#ffffff';c.beginPath();c.ellipse(cx,cy,30,15,0,0,TAU);c.fill();c.strokeStyle=`rgba(51,196,107,${.35+.3*pulse})`;c.lineWidth=2;c.setLineDash([5,4]);c.beginPath();c.ellipse(cx,cy,30,15,0,0,TAU);c.stroke();c.setLineDash([]);c.lineWidth=1;{const m=img(padSrc(p.id));if(ok_(m)){const h=p.id==='robot'?46:36,w=h*m.naturalWidth/m.naturalHeight;c.drawImage(m,cx-w/2,cy-h+8+Math.sin(Y.t*3+p.x)*1.5,w,h)}else emo(c,p.u[1],cx,cy-2,20)}label(c,`🍎${price(p.id)}`,cx,cy+22,can?'#eafff0':'#ffffff',can?'#1f9a4f':'#5f6b8f')});
  if(Y.ripple&&Y.t-Y.ripple.t<.6){const [x,y]=iso(Y.ripple.x,Y.ripple.y),k=(Y.t-Y.ripple.t)/.6;c.strokeStyle=`rgba(58,142,230,${1-k})`;c.lineWidth=2;c.beginPath();c.ellipse(x,y,6+k*26,3+k*13,0,0,TAU);c.stroke();c.lineWidth=1}
  // floor glow where to pick up and serve
  Y.robots.forEach((r,i)=>{if(i<lvOf('robot')&&r.dish.length)poly(c,quad(r.zx+.1,r.zy+.1,r.zx+.9,r.zy+.9),`rgba(255,170,40,${.2+.2*pulse})`)});
@@ -4874,17 +4901,18 @@ function draw(){const c=Y.ctx,me=Y.me,dec=lvOf('decor'),sg=lvOf('sign');c.lineJo
  for(const p of Y.pops){if(p.t<0)continue;const [x,y]=iso(p.x,p.y),a=1-p.t/1.1;c.globalAlpha=a;emo(c,p.txt,x,y-40-p.t*40,20);c.globalAlpha=1}}
 function drawRobot(c,r,i){const R=st().robots[i],[x,y]=iso(r.x+.5,r.y+.5),[,by]=iso(r.x+1,r.y+1);
  box(c,r.x+.1,r.y+.1,.8,.8,30,R&&R.bug?'#ffd6e0':'#dfe7f3','#b4c2da','#9fb0cc');
- const bob=Math.sin(Y.t*3+i)*2,cooking=r.t>0,pic=img(robotSrc(i));
+ const bob=Math.sin(Y.t*3+i)*2,cooking=r.t>0,bugPic=R&&R.bug?img('images/rb-robot-bug.webp'):null,pic=ok_(bugPic)?bugPic:img(robotSrc(i));
  if(ok_(pic)){const h=58+(cooking?Math.abs(Math.sin(Y.t*10))*3:0),w=h*pic.naturalWidth/pic.naturalHeight;c.drawImage(pic,x-w/2,y-30-h+bob,w,h)}else emo(c,'🤖',x,y-58+bob,42);
  if(cooking){c.lineWidth=4;c.strokeStyle='rgba(255,255,255,.9)';c.beginPath();c.arc(x+26,y-70,9,0,TAU);c.stroke();c.strokeStyle='#33c46b';c.beginPath();c.arc(x+26,y-70,9,-Math.PI/2,-Math.PI/2+TAU*r.t/cookSec());c.stroke();c.lineWidth=1}
  r.puff.forEach(t=>{c.globalAlpha=Math.max(0,.75-t*.6);c.fillStyle='#fff';c.beginPath();c.arc(x-22+Math.sin(t*7)*3,y-70-t*36,4+t*7,0,TAU);c.fill()});c.globalAlpha=1;
  // dishes ready on its tray
- r.dish.forEach((d,k)=>emo(c,MENU[d]?MENU[d].e:'🤢',x-16+k*16,y-22,18));
- if(R&&R.bug){emo(c,'🐛',x+18,y-86+Math.sin(Y.t*9)*3,24);bubble(c,x,y-102,'❗')}
+ r.dish.forEach((d,k)=>dish(c,d,x-16+k*16,y-22,18));
+ if(R&&R.bug){if(!ok_(bugPic))emo(c,'🐛',x+18,y-86+Math.sin(Y.t*9)*3,24);bubble(c,x,y-102,'❗')}
  else if(!R||!R.code){bubble(c,x,y-102,'❓');c.strokeStyle=`rgba(255,160,40,${.5+.5*Math.sin(Y.t*5)})`;c.lineWidth=3;c.beginPath();c.ellipse(x,y+2,34,17,0,0,TAU);c.stroke();c.lineWidth=1}
  label(c,R&&R.code?(R.smart?`❓ ${L('주문 보고','by order')}`:`${MENU[R.item].e} ${T(MENU[R.item].name).split(' ')[0]}`):L(`${i+1}번 로봇`,`Robot ${i+1}`),x,by-6,R&&R.code?'#ffffff':'#fff3d6')}
-function drawTable(c,t){const [x,y]=iso(t.x+.5,t.y+.5);c.fillStyle='#5ab0e6';c.fillRect(x-3,y-18,6,18);c.fillStyle='rgba(0,0,0,.12)';c.beginPath();c.ellipse(x,y,22,11,0,0,TAU);c.fill();
- c.fillStyle='#ffffff';c.beginPath();c.ellipse(x,y-20,30,15,0,0,TAU);c.fill();c.strokeStyle='#dfe7f3';c.lineWidth=2;c.stroke();c.lineWidth=1;
+function drawTable(c,t){const [x,y]=iso(t.x+.5,t.y+.5),tp=img('images/rb-table.webp');c.fillStyle='rgba(0,0,0,.12)';c.beginPath();c.ellipse(x,y,26,12,0,0,TAU);c.fill();
+ if(ok_(tp)){const w=78,h=w*tp.naturalHeight/tp.naturalWidth;c.drawImage(tp,x-w/2,y+8-h,w,h)}
+ else{c.fillStyle='#5ab0e6';c.fillRect(x-3,y-18,6,18);c.fillStyle='#ffffff';c.beginPath();c.ellipse(x,y-20,30,15,0,0,TAU);c.fill();c.strokeStyle='#dfe7f3';c.lineWidth=2;c.stroke();c.lineWidth=1}
  Y.diners.filter(d=>d.t===t.i&&d.state==='eat').forEach((d,k)=>miniDish(c,MENU[d.item].dish,x-8+k*16,y-24,8));
  const n=Math.round(t.coinShow);if(n>0){emo(c,'🍎',x+16,y-34,18);label(c,`${n}`,x+16,y-50,'#fff6d0')}}
 function drawDiner(c,d){const [x,y]=iso(d.x,d.y);
@@ -4893,36 +4921,39 @@ function drawDiner(c,d){const [x,y]=iso(d.x,d.y);
   if(d.mood){bubble(c,x,ty,d.mood);return}
   // the order bubble: the menu picture (the same one on the robot's name tag and the menu board) and a patience ring
   if(d.state==='sit'&&!d.got){const m=MENU[d.item],h=34;c.fillStyle='#ffffff';c.beginPath();c.roundRect(x-19,ty-h,38,h,12);c.fill();c.beginPath();c.moveTo(x-5,ty);c.lineTo(x+5,ty);c.lineTo(x,ty+6);c.fill();
-   emo(c,m.e,x,ty-h/2,22);const k=Math.min(1,d.wait/150);c.strokeStyle=k<.6?'#33c46b':'#ffb020';c.lineWidth=3;c.beginPath();c.arc(x+19,ty-h+2,6,-Math.PI/2,-Math.PI/2+TAU*(1-k));c.stroke();c.lineWidth=1}
+   dish(c,d.item,x,ty-h/2,22);const k=Math.min(1,d.wait/150);c.strokeStyle=k<.6?'#33c46b':'#ffb020';c.lineWidth=3;c.beginPath();c.arc(x+19,ty-h+2,6,-Math.PI/2,-Math.PI/2+TAU*(1-k));c.stroke();c.lineWidth=1}
   return}
  person(c,x,y,d.e,d.ph*3,d.walk);if(d.mood)bubble(c,x,y-70,d.mood)}
 function drawMe(c){const me=Y.me,[x,y]=iso(me.x,me.y),bob=me.moving?Math.abs(Math.sin(me.ph))*2.5:0;shadow(c,x,y,16);const im=Y.im.me;let top;
  if(ok_(im)){legs(c,x,y,me.ph,me.moving,'#2f3d6b','#ffffff');const h=62,w=h*im.naturalWidth/im.naturalHeight;c.save();c.translate(x,0);if(me.dir<0)c.scale(-1,1);c.drawImage(im,-w/2,y-12-h-bob,w,h);c.restore();top=y-12-h-bob}
  else{emo(c,S.av||'🧒',x,y-26-bob,40);top=y-50-bob}
- if(Y.hold.length){c.fillStyle='#c98a3a';c.beginPath();c.ellipse(x,top+8,20,5,0,0,TAU);c.fill()}
- Y.hold.forEach((d,k)=>emo(c,MENU[d]?MENU[d].e:'🤢',x+(k-(Y.hold.length-1)/2)*15,top+1,17))}
+ if(Y.hold.length){const tr=img('images/rb-tray.webp');if(ok_(tr))c.drawImage(tr,x-24,top-6,48,48*tr.naturalHeight/tr.naturalWidth);else{c.fillStyle='#c98a3a';c.beginPath();c.ellipse(x,top+8,20,5,0,0,TAU);c.fill()}}
+ Y.hold.forEach((d,k)=>dish(c,d,x+(k-(Y.hold.length-1)/2)*15,top+1,17))}
 function drawPy(c){const b=Y.bd,[x,y]=iso(b.x,b.y),bob=Math.abs(Math.sin(b.ph))*2;shadow(c,x,y,11);const im=Y.im.py;
  if(ok_(im)){const h=40,w=h*im.naturalWidth/im.naturalHeight;c.drawImage(im,x-w/2,y-h-bob+3,w,h)}else emo(c,'🐍',x,y-14-bob,24)}
 function drawSign(c){const y0=-1.8,y1=.9,x=MW+1.05,H=54,P=30,[ax,ay]=iso(x,y1),[bx,by]=iso(x,y0),sv=lvOf('sign');
  [[ax,ay],[bx,by]].forEach(([px,py])=>{c.fillStyle='#2f8f7a';c.fillRect(px-3,py-P,6,P)});
  const pts=[[ax,ay-P],[bx,by-P],[bx,by-P-H],[ax,ay-P-H]];poly(c,pts,sv?'#ffcf3a':'#3cb898');c.strokeStyle='#fff';c.lineWidth=3;poly(c,pts,null,'#fff');c.lineWidth=1;
  c.save();c.translate((ax+bx)/2,(ay+by)/2-P-H/2);c.transform(1,-.5,0,1,0,0);c.font=`900 17px ${TF}`;c.textAlign='center';c.textBaseline='middle';c.fillStyle=sv?'#e0533d':'#fff';c.fillText(L('🤖 로봇 버거','🤖 Robot Burger'),0,1,(bx-ax)-16);c.restore();
+ // the shiny sign upgrade puts a glowing burger sign on top
+ const si=sv?img('images/rb-sign.webp'):null;if(ok_(si)){const [mx,my]=iso(x,(y0+y1)/2),h=64+(sv>=2?Math.sin(Y.t*4)*2:0),w=h*si.naturalWidth/si.naturalHeight;c.drawImage(si,mx-w/2,my-P-H-h+6,w,h)}
  if(sv>=2&&Math.floor(Y.t*3)%2){const [mx,my]=iso(x,(y0+y1)/2);emo(c,'✨',mx+40,my-P-H-24,16)}}
 
 // ---------------------------------------------------------------- input: drag anywhere to walk, tap a thing or a spot, arrow keys
 function listen(){const cv=Y.el.cv,on=(t,ev,fn,o)=>{t.addEventListener(ev,fn,o);Y.on.push([t,ev,fn,o])};
- on(cv,'pointerdown',e=>{if(!Y)return;e.preventDefault();const r=cv.getBoundingClientRect();Y.joy={id:e.pointerId,x0:e.clientX,y0:e.clientY,dx:0,dy:0,on:false,t0:performance.now(),px:e.clientX-r.left,py:e.clientY-r.top};try{cv.setPointerCapture(e.pointerId)}catch(_){}});
+ on(cv,'pointerdown',e=>{if(!Y)return;e.preventDefault();const r=cv.getBoundingClientRect();if(Math.abs(r.width-Y.cw)>1||Math.abs(r.height-Y.ch)>1)resize();Y.joy={id:e.pointerId,x0:e.clientX,y0:e.clientY,dx:0,dy:0,on:false,t0:performance.now(),px:e.clientX-r.left,py:e.clientY-r.top};try{cv.setPointerCapture(e.pointerId)}catch(_){}});
  on(cv,'pointermove',e=>{const j=Y&&Y.joy;if(!j||j.id!==e.pointerId)return;const dx=e.clientX-j.x0,dy=e.clientY-j.y0,d=Math.hypot(dx,dy);
   if(!j.on&&d>10){j.on=true;Y.me.path=null;Y.arrive=null;Y.el.joy.style.left=j.px+'px';Y.el.joy.style.top=j.py+'px';Y.el.joy.classList.remove('hidden')}
   if(j.on){const m=Math.min(d,46);j.dx=dx/(d||1)*m/46;j.dy=dy/(d||1)*m/46;Y.el.joy.firstChild.style.transform=`translate(${j.dx*30}px,${j.dy*30}px)`}});
- const up=e=>{const j=Y&&Y.joy;if(!j||j.id!==e.pointerId)return;if(!j.on&&performance.now()-j.t0<450){const o=thingAt(j.px,j.py);if(o)goThing(o);else{const [tx,ty]=toTile(j.px,j.py);route(tx,ty)}}Y.joy=null;Y.el.joy.classList.add('hidden')};
+ const up=e=>{const j=Y&&Y.joy;if(!j||j.id!==e.pointerId)return;if(!j.on&&performance.now()-j.t0<700){const o=thingAt(j.px,j.py);if(o)goThing(o);else{const [tx,ty]=toTile(j.px,j.py);route(tx,ty)}}Y.joy=null;Y.el.joy.classList.add('hidden')};
  on(cv,'pointerup',up);on(cv,'pointercancel',up);
  on(Y.el.up,'click',()=>{sfx('tap');board()});
  on(Y.el.lv,'click',()=>{sfx('tap');const l=shopLv(),nx=LV[l+1];modal(`<div class="big">${LV[l][1]}</div><h2>${T(LV[l][2])}</h2><p>${L(`대접한 손님 ${st().served}명`,`${st().served} diners served`)}${nx?L(` · 다음 단계까지 ${nx[0]-st().served}명`,` · ${nx[0]-st().served} to the next level`):''}</p><div class="rbmenu">${menuOpen().map(k=>`<div class="rbm"><span class="dish">${MENU[k].dish.slice().reverse().map(x=>`<i>${LAYER[x]}</i>`).join('')}</span><b>${MENU[k].e} ${T(MENU[k].name)}</b><small>🍎 ${MENU[k].price}</small></div>`).join('')}</div>`,{cls:'wide'})});
  on(Y.el.card,'click',e=>{const b=e.target.closest('[data-c]');if(!b||!Y)return;if(b.dataset.c==='buy')buy(Y.card.id);else{sfx('tap');closeCard()}});
  const key=e=>{if(!Y||modalOpen()||VIEW!=='home')return;const m={ArrowLeft:'l',ArrowRight:'r',ArrowUp:'u',ArrowDown:'d',a:'l',d:'r',w:'u',s:'d'}[e.key];if(!m||(e.target&&/INPUT|TEXTAREA/.test(e.target.tagName)))return;Y.keys[m]=e.type==='keydown';e.preventDefault()};
  on(window,'keydown',key);on(window,'keyup',key);on(window,'blur',()=>{if(Y)Y.keys={}});
- let rt=0;on(window,'resize',()=>{clearTimeout(rt);rt=setTimeout(resize,100)})}
+ let rt=0;on(window,'resize',()=>{clearTimeout(rt);rt=setTimeout(resize,100)});
+ if(window.ResizeObserver){const ro=new ResizeObserver(()=>resize());ro.observe(cv);Y.on.push([{removeEventListener:()=>ro.disconnect()},'ro',null])}}
 return {open,show,stop,done,robotTap,offerSkill,learnSkill,lessonTask,robotTask,smartTask,listTask,fixTask,dishCode,hasSkill,MENU,LV,shopLv,st,get _y(){return Y},_route:(x,y,f)=>route(x,y,f),_spawn:()=>spawnDiner(),_bug:()=>maybeBug(true),_thing:(x,y)=>thingAt(x,y),
  _serveAll:()=>{if(!Y)return;Y.tables.forEach(t=>serveTable(t,true))}};
 })();

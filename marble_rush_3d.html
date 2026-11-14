@@ -387,6 +387,7 @@ button,input,select{font:inherit}button{cursor:pointer;touch-action:manipulation
   <div class="set-row"><span id="lblLang" data-en="🌐 Language">🌐 언어</span><div class="seg lang-seg" role="group" aria-labelledby="lblLang"><button type="button" data-lang="ko">한국어</button><button type="button" data-lang="en">English</button></div></div>
   <p class="set-note" id="playerNote"></p>
   <button class="danger-btn" id="resetDataBtn" type="button" data-en="🗑️ Erase this game's records">🗑️ 이 게임 기록 지우기</button>
+  <p class="set-note" style="margin:12px 0 10px" data-en="📚 Schools may teach things in a different order or in a different way. If something seems different, follow your teacher.">📚 학교마다 배우는 순서와 방법이 조금씩 다를 수 있어요. 헷갈리면 학교 선생님 설명을 따라 주세요.</p>
   <p class="copy">© 2026 Dongsun Moon. <span data-en="All rights reserved.">모든 권리 보유.</span></p>
  </div>
 </div>
@@ -755,14 +756,14 @@ const EXPS=[
   diff:L('다른 점은 딱 하나: 무게예요 (쇠구슬이 3배 무거워요)','Only one thing is different: the weight (the steel ball is 3 times heavier)'),
   lanes:[{mat:'steel',name:L('⚙️ 쇠구슬','⚙️ Steel ball')},{mat:'glass',name:L('🔮 유리구슬','🔮 Glass marble')}],
   opts:[['A',L('쇠구슬이 먼저','Steel first')],['B',L('유리구슬이 먼저','Glass first')],['same',L('거의 동시에','About the same time')]],ans:'same',
-  why:L('무게가 달라도 굴러 내려오는 빠르기는 같아요! 옛날 과학자 갈릴레이가 알아낸 놀라운 사실이에요.','Heavy or light, they roll down just as fast! A scientist named Galileo found this out long ago.'),
-  life:L('깃털이나 종이처럼 가볍고 넓은 것만 공기에 막혀서 천천히 떨어져요.','Only light, wide things like feathers fall slowly, because the air holds them back.')},
+  why:L('무게가 달라도 굴러 내려오는 빠르기는 거의 같아요! 옛날 과학자 갈릴레이가 알아낸 놀라운 사실이에요.','Heavy or light, they roll down at almost the same speed! A scientist named Galileo found this out long ago.'),
+  life:L('깃털이나 종이처럼 가볍고 넓은 것은 공기에 많이 막혀서 천천히 떨어져요.','Light, wide things like feathers and paper fall slowly, because the air holds them back a lot.')},
  {id:'slope',ic:'⛰️',kind:'race',measure:'time',t:L('가파른 길, 완만한 길','Steep or gentle'),
   q:L('가파른 미끄럼틀과 완만한 미끄럼틀이 있어요. 누가 먼저 끝에 도착할까요?','One slide is steep and one is gentle. Which marble reaches the end first?'),
   diff:L('다른 점은 딱 하나: 기울기예요','Only one thing is different: how steep the slide is'),
   lanes:[{mat:'glass',drop:210,name:L('⛰️ 가파른 길','⛰️ Steep slide')},{mat:'glass',drop:60,name:L('🌄 완만한 길','🌄 Gentle slide')}],
   opts:[['A',L('가파른 길','The steep slide')],['B',L('완만한 길','The gentle slide')],['same',L('거의 동시에','About the same time')]],ans:'A',
-  why:L('경사가 가파를수록 구슬을 아래로 끌어내리는 힘이 커서 더 빨리 내려와요.','The steeper the slope, the harder gravity pulls the marble down it, so it goes faster.'),
+  why:L('경사가 가파를수록 비탈을 따라 구슬을 끌어내리는 힘이 커서 더 빨리 내려와요.','The steeper the slope, the harder gravity pulls the marble down it, so it goes faster.'),
   life:L('그래서 가파른 미끄럼틀이 더 짜릿해요!','That is why steep slides feel more exciting!')},
  {id:'friction',ic:'🧊',kind:'race',measure:'time',t:L('얼음길과 카펫길','Ice or carpet'),
   q:L('매끈한 얼음길과 보송보송한 카펫길이 있어요. 누가 먼저 도착할까요?','One slide is smooth ice and one is fuzzy carpet. Which marble gets there first?'),
@@ -1173,14 +1174,14 @@ function showResults(){
  mineStats.races++;if(won)mineStats.wins++;
  const wId=theme.custom?null:WORLDS[raceWorld]?.id;if(wId&&!stats.worlds.includes(wId))stats.worlds.push(wId);if(theme.custom)stats.customRaces++;
  const fmt=t=>{const s=Math.max(0,t);return `${Math.floor(s/60)}:${(s%60).toFixed(1).padStart(4,'0')}`};
- let table='',actions='',coachHtml=won?coachLine('race'):theme.custom?coachHere('clap','내가 만든 코스가 멋지게 굴러갔어요! 고쳐 보고 또 달려 봐요. 그게 엔지니어의 방법이에요 🌙','Your own course rolled beautifully! Tweak it and race again: that is how engineers work 🌙'):Math.random()<.6?coachHere('go',...pick(LOSE_LINES)):'',title,leagueDone=false,hero=champ.id,heroText=L(`${nameOf(champ.id)} 우승!`,`${nameOf(champ.id)} wins!`),heroSub='',mineLine=won?L(`🎉 ${myKo} ${esc(nameOf(mine))}이 우승했어요! 응원 대성공!`,`🎉 ${myEn} ${esc(nameOf(mine))} won! Great cheering!`):L(`${esc(MY)} ${myKo} ${esc(nameOf(mine))}은 ${myRank}위! 다음엔 1등 할 수 있어요!`,`${esc(MY)} ${myEn} ${esc(nameOf(mine))} came ${ord(myRank)}. It could win next time!`);
+ let table='',actions='',coachHtml=won?coachLine('race'):theme.custom?coachHere('clap','내가 만든 코스가 멋지게 굴러갔어요! 고쳐 보고 또 달려 봐요. 그게 엔지니어의 방법이에요 🌙','Your own course rolled beautifully! Tweak it and race again: that is how engineers work 🌙'):Math.random()<.6?coachHere('go',...pick(LOSE_LINES)):'',title,leagueDone=false,hero=champ.id,heroText=L(`${nameOf(champ.id)} 우승!`,`${nameOf(champ.id)} wins!`),heroSub='',mineLine=won?L(`🎉 ${myKo} ${esc(nameOf(mine))}${jo(nameOf(mine),'이','가')} 우승했어요! 응원 대성공!`,`🎉 ${myEn} ${esc(nameOf(mine))} won! Great cheering!`):L(`${esc(MY)} ${myKo} ${esc(nameOf(mine))}${jo(nameOf(mine),'은','는')} ${myRank}위! 다음엔 1등 할 수 있어요!`,`${esc(MY)} ${myEn} ${esc(nameOf(mine))} came ${ord(myRank)}. It could win next time!`);
  if(mode==='league'&&league&&!league.done){
   const pts=Array(numBalls).fill(0);rank.forEach((m,i)=>{pts[m.id]=POINTS[i]||0;league.total[m.id]+=POINTS[i]||0});league.last=pts;
   const k=league.race,order=[...Array(numBalls).keys()].sort((a,b)=>league.total[b]-league.total[a]||pts[b]-pts[a]);
   leagueDone=k>=LEAGUE_RACES;title=leagueDone?L('🏆 리그 최종 결과','🏆 Final league standings'):L(`리그 ${k}/${LEAGUE_RACES}경기 결과`,`League race ${k}/${LEAGUE_RACES}`);
   table=`<table class="standings"><tr><th></th><th style="text-align:left">${L('구슬','Marble')}</th><th>${L('이번','Race')}</th><th>${L('합계','Total')}</th></tr>${order.map((id,i)=>`<tr class="${id===mine?'mine':''}"><td>${i<3?['🥇','🥈','🥉'][i]:i+1}</td><td class="nm"><span class="dot" style="background:${PALETTE[id][1]}"></span>${esc(nameOf(id))}${id===mine?' '+esc(MY):''}</td><td class="pts">${pts[id]?'+'+pts[id]:'-'}</td><td class="tot">${league.total[id]}</td></tr>`).join('')}</table>`;
   if(leagueDone){league.done=true;stats.leagues++;const lc=order[0],lr=order.indexOf(mine)+1;hero=lc;heroText=L(`${nameOf(lc)} 리그 챔피언!`,`${nameOf(lc)} is the league champion!`);heroSub=L(`리그 합계 ${league.total[lc]}점`,`${league.total[lc]} league points`);
-   mineLine=lc===mine?L(`👑 ${myKo} ${esc(nameOf(mine))}이 리그 챔피언이에요!`,`👑 ${myEn} ${esc(nameOf(mine))} is the league champion!`):L(`${esc(MY)} ${myKo} ${esc(nameOf(mine))}은 리그 ${lr}위 (${league.total[mine]}점)!`,`${esc(MY)} ${myEn} ${esc(nameOf(mine))} finished the league ${ord(lr)} (${league.total[mine]} points)!`);if(lc===mine)coachHtml=coachLine('big');setTimeout(()=>speak(fill(T.champ,lc),true),2600);
+   mineLine=lc===mine?L(`👑 ${myKo} ${esc(nameOf(mine))}${jo(nameOf(mine),'이','가')} 리그 챔피언이에요!`,`👑 ${myEn} ${esc(nameOf(mine))} is the league champion!`):L(`${esc(MY)} ${myKo} ${esc(nameOf(mine))}${jo(nameOf(mine),'은','는')} 리그 ${lr}위 (${league.total[mine]}점)!`,`${esc(MY)} ${myEn} ${esc(nameOf(mine))} finished the league ${ord(lr)} (${league.total[mine]} points)!`);if(lc===mine)coachHtml=coachLine('big');setTimeout(()=>speak(fill(T.champ,lc),true),2600);
    actions=`<div class="result-actions one"><button class="primary" type="button" data-act="newLeague">${L('🔁 새 리그 시작','🔁 New league')}</button></div>`}
   else{league.race++;setTimeout(()=>speak(fill(T.leagueNext,order[0],{k}),false),2600);
    actions=`<div class="result-actions one"><button class="primary" type="button" data-act="next">${L(`▶ 다음 경기 (${league.race}/${LEAGUE_RACES})`,`▶ Next race (${league.race}/${LEAGUE_RACES})`)}</button></div>`}
@@ -1319,6 +1320,8 @@ function renderBuilder(){
   <div class="modal-actions"><button class="control" type="button" data-b="random">🎲 ${L('랜덤으로 채우기','Fill randomly')}</button><button class="primary" type="button" data-b="go" ${d.mods.length<2?'disabled':''}>🏁 ${L('저장하고 달리기!','Save and race!')}</button></div>
   ${d.idx!=null?`<button class="danger-btn b-del" type="button" data-b="remove">🗑️ ${L('이 코스 지우기','Delete this course')}</button>`:''}`;
  $('bName').addEventListener('input',e=>{draft.name=e.target.value.replace(/[<>]/g,'').slice(0,12)})}
+// Korean particle after a name: 받침 → first form (초록이), none → second (연두가)
+const jo=(w,a,b)=>{w=String(w);const c=w.charCodeAt(w.length-1)-44032;return c>=0&&c<11172&&c%28?a:b};
 function builderAct(b){
  const d=draft,a=b.dataset.b,i=+b.dataset.i;buildMsg='';
  if(a==='add'){if(d.mods.length>=MAX_PIECES){buildMsg=L(`조각은 ${MAX_PIECES}개까지 넣을 수 있어요.`,`You can use up to ${MAX_PIECES} pieces.`)}else{d.mods.push(b.dataset.p);tone(660+d.mods.length*40,70,'triangle',.06)}}

@@ -7,7 +7,7 @@
 <title data-en="Moon Mini Games">문 미니 게임 | Moon Mini Games</title>
 <meta name="description" content="어린이를 위한 무료 웹 미니 게임 · Free mini games for kids. 휴대폰·PC 모두 가능, 한국어/English.">
 <meta property="og:title" content="Moon Mini Games · 문 미니 게임">
-<meta property="og:description" content="꼬마 탐정단 · 마블 레이스 · 꼬마 체스 기사단 · 꼬마 과학 수호대 · 꼬마 음악 아카데미 · 꼬마 수학 아쿠아리움 — 휴대폰과 PC에서 바로 플레이! Play right away on phone or PC.">
+<meta property="og:description" content="꼬마 탐정단 · 마블 레이스 · 꼬마 체스 기사단 · 꼬마 과학 수호대 · 꼬마 음악 아카데미 · 꼬마 수학 아쿠아리움 · 꼬마 파이썬 섬 — 휴대폰과 PC에서 바로 플레이! Play right away on phone or PC.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://game.dongsunmoon.com/">
 <meta property="og:image" content="https://game.dongsunmoon.com/images/og-image.jpg">
@@ -222,6 +222,7 @@ footer{margin-top:22px;text-align:center;color:#8a93b8;font-size:12px}
     <li data-en="🔊 Turn the sound on to hear the voice guide">🔊 소리를 켜면 음성 안내가 나와요</li>
     <li data-en="📱 Works on phones, tablets and computers">📱 휴대폰 · 태블릿 · 컴퓨터 모두 OK</li>
     <li data-en="💾 Progress is saved on this device, separately for each profile">💾 진행 기록은 이 기기에 프로필마다 따로 저장돼요</li>
+    <li data-en="📚 Schools may teach things in a different order or in a different way. If something seems different, follow your teacher.">📚 학교마다 배우는 순서와 방법이 조금씩 다를 수 있어요. 헷갈리면 학교 선생님 설명을 따라 주세요.</li>
   </ul>
   <section class="maker" aria-label="만든 사람" data-en-aria-label="About the maker">
     <img class="mk-photo" src="images/dm-profile.webp" alt="Dongsun Moon" width="84" height="84" loading="lazy">
@@ -253,7 +254,7 @@ const GAMES=[
     title:['마블 레이스','Marble Rush'],
     age:['누구나','All ages'],
     desc:['진짜처럼 통통 튕기는 구슬 레이스! 내 구슬을 응원하고 5경기 리그 우승에 도전해요.','Marbles really bounce! Cheer for yours and go for the 5-race league title.'],
-    tags:[['🌈 6개 월드','🌈 6 worlds'],['🏆 리그전','🏆 League'],['📣 내 구슬 응원','📣 Cheer your marble']],
+    tags:[['🌈 7개 월드','🌈 7 worlds'],['🏆 리그전','🏆 League'],['📣 내 구슬 응원','📣 Cheer your marble']],
     stat:()=>{const m=(readSave('marbleRush.v2')||readSave('marble3dsettings'))?.mineStats;return m&&m.races>0?L(`🏆 내 구슬 우승 ${m.wins}번 / ${m.races}경기`,`🏆 Your marble won ${m.wins} of ${m.races} race${m.races===1?'':'s'}`):''}
   },
   {

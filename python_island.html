@@ -951,7 +951,7 @@ function parse(src,lineBase=0){const T=lex(src);if(lineBase)T.forEach(t=>t.line+
  function block(head,line){
   if(peek().t!=='nl')return [simpleLine()];
   next();
-  if(peek().t!=='indent')throw syn(`expected an indented block after '${head}' statement on line ${line}`,peek().line,`${head} 다음 줄은 스페이스 4칸 들여 써야 ${head} 안에 들어가요.`,`The line after ${head} must be indented 4 spaces to belong to it.`,'IndentationError');
+  if(peek().t!=='indent')throw syn(`expected an indented block after '${head}' statement on line ${line}`,peek().line,`${head} 다음 줄은 들여 써야(보통 스페이스 4칸) ${head} 안에 들어가요.`,`The line after ${head} must be indented (usually 4 spaces) to belong to it.`,'IndentationError');
   next();const body=[];while(peek().t!=='dedent'&&peek().t!=='eof')body.push(stmt());if(peek().t==='dedent')next();return body}
  function stmt(){const t=peek();
   if(t.t==='indent')throw syn('unexpected indent',t.line,'이 줄은 들여 쓸 필요가 없어요. 위의 줄과 같은 칸에서 시작해요.','This line shouldn’t be indented. Start it where the line above starts.','IndentationError');
@@ -1731,7 +1731,7 @@ const R=[
  [/^ride\(.*\)$/,()=>['🎟️ 태워 주기','🎟️ let them ride']],[/^wave\(.*\)$/,()=>['👋 손 흔들며 다음에 오라고 하기','👋 wave: come back next time']],
  [/^show\(\)$/,()=>['🎆 쇼 카드대로 하기','🎆 run the show card']],[/^special\(\)$/,()=>['🍔 레시피 카드대로 만들기','🍔 cook from the recipe card']],
  // boxes (variables) last, so commands above win
- [/^(\w+) = \1 ([+\-*]) (\d+)$/,m=>[`📦 ${m[1]} 상자 값 ${m[2]==='+'?m[3]+' 늘리기':m[2]==='-'?m[3]+' 줄이기':m[3]+'배 하기'}`,`📦 ${m[2]==='+'?'add '+m[3]+' to':m[2]==='-'?'take '+m[3]+' from':'multiply'} ${m[1]}`]],
+ [/^(\w+) = \1 ([+\-*]) (\d+)$/,m=>[`📦 ${m[1]} 상자 값 ${m[2]==='+'?m[3]+' 늘리기':m[2]==='-'?m[3]+' 줄이기':m[3]+'배 하기'}`,m[2]==='*'?`📦 multiply ${m[1]} by ${m[3]}`:`📦 ${m[2]==='+'?'add '+m[3]+' to':'take '+m[3]+' from'} ${m[1]}`]],
  [/^(\w+) = input\((.*)\)$/,m=>[`⌨️ 물어보고 대답을 ${m[1]} 상자에 넣기`,`⌨️ ask, and put the answer in the ${m[1]} box`]],
  [/^(\w+) = (.+)$/,m=>[`📦 ${m[1]} 상자에 ${m[2]} 넣기`,`📦 put ${m[2]} in the ${m[1]} box`]],
  [/^(\w+)\(\)$/,m=>[`▶ ${m[1]} 명령 실행`,`▶ run ${m[1]}`]]];
@@ -1755,6 +1755,8 @@ const run=code=>{const r=PY.run(code,{maxTrace:1,vars:false,seed:3,maxSteps:6000
 const FRUIT=['🍎','🍌','🍇','🍓','🍑','🍒','🍉','🍋'],ANIMAL=['🐶','🐱','🐰','🐻','🐼','🦊','🐯','🐸'],FOOD=['🍔','🧃','🍰','🍕','🍦','🍩','🍪','🌭'],TOY=['🎈','🧸','🪁','🎲','🪀','🎁'];
 const NAMES=['파이','나비','뭉치','콩이','별이','하루'],NAMES_EN=['Py','Nabi','Mungchi','Kongi','Byeori','Haru'];
 const q=s=>'"'+s+'"';
+// a Korean particle after a number, as it is read aloud (1 일, 2 이, 3 삼 …): nj(3,'은') → '3은', nj(2,'은') → '2는'
+const nj=(n,p)=>{const d=String(n).slice(-1),b='013678'.includes(d),l='178'.includes(d);const P={은:['은','는'],이:['이','가'],이에요:['이에요','예요'],으로:[l?'로':'으로','로']}[p];return n+(b?P[0]:P[1])};
 const num=(R,d,lo=1)=>R.int(lo,[9,20,50][d-1]);
 // ---------------------------------------------------------------- world 1: commands in order (Py on an open garden)
 const OPEN={map:['...........','...........','...........','...........','...........','.....P.....','...........','...........','...........','...........','...........']};
@@ -1769,16 +1771,19 @@ const W1=[
   return {kind:'grid',code:`# ${LL(`파이는 ${DIR[start][0]} ${DIR[start][1]}을 보고 있어요`,`Py faces ${DIR[start][0]} ${DIR[start][2]}`)}\n`+code,optKind:'text',answerText:dirOpt(a),lits:[dirOpt(b),...['E','N','W','S'].filter(x=>x!==a&&x!==b).map(dirOpt)],
    ask:'코드를 다 하면 파이는 어느 쪽을 볼까요?|After the code, which way does Py face?',why:'오른쪽 왼쪽은 파이가 보는 쪽에서 정해요. 한 줄씩 손으로 돌려 보면 쉬워요.|Left and right are from Py’s view. Turn your hand one line at a time.'}},
  (R,d)=>{const n=[R.int(2,3),R.int(3,5),R.int(5,7)][d-1],ls=[];for(let i=0;i<n;i++)ls.push(i&&R.chance(.35)?R.pick(['turn_left()','turn_right()']):'move()');if(!ls.includes('move()'))ls[0]='move()';const code=ls.join('\n');
-  const g=grid(code,'E').res,alt1=grid(swapTurns(code),'E').res,alt2=grid(code.replace('move()\n','').replace(/^move\(\)$/,''),'E').res;
+  const run0=grid(code,'E');if(run0.r.err)return null;   // Py must not reach the garden's edge, or the answer would differ from counting the moves
+  const g=run0.res,alt1=grid(swapTurns(code),'E').res,alt2=grid(code.replace('move()\n','').replace(/^move\(\)$/,''),'E').res;
   return {kind:'grid',code:`# ${LL('파이는 → 오른쪽을 보고 있어요','Py faces → right')}\n`+code,optKind:'text',answerText:where(g.x-5,g.y-5),lits:[where(alt1.x-5,alt1.y-5),where(alt2.x-5,alt2.y-5),where(g.x-5+1,g.y-5),where(g.y-5,g.x-5)],
    ask:'코드를 다 하면 파이는 처음 자리에서 어디에 있을까요?|After the code, where is Py from its start?',why:'`move()` 명령마다 한 칸, 도는 명령은 제자리에서 방향만 바꿔요.|Each `move()` is one square; turns only change the direction.'}},
- (R,d)=>{const n=[R.int(3,4),R.int(4,6),R.int(6,8)][d-1],ls=[];for(let i=0;i<n;i++)ls.push(R.chance(.6)?'move()':R.pick(['turn_left()','turn_right()']));if(!ls.includes('move()'))ls[0]='move()';const code=ls.join('\n'),mv=grid(code,'E').moves;
+ (R,d)=>{const n=[R.int(3,4),R.int(4,6),R.int(6,8)][d-1],ls=[];for(let i=0;i<n;i++)ls.push(R.chance(.6)?'move()':R.pick(['turn_left()','turn_right()']));if(!ls.includes('move()'))ls[0]='move()';const code=ls.join('\n'),run0=grid(code,'E');if(run0.r.err)return null;const mv=run0.moves;
   return {kind:'grid',code,optKind:'out',answerText:String(mv),lits:[String(n),String(mv+1),String(Math.max(0,mv-1))],ask:'파이는 모두 몇 칸 움직일까요?|How many squares does Py move in all?',why:'움직이는 건 `move()` 명령뿐이에요. 도는 명령은 칸을 세지 않아요.|Only `move()` moves Py. Turns don’t count as squares.'}},
- (R,d)=>{const dist=R.int(2,4),row='#P'+'.'.repeat(dist)+'#',m=R.int(dist,dist+2),ls=[...Array(m)].map(()=>'move()');if(d>=2&&R.chance(.5))ls.splice(R.int(1,ls.length-1),0,`say("${LL('야호!','Yay!')}")`);const code=ls.join('\n'),g=grid(code,'E',['#'.repeat(row.length),row,'#'.repeat(row.length)]);
+ (R,d)=>{const dist=R.int(2,4),row='#P'+'.'.repeat(dist)+'#',m=R.int(dist,dist+2),ls=[...Array(m)].map(()=>'move()');if(d>=2&&R.chance(.5))ls.splice(R.int(1,ls.length-1),0,`say("${LL('야호!','Yay!')}")`);
+  // run the code exactly as shown (note on line 1), so the bump's line number is the line the child sees
+  const code=`# ${LL(`파이 앞 ${dist}칸 뒤에 🪨 바위가 있어요`,`There’s a 🪨 rock after ${dist} squares`)}\n`+ls.join('\n'),g=grid(code,'E',['#'.repeat(row.length),row,'#'.repeat(row.length)]),last=ls.length+1;
   const opt=k=>EN()?'Line '+k:k+'번째 줄';
   const right=g.r.err?opt(g.r.err.line):LL('안 부딪혀요','No bump');
-  return {kind:'grid',code:`# ${LL(`파이 앞 ${dist}칸 뒤에 🪨 바위가 있어요`,`There’s a 🪨 rock after ${dist} squares`)}\n`+code,optKind:'text',answerText:right+'|'+right,
-   lits:[...[1,2,3].map(x=>(g.r.err?g.r.err.line:m+1)+(x%2?x:-x)).filter(k=>k>=2&&k<=m+1).map(k=>opt(k)+'|'+opt(k)),LL('안 부딪혀요','No bump')+'|'+LL('안 부딪혀요','No bump')].filter(x=>x.split('|')[0]!==right),
+  return {kind:'grid',code,optKind:'text',answerText:right+'|'+right,
+   lits:[...[1,2,3].map(x=>(g.r.err?g.r.err.line:last)+(x%2?x:-x)).filter(k=>k>=2&&k<=last).map(k=>opt(k)+'|'+opt(k)),LL('안 부딪혀요','No bump')+'|'+LL('안 부딪혀요','No bump')].filter(x=>x.split('|')[0]!==right),
    ask:'몇 번째 줄에서 바위에 부딪힐까요?|On which line does Py bump the rock?',why:`첫 줄은 설명(#)이에요. 바위 앞 칸까지는 ${dist}번 갈 수 있어요.|The first line is a note (#). Py can move ${dist} times before the rock.`}},
  (R,d)=>{const len=[5,6,8][d-1],cells=[...Array(len)].map((_,i)=>i&&R.chance(.5)?'A':'.');const row='#P'+cells.slice(1).join('')+'#';const ls=[];let eaten=0;
   for(let i=1;i<len;i++){ls.push('move()');if(cells[i]==='A'&&R.chance(.75)){ls.push('eat()');eaten++}}if(!eaten){const i=cells.lastIndexOf('A');if(i<1){cells[2]='A'}}
@@ -1811,14 +1816,14 @@ const W3=[
 // ---------------------------------------------------------------- world 4: for loops and range
 const W4=[
  (R,d)=>{const e=R.pick(['⭐','🍎','🎈','🐟']),n=[R.int(2,4),R.int(3,6),R.int(4,8)][d-1];return {code:`for i in range(${n}):\n    print("${e}", end="")`,alts:[`print("${e}" * ${n-1})`,`print("${e}" * ${n+1})`],why:`range(${n})는 ${n}번 반복해요.|range(${n}) repeats ${n} times.`}},
- (R,d)=>{const n=[R.int(2,3),R.int(3,4),R.int(4,5)][d-1];return {code:`for i in range(${n}):\n    print(i)`,alts:[`for i in range(1, ${n+1}):\n    print(i)`,`for i in range(${n+1}):\n    print(i)`],why:`i는 0부터 시작해서 ${n}은 빼고 ${n-1}까지예요.|i starts at 0 and stops before ${n}.`}},
- (R,d)=>{const a=R.int(0,2),b=a+[R.int(2,4),R.int(3,6),R.int(4,8)][d-1];return {code:`total = 0\nfor i in range(${a}, ${b}):\n    total = total + i\nprint(total)`,alts:[`total = 0\nfor i in range(${a}, ${b+1}):\n    total = total + i\nprint(total)`,`total = 0\nfor i in range(${a+1}, ${b+1}):\n    total = total + i\nprint(total)`],why:`range(${a}, ${b})는 ${a}부터 ${b-1}까지예요. 끝 숫자 ${b}는 안 들어가요.|range(${a}, ${b}) goes from ${a} to ${b-1}; the end ${b} isn’t included.`}},
- (R,d)=>{const n=[R.int(2,5),R.int(3,8),R.int(5,12)][d-1];return {code:`last = 0\nfor i in range(${n}):\n    last = i\nprint(last)`,lits:[String(n),String(n+1)],alts:[`print(${n})`],why:`마지막으로 들어간 i는 ${n-1}이에요. range는 ${n} 앞에서 멈춰요.|The last i is ${n-1}; range stops before ${n}.`}},
- (R,d)=>{const a=[R.int(2,3),R.int(3,5),R.int(4,7)][d-1],b=R.int(2,5);return {code:`coins = 0\nfor i in range(${a}):\n    coins = coins + ${b}\nprint(coins)`,alts:[`print(${(a-1)*b})`,`print(${a+b})`],why:`${b}씩 ${a}번 더하면 ${a} × ${b}예요.|Adding ${b}, ${a} times, is ${a} × ${b}.`}},
+ (R,d)=>{const n=[R.int(2,3),R.int(3,4),R.int(4,5)][d-1];return {code:`for i in range(${n}):\n    print(i)`,alts:[`for i in range(1, ${n+1}):\n    print(i)`,`for i in range(${n+1}):\n    print(i)`],why:`i는 0부터 시작해서 ${nj(n,'은')} 빼고 ${n-1}까지예요.|i starts at 0 and stops before ${n}.`}},
+ (R,d)=>{const a=R.int(0,2),b=a+[R.int(2,4),R.int(3,6),R.int(4,8)][d-1];return {code:`total = 0\nfor i in range(${a}, ${b}):\n    total = total + i\nprint(total)`,alts:[`total = 0\nfor i in range(${a}, ${b+1}):\n    total = total + i\nprint(total)`,`total = 0\nfor i in range(${a+1}, ${b+1}):\n    total = total + i\nprint(total)`],why:`range(${a}, ${b})는 ${a}부터 ${b-1}까지예요. 끝 숫자 ${nj(b,'은')} 안 들어가요.|range(${a}, ${b}) goes from ${a} to ${b-1}; the end ${b} isn’t included.`}},
+ (R,d)=>{const n=[R.int(2,5),R.int(3,8),R.int(5,12)][d-1];return {code:`last = 0\nfor i in range(${n}):\n    last = i\nprint(last)`,lits:[String(n),String(n+1)],alts:[`print(${n})`],why:`마지막으로 들어간 i는 ${nj(n-1,'이에요')}. range는 ${n} 앞에서 멈춰요.|The last i is ${n-1}; range stops before ${n}.`}},
+ (R,d)=>{const a=[R.int(2,3),R.int(3,5),R.int(4,7)][d-1],b=R.int(2,5);return {code:`coins = 0\nfor i in range(${a}):\n    coins = coins + ${b}\nprint(coins)`,alts:[`print(${(a-1)*b})`,`print(${a+b})`],why:`${b}씩 ${a}번 더하면 ${a} × ${nj(b,'이에요')}.|Adding ${b}, ${a} times, is ${a} × ${b}.`}},
  (R,d)=>{if(d<2)return null;const n=R.pick(['파이썬','사과','코딩','바다']),en=R.pick(['cat','sun','pie','fish']);const w=EN()?en:n;return {code:`for ch in "${w}":\n    print(ch)`,alts:[`print("${w}")`,`for ch in "${w}":\n    print(ch, end="")`],why:'글자를 for로 돌면 한 글자씩 꺼내요.|Looping over text gives one letter at a time.'}},
- (R,d)=>{if(d<2)return null;const s=R.int(2,3),n=s*R.int(3,4)+R.int(0,1);return {code:`for i in range(0, ${n}, ${s}):\n    print(i, end=" ")`,alts:[`for i in range(0, ${n+1}, ${s}):\n    print(i, end=" ")`,`for i in range(1, ${n}, ${s}):\n    print(i, end=" ")`],why:`range의 세 번째 숫자 ${s}는 건너뛰는 칸이에요.|The third number ${s} in range is the step.`}},
+ (R,d)=>{if(d<2)return null;const s=R.int(2,3),n=s*R.int(3,4)+R.int(0,1);return {code:`for i in range(0, ${n}, ${s}):\n    print(i, end=" ")`,alts:[`for i in range(0, ${n+1}, ${s}):\n    print(i, end=" ")`,`for i in range(1, ${n}, ${s}):\n    print(i, end=" ")`],why:`range의 세 번째 숫자는 ${s}씩 뛰어 세라는 뜻이에요.|The third number in range means count up by ${s} each time.`}},
  (R,d)=>{if(d<3)return null;const a=R.int(2,4),b=R.int(2,4);return {code:`count = 0\nfor i in range(${a}):\n    for j in range(${b}):\n        count = count + 1\nprint(count)`,alts:[`print(${a+b})`,`print(${a*b+1})`],why:`바깥 반복 ${a}번마다 안쪽이 ${b}번씩 돌아서 ${a} × ${b}번이에요.|For each of ${a} outer loops, the inner one runs ${b} times: ${a} × ${b}.`}},
- (R,d)=>{const e=R.pick(['🐟','⭐','🍀','🌸']),n=[3,R.int(3,4),R.int(4,5)][d-1];return {code:`for i in range(1, ${n}):\n    print("${e}" * i)`,alts:[`for i in range(1, ${n+1}):\n    print("${e}" * i)`,`for i in range(${n}):\n    print("${e}" * i)`],why:`i가 1, 2, …, ${n-1}로 커지면서 줄마다 하나씩 늘어요.|As i grows 1, 2, … ${n-1}, each line gets one more.`}},
+ (R,d)=>{const e=R.pick(['🐟','⭐','🍀','🌸']),n=[3,R.int(3,4),R.int(4,5)][d-1];return {code:`for i in range(1, ${n}):\n    print("${e}" * i)`,alts:[`for i in range(1, ${n+1}):\n    print("${e}" * i)`,`for i in range(${n}):\n    print("${e}" * i)`],why:`i가 ${[...Array(n-2)].map((_,k)=>k+1).join(', ')}, ${nj(n-1,'으로')} 커지면서 줄마다 하나씩 늘어요.|As i grows ${[...Array(n-1)].map((_,k)=>k+1).join(', ')}, each line gets one more.`}},
  (R,d)=>{const n=[3,R.int(3,5),R.int(4,6)][d-1];return {code:`for i in range(${n}, 0, -1):\n    print(i, end=" ")\nprint("🚀")`,alts:[`for i in range(${n}, -1, -1):\n    print(i, end=" ")\nprint("🚀")`,`for i in range(1, ${n+1}):\n    print(i, end=" ")\nprint("🚀")`],why:'-1 만큼씩 거꾸로 세고, 끝 숫자 0은 들어가지 않아요.|It counts down by 1, and the end number 0 is not included.'}},
  (R,d)=>{const e=R.pick(['🎈','🍭','🐣']),a=R.int(1,3),n=R.int(2,4);return {code:`gifts = ${a}\nfor i in range(${n}):\n    gifts = gifts * 2\nprint(gifts)`,alts:[`print(${a*2*n})`,`print(${a*Math.pow(2,n-1)})`],why:`${n}번 반복할 때마다 두 배가 돼요.|It doubles on each of the ${n} loops.`}},
  (R,d)=>{if(d<2)return null;const n=R.int(5,9);return {code:`count = 0\nfor i in range(${n}):\n    if i % 2 == 0:\n        count = count + 1\nprint(count)`,alts:[`print(${Math.floor(n/2)})`,`print(${n})`],why:`0부터 ${n-1}까지에서 짝수(0도 짝수)를 세요.|Count the even numbers from 0 to ${n-1} (0 is even).`}}];
@@ -1826,7 +1831,7 @@ const W4=[
 const W5=[
  (R,d)=>{const t=num(R,d,3),x=R.chance(.3)?t:R.int(1,t*2);return {code:`x = ${x}\nif x > ${t}:\n    print("🍦")\nelse:\n    print("🍪")`,alts:[`x = ${x}\nif x >= ${t}:\n    print("🍦")\nelse:\n    print("🍪")`],lits:['🍦\n🍪'],why:`${x} > ${t} 는 ${x>t?'참(True)':'거짓(False)'}이에요.${x===t?' 같은 수는 > 가 아니에요.':''}|${x} > ${t} is ${x>t?'True':'False'}.${x===t?' Equal numbers are not >.':''}`}},
  (R,d)=>{const s=R.pick([95,85,72,60,90,70]);return {code:`score = ${s}\nif score >= 90:\n    print("🥇")\nelif score >= 70:\n    print("🥈")\nelse:\n    print("🥉")`,alts:[`score = ${s}\nif score >= 70:\n    print("🥈")\nelif score >= 90:\n    print("🥇")\nelse:\n    print("🥉")`],lits:['🥇\n🥈','🥉'],why:'if부터 차례로 확인하고, 처음 맞는 곳 하나만 실행해요.|Checks go in order from the if; only the first true one runs.'}},
- (R,d)=>{const n=num(R,d);const [ev,od]=EN()?['even','odd']:['짝수','홀수'];return {code:`n = ${n}\nif n % 2 == 0:\n    print("${ev}")\nelse:\n    print("${od}")`,alts:[`n = ${n+1}\nif n % 2 == 0:\n    print("${ev}")\nelse:\n    print("${od}")`],why:`${n}을(를) 2로 나눈 나머지는 ${n%2}예요. 0이면 짝수예요.|${n} % 2 is ${n%2}. 0 means even.`}},
+ (R,d)=>{const n=num(R,d);const [ev,od]=EN()?['even','odd']:['짝수','홀수'];return {code:`n = ${n}\nif n % 2 == 0:\n    print("${ev}")\nelse:\n    print("${od}")`,alts:[`n = ${n+1}\nif n % 2 == 0:\n    print("${ev}")\nelse:\n    print("${od}")`],why:`${n}을(를) 2로 나눈 나머지는 ${nj(n%2,'이에요')}. 0이면 짝수예요.|${n} % 2 is ${n%2}. 0 means even.`}},
  (R,d)=>{const x=R.int(1,9),y=R.int(1,9);const [sa,df]=EN()?['same','different']:['같아요','달라요'];return {code:`a = ${x}\nb = ${y}\nif a == b:\n    print("${sa}")\nelse:\n    print("${df}")`,alts:[`a = 1\nb = 1\nif a == b:\n    print("${sa}")\nelse:\n    print("${df}")`,`a = 1\nb = 2\nif a == b:\n    print("${sa}")\nelse:\n    print("${df}")`],why:'== 는 두 값이 같은지 묻는 질문이에요.|== asks whether two values are equal.'}},
  (R,d)=>{const x=R.int(5,15),t=R.int(3,10);return {code:`x = ${x}\nif x > ${t}:\n    print("A")\nif x > ${t-2}:\n    print("B")`,alts:[`x = ${x}\nif x > ${t}:\n    print("A")\nelif x > ${t-2}:\n    print("B")`],lits:['A','B','A\nB'],why:'if 두 개는 따로따로 확인해요. 둘 다 참이면 둘 다 실행돼요.|Two separate ifs are each checked; both run if both are true.'}},
  (R,d)=>{const x=R.int(1,9);const dd=LL('딩동댕','Correct!');return {kind:'fix',code:`x = ${x}\nif x = ${x}:\n    print("${dd}")`,line:2,cands:[`if x == ${x}:`,`if x = = ${x}:`,`if x => ${x}:`],target:dd,ask:`버그를 고쳐서 ${dd}이 나오게 하는 줄은?|Which line fixes the bug so it prints ${dd}?`,why:'같은지 비교할 때는 = 가 아니라 == 를 써요.|To compare, use == not =.'}},
@@ -1839,7 +1844,7 @@ const W6=[
  (R,d)=>{if(d<2)return null;const t=R.pick([10,20,30,50,100]);return {code:`coins = 1\nwhile coins < ${t}:\n    coins = coins * 2\nprint(coins)`,alts:[`coins = 1\nwhile coins < ${t}:\n    coins = coins * 2\n    print(coins)`],lits:[String(t)],why:'두 배씩 커지다가 처음으로 목표 이상이 되면 멈춰요.|It doubles until it first reaches the target.'}},
  (R,d)=>{const s=R.int(3,8);return {code:`x = ${s}\ncount = 0\nwhile x < 3:\n    x = x + 1\n    count = count + 1\nprint(count)`,lits:['1','3',String(s)],why:'처음부터 조건이 거짓이면 한 번도 반복하지 않아요.|If the condition is False at the start, the loop never runs.'}},
  (R,d)=>{const t=[R.int(8,12),R.int(10,20),R.int(20,40)][d-1],s=R.int(2,4);return {code:`steps = 0\nhp = ${t}\nwhile hp > 0:\n    hp = hp - ${s}\n    steps = steps + 1\nprint(steps)`,alts:[`print(${Math.floor(t/s)})`,`print(${t})`],lits:[String(Math.ceil(t/s)+1)],why:`hp가 0 이하가 될 때까지 ${s}씩 줄이며 횟수를 세요.|Count how many times ${s} is taken away until hp is 0 or less.`}},
- (R,d)=>{const e=R.pick(['🍎','🐟','⭐']),n=[R.int(2,3),R.int(3,4),R.int(4,6)][d-1];return {code:`bag = ""\ncount = 0\nwhile count < ${n}:\n    bag = bag + "${e}"\n    count = count + 1\nprint(bag)`,alts:[`print("${e}" * ${n-1})`,`print("${e}" * ${n+1})`],why:`count가 ${n}이 되면 count < ${n}이 거짓이라 멈춰요.|When count reaches ${n}, count < ${n} is False and it stops.`}},
+ (R,d)=>{const e=R.pick(['🍎','🐟','⭐']),n=[R.int(2,3),R.int(3,4),R.int(4,6)][d-1];return {code:`bag = ""\ncount = 0\nwhile count < ${n}:\n    bag = bag + "${e}"\n    count = count + 1\nprint(bag)`,alts:[`print("${e}" * ${n-1})`,`print("${e}" * ${n+1})`],why:`count가 ${nj(n,'이')} 되면 count < ${nj(n,'이')} 거짓이라 멈춰요.|When count reaches ${n}, count < ${n} is False and it stops.`}},
  (R,d)=>{const n=R.int(2,4);return {kind:'fix',code:`n = ${n}\nwhile n > 0:\n    print("🚀")\nn = n - 1`,line:4,cands:['    n = n - 1','    n = n + 1','n = n + 1'],target:Array(n).fill('🚀').join('\n'),ask:`🚀 를 ${n}번만 보이려면 4번째 줄을 어떻게 고칠까요?|How should line 4 be so 🚀 shows only ${n} times?`,why:'n을 줄이는 줄이 반복 안(들여쓰기)에 있어야 언젠가 멈춰요.|The line that lowers n must be inside the loop (indented) so it ends.'}}];
 // ---------------------------------------------------------------- world 7: functions
 const W7=[
@@ -1854,7 +1859,7 @@ const W7=[
 const listOf=(R,n,pool)=>R.some(pool,n);
 const lit=a=>'['+a.map(q).join(', ')+']';
 const W8=[
- (R,d)=>{const a=listOf(R,[3,4,5][d-1],FRUIT),k=R.int(1,a.length-1);return {code:`train = ${lit(a)}\nprint(train[${k}])`,alts:[`print("${a[k-1]}")`,...(k+1<a.length?[`print("${a[k+1]}")`]:[])],why:`기차 칸 번호는 0부터예요. [${k}]은 ${k+1}번째 칸이에요.|Car numbers start at 0, so [${k}] is car number ${k+1}.`}},
+ (R,d)=>{const a=listOf(R,[3,4,5][d-1],FRUIT),k=R.int(1,a.length-1);return {code:`train = ${lit(a)}\nprint(train[${k}])`,alts:[`print("${a[k-1]}")`,...(k+1<a.length?[`print("${a[k+1]}")`]:[])],why:`기차 칸 번호는 0부터예요. 그래서 ${k}번 칸은 앞에서 ${k+1}번째 칸이에요.|Car numbers start at 0, so car ${k} is the ${['1st','2nd','3rd','4th','5th','6th'][k]} car from the front.`}},
  (R,d)=>{const a=listOf(R,[3,4,5][d-1],ANIMAL);return {code:`train = ${lit(a)}\nprint(train[-1])`,alts:[`print("${a[0]}")`,`print("${a[a.length-2]}")`],why:'[-1]은 맨 뒤 칸이에요.|[-1] is the last car.'}},
  (R,d)=>{const a=listOf(R,[3,4,6][d-1],FOOD);return {code:`train = ${lit(a)}\nprint(len(train))`,lits:[String(a.length-1),String(a.length+1)],why:'len은 칸이 모두 몇 개인지 세요. 번호와 달리 1부터 세요.|len counts how many cars there are, starting from 1.'}},
  (R,d)=>{const a=listOf(R,[2,3,4][d-1],FRUIT),x=R.pick(FRUIT.filter(f=>!a.includes(f)));return {code:`train = ${lit(a)}\ntrain.append("${x}")\nprint(train)`,alts:[`print(${lit([x,...a])})`,`print(${lit(a)})`],why:'append는 맨 뒤에 새 칸을 붙여요.|append adds a new car at the end.'}},
@@ -2224,7 +2229,7 @@ WORLD(3,{icon:'📦',name:'보물 상자|Treasure Boxes',concept:'변수|Variabl
   options:['ice_cream = 4\nprint("아이스크림", ice_cream)','ice cream = 4\nprint("아이스크림", ice cream)','1ice_cream = 4\nprint("아이스크림", 1ice_cream)'],
   solution:'ice_cream = 4\nprint("아이스크림", ice_cream)',
   why:'상자 이름에는 빈칸을 쓸 수 없고, 숫자로 시작할 수도 없어요. 빈칸 대신 `_` 기호를 써요.|Box names can’t have spaces or start with a number. Use `_` in place of a space.',
-  learn:'상자 이름은 글자로 시작하고, 빈칸 대신 밑줄 `_` 기호를 써요.|A box name starts with a letter and uses an underscore `_` instead of a space.',
+  learn:'상자 이름은 숫자로 시작할 수 없고, 빈칸 대신 밑줄 `_` 기호를 써요.|A box name can’t start with a number, and it uses an underscore `_` instead of a space.',
   hints:['세 코드는 이름표만 달라요. 이름표 글자를 하나씩 비교해 봐요.|The three codes differ only in the name tag. Compare the tags letter by letter.','이름표에 빈칸이 있으면 파이썬은 이름이 두 개인 줄 알아요. 숫자로 시작해도 안 돼요.|If a tag has a space, Python thinks it’s two names. Starting with a number won’t work either.','빈칸 대신 밑줄 `_` 기호를 쓰고, 글자로 시작하는 이름표를 골라요.|Pick the tag that starts with a letter and uses an underscore `_` instead of a space.']},
  {id:'w3-5',kind:'fix',stage:'text',title:'글자와 숫자|Text and numbers',
   say:'화면에 “고양이는 3살”을 보여 주고 싶은데 오류가 났어요! 🐞 ▶ 실행해서 오류 설명을 읽고, 틀린 줄을 눌러서 고쳐요.|I want the screen to say the cat is 3, but there’s an error! 🐞 Press ▶ Run, read the error message, then tap the wrong line and fix it.',
@@ -3169,7 +3174,7 @@ function settings(){
   <div class="setrow"><span>🔠 ${L('큰 코드 글씨','Big code text')}</span><button class="tog ${S.opt.big?'on':''}" type="button" data-act="t" data-k="big" aria-label="${L('큰 코드 글씨','Big code text')}"></button></div>
   <div class="setrow"><span>🌐 ${L('언어','Language')}</span><span class="seg"><button type="button" class="${LANG==='ko'?'on':''}" data-act="lang" data-v="ko">한국어</button><button type="button" class="${LANG==='en'?'on':''}" data-act="lang" data-v="en">English</button></span></div>
   <p class="muted">${MGP.me?L(`${esc(S.av)} ${esc(S.name)}의 기록이에요. 플레이어는 첫 화면에서 바꿔요.`,`This is ${esc(S.name)}’s progress. Switch players on the main page.`):L('첫 화면에서 프로필을 만들면 형제자매가 따로 기록할 수 있어요.','Make profiles on the main page so siblings keep separate progress.')}</p>
-  <button class="btn ghost wide danger" type="button" data-act="reset">🗑️ ${L('이 게임 기록 지우기','Reset this game')}</button>${COPYRIGHT()}`,{acts:{
+  <button class="btn ghost wide danger" type="button" data-act="reset">🗑️ ${L('이 게임 기록 지우기','Reset this game')}</button><p class="muted">📚 ${L('학교마다 배우는 순서와 방법이 조금씩 다를 수 있어요. 헷갈리면 학교 선생님 설명을 따라 주세요.','Schools may teach things in a different order or in a different way. If something seems different, follow your teacher.')}</p>${COPYRIGHT()}`,{acts:{
   t:b=>{const k=b.dataset.k;S.opt[k]=!S.opt[k];if(k==='voice'&&!S.opt.voice)hush();if(k==='big')document.body.classList.toggle('bigcode',S.opt.big);save();b.classList.toggle('on',S.opt[k]);if(k==='voice'&&S.opt.voice)say(L('목소리를 켰어요!','Voice is on!'));return false},
   capt:b=>{S.opt.capt=S.opt.capt===false;save();b.classList.toggle('on',S.opt.capt!==false);if(P&&P.ed&&P.ed.draw)P.ed.draw();return false},
   diff:b=>{S.opt.diff=+b.dataset.v;save();b.parentNode.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));return false},
@@ -3512,7 +3517,7 @@ function lineQ(maxW){for(let k=0;k<30;k++){const w=pickWorld(LINES,maxW),set=LIN
 function diveQ(maxW,lv){const kinds=['list'];if(maxW>=9)kinds.push('dict');if(maxW>=10)kinds.push('set');const k=Math.random()<.55?'list':ch(kinds);
  if(k==='list'){const n=clamp(3+Math.floor(lv/2),3,6),items=mix(GEMS).slice(0,n);const forms=[()=>R(0,n-1),()=>-1,...(lv>=2?[()=>-2]:[]),...(lv>=3?[()=>'len']:[])];const f=ch(forms)();
   const idx=f==='len'?`len(treasure) - 1`:String(f);const code=`treasure = [${items.map(x=>`"${x}"`).join(', ')}]\nprint(treasure[${idx}])`,ans=out(code);const pos=items.indexOf(ans);
-  return {kind:'list',items,code,ask:`treasure[${idx}]`,pos,ans,why:f==='len'?`len(treasure) - 1은 맨 끝 칸 번호 ${n-1}이에요|len(treasure) - 1 is the last position, ${n-1}`:+f<0?`${f}는 끝에서 ${-f}번째 칸이에요|${f} is the ${-f === 1 ? 'last' : '2nd from the end'} chest`:`칸 번호는 0부터 세요: ${f}번 칸|Positions start at 0: chest ${f}`}}
+  return {kind:'list',items,code,ask:`treasure[${idx}]`,pos,ans,why:f==='len'?`len(treasure) - 1은 맨 끝 칸, ${n-1}번 칸이에요|len(treasure) - 1 is the last position, ${n-1}`:+f<0?`${f}${f===-1?'은':'는'} 끝에서 ${-f}번째 칸이에요|${f} is the ${-f === 1 ? 'last chest' : '2nd chest from the end'}`:`칸 번호는 0부터 세요: ${f}번 칸|Positions start at 0: chest ${f}`}}
  if(k==='dict'){const tags=mix(['🔴','🔵','🟢','🟡']).slice(0,3),vals=mix(GEMS).slice(0,3),q=R(0,2);const code=`locker = {${tags.map((t,i)=>`"${t}": "${vals[i]}"`).join(', ')}}\nprint(locker["${tags[q]}"])`,ans=out(code);const order=mix([0,1,2]);
   return {kind:'dict',items:order.map(i=>vals[i]),tags:order.map(i=>tags[i]),code,ask:`locker["${tags[q]}"]`,pos:order.indexOf(q),ans,why:`딕셔너리는 순서가 아니라 이름표 "${tags[q]}"로 찾아요|A dict finds by tag "${tags[q]}", not by position`}}
  const pouch=mix(PETS).slice(0,3),q=Math.random()<.5?ch(pouch):ch(PETS.filter(p=>!pouch.includes(p)));const code=`pouch = {${pouch.map(x=>`"${x}"`).join(', ')}}\nprint("${q}" in pouch)`,ans=out(code);
@@ -3640,7 +3645,7 @@ function fishGame(){const play=shell(LIST[0].name,'🎣','fish'),lv=level(),rod=
  play.innerHTML=`<div class="fs-scene"><canvas class="fs-cv"></canvas>
    <div class="fs-me"><img src="images/aq-me-${meKey()}.webp" alt="" draggable="false"></div><div class="fs-rail"></div>
    <div class="fs-py"><img src="images/py-hi.webp" alt="" draggable="false"></div><div class="fs-say"></div><div class="fs-power"><i></i></div></div>
-  <div class="fs-hud"><div class="fs-want"></div><div class="fs-side"><span class="fs-n"></span><span class="fs-bucket">${img('pg-bucket','🪣','fs-ic')} <b>0</b></span><button type="button" class="fs-book" aria-label="${L('물고기 도감','Fish book')}">${img('pg-fish-book','📖','fs-ic')}</button></div></div>
+  <div class="fs-hud"><div class="fs-want"></div><div class="fs-side"><span class="fs-n"></span><span class="fs-bucket">${img('pg-bucket','🪣','fs-ic')} <b>0</b></span><button type="button" class="fs-book" aria-label="${L('낚시 도감','Catch book')}">${img('pg-fish-book','📖','fs-ic')}</button></div></div>
   <div class="fs-run"></div><div class="fs-reel" aria-hidden="true"><em>💥</em><div class="fs-ten"><i></i></div><em>🎣</em></div>
   <div class="fs-rod"><button type="button" class="fs-tab"></button><div class="fs-body"></div></div><div class="fs-reveal hidden"></div>`;
  const $q=s=>play.querySelector(s),scene=$q('.fs-scene'),cv=$q('.fs-cv'),cx=cv.getContext('2d'),meEl=$q('.fs-me'),pyEl=$q('.fs-py'),sayEl=$q('.fs-say'),powEl=$q('.fs-power'),
@@ -3680,7 +3685,7 @@ function fishGame(){const play=shell(LIST[0].name,'🎣','fish'),lv=level(),rod=
  // ---- HUD: the wanted poster, casts left, my bucket, the fish book
  function hud(){const w=wanted,bk=BAIT[w.bait],clue=tier===1?`🎯 ${L(['가까이','중간쯤','멀리'][w.band-1],['near','middle','far'][w.band-1])}`:`📏 depth ${w.band}`;
   wantEl.className='fs-want'+(st.wantedGot?' got':'');
-  wantEl.innerHTML=`${fishPic(w.id)}<span><i>${st.wantedGot?'✅ '+L('찾았다!','Found!'):'🎯 '+L('찾는 물고기','Wanted')}</i><b>${esc(L(w.ko,w.en))}</b><small>${bk[0]} ${esc(L(bk[1],bk[2]))} · ${clue}</small></span>`;
+  wantEl.innerHTML=`${fishPic(w.id)}<span><i>${st.wantedGot?'✅ '+L('찾았다!','Found!'):'🎯 '+L('오늘의 목표','Wanted')}</i><b>${esc(L(w.ko,w.en))}</b><small>${bk[0]} ${esc(L(bk[1],bk[2]))} · ${clue}</small></span>`;
   $q('.fs-n').textContent=`🎣 ${Math.min(total,tries()+(st.cur?1:0))}/${total}`;$q('.fs-bucket b').textContent=st.caught.length}
  // ---- the rod's code panel: tap a value to change it
  function rodSum(){const c=rodFill(tier,vals),bs=tier===5?[...(/baits = \[(.*)\]/.exec(c)||['',''])[1].matchAll(/"(\w+)"/g)].map(m=>m[1]):[(/"(\w+)"/.exec(c)||['','worm'])[1]],d=/depth = (\d)/.exec(c),n=/range\((\d)\)/.exec(c);
@@ -3749,7 +3754,7 @@ function fishGame(){const play=shell(LIST[0].name,'🎣','fish'),lv=level(),rod=
   if(isW){st.wantedGot=true}st.caught.push({id:f.id,cm:c.cm,first,isW,gold:!!f.gold,name:L(f.ko,f.en)});
   st.jump={x0:pierW+14,y0:hz,x1:meX+meW*.95,y1:deck-meH*.32,id:f.id,s:(f.big?96:70)*big};meDo('cheer');pyPose('wow');pySay('와! 낚았다!|Wow! Got it!');hud()}
  function reveal(){const c=st.caught[st.caught.length-1];st.ph='reveal';st.t=0;
-  revEl.innerHTML=`<div class="fs-card ${c.gold?'gold':''}" role="dialog" aria-live="polite">${c.first?`<span class="fs-new">NEW!</span>`:''}${c.isW?`<span class="fs-stamp">🎯 ${L('찾던 물고기!','Wanted fish!')}</span>`:''}
+  revEl.innerHTML=`<div class="fs-card ${c.gold?'gold':''}" role="dialog" aria-live="polite">${c.first?`<span class="fs-new">NEW!</span>`:''}${c.isW?`<span class="fs-stamp">🎯 ${L('찾던 목표!','Wanted catch!')}</span>`:''}
    <div class="fs-pic">${fishPic(c.id)}</div><b>${c.gold?'✨ ':''}${esc(c.name)}</b><span class="fs-cm">📏 ${c.cm}cm${c.cm>=(book.big[c.id]||0)&&dex[c.id]>1?` · 🏅 ${L('최고 기록!','New record!')}`:''}</span>
    ${c.gold?`<p>${L('황금빛 물고기! 아주 귀한 친구예요!','A golden fish! A very rare friend!')}</p>`:''}<small class="fs-tapn">${L('눌러서 계속','Tap to go on')} ▶</small></div>`;
   revEl.classList.remove('hidden');say(L(`${c.name}! ${c.cm}센티!`,`${c.name}! ${c.cm} centimetres!`));
@@ -3769,7 +3774,7 @@ function fishGame(){const play=shell(LIST[0].name,'🎣','fish'),lv=level(),rod=
  // ---- the fish book: every fish I have caught, and hints for the ones still hiding
  function openBook(){if(G.paused||G.done)return;sfx('tap');G.paused=true;st.holding=false;if(st.ph==='charge'){st.ph='ready';powEl.classList.remove('on');meDo('')}
   const n=ALLFISH.filter(f=>dex[f.id]).length;
-  overlay(`<h3>📖 ${L('물고기 도감','Fish book')} <small class="fs-cnt">${n}/${ALLFISH.length}</small></h3><div class="fs-dex">${ALLFISH.map(f=>{const k=dex[f.id]||0;
+  overlay(`<h3>📖 ${L('낚시 도감','Catch book')} <small class="fs-cnt">${n}/${ALLFISH.length}</small></h3><div class="fs-dex">${ALLFISH.map(f=>{const k=dex[f.id]||0;
    return `<div class="fs-dx ${k?'got':''} ${f.gold?'gold':''}"><span class="fs-dpic">${fishPic(f.id)}</span><b>${k?esc(L(f.ko,f.en)):'???'}</b><small>${k?`×${k} · ${book.big[f.id]||'?'}cm`:f.gold?'✨ ???':`📏 ${f.band} · ${BAIT[f.bait][0]}`}</small></div>`}).join('')}</div>
    <p class="fs-dexnote">${L('📏 숫자는 사는 깊이, 그림은 좋아하는 미끼예요.','📏 is the depth it lives at; the picture is its favourite bait.')}</p><button class="btn wide" type="button" data-pa="close">${L('닫기','Close')}</button>`,{close:()=>{closeOverlay();G.paused=false}})}
  listen($q('.fs-book'),'click',openBook);listen(wantEl,'click',openBook);
@@ -3891,7 +3896,7 @@ function fishGame(){const play=shell(LIST[0].name,'🎣','fish'),lv=level(),rod=
    ten:+st.ten.toFixed(3),dist:+st.dist.toFixed(3),wanted:wanted.id,wantedGot:st.wantedGot,caught:st.caught.map(c=>c.id),code:rodFill(tier,vals),busy:st.ph!=='ready'})};
  size();hud();rodRender();if(tier>=2&&(book.seenTier||0)<tier){rodOpen(true);book.seenTier=tier}draw(performance.now()/1000);pySay('꾹 눌렀다가 떼면 휙! 던져요|Hold, then let go to cast!');
  howTo(img('pg-fisher','🎣','pg-hero'),LIST[0].name,['화면을 꾹 누르면 힘이 모여요. 떼면 휙! 던져요.|Hold the screen to build power, then let go to cast!','찌가 톡톡 흔들리면 기다려요. 쏙! 들어가며 ❗가 뜨면 바로 탭!|Wait while the bobber wiggles. When it dips and ❗ pops up, tap!','꾹 눌러서 감아요. 줄이 빨개지면 잠깐 떼요.|Hold to reel. Let go for a moment when the line turns red.',
-   tier===1?'🎯 찾는 물고기는 좋아하는 미끼로! 아래 🎣 낚싯대 코드에서 미끼를 바꿔요.|Use the 🎯 wanted fish’s favourite bait. Change it in the 🎣 rod code below!':'🎯 찾는 물고기는 좋아하는 미끼와 깊이로! 아래 🎣 낚싯대 코드에서 바꿔요.|Set the 🎯 wanted fish’s favourite bait and depth in the 🎣 rod code below!'],
+   tier===1?'🎯 목표는 좋아하는 미끼로 잡아요! 아래 🎣 낚싯대 코드에서 미끼를 바꿔요.|Use the 🎯 wanted catch’s favourite bait. Change it in the 🎣 rod code below!':'🎯 목표는 좋아하는 미끼와 깊이로 잡아요! 아래 🎣 낚싯대 코드에서 바꿔요.|Set the 🎯 wanted catch’s favourite bait and depth in the 🎣 rod code below!'],
   '꾹 눌렀다 떼서 던지고, 찌가 쏙! 들어가면 톡! 낚싯대 코드를 바꾸면 다른 물고기가 와요.|Hold and let go to cast, then tap when the bobber dips! Change the rod code to call other fish.',()=>{size();frames(tick)})}
 
 // ================================================================ 🏎️ Kart Track — steer into the lane with the right value and beat the bug racer

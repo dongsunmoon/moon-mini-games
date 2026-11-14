@@ -565,7 +565,8 @@ const sayAs=(shown,spoken)=>`<span data-say="${esc(spoken)}">${shown}</span>`;
 
 // ---------------------------------------------------------------- fractions in text
 const EN_ORD={2:'half',3:'third',4:'fourth',5:'fifth',6:'sixth',7:'seventh',8:'eighth',9:'ninth',10:'tenth',11:'eleventh',12:'twelfth',100:'hundredth',1000:'thousandth'};
-const enFrac=(n,d)=>d===2?(n===1?'one half':n+' halves'):d===1?String(n):n+' '+(EN_ORD[d]||d+'th')+(n===1?'':'s');
+const enOrd=d=>EN_ORD[d]||d+(d%100>=11&&d%100<=13?'th':({1:'st',2:'nd',3:'rd'}[d%10]||'th'));
+const enFrac=(n,d)=>d===2?(n===1?'one half':n+' halves'):d===1?String(n):n+' '+enOrd(d)+(n===1?'':'s');
 const frSay=(n,d)=>L(`${d}분의 ${n}`,enFrac(n,d));
 const fr=(n,d)=>`<span class="fr" data-say="${esc(frSay(n,d))}"><b>${N(n)}</b><i>${N(d)}</i></span>`;
 const mixedSay=(w,n,d)=>L(`${w}${josa(w,'과','와')} ${d}분의 ${n}`,`${w} and ${enFrac(n,d)}`);
@@ -815,19 +816,19 @@ V.cal=(o={})=>{const st=o.start||0,days=o.days||30,mk=new Set(o.mark||[]),wd=L('
 const FISH_RAW={
 1:[ // Sunny Seaside (Korean coast)
 ['mackerel','고등어','Chub mackerel','kr',1,'torpedo|#2f7f8f|#eaf3f5|#2f6a7a|wavy|#173b48','','등이 푸른 생선이에요. 큰 무리를 지어 아주 빠르게 헤엄쳐요.','Its back is blue-green. Mackerel swim fast in big schools.'],
-['anchovy','멸치','Anchovy','kr',1,'tiny|#8fb0c4|#f4f8fb|#9fb8c8|hstripe|#c8d8e4','','손가락만큼 작지만 수만 마리가 함께 무리를 지어요.','Only as long as a finger, but they swim in schools of thousands.'],
+['anchovy','멸치','Anchovy','kr',1,'tiny|#8fb0c4|#f4f8fb|#9fb8c8|hstripe|#c8d8e4','','손가락만큼 작지만 수만 마리가 함께 무리를 지어요.','Only as long as a finger, but they swim in schools of tens of thousands.'],
 ['rockfish','조피볼락','Korean rockfish','kr',1,'oval|#6b5a4a|#cbb9a0|#5a4a3c|mottled|#3d3228','bigeye','바위틈에 숨는 걸 좋아해요. 알이 엄마 배 속에서 깨어나 새끼로 태어나요.','It likes to hide among rocks. Its eggs hatch inside the mother, so the babies are born live.'],
 ['filefish','쥐치','Filefish','kr',1,'tall|#c9b27a|#efe2bd|#a8925a|spots|#8a7448','spine','머리 위에 뿔처럼 생긴 가시가 하나 있어요.','It has one spine on its head, like a little horn.'],
 ['redbream','참돔','Red seabream','kr',2,'tall|#ff8fa0|#ffe3e8|#ff7088|dots|#3fb3ff','','분홍빛 몸에 파란 점이 반짝반짝 빛나요.','A pink body covered in shiny blue dots.'],
 ['flounder','넙치','Olive flounder','kr',2,'flat|#8a7a5a|#d8cdb0|#7a6a4a|spots|#5a4a32','','두 눈이 몸 왼쪽에 모여 있어요. 모래 색으로 몸 색을 바꿔 숨어요.','Both eyes are on the left side of its body, and it changes colour to hide on sand.'],
 ['puffer','자주복','Pufferfish','kr',2,'puffer|#6f7f8a|#f6f6ee|#5f6f7a|spots|#2d3a44','','위험하면 물을 삼켜 몸을 풍선처럼 부풀려요.','When it is in danger, it gulps water and puffs up like a balloon.'],
-['hairtail','갈치','Largehead hairtail','kr',2,'ribbon|#d8e4ee|#ffffff|#c0d0de|none|','','은빛 리본처럼 생겼어요. 몸을 꼿꼿이 세우고 헤엄치기도 해요.','It looks like a silver ribbon and often swims standing straight up.'],
-['yellowtail','방어','Yellowtail amberjack','kr',2,'torpedo|#4c6f9a|#eef3f7|#ffd23f|hstripe|#ffd23f','','몸 옆에 노란 줄이 있어요. 힘이 세고 빠르게 헤엄쳐요.','A strong, fast swimmer with a yellow stripe along its side.'],
+['hairtail','갈치','Largehead hairtail','kr',2,'ribbon|#d8e4ee|#ffffff|#c0d0de|none|','','은빛 리본처럼 생겼어요. 몸을 꼿꼿이 세우고 헤엄치기도 해요.','It looks like a silver ribbon and sometimes swims standing straight up.'],
+['yellowtail','방어','Japanese amberjack','kr',2,'torpedo|#4c6f9a|#eef3f7|#ffd23f|hstripe|#ffd23f','','몸 옆에 노란 줄이 있어요. 힘이 세고 빠르게 헤엄쳐요.','A strong, fast swimmer with a yellow stripe along its side.'],
 ['octopus','문어','Octopus','kr',2,'emoji|🐙','','다리가 8개, 심장이 3개예요!','It has 8 arms and 3 hearts!'],
 ['bluecrab','꽃게','Swimming crab','kr',1,'emoji|🦀|hue-rotate(160deg) saturate(.7)','','뒷다리가 노처럼 납작해서 헤엄을 잘 쳐요.','Its back legs are flat like paddles, so it swims well.'],
-['squid','오징어','Squid','kr',1,'emoji|🦑','','다리가 10개예요. 먹물을 뿜고 재빨리 도망가요.','It has 10 arms and squirts ink to escape.'],
+['squid','오징어','Squid','kr',1,'emoji|🦑','','다리가 10개인데, 그중 2개가 아주 길어요. 먹물을 뿜고 재빨리 도망가요.','It has 8 arms and 2 extra-long tentacles. It squirts ink to escape.'],
 ['moonjelly','보름달물해파리','Moon jellyfish','kr ca',1,'jelly|#cfe8ff|#ffffff|#ffb3d1|rings|#ffb3d1','','몸의 대부분이 물이고, 뇌가 없어요.','Its body is almost all water, and it has no brain.'],
-['seastar','아무르불가사리','Northern sea star','kr',1,'star|#ffb347|#ff7f50|#ff9a3c|none|','arms5','팔이 잘려도 새 팔이 다시 자라나요.','If it loses an arm, it can grow a new one.'],
+['seastar','아무르불가사리','Northern Pacific sea star','kr',1,'star|#ffb347|#ff7f50|#ff9a3c|none|','arms5','팔이 잘려도 새 팔이 다시 자라나요.','If it loses an arm, it can grow a new one.'],
 ['seahorse','해마','Seahorse','kr',3,'horse|#f2b84b|#ffe7a8|#e8a030|none|','','아빠 해마가 배 주머니에서 알을 품어 새끼를 키워요.','Dad seahorses carry the eggs in a pouch on their belly.'],
 ['snowcrab','대게','Snow crab','kr ca',3,'emoji|🦀|saturate(.6) brightness(1.15)','','다리가 대나무처럼 곧고 길어서 ‘대게’라고 불러요. 캐나다 대서양에도 많이 살아요.','Its long, straight legs gave it its Korean name. Many also live in Atlantic Canada.'],
 ['pollock','명태','Alaska pollock','kr',3,'torpedo|#8a8f6a|#f0f0e4|#7a7f5a|mottled|#5c6040','barbel','예전엔 동해에 아주 많았지만 지금은 귀해졌어요. 동태·황태·코다리처럼 이름이 아주 많아요.','Once common in Korea’s East Sea, now rare there. In Korean it has dozens of names!'],
@@ -849,7 +850,7 @@ const FISH_RAW={
 ['laketrout','호수송어','Lake trout','ca',3,'torpedo|#4a5a6a|#eeeeea|#3a4a5a|dots|#e8ecf0','','차갑고 깊은 호수에 살아요. 수십 년을 살 수 있어요.','It lives in cold, deep lakes and can live for decades.'],
 ['gar','긴코가아','Longnose gar','ca',3,'gar|#8a8a5a|#e8e8c8|#7a7a4a|spots|#3a3a20','','주둥이가 아주 길고 뾰족해요. 물 위에서 공기를 들이마셔 숨 쉴 수도 있어요.','Its snout is long and thin, and it can gulp air at the surface to breathe.'],
 ['paintedturtle','비단거북','Painted turtle','ca',3,'emoji|🐢|saturate(1.3) hue-rotate(-20deg)','','등딱지 가장자리에 빨간 무늬가 있어요. 겨울에는 연못 바닥에서 겨울잠을 자요.','It has red marks around its shell and sleeps through winter at the bottom of ponds.'],
-['muskie','머스키','Muskellunge','ca',4,'long|#8a9a6a|#eef0d8|#7a8a5a|bars|#4a5a3a','duckbill','온타리오 호수의 대장 물고기예요. 1미터가 넘게 자라요.','The giant of Ontario’s lakes. It can grow longer than 1 metre.'],
+['muskie','머스키','Muskellunge','ca',4,'long|#8a9a6a|#eef0d8|#7a8a5a|bars|#4a5a3a','duckbill','온타리오 호수의 사냥꾼 대장이에요. 1미터가 넘게 자라요.','A top hunter of Ontario’s lakes. It can grow longer than 1 metre.'],
 ['ameel','아메리카뱀장어','American eel','ca',4,'eel|#6a6a3a|#d8d0a0|#5a5a2a|none|','','아주 먼 바다(사르가소해)에서 태어나 강을 거슬러 호수까지 와서 살아요.','It is born far out in the ocean (the Sargasso Sea), then travels up rivers to live in lakes.'],
 ['riverotter','북미수달','River otter','ca',4,'emoji|🦦','','눈 덮인 언덕이나 진흙 비탈을 미끄럼 타듯 내려가며 놀아요.','It loves to play by sliding down snowy and muddy banks.'],
 ['lakesturgeon','호수철갑상어','Lake sturgeon','ca',5,'sturgeon|#6a6a5a|#cfcfc0|#5a5a4a|scutes|#e8e8d8','barbel','공룡 시대부터 살아온 물고기 무리예요. 100년 넘게 살기도 해요.','Its family dates back to the age of dinosaurs, and it can live over 100 years.']],
@@ -862,7 +863,7 @@ const FISH_RAW={
 ['beakperch','돌돔','Striped beakperch','kr',2,'tall|#e8e4d8|#f8f6f0|#b8b4a8|bars|#2a2a2a','','검은 줄무늬가 있어요. 이빨이 튼튼해서 성게 껍데기도 깨 먹어요.','It has black stripes and teeth strong enough to crack sea urchins.'],
 ['tilefish','옥돔','Red tilefish','kr',2,'oval|#ff9aa8|#fff0f0|#ff8a98|none|','square','제주에서 귀하게 여기는 분홍빛 물고기예요. 모래 바닥에 굴을 파고 살아요.','A treasured pink fish of Jeju that digs burrows in the sandy floor.'],
 ['nudibranch','갯민숭달팽이','Sea slug','kr',2,'slug|#8a5aff|#ffd23f|#ff8ad8|none|','','껍데기 없는 바다 달팽이예요. 화려한 색으로 “나 맛없어!” 하고 알려요.','A sea snail without a shell. Its bright colours warn, “I taste bad!”'],
-['abalone','전복','Abalone','kr',2,'shell|#7a6a5a|#c8b8e8|#9ad8c8|none|','','해녀가 물속에 들어가 따 오는 조개예요. 껍데기 안쪽이 무지갯빛이에요.','Haenyeo divers collect it. The inside of its shell shines like a rainbow.'],
+['abalone','전복','Abalone','kr',2,'shell|#7a6a5a|#c8b8e8|#9ad8c8|none|','','해녀가 물속에 들어가 따 오는 바다 고둥이에요. 껍데기 안쪽이 무지갯빛이에요.','Haenyeo divers collect this sea snail. The inside of its shell shines like a rainbow.'],
 ['butterflyfish','나비고기','Butterflyfish','kr',2,'tall|#ffe04a|#fff8c0|#ffd020|eyebar|#2a2a2a','','납작하고 동그란 몸에 눈을 가리는 검은 띠가 있어요. 산호와 바위 사이를 나비처럼 다녀요.','A flat, round fish with a dark band over its eye. It flutters around rocks like a butterfly.'],
 ['lionfish','쏠배감펭','Lionfish','kr',3,'lion|#f2e2d0|#ffffff|#e8c8b0|bars|#c0402a','','사자 갈기 같은 지느러미에 독가시가 있어요. 절대 만지면 안 돼요!','Its mane-like fins have venomous spines — never touch it!'],
 ['boxfish','거북복','Boxfish','kr',3,'box|#f2c83a|#fff0a0|#e8b82a|dots|#2a2a2a','','몸이 딱딱한 상자 모양이라 지느러미를 살랑살랑 움직여 헤엄쳐요.','Its body is a hard box, so it swims by fluttering its little fins.'],
@@ -870,7 +871,7 @@ const FISH_RAW={
 ['moray','곰치','Moray eel','kr',3,'eel|#8a7a3a|#c8b870|#7a6a2a|mottled|#4a3a1a','','바위 구멍에 숨어 입을 벌렸다 닫았다 하며 숨을 쉬어요.','It hides in rock holes and opens and closes its mouth to breathe.'],
 ['sunfish','개복치','Ocean sunfish','kr',4,'mola|#9aa8b8|#e0e6ec|#8a98a8|none|','','세상에서 가장 무거운 뼈 있는 물고기 중 하나예요. 꼬리가 없는 것처럼 보여요.','One of the heaviest bony fish in the world. It looks as if it has no tail.'],
 ['greenturtle','푸른바다거북','Green sea turtle','kr',5,'emoji|🐢','','해초를 먹고 사는 바다거북이에요. 제주 바다에서도 볼 수 있어요.','A sea turtle that eats seagrass and seaweed. It is sometimes seen around Jeju.'],
-['dolphin','남방큰돌고래','Bottlenose dolphin','kr',5,'dolphin|#8a9aa8|#dde4ea|#7a8a98|none|','','제주 바닷가에 100마리쯤이 무리 지어 살아요.','About a hundred of them live together along Jeju’s coast.'],
+['dolphin','남방큰돌고래','Indo-Pacific bottlenose dolphin','kr',5,'dolphin|#8a9aa8|#dde4ea|#7a8a98|none|','','제주 바닷가에 100마리쯤이 무리 지어 살아요.','About a hundred of them live together along Jeju’s coast.'],
 ['whaleshark','고래상어','Whale shark','kr',5,'shark|#4a6a8a|#e8f0f4|#3a5a7a|dots|#ffffff','wide','세상에서 가장 큰 물고기예요. 작은 플랑크톤을 먹는 순한 상어예요.','The biggest fish in the world — a gentle shark that eats tiny plankton.']],
 4:[ // Salmon Coast (British Columbia)
 ['herring','청어','Pacific herring','kr ca',1,'torpedo|#5a8aa8|#eef4f8|#4a7a98|none|','','한국과 캐나다 바다에 모두 살아요. 봄이면 바닷가에 알을 아주 많이 낳아요.','It lives in both Korean and Canadian seas and lays huge numbers of eggs along the coast in spring.'],
@@ -882,14 +883,14 @@ const FISH_RAW={
 ['chum','연어','Chum salmon','kr ca',2,'torpedo|#6a7a6a|#e8ece6|#5a6a5a|bars|#8a4a7a','','한국 강으로도 돌아오는 연어예요. 한국과 캐나다를 잇는 물고기예요!','This salmon also returns to rivers in Korea — it links Korea and Canada!'],
 ['lingcod','링코드','Lingcod','ca',2,'long|#6a6a4a|#d8d0b0|#5a5a3a|mottled|#3a3a2a','bigmouth','살이 파란빛이나 초록빛인 것도 있어요. 익히면 하얗게 변해요.','Some have blue-green flesh that turns white when cooked.'],
 ['dungeness','던지니스게','Dungeness crab','ca',2,'emoji|🦀|saturate(.7) hue-rotate(-15deg)','','등딱지가 20센티미터 넘게 자라요. 모래 속에 숨는 걸 좋아해요.','Its shell can grow over 20 centimetres wide, and it likes to bury itself in sand.'],
-['chinook','왕연어','Chinook salmon','ca',3,'torpedo|#5a6a7a|#e8eef2|#4a5a6a|dots|#2a3a4a','big','태평양 연어 중에서 가장 커요. 범고래가 가장 좋아하는 먹이예요.','The biggest Pacific salmon — and the orcas’ favourite food.'],
-['halibut','태평양핼리벗','Pacific halibut','ca',3,'flat|#5a5a4a|#e8e8e0|#4a4a3a|mottled|#3a3a2a','','넙치 무리 중에서 가장 크게 자라요. 두 눈이 몸 오른쪽에 있어요.','The biggest of all flatfish. Both its eyes are on the right side of its body.'],
+['chinook','왕연어','Chinook salmon','ca',3,'torpedo|#5a6a7a|#e8eef2|#4a5a6a|dots|#2a3a4a','big','태평양 연어 중에서 가장 커요. 물고기를 먹는 범고래가 가장 좋아하는 먹이예요.','The biggest Pacific salmon — and the favourite food of fish-eating orcas.'],
+['halibut','태평양핼리벗','Pacific halibut','ca',3,'flat|#5a5a4a|#e8e8e0|#4a4a3a|mottled|#3a3a2a','','세계에서 손꼽히게 큰 가자미예요. 두 눈이 몸 오른쪽에 있어요.','One of the biggest flatfish in the world. Both its eyes are on the right side of its body.'],
 ['yelloweye','노랑눈볼락','Yelloweye rockfish','ca',3,'oval|#ff7a3a|#ffc08a|#ff6a2a|none|','yelloweye','100년 넘게 살 수 있는 물고기예요.','It can live for more than 100 years!'],
 ['wolfeel','늑대장어','Wolf eel','ca',3,'eel|#8a8a7a|#c8c8b8|#7a7a6a|spots|#4a4a40','bighead','무서워 보이지만 순하고, 한 짝과 평생 함께 지내요.','It looks scary but is gentle, and it stays with one partner for life.'],
 ['sunflowerstar','해바라기불가사리','Sunflower sea star','ca',3,'star|#ff8a3a|#ffb87a|#ff7a2a|none|','arms20','팔이 24개까지 생기고, 아주 빨리 움직이는 불가사리예요.','It can have up to 24 arms and is one of the fastest sea stars.'],
 ['harbourseal','잔점박이물범','Harbour seal','ca',3,'seal|#9a9a8a|#d8d4c8|#8a8a7a|spots|#4a4a40','','바위 위에서 바나나처럼 몸을 구부리고 쉬어요.','It rests on rocks with its body curved like a banana.'],
 ['giantoctopus','대왕문어','Giant Pacific octopus','kr ca',4,'emoji|🐙|hue-rotate(-25deg) saturate(1.2)','','세계에서 가장 큰 문어예요. 한국 동해에도 살아요.','The world’s largest octopus — it lives in Korea’s East Sea too.'],
-['seaotter','해달','Sea otter','ca',4,'emoji|🦦|brightness(1.1)','','잘 때 떠내려가지 않게 친구와 손을 잡아요. 돌로 조개를 깨 먹어요.','It holds hands with friends while sleeping so they don’t drift apart, and cracks shells with rocks.'],
+['seaotter','해달','Sea otter','ca',4,'emoji|🦦|brightness(1.1)','','잘 때 떠내려가지 않게 친구와 손을 잡기도 해요. 돌로 조개를 깨 먹어요.','It sometimes holds hands with friends while sleeping so they don’t drift apart, and cracks shells with rocks.'],
 ['whitesturgeon','흰철갑상어','White sturgeon','ca',5,'sturgeon|#8a8a8a|#e0e0e0|#7a7a7a|scutes|#f0f0f0','barbel','북아메리카에서 가장 큰 민물고기예요. 캐나다 프레이저강에 살아요.','North America’s largest freshwater fish. It lives in BC’s Fraser River.'],
 ['orca','범고래','Orca','ca',5,'whale|#1e2430|#ffffff|#1e2430|orca|#ffffff','','가족끼리 무리 지어 살아요. 무리마다 쓰는 ‘말소리’가 달라요.','Orcas live in family groups, and each group has its own calls.']],
 5:[ // Rivers and Mudflats (Korea)
@@ -901,16 +902,16 @@ const FISH_RAW={
 ['mullet','숭어','Mullet','kr',1,'torpedo|#6a7a8a|#eef0f2|#5a6a7a|hstripe|#9aa8b8','','물 위로 높이 뛰어오르는 걸 좋아해요.','It loves to leap high out of the water.'],
 ['fiddler','농게','Fiddler crab','kr',1,'emoji|🦀|hue-rotate(20deg)','','수컷은 한쪽 집게발이 아주 커서 흔들며 신호를 보내요.','Males have one giant claw that they wave to send signals.'],
 ['kkeokji','꺽지','Korean aucha perch','kr',2,'oval|#5a6a4a|#c8c8a8|#4a5a3a|mottled|#2a3a20','earspot','한국에만 사는 물고기예요. 아빠 꺽지가 알을 지켜요.','It lives only in Korea, and the dad guards the eggs.'],
-['bitterling','각시붕어','Rose bitterling','kr',2,'tall|#a8a8b8|#f0e8f0|#ff6a8a|hstripe|#7a8ac8','','민물조개 속에 알을 낳아요! 한국에만 살아요.','It lays its eggs inside freshwater mussels! It lives only in Korea.'],
+['bitterling','각시붕어','Korean rose bitterling','kr',2,'tall|#a8a8b8|#f0e8f0|#ff6a8a|hstripe|#7a8ac8','','민물조개 속에 알을 낳아요! 한국에만 살아요.','It lays its eggs inside freshwater mussels! It lives only in Korea.'],
 ['amurcat','메기','Amur catfish','kr',2,'cat|#5a5a4a|#c8c0a8|#4a4a3a|mottled|#2a2a20','whiskers','긴 수염으로 어두운 물속에서 먹이를 찾아요.','It finds food in dark water with its long whiskers.'],
 ['mudskipper','짱뚱어','Mudskipper','kr',2,'skipper|#7a7a5a|#c8c0a0|#6a6a4a|dots|#4aa0ff','','지느러미로 갯벌 위를 걷고 뛰어다녀요. 물 밖에서도 숨 쉴 수 있어요.','It walks and hops on mudflats with its fins and can breathe out of water.'],
 ['nakji','낙지','Long-arm octopus','kr',2,'emoji|🐙|saturate(.5) brightness(1.15)','','갯벌 구멍 속에 살아요. 다리가 아주 길어요.','It lives in holes in the mudflat and has very long arms.'],
-['mandarin','쏘가리','Mandarin fish','kr',3,'oval|#c8a84a|#f0e0a8|#b8983a|leopard|#4a3a1a','bigmouth','표범 같은 얼룩무늬가 있어 ‘강의 표범’이라고 불려요.','Its leopard-like spots make it the “leopard of the river”.'],
+['mandarin','쏘가리','Leopard mandarin fish','kr',3,'oval|#c8a84a|#f0e0a8|#b8983a|leopard|#4a3a1a','bigmouth','표범 같은 얼룩무늬가 있어 ‘강의 표범’이라고 불려요.','Its leopard-like spots make it the “leopard of the river”.'],
 ['gangmochi','금강모치','Gangmochi','kr',3,'tiny|#a87a4a|#f0e0c0|#ff8a3a|hstripe|#ff8a3a','','한국에만 사는 작은 물고기예요. 차가운 산골 물에 살아요.','A small fish found only in Korea, in cold mountain streams.'],
 ['jpeel','뱀장어','Japanese eel','kr',3,'eel|#3a4a3a|#c8c8a8|#2a3a2a|none|','','아주 먼 바다에서 태어나 한국의 강까지 헤엄쳐 와요.','It is born far away in the ocean and swims all the way to Korean rivers.'],
 ['eoreumchi','어름치','Korean spotted barbel','kr',4,'torpedo|#a8a898|#f0f0e8|#98988a|dotrows|#3a3a3a','barbel','알을 낳은 뒤 자갈을 쌓아 탑을 만들어요. 천연기념물이에요.','After laying eggs it piles pebbles into a little tower. It is a protected natural monument.'],
 ['lenok','열목어','Manchurian trout','kr',4,'torpedo|#8a6a5a|#e8dcd0|#7a5a4a|dots|#3a1a1a','redeye','아주 차갑고 맑은 계곡물에만 살아요. 눈이 빨갛게 보여요.','It lives only in very cold, clear mountain streams, and its eyes look red.'],
-['namsaengi','남생이','Reeves’ turtle','kr',4,'emoji|🐢|saturate(.5) brightness(.85)','','한국 토종 거북이에요. 천연기념물로 보호받고 있어요.','Korea’s native freshwater turtle, protected as a natural monument.'],
+['namsaengi','남생이','Reeves’ turtle','kr',4,'emoji|🐢|saturate(.5) brightness(.85)','','한국 토종 거북이에요. 천연기념물로 보호받고 있어요.','A native Korean freshwater turtle, protected as a natural monument.'],
 ['goldmandarin','황쏘가리','Golden mandarin fish','kr',5,'oval|#ffc83a|#ffe8a0|#ffb820|none|','bigmouth','온몸이 황금빛인 쏘가리예요. 한강의 황쏘가리는 천연기념물이에요.','A golden-yellow mandarin fish. Those in the Han River are a protected natural monument.'],
 ['mihojonggae','미호종개','Miho spined loach','kr',5,'eel|#e8d8a8|#fff8e8|#d8c898|spots|#8a6a3a','whiskers','한국에만 사는 아주 귀한 물고기예요. 천연기념물이자 멸종위기종이에요.','A very rare fish found only in Korea — a natural monument and an endangered species.'],
 ['eurasianotter','수달','Eurasian otter','kr',5,'emoji|🦦|saturate(.8) brightness(.9)','','한국 강에 사는 천연기념물이에요. 물속에서는 귀와 콧구멍을 닫아요.','A protected natural monument of Korean rivers. It closes its ears and nose underwater.']],
@@ -924,10 +925,10 @@ const FISH_RAW={
 ['seacucumber','해삼','Sea cucumber','kr ca',2,'cuke|#6a4a3a|#a87a5a|#5a3a2a|none|','','위험하면 몸속 기관을 내뿜고, 나중에 다시 만들어요.','When in danger it can push out its insides and grow them back later.'],
 ['atlsalmon','대서양연어','Atlantic salmon','ca',3,'torpedo|#6a7a9a|#f4f6fa|#5a6a8a|xspots|#1a2a3a','','태평양 연어와 달리 알을 낳은 뒤에도 살아서 다시 바다로 가기도 해요.','Unlike Pacific salmon, it can survive spawning and swim back to the sea.'],
 ['char','북극곤들매기','Arctic char','ca',3,'torpedo|#4a6a6a|#ff6a3a|#ff5a2a|dots|#ffc0b0','','세상에서 가장 북쪽에 사는 민물고기예요. 배가 빨개요.','The world’s most northern freshwater fish, with a red belly.'],
-['atlhalibut','대서양핼리벗','Atlantic halibut','ca',3,'flat|#6a6a5a|#ececec|#5a5a4a|none|','','바다 밑바닥에 납작하게 누워 지내는 아주 큰 넙치예요.','A very big flatfish that lies flat on the sea floor.'],
+['atlhalibut','대서양핼리벗','Atlantic halibut','ca',3,'flat|#6a6a5a|#ececec|#5a5a4a|none|','','바다 밑바닥에 납작하게 누워 지내는 아주 큰 가자미예요.','A very big flatfish that lies flat on the sea floor.'],
 ['wolffish','대서양늑대고기','Atlantic wolffish','ca',3,'long|#7a8a9a|#c8d0d8|#6a7a8a|bars|#3a4a5a','teeth','큰 이빨로 성게와 게를 부숴 먹어요. 피 속에 얼지 않게 하는 성분이 있어요.','It crushes urchins and crabs with big teeth, and its blood has a natural antifreeze.'],
 ['lobster','바닷가재','American lobster','ca',3,'emoji|🦞','','캐나다 대서양의 유명한 바닷가재예요. 아주 드물게 파란 가재도 있어요.','Atlantic Canada’s famous lobster — very rarely, a blue one is found!'],
-['lionsmane','사자갈기해파리','Lion’s mane jellyfish','ca',3,'jelly|#ff8a4a|#ffc08a|#ff6a2a|none|','long','세상에서 가장 큰 해파리예요. 촉수가 아주 길어요.','The world’s biggest jellyfish, with extremely long tentacles.'],
+['lionsmane','사자갈기해파리','Lion’s mane jellyfish','ca',3,'jelly|#ff8a4a|#ffc08a|#ff6a2a|none|','long','세상에서 가장 큰 해파리 중 하나예요. 촉수가 아주 길어요.','One of the world’s biggest jellyfish, with extremely long tentacles.'],
 ['bluefin','대서양참다랑어','Atlantic bluefin tuna','ca',4,'torpedo|#1a3a6a|#e8eef4|#ffd23f|finlets|#ffd23f','big','바다에서 가장 빠른 물고기 중 하나예요. 몸무게가 수백 킬로그램까지 나가요.','One of the fastest fish in the sea. It can weigh hundreds of kilograms.'],
 ['harpseal','하프물범','Harp seal','ca',4,'seal|#c8ccd0|#eef0f2|#b8bcc0|harp|#4a4a50','','아기 때는 털이 새하얘요. 바다 얼음 위에서 태어나요.','Its pups are born on the sea ice with fluffy white fur.'],
 ['puffin','퍼핀','Atlantic puffin','ca',4,'puffin|#1e2028|#ffffff|#ff8a2a|none|','','날개로 물속을 날듯이 헤엄쳐 물고기를 잡아요. 뉴펀들랜드 래브라도를 상징하는 새예요.','It “flies” underwater with its wings to catch fish. It is the provincial bird of Newfoundland and Labrador.'],
@@ -941,7 +942,7 @@ const FISH_RAW={
 ['leg3','제주 보석고기','Island Jewel','legend',5,'oval|#2ad8c8|#c8fff4|#ffd23f|dots|#ffffff','legend','3학년 수학을 모두 마스터한 관장님께 찾아온 전설의 물고기예요.','A legendary fish that comes only to directors who master Grade 3 math.'],
 ['leg4','은하 연어','Galaxy Salmon','legend',5,'torpedo|#3a2a8a|#8a7aff|#ff8ad8|dots|#ffffff','legend','4학년 수학을 모두 마스터한 관장님께 찾아온 전설의 물고기예요.','A legendary fish that comes only to directors who master Grade 4 math.'],
 ['leg5','황금 용고기','Golden Dragonfish','legend',5,'long|#ffc83a|#fff0b0|#ff8a2a|scales|#e8a020','legend','5학년 수학을 모두 마스터한 관장님께 찾아온 전설의 물고기예요.','A legendary fish that comes only to directors who master Grade 5 math.'],
-['leg6','오로라 고래','Aurora Whale','legend',5,'whale|#2a8a9a|#c8fff0|#7affc8|aurora|#c87aff','legend','6학년 수학을 모두 마스터한 관장님께 찾아온 전설의 물고기예요. 초등 수학 완전 정복!','A legendary whale for directors who master Grade 6 math — all of elementary math!']]
+['leg6','오로라 고래','Aurora Whale','legend',5,'whale|#2a8a9a|#c8fff0|#7affc8|aurora|#c87aff','legend','6학년 수학을 모두 마스터한 관장님께 찾아온 전설의 고래예요. 초등 수학 완전 정복!','A legendary whale for directors who master Grade 6 math — all of elementary math!']]
 };
 const FISH=[],FISH_BY={};
 Object.entries(FISH_RAW).forEach(([reg,list])=>list.forEach(r=>{const [id,ko,en,where,rar,look,extra,fko,fen]=r;const f={id,ko,en,where,r:rar,look,extra,fko,fen,reg:+reg};FISH.push(f);FISH_BY[id]=f}));
@@ -1310,7 +1311,7 @@ S.push({id:'g1-03',icon:'🫧',strand:'num',
   if(t==='box'){const n=R(4,10),b=R(1,n-1),a=n-b,first=Math.random()<.5;return {q:first?L(`□와 ${eul(b)} 모으면 ${iga(n)} 돼요. □는 얼마일까요?`,`□ and ${b} make ${n}. What is □?`):L(`${gwa(b)} □를 모으면 ${iga(n)} 돼요. □는 얼마일까요?`,`${b} and □ make ${n}. What is □?`),a:A.n(a),hint:L(`${b}에서 ${n}까지 이어서 세어 보세요.`,`Count on from ${b} to ${n}.`),exp:L(`${gwa(a)} ${eul(b)} 모으면 ${iga(n)} 돼요. □는 ${ye(a)}`,`${a} and ${b} make ${n}, so □ is ${a}.`)}}
   if(t==='story'){const n=R(5,10),a=R(2,n-1);const q=pick([
     L(`물고기 ${n}마리를 두 수조에 나누어 넣어요. 한 수조에 ${a}마리를 넣으면 다른 수조에는 몇 마리를 넣어야 할까요?`,`${n} fish go into two tanks. If ${a} go into one tank, how many go into the other tank?`),
-    L(`조개 ${n}개를 두 바구니에 나누어 담았어요. 한 바구니에 ${a}개가 있어요. 다른 바구니에는 몇 개가 있을까요?`,`${n} shells are shared between two baskets. One basket has ${a}. How many are in the other basket?`),
+    L(`조개 ${n}개를 두 바구니에 나누어 담았어요. 한 바구니에 ${a}개가 있어요. 다른 바구니에는 몇 개가 있을까요?`,`${n} shells are put into two baskets. One basket has ${a}. How many are in the other basket?`),
     L(`해달이 조개 ${n}개를 두 손에 들고 있어요. 왼손에 ${a}개가 있어요. 오른손에는 몇 개가 있을까요?`,`A sea otter holds ${n} shells in its two paws. ${a} are in its left paw. How many are in its right paw?`)]);
    return {q,a:A.n(n-a),hint:L(`${eun(n)} ${gwa(a)} 몇으로 가를 수 있을까요?`,`${n} splits into ${a} and what?`),exp:L(`${eun(n)} ${gwa(a)} ${ro(n-a)} 가를 수 있어요. 답은 ${ye(n-a)}`,`${n} splits into ${a} and ${n-a}. The answer is ${n-a}.`)}}
   if(t==='same'){const s=R(4,10),p=R(1,s-1),q=s-p,a=pick(seqTo(1,s-1).filter(v=>v!==p&&v!==q)),b=s-a;return {q:L(`${gwa(a)} □를 모은 수는 ${gwa(p)} ${eul(q)} 모은 수와 같아요. □는 얼마일까요?`,`${a} and □ make the same number as ${p} and ${q}. What is □?`),a:A.n(b),hint:L(`먼저 ${gwa(p)} ${eul(q)} 모아 보세요.`,`First put ${p} and ${q} together.`),exp:L(`${gwa(p)} ${eul(q)} 모으면 ${ye(s)} ${gwa(a)} ${eul(b)} 모아도 ${ye(s)} 그래서 □는 ${ye(b)}`,`${p} and ${q} make ${s}. ${a} and ${b} also make ${s}, so □ is ${b}.`)}}
@@ -1379,7 +1380,7 @@ S.push({id:'g1-05',icon:'➖',strand:'num',
    return {q,a:A.n(a-b),hint:L('"남은 것"은 빼서 구해요.','"How many are left" means subtract.'),exp:L(`남은 것을 구할 때는 빼요. ${a} − ${b} = ${a-b}`,`To find how many are left, subtract: ${a} − ${b} = ${a-b}.`)}}
   if(t==='box'){if(Math.random()<.5){const a=R(3,10),c=R(0,a-1);return {q:L(`□에 알맞은 수를 구하세요. ${a} − □ = ${c}`,`Find the number for □. ${a} − □ = ${c}`),a:A.n(a-c),hint:L(`${a}에서 몇을 빼야 ${iga(c)} 남을까요?`,`Take away how many from ${a} to leave ${c}?`),exp:L(`${a} − ${a-c} = ${ye(c)} 그래서 □는 ${ye(a-c)}`,`${a} − ${a-c} = ${c}, so □ is ${a-c}.`)}}
    const b=R(1,6),c=R(1,10-b);return {q:L(`□에 알맞은 수를 구하세요. □ − ${b} = ${c}`,`Find the number for □. □ − ${b} = ${c}`),a:A.n(b+c),hint:L(`${b}${josa(b,'을','를')} 빼고 ${iga(c)} 남았어요. 처음 수는 ${c} + ${b}${josa(b,'과','와')} 같아요.`,`After taking away ${b}, ${c} are left. The start is ${c} + ${b}.`),exp:L(`${c} + ${b} = ${ye(b+c)} ${b+c} − ${b} = ${ye(c)} 그래서 □는 ${ye(b+c)}`,`${c} + ${b} = ${b+c}. ${b+c} − ${b} = ${c}, so □ is ${b+c}.`)}}
-  if(t==='storyCmp'){if(Math.random()<.2)return {q:L('문어는 다리가 8개, 오징어는 다리가 10개예요. 오징어 다리가 몇 개 더 많을까요?','An octopus has 8 arms. A squid has 10 arms. How many more arms does the squid have?'),a:A.n(2),hint:L('10에서 8을 빼 보세요.','Take 8 away from 10.'),exp:L('10 − 8 = 2, 오징어 다리가 2개 더 많아요.','10 − 8 = 2. The squid has 2 more arms.')};
+  if(t==='storyCmp'){if(Math.random()<.2)return {q:L('문어는 다리가 8개, 오징어는 다리가 10개예요. 오징어 다리가 몇 개 더 많을까요?','An octopus has 8 arms. A squid has 10 arms and tentacles. How many more does the squid have?'),a:A.n(2),hint:L('10에서 8을 빼 보세요.','Take 8 away from 10.'),exp:L('10 − 8 = 2, 오징어 다리가 2개 더 많아요.','10 − 8 = 2. The squid has 2 more.')};
    const p=R(4,10),q=R(1,p-1);return {q:pick([L(`다이버는 조개를 ${p}개, 해달은 ${q}개 주웠어요. 다이버가 몇 개 더 많이 주웠을까요?`,`A diver found ${p} shells and a sea otter found ${q}. How many more did the diver find?`),L(`1번 수조에 복어가 ${p}마리, 2번 수조에 복어가 ${q}마리 있어요. 1번 수조에 몇 마리 더 많을까요?`,`Tank 1 has ${p} pufferfish and tank 2 has ${q}. How many more are in tank 1?`)]),a:A.n(p-q),hint:L('"몇 개 더 많은지"는 큰 수에서 작은 수를 빼요.','"How many more" means take the smaller number from the bigger one.'),exp:L(`${p} − ${q} = ${p-q}`,`${p} − ${q} = ${p-q}.`)}}
   if(t==='bigDiff'){const ds=sample(seqTo(0,8),4),ex=ds.map(d=>{const b=R(1,Math.min(9,10-d)),a=b+d;return {d,s:`${a} − ${b}`,f:`${a} − ${b} = ${d}`}}),bigQ=Math.random()<.5,best=ex.reduce((m,e)=>(bigQ?e.d>m.d:e.d<m.d)?e:m);
    return {q:bigQ?L('차가 가장 큰 것은 어느 것일까요?','Which one has the biggest difference?'):L('차가 가장 작은 것은 어느 것일까요?','Which one has the smallest difference?'),a:A.c(best.s,ex.filter(e=>e!==best).map(e=>e.s)),hint:L('하나씩 계산해서 비교해 보세요.','Work out each one, then compare.'),exp:L(`${ex.map(e=>e.f).join(', ')}. 가장 ${bigQ?'큰':'작은'} 것은 ${ye(best.s)}`,`${ex.map(e=>e.f).join(', ')}. The ${bigQ?'biggest':'smallest'} is ${best.s}.`)}}
@@ -1679,7 +1680,7 @@ S.push({id:'g1-14',icon:'🕐',strand:'mea',
   if(t==='readO')return {q:L('시계가 나타내는 시각은 몇 시일까요?','What time does the clock show?'),vis:V.clock(h,0),a:A.c(tm(h,0),[tm(hw(h+1),0),tm(hw(h-1),0),tm(h,30)]),hint:L('짧은바늘이 가리키는 숫자를 읽어요.','Read the number the short hand points to.'),exp:tExp(h,0)};
   if(t==='typeO')return {q:L('몇 시일까요?','What time is it?'),vis:V.clock(h,0),a:tAns(h,0),hint:L('긴바늘이 12에 있으면 "몇 시"예요. 짧은바늘을 보세요.','The long hand on 12 means o\'clock. Look at the short hand.'),exp:tExp(h,0)};
   if(t==='pickO'){const o=sample(seqTo(1,12).filter(v=>v!==h),2),w=h!==12?[V.clock(12,h*5),V.clock(o[0],0)]:o.map(v=>V.clock(v,0));return {q:L(`${tm(h,0)}${josa(tm(h,0),'을','를')} 나타내는 시계는 어느 것일까요?`,`Which clock shows ${tm(h,0)}?`),a:A.c(V.clock(h,0),w),hint:L('짧은바늘과 긴바늘을 헷갈리지 않게 보세요.','Do not mix up the short hand and the long hand.'),exp:tExp(h,0)}}
-  if(t==='readH')return {q:L('시계가 나타내는 시각은 몇 시 몇 분일까요?','What time does the clock show?'),vis:V.clock(h,30),a:A.c(tm(h,30),[tm(hw(h+1),30),tm(h,0),tm(hw(h+1),0)]),hint:L('짧은바늘이 두 숫자 사이에 있으면 앞의 숫자를 읽어요.','If the short hand is between two numbers, read the smaller one it has passed.'),exp:tExp(h,30)};
+  if(t==='readH')return {q:L('시계가 나타내는 시각은 몇 시 몇 분일까요?','What time does the clock show?'),vis:V.clock(h,30),a:A.c(tm(h,30),[tm(hw(h+1),30),tm(h,0),tm(hw(h+1),0)]),hint:L('짧은바늘이 두 숫자 사이에 있으면 앞의 숫자를 읽어요.','If the short hand is between two numbers, read the number it has just passed.'),exp:tExp(h,30)};
   if(t==='typeH')return {q:L('몇 시 몇 분일까요?','What time is it?'),vis:V.clock(h,30),a:tAns(h,30),hint:L('긴바늘이 6에 있으면 30분이에요.','The long hand on 6 means 30 minutes.'),exp:tExp(h,30)};
   if(t==='pickH')return {q:L(`${tm(h,30)}${josa(tm(h,30),'을','를')} 나타내는 시계는 어느 것일까요?`,`Which clock shows ${tm(h,30)}?`),a:A.c(V.clock(h,30),[V.clock(hw(h-1),30),V.clock(h,0)]),hint:L('30분이면 긴바늘이 6을 가리켜요.','At half past, the long hand points to 6.'),exp:tExp(h,30)};
   if(t==='hand'){const r=Math.random();if(r<.4)return {q:L(`${tm(h,30)}일 때 긴바늘은 어느 숫자를 가리킬까요?`,`At ${tm(h,30)}, which number does the long hand point to?`),vis:V.clock(h,0,{blank:true}),a:A.c('6',['12','3','9']),hint:L('긴바늘은 분을 나타내요.','The long hand shows the minutes.'),exp:L('30분일 때 긴바늘은 6을 가리켜요.','At half past, the long hand points to 6.')};
@@ -1687,12 +1688,12 @@ S.push({id:'g1-14',icon:'🕐',strand:'mea',
    return {q:L(`${tm(h,0)}일 때 짧은바늘은 어느 숫자를 가리킬까요?`,`At ${tm(h,0)}, which number does the short hand point to?`),vis:V.clock(h,0,{blank:true}),a:A.c(String(h),[String(hw(h+1)),String(hw(h-1)),h===12||h===6?'3':'12']),hint:L('짧은바늘은 "몇 시"를 나타내요.','The short hand shows the hour.'),exp:L(`${tm(h,0)}에는 짧은바늘이 ${eul(h)} 가리켜요.`,`At ${tm(h,0)}, the short hand points to ${h}.`)}}
   const m=pick([0,30]);
   if(t==='later'||t==='before'){const up=t==='later',h2=hw(up?h+1:h-1),ch=Math.random()<.5;return {q:up?L(`시계의 시각에서 1시간 뒤는 몇 시${m?' 몇 분':''}일까요?`,'What time will it be 1 hour after the time on the clock?'):L(`시계의 시각에서 1시간 전은 몇 시${m?' 몇 분':''}였을까요?`,'What time was it 1 hour before the time on the clock?'),vis:V.clock(h,m),a:ch?A.c(tm(h2,m),[tm(h,m),tm(hw(up?h-1:h+1),m),tm(h2,30-m)]):tAns(h2,m),hint:up?L('1시간 뒤에는 짧은바늘이 다음 숫자로 가요.','In 1 hour, the short hand moves on to the next number.'):L('1시간 전에는 짧은바늘이 앞의 숫자에 있었어요.','1 hour before, the short hand was one number back.'),exp:L(`시계는 ${ye(tm(h,m))} 1시간 ${up?'뒤는':'전은'} ${ye(tm(h2,m))}`,`The clock shows ${tm(h,m)}. 1 hour ${up?'later':'before'} is ${tm(h2,m)}.`)}}
-  if(t==='half'){const h2=m?hw(h+1):h,m2=m?0:30;return {q:L('시계의 시각에서 30분 뒤는 몇 시 몇 분일까요?','What time will it be 30 minutes after the time on the clock?'),vis:V.clock(h,m),a:Math.random()<.5?A.c(tm(h2,m2),[tm(h,m),tm(hw(h2+1),m2),tm(hw(h+1),m)].filter(x=>x!==tm(h2,m2))):tAns(h2,m2),hint:L('30분이 지나면 긴바늘이 반 바퀴 돌아요.','In 30 minutes, the long hand goes halfway around.'),exp:L(`${tm(h,m)}에서 30분 뒤는 ${ye(tm(h2,m2))}`,`30 minutes after ${tm(h,m)} is ${tm(h2,m2)}.`)}}
+  if(t==='half'){const h2=m?hw(h+1):h,m2=m?0:30;return {q:L(`시계의 시각에서 30분 뒤는 몇 시${m2?' 몇 분':''}일까요?`,'What time will it be 30 minutes after the time on the clock?'),vis:V.clock(h,m),a:Math.random()<.5?A.c(tm(h2,m2),[tm(h,m),tm(hw(h2+1),m2),tm(hw(h+1),m)].filter(x=>x!==tm(h2,m2))):tAns(h2,m2),hint:L('30분이 지나면 긴바늘이 반 바퀴 돌아요.','In 30 minutes, the long hand goes halfway around.'),exp:L(`${tm(h,m)}에서 30분 뒤는 ${ye(tm(h2,m2))}`,`30 minutes after ${tm(h,m)} is ${tm(h2,m2)}.`)}}
   if(t==='show'){const [ko,en]=pick([['돌고래 쇼','dolphin show'],['물범 공연','seal show'],['먹이 주기 체험','feeding tour'],['바다 영화','sea movie']]),long=Math.random()<.6,h2=long?hw(h+1):m?hw(h+1):h,m2=long?m:30-m;
    return {q:L(`${eun(ko)} ${tm(h,m)}에 시작해서 ${long?'1시간':'30분'} 동안 해요. 끝나는 시각은 몇 시${m2?' 몇 분':''}일까요?`,`The ${en} starts at ${tm(h,m)} and lasts ${long?'1 hour':'30 minutes'}. What time does it end?`),vis:V.clock(h,m),a:tAns(h2,m2),hint:long?L('1시간 뒤에는 짧은바늘이 다음 숫자로 가요.','In 1 hour, the short hand moves on one number.'):L('30분 뒤에는 긴바늘이 반 바퀴 돌아요.','In 30 minutes, the long hand goes halfway around.'),exp:L(`${tm(h,m)}에서 ${long?'1시간':'30분'} 뒤는 ${ye(tm(h2,m2))}`,`${long?'1 hour':'30 minutes'} after ${tm(h,m)} is ${tm(h2,m2)}.`)}}
   // late: which time is latest / earliest (same morning)
   let ts;do{ts=[0,1,2].map(()=>[R(1,11),pick([0,30])])}while(new Set(ts.map(x=>x[0]*60+x[1])).size<3);const lq=Math.random()<.5,v=x=>x[0]*60+x[1],best=ts.reduce((a,b)=>(lq?v(b)>v(a):v(b)<v(a))?b:a),srt=[...ts].sort((a,b)=>v(a)-v(b));
-  return {q:lq?L('하루 중 가장 늦은 시각은 어느 것일까요?','Which time is the latest in the day?'):L('하루 중 가장 이른 시각은 어느 것일까요?','Which time is the earliest in the day?'),a:A.c(tm(...best),ts.filter(x=>x!==best).map(x=>tm(...x))),hint:L('시를 먼저 비교하고, 같으면 분을 비교해요.','Compare the hours first. If they are the same, compare the minutes.'),exp:L(`이른 시각부터 ${srt.map(x=>tm(...x)).join(', ')} 순서예요. 가장 ${lq?'늦은':'이른'} 시각은 ${ye(tm(...best))}`,`From earliest: ${srt.map(x=>tm(...x)).join(', ')}. The ${lq?'latest':'earliest'} is ${tm(...best)}.`)}}
+  return {q:lq?L('모두 같은 날 오전의 시각이에요. 가장 늦은 시각은 어느 것일까요?','All these times are in the same morning. Which time is the latest?'):L('모두 같은 날 오전의 시각이에요. 가장 이른 시각은 어느 것일까요?','All these times are in the same morning. Which time is the earliest?'),a:A.c(tm(...best),ts.filter(x=>x!==best).map(x=>tm(...x))),hint:L('시를 먼저 비교하고, 같으면 분을 비교해요.','Compare the hours first. If they are the same, compare the minutes.'),exp:L(`이른 시각부터 ${srt.map(x=>tm(...x)).join(', ')} 순서예요. 가장 ${lq?'늦은':'이른'} 시각은 ${ye(tm(...best))}`,`From earliest: ${srt.map(x=>tm(...x)).join(', ')}. The ${lq?'latest':'earliest'} is ${tm(...best)}.`)}}
 });
 
 // ================================================================ g1-15
@@ -1700,7 +1701,7 @@ const SHN={sq:['네모 모양','rectangle','■'],tri:['세모 모양','triangle
 const shn=k=>sayAs(L(`${SHN[k][2]} ${SHN[k][0]}`,`${SHN[k][2]} ${SHN[k][1]}`),L(SHN[k][0],SHN[k][1]));
 const SH3=['sq','tri','cir'],shnA=()=>SH3.map(shn),catOf=k=>k==='rect'?'sq':k;
 const CORN={sq:4,tri:3,cir:0};
-const SHX=c=>({sq:L('곧은 선 4개와 뾰족한 곳 4군데가 있으면 ■ 네모 모양이에요.','4 straight sides and 4 corners make a ■ rectangle. A square is a rectangle too.'),tri:L('곧은 선 3개와 뾰족한 곳 3군데가 있으면 ▲ 세모 모양이에요.','3 straight sides and 3 corners make a ▲ triangle.'),cir:L('뾰족한 곳 없이 둥글면 ● 동그라미 모양이에요.','Round all the way with no corners: a ● circle.')})[c];
+const SHX=c=>({sq:L('곧은 선 4개와 뾰족한 곳 4군데가 있으면 ■ 네모 모양이에요.','A ■ rectangle has 4 straight sides and 4 square corners. A square is a rectangle too.'),tri:L('곧은 선 3개와 뾰족한 곳 3군데가 있으면 ▲ 세모 모양이에요.','3 straight sides and 3 corners make a ▲ triangle.'),cir:L('뾰족한 곳 없이 둥글면 ● 동그라미 모양이에요.','Round all the way with no corners: a ● circle.')})[c];
 const FOBJ=[['🖼️','액자','picture frame','sq'],['🧇','와플','waffle','sq'],['📺','텔레비전','TV','sq'],['✉️','편지 봉투','envelope','sq'],['📘','공책','notebook','sq'],['🍕','피자 조각','slice of pizza','tri'],['🍙','주먹밥','rice ball','tri'],['⛺','텐트','tent','tri'],['📐','삼각자','set square','tri'],['🧀','치즈 조각','piece of cheese','tri'],['🍪','쿠키','cookie','cir'],['🍩','도넛','doughnut','cir'],['🕐','시계','clock','cir'],['🌕','보름달','full moon','cir'],['🥏','원반','flying disc','cir']].map(([e,k,n,c])=>({e,k,n,c}));
 const bigPoly=c=>{const kind=c==='sq'?pick(['sq','rect']):c==='tri'?pick(['tri','eq','iso','right','acute','obtuse']):'circle';return V.poly(kind,{fill:pick(['#dff1ff','#ffe9a8','#d8f5e3','#ffd9e6','#efe6ff'])})};
 const rndShape=c=>({k:c==='sq'?pick(['sq','rect']):c,v:R(0,3),c:pick(SHC)});
@@ -1849,9 +1850,9 @@ S.push({id:'g1-19',icon:'🎨',strand:'alg',
    return {q:L('되풀이되는 부분은 어느 것일까요?','Which part repeats?'),vis:V.pattern(seq),a:A.c(r,w),hint:L('처음부터 같은 묶음이 다시 나오는 곳을 찾아보세요.','Look for where the start of the pattern shows up again.'),exp:L(`${r} 묶음이 계속 되풀이돼요.`,`The group ${r} repeats again and again.`)}}
   if(t==='num'||t==='numBack'){const step=t==='numBack'?-pick([1,2,5,10]):pick(lv===1?[1,2]:[2,5,10]),a=Math.abs(step),st=step>0?a*R(0,a===1?20:Math.floor(60/a)):a*R(5,Math.floor(100/a)),arr=skipSeq(st,step,5),qi=lv===1?4:R(1,4);return seqQ(arr,qi,step)}
   if(t==='rule'){const step=pick([1,2,5,10]),up=Math.random()<.6,s=up?step:-step,st=up?step*R(0,Math.min(8,Math.floor(100/step)-4)):step*R(4,Math.min(12,Math.floor(100/step))),arr=skipSeq(st,s,5),all=[1,2,5,10].flatMap(v=>[v,-v]);return {q:L(`${arr.join(', ')}의 규칙은 어느 것일까요?`,`What is the rule for ${arr.join(', ')}?`),a:A.c(stepWord(s),shuffle(all.filter(v=>v!==s)).slice(0,5).map(stepWord)),hint:L('이웃한 두 수가 얼마나 차이 나는지 보세요.','How far apart are the numbers next to each other?'),exp:L(`${arr[0]}에서 ${ro(arr[1])} ${step}만큼 ${up?'커졌어요':'작아졌어요'}. ${stepWord(s)}.`,`From ${arr[0]} to ${arr[1]} is ${step} ${up?'more':'less'}. ${stepWord(s)}`)}}
-  if(t==='follow'){const g=codeSetup(),moves=mkMoves(g.dx,g.dy),an=sample(SEA.filter(s=>s.e!=='🐢'),4),cells=[[g.ex,g.ey]];
-   for(const c of shuffle([[g.ex+1,g.ey],[g.ex-1,g.ey],[g.ex,g.ey+1],[g.ex,g.ey-1],[g.ex+1,g.ey+1],[g.ex-1,g.ey-1]]))if(cells.length<3&&c[0]>=0&&c[0]<g.W&&c[1]>=0&&c[1]<g.H&&!(c[0]===g.sx&&c[1]===g.sy))cells.push(c);
-   while(cells.length<3){const c=[R(0,g.W-1),R(0,g.H-1)];if(!cells.some(d=>d[0]===c[0]&&d[1]===c[1])&&!(c[0]===g.sx&&c[1]===g.sy))cells.push(c)}
+  if(t==='follow'){const g=codeSetup(),moves=mkMoves(g.dx,g.dy),an=sample(SEA.filter(s=>s.e!=='🐢'),4),cells=[[g.ex,g.ey]],path=moves.map((_,i)=>runP([g.sx,g.sy],moves.slice(0,i+1))),onPath=c=>path.some(d=>d[0]===c[0]&&d[1]===c[1]);
+   for(const c of shuffle([[g.ex+1,g.ey],[g.ex-1,g.ey],[g.ex,g.ey+1],[g.ex,g.ey-1],[g.ex+1,g.ey+1],[g.ex-1,g.ey-1]]))if(cells.length<3&&c[0]>=0&&c[0]<g.W&&c[1]>=0&&c[1]<g.H&&!(c[0]===g.sx&&c[1]===g.sy)&&!onPath(c))cells.push(c);
+   while(cells.length<3){const c=[R(0,g.W-1),R(0,g.H-1)];if(!cells.some(d=>d[0]===c[0]&&d[1]===c[1])&&!(c[0]===g.sx&&c[1]===g.sy)&&!onPath(c))cells.push(c)}
    const items=[{x:g.sx,y:g.sy,e:'🐢',bg:C.sand},...cells.map((c,i)=>({x:c[0],y:c[1],e:an[i].e}))];
    return {q:L(`거북이가 ${prog(moves)} 순서로 한 칸씩 움직여요. 어느 친구를 만날까요?`,`The turtle moves ${prog(moves)}, one square for each arrow. Which friend does it reach?`),vis:cgrid(g.W,g.H,items),a:A.c(an[0].e,an.slice(1,cells.length).map(s=>s.e)),hint:L('손가락으로 거북이 칸에서 출발해 화살표를 하나씩 따라가 보세요.','Put your finger on the turtle and follow the arrows one at a time.'),exp:L(`${prog(moves)} 순서로 가면 ${an[0].k}${josa(an[0].k,'을','를')} 만나요.`,`Following ${prog(moves)}, the turtle reaches the ${an[0].s}.`)}}
   // code: choose the arrows that reach the fish
@@ -2258,11 +2259,11 @@ S.push({id:'g2-06',icon:'🟰',strand:'alg',
     exp:f===0?L(`${c} − ${b} = ${a}이니까 □는 ${a}${iyo(a)}.`,`${c} − ${b} = ${a}, so □ = ${a}.`):f===1?L(`${c} − ${a} = ${b}이니까 □는 ${b}${iyo(b)}.`,`${c} − ${a} = ${b}, so □ = ${b}.`):f===2?L(`${c} − ${a} = ${b}이니까 □는 ${b}${iyo(b)}.`,`${c} − ${a} = ${b}, so □ = ${b}.`):L(`${a} + ${b} = ${c}이니까 □는 ${c}${iyo(c)}.`,`${a} + ${b} = ${c}, so □ = ${c}.`)}}
   if(ty==='fam'){let a,b;do{a=R(3,9);b=R(2,9)}while(a===b||a+b<11);const c=a+b,x=pick([a,b]),y=c-x;
    return {q:L(`${a} + ${b} = ${c}${iyo(c)}. 그렇다면 ${c} − ${x} = ?`,`${a} + ${b} = ${c}. So what is ${c} − ${x}?`),vis:V.items([...Array(a).fill('🐟'),...Array(b).fill('🐠')],'🐟',{per:6}),a:A.n(y),
-    hint:L('그림에서 한 가지 물고기를 빼면 다른 물고기가 남아요.','Take away one kind of fish. The other kind is left.'),exp:L(`${a}, ${b}, ${c}는 한 가족이에요. ${c}에서 ${x}${josa(x,'을','를')} 빼면 ${y}${josa(y,'이','가')} 남아요.`,`${a}, ${b} and ${c} are a fact family. ${c} take away ${x} leaves ${y}.`)}}
+    hint:L('그림에서 한 가지 물고기를 빼면 다른 물고기가 남아요.','Take away one kind of fish. The other kind is left.'),exp:L(`${a}, ${b}, ${c}${josa(c,'은','는')} 한 가족이에요. ${c}에서 ${x}${josa(x,'을','를')} 빼면 ${y}${josa(y,'이','가')} 남아요.`,`${a}, ${b} and ${c} are a fact family. ${c} take away ${x} leaves ${y}.`)}}
   if(ty==='notFam'){let a,b;do{a=R(6,45);b=R(6,45)}while(a===b);const c=a+b,tr=[`${a} + ${b} = ${c}`,`${b} + ${a} = ${c}`,`${c} − ${a} = ${b}`,`${c} − ${b} = ${a}`],bad=pick([`${c} + ${b} = ${a}`,`${a} + ${c} = ${b}`,`${Math.max(a,b)} − ${Math.min(a,b)} = ${c}`]);
    return {q:L(`세 수 ${a}, ${b}, ${c}${josa(c,'을','를')} 사용한 식 중에서 틀린 것은 어느 것일까요?`,`Which number sentence with ${a}, ${b} and ${c} is NOT true?`),a:A.c(bad,sample(tr,3)),
     hint:L(`가장 큰 수 ${c}${josa(c,'은','는')} 덧셈의 합, 뺄셈에서는 처음 수가 돼요.`,`The biggest number, ${c}, is the sum in an addition and the start of a subtraction.`),
-    exp:L(`${a} + ${b} = ${c}이에요. 그래서 ${c} − ${a} = ${b}, ${c} − ${b} = ${a}는 맞고, ${bad}${josa(bad,'은','는')} 틀려요.`,`${a} + ${b} = ${c}, so ${c} − ${a} = ${b} and ${c} − ${b} = ${a} are true. ${bad} is not true.`)}}
+    exp:L(`${a} + ${b} = ${c}${iyo(c)}. 그래서 ${c} − ${a} = ${b}, ${c} − ${b} = ${a}${josa(a,'은','는')} 맞고, ${bad}${josa(bad,'은','는')} 틀려요.`,`${a} + ${b} = ${c}, so ${c} − ${a} = ${b} and ${c} − ${b} = ${a} are true. ${bad} is not true.`)}}
   if(ty==='fromAdd'){let a,b;do{a=R(6,45);b=R(6,45)}while(a===b);const c=a+b,right=pick([`${c} − ${a} = ${b}`,`${c} − ${b} = ${a}`]);
    return {q:L(`${a} + ${b} = ${c}${iyo(c)}. 이 덧셈식으로 만들 수 있는 뺄셈식은 어느 것일까요?`,`${a} + ${b} = ${c}. Which subtraction belongs to the same fact family?`),a:A.c(right,[`${c} − ${a} = ${a}`,`${c} − ${b} = ${b}`,`${c} + ${a} = ${b}`]),
     hint:L('전체 수에서 한 부분을 빼면 다른 부분이 남아요.','The whole take away one part leaves the other part.'),exp:L(`전체 ${c}에서 한 부분을 빼면 다른 부분이 남아요. ${right}`,`The whole is ${c}. Take away one part and the other part is left: ${right}.`)}}
@@ -2279,9 +2280,9 @@ S.push({id:'g2-06',icon:'🟰',strand:'alg',
   if(k===0)return {q:L(`수조에 ${f[0]}${josa(f[0],'이','가')} 몇 마리 있었어요. ${b}마리를 더 넣었더니 ${c}마리가 되었어요. 처음에는 몇 마리였을까요?`,`There were some ${f[1]} in a tank. The keeper added ${b} more. Now there are ${c}. How many were there at first?`),a:A.n(a),
    hint:L('□ + 더 넣은 수 = 지금 수로 생각해 보세요.','Think: □ + the ones added = how many now.'),exp:L(`□ + ${b} = ${c}이니까 □ = ${c} − ${b} = ${a}${iyo(a)}.`,`□ + ${b} = ${c}, so □ = ${c} − ${b} = ${a}.`)};
   if(k===1)return {q:L(`수조에 ${f[0]} ${a}마리가 있었어요. 몇 마리를 더 넣었더니 ${c}마리가 되었어요. 몇 마리를 더 넣었을까요?`,`A tank had ${a} ${f[1]}. The keeper added some more. Now there are ${c}. How many were added?`),a:A.n(b),
-   hint:L(`${a} + □ = ${c}로 생각해 보세요.`,`Think: ${a} + □ = ${c}.`),exp:L(`${a} + □ = ${c}이니까 □ = ${c} − ${a} = ${b}${iyo(b)}.`,`${a} + □ = ${c}, so □ = ${c} − ${a} = ${b}.`)};
+   hint:L(`${a} + □ = ${c}${ro(c)} 생각해 보세요.`,`Think: ${a} + □ = ${c}.`),exp:L(`${a} + □ = ${c}이니까 □ = ${c} − ${a} = ${b}${iyo(b)}.`,`${a} + □ = ${c}, so □ = ${c} − ${a} = ${b}.`)};
   return {q:L(`수조에 ${f[0]} ${c}마리가 있었어요. 몇 마리를 다른 수조로 옮겼더니 ${a}마리가 남았어요. 몇 마리를 옮겼을까요?`,`A tank had ${c} ${f[1]}. The keeper moved some to another tank. ${a} are left. How many were moved?`),a:A.n(b),
-   hint:L(`${c} − □ = ${a}로 생각해 보세요.`,`Think: ${c} − □ = ${a}.`),exp:L(`${c} − □ = ${a}이니까 □ = ${c} − ${a} = ${b}${iyo(b)}.`,`${c} − □ = ${a}, so □ = ${c} − ${a} = ${b}.`)};
+   hint:L(`${c} − □ = ${a}${ro(a)} 생각해 보세요.`,`Think: ${c} − □ = ${a}.`),exp:L(`${c} − □ = ${a}이니까 □ = ${c} − ${a} = ${b}${iyo(b)}.`,`${c} − □ = ${a}, so □ = ${c} − ${a} = ${b}.`)};
  },
  quick(lv){const c=lv<3?R(11,18):R(3,9)*10+R(1,9),b=lv<3?R(c-9,9):R(1,Math.floor(c/10)-1)*10,a=c-b,f=R(0,1);
   return f?{q:`□ + ${b} = ${c}`,a,w:W3(a,[a+1,a-1,c+b])}:{q:`${c} − □ = ${a}`,a:b,w:W3(b,[b+1,b-1,a])}}
@@ -2343,7 +2344,7 @@ const rTok=()=>({c:R(0,2),s:R(0,2),b:R(0,1)});
 const toks=(list,per=6)=>{const cw=46;let s='';list.forEach((t,i)=>s+=tok(25+(i%per)*cw,25+Math.floor(i/per)*cw,t));return svg(Math.min(list.length,per)*cw+4,Math.ceil(list.length/per)*cw+4,s)};
 const twoBox=(g1,g2)=>{let s='';[g1,g2].forEach((g,k)=>{const ox=6+k*160;s+=`<rect x="${ox}" y="24" width="148" height="104" rx="14" fill="#f4f8ff" stroke="${C.soft}" stroke-width="2"/>`+tx(ox+74,12,k?L('나','B'):L('가','A'),{fs:15});g.forEach((t,i)=>s+=tok(ox+40+(i%2)*68,52+Math.floor(i/2)*48,t))});return svg(320,134,s)};
 const tally=n=>{let s='',x=12;for(let g=0;g*5<n;g++){const k=Math.min(5,n-g*5);for(let i=0;i<Math.min(k,4);i++)s+=ln(x+i*10,10,x+i*10,52,C.ink,3.2);if(k===5)s+=ln(x-6,44,x+36,16,C.coral,3.2);x+=56}return svg(x,62,s)};
-const LEGA=()=>[['🐙',L('문어','octopuses')],['🦀',L('꽃게','crabs')],['🦐',L('새우','shrimp')],['🦞',L('바닷가재','lobsters')]];
+const LEGA=()=>[['🐧',L('펭귄','penguins')],['🦀',L('꽃게','crabs')],['🦐',L('새우','shrimp')],['🦞',L('바닷가재','lobsters')]];
 const NOLEGA=()=>[['🐟',L('고등어','mackerel')],['🐠',L('열대어','tropical fish')],['🐡',L('복어','pufferfish')],['🦈',L('상어','sharks')]];
 S.push({id:'g2-08',icon:'🗂️',strand:'dat',
  name:L('분류하기','Sorting'),
@@ -2352,7 +2353,7 @@ S.push({id:'g2-08',icon:'🗂️',strand:'dat',
  kr:L('2학년 · 분류하기','Korea Grade 2 · Sorting'),ca:L('온타리오 2학년 · 자료','Ontario Grade 2 · Data'),
  learn:()=>[
   {t:L('분류할 때는 누가 해도 결과가 같은 분명한 기준을 정해요. 예쁜 것과 안 예쁜 것은 기준이 될 수 없어요.','To sort, choose a clear rule that gives everyone the same groups, like colour or shape. “Pretty” is not a clear rule.'),vis:toks([{c:0,s:0,b:1},{c:1,s:1,b:0},{c:2,s:2,b:1},{c:0,s:1,b:0},{c:1,s:0,b:1},{c:2,s:0,b:0}])},
-  {t:L('바다 동물을 다리가 있는 것과 없는 것으로 분류해 볼까요? 문어와 꽃게는 다리가 있고, 고등어는 없어요.','Let’s sort sea animals: with legs or without legs. Octopuses and crabs have legs; mackerel do not.'),vis:V.items(['🐙','🦀','🦐','🐟','🐠','🦈'],'🐟',{per:3})},
+  {t:L('바다 동물을 다리가 있는 것과 없는 것으로 분류해 볼까요? 펭귄과 꽃게는 다리가 있고, 고등어는 없어요.','Let’s sort sea animals: with legs or without legs. Penguins and crabs have legs; mackerel do not.'),vis:V.items(['🐧','🦀','🦐','🐟','🐠','🦈'],'🐟',{per:3})},
   {t:L('셀 때는 5개씩 묶어 표시하면 편해요. 4개를 세로로 긋고, 5번째는 비스듬히 그어요.','When counting, tally marks help: draw 4 lines, then cross them with the 5th.'),vis:tally(7)}],
  gen(lv){
   const ty=pick(lv===1?['cntTok','cntKind','legs']:lv===2?['rule','rule','odd','tally','cntTok']:['cnt2','river','tallyPick','diff','rule']);
@@ -2367,14 +2368,14 @@ S.push({id:'g2-08',icon:'🗂️',strand:'dat',
     hint:L('같은 동물끼리 모아서 세어 보세요.','Group the same animals together, then count.'),exp:L(`${nm}만 세면 ${cnt[i]}마리예요.`,`There are ${cnt[i]} ${nm}.`)}}
   if(ty==='legs'||ty==='diff'){let x,y;do{x=R(2,7);y=R(2,7)}while(ty==='diff'&&x===y);const l=shuffle([...Array.from({length:x},()=>pick(LEGA())[0]),...Array.from({length:y},()=>pick(NOLEGA())[0])]);
    if(ty==='legs'){const w=Math.random()<.5;return {q:w?L('다리가 있는 동물은 몇 마리일까요?','How many of these animals have legs?'):L('다리가 없는 동물은 몇 마리일까요?','How many of these animals have no legs?'),vis:V.items(l.length,l,{per:6}),a:A.n(w?x:y),
-     hint:L('문어, 꽃게, 새우, 바닷가재는 다리가 있고, 물고기는 다리가 없어요.','Octopuses, crabs, shrimp and lobsters have legs. Fish do not.'),exp:L(`다리가 있는 동물은 ${x}마리, 없는 동물은 ${y}마리예요.`,`${x} have legs and ${y} have no legs.`)}}
+     hint:L('펭귄, 꽃게, 새우, 바닷가재는 다리가 있고, 물고기는 다리가 없어요.','Penguins, crabs, shrimp and lobsters have legs. Fish do not.'),exp:L(`다리가 있는 동물은 ${x}마리, 없는 동물은 ${y}마리예요.`,`${x} have legs and ${y} have no legs.`)}}
    const m=x>y;return {q:m?L('다리가 있는 동물은 없는 동물보다 몇 마리 더 많을까요?','How many more animals have legs than have no legs?'):L('다리가 없는 동물은 있는 동물보다 몇 마리 더 많을까요?','How many more animals have no legs than have legs?'),vis:V.items(l.length,l,{per:6}),a:A.n(Math.abs(x-y)),
     hint:L('두 무리로 분류해서 각각 센 다음 비교해요.','Sort into two groups, count each, then compare.'),exp:L(`다리가 있는 동물 ${x}마리, 없는 동물 ${y}마리예요. ${Math.max(x,y)} − ${Math.min(x,y)} = ${Math.abs(x-y)}마리예요.`,`${x} with legs, ${y} without. ${Math.max(x,y)} − ${Math.min(x,y)} = ${Math.abs(x-y)}.`)}}
   if(ty==='rule'){const at=pick(['c','s','b']),n=at==='b'?2:3,[v1,v2]=sample([...Array(n).keys()],2);let g1,g2;
    const varies=g=>['c','s','b'].filter(k=>k!==at).every(k=>new Set(g.map(t=>t[k])).size>1);
    do{g1=Array.from({length:4},()=>({...rTok(),[at]:v1}));g2=Array.from({length:4},()=>({...rTok(),[at]:v2}))}while(!varies(g1)||!varies(g2));
    const opts=[L('색깔','colour'),L('모양','shape'),L('크기','size')],ix={c:0,s:1,b:2}[at];
-   const desc=v=>at==='c'?tcN(v):at==='s'?tsN(v):v?L('큰 것','big'):L('작은 것','small');
+   const desc=v=>at==='c'?tcN(v):at==='s'?L(tsN(v),'a '+tsN(v)):v?L('큰 것','big'):L('작은 것','small');
    return {q:L('가와 나는 무엇에 따라 분류했을까요?','What rule was used to sort A and B?'),vis:twoBox(g1,g2),a:A.c(opts[ix],opts.filter((_,k)=>k!==ix),{keep:true,order:opts}),
     hint:L('가에 있는 것들이 모두 똑같은 점을 찾아보세요.','What is the same about everything in A?'),
     exp:L(`가는 모두 ${desc(v1)}, 나는 모두 ${desc(v2)}${iyo(desc(v2))}. ${opts[ix]}에 따라 분류했어요.`,`Everything in A is ${desc(v1)} and everything in B is ${desc(v2)}. The rule is ${opts[ix]}.`)}}
@@ -2411,7 +2412,7 @@ S.push({id:'g2-09',icon:'✖️',strand:'num',
   {t:L('줄을 맞추어 놓아도 곱셈으로 셀 수 있어요. 4마리씩 3줄은 4 × 3 = 12예요.','Rows work too. 3 rows of 4 fish: 3 × 4 = 12.'),vis:V.array(3,4)}],
  gen(lv){
   const ty=pick(lv===1?['grp','rep','arr']:lv===2?['sent','times','toMul','grp']:['story','notEq','cmp','lens']);
-  const k=R(2,lv===1?5:9),g=R(2,lv===1?5:6),p=k*g,em=pick(['🐟','🐠','🐡','🦐','🐚']);
+  const k=R(2,lv===1?5:9),g=R(2,lv===1?5:6),p=k*g,em=pick(['🐟','🐠','🐡']);
   if(ty==='grp')return {q:L('몇 마리씩 몇 묶음일까요?','How many are in each group, and how many groups are there?'),vis:V.groups(g,k,em),a:A.m([k,g],[L('한 묶음에','in each group'),L('묶음 수','groups')]),
    hint:L('한 묶음 안의 수를 세고, 묶음이 몇 개인지 세어요.','Count one group, then count the groups.'),exp:L(`한 묶음에 ${k}마리씩 ${g}묶음이에요. ${k}씩 ${g}묶음은 ${k}의 ${g}배예요.`,`There are ${g} groups with ${k} in each group.`)};
   if(ty==='rep'){const sum=Array(g).fill(k).join(' + ');return {q:L('물고기는 모두 몇 마리일까요?','How many fish are there in all?')+`<br><b>${sum} = ?</b>`,vis:V.groups(g,k,em),a:A.n(p),
@@ -2439,7 +2440,7 @@ S.push({id:'g2-09',icon:'✖️',strand:'num',
    return {q:L('물고기가 더 많은 것은 어느 것일까요?','Which has more fish?'),a:A.c(big?o1:o2,[big?o2:o1]),hint:L('각각 곱셈으로 몇 마리인지 구해 보세요.','Use multiplication to find each total.'),
     exp:L(`${k1} × ${g1} = ${k1*g1}, ${k2} × ${g2} = ${k2*g2}이니까 ${big?o1:o2}가 더 많아요.`,`${g1} × ${k1} = ${k1*g1} and ${g2} × ${k2} = ${k2*g2}, so ${big?o1:o2} has more.`)}}
   const k2=R(2,6),g2=R(2,4),t=k2*g2;
-  return {q:L(`고등어의 길이는 ${k2} cm예요. 뱀장어의 길이는 고등어의 ${g2}배예요. 뱀장어는 몇 cm일까요?`,`A toy mackerel is ${k2} cm long. A toy eel is ${g2} times as long. How long is the eel?`),vis:V.lens([{v:k2,l:'🐟'},{v:t,l:'🐍'}]),a:A.n(t,{u:'cm'}),
+  return {q:L(`고등어 인형의 길이는 ${k2} cm예요. 뱀장어 인형의 길이는 고등어 인형의 ${g2}배예요. 뱀장어 인형은 몇 cm일까요?`,`A toy mackerel is ${k2} cm long. A toy eel is ${g2} times as long. How long is the eel?`),vis:V.lens([{v:k2,l:'🐟'},{v:t,l:'🐍'}]),a:A.n(t,{u:'cm'}),
    hint:L(`${k2} cm를 ${g2}번 이어 붙인 길이예요.`,`It is ${g2} lengths of ${k2} cm.`),exp:L(`${k2}의 ${g2}배는 ${k2} × ${g2} = ${t}이니까 ${t} cm예요.`,`${g2} × ${k2} = ${t}, so it is ${t} cm long.`)};
  },
  quick(lv){const k=R(2,lv===1?5:9),g=R(3,4),p=k*g;return Math.random()<.5?{q:Array(g).fill(k).join(' + '),a:p,w:mulW(k,g)}:{q:L(`${k}의 ${g}배`,`${g} times ${k}`),a:p,w:mulW(k,g)}}
@@ -2452,7 +2453,7 @@ const TST=(t,n)=>({
  3:[L(`보트 한 대에 다이버가 3명씩 타요. 보트 ${n}대에는 다이버가 모두 몇 명일까요?`,`Each boat carries 3 divers. How many divers are in ${n} boats?`),'🚤'],
  6:[L(`과자 한 상자에 물고기 과자가 6개씩 들어 있어요. ${n}상자에는 모두 몇 개일까요?`,`A box holds 6 fish crackers. How many crackers are in ${n} boxes?`),'📦'],
  4:[L(`바다거북은 지느러미발이 4개예요. 바다거북 ${n}마리의 지느러미발은 모두 몇 개일까요?`,`A sea turtle has 4 flippers. How many flippers do ${n} sea turtles have?`),'🐢'],
- 8:[L(`문어 한 마리는 다리가 8개예요. 문어 ${n}마리의 다리는 모두 몇 개일까요?`,`An octopus has 8 legs. How many legs do ${n} octopuses have?`),'🐙'],
+ 8:[L(`문어 한 마리는 다리가 8개예요. 문어 ${n}마리의 다리는 모두 몇 개일까요?`,`An octopus has 8 arms. How many arms do ${n} octopuses have?`),'🐙'],
  7:[L(`1주일은 7일이에요. 사육사가 ${n}주일 동안 매일 해달에게 먹이를 주면 모두 며칠일까요?`,`A week has 7 days. The keeper feeds the sea otters every day for ${n} weeks. How many days is that?`),'📅'],
  9:[L(`돌고래 공연장에는 한 줄에 의자가 9개씩 있어요. ${n}줄에는 의자가 모두 몇 개일까요?`,`The dolphin show has 9 seats in each row. How many seats are in ${n} rows?`),'💺']})[t];
 const factExp=(t,n)=>n===1?L(`어떤 수에 1을 곱하면 그 수 그대로예요. ${t} × 1 = ${t}`,`Any number times 1 is itself: ${t} × 1 = ${t}.`):
@@ -2461,12 +2462,12 @@ const factExp=(t,n)=>n===1?L(`어떤 수에 1을 곱하면 그 수 그대로예�
 const ttGen=(lv,lo,hi,extra)=>{const all=[...lo,...hi],T=lv===1?lo:lv===2?hi.concat(lo.slice(0,1)):all;
  const ty=pick(lv===1?['pic','fact','skip','story']:lv===2?['fact','missing','story','pick']:['cmp','next','two','missing',extra]),t=pick(T),n=R(2,9),p=t*n;
  const hint=L(`${t}단을 떠올려 보세요. ${t}씩 커져요.`,`Think of the ${t} times table: it goes up by ${t} each time.`);
- if(ty==='pic'){const em=TST(t,n)[1],m=R(2,6);return {q:TST(t,m)[0]+`<br><b>${t} × ${m} = ?</b>`,vis:V.items(m,em,{per:Math.min(m,5)}),a:A.n(t*m),hint,exp:factExp(t,m)}}
+ if(ty==='pic'){const em=TST(t,n)[1],m=R(2,6);return {q:TST(t,m)[0]+`<br><b>${L(`${t} × ${m}`,`${m} × ${t}`)} = ?</b>`,vis:V.items(m,em,{per:Math.min(m,5)}),a:A.n(t*m),hint,exp:factExp(t,m)}}
  if(ty==='fact')return {q:L('곱셈을 해 보세요.','Multiply.')+`<br><b>${t} × ${n} = ?</b>`,a:A.n(p),hint,exp:factExp(t,n)};
  if(ty==='skip'){const k=R(2,5),seq=Array.from({length:k+1},(_,i)=>i<k?t*(i+1):'?');return {q:L(`${t}씩 뛰어 세었어요. ?에 알맞은 수는 얼마일까요?`,`Counting by ${t}s. What number goes in the ?`),vis:V.pattern(seq),a:A.n(t*(k+1)),
   hint:L(`마지막 수에 ${t}${josa(t,'을','를')} 더해 보세요.`,`Add ${t} to the last number.`),exp:L(`${t}씩 ${k+1}번 뛰어 세면 ${t} × ${k+1} = ${t*(k+1)}${iyo(t*(k+1))}.`,`Counting by ${t}s ${k+1} times gives ${t} × ${k+1} = ${t*(k+1)}.`)}}
  if(ty==='story'){const m=R(2,9),s=TST(t,m);return {q:s[0],vis:lv===1?V.items(m,s[1],{per:Math.min(m,5)}):undefined,a:A.n(t*m),hint:L(`${t}씩 ${m}묶음이에요.`,`That is ${m} groups of ${t}.`),
-  exp:L(`${t}씩 ${m}묶음이니까 ${t} × ${m} = ${t*m}${iyo(t*m)}.`,`${m} groups of ${t}: ${t} × ${m} = ${t*m}.`)}}
+  exp:L(`${t}씩 ${m}묶음이니까 ${t} × ${m} = ${t*m}${iyo(t*m)}.`,`${m} groups of ${t}: ${m} × ${t} = ${t*m}.`)}}
  if(ty==='missing'){const f=Math.random()<.5;return {q:L('□ 안에 알맞은 수는 얼마일까요?','What number goes in the □?')+`<br><b>${f?`${t} × □`:`□ × ${t}`} = ${p}</b>`,a:A.n(n),
   hint:L(`${t}단에서 곱이 ${p}인 것을 찾아보세요.`,`Which fact in the ${t} times table gives ${p}?`),exp:L(`${f?`${t} × ${n}`:`${n} × ${t}`} = ${p}이니까 □는 ${n}${iyo(n)}.`,`${f?`${t} × ${n}`:`${n} × ${t}`} = ${p}, so □ = ${n}.`)}}
  if(ty==='pick'){const n2=n<9?n+1:n-1,wr=[`${t} × ${n2}`,`${t} × ${n<=2?n+2:n-2}`,...all.filter(x=>x!==t&&x*n!==p).map(x=>`${x} × ${n}`)];
@@ -2501,11 +2502,11 @@ S.push({id:'g2-10',icon:'🔢',strand:'num',
 });
 S.push({id:'g2-11',icon:'🔢',strand:'num',
  name:L('곱셈구구 4·8·7·9단','Times tables 4, 8, 7, 9'),
- about:L('4단, 8단, 7단, 9단 곱셈구구를 익혀요. 문어 다리는 8개!','Learn the 4, 8, 7 and 9 times tables. An octopus has 8 legs!'),
+ about:L('4단, 8단, 7단, 9단 곱셈구구를 익혀요. 문어 다리는 8개!','Learn the 4, 8, 7 and 9 times tables. An octopus has 8 arms!'),
  goals:[L('4단과 8단을 외울 수 있어요.','I know the 4 and 8 times tables.'),L('7단과 9단을 외울 수 있어요.','I know the 7 and 9 times tables.'),L('□가 있는 곱셈식을 풀 수 있어요.','I can find a missing factor.')],
  kr:L('2학년 · 곱셈구구','Korea Grade 2 · Times tables'),ca:L('온타리오 3~4학년 · 수','Ontario Grades 3–4 · Number'),
  learn:()=>[
-  {t:L('문어 한 마리는 다리가 8개예요. 문어 3마리는 8 × 3 = 24개예요.','An octopus has 8 legs. 3 octopuses have 8 × 3 = 24 legs.'),vis:V.items(3,'🐙')},
+  {t:L('문어 한 마리는 다리가 8개예요. 문어 3마리는 8 × 3 = 24개예요.','An octopus has 8 arms. 3 octopuses have 3 × 8 = 24 arms.'),vis:V.items(3,'🐙')},
   {t:L('8단은 4단의 2배예요. 4 × 6 = 24이니까 8 × 6 = 48이에요.','The 8 table is double the 4 table. 4 × 6 = 24, so 8 × 6 = 48.'),vis:V.pattern(['8','16','24','32','40','48'])},
   {t:L('9단은 10단보다 조금 작아요. 9 × 4는 10 × 4 = 40보다 4 작은 36이에요.','The 9 table is a bit less than the 10 table. 9 × 4 is 4 less than 40: 36.'),vis:V.pattern(['9','18','27','36','45'])}],
  gen(lv){return ttGen(lv,[4,8],[7,9],pick(['double','nine']))},
@@ -2525,7 +2526,7 @@ S.push({id:'g2-12',icon:'0️⃣',strand:'num',
  gen(lv){
   const ty=pick(lv===1?['one','zero','swap']:lv===2?['mixed','mixed','table','same','missing']:['rowStep','count','story','big','table']);
   const n=R(2,9);
-  if(ty==='one'){const f=Math.random()<.5,e=f?`1 × ${n}`:`${n} × 1`;return {q:L('곱셈을 해 보세요.','Multiply.')+`<br><b>${e} = ?</b>`,vis:f?V.groups(n,1,'🐠'):V.groups(1,n,'🐠'),a:A.n(n),
+  if(ty==='one'){const f=Math.random()<.5,e=f?`1 × ${n}`:`${n} × 1`;return {q:L('곱셈을 해 보세요.','Multiply.')+`<br><b>${e} = ?</b>`,vis:L(f,!f)?V.groups(n,1,'🐠'):V.groups(1,n,'🐠'),a:A.n(n),
    hint:L('1이 몇 번 있는지, 또는 한 묶음에 몇 개인지 생각해 보세요.','Think about groups of 1, or one group.'),exp:L(`1과 어떤 수의 곱은 그 수 그대로예요. ${e} = ${n}`,`1 times a number is that number: ${e} = ${n}.`)}}
   if(ty==='zero'){const f=Math.random()<.5,e=f?`0 × ${n}`:`${n} × 0`;return {q:L(`빈 수조 ${n}개에 물고기가 0마리씩 있어요.`,`${n} empty tanks have 0 fish each.`)+`<br><b>${e} = ?</b>`,vis:V.groups(n,0),a:A.n(0),
    hint:L('물고기가 한 마리도 없으면 모두 몇 마리일까요?','If there are no fish anywhere, how many fish are there?'),exp:L(`0과 어떤 수를 곱하면 항상 0이에요. ${e} = 0`,`Anything times 0 is 0: ${e} = 0.`)}}
@@ -2657,7 +2658,7 @@ S.push({id:'g2-14',icon:'📐',strand:'mea',
    if(ty==='addC'&&Math.random()<.4){const a=R(55,95),b=R(105-a,95),t=a+b;return {q:L('□ 안에 알맞은 수를 써 보세요.','Fill in the boxes.')+`<br><b>${a} cm + ${b} cm = □ m □ cm</b>`,a:A.m([1,t-100],lab),hint,
     exp:L(`${a} + ${b} = ${t}이니까 ${t} cm예요. ${t} cm = ${mcm(1,t-100)}예요.`,`${a} cm + ${b} cm = ${t} cm = ${mcm(1,t-100)}.`)}}
    return {q:L('□ 안에 알맞은 수를 써 보세요.','Fill in the boxes.')+`<br><b>${mcm(m1,c1)} + ${mcm(m2,c2)} = □ m □ cm</b>`,a:A.m([M,Cc],lab),hint:L('m는 m끼리, cm는 cm끼리 더해요.','Add metres to metres and centimetres to centimetres.'),
-    exp:s>=100?L(`cm끼리 ${c1} + ${c2} = ${s}, ${s} cm = 1 m ${Cc} cm예요. m끼리 ${m1} + ${m2} + 1 = ${M}. 그래서 ${mcm(M,Cc)}예요.`,`cm: ${c1} + ${c2} = ${s} = 1 m ${Cc} cm. m: ${m1} + ${m2} + 1 = ${M}. So ${mcm(M,Cc)}.`)
+    exp:s>=100?L(`cm끼리 ${c1} + ${c2} = ${s}, ${s} cm = 1 m ${Cc} cm예요. m끼리 ${m1} + ${m2} + 1 = ${M}. 그래서 ${mcm(M,Cc)}예요.`,`cm: ${c1} + ${c2} = ${s} cm = 1 m ${Cc} cm. m: ${m1} + ${m2} + 1 = ${M}. So ${mcm(M,Cc)}.`)
      :L(`m끼리 ${m1} + ${m2} = ${M}, cm끼리 ${c1} + ${c2} = ${Cc}. 그래서 ${mcm(M,Cc)}예요.`,`m: ${m1} + ${m2} = ${M}. cm: ${c1} + ${c2} = ${Cc}. So ${mcm(M,Cc)}.`)}}
   if(ty==='sub'||ty==='story'){const m1=R(3,8),m2=R(1,m1-1),c1=R(30,95),c2=R(10,c1-5),M=m1-m2,Cc=c1-c2;
    const q=ty==='sub'?L('□ 안에 알맞은 수를 써 보세요.','Fill in the boxes.')+`<br><b>${mcm(m1,c1)} − ${mcm(m2,c2)} = □ m □ cm</b>`:L(`밧줄이 ${mcm(m1,c1)} 있어요. 보트를 묶는 데 ${mcm(m2,c2)}를 썼어요. 남은 밧줄은 몇 m 몇 cm일까요?`,`A rope is ${mcm(m1,c1)} long. The keeper uses ${mcm(m2,c2)} to tie a boat. How much rope is left?`);
@@ -2670,7 +2671,7 @@ S.push({id:'g2-14',icon:'📐',strand:'mea',
    return {q:L('길이가 1 m보다 긴 것은 어느 것일까요?','Which one is longer than 1 m?'),a:A.c(ans[0],wr.map(x=>x[0])),hint:L('양팔을 벌린 길이가 약 1 m예요.','Your arm span is about 1 m.'),
     exp:L(`${ans[0]}${josa(ans[0],'은','는')} 약 ${ans[1]} m라서 1 m보다 길어요. 나머지는 1 m보다 짧아요.`,`A ${ans[0]} is about ${ans[1]} m, longer than 1 m. The others are shorter than 1 m.`)}}
   if(ty==='body'){const k=R(3,9),st=Math.random()<.5;
-   return st?{q:L(`양팔을 벌린 길이가 약 1 m예요. 고래 그림의 길이를 재었더니 양팔 길이로 약 ${k}번이었어요. 고래 그림은 약 몇 m일까요?`,`The keeper’s arm span is about 1 m. A whale painting is about ${k} arm spans long. About how many metres long is it?`),a:A.n(k,{u:'m'}),
+   return st?{q:L(`양팔을 벌린 길이가 약 1 m예요. 고래 그림의 길이를 재었더니 양팔 길이로 약 ${k}번이었어요. 고래 그림은 약 몇 m일까요?`,`Your arm span is about 1 m. A whale painting is about ${k} of your arm spans long. About how many metres long is it?`),a:A.n(k,{u:'m'}),
      hint:L('1 m가 몇 번인지 생각해 보세요.','How many times does 1 m fit?'),exp:L(`1 m로 약 ${k}번이니까 약 ${k} m예요.`,`About ${k} arm spans of 1 m is about ${k} m.`)}
     :{q:L(`사육사의 한 걸음은 약 50 cm예요. 수조 앞을 ${2*k}걸음 걸었다면 약 몇 m일까요?`,`The keeper’s step is about 50 cm. The keeper walks ${2*k} steps along a tank. About how many metres is that?`),a:A.n(k,{u:'m'}),
      hint:L('두 걸음이 약 몇 cm인지 생각해 보세요.','How long are two steps?'),exp:L(`두 걸음이 약 100 cm = 1 m예요. ${2*k}걸음은 두 걸음씩 ${k}번이니까 약 ${k} m예요.`,`Two steps are about 100 cm = 1 m. ${2*k} steps is ${k} pairs of steps: about ${k} m.`)}}
@@ -2716,7 +2717,7 @@ S.push({id:'g2-15',icon:'🕒',strand:'mea',
   if(ty==='dur'){const m0=R(0,4)*10,d=R(2,9)*10,tot=h*60+m0+d,h2=(Math.floor(tot/60)-1)%12+1,m2=tot%60;
    return {q:L(`돌고래 공연이 ${tS(h,m0)}에 시작해서 ${tS(h2,m2)}에 끝났어요. 공연은 몇 분 동안 했을까요?`,`The dolphin show started at ${h}:${pad(m0)} and ended at ${h2}:${pad(m2)}. How many minutes long was it?`),a:A.n(d,{u:L('분','min')}),
     hint:L('긴바늘이 몇 칸 움직였는지 세어 보세요. 한 칸은 5분이에요.','How far did the long hand move? Count by 5s or 10s.'),
-    exp:m0+d>60?L(`${tS(h,m0)}부터 ${tS(h%12+1,0)}까지 ${60-m0}분, 다시 ${tS(h2,m2)}까지 ${m2}분이에요. ${60-m0} + ${m2} = ${d}분이에요.`,`From ${h}:${pad(m0)} to ${h%12+1}:00 is ${60-m0} min, then ${m2} more min. ${60-m0} + ${m2} = ${d} minutes.`)
+    exp:m0+d>60?L(`${tS(h,m0)}부터 ${tS(h%12+1,0)}까지 ${60-m0}분, 다시 ${tS(h2,m2)}까지 ${d-60+m0}분이에요. ${60-m0} + ${d-60+m0} = ${d}분이에요.`,`From ${h}:${pad(m0)} to ${h%12+1}:00 is ${60-m0} min, then ${d-60+m0} more min to ${h2}:${pad(m2)}. ${60-m0} + ${d-60+m0} = ${d} minutes.`)
      :L(`${tS(h,m0)}에서 ${d}분이 지나면 ${tS(h2,m2)}${iyo(tS(h2,m2))}. 그래서 ${d}분이에요.`,`${d} minutes after ${h}:${pad(m0)} is ${h2}:${pad(m2)}. So it was ${d} minutes.`)}}
   if(ty==='h60b'){const m=R(1,5)*10+pick([0,5]);if(Math.random()<.5){const t=60+m;return {q:L('□ 안에 알맞은 수는 얼마일까요?','What number goes in the □?')+`<br><b>${L(`1시간 ${m}분 = □분`,`1 h ${m} min = □ min`)}</b>`,a:A.n(t,{u:L('분','min')}),hint:L('1시간은 60분이에요.','1 hour = 60 minutes.'),exp:L(`60분 + ${m}분 = ${t}분이에요.`,`60 min + ${m} min = ${t} min.`)}}
    const n=R(1,2),t=60*n+m;return {q:L('□ 안에 알맞은 수를 써 보세요.','Fill in the boxes.')+`<br><b>${L(`${t}분 = □시간 □분`,`${t} min = □ h □ min`)}</b>`,a:A.m([n,m],[L('시간','h'),L('분','min')]),hint:L('60분이 1시간이에요.','60 minutes make 1 hour.'),
@@ -2810,7 +2811,7 @@ S.push({id:'g2-17',icon:'🧩',strand:'alg',
  gen(lv){
   const ty=pick(lv===1?['next','next','numNext','grow']:lv===2?['next','mid','core','grow','addT','rule']:['nth','dec','calendar','mulT','jump','mid']);
   if(ty==='next'||ty==='mid'){const core=mkCore(lv),reps=Math.ceil(8/core.length)+1,seq=Array.from({length:core.length*reps},(_,i)=>core[i%core.length]),len=Math.min(seq.length,lv===1?7:9),
-    k=ty==='next'?len:R(core.length,len-1),ans=seq[k],shown=seq.slice(0,ty==='next'?len:len+1).map((e,i)=>i===k?'?':e),wr=[...new Set(core.filter(e=>e!==ans))];
+    k=ty==='next'?len:R(core.length,len-1),ans=seq[k],shown=seq.slice(0,len+1).map((e,i)=>i===k?'?':e),wr=[...new Set(core.filter(e=>e!==ans))];
    while(wr.length<2)wr.push(pick(PEM.filter(e=>e!==ans&&!wr.includes(e))));
    return {q:ty==='next'?L('규칙에 따라 ?에 올 것은 무엇일까요?','What comes next in the pattern?'):L('규칙에 따라 ?에 알맞은 것은 무엇일까요?','What is missing at the ?'),vis:V.pattern(shown),a:A.c(ans,wr),
     hint:L('되풀이되는 부분을 손가락으로 짚어 보세요.','Find the part that repeats.'),exp:L(`${core.join('')}${josa('가','이','가')} 되풀이돼요. 그래서 ?에는 ${ans}${josa('가','이','가')} 와요.`,`The core ${core.join('')} repeats, so the ? is ${ans}.`)}}
@@ -2890,7 +2891,7 @@ S.push({id:'g2-18',icon:'🍕',strand:'num',
   if(ty==='whole'){const d=pick([2,3,4,6,8]);return {q:L(`${fr(1,d)}이 몇 개 모이면 전체(1)가 될까요?`,`How many ${fr(1,d)} pieces make one whole?`),vis:V.fracBar(1,d,{w:280,lab:true}),a:A.n(d),
    hint:L('전체를 몇 조각으로 나누었는지 보세요.','How many pieces make the whole bar?'),exp:L(`전체를 똑같이 ${d}${ro(d)} 나누었으니 ${fr(1,d)}이 ${d}개 모이면 1이에요.`,`The whole is ${d} equal parts, so ${d} pieces of ${fr(1,d)} make 1.`)}}
   if(ty==='cmp'){const [a,b]=sample([2,3,4,6,8],2),big=Math.random()<.6,ans=big?Math.min(a,b):Math.max(a,b);
-   return {q:big?L('같은 크기의 떡을 나누었어요. 한 조각이 더 큰 것은 어느 것일까요?','Two fish cakes of the same size are cut up. Which piece is bigger?'):L('같은 크기의 떡을 나누었어요. 한 조각이 더 작은 것은 어느 것일까요?','Two fish cakes of the same size are cut up. Which piece is smaller?'),
+   return {q:big?L('같은 크기의 떡을 나누었어요. 한 조각이 더 큰 것은 어느 것일까요?','Two rice cakes of the same size are cut up. Which piece is bigger?'):L('같은 크기의 떡을 나누었어요. 한 조각이 더 작은 것은 어느 것일까요?','Two rice cakes of the same size are cut up. Which piece is smaller?'),
     vis:row(V.fracPie(1,a,{r:44}),V.fracPie(1,b,{r:44})),a:A.c(fr(1,ans),[fr(1,ans===a?b:a)]),hint:L('똑같이 나눈 조각 수가 많을수록 한 조각은 작아져요.','The more equal pieces, the smaller each piece.'),
     exp:L(`${Math.min(a,b)}조각으로 나눈 것이 ${Math.max(a,b)}조각으로 나눈 것보다 한 조각이 커요. 답은 ${fr(1,ans)}이에요.`,`Cutting into ${Math.min(a,b)} pieces makes bigger pieces than cutting into ${Math.max(a,b)}. The answer is ${fr(1,ans)}.`)}}
   // story: sharing one thing equally
@@ -2942,9 +2943,9 @@ S.push({id:'g2-19',icon:'💵',strand:'fin',
    const ways=new Set();for(let k=0;k<400&&ways.size<6;k++){let r=X;const l=[];while(r>0){const c=pick(cs.filter(v=>v<=r));l.push(c);r-=c}if(l.length<=5&&l.length>=2)ways.add(l.sort((a,b)=>b-a).join(','))}
    const W=[...ways].map(s=>s.split(',').map(Number));if(W.length<2)return {q:L(`${money(X)}${josa(money(X),'을','를')} 만들 수 있는 동전은 무엇일까요?`,`Which coins make ${money(X)}?`),a:A.c(coinStr(greedy(X)),[coinStr([...greedy(X),cs[cs.length-1]])]),hint:L('하나씩 더해 보세요.','Add them up.'),exp:L(`${coinStr(greedy(X))} = ${money(X)}`,`${coinStr(greedy(X))} = ${money(X)}`)};
    const right=pick(W),bad=[];for(let k=0;k<60&&bad.length<4;k++){const b=[...pick(W)],i=R(0,b.length-1),alt=pick(cs.filter(c=>c!==b[i]));b[i]=alt;b.sort((x,y)=>y-x);const s=coinStr(b);if(b.reduce((x,y)=>x+y,0)!==X&&!bad.includes(s))bad.push(s)}
-   if(ty==='ways')return {q:L(`${money(X)}${josa(money(X),'을','를')} 바르게 만든 것은 어느 것일까요?`,`Which coins make exactly ${money(X)}?`),a:A.c(coinStr(right),bad.slice(0,3)),hint:L('하나씩 더해서 확인해 보세요.','Add up each set to check.'),
+   if(ty==='ways')return {q:L(`${money(X)}${josa(money(X),'을','를')} 바르게 만든 것은 어느 것일까요?`,`Which one makes exactly ${money(X)}?`),a:A.c(coinStr(right),bad.slice(0,3)),hint:L('하나씩 더해서 확인해 보세요.','Add up each set to check.'),
     exp:L(`${coinStr(right)} = ${money(X)}${iyo(money(X))}.`,`${coinStr(right)} = ${money(X)}.`)};
-   const goods=shuffle(W).slice(0,3).map(coinStr);if(goods.length<2)return {q:L(`${money(X)}${josa(money(X),'을','를')} 바르게 만든 것은 어느 것일까요?`,`Which coins make exactly ${money(X)}?`),a:A.c(coinStr(right),bad.slice(0,3)),hint:L('하나씩 더해서 확인해 보세요.','Add up each set to check.'),exp:L(`${coinStr(right)} = ${money(X)}${iyo(money(X))}.`,`${coinStr(right)} = ${money(X)}.`)};
+   const goods=shuffle(W).slice(0,3).map(coinStr);if(goods.length<2)return {q:L(`${money(X)}${josa(money(X),'을','를')} 바르게 만든 것은 어느 것일까요?`,`Which one makes exactly ${money(X)}?`),a:A.c(coinStr(right),bad.slice(0,3)),hint:L('하나씩 더해서 확인해 보세요.','Add up each set to check.'),exp:L(`${coinStr(right)} = ${money(X)}${iyo(money(X))}.`,`${coinStr(right)} = ${money(X)}.`)};
    const b0=bad[0];
    return {q:L(`${money(X)}${josa(money(X),'이','가')} 되지 않는 것은 어느 것일까요?`,`Which one does NOT make ${money(X)}?`),a:A.c(b0,goods),hint:L('하나씩 더해서 확인해 보세요.','Add up each set to check.'),
     exp:L(`${goods[0]} = ${money(X)}처럼 나머지는 모두 ${money(X)}${iyo(money(X))}. ${b0}${josa(b0,'은','는')} ${money(X)}${josa(money(X),'이','가')} 아니에요.`,`The others all make ${money(X)}, for example ${goods[0]}. ${b0} does not.`)}}
@@ -2991,10 +2992,10 @@ S.push({id:'g2-20',icon:'🍪',strand:'num',
   if(ty==='fair'){const g=R(2,4),k=R(2,5),eq=Math.random()<.5;let cs=Array(g).fill(k);if(!eq){const i=R(0,g-1);let j;do j=R(0,g-1);while(j===i);cs[i]++;cs[j]--}
    return {q:L(`물고기 ${g*k}마리를 수조 ${g}개에 나누었어요. 똑같이 나누었을까요?`,`${g*k} fish were put into ${g} tanks. Were they shared equally?`),vis:grpH(cs),a:YN(eq,L('똑같이 나누었어요','Yes, equally'),L('똑같지 않아요','No, not equally')),
     hint:L('수조마다 몇 마리인지 세어 보세요.','Count the fish in each tank.'),exp:eq?L(`수조마다 ${k}마리씩으로 같아요.`,`Every tank has ${k} fish, so it is equal.`):L(`수조마다 ${cs.join(', ')}마리로 달라요. 똑같이 나누지 않았어요.`,`The tanks have ${cs.join(', ')} fish. That is not equal.`)}}
-  if(ty==='legs'){const [t,ko,en]=pick([[8,'문어 다리','octopus legs'],[5,'불가사리 팔','starfish arms'],[2,'꽃게 집게발','crab claws'],[4,'바다거북 지느러미발','sea turtle flippers']]),m=R(2,9),n=t*m;
+  if(ty==='legs'){const [t,ko,en]=pick([[8,'문어 다리','octopus arms'],[5,'불가사리 팔','starfish arms'],[2,'꽃게 집게발','crab claws'],[4,'바다거북 지느러미발','sea turtle flippers']]),m=R(2,9),n=t*m;
    const who=L({8:'문어',5:'불가사리',2:'꽃게',4:'바다거북'}[t],{8:'octopuses',5:'starfish',2:'crabs',4:'sea turtles'}[t]);
    return {q:L(`${ko}${josa(ko,'이','가')} 모두 ${n}개 있어요. ${who}${josa(who,'은','는')} 몇 마리일까요? (한 마리에 ${t}개)`,`There are ${n} ${en} in all. Each animal has ${t}. How many ${who} are there?`),a:A.n(m),
-    hint:L(`${t}단에서 곱이 ${n}인 것을 찾아보세요.`,`Which fact in the ${t} times table gives ${n}?`),exp:L(`${t} × ${m} = ${n}이니까 ${m}마리예요.`,`${t} × ${m} = ${n}, so there are ${m}.`)}}
+    hint:L(`${t}단에서 곱이 ${n}인 것을 찾아보세요.`,`Which fact in the ${t} times table gives ${n}?`),exp:L(`${t} × ${m} = ${n}이니까 ${m}마리예요.`,`${m} × ${t} = ${n}, so there are ${m}.`)}}
   if(ty==='snack'){const g=R(2,9),k=R(2,9),n=g*k;return {q:L(`물고기 과자 ${n}개를 손님 ${g}명이 똑같이 나누어 먹으면 한 명이 몇 개씩 먹을까요?`,`${g} visitors share ${n} fish crackers equally. How many crackers does each visitor get?`),a:A.n(k),
    hint:L(`${g} × □ = ${n}에서 □를 찾아보세요.`,`Find □ in ${g} × □ = ${n}.`),exp:L(`${k} × ${g} = ${n}이니까 한 명이 ${k}개씩 먹어요.`,`${g} × ${k} = ${n}, so each visitor gets ${k}.`)}}
   if(ty==='fairPic'){let g,k;do{g=R(2,4);k=R(2,4)}while(g*k>12);const n=g*k,right=grpH(Array(g).fill(k)),un=Array(g).fill(k);un[0]++;un[g-1]--;
@@ -3010,7 +3011,7 @@ S.push({id:'g2-20',icon:'🍪',strand:'num',
     hint:L('먼저 먹이가 모두 몇 개인지 구해요.','First find how many snacks there are in all.'),exp:L(`먹이는 ${a} × ${b} = ${n}개예요. ${k} × ${g} = ${n}이니까 한 마리가 ${k}개씩 먹어요.`,`There are ${b} × ${a} = ${n} snacks. ${g} × ${k} = ${n}, so each seal gets ${k}.`)}}
   // boats: grouping
   const k=R(3,6),g=R(3,8),n=k*g;return {q:L(`다이버 ${n}명이 보트 한 대에 ${k}명씩 타요. 보트는 몇 대 필요할까요?`,`${n} divers ride in boats, ${k} in each boat. How many boats do they need?`),a:A.n(g,{u:L('대','boats')}),
-   hint:L(`${k}씩 몇 번이면 ${n}이 될까요?`,`How many groups of ${k} make ${n}?`),exp:L(`${k} × ${g} = ${n}이니까 보트 ${g}대가 필요해요.`,`${g} × ${k} = ${n}, so they need ${g} boats.`)};
+   hint:L(`${k}씩 몇 번이면 ${n}${josa(n,'이','가')} 될까요?`,`How many groups of ${k} make ${n}?`),exp:L(`${k} × ${g} = ${n}이니까 보트 ${g}대가 필요해요.`,`${g} × ${k} = ${n}, so they need ${g} boats.`)};
  },
  quick(lv){const g=R(2,lv===1?5:9),k=R(2,9),n=g*k;return {q:`${g} × ? = ${n}`,a:k,w:W3(k,[k+1,k-1,n-g])}}
 });
@@ -3230,7 +3231,7 @@ S.push({id:'g3-03',icon:'📐',strand:'geo',
   // clock hands at o'clock times
   const h=Math.random()<.4?pick([3,9]):pick([1,2,4,5,6,7,8,10,11]),ang=Math.min(h,12-h)*30;
   return {q:L(`${h}시에 시계의 긴바늘과 짧은바늘이 이루는 각은 직각일까요?`,`At ${h}:00, do the two hands of the clock make a right angle?`),vis:V.clock(h,0),a:yn(ang===90),
-   hint:L('긴바늘은 12를 가리켜요. 짧은바늘이 3이나 9를 가리킬 때 반듯한 모서리가 생겨요.','The long hand points to 12. Think about where the short hand points.'),
+   hint:L('긴바늘은 12를 가리켜요. 짧은바늘이 3이나 9를 가리킬 때 반듯한 모서리가 생겨요.','The long hand points to 12. When the short hand points to 3 or 9, the hands make a square corner.'),
    exp:ang===90?L(`긴바늘은 12, 짧은바늘은 ${h}${josa(h,'을','를')} 가리켜 직각을 이루어요.`,`The long hand points to 12 and the short hand to ${h}: a square corner, a right angle.`):ang<90?L('두 바늘 사이가 직각보다 좁아요. 직각이 아니에요.','The hands are closer together than a square corner, so it is not a right angle.'):L('두 바늘 사이가 직각보다 넓어요. 직각이 아니에요.','The hands are wider apart than a square corner, so it is not a right angle.')}}
 });
 
@@ -3330,7 +3331,7 @@ S.push({id:'g3-05',icon:'🍪',strand:'num',
 });
 
 // ---------------------------------------------------------------- g3-06 division facts
-const LEGS=[['문어','다리',8,'an octopus','octopuses','legs'],['불가사리','팔',5,'a sea star','sea stars','arms'],['꽃게','다리',10,'a crab','crabs','legs'],['오징어','다리',10,'a squid','squid','arms'],['펭귄','발',2,'a penguin','penguins','feet']];
+const LEGS=[['문어','다리',8,'an octopus','octopuses','arms'],['불가사리','팔',5,'a sea star','sea stars','arms'],['꽃게','다리',10,'a crab','crabs','legs'],['오징어','다리',10,'a squid','squid','arms and tentacles'],['펭귄','발',2,'a penguin','penguins','feet']];
 S.push({id:'g3-06',icon:'➗',strand:'num',
  name:L('곱셈구구로 나눗셈','Division facts'),
  about:L('곱셈구구를 이용해 나눗셈의 몫을 빠르게 구해요.','Use times tables to find division facts quickly.'),
@@ -3339,7 +3340,7 @@ S.push({id:'g3-06',icon:'➗',strand:'num',
  ca:L('온타리오 3~4학년 · 수','Ontario Grade 3–4 · Number'),
  learn:()=>[
   {t:L('42 ÷ 6의 몫은 6단 곱셈구구에서 찾아요. 6 × 7 = 42이니까 42 ÷ 6 = 7이에요.','To find 42 ÷ 6, use the 6 times table: 6 × 7 = 42, so 42 ÷ 6 = 7.'),vis:V.groups(6,7,'🐟')},
-  {t:L('문어 한 마리의 다리는 8개예요. 다리가 32개이면 문어는 32 ÷ 8 = 4마리예요.','An octopus has 8 legs. If there are 32 legs, there are 32 ÷ 8 = 4 octopuses.'),vis:V.items(4,'🐙',{per:4})},
+  {t:L('문어 한 마리의 다리는 8개예요. 다리가 32개이면 문어는 32 ÷ 8 = 4마리예요.','An octopus has 8 arms. If there are 32 arms, there are 32 ÷ 8 = 4 octopuses.'),vis:V.items(4,'🐙',{per:4})},
   {t:L('어떤 수를 1로 나누면 그 수 그대로, 같은 수로 나누면 1이에요. 6 ÷ 1 = 6, 6 ÷ 6 = 1이에요.','A number divided by 1 stays the same, and a number divided by itself is 1: 6 ÷ 1 = 6 and 6 ÷ 6 = 1.'),vis:V.groups(1,6,'🐠')}
  ],
  gen(lv){const t=pick(lv===1?['fact','fact','arr','help']:lv===2?['fact','missA','missB','fact']:['legs','two','cmp','wrong']);
@@ -3362,7 +3363,7 @@ S.push({id:'g3-06',icon:'➗',strand:'num',
   const facts=tryGen(()=>{const f=Array.from({length:4},()=>{const d=R(2,9),q=R(2,9);return [d*q,d,q]});return new Set(f.map(x=>x[0]+'/'+x[1])).size===4?f:null},[[42,6,7],[36,4,9],[24,3,8],[45,5,9]]);
   const bad=R(0,3),off=pick([1,-1]),txt=facts.map(([n,d,q],i)=>`${n} ÷ ${d} = ${i===bad?q+off:q}`);const [bn,bd,bq]=facts[bad];
   return {q:L('계산이 틀린 나눗셈식을 찾아보세요.','Find the division sentence that is wrong.'),a:A.c(txt[bad],txt.filter((x,i)=>i!==bad)),hint:L('나누는 수와 몫을 곱해서 나누어지는 수가 되는지 확인해 보세요.','Check each one: divisor × quotient should give the first number.'),
-   exp:L(`${bd} × ${bq+off} = ${bd*(bq+off)}이라서 틀렸어요. ${bn} ÷ ${bd} = ${ie(bq)}.`,`${bd} × ${bq+off} = ${bd*(bq+off)}, not ${bn}. The right answer is ${bn} ÷ ${bd} = ${bq}.`)}},
+   exp:L(`${bd} × ${bq+off} = ${bd*(bq+off)}${josa(bd*(bq+off),'이라서','라서')} 틀렸어요. ${bn} ÷ ${bd} = ${ie(bq)}.`,`${bd} × ${bq+off} = ${bd*(bq+off)}, not ${bn}. The right answer is ${bn} ÷ ${bd} = ${bq}.`)}},
  quick(lv){const d=R(2,lv===1?5:9),q=R(2,9);return {q:`${d*q} ÷ ${d}`,a:q,w:near(q,{n:3,min:1})}}
 });
 
@@ -3377,7 +3378,7 @@ S.push({id:'g3-07',icon:'✖️',strand:'num',
  learn:()=>[
   {t:L('23 × 3은 20 × 3 = 60과 3 × 3 = 9를 더해요. 23 × 3 = 69예요.','For 23 × 3, find 20 × 3 = 60 and 3 × 3 = 9, then add: 23 × 3 = 69.'),vis:V.blocks(0,6,9)},
   {t:L('47 × 6에서 7 × 6 = 42이니 2를 쓰고 4를 올려요. 4 × 6 = 24에 4를 더하면 28이니 답은 282예요.','In 47 × 6, 7 × 6 = 42: write 2 and carry 4. Then 4 × 6 = 24, plus 4 is 28. The answer is 282.'),vis:colCalc(47,6,'×',282)},
-  {t:L('문어 한 마리의 다리는 8개예요. 문어 12마리의 다리는 12 × 8 = 96개예요.','An octopus has 8 legs. 12 octopuses have 12 × 8 = 96 legs.'),vis:V.items(12,'🐙',{per:6})}
+  {t:L('문어 한 마리의 다리는 8개예요. 문어 12마리의 다리는 12 × 8 = 96개예요.','An octopus has 8 arms. 12 octopuses have 12 × 8 = 96 arms.'),vis:V.items(12,'🐙',{per:6})}
  ],
  gen(lv){const t=pick(lv===1?['tens','easy','pic']:lv===2?['carry','big','big','parts']:['story','money','cmp','est']);
   const HT=L('십의 자리와 일의 자리로 나누어 곱한 다음 더해요.','Split the number into tens and ones, multiply each, then add.');
@@ -3391,7 +3392,7 @@ S.push({id:'g3-07',icon:'✖️',strand:'num',
   if(t==='parts'){const a=tryGen(()=>{const a=R(21,98);return a%10?a:null},47),m=R(3,9),T=a-a%10,O=a%10,first=Math.random()<.5;
    return {q:first?`${a} × ${m} = ${T} × ${m} + ${O} × ${m} = □ + ${O*m}`:`${a} × ${m} = ${T} × ${m} + ${O} × ${m} = ${T*m} + □`,a:A.n(first?T*m:O*m),hint:L('□에 들어갈 곱셈을 해 보세요.','Work out the product that goes in □.'),exp:L(`${first?`${T} × ${m} = ${ie(T*m)}`:`${O} × ${m} = ${ie(O*m)}`}. 모두 더하면 ${a} × ${m} = ${ie(a*m)}.`,`${first?`${T} × ${m} = ${T*m}`:`${O} × ${m} = ${O*m}`}. Altogether ${a} × ${m} = ${a*m}.`)}}
   if(t==='story'){const k=R(0,3),m=R(3,9);let a,q,u,ex;
-   if(k===0){a=R(12,39);q=L(`문어 한 마리의 다리는 8개예요. 문어 ${a}마리의 다리는 모두 몇 개일까요?`,`An octopus has 8 legs. How many legs do ${a} octopuses have?`);u=U('개','legs');return {q,a:A.n(a*8,u),hint:HT,exp:mulSteps(a,8)+L('개예요.','.')}}
+   if(k===0){a=R(12,39);q=L(`문어 한 마리의 다리는 8개예요. 문어 ${a}마리의 다리는 모두 몇 개일까요?`,`An octopus has 8 arms. How many arms do ${a} octopuses have?`);u=U('개','arms');return {q,a:A.n(a*8,u),hint:HT,exp:mulSteps(a,8)+L('개예요.','.')}}
    if(k===1){a=R(12,48);q=L(`보트 한 대에 손님이 ${a}명씩 타요. 보트 ${m}대에는 모두 몇 명이 탈까요?`,`Each boat carries ${a} visitors. How many visitors ride in ${m} boats?`);u=U('명','visitors')}
    else if(k===2){const f=fishP();a=R(15,65);q=L(`수조 한 개에 ${f.k} ${a}마리씩 있어요. 수조 ${m}개에는 모두 몇 마리가 있을까요?`,`Each tank has ${a} ${f.e}. How many are there in ${m} tanks?`);u=U('마리','')}
    else{a=R(12,49);q=L(`불가사리 한 마리의 팔은 5개예요. 불가사리 ${a}마리의 팔은 모두 몇 개일까요?`,`A sea star has 5 arms. How many arms do ${a} sea stars have?`);u=U('개','arms');return {q,a:A.n(a*5,u),hint:HT,exp:mulSteps(a,5)+'.'}}
@@ -3430,7 +3431,7 @@ S.push({id:'g3-08',icon:'📏',strand:'mea',
   if(t==='ruler'||t==='ruler2'){const c=R(2,lv===1?6:4),m=R(1,9),len=rnd(c+m/10),st=t==='ruler2'?R(1,2):0,o=pick(OBJ),nm=L(o[1],o[2]);
    const asMix=t==='ruler'&&Math.random()<.5,vis=V.ruler(len,{mm:true,obj:o[0],start:st});
    const hint=st?L(`${st} cm에서 시작했어요. 끝 눈금에서 시작 눈금을 빼거나, 작은 눈금을 세어 보세요.`,`It starts at ${st} cm. Subtract the start from the end, or count the small marks.`):L('큰 눈금은 cm, 작은 눈금 한 칸은 1 mm예요.','Big marks show cm. Each small space is 1 mm.');
-   const exp=st?L(`끝 눈금 ${N(st+len)} cm(${(st+c)} cm ${m} mm)에서 ${st} cm를 빼면 ${mmTxt(c,m)} = ${ie(c*10+m+' mm')}.`,`The end is at ${st+c} cm ${m} mm. Take away ${st} cm: ${mmTxt(c,m)} = ${c*10+m} mm.`):L(`${c} cm보다 작은 눈금 ${m}칸 더 길어요. ${mmTxt(c,m)} = ${ie(c*10+m+' mm')}.`,`It is ${c} cm and ${m} small spaces more: ${mmTxt(c,m)} = ${c*10+m} mm.`);
+   const exp=st?L(`끝 눈금 ${st+c} cm ${m} mm에서 ${st} cm를 빼면 ${mmTxt(c,m)} = ${ie(c*10+m+' mm')}.`,`The end is at ${st+c} cm ${m} mm. Take away ${st} cm: ${mmTxt(c,m)} = ${c*10+m} mm.`):L(`${c} cm보다 작은 눈금 ${m}칸 더 길어요. ${mmTxt(c,m)} = ${ie(c*10+m+' mm')}.`,`It is ${c} cm and ${m} small spaces more: ${mmTxt(c,m)} = ${c*10+m} mm.`);
    return asMix?{q:L(`${nm}의 길이는 몇 cm 몇 mm일까요?`,`How long is the ${nm}? Give cm and mm.`),vis,a:A.m([c,m],['cm','mm']),hint,exp}:{q:L(`${nm}의 길이는 몇 mm일까요?`,`How long is the ${nm} in millimetres?`),vis,a:A.n(c*10+m,{u:'mm'}),hint,exp}}
   if(t==='c2m'){const c=R(2,15),m=Math.random()<.5?0:R(1,9);
    return {q:`${mmTxt(c,m)} = □ mm`,a:A.n(c*10+m,{u:'mm'}),hint:L('1 cm = 10 mm예요.','1 cm = 10 mm.'),exp:m?L(`${c} cm = ${c*10} mm이고 ${c*10} + ${m} = ${c*10+m}이므로 ${ie(c*10+m+' mm')}.`,`${c} cm = ${c*10} mm, and ${c*10} + ${m} = ${c*10+m}, so it is ${c*10+m} mm.`):L(`1 cm = 10 mm이니 ${c} cm = ${ie(c*10+' mm')}.`,`1 cm = 10 mm, so ${c} cm = ${c*10} mm.`)}}
@@ -3486,7 +3487,7 @@ S.push({id:'g3-09',icon:'⏱️',strand:'mea',
   if(t==='end'){const h=R(1,10),m=pick([0,30]),d=pick([15,30,45]),T=h*60+m;
    return {q:L(`해달 먹이 주기 시간이 ${tStr(T)}에 시작해서 ${d}분 동안 했어요. 끝난 시각은?`,`Sea otter feeding starts at ${tStr(T)} and lasts ${d} minutes. When does it end?`),vis:V.clock(h,m),a:tOpts(T+d),hint:L('긴바늘이 몇 칸 더 가는지 생각해 보세요. 한 칸(숫자 하나)은 5분이에요.','Move the long hand forward. Each number is 5 minutes.'),exp:L(`${tStr(T)}에서 ${d}분 지나면 ${tStr(T+d)}이에요.`,`${d} minutes after ${tStr(T)} is ${tStr(T+d)}.`)}}
   if(t==='unit'){const [ko,en,n,u]=pick(ACT),O=L(['초','분','시간'],['seconds','minutes','hours']);
-   return {q:L(`${ko}에 걸리는 시간은 약 ${n}□예요. □에 알맞은 단위는?`,`${en[0].toUpperCase()+en.slice(1)} takes about ${n} □. Which unit fits?`),a:ord(O[u],O),hint:L('1초는 아주 짧고, 1시간은 꽤 길어요.','A second is very short. An hour is quite long.'),exp:L(`${ko}에는 약 ${n}${O[u]}가 걸려요.`,`${en[0].toUpperCase()+en.slice(1)} takes about ${n} ${O[u]}.`)}}
+   return {q:L(`${ko}에 걸리는 시간은 약 ${n}□예요. □에 알맞은 단위는?`,`${en[0].toUpperCase()+en.slice(1)} takes about ${n} □. Which unit fits?`),a:ord(O[u],O),hint:L('1초는 아주 짧고, 1시간은 꽤 길어요.','A second is very short. An hour is quite long.'),exp:L(`${ko}에는 약 ${n}${O[u]}${josa(O[u],'이','가')} 걸려요.`,`${en[0].toUpperCase()+en.slice(1)} takes about ${n} ${O[u]}.`)}}
   if(t==='addHM'){const h1=R(1,3),m1=R(2,11)*5,h2=R(1,3),m2=R(2,11)*5,M=m1+m2,H=h1+h2+(M>=60?1:0);
    return {q:L(`${dHM(h1,m1)} + ${dHM(h2,m2)} = □시간 □분`,`${dHM(h1,m1)} + ${dHM(h2,m2)} = □ h □ min`),a:A.m([H,M%60],HM()),hint:L('분끼리, 시간끼리 더해요. 60분은 1시간이에요.','Add minutes to minutes and hours to hours. 60 min = 1 h.'),
     exp:L(`분: ${m1} + ${m2} = ${M}분${M>=60?` = 1시간 ${M-60}분`:''}, 시간: ${h1} + ${h2}${M>=60?' + 1':''} = ${H}시간. 답은 ${ie(dHM(H,M%60))}.`,`Minutes: ${m1} + ${m2} = ${M}${M>=60?` = 1 h ${M-60} min`:''}. Hours: ${h1} + ${h2}${M>=60?' + 1':''} = ${H}. Answer: ${dHM(H,M%60)}.`)}}
@@ -3534,7 +3535,7 @@ S.push({id:'g3-10',icon:'🍰',strand:'num',
     hint:L('전체가 똑같이 몇 조각인지(분모), 그중 몇 조각인지(분자) 세어 보세요.','Count all the equal parts (denominator), then the parts asked about (numerator).'),exp:L(`전체를 똑같이 ${d}${ro(d)} 나눈 것 중의 ${v}이니 ${fie(v,d)}.`,`${v} of ${d} equal parts is ${fr(v,d)}.`)}}
   if(t==='read'){const d=R(3,9),n=R(1,d-1),w2=n+1<d?n+1:n-1;
    const right=L(`${d}분의 ${n}`,enFrac(n,d)),wrong=L([`${n}분의 ${d}`,`${d+1}분의 ${n}`,`${d}분의 ${w2}`],[enFrac(d,n),enFrac(n,d+1),enFrac(w2,d)]);
-   return {q:L('이 분수를 어떻게 읽을까요?','How do you read this fraction?'),vis:bigTxt(`<span class="fr"><b>${n}</b><i>${d}</i></span>`),a:A.c(right,wrong),hint:L('분모(아래)를 먼저 읽고, 분자(위)를 나중에 읽어요.','Say the top number first, then name the bottom number.'),exp:L(`분모가 ${d}, 분자가 ${n}이니 ${d}분의 ${n}이라고 읽어요.`,`The numerator is ${n} and the denominator is ${d}, so it is ${enFrac(n,d)}.`)}}
+   return {q:L('이 분수를 어떻게 읽을까요?','How do you read this fraction?'),vis:bigTxt(`<span class="fr"><b>${n}</b><i>${d}</i></span>`),a:A.c(right,wrong),hint:L('분모(아래)를 먼저 읽고, 분자(위)를 나중에 읽어요.','Say the top number first, then name the bottom number.'),exp:L(`분모가 ${d}, 분자가 ${n}이니 ${d}분의 ${n}${josa(n,'이라고','라고')} 읽어요.`,`The numerator is ${n} and the denominator is ${d}, so it is ${enFrac(n,d)}.`)}}
   if(t==='equal'){const d=R(3,5),eq=Math.random()<.5;
    return {q:L('이 띠는 똑같이 나누어져 있나요?','Is this strip cut into equal parts?'),vis:eq?V.fracBar(0,d):uneqBar(d),a:yn(eq),hint:L('조각들의 크기가 모두 같은지 살펴보세요.','Check whether all the pieces are the same size.'),exp:eq?L(`${d}조각의 크기가 모두 같으니 똑같이 나누어졌어요.`,`All ${d} pieces are the same size, so the parts are equal.`):L('조각의 크기가 서로 달라서 똑같이 나눈 것이 아니에요. 분수로 나타낼 수 없어요.','The pieces are different sizes, so the parts are not equal.')}}
   if(t==='unitN'){const d=R(3,10),n=R(2,d-1);
@@ -3553,7 +3554,7 @@ S.push({id:'g3-10',icon:'🍰',strand:'num',
   // between two unit fractions
   const a=R(2,8);
   return {q:L(`분자가 1인 분수 중에서 ${fr(1,a)}보다 작고 ${fr(1,a+2)}보다 큰 분수가 있어요. 이 분수의 분모는 얼마일까요?`,`A unit fraction is smaller than ${fr(1,a)} but bigger than ${fr(1,a+2)}. What is its denominator?`),a:A.n(a+1),hint:L('단위분수는 분모가 클수록 작아요.','Unit fractions get smaller as the denominator gets bigger.'),exp:L(`${fr(1,a)} > ${fr(1,a+1)} > ${fr(1,a+2)}이니 분모는 ${ie(a+1)}.`,`${fr(1,a)} > ${fr(1,a+1)} > ${fr(1,a+2)}, so the denominator is ${a+1}.`)}},
- quick(lv){if(lv<3){const d=R(3,9),n=R(2,d-1);return {q:L(`${n}/${d}은 1/${d}이 ?개`,`${n}/${d} = ? × 1/${d}`),a:n,w:[n+1,n-1,d,n+2].filter((x,i,a)=>x>=1&&x!==n&&a.indexOf(x)===i).slice(0,3)}}
+ quick(lv){if(lv<3){const d=R(3,9),n=R(2,d-1);return {q:L(`${n}/${d}${josa(n,'은','는')} 1/${d}이 ?개`,`${n}/${d} = ? × 1/${d}`),a:n,w:[n+1,n-1,d,n+2].filter((x,i,a)=>x>=1&&x!==n&&a.indexOf(x)===i).slice(0,3)}}
   const ds=sample(range(2,9),4),m=Math.min(...ds);return {q:L('가장 큰 분수는?','Biggest?'),a:`1/${m}`,w:ds.filter(d=>d!==m).map(d=>`1/${d}`)}}
 });
 
@@ -3575,7 +3576,7 @@ S.push({id:'g3-11',icon:'🔟',strand:'num',
   if(t==='bar'){const n=R(1,9);return {q:L('색칠한 부분을 소수로 나타내세요.','Write the coloured part as a decimal.'),vis:V.fracBar(n,10),a:A.n(n/10),hint:L('한 칸은 0.1이에요. 색칠한 칸을 세어 보세요.','Each part is 0.1. Count the coloured parts.'),exp:L(`0.1이 ${n}개이니 ${ie(N(n/10))}.`,`${n} tenths make ${N(n/10)}.`)}}
   if(t==='count'){const n=lv===1?R(2,9):R(11,39);return {q:L(`0.1이 ${n}개인 수는 얼마일까요?`,`What number is ${n} tenths?`),a:A.n(n/10),hint:L('0.1이 10개이면 1이에요.','10 tenths make 1.'),exp:L(`0.1이 ${n}개이면 ${ie(N(n/10))}.`,`${n} tenths make ${N(n/10)}.`)}}
   if(t==='read'){const w=R(0,9),d=R(1,9);if(w===d)return again('g3-11',lv);
-   return {q:L('이 소수를 어떻게 읽을까요?','How do you read this decimal?'),vis:bigTxt(`${w}.${d}`),a:A.c(decRead(w,d),[decRead(d,w),L(`${KD[w]}${KD[d]}`,`${ED[w]} ${ED[d]}`),decRead(w,d===9?8:d+1)]),hint:L('소수점은 ‘점’이라고 읽고, 소수점 뒤의 숫자는 하나씩 읽어요.','Say the point as "point", then say the digit after it.'),exp:L(`${w}.${d}${josa(d,'은','는')} ${decRead(w,d)}이라고 읽어요.`,`${w}.${d} is read "${decRead(w,d)}".`),say:L('이 소수를 어떻게 읽을까요?','How do you read this decimal?')}}
+   return {q:L('이 소수를 어떻게 읽을까요?','How do you read this decimal?'),vis:bigTxt(`${w}.${d}`),a:A.c(decRead(w,d),[decRead(d,w),L(`${KD[w]}${KD[d]}`,`${ED[w]} ${ED[d]}`),decRead(w,d===9?8:d+1)]),hint:L('소수점은 ‘점’이라고 읽고, 소수점 뒤의 숫자는 하나씩 읽어요.','Say the point as "point", then say the digit after it.'),exp:L(`${w}.${d}${josa(d,'은','는')} ${decRead(w,d)}${josa(d,'이라고','라고')} 읽어요.`,`${w}.${d} is read "${decRead(w,d)}".`),say:L('이 소수를 어떻게 읽을까요?','How do you read this decimal?')}}
   if(t==='fr10'){const n=R(1,9),toDec=Math.random()<.5;
    return toDec?{q:L(`${fr(n,10)}${josa(n,'을','를')} 소수로 나타내세요.`,`Write ${fr(n,10)} as a decimal.`),a:A.n(n/10),hint:L('1/10 = 0.1이에요.','1/10 = 0.1.'),exp:L(`${fr(n,10)}${josa(n,'은','는')} 1/10이 ${n}개, 곧 0.1이 ${n}개이니 ${ie(N(n/10))}.`,`${fr(n,10)} is ${n} tenths, which is ${N(n/10)}.`)}
     :{q:L(`${N(n/10)}${josa(n,'을','를')} 분수로 나타내세요.`,`Write ${N(n/10)} as a fraction.`),a:A.f(n,10),hint:L('0.1 = 1/10이에요.','0.1 = 1/10.'),exp:L(`${N(n/10)}${josa(n,'은','는')} 0.1이 ${n}개이니 ${fie(n,10)}.`,`${N(n/10)} is ${n} tenths: ${fr(n,10)}.`)}}
@@ -3646,7 +3647,7 @@ S.push({id:'g3-12',icon:'✖️',strand:'num',
 });
 
 // ---------------------------------------------------------------- g3-13 division with remainders
-const RS=(n,d,q,r)=>L(`${n} ÷ ${d} = ${q} … ${r}`,`${n} ÷ ${d} = ${q} R ${r}`),RSay=(n,d,q,r)=>L(`${n} 나누기 ${d}는 몫 ${q}, 나머지 ${r}`,`${n} divided by ${d} is ${q} remainder ${r}`);
+const RS=(n,d,q,r)=>L(`${n} ÷ ${d} = ${q} … ${r}`,`${n} ÷ ${d} = ${q} R ${r}`),RSay=(n,d,q,r)=>L(`${n} 나누기 ${d}${josa(d,'은','는')} 몫 ${q}, 나머지 ${r}`,`${n} divided by ${d} is ${q} remainder ${r}`);
 const QR=()=>[L('몫','quotient'),L('나머지','remainder')];
 S.push({id:'g3-13',icon:'➗',strand:'num',
  name:L('나머지가 있는 나눗셈','Division with remainders'),
@@ -3671,7 +3672,7 @@ S.push({id:'g3-13',icon:'➗',strand:'num',
   if(t==='two'){const d=R(2,9),q=R(10,Math.floor(99/d)>10?Math.floor((99-(d-1))/d):10),r=R(0,d-1),n=d*q+r;
    return {q:`${n} ÷ ${d}`+L('의 몫과 나머지는?',': quotient and remainder?'),say:L(`${n} 나누기 ${d}의 몫과 나머지는?`,`${n} divided by ${d}: quotient and remainder?`),a:A.m([q,r],QR()),hint:L('십의 자리부터 나누고, 남은 수를 일의 자리와 함께 나누어요.','Divide the tens first, then divide what is left together with the ones.'),exp:ex(n,d,q,r)}}
   if(t==='check'){const d=R(3,9),q=R(4,Math.floor(95/d)),r=R(1,d-1),n=d*q+r;
-   return {q:L(`${RS(n,d,q,r)}${josa(r,'이','가')} 맞는지 확인하려고 해요. ${d} × ${q} + ${r} = □`,`Check ${RS(n,d,q,r)}: ${d} × ${q} + ${r} = □`),say:L(`${RSay(n,d,q,r)}. 확인하는 식 ${d} 곱하기 ${q} 더하기 ${r}는?`,`Check ${RSay(n,d,q,r)}: ${d} times ${q} plus ${r} is?`),a:A.n(n),hint:L('곱셈을 먼저 하고 나머지를 더해요.','Multiply first, then add the remainder.'),exp:L(`${d} × ${q} = ${d*q}, ${d*q} + ${r} = ${ie(n)}. 나누어지는 수와 같으니 맞아요.`,`${d} × ${q} = ${d*q}, and ${d*q} + ${r} = ${n}, the number we divided. It checks out.`)}}
+   return {q:L(`${RS(n,d,q,r)}${josa(r,'이','가')} 맞는지 확인하려고 해요. ${d} × ${q} + ${r} = □`,`Check ${RS(n,d,q,r)}: ${d} × ${q} + ${r} = □`),say:L(`${RSay(n,d,q,r)}. 확인하는 식 ${d} 곱하기 ${q} 더하기 ${r}${josa(r,'은','는')}?`,`Check ${RSay(n,d,q,r)}: ${d} times ${q} plus ${r} is?`),a:A.n(n),hint:L('곱셈을 먼저 하고 나머지를 더해요.','Multiply first, then add the remainder.'),exp:L(`${d} × ${q} = ${d*q}, ${d*q} + ${r} = ${ie(n)}. 나누어지는 수와 같으니 맞아요.`,`${d} × ${q} = ${d*q}, and ${d*q} + ${r} = ${n}, the number we divided. It checks out.`)}}
   if(t==='even'){const d=R(2,9),q=R(11,Math.floor(99/d)),n=d*q;
    return {q:`${n} ÷ ${d} = ?`,a:A.n(q),hint:L('십의 자리부터 나누어 보세요.','Divide the tens first, then the ones.'),exp:L(`${d} × ${q} = ${n}이므로 ${n} ÷ ${d} = ${ie(q)}. 나머지는 0이에요.`,`${d} × ${q} = ${n}, so ${n} ÷ ${d} = ${q} with no remainder.`)}}
   if(t==='boats'){const d=R(4,9),q=R(3,9),r=R(1,d-1),n=d*q+r;
@@ -3680,7 +3681,7 @@ S.push({id:'g3-13',icon:'➗',strand:'num',
   if(t==='full'){const d=R(4,9),q=R(3,9),r=R(1,d-1),n=d*q+r,f=fishP();
    return {q:L(`${f.k} ${n}마리를 수조 한 개에 ${d}마리씩 넣으려고 해요. 가득 찬 수조는 몇 개이고, 남는 ${f.k}${josa(f.k,'은','는')} 몇 마리일까요?`,`${n} ${f.e} go into tanks, ${d} in each tank. How many tanks are full, and how many ${f.e} are left over?`),a:A.m([q,r],[L('가득 찬 수조','full tanks'),L('남는 수','left over')]),hint:HQ,exp:L(`${n} ÷ ${d} = ${q} … ${r}, 수조 ${q}개가 가득 차고 ${r}마리가 남아요.`,`${n} ÷ ${d} = ${q} R ${r}: ${q} full tanks and ${r} left over.`)}}
   if(t==='miss'){const d=R(3,9),q=R(3,9),r=R(1,d-1),n=d*q+r;
-   return {q:L(`□ ÷ ${d} = ${q} … ${r}일 때, □는 얼마일까요?`,`□ ÷ ${d} = ${q} R ${r}. What is □?`),say:L(`네모 나누기 ${d}는 몫 ${q}, 나머지 ${r}일 때 네모는?`,`Box divided by ${d} is ${q} remainder ${r}. What is the box?`),a:A.n(n),hint:L('나누는 수 × 몫 + 나머지를 계산해요.','Work out divisor × quotient + remainder.'),exp:L(`□ = ${d} × ${q} + ${r} = ${d*q} + ${r} = ${ie(n)}.`,`□ = ${d} × ${q} + ${r} = ${d*q} + ${r} = ${n}.`)}}
+   return {q:L(`□ ÷ ${d} = ${q} … ${r}일 때, □는 얼마일까요?`,`□ ÷ ${d} = ${q} R ${r}. What is □?`),say:L(`네모 나누기 ${d}${josa(d,'은','는')} 몫 ${q}, 나머지 ${r}일 때 네모는?`,`Box divided by ${d} is ${q} remainder ${r}. What is the box?`),a:A.n(n),hint:L('나누는 수 × 몫 + 나머지를 계산해요.','Work out divisor × quotient + remainder.'),exp:L(`□ = ${d} × ${q} + ${r} = ${d*q} + ${r} = ${ie(n)}.`,`□ = ${d} × ${q} + ${r} = ${d*q} + ${r} = ${n}.`)}}
   // which division is correct?
   const d=R(3,9),q=R(3,9),r=R(1,d-2>0?d-2:1),n=d*q+r;
   return {q:L('바르게 계산한 나눗셈을 고르세요.','Choose the division that is correct.'),a:A.c(RS(n,d,q,r),[RS(n,d,q-1,r+d),RS(n,d,q+1,r),RS(n,d,q,r+1)]),hint:L('나머지가 나누는 수보다 작은지, 나누는 수 × 몫 + 나머지가 맞는지 확인해 보세요.','Check that the remainder is smaller than the divisor and that divisor × quotient + remainder works.'),
@@ -3785,7 +3786,7 @@ S.push({id:'g3-15',icon:'🍕',strand:'num',
    return {q:L(`${mixed(w,n,d)}${josa(n,'은','는')} ${fr(1,d)}이 몇 개일까요?`,`How many pieces of ${fr(1,d)} make ${mixed(w,n,d)}?`),a:A.n(num,U('개','')),hint:L(`1은 ${fr(1,d)}이 ${d}개예요.`,`1 whole is ${d} pieces of ${fr(1,d)}.`),exp:L(`${w} × ${d} + ${n} = ${num}, ${fr(1,d)}이 ${num}개예요.`,`${w} × ${d} + ${n} = ${num} pieces.`)}}
   // missing numerator
   const d=R(2,9),w=R(1,4),n=R(1,d-1),num=w*d+n;
-  return {q:L(`□ 안에 알맞은 수는? □/${d} = ${mixed(w,n,d)}`,`What number goes in □? □/${d} = ${mixed(w,n,d)}`),say:L(`${d}분의 네모는 ${mixedSay(w,n,d)}와 같아요. 네모는?`,`Box ${plur(d)} equals ${mixedSay(w,n,d)}. What is the box?`),a:A.n(num),hint:L(`자연수 ${w}${josa(w,'을','를')} ${d}분의 몇으로 바꾸어 보세요.`,`Change the whole number ${w} into ${plur(d)}.`),exp:L(`${w} × ${d} + ${n} = ${num}이니 □ = ${ie(num)}.`,`${w} × ${d} + ${n} = ${num}, so □ = ${num}.`)}},
+  return {q:L(`□ 안에 알맞은 수는? □/${d} = ${mixed(w,n,d)}`,`What number goes in □? □/${d} = ${mixed(w,n,d)}`),say:L(`${d}분의 네모는 ${mixedSay(w,n,d)}${josa(n,'과','와')} 같아요. 네모는?`,`Box ${plur(d)} equals ${mixedSay(w,n,d)}. What is the box?`),a:A.n(num),hint:L(`자연수 ${w}${josa(w,'을','를')} ${d}분의 몇으로 바꾸어 보세요.`,`Change the whole number ${w} into ${plur(d)}.`),exp:L(`${w} × ${d} + ${n} = ${num}이니 □ = ${ie(num)}.`,`${w} × ${d} + ${n} = ${num}, so □ = ${num}.`)}},
  quick(lv){if(lv===1){const d=R(2,6),k=R(2,5);return {q:L(`${d*k}의 1/${d}`,`1/${d} of ${d*k}`),a:k,w:near(k,{n:3,min:1}).filter(x=>x!==d*k).slice(0,3)}}
   const d=R(2,5),w=R(1,3),n=R(1,d-1),num=w*d+n;
   if(lv===2)return {q:`${num}/${d} = ?`,a:`${w} ${n}/${d}`,w:[`${w+1} ${n}/${d}`,`${w} ${n}/${d+1}`,n+1<d?`${w} ${n+1}/${d}`:n>1?`${w} ${n-1}/${d}`:`${w+2} ${n}/${d}`]};
@@ -4257,7 +4258,7 @@ S.push({id:'g4-04',icon:'🔺',strand:'geo',
     :{q:L('삼각형의 한 변을 길게 늘였어요. ?의 각도는 몇 도일까요?','One side of the triangle is extended. What is the angle marked ??'),vis,a:A.n(180-a-b,{u:'°'}),hint:L('바깥쪽 각으로 안쪽 각을 먼저 구해요.','Use the outside angle to find the inside angle first.'),exp:L(`안쪽 각은 180° − ${180-b}° = ${b}°, ?는 180° − ${a}° − ${b}° = ${180-a-b}°예요.`,`The inside angle is 180° − ${180-b}° = ${b}°, so ? = 180° − ${a}° − ${b}° = ${180-a-b}°.`)}}
   if(t===1){const apex=pick([20,30,40,50,60,70,80,100,120]),base=(180-apex)/2,askBase=R(0,1);const pts=triPts(base,base);
    return {q:askBase?L(`이등변삼각형의 꼭대기 각이 ${apex}°예요. 밑의 한 각은 몇 도일까요?`,`An isosceles triangle has a top angle of ${apex}°. How big is one of the bottom angles?`):L(`이등변삼각형의 밑의 한 각이 ${base}°예요. 꼭대기 각은 몇 도일까요?`,`One bottom angle of an isosceles triangle is ${base}°. How big is the top angle?`),vis:V.poly(pts,{angles:askBase?['?','',deg(apex)]:[deg(base),'','?'],ticks:[0,1,1]}),a:A.n(askBase?base:apex,{u:'°'}),hint:L('이등변삼각형은 밑의 두 각의 크기가 같아요.','In an isosceles triangle the two bottom angles are equal.'),exp:askBase?L(`(180° − ${apex}°) ÷ 2 = ${base}°예요.`,`(180° − ${apex}°) ÷ 2 = ${base}°.`):L(`180° − ${base}° − ${base}° = ${apex}°예요.`,`180° − ${base}° − ${base}° = ${apex}°.`)}}
-  if(t===2){const a=R(12,24)*5,b=180-a;return {q:L(`연 모양 수조 뚜껑의 네 각 중 세 각이 ${a}°, ${b}°, ${a}°예요. 나머지 한 각은 몇 도일까요?`,`A kite-shaped tank lid has three angles of ${a}°, ${b}° and ${a}°. How big is the fourth angle?`),a:A.n(360-2*a-b,{u:'°'}),hint:L('사각형의 네 각의 합은 360°예요.','The four angles of a quadrilateral add up to 360°.'),exp:`360° − ${a}° − ${b}° − ${a}° = ${360-2*a-b}°`}}
+  if(t===2){const a=R(12,20)*5;let b;do{b=R(10,22)*5}while(b===180-a||360-2*a-b<=0||360-2*a-b>=180);return {q:L(`연 모양 수조 뚜껑의 네 각 중 세 각이 ${a}°, ${b}°, ${a}°예요. 나머지 한 각은 몇 도일까요?`,`A kite-shaped tank lid has three angles of ${a}°, ${b}° and ${a}°. How big is the fourth angle?`),a:A.n(360-2*a-b,{u:'°'}),hint:L('사각형의 네 각의 합은 360°예요.','The four angles of a quadrilateral add up to 360°.'),exp:`360° − ${a}° − ${b}° − ${a}° = ${360-2*a-b}°`}}
   const n=pick([5,6]);return {q:L(`${n===5?'오':'육'}각형을 대각선으로 나누면 삼각형 ${n-2}개가 생겨요. ${n===5?'오':'육'}각형의 모든 각의 크기의 합은 몇 도일까요?`,`A ${n===5?'pentagon':'hexagon'} can be cut into ${n-2} triangles. What do all its angles add up to?`),vis:V.poly(`reg${n}`,{fill:'#e9fbef'})+'',a:A.n(180*(n-2),{u:'°'}),hint:L('삼각형 하나의 각의 합은 180°예요.','Each triangle has 180°.'),exp:`180° × ${n-2} = ${180*(n-2)}°`}},
  quick(lv){let a,b;do{a=R(3,9)*10;b=R(3,9)*10}while(a+b>160);if(lv>1&&R(0,1)){const x=R(5,15)*10;return {q:`180° − ${x}°`,a:180-x,w:near(180-x,{step:10})}}return {q:`${a}°+${b}°+?=180°`,a:180-a-b,w:near(180-a-b,{step:10,min:10})}}
 });
@@ -4374,7 +4375,7 @@ S.push({id:'g4-07',icon:'🔄',strand:'geo',
   if(t===1){const k=pick(['fh','fv','r90','r180','r270']),opts=['fh','fv','r90','r180','r270'].filter(x=>x!==k);
    return {q:L('왼쪽 도형을 한 번 움직였더니 오른쪽 도형이 되었어요. 어떻게 움직였을까요?','One move turned the left shape into the right shape. Which move was it?'),vis:`<div class="vis-row">${shSvg(c,col,30)}${svg(50,94,tx(25,47,'→',{fs:28,c:'#d0582a'}))}${shSvg(app(c,k),col,30)}</div>`,a:A.c(mvName(k==='r270'?'c90':k),sample(opts,3).map(x=>mvName(x==='r270'?'c90':x))),hint:L('물고기 눈과 긴 부분이 어디로 갔는지 보세요.','Look where the fish eye and the long part went.'),exp:L(`${mvName(k==='r270'?'c90':k)}${J(mvName(k==='r270'?'c90':k),'을','를')} 하면 오른쪽 도형이 돼요.`,`A ${mvName(k==='r270'?'c90':k)} gives the shape on the right.`)}}
   if(t===2){const [n,k,b]=pick([[2,'r90','r180'],[3,'r90','r270'],[4,'r90','id'],[2,'fh','id'],[3,'fh','fh'],[2,'c90','r180'],[3,'c90','r90']]);
-   return {q:L(`도형을 ${mvName(k).replace('돌리기','돌리기').replace('뒤집기','뒤집기')}${J(mvName(k).replace('돌리기','돌리기').replace('뒤집기','뒤집기'),'을','를')} ${n}번 했어요. 알맞은 모양은?`,`The shape was given a ${mvName(k)} ${n} times. Which picture shows the result?`),vis:mainPic(c,col,mvSign(k)+' ×'+n),a:picChoice(c,col,b,ALL),hint:L('한 번씩 차례로 해 보거나, 모두 합쳐 몇 °인지 생각해요.','Do it step by step, or add up the turns.'),exp:k==='fh'?L(`두 번 뒤집으면 처음 모양으로 돌아와요. ${n}번이면 ${n%2?'한 번 뒤집은 모양':'처음 모양'}${J(n%2?'한 번 뒤집은 모양':'처음 모양','이에요','예요')}.`,`Two flips bring it back. After ${n} flips it looks ${n%2?'flipped once':'like the start'}.`):L(`90° × ${n} = ${90*n}°만큼 돌린 것과 같아요.`,`It is the same as one turn of 90° × ${n} = ${90*n}°.`)}}
+   return {q:L(`도형을 ${mvName(k).replace('돌리기','돌리기').replace('뒤집기','뒤집기')}${J(mvName(k).replace('돌리기','돌리기').replace('뒤집기','뒤집기'),'을','를')} ${n}번 했어요. 알맞은 모양은?`,`The shape was given a ${mvName(k)} ${n} times. Which picture shows the result?`),vis:mainPic(c,col,mvSign(k)+' ×'+n),a:picChoice(c,col,b,ALL),hint:L('한 번씩 차례로 해 보거나, 모두 합쳐 몇 °인지 생각해요.','Do it step by step, or add up the turns.'),exp:k==='fh'?L(`두 번 뒤집으면 처음 모양으로 돌아와요. ${n}번이면 ${n%2?'한 번 뒤집은 모양':'처음 모양'}${J(n%2?'한 번 뒤집은 모양':'처음 모양','이에요','예요')}.`,`Two flips bring it back. After ${n} flips it looks ${n%2?'flipped once':'like the start'}.`):L(`${k==='c90'?'시계 반대 방향':'시계 방향'}으로 90° × ${n} = ${90*n}°만큼 돌린 것과 같아요.`,`It is the same as one ${k==='c90'?'counterclockwise':'clockwise'} turn of 90° × ${n} = ${90*n}°.`)}}
   const [k,same,ws]=pick([['r90','c270',['c90','r180','fh']],['r180','c180',['c90','r90','fv']],['c90','r270',['r90','c180','fh']],['r270','c90',['r90','r180','fv']]]);
   return {q:L(`${mvName(k)}${J(mvName(k),'과','와')} 결과가 같은 것은?`,`Which move gives the same result as a ${mvName(k)}?`),vis:`<div class="vis-row">${shSvg(c,col,30)}${svg(70,94,tx(35,47,mvSign(k),{fs:18,c:'#d0582a'}))}${shSvg(app(c,mvBase(k)),col,30)}</div>`,a:A.c(mvName(same),ws.map(mvName)),hint:L('한 바퀴는 360°예요. 반대 방향으로 몇 ° 돌리면 같아질까요?','A full turn is 360°. How far the other way gives the same result?'),exp:L(`360° − ${({r90:90,r180:180,c90:90,r270:270})[k]}° = ${360-({r90:90,r180:180,c90:90,r270:270})[k]}°이므로 ${mvName(same)}${J(mvName(same),'과','와')} 같아요.`,`360° − ${({r90:90,r180:180,c90:90,r270:270})[k]}° = ${360-({r90:90,r180:180,c90:90,r270:270})[k]}°, so it matches a ${mvName(same)}.`)}}
 });
@@ -4451,8 +4452,8 @@ S.push({id:'g4-09',icon:'🧩',strand:'alg',
    const d=pick([15,25,50,125,250,500,1000,1500]),a=R(1,20)*25,up=R(0,1),seq=[0,1,2,3,4].map(k=>up?a+k*d:a+(4-k)*d),h=R(1,3);
    return {q:L('규칙을 찾아 ?에 알맞은 수를 구해 보세요.','Find the rule. What is the missing number?'),vis:V.pattern(seq.map((x,k)=>k===h?'?':N(x))),a:A.n(seq[h]),hint:L('?를 뺀 이웃한 수들의 차이를 보세요.','Look at the jumps between the numbers you can see.'),exp:L(`${d}씩 ${up?'커지':'작아지'}므로 ?는 ${N(seq[h])}${J(N(seq[h]),'이에요','예요')}.`,`It goes ${up?'up':'down'} by ${d}, so ? = ${N(seq[h])}.`)}}
   const t=R(0,3);
-  if(t===0){const a=R(2,15),d=R(2,12),n=pick([8,10,12,15,20]);return {q:L(`${a}, ${a+d}, ${a+2*d}, ${a+3*d}, …처럼 같은 규칙으로 수를 늘어놓을 때, ${n}째 수는 얼마일까요?`,`The pattern ${a}, ${a+d}, ${a+2*d}, ${a+3*d}, … continues. What is the ${n}th number?`),a:A.n(a+(n-1)*d),hint:L(`첫째 수에 ${d}${J(d,'을','를')} 몇 번 더해야 ${n}째 수가 될까요?`,`How many jumps of ${d} from the 1st to the ${n}th number?`),exp:L(`첫째 수 ${a}에 ${d}${J(d,'을','를')} ${n-1}번 더해요. ${a} + ${d} × ${n-1} = ${a+(n-1)*d}`,`From the 1st number, add ${d} a total of ${n-1} times: ${a} + ${d} × ${n-1} = ${a+(n-1)*d}.`)}}
-  if(t===1){const i=pick([0,2,3,5,7]),f=CALC[i],k=i===0?R(5,6):R(5,7),[l,r]=f(k);return {q:L(`계산식의 규칙을 찾아 ${k}째 계산식의 결과를 구해 보세요.`,`Find the pattern. What is the answer in line ${k}?`),vis:calcVis(f,3)+`<p style="text-align:center;font-weight:800">${l} = ?</p>`,a:A.n(r),hint:L('줄이 하나 늘 때 결과가 어떻게 변하는지 보세요.','How does the answer change each line?'),exp:L(`규칙에 따라 ${k}째 줄은 ${l} = ${N(r)}${J(N(r),'이에요','예요')}.`,`Line ${k} is ${l} = ${N(r)}.`)}}
+  if(t===0){const a=R(2,15),d=R(2,12),n=pick([8,10,12,15,20]);return {q:L(`${a}, ${a+d}, ${a+2*d}, ${a+3*d}, …처럼 같은 규칙으로 수를 늘어놓을 때, ${n}번째 수는 얼마일까요?`,`The pattern ${a}, ${a+d}, ${a+2*d}, ${a+3*d}, … continues. What is the ${n}th number?`),a:A.n(a+(n-1)*d),hint:L(`첫째 수에 ${d}${J(d,'을','를')} 몇 번 더해야 ${n}번째 수가 될까요?`,`How many jumps of ${d} from the 1st to the ${n}th number?`),exp:L(`첫째 수 ${a}에 ${d}${J(d,'을','를')} ${n-1}번 더해요. ${a} + ${d} × ${n-1} = ${a+(n-1)*d}`,`From the 1st number, add ${d} a total of ${n-1} times: ${a} + ${d} × ${n-1} = ${a+(n-1)*d}.`)}}
+  if(t===1){const i=pick([0,2,3,5,7]),f=CALC[i],k=i===0?R(5,6):R(5,7),[l,r]=f(k);return {q:L(`계산식의 규칙을 찾아 ${k}번째 계산식의 결과를 구해 보세요.`,`Find the pattern. What is the answer in line ${k}?`),vis:calcVis(f,3)+`<p style="text-align:center;font-weight:800">${l} = ?</p>`,a:A.n(r),hint:L('줄이 하나 늘 때 결과가 어떻게 변하는지 보세요.','How does the answer change each line?'),exp:L(`규칙에 따라 ${k}번째 줄은 ${l} = ${N(r)}${J(N(r),'이에요','예요')}.`,`Line ${k} is ${l} = ${N(r)}.`)}}
   if(t===2){const s=R(3,5),add=R(2,4),n=R(6,10),cnt=k=>s+(k-1)*add;return {q:L(`해초 화분을 놓는 규칙이에요. 1단계 ${cnt(1)}개, 2단계 ${cnt(2)}개, 3단계 ${cnt(3)}개… ${n}단계에는 화분이 몇 개일까요?`,`Seaweed pots are set out in steps: step 1 has ${cnt(1)}, step 2 has ${cnt(2)}, step 3 has ${cnt(3)}… How many pots in step ${n}?`),vis:V.pattern([cnt(1),cnt(2),cnt(3),'…','?']),a:A.n(cnt(n)),hint:L('한 단계마다 몇 개씩 늘어나는지 찾아요.','How many more pots each step?'),exp:L(`한 단계마다 ${add}개씩 늘어나요. ${cnt(1)} + ${add} × ${n-1} = ${cnt(n)}개`,`Each step adds ${add}: ${cnt(1)} + ${add} × ${n-1} = ${cnt(n)}.`)}}
   const kind=R(0,2),a=R(2,6),seq=kind===0?[0,1,2,3].map(k=>a+k*a):kind===1?[0,1,2,3].map(k=>a*2**k):[0,1,2,3].map(k=>a+k*(k+1)/2);
   const R0=L('앞의 수에 같은 수를 더해요.','Add the same number each time.'),R1=L('앞의 수에 2를 곱해요.','Multiply by 2 each time.'),R2=L('더하는 수가 1씩 커져요.','The jump grows by 1 each time.'),R3=L('앞의 수에서 같은 수를 빼요.','Subtract the same number each time.');
@@ -4594,7 +4595,7 @@ S.push({id:'g4-13',icon:'🔢',strand:'num',
    return {q:`${N(rnd(x*f))} ${small} = □ ${big}`,a:A.n(x,{u:big}),hint:L(`1000 ${small} = 1 ${big}${J(big,'이에요','예요')}.`,`1000 ${small} = 1 ${big}.`),exp:`${N(x*f)} ÷ 1000 = ${N(x)} → ${N(x*f)} ${small} = ${N(x)} ${big}`}}
   if(t===1){const x=R(1,9)/10+R(0,3);const s=N(x);return {q:L(`${s}${J(s,'과','와')} 크기가 같지 않은 것은?`,`Which is NOT equal to ${s}?`),a:A.c(N(x/10),[s+'0',s+'00',x<1?fr(Math.round(x*10),10):fr(Math.round(x*100),100)]),hint:L('소수 끝자리의 0은 값을 바꾸지 않아요.','Zeros at the end of a decimal do not change its value.'),exp:L(`${N(x/10)}${josa(N(x/10),'은','는')} ${s}의 1/10이에요.`,`${N(x/10)} is one tenth of ${s}, not equal to it.`)}}
   if(t===2){const x=R(101,999)/100,k=R(0,1);return k?{q:L(`어떤 수의 10배가 ${N(x)}${J(N(x),'이에요','예요')}. 어떤 수는?`,`10 times a number is ${N(x)}. What is the number?`),a:A.n(x/10),hint:L('10배 하기 전의 수를 구하려면 1/10을 해요.','Undo × 10 by dividing by 10.'),exp:`${N(x)} ÷ 10 = ${N(x/10)}`}:{q:L(`${N(x)}의 1/10은 얼마일까요?`,`What is one tenth of ${N(x)}?`),a:A.n(x/10),hint:L('소수점을 왼쪽으로 한 칸 옮겨요.','Move the decimal point one place to the left.'),exp:`${N(x)} ÷ 10 = ${N(x/10)}`}}
-  const v=R(105,980)/1000,[ko,en]=pick([['해마의 몸길이가 □ m예요. 몇 mm일까요?','A seahorse is □ m long. How many millimetres is that?'],['산호 조각의 길이가 □ m예요. 몇 mm일까요?','A piece of coral is □ m long. How many millimetres is that?']]);
+  const v=R(105,980)/1000,[ko,en]=pick([['뱀장어의 몸길이가 □ m예요. 몇 mm일까요?','An eel is □ m long. How many millimetres is that?'],['산호 조각의 길이가 □ m예요. 몇 mm일까요?','A piece of coral is □ m long. How many millimetres is that?']]);
   return {q:L(ko,en).replace('□',N(v)),a:A.n(Math.round(v*1000),{u:'mm'}),hint:L('1 m = 1000 mm예요.','1 m = 1000 mm.'),exp:`${N(v)} × 1000 = ${Math.round(v*1000)} mm`}},
  quick(lv){if(lv===1){const k=R(11,99);return {q:L(`0.01이 ${k}개`,`${k} × 0.01`),a:k/100,w:[k/10,k/1000,rnd(k/100+0.1)].map(x=>rnd(x))}}
   const x=R(11,99)/10,op=pick([10,100]);return R(0,1)?{q:`${x} × ${op}`,a:rnd(x*op),w:[rnd(x*op*10),rnd(x*op/10),rnd(x+op)].filter(v=>v!==rnd(x*op))}:{q:`${x} ÷ 10`,a:rnd(x/10),w:[rnd(x/100),rnd(x*10),rnd(x-1)]}}
@@ -4749,12 +4750,14 @@ S.push({id:'g4-17',icon:'📈',strand:'dat',
    return {q:L(`수조 물 온도를 2시간마다 재었어요. ${mid}의 온도는 약 몇 °C였을까요?`,`The water temperature was measured every 2 hours. About what was it at ${mid}?`),vis:V.lineG(v.map((x,i)=>({l:ls[i],v:x})),{min:Math.max(0,Math.min(...v)-4),max:Math.max(...v)+4,step:2,unit:'°C'}),a:A.c(m+' °C',[Math.min(a,b)-2,Math.max(a,b)+2,Math.max(a,b)+4].map(x=>x+' °C')),hint:L('두 점을 이은 선의 가운데쯤을 읽어요.','Read the middle of the line between the two points.'),exp:L(`${ls[k]}에 ${a} °C, ${ls[k+1]}에 ${b} °C이므로 ${mid}에는 그 가운데인 약 ${m} °C예요.`,`It was ${a} °C at ${ls[k]} and ${b} °C at ${ls[k+1]}, so about ${m} °C at ${mid}, halfway between.`)}}
   if(t===1){const st=R(20,30),inc=pick([2,3,4]),dd=[0,1,2,3].map(i=>({l:L(['1월','2월','3월','4월'][i],['Jan','Feb','Mar','Apr'][i]),v:st+i*inc}));return {q:L(`아기 거북이 매달 같은 만큼 자란다면 5월에는 몇 cm일까요?`,`A baby turtle grows the same amount every month. How long will it be in May?`),vis:V.lineG(dd,{min:st-4>0?st-4:0,max:st+4*inc+2,step:2,unit:'cm'}),a:A.n(st+4*inc,{u:'cm'}),hint:L('한 달에 몇 cm씩 자라는지 찾아요.','How much does it grow each month?'),exp:L(`한 달에 ${inc} cm씩 자라므로 ${st+3*inc} + ${inc} = ${st+4*inc} cm예요.`,`It grows ${inc} cm a month: ${st+3*inc} + ${inc} = ${st+4*inc} cm.`)}}
   if(t===2){const vals=d.map(x=>x.v),hi=Math.max(...vals);if(vals.filter(v=>v===hi).length>1)return this.gen(3);const bi=vals.indexOf(hi),wr=d.filter((x,i)=>i!==bi);
-   const right=L(`${d[bi].l}에 ${S_.what}${J(S_.what,'이','가')} 가장 컸어요.`,`${S_.what[0].toUpperCase()+S_.what.slice(1)} was highest ${S_.at(d[bi].l)}.`),ws=sample(wr,2).map(x=>L(`${x.l}에 ${S_.what}${J(S_.what,'이','가')} 가장 컸어요.`,`${S_.what[0].toUpperCase()+S_.what.slice(1)} was highest ${S_.at(x.l)}.`));const i0=R(0,d.length-2),c0=d[i0+1].v-d[i0].v;if(c0)ws.push(L(`${iv(i0)} 사이에 ${S_.what}${J(S_.what,'이','가')} ${c0>0?'줄었어요':'늘었어요'}.`,`From ${d[i0].l} to ${d[i0+1].l} ${S_.what} ${c0>0?'went down':'went up'}.`));
+   const right=L(`${S_.at(d[bi].l)}에 ${S_.what}${J(S_.what,'이','가')} 가장 컸어요.`,`${S_.what[0].toUpperCase()+S_.what.slice(1)} was highest ${S_.at(d[bi].l)}.`),ws=sample(wr,2).map(x=>L(`${S_.at(x.l)}에 ${S_.what}${J(S_.what,'이','가')} 가장 컸어요.`,`${S_.what[0].toUpperCase()+S_.what.slice(1)} was highest ${S_.at(x.l)}.`));const i0=R(0,d.length-2),c0=d[i0+1].v-d[i0].v;if(c0)ws.push(L(`${iv(i0)} 사이에 ${S_.what}${J(S_.what,'이','가')} ${c0>0?'줄었어요':'늘었어요'}.`,`From ${d[i0].l} to ${d[i0+1].l} ${S_.what} ${c0>0?'went down':'went up'}.`));
    return {q:L('그래프를 보고 바르게 말한 것은?','Which statement matches the graph?'),vis,a:A.c(right,ws),hint:L('문장을 하나씩 그래프와 비교해 보세요.','Check each sentence against the graph.'),exp:L(`가장 높은 점은 ${d[bi].l}이고, ${hi} ${u}${J(u,'이에요','예요')}.`,`The highest point is ${d[bi].l} (${hi} ${u}).`)}}
   const k=R(0,1),opts=[L('막대그래프','bar graph'),L('꺾은선그래프','line graph')];return {q:k?L('아기 상어의 키가 달마다 어떻게 변하는지 나타내기에 더 알맞은 그래프는?','Which graph is better for showing how a baby shark grows month by month?'):L('수족관별 물고기 수를 비교하기에 더 알맞은 그래프는?','Which graph is better for comparing the number of fish in different aquariums?'),a:A.c(opts[k],[opts[1-k]],{keep:true,order:opts}),hint:L('시간에 따른 변화인지, 여러 대상의 비교인지 생각해요.','Is it change over time, or comparing separate things?'),exp:k?L('시간에 따른 변화는 꺾은선그래프가 잘 보여 줘요.','A line graph shows change over time well.'):L('여러 대상의 크기를 비교할 때는 막대그래프가 좋아요.','A bar graph is good for comparing separate things.')}}
 });
 
 // ================================================================ g4-18 다각형
+// English article for a word: an octagon, a hexagon
+const an=w=>(/^[aeiou]/i.test(w)?'an ':'a ')+w,An=w=>{const t=an(w);return t[0].toUpperCase()+t.slice(1)};
 const PN={3:['삼각형','triangle'],4:['사각형','quadrilateral'],5:['오각형','pentagon'],6:['육각형','hexagon'],7:['칠각형','heptagon'],8:['팔각형','octagon'],9:['구각형','nonagon'],10:['십각형','decagon']};
 const pName=n=>L(PN[n][0],PN[n][1]),rName=n=>L('정'+PN[n][0],n===3?'equilateral triangle':n===4?'square':'regular '+PN[n][1]);
 // a convex polygon with n corners that is clearly not regular
@@ -4773,19 +4776,19 @@ S.push({id:'g4-18',icon:'⬡',strand:'geo',
   {t:L('서로 이웃하지 않은 두 꼭짓점을 이은 선분을 대각선이라고 해요. 오각형의 대각선은 5개예요.','A diagonal joins two corners that are not next to each other. A pentagon has 5 diagonals.'),vis:V.poly('reg5',{diag:true})}],
  gen(lv){
   if(lv===1){const t=R(0,2);
-   if(t===0){const n=R(5,8);return {q:L('이 다각형의 이름은 무엇일까요?','What is the name of this polygon?'),vis:V.poly(oddPoly(n)),a:A.c(pName(n),[3,4,5,6,7,8,9].filter(x=>x!==n&&Math.abs(x-n)<=2).slice(0,3).map(pName)),hint:L('변의 수를 세어 보세요.','Count the sides.'),exp:L(`변이 ${n}개이므로 ${PN[n][0]}${J(PN[n][0],'이에요','예요')}.`,`It has ${n} sides, so it is a ${PN[n][1]}.`)}}
-   if(t===1){const n=R(5,9),k=R(0,1);return {q:k?L('이 다각형의 꼭짓점은 몇 개일까요?','How many vertices does this polygon have?'):L('이 다각형의 변은 몇 개일까요?','How many sides does this polygon have?'),vis:V.poly(R(0,1)?oddPoly(n):`reg${n}`),a:A.n(n),hint:L('하나씩 표시하며 세어 보세요.','Count carefully, one at a time.'),exp:L(`${PN[n][0]}${J(PN[n][0],'은','는')} 변이 ${n}개, 꼭짓점이 ${n}개예요.`,`A ${PN[n][1]} has ${n} sides and ${n} vertices.`)}}
+   if(t===0){const n=R(5,8);return {q:L('이 다각형의 이름은 무엇일까요?','What is the name of this polygon?'),vis:V.poly(oddPoly(n)),a:A.c(pName(n),[3,4,5,6,7,8,9].filter(x=>x!==n&&Math.abs(x-n)<=2).slice(0,3).map(pName)),hint:L('변의 수를 세어 보세요.','Count the sides.'),exp:L(`변이 ${n}개이므로 ${PN[n][0]}${J(PN[n][0],'이에요','예요')}.`,`It has ${n} sides, so it is ${an(PN[n][1])}.`)}}
+   if(t===1){const n=R(5,9),k=R(0,1);return {q:k?L('이 다각형의 꼭짓점은 몇 개일까요?','How many vertices does this polygon have?'):L('이 다각형의 변은 몇 개일까요?','How many sides does this polygon have?'),vis:V.poly(R(0,1)?oddPoly(n):`reg${n}`),a:A.n(n),hint:L('하나씩 표시하며 세어 보세요.','Count carefully, one at a time.'),exp:L(`${PN[n][0]}${J(PN[n][0],'은','는')} 변이 ${n}개, 꼭짓점이 ${n}개예요.`,`${An(PN[n][1])} has ${n} sides and ${n} vertices.`)}}
    const k=pick(['reg','odd','rhom','rect']),n=R(5,8),ok=k==='reg';const vis=k==='reg'?V.poly(`reg${n}`):k==='odd'?V.poly(oddPoly(n)):k==='rhom'?V.poly(fit(angPts([60,120,60,120],[1,1]),130,118),{ticks:[1,1,1,1]}):V.poly('rect',{right:[0,1,2,3]});
    return {q:L('이 도형은 정다각형일까요?','Is this a regular polygon?'),vis,a:yesNo(ok),hint:L('변의 길이와 각의 크기가 모두 같은지 보세요.','Are all the sides equal and all the angles equal?'),exp:ok?L('변의 길이와 각의 크기가 모두 같으므로 정다각형이에요.','All sides and all angles are equal, so it is regular.'):k==='rhom'?L('네 변의 길이는 같지만 각의 크기가 달라서 정다각형이 아니에요.','The sides are equal but the angles are not, so it is not regular.'):k==='rect'?L('네 각은 같지만 변의 길이가 달라서 정다각형이 아니에요.','The angles are equal but the sides are not, so it is not regular.'):L('변의 길이가 모두 같지 않아서 정다각형이 아니에요.','Its sides are not all equal, so it is not regular.')}}
   if(lv===2){const t=R(0,2);
-   if(t===0){const n=R(4,7),dg=n*(n-3)/2;return {q:L(`${PN[n][0]}에 그을 수 있는 대각선은 모두 몇 개일까요?`,`How many diagonals does a ${PN[n][1]} have?`),vis:V.poly(`reg${n}`,{diag:true}),a:A.n(dg),hint:L('한 꼭짓점에서 그을 수 있는 대각선부터 세어 보세요.','Start by counting the diagonals from one corner.'),exp:L(`한 꼭짓점에서 ${n-3}개씩, ${n} × ${n-3} ÷ 2 = ${dg}개예요. (같은 대각선을 두 번 세지 않도록 2로 나눠요.)`,`${n-3} from each corner: ${n} × ${n-3} ÷ 2 = ${dg} (divide by 2 so each diagonal is counted once).`)}}
+   if(t===0){const n=R(4,7),dg=n*(n-3)/2;return {q:L(`${PN[n][0]}에 그을 수 있는 대각선은 모두 몇 개일까요?`,`How many diagonals does ${an(PN[n][1])} have?`),vis:V.poly(`reg${n}`,{diag:true}),a:A.n(dg),hint:L('한 꼭짓점에서 그을 수 있는 대각선부터 세어 보세요.','Start by counting the diagonals from one corner.'),exp:L(`한 꼭짓점에서 ${n-3}개씩, ${n} × ${n-3} ÷ 2 = ${dg}개예요. (같은 대각선을 두 번 세지 않도록 2로 나눠요.)`,`${n-3} from each corner: ${n} × ${n-3} ÷ 2 = ${dg} (divide by 2 so each diagonal is counted once).`)}}
    if(t===1){const n=R(3,8),s=R(3,15);return {q:L(`한 변이 ${s} cm인 ${rName(n)}의 둘레는 몇 cm일까요?`,`${n===3?'An':'A'} ${rName(n)} has sides of ${s} cm. What is its perimeter?`),vis:V.poly(n===3?'eq':n===4?'sq':`reg${n}`,{ticks:Array(n).fill(1),labels:[s+' cm']}),a:A.n(n*s,{u:'cm'}),hint:L('정다각형은 변의 길이가 모두 같아요.','All sides of a regular polygon are equal.'),exp:`${s} × ${n} = ${n*s} cm`}}
    const n=R(5,10);return {q:L(`변이 ${n}개이고, 변의 길이와 각의 크기가 모두 같은 도형의 이름은?`,`A shape has ${n} sides, all the same length, and all its angles are equal. What is it?`),a:A.c(rName(n),[n-1,n+1,n-2,n+2].filter(x=>x>=3&&x<=10).slice(0,3).map(rName)),hint:L('변의 수와 정다각형의 뜻을 함께 생각해요.','Think about the number of sides and what "regular" means.'),exp:L(`변이 ${n}개인 정다각형이므로 ${rName(n)}${J(rName(n),'이에요','예요')}.`,`A regular polygon with ${n} sides is a ${rName(n)}.`)}}
   const t=R(0,3);
   if(t===0){const n=R(5,8),s=R(4,16);return {q:L(`${rName(n)} 모양 수조의 둘레가 ${n*s} cm예요. 한 변은 몇 cm일까요?`,`A tank shaped like a ${rName(n)} has a perimeter of ${n*s} cm. How long is one side?`),a:A.n(s,{u:'cm'}),hint:L(`변이 ${n}개이고 길이가 모두 같아요.`,`It has ${n} equal sides.`),exp:`${n*s} ÷ ${n} = ${s} cm`}}
-  if(t===1){const n=R(7,10),k=R(0,1);return k?{q:L(`${PN[n][0]}의 한 꼭짓점에서 그을 수 있는 대각선은 몇 개일까요?`,`How many diagonals can be drawn from one corner of a ${PN[n][1]}?`),a:A.n(n-3),hint:L('자기 자신과 이웃한 두 꼭짓점에는 대각선을 그을 수 없어요.','You cannot draw one to the corner itself or to its two neighbours.'),exp:`${n} − 3 = ${n-3}`}:{q:L(`${PN[n][0]}의 대각선은 모두 몇 개일까요?`,`How many diagonals does a ${PN[n][1]} have in all?`),a:A.n(n*(n-3)/2),hint:L('한 꼭짓점에서 몇 개씩 그을 수 있는지 먼저 생각해요.','First think how many come from one corner.'),exp:L(`${n} × ${n-3} ÷ 2 = ${n*(n-3)/2}개예요.`,`${n} × ${n-3} ÷ 2 = ${n*(n-3)/2}.`)}}
+  if(t===1){const n=R(7,10),k=R(0,1);return k?{q:L(`${PN[n][0]}의 한 꼭짓점에서 그을 수 있는 대각선은 몇 개일까요?`,`How many diagonals can be drawn from one corner of ${an(PN[n][1])}?`),a:A.n(n-3),hint:L('자기 자신과 이웃한 두 꼭짓점에는 대각선을 그을 수 없어요.','You cannot draw one to the corner itself or to its two neighbours.'),exp:`${n} − 3 = ${n-3}`}:{q:L(`${PN[n][0]}의 대각선은 모두 몇 개일까요?`,`How many diagonals does ${an(PN[n][1])} have in all?`),a:A.n(n*(n-3)/2),hint:L('한 꼭짓점에서 몇 개씩 그을 수 있는지 먼저 생각해요.','First think how many come from one corner.'),exp:L(`${n} × ${n-3} ÷ 2 = ${n*(n-3)/2}개예요.`,`${n} × ${n-3} ÷ 2 = ${n*(n-3)/2}.`)}}
   if(t===2){const n=R(5,9),s=R(3,12);return {q:L(`한 변이 ${s} cm이고 둘레가 ${n*s} cm인 정다각형의 이름은?`,`A regular polygon has sides of ${s} cm and a perimeter of ${n*s} cm. What is it?`),a:A.c(rName(n),[n-1,n+1,n-2,n+2].filter(x=>x>=3&&x<=10).slice(0,3).map(rName)),hint:L('둘레를 한 변의 길이로 나누면 변의 수가 나와요.','Perimeter ÷ side length = number of sides.'),exp:L(`${n*s} ÷ ${s} = ${n}이므로 변이 ${n}개인 ${rName(n)}${J(rName(n),'이에요','예요')}.`,`${n*s} ÷ ${s} = ${n} sides: a ${rName(n)}.`)}}
-  const [n,dg]=pick([[5,5],[6,9],[7,14],[8,20]]);return {q:L(`대각선이 모두 ${dg}개인 다각형은 무엇일까요?`,`Which polygon has ${dg} diagonals?`),a:A.c(pName(n),[4,5,6,7,8,9].filter(x=>x!==n).slice(0,4).filter((x,i)=>i<3).map(pName)),hint:L('사각형 2개, 오각형 5개… 차례로 구해 보세요.','A quadrilateral has 2, a pentagon 5, … keep going.'),exp:L(`${n} × ${n-3} ÷ 2 = ${dg}이므로 ${PN[n][0]}${J(PN[n][0],'이에요','예요')}.`,`${n} × ${n-3} ÷ 2 = ${dg}, so it is a ${PN[n][1]}.`)}}
+  const [n,dg]=pick([[5,5],[6,9],[7,14],[8,20]]);return {q:L(`대각선이 모두 ${dg}개인 다각형은 무엇일까요?`,`Which polygon has ${dg} diagonals?`),a:A.c(pName(n),[4,5,6,7,8,9].filter(x=>x!==n).slice(0,4).filter((x,i)=>i<3).map(pName)),hint:L('사각형 2개, 오각형 5개… 차례로 구해 보세요.','A quadrilateral has 2, a pentagon 5, … keep going.'),exp:L(`${n} × ${n-3} ÷ 2 = ${dg}이므로 ${PN[n][0]}${J(PN[n][0],'이에요','예요')}.`,`${n} × ${n-3} ÷ 2 = ${dg}, so it is ${an(PN[n][1])}.`)}}
 });
 
 // ================================================================ g4-19 직사각형의 넓이
@@ -4835,21 +4838,21 @@ S.push({id:'g4-20',icon:'🧾',strand:'fin',
   {t:L(`어림하면 빠르게 확인할 수 있어요. ${money(k?2900:395)}${J(money(k?2900:395),'은','는')} 약 ${money(k?3000:400)}${J(money(k?3000:400),'으로','로')} 생각해요. 묶음으로 사는 것이 더 싼지도 비교해 봐요.`,`Estimate to check quickly: ${money(k?2900:395)} is about ${money(k?3000:400)}. Also compare: is a pack cheaper than buying one at a time?`),vis:''}]},
  gen(lv){const krw=MONEY.kind==='krw',it=ITEMS();
   if(lv===1){const t=R(0,2);
-   if(t===0){const [a,b]=sample(it.slice(1),2);return {q:L(`${a[0]}${J(a[0],'과','와')} ${b[0]}${J(b[0],'을','를')} 샀어요. 모두 얼마일까요?`,`You buy a ${a[0]} and ${b[0]}. How much is that in all?`),vis:priceTab([a,b]),a:A.money(a[1]+b[1]),hint:L('두 값을 더해요.','Add the two prices.'),exp:`${money(a[1])} + ${money(b[1])} = ${money(a[1]+b[1])}`}}
-   if(t===1){const a=pick(it.slice(1)),bill=BILL().find(x=>x>a[1]);return {q:L(`${a[0]}(${money(a[1])})를 사고 ${money(bill)}${J(money(bill),'을','를')} 냈어요. 거스름돈은 얼마일까요?`,`A ${a[0]} costs ${money(a[1])}. You pay with ${money(bill)}. How much change do you get?`),vis:V.coins([bill]),a:A.money(bill-a[1]),hint:L('낸 돈 − 물건값','money paid − price'),exp:`${money(bill)} − ${money(a[1])} = ${money(bill-a[1])}`}}
-   const a=pick(it),dd=krw?pick([100,500,1000]):pick([25,50,100]),have=a[1]-dd>=(krw?100:25)&&R(0,1)?a[1]-dd:a[1]+dd;return {q:L(`${money(have)}${J(money(have),'이','가')} 있어요. ${money(a[1])}짜리 ${a[0]}${J(a[0],'을','를')} 살 수 있을까요?`,`You have ${money(have)}. Can you buy a ${a[0]} for ${money(a[1])}?`),a:yesNo(have>=a[1]),hint:L('가진 돈과 물건값을 비교해요.','Compare your money with the price.'),exp:have>=a[1]?L(`${money(have)}${J(money(have),'이','가')} ${money(a[1])}보다 많으므로 살 수 있어요.`,`${money(have)} is more than ${money(a[1])}, so yes.`):L(`${money(have)}${J(money(have),'은','는')} ${money(a[1])}보다 적어서 살 수 없어요.`,`${money(have)} is less than ${money(a[1])}, so no.`)}}
+   if(t===0){const [a,b]=sample(it.slice(1),2);return {q:L(`${a[0]}${J(a[0],'과','와')} ${b[0]}${J(b[0],'을','를')} 샀어요. 모두 얼마일까요?`,`You buy ${an(a[0])} and ${an(b[0])}. How much is that in all?`),vis:priceTab([a,b]),a:A.money(a[1]+b[1]),hint:L('두 값을 더해요.','Add the two prices.'),exp:`${money(a[1])} + ${money(b[1])} = ${money(a[1]+b[1])}`}}
+   if(t===1){const a=pick(it.slice(1)),bill=BILL().find(x=>x>a[1]);return {q:L(`${a[0]}(${money(a[1])})${J(a[0],'을','를')} 사고 ${money(bill)}${J(money(bill),'을','를')} 냈어요. 거스름돈은 얼마일까요?`,`${An(a[0])} costs ${money(a[1])}. You pay with ${money(bill)}. How much change do you get?`),vis:V.coins([bill]),a:A.money(bill-a[1]),hint:L('낸 돈 − 물건값','money paid − price'),exp:`${money(bill)} − ${money(a[1])} = ${money(bill-a[1])}`}}
+   const a=pick(it),dd=krw?pick([100,500,1000]):pick([25,50,100]),have=a[1]-dd>=(krw?100:25)&&R(0,1)?a[1]-dd:a[1]+dd;return {q:L(`${money(have)}${J(money(have),'이','가')} 있어요. ${money(a[1])}짜리 ${a[0]}${J(a[0],'을','를')} 살 수 있을까요?`,`You have ${money(have)}. Can you buy ${an(a[0])} for ${money(a[1])}?`),a:yesNo(have>=a[1]),hint:L('가진 돈과 물건값을 비교해요.','Compare your money with the price.'),exp:have>=a[1]?L(`${money(have)}${J(money(have),'이','가')} ${money(a[1])}보다 많으므로 살 수 있어요.`,`${money(have)} is more than ${money(a[1])}, so yes.`):L(`${money(have)}${J(money(have),'은','는')} ${money(a[1])}보다 적어서 살 수 없어요.`,`${money(have)} is less than ${money(a[1])}, so no.`)}}
   if(lv===2){const t=R(0,2);
    if(t===0){const list=sample(it,3),tot=list.reduce((s,x)=>s+x[1],0);return {q:L('세 가지 물건을 모두 사면 얼마일까요?','How much do all three items cost together?'),vis:priceTab(list),a:A.money(tot),hint:L('두 개를 먼저 더하고, 나머지 하나를 더해요.','Add two prices, then add the third.'),exp:`${list.map(x=>money(x[1])).join(' + ')} = ${money(tot)}`}}
    if(t===1){const [a,b]=sample(it.slice(1),2),n=R(2,4),tot=a[1]*n+b[1];return {q:L(`${a[0]} ${n}개와 ${b[0]} 1개를 샀어요. 모두 얼마일까요?`,`You buy ${n} ${a[0]}s and one ${b[0]}. What is the total?`),vis:priceTab([a,b]),a:A.money(tot),hint:L('같은 물건 여러 개는 곱셈으로 구해요.','Use multiplication for the same item.'),exp:`${money(a[1])} × ${n} + ${money(b[1])} = ${money(a[1]*n)} + ${money(b[1])} = ${money(tot)}`}}
    let list,tot,est;do{list=sample(it,3);tot=list.reduce((s,x)=>s+x[1],0);est=list.reduce((s,x)=>s+roundM(x[1]),0)}while(list.some(x=>Math.abs(x[1]%(krw?1000:100)-(krw?500:50))<1));const st=krw?1000:100;
    return {q:L(`세 물건의 값을 ${krw?'천 원':'1달러'} 단위로 어림하면 모두 약 얼마일까요?`,`Round each price to the nearest ${krw?'1000 won':'dollar'}. About how much is the total?`),vis:priceTab(list),a:A.c(money(est),[est-st,est+st,est+2*st].filter(x=>x>0).map(money)),hint:L(`각 값을 가장 가까운 ${krw?'천 원':'달러'}${J(krw?'천 원':'달러','으로','로')} 바꾸어 더해요.`,`Round each price, then add.`),exp:L(`${list.map(x=>money(roundM(x[1]))).join(' + ')} = ${money(est)} 정도예요. (정확한 값: ${money(tot)})`,`${list.map(x=>money(roundM(x[1]))).join(' + ')} = about ${money(est)}. (Exact: ${money(tot)})`)}}
   const t=R(0,2);
-  if(t===0){const [a,b]=sample(it,2),tot=a[1]+b[1],bill=BILL().find(x=>x>tot);return {q:L(`${a[0]}${J(a[0],'과','와')} ${b[0]}${J(b[0],'을','를')} 사고 ${money(bill)}${J(money(bill),'을','를')} 냈어요. 거스름돈은 얼마일까요?`,`You buy a ${a[0]} and a ${b[0]} and pay with ${money(bill)}. How much change do you get?`),vis:priceTab([a,b]),a:A.money(bill-tot),hint:L('먼저 두 물건값을 더한 다음, 낸 돈에서 빼요.','First add the prices, then subtract from what you paid.'),exp:`${money(a[1])} + ${money(b[1])} = ${money(tot)}, ${money(bill)} − ${money(tot)} = ${money(bill-tot)}`}}
+  if(t===0){const [a,b]=sample(it,2),tot=a[1]+b[1],bill=BILL().find(x=>x>tot);return {q:L(`${a[0]}${J(a[0],'과','와')} ${b[0]}${J(b[0],'을','를')} 사고 ${money(bill)}${J(money(bill),'을','를')} 냈어요. 거스름돈은 얼마일까요?`,`You buy ${an(a[0])} and ${an(b[0])} and pay with ${money(bill)}. How much change do you get?`),vis:priceTab([a,b]),a:A.money(bill-tot),hint:L('먼저 두 물건값을 더한 다음, 낸 돈에서 빼요.','First add the prices, then subtract from what you paid.'),exp:`${money(a[1])} + ${money(b[1])} = ${money(tot)}, ${money(bill)} − ${money(tot)} = ${money(bill-tot)}`}}
   if(t===1){const one=krw?R(5,12)*100:R(10,30)*5,k=pick([3,4,5,6]),pack=one*k-(krw?R(2,8)*100:R(2,8)*5),save=one*k-pack,nm=pick([[L('조개 엽서','shell postcards'),'장'],[L('바다 스티커','sticker sheets'),'장'],[L('물고기 배지','fish badges'),'개']]);
    return R(0,1)?{q:L(`${nm[0]}${J(nm[0],'은','는')} 1${nm[1]}에 ${money(one)}, ${k}${nm[1]} 묶음은 ${money(pack)}${J(money(pack),'이에요','예요')}. ${k}${nm[1]}${J(nm[1],'을','를')} 묶음으로 사면 하나씩 살 때보다 얼마 아낄까요?`,`${nm[0][0].toUpperCase()+nm[0].slice(1)} cost ${money(one)} each, or ${money(pack)} for a pack of ${k}. How much do you save by buying the pack instead of ${k} single ones?`),a:A.money(save),hint:L(`먼저 하나씩 ${k}${nm[1]} 살 때의 값을 구해요.`,`First find the cost of ${k} single ones.`),exp:`${money(one)} × ${k} = ${money(one*k)}, ${money(one*k)} − ${money(pack)} = ${money(save)}`}
     :{q:L(`${nm[0]} ${k}${nm[1]}${J(nm[1],'을','를')} 사려고 해요. 1${nm[1]}에 ${money(one)}씩 사는 것과 ${k}${nm[1]} 묶음을 ${money(pack)}에 사는 것 중 어느 쪽이 더 쌀까요?`,`You want ${k} ${nm[0]}. Is it cheaper to buy them at ${money(one)} each, or a pack of ${k} for ${money(pack)}?`),a:A.c(L('묶음으로 사기','the pack'),[L('하나씩 사기','one at a time')],{keep:true,order:[L('하나씩 사기','one at a time'),L('묶음으로 사기','the pack')]}),hint:L('같은 개수일 때의 값을 비교해요.','Compare the cost of the same number.'),exp:L(`하나씩 사면 ${money(one*k)}, 묶음은 ${money(pack)}이므로 묶음이 ${money(save)} 더 싸요.`,`One at a time: ${money(one*k)}. The pack: ${money(pack)}. The pack is ${money(save)} cheaper.`)}}
   const have=krw?pick([10000,20000]):pick([1000,2000]),list=sample(it,2),spent=list[0][1]+list[1][1];if(spent>=have)return this.gen(3);const left=have-spent,c=pick(it.filter(x=>x!==list[0]&&x!==list[1]));
-  return {q:L(`${money(have)}${J(money(have),'을','를')} 가지고 ${list[0][0]}${J(list[0][0],'과','와')} ${list[1][0]}${J(list[1][0],'을','를')} 샀어요. 남은 돈으로 ${c[0]}(${money(c[1])})도 살 수 있을까요?`,`You have ${money(have)}. You buy a ${list[0][0]} and a ${list[1][0]}. Can you also buy a ${c[0]} (${money(c[1])}) with what is left?`),vis:priceTab(list),a:yesNo(left>=c[1]),hint:L('먼저 남은 돈을 구해요.','First find how much money is left.'),exp:L(`남은 돈은 ${money(have)} − ${money(spent)} = ${money(left)}이므로 ${left>=c[1]?'살 수 있어요':'살 수 없어요'}.`,`Money left: ${money(have)} − ${money(spent)} = ${money(left)}, so ${left>=c[1]?'yes':'no'}.`)}},
+  return {q:L(`${money(have)}${J(money(have),'을','를')} 가지고 ${list[0][0]}${J(list[0][0],'과','와')} ${list[1][0]}${J(list[1][0],'을','를')} 샀어요. 남은 돈으로 ${c[0]}(${money(c[1])})도 살 수 있을까요?`,`You have ${money(have)}. You buy ${an(list[0][0])} and ${an(list[1][0])}. Can you also buy ${an(c[0])} (${money(c[1])}) with what is left?`),vis:priceTab(list),a:yesNo(left>=c[1]),hint:L('먼저 남은 돈을 구해요.','First find how much money is left.'),exp:L(`남은 돈은 ${money(have)} − ${money(spent)} = ${money(left)}이므로 ${left>=c[1]?'살 수 있어요':'살 수 없어요'}.`,`Money left: ${money(have)} − ${money(spent)} = ${money(left)}, so ${left>=c[1]?'yes':'no'}.`)}},
  quick(lv){if(MONEY.kind==='krw'){const bill=pick([5000,10000]),p=R(11,bill/100-1)*100;return {q:`${bill} − ${p}`,a:bill-p,w:wrongN(bill-p,[bill-p+100,bill-p-100,bill-p+1000,bill-p-1000].filter(x=>x>0))}}
   const bill=pick([500,1000]),p=R(11,bill/5-1)*5,ch=bill-p,f=v=>'$'+(v/100).toFixed(2);return {q:`${f(bill).replace('.00','')} − ${f(p)}`,a:f(ch),w:wrongN(ch,[ch+100,ch-100,ch+10,ch-10,ch+5].filter(x=>x>0)).map(f)}}
 });
@@ -4912,7 +4915,7 @@ const T01=[[
 ],[
  ()=>{const a=R(2,9),b=R(2,9),c=R(2,9),p=a*(b+c),e=R(2,9),q=R(1,Math.min(9,p-1)),d=e*q;return {e:`${a} × (${b} + ${c}) − ${d} ÷ ${e}`,v:p-q,st:[`${b} + ${c} = ${b+c}`,`${a} × ${b+c} = ${p}`,`${d} ÷ ${e} = ${q}`,`${p} − ${q} = ${p-q}`]}},
  ()=>{const d=R(2,6),k=R(2,5),c=d*k,b=R(2,9),a=R(5,40),p=b*c,q=b*k,s=a+q,e=R(1,Math.min(40,s-1));return {e:`${a} + ${b} × ${c} ÷ ${d} − ${e}`,v:s-e,st:[`${b} × ${c} = ${p}`,`${p} ÷ ${d} = ${q}`,`${a} + ${q} = ${s}`,`${s} − ${e} = ${s-e}`]}},
- ()=>{const a=R(2,20),b=R(2,20),c=R(2,5),p=(a+b)*c,e=R(2,9),q=R(1,9),d=e*q;return {e:`(${a} + ${b}) × ${c} − ${d} ÷ ${e}`,v:p-q,st:[`${a} + ${b} = ${a+b}`,`${a+b} × ${c} = ${p}`,`${d} ÷ ${e} = ${q}`,`${p} − ${q} = ${p-q}`]}},
+ ()=>{const a=R(2,20),b=R(2,20),c=R(2,5),p=(a+b)*c,e=R(2,9),q=R(1,Math.min(9,p-1)),d=e*q;return {e:`(${a} + ${b}) × ${c} − ${d} ÷ ${e}`,v:p-q,st:[`${a} + ${b} = ${a+b}`,`${a+b} × ${c} = ${p}`,`${d} ÷ ${e} = ${q}`,`${p} − ${q} = ${p-q}`]}},
  ()=>{const m=R(2,6),q=R(2,9),c=R(1,15),b=c+m,a=m*q,d=R(2,6),e=R(1,30);return {e:`${a} ÷ (${b} − ${c}) × ${d} + ${e}`,v:q*d+e,st:[`${b} − ${c} = ${m}`,`${a} ÷ ${m} = ${q}`,`${q} × ${d} = ${q*d}`,`${q*d} + ${e} = ${q*d+e}`]}}
 ]];
 // stories: q, right expression e, wrong expressions w [[text,value]], value v
@@ -5045,7 +5048,7 @@ S.push({id:'g5-03',icon:'🤝',strand:'num',
   const a=R(4,9),b=a+R(1,6),SC=[[L(`유람선 두 척이 ${a}분, ${b}분마다 출발해요. 다시 함께 출발하는 때를 알고 싶어요.`,`Two boats leave every ${a} and ${b} minutes. When will they leave together again?`),lL],
    [L(`가로 ${a} cm, 세로 ${b} cm 카드를 늘어놓아 가장 작은 정사각형을 만들려고 해요.`,`You lay ${a} cm by ${b} cm cards side by side to make the smallest square.`),lL],
    [L(`해마 ${a*2}마리와 꽃게 ${b*2}마리를 가장 많은 수조에 남김없이 똑같이 나누려고 해요.`,`You share ${a*2} seahorses and ${b*2} crabs equally among the most tanks.`),gL],
-   [L(`길이가 ${a*6} cm, ${b*6} cm인 리본 두 개를 남김없이 같은 길이로 가장 길게 자르려고 해요.`,`You cut ribbons of ${a*6} cm and ${b*6} cm into equal pieces that are as long as possible.`),gL]],s=pick(SC);
+   [L(`길이가 ${a*6} cm, ${b*6} cm인 리본 두 개를 남김없이 같은 길이로 가장 길게 자르려고 해요.`,`You cut ribbons of ${a*6} cm and ${b*6} cm into equal pieces, as long as possible, with nothing left over.`),gL]],s=pick(SC);
   return {q:s[0]+L(' 무엇을 구해야 할까요?',' What do you need to find?'),a:KC(s[1],[gL,lL]),hint:L('똑같이 나누면 공약수, 다시 만나면 공배수예요.','Sharing equally → common factor. Meeting again → common multiple.'),exp:s[1]===gL?L('남김없이 똑같이 나누는 가장 큰 수는 최대공약수예요.','The biggest number that divides both exactly is the GCF.'):L('두 수의 배수가 처음 같아지는 때는 최소공배수예요.','The first time the multiples meet is the LCM.')}},
  quick(lv){const [a,b]=lv===1?pair03(30,120):pair03(40,60,2,8,5),g=gcd(a,b),l=lcm(a,b);
   if(lv===1||(lv===3&&Math.random()<.5))return {q:L(`최대공약수 ${a}, ${b}`,`GCF of ${a}, ${b}`),a:g,w:qW(g,[g*2,g===1?3:1,a],{min:1})};
@@ -5064,7 +5067,7 @@ const rWrong=(r,xs)=>{const x1=xs[0],y1=rv(r,x1);const c=r.t==='mul'?[{t:'add',k
  return c.filter(w=>w.k>0&&(w.t!=='lin'||w.c>0)&&!(w.t==='mul'&&w.k===1)&&!(w.t==='div'&&w.k===1)&&xs.some(x=>rv(w,x)!==rv(r,x))).map(rS)};
 const CTX04=[
  ()=>({x:L('문어의 수(□)','Octopuses (x)'),y:L('다리의 수(◇)','Legs (y)'),r:{t:'mul',k:8},s:L('문어 한 마리의 다리는 8개예요.','An octopus has 8 legs.'),x0:R(1,3)}),
- ()=>({x:L('불가사리의 수(□)','Starfish (x)'),y:L('팔의 수(◇)','Arms (y)'),r:{t:'mul',k:5},s:L('불가사리 한 마리의 팔은 5개예요.','A starfish has 5 arms.'),x0:R(1,3)}),
+ ()=>({x:L('불가사리의 수(□)','Starfish (x)'),y:L('팔의 수(◇)','Arms (y)'),r:{t:'mul',k:5},s:L('이 불가사리는 한 마리에 팔이 5개예요.','Each of these starfish has 5 arms.'),x0:R(1,3)}),
  ()=>({x:L('꽃게의 수(□)','Crabs (x)'),y:L('다리의 수(◇)','Legs (y)'),r:{t:'mul',k:10},s:L('꽃게 한 마리의 다리는 10개예요.','A crab has 10 legs.'),x0:R(1,3)}),
  ()=>{const k=R(2,9);return {x:L('수조의 수(□)','Tanks (x)'),y:L('물고기의 수(◇)','Fish (y)'),r:{t:'mul',k},s:L(`수조 하나에 물고기가 ${k}마리씩 있어요.`,`Each tank holds ${k} fish.`),x0:R(1,3)}},
  ()=>{const k=R(3,8);return {x:L('보트의 수(□)','Boats (x)'),y:L('탈 수 있는 사람 수(◇)','People (y)'),r:{t:'mul',k},s:L(`보트 한 척에 ${k}명씩 탈 수 있어요.`,`Each boat holds ${k} people.`),x0:R(1,3)}},
@@ -5222,14 +5225,14 @@ S.push({id:'g5-07',icon:'➖',strand:'num',
    if(t==='pp')return {q:L('계산해 보세요.','Work it out.')+`<br><b>${F1} − ${F2} = ?</b>`,vis:lv===1?V.fracBars([[n1,d1],[n2,d2]]):undefined,a:fA(dN,l),hint,exp:exP};
    if(t==='fill'){const box1=d1!==l,e=box1?`${frB('□',l)} − ${fr(b1,l)}`:`${fr(a1,l)} − ${frB('□',l)}`,dd=box1?d1:d2,nn=box1?n1:n2;
     return {q:L('통분하여 빼려고 해요. □에 알맞은 수는?','We subtract using a common denominator. What goes in □?')+`<br>${F1} − ${F2} = ${e}`,vis:V.fracBars([[n1,d1],[n2,d2]]),a:A.n(box1?a1:b1),hint,exp:L(`${fr(nn,dd)}의 분모와 분자에 ${l/dd}${josa(l/dd,'을','를')} 곱하면 ${fr(nn*l/dd,l)}`,`Multiply the top and bottom of ${fr(nn,dd)} by ${l/dd}: ${fr(nn*l/dd,l)}`)}}
-   if(t==='story1'){const s=pick([L(`물 ${F1} L 중에서 ${F2} L를 어항에 부었어요. 남은 물은 몇 L일까요?`,`You had ${F1} L of water and poured ${F2} L into a fish bowl. How much water is left?`),L(`먹이 ${F1} kg 중에서 ${F2} kg를 연어에게 주었어요. 남은 먹이는 몇 kg일까요?`,`There was ${F1} kg of food. The salmon got ${F2} kg. How much food is left?`)]);
+   if(t==='story1'){const s=pick([L(`물 ${F1} L 중에서 ${F2} L를 어항에 부었어요. 남은 물은 몇 L일까요?`,`You had ${F1} L of water and poured ${F2} L into a fish bowl. How much water is left?`),L(`먹이 ${F1} kg 중에서 ${F2} kg을 연어에게 주었어요. 남은 먹이는 몇 kg일까요?`,`There was ${F1} kg of food. The salmon got ${F2} kg. How much food is left?`)]);
     return {q:s,vis:V.fracBars([[n1,d1],[n2,d2]]),a:fA(dN,l),hint,exp:exP}}
    return {q:L(`${F1} − ${F2}의 값은 어느 것일까요?`,`What is ${F1} − ${F2}?`),a:fC([dN,l],[[Math.abs(n1-n2),Math.abs(d1-d2)],[a1+b1,l],[Math.abs(n1-n2),l],[dN+1,l],[dN,l*2]]),hint:L('분모끼리 빼면 안 돼요. 먼저 통분해요.','Never subtract the denominators. Use a common denominator first.'),exp:exP}}
   // mixed numbers
   const w1=brw?R(2,5):R(2,6),w2=R(1,w1-1),dif=(w1*l+a1)-(w2*l+b1),M1=mixed(w1,n1,d1),M2=mixed(w2,n2,d2);
   const exM=L('통분하면 ','With a common denominator: ')+(a1>=b1?`${mixed(w1,a1,l)} − ${mixed(w2,b1,l)} = ${mixed(w1-w2,a1-b1,l)}${tailM(w1-w2,a1-b1,l)}`:`${mixed(w1,a1,l)} − ${mixed(w2,b1,l)} = ${mixed(w1-1,a1+l,l)} − ${mixed(w2,b1,l)} = ${fq(w1-1-w2,a1+l-b1,l)}${w1-1-w2?tailM(w1-1-w2,a1+l-b1,l):tail(a1+l-b1,l)}`);
-  if(t==='story'){const big=R(3,5),sm=R(1,2),B1=mixed(big,n1,d1),B2=mixed(sm,n2,d2),dif2=(big*l+a1)-(sm*l+b1),exB=L('통분하면 ','With a common denominator: ')+(a1>=b1?`${mixed(big,a1,l)} − ${mixed(sm,b1,l)} = ${mixed(big-sm,a1-b1,l)}${tailM(big-sm,a1-b1,l)}`:`${mixed(big-1,a1+l,l)} − ${mixed(sm,b1,l)} = ${mixed(big-1-sm,a1+l-b1,l)}${tailM(big-1-sm,a1+l-b1,l)}`);
-   const s=pick([L(`엄마 벨루가의 몸길이는 ${B1} m, 아기 벨루가는 ${B2} m예요. 엄마가 몇 m 더 길까요?`,`The mother beluga is ${B1} m long and her baby is ${B2} m long. How much longer is the mother?`),L(`물탱크에 바닷물이 ${B1} L 있었어요. 수조를 채우는 데 ${B2} L를 썼어요. 남은 물은 몇 L일까요?`,`A water tank had ${B1} L of sea water. ${B2} L was used to fill a tank. How much is left?`),L(`먹이가 ${B1} kg 있었어요. 문어에게 ${B2} kg를 주었어요. 남은 먹이는 몇 kg일까요?`,`There was ${B1} kg of food. The octopus got ${B2} kg. How much food is left?`)]);
+  if(t==='story'){const big=R(3,5),sm=R(1,2),B1=mixed(big,n1,d1),B2=mixed(sm,n2,d2),dif2=(big*l+a1)-(sm*l+b1),exB=L('통분하면 ','With a common denominator: ')+(a1>=b1?`${mixed(big,a1,l)} − ${mixed(sm,b1,l)} = ${mixed(big-sm,a1-b1,l)}${tailM(big-sm,a1-b1,l)}`:`${mixed(big-1,a1+l,l)} − ${mixed(sm,b1,l)} = ${fq(big-1-sm,a1+l-b1,l)}${big-1-sm?tailM(big-1-sm,a1+l-b1,l):tail(a1+l-b1,l)}`);
+   const s=pick([L(`엄마 벨루가의 몸길이는 ${B1} m, 아기 벨루가는 ${B2} m예요. 엄마가 몇 m 더 길까요?`,`The mother beluga is ${B1} m long and her baby is ${B2} m long. How much longer is the mother?`),L(`물탱크에 바닷물이 ${B1} L 있었어요. 수조를 채우는 데 ${B2} L를 썼어요. 남은 물은 몇 L일까요?`,`A water tank had ${B1} L of sea water. ${B2} L was used to fill a tank. How much is left?`),L(`먹이가 ${B1} kg 있었어요. 문어에게 ${B2} kg을 주었어요. 남은 먹이는 몇 kg일까요?`,`There was ${B1} kg of food. The octopus got ${B2} kg. How much food is left?`)]);
    return {q:s,a:fA(dif2,l),hint:L('통분한 다음 자연수끼리, 분수끼리 빼요.','Use a common denominator, then subtract the wholes and the fractions.'),exp:exB}}
   return {q:L('계산해 보세요.','Work it out.')+`<br><b>${M1} − ${M2} = ?</b>`,a:fA(dif,l),hint:a1<b1?L('분수끼리 뺄 수 없으면 자연수에서 1을 받아내려요.','If you cannot subtract the fractions, regroup 1 whole.'):L('자연수끼리, 분수끼리 통분하여 빼요.','Subtract the wholes, then the fractions with a common denominator.'),exp:exM}},
  quick(lv){let d1,d2,n1,n2;do{[d1,d2]=dPair(lv===2?2:1);n1=lv===3?pf(d1):1;n2=lv===3?pf(d2):1}while(n1*d2===n2*d1);if(n1/d1<n2/d2)[n1,d1,n2,d2]=[n2,d2,n1,d1];
@@ -5547,7 +5550,8 @@ S.push({id:'g5-14',icon:'✖️',strand:'num',
   {t:L('10, 100, 1000을 곱하면 소수점이 오른쪽으로, 0.1, 0.01을 곱하면 왼쪽으로 옮겨져요.','Multiplying by 10, 100 or 1000 moves the point to the right; by 0.1 or 0.01, to the left.'),vis:lines(['2.35 × 100 = 235','35 × 0.01 = 0.35'])}],
  gen(lv){
   const t=lv===1?pick(['dw','dw','p10']):lv===2?pick(['dd','p01','point','wd']):pick(['story','story','miss','cmp']);
-  const ex=(ai,pa,bi,pb)=>L(`${N(ai)} × ${N(bi)} = ${N(ai*bi)}. 두 수의 소수점 아래 자리 수를 더하면 ${pa+pb}자리 → ${N(dv(ai*bi,pa+pb))}`,`${N(ai)} × ${N(bi)} = ${N(ai*bi)}. ${pa+pb} decimal place${pa+pb>1?'s':''} in all → ${N(dv(ai*bi,pa+pb))}`);
+  const dShow=(P,pp)=>{const s=(P/10**pp).toFixed(pp),n=N(dv(P,pp));return pp&&s!==n.replace(/,/g,'')?`${s} = ${n}`:n};   // 1.80 = 1.8 when the product ends in 0
+  const ex=(ai,pa,bi,pb)=>L(`${N(ai)} × ${N(bi)} = ${N(ai*bi)}. 두 수의 소수점 아래 자리 수를 더하면 ${pa+pb}자리 → ${dShow(ai*bi,pa+pb)}`,`${N(ai)} × ${N(bi)} = ${N(ai*bi)}. ${pa+pb} decimal place${pa+pb>1?'s':''} in all → ${dShow(ai*bi,pa+pb)}`);
   const hint=L('자연수처럼 곱한 다음 소수점 아래 자리 수를 세어 소수점을 찍어요.','Multiply as whole numbers, then count the decimal places.');
   if(t==='dw'){const ai=Math.random()<.5?R(2,9):dI(11,59),k=R(2,9),a=dv(ai,1);return {q:L('계산해 보세요.','Work it out.')+`<br><b>${N(a)} × ${k} = ?</b>`,vis:ai<10&&k<=4?V.fracBars(Array(k).fill([ai,10])):undefined,a:A.n(dv(ai*k,1)),hint,exp:ex(ai,1,k,0)}}
   if(t==='p10'){const pa=R(1,3),ai=dI(11,pa===1?999:9999),a=dv(ai,pa),z=R(1,3),m=10**z,v=rnd(a*m);
@@ -5557,7 +5561,7 @@ S.push({id:'g5-14',icon:'✖️',strand:'num',
   if(t==='p01'){const z=R(1,2),m=dv(1,z),pa=R(0,3-z),ai=pa?dI(11,999):R(2,999),a=dv(ai,pa),v=dv(ai,pa+z);
    return {q:L('계산해 보세요.','Work it out.')+`<br><b>${N(a)} × ${N(m)} = ?</b>`,a:A.n(v),hint:L(`${N(m)}${josa(N(m),'을','를')} 곱하면 소수점이 왼쪽으로 옮겨져요.`,`Multiplying by ${N(m)} moves the point to the left.`),exp:L(`${N(m)}${josa(N(m),'을','를')} 곱하면 소수점이 왼쪽으로 ${z}칸 옮겨져요. → ${N(v)}`,`Multiplying by ${N(m)} moves the point ${z} place${z>1?'s':''} left → ${N(v)}`)}}
   if(t==='point'){const ai=dI(12,98),bi=dI(12,98),P=ai*bi,[pa,pb]=pick([[1,1],[1,2],[2,1]]),a=dv(ai,pa),b=dv(bi,pb),pp=pa+pb;
-   return {q:L(`${ai} × ${bi} = ${P}${josa(P,'이에요','예요')}. ${N(a)} × ${N(b)}의 값은 어느 것일까요?`,`${ai} × ${bi} = ${P}. What is ${N(a)} × ${N(b)}?`),a:A.c(N(dv(P,pp)),[N(dv(P,pp-1)),N(dv(P,pp+1)),N(dv(P,pp===1?pp+2:pp-2))]),hint:L('두 수의 소수점 아래 자리 수를 더해 보세요.','Add up the decimal places in both numbers.'),exp:L(`소수점 아래 자리 수: ${pa} + ${pb} = ${pp}자리 → ${N(dv(P,pp))}`,`Decimal places: ${pa} + ${pb} = ${pp} → ${N(dv(P,pp))}`)}}
+   return {q:L(`${ai} × ${bi} = ${P}${josa(P,'이에요','예요')}. ${N(a)} × ${N(b)}의 값은 어느 것일까요?`,`${ai} × ${bi} = ${P}. What is ${N(a)} × ${N(b)}?`),a:A.c(N(dv(P,pp)),[N(dv(P,pp-1)),N(dv(P,pp+1)),N(dv(P,pp===1?pp+2:pp-2))]),hint:L('두 수의 소수점 아래 자리 수를 더해 보세요.','Add up the decimal places in both numbers.'),exp:L(`소수점 아래 자리 수: ${pa} + ${pb} = ${pp}자리 → ${dShow(P,pp)}`,`Decimal places: ${pa} + ${pb} = ${pp} → ${dShow(P,pp)}`)}}
   if(t==='wd'){const W=R(2,15),pb=R(1,2),bi=pb===1?dI(2,29):dI(11,99),b=dv(bi,pb);return {q:L('계산해 보세요.','Work it out.')+`<br><b>${W} × ${N(b)} = ?</b>`,a:A.n(dv(W*bi,pb)),hint,exp:ex(W,0,bi,pb)}}
   if(t==='story'){const k=R(0,3);
    if(k===0){const ai=dI(25,95),n=R(3,12);return {q:L(`고등어 한 마리의 무게는 ${N(dv(ai,2))} kg이에요. 고등어 ${n}마리의 무게는 몇 kg일까요?`,`One mackerel has a mass of ${N(dv(ai,2))} kg. What is the mass of ${n} mackerel?`),a:A.n(dv(ai*n,2),{u:'kg'}),hint,exp:ex(ai,2,n,0)+' kg'}}
@@ -5613,7 +5617,7 @@ S.push({id:'g5-15',icon:'📦',strand:'geo',
   if(t==='par'){const it=pick([[L('한 면과 평행한 면은','faces are parallel to one face'),1],[L('한 면과 수직인 면은','faces are perpendicular to one face'),4],[L('한 꼭짓점에서 만나는 면은','faces meet at one vertex'),3],[L('한 꼭짓점에서 만나는 모서리는','edges meet at one vertex'),3]]);
    return {q:L(`직육면체에서 ${it[0]} 몇 개일까요?`,`In a rectangular prism, how many ${it[0]}?`),vis:V.box(l,w,h),a:A.n(it[1]),hint:L('상자를 손에 들고 있다고 생각해 보세요.','Imagine holding the box in your hand.'),exp:L('마주 보는 면은 1개라서 평행한 면은 1개, 옆에서 만나는 면은 4개라서 수직인 면은 4개예요. 한 꼭짓점에서는 면 3개, 모서리 3개가 만나요.','Each face has 1 parallel (opposite) face and 4 perpendicular faces. At each vertex 3 faces and 3 edges meet.')}}
   if(t==='net'||t==='notnet'){const ok=t==='net',r=nets(ok,1)[0],w_=nets(!ok,3);
-   return {q:ok?L('접었을 때 정육면체가 되는 전개도는 어느 것일까요?','Which net folds into a cube?'):L('접었을 때 정육면체가 되지 <b>않는</b> 전개도는 어느 것일까요?','Which of these does <b>not</b> fold into a cube?'),a:A.c(netPic(r),w_.map(x=>netPic(x))),hint:L('머릿속으로 한 면씩 접어 보세요. 겹치는 면이 생기면 안 돼요.','Fold it one square at a time in your head. No two squares may land on the same face.'),exp:L('정육면체의 전개도는 접었을 때 6개의 면이 겹치지 않고 모두 따로 있어야 해요. 2 × 2로 모인 칸이 있거나, 한 면에 세 면이 붙어 겹치면 안 돼요.','A cube net must fold so all 6 squares land on different faces. A 2 × 2 block of squares never works.')}}
+   return {q:ok?L('접었을 때 정육면체가 되는 전개도는 어느 것일까요?','Which net folds into a cube?'):L('접었을 때 정육면체가 되지 <b>않는</b> 전개도는 어느 것일까요?','Which of these does <b>not</b> fold into a cube?'),a:A.c(netPic(r),w_.map(x=>netPic(x))),hint:L('머릿속으로 한 면씩 접어 보세요. 겹치는 면이 생기면 안 돼요.','Fold it one square at a time in your head. No two squares may land on the same face.'),exp:L('정육면체의 전개도는 접었을 때 6개의 면이 겹치지 않고 모두 따로 있어야 해요. 2 × 2로 모인 칸이 있으면 절대 안 돼요.','A cube net must fold so all 6 squares land on different faces. A 2 × 2 block of squares never works.')}}
   if(t==='opp'){const c=net(true),f=fold(c),i=R(0,5),j=f.indexOf(f[i]^1),lab=L(['가','나','다','라','마','바'],EN);
    return {q:L('전개도를 접어 정육면체를 만들었을 때, 색칠한 면과 마주 보는 면은 어느 것일까요?','When this net is folded into a cube, which face is opposite the coloured face?'),vis:netPic(c,{u:32,mark:i,lab}),a:A.c(lab[j],sample(lab.filter((_,k)=>k!==i&&k!==j),3)),hint:L('한 줄로 이어진 세 면에서 양 끝 면은 서로 마주 봐요. 마주 보는 면은 서로 만나지 않아요.','In a row of three squares, the two ends are opposite. Opposite faces never touch.'),exp:L(`색칠한 면 ${lab[i]}${josa(lab[i],'과','와')} 마주 보는 면은 ${lab[j]}예요.`,`Face ${lab[i]} is opposite face ${lab[j]}.`)}}
   // missing edge
@@ -5646,7 +5650,7 @@ S.push({id:'g5-16',icon:'⚖️',strand:'dat',
    return {q:L(`수조 ${n}개에 있는 물고기 수의 평균은 ${m}마리예요. ${LT.slice(0,n-1).join(', ')} 수조는 ${kn.join(', ')}마리예요. ${LT[n-1]} 수조에는 몇 마리 있을까요?`,`The mean number of fish in ${n} tanks is ${m}. Tanks ${LT.slice(0,n-1).join(', ')} have ${kn.join(', ')} fish. How many fish are in tank ${LT[n-1]}?`),a:A.n(x),hint:L('먼저 평균으로 전체 물고기 수를 구해요.','First use the mean to find the total.'),exp:`${m} × ${n} = ${m*n}, ${m*n} − (${kn.join(' + ')}) = ${x}`}}
   if(t==='cmpG'){const na=R(3,4),nb=R(4,5),ma=R(10,20),mb=Math.random()<.2?ma:ma+pick([-3,-2,-1,1,2,3]),va=meanSet(na,ma,4,1),vb=meanSet(nb,mb,4,1),GA=L('가 모둠','Team A'),GB=L('나 모둠','Team B'),EQ=L('같아요','The same');
    return {q:L(`잠수부 두 모둠이 주운 바다 쓰레기 수예요. 한 사람이 주운 쓰레기 수의 평균이 더 많은 모둠은?<br>가: ${va.join(', ')}<br>나: ${vb.join(', ')}`,`Two diver teams picked up sea litter. Which team has the greater mean per diver?<br>A: ${va.join(', ')}<br>B: ${vb.join(', ')}`),a:KC(ma>mb?GA:ma<mb?GB:EQ,[GA,GB,EQ]),hint:L('사람 수가 다르니까 합이 아니라 평균을 비교해요.','The teams have different sizes, so compare means, not totals.'),exp:L(`가: ${mExp(va)}, 나: ${mExp(vb)}`,`A: ${mExp(va)}; B: ${mExp(vb)}`)}}
-  if(t==='newV'){const n=R(3,5),m=R(10,25),m2=m+pick([-2,-1,1,2,3]),x=(n+1)*m2-n*m;
+  if(t==='newV'){const n=R(3,5),m=R(10,25);let m2,x;do{m2=m+pick([-2,-1,1,2,3]);x=(n+1)*m2-n*m}while(x<5);
    return {q:L(`가오리 ${n}마리의 무게 평균은 ${m} kg이에요. ${x} kg인 가오리 한 마리가 새로 오면, ${n+1}마리의 무게 평균은 몇 kg일까요?`,`The mean mass of ${n} stingrays is ${m} kg. A new stingray of ${x} kg arrives. What is the mean mass of the ${n+1} stingrays?`),a:A.n(m2,{u:'kg'}),hint:L('먼저 처음 무게의 합을 구해요.','First find the total mass before.'),exp:`${m} × ${n} = ${m*n}, ${m*n} + ${x} = ${m*n+x}, ${m*n+x} ÷ ${n+1} = ${m2} kg`}}
   const n=R(5,6),m=R(10,25),v=meanSet(n,m,6,1),c=v.filter(x=>x>m).length;
   return {q:L(`물개 ${n}마리가 하루에 먹은 생선 수예요. 평균보다 많이 먹은 물개는 몇 마리일까요?<br>${v.join(', ')}`,`Here is how many fish each of ${n} seals ate today. How many seals ate more than the mean?<br>${v.join(', ')}`),a:A.n(c),hint:L('먼저 평균을 구한 다음 비교해요.','Find the mean first, then compare.'),exp:L(`평균: ${mExp(v)}. ${m}보다 큰 수: ${v.filter(x=>x>m).join(', ')} → ${c}마리`,`Mean: ${mExp(v)}. More than ${m}: ${v.filter(x=>x>m).join(', ')} → ${c}`)}},
@@ -6027,7 +6031,7 @@ S.push({id:'g6-03',icon:'➗',strand:'num',
   if(t==='round'){let a,b;do{b=pick([3,6,7,9]);a=R(b+1,60)}while(a%b===0||((a*10)%b===0));const r=Math.round(a/b*10)/10,tr=Math.floor(a/b*100)/100;
    return {q:L(`${a} ÷ ${b}의 몫을 반올림하여 소수 첫째 자리까지 나타내세요.`,`Find ${a} ÷ ${b} and round the quotient to the nearest tenth.`),a:A.n(r),
     hint:L('소수 둘째 자리까지 구한 다음 반올림해요.','Divide to the hundredths place, then round.'),
-    exp:L(`${a} ÷ ${b} = ${tr.toFixed(2)}…이고, 소수 둘째 자리 숫자를 반올림하면 ${N(r)}${ie(N(r))}.`,`${a} ÷ ${b} = ${tr.toFixed(2)}…; rounding at the hundredths digit gives ${N(r)}.`)}}
+    exp:L(`${a} ÷ ${b} = ${tr.toFixed(2)}…이고, 소수 둘째 자리에서 반올림하면 ${N(r)}${ie(N(r))}.`,`${a} ÷ ${b} = ${tr.toFixed(2)}…; rounding at the hundredths digit gives ${N(r)}.`)}}
   let n,q;do{n=R(3,9);q=R(t==='avg'?80:15,320)}while(q%10===0);const D=rnd(q*n/100),qq=q/100;
   if(t==='box')return {q:L(`□ × ${n} = ${N(D)}일 때, □에 알맞은 수는 무엇일까요?`,`□ × ${n} = ${N(D)}. What is □?`),a:A.n(qq),
    hint:L(`□ = ${N(D)} ÷ ${n}${ie(n)}.`,`□ = ${N(D)} ÷ ${n}.`),exp:`□ = ${N(D)} ÷ ${n} = ${N(qq)}`};
@@ -6089,12 +6093,12 @@ S.push({id:'g6-04',icon:'🍹',strand:'alg',
     hint:L('두 수에 같은 수를 곱한 비를 찾아요.','Look for both terms multiplied by the same number.'),exp:L(`${a} × ${k} = ${a*k}, ${b} × ${k} = ${b*k}이므로 ${a*k} : ${b*k}${ie(b*k)}.`,`${a} × ${k} = ${a*k} and ${b} × ${k} = ${b*k}, so ${a*k} : ${b*k}.`)}}
   if(t==='ring'){let x1,y1,x2,y2;do{y1=pick([10,20,25,50]);y2=pick([10,20,25,50]);x1=R(Math.ceil(y1*.3),y1-1);x2=R(Math.ceil(y2*.3),y2-1)}while(y1===y2||Math.abs(x1/y1-x2/y2)<.04);
    const win=x1/y1>x2/y2?0:1,nm=[L('바다사자 가','Sea lion A'),L('바다사자 나','Sea lion B')];
-   return {q:L(`고리 던지기에서 바다사자 가는 ${y1}번 중 ${x1}번, 바다사자 나는 ${y2}번 중 ${x2}번 고리를 받았어요. 받은 비율이 더 높은 쪽은?`,`In a ring toss, sea lion A caught ${x1} of ${y1} rings and sea lion B caught ${x2} of ${y2}. Whose catch rate is higher?`),a:A.c(nm[win],[nm[1-win]],{keep:true}),
+   return {q:L(`고리 던지기에서 바다사자 가는 ${y1}번 중 ${x1}번, 바다사자 나는 ${y2}번 중 ${x2}번 고리를 받았어요. 받은 비율이 더 높은 쪽은?`,`In a ring toss, sea lion A caught ${x1} of ${y1} rings and sea lion B caught ${x2} of ${y2}. Whose catch rate is higher?`),a:A.c(nm[win],[nm[1-win]],{keep:true,order:nm}),
     hint:L('비율을 소수로 바꾸어 비교해 보세요.','Change each rate into a decimal and compare.'),
     exp:L(`가: ${x1} ÷ ${y1} = ${N(x1/y1)}, 나: ${x2} ÷ ${y2} = ${N(x2/y2)}이므로 ${win?'나':'가'}의 비율이 더 높아요.`,`A: ${x1} ÷ ${y1} = ${N(x1/y1)}, B: ${x2} ÷ ${y2} = ${N(x2/y2)}. ${win?'B':'A'} is higher.`)}}
   if(t==='crowd'){let w1,f1,w2,f2;do{w1=pick([20,40,50,80,100]);w2=pick([20,40,50,80,100]);f1=R(4,20);f2=R(4,20)}while(w1===w2||Math.abs(f1/w1-f2/w2)<.02||f1===f2);
    const win=f1/w1>f2/w2?0:1,nm=[L('가 수조','tank A'),L('나 수조','tank B')];
-   return {q:L(`가 수조는 물 ${w1} L에 물고기 ${f1}마리, 나 수조는 물 ${w2} L에 물고기 ${f2}마리가 살아요. 물 1 L당 물고기가 더 많은 수조는?`,`Tank A has ${f1} fish in ${w1} L of water. Tank B has ${f2} fish in ${w2} L. Which tank has more fish per litre?`),a:A.c(nm[win],[nm[1-win]],{keep:true}),
+   return {q:L(`가 수조는 물 ${w1} L에 물고기 ${f1}마리, 나 수조는 물 ${w2} L에 물고기 ${f2}마리가 살아요. 물 1 L당 물고기가 더 많은 수조는?`,`Tank A has ${f1} fish in ${w1} L of water. Tank B has ${f2} fish in ${w2} L. Which tank has more fish per litre?`),a:A.c(nm[win],[nm[1-win]],{keep:true,order:nm}),
     hint:L('물 양에 대한 물고기 수의 비율을 구해 비교해요.','Find fish ÷ litres for each tank.'),
     exp:L(`가: ${f1} ÷ ${w1} = ${N(f1/w1)}, 나: ${f2} ÷ ${w2} = ${N(f2/w2)}이므로 ${win?'나':'가'} 수조예요.`,`A: ${f1} ÷ ${w1} = ${N(f1/w1)}, B: ${f2} ÷ ${w2} = ${N(f2/w2)}, so tank ${win?'B':'A'}.`)}}
   const tt=pick([20,25,40,50,200,250,500]),c=R(1,tt-1);
@@ -6242,7 +6246,7 @@ S.push({id:'g6-07',icon:'🧊',strand:'mea',
     return Math.random()<.5?{q:`${N(k)} m³ = □ cm³`,a:A.n(k*1e6,{u:'cm³'}),hint:L(`1 m³ = ${N(1e6)} cm³예요.`,`1 m³ = ${N(1e6)} cm³.`),exp:`${N(k)} × ${N(1e6)} = ${N(k*1e6)} (cm³)`}
      :{q:`${N(k*1e6)} cm³ = □ m³`,a:A.n(k,{u:'m³'}),hint:L(`${N(1e6)} cm³ = 1 m³예요.`,`${N(1e6)} cm³ = 1 m³.`),exp:`${N(k*1e6)} ÷ ${N(1e6)} = ${N(k)} (m³)`}}
    let A_,B_;do{A_=[R(2,9),R(2,9),R(2,9)];B_=[R(2,9),R(2,9),R(2,9)]}while(A_[0]*A_[1]*A_[2]===B_[0]*B_[1]*B_[2]);const va=A_[0]*A_[1]*A_[2],vb=B_[0]*B_[1]*B_[2],nm=[L('가 상자','box A'),L('나 상자','box B')],win=va>vb?0:1;
-   return {q:L(`가 상자는 ${A_.join(' cm × ')} cm, 나 상자는 ${B_.join(' cm × ')} cm예요. 부피가 더 큰 상자는?`,`Box A is ${A_.join(' cm × ')} cm and box B is ${B_.join(' cm × ')} cm. Which box has the greater volume?`),a:A.c(nm[win],[nm[1-win]],{keep:true}),
+   return {q:L(`가 상자는 ${A_.join(' cm × ')} cm, 나 상자는 ${B_.join(' cm × ')} cm예요. 부피가 더 큰 상자는?`,`Box A is ${A_.join(' cm × ')} cm and box B is ${B_.join(' cm × ')} cm. Which box has the greater volume?`),a:A.c(nm[win],[nm[1-win]],{keep:true,order:nm}),
     hint:L('두 상자의 부피를 각각 구해 비교해요.','Find each volume and compare.'),exp:L(`가: ${va} cm³, 나: ${vb} cm³이므로 ${win?'나':'가'} 상자가 더 커요.`,`A: ${va} cm³, B: ${vb} cm³, so box ${win?'B':'A'} is greater.`)}}
   const t=pick(['missing','missing','tank','stone','fit','cm2m']);
   if(t==='missing'){const l=R(3,12),w=R(2,10),h=R(2,10),V_=l*w*h,ask=R(0,2),dims=[l,w,h],lab=dims.map((x,j)=>j===ask?'? cm':`${x} cm`),known=dims.filter((_,j)=>j!==ask);
@@ -6309,7 +6313,7 @@ S.push({id:'g6-08',icon:'📦',strand:'mea',
    return t==='side'?{q:L(`겉넓이가 ${sa} cm²인 정육면체의 한 모서리는 몇 cm일까요?`,`A cube has a surface area of ${sa} cm². How long is each edge?`),a:A.n(e,{u:'cm'}),hint:L('한 면의 넓이를 먼저 구해요.','First find the area of one face.'),exp:L(`한 면은 ${sa} ÷ 6 = ${e*e} (cm²)이고, ${e} × ${e} = ${e*e}이므로 ${e} cm예요.`,`One face is ${sa} ÷ 6 = ${e*e} cm², and ${e} × ${e} = ${e*e}, so the edge is ${e} cm.`)}
     :{q:L(`겉넓이가 ${sa} cm²인 정육면체의 부피는 몇 cm³일까요?`,`A cube has a surface area of ${sa} cm². What is its volume?`),a:A.n(e**3,{u:'cm³'}),hint:L('한 면의 넓이로 한 모서리의 길이를 찾아요.','Use the area of one face to find the edge.'),exp:L(`한 면 ${sa} ÷ 6 = ${e*e} → 한 모서리 ${e} cm → 부피 ${e} × ${e} × ${e} = ${e**3} (cm³)`,`One face: ${sa} ÷ 6 = ${e*e} → edge ${e} cm → volume ${e} × ${e} × ${e} = ${e**3} cm³`)}}
   let a,b;do{a=[R(3,10),R(2,8),R(2,8)];b=[R(3,10),R(2,8),R(2,8)]}while(SA(...a)===SA(...b));const sa=SA(...a),sb=SA(...b),win=sa>sb?0:1,nm=[L('가 상자','box A'),L('나 상자','box B')];
-  return {q:L(`선물 상자 두 개를 포장지로 빈틈없이 싸려고 해요. 가 상자는 ${a.join(' cm × ')} cm, 나 상자는 ${b.join(' cm × ')} cm예요. 포장지가 더 많이 필요한 상자는?`,`Two gift boxes will be wrapped with no gaps. Box A is ${a.join(' cm × ')} cm and box B is ${b.join(' cm × ')} cm. Which box needs more paper?`),a:A.c(nm[win],[nm[1-win]],{keep:true}),
+  return {q:L(`선물 상자 두 개를 포장지로 빈틈없이 싸려고 해요. 가 상자는 ${a.join(' cm × ')} cm, 나 상자는 ${b.join(' cm × ')} cm예요. 포장지가 더 많이 필요한 상자는?`,`Two gift boxes will be wrapped with no gaps. Box A is ${a.join(' cm × ')} cm and box B is ${b.join(' cm × ')} cm. Which box needs more paper?`),a:A.c(nm[win],[nm[1-win]],{keep:true,order:nm}),
    hint:L('두 상자의 겉넓이를 각각 구해요.','Find each surface area.'),exp:L(`가: ${sa} cm², 나: ${sb} cm²이므로 ${win?'나':'가'} 상자예요.`,`A: ${sa} cm², B: ${sb} cm², so box ${win?'B':'A'}.`)}}
 });
 
@@ -6590,9 +6594,9 @@ S.push({id:'g6-13',icon:'🍬',strand:'alg',
   if(t==='diff'){const T=k*s;
    return {q:L(`물고기 먹이 ${T}개를 ${both}에 ${rt} 나누어요. 두 곳이 받는 먹이의 차는 몇 개일까요?`,`${T} food pellets are shared between ${both} in the ratio ${rt}. What is the difference between the two shares?`),a:A.n(Math.abs(a-b)*k),
     hint:L('각각 몇 개인지 먼저 구해요.','Find each share first.'),exp:L(`${a*k}개와 ${b*k}개이므로 차는 ${Math.abs(a-b)*k}개예요.`,`The shares are ${a*k} and ${b*k}, so the difference is ${Math.abs(a-b)*k}.`)}}
-  const P=2*k*s;
-  return {q:L(`둘레가 ${P} cm인 직사각형 수조 받침이 있어요. 가로와 세로의 비가 ${a} : ${b}이면 가로는 몇 cm일까요?`,`A rectangular tank stand has a perimeter of ${P} cm. Its length and width are in the ratio ${a} : ${b}. How long is the length?`),vis:rectPic(L('가로','length'),L('세로','width')),a:A.n(a*k,{u:'cm'}),
-   hint:L('가로와 세로의 합은 둘레의 반이에요.','Length + width is half the perimeter.'),exp:L(`가로 + 세로 = ${P} ÷ 2 = ${P/2} (cm), ${P/2} × ${fr(a,s)} = ${a*k} (cm)`,`length + width = ${P} ÷ 2 = ${P/2} cm; ${P/2} × ${fr(a,s)} = ${a*k} cm`)}},
+  const P=2*k*s,la=Math.max(a,b),lb=Math.min(a,b);   // the length is the longer side, as in the picture
+  return {q:L(`둘레가 ${P} cm인 직사각형 수조 받침이 있어요. 가로와 세로의 비가 ${la} : ${lb}이면 가로는 몇 cm일까요?`,`A rectangular tank stand has a perimeter of ${P} cm. Its length and width are in the ratio ${la} : ${lb}. How long is the length?`),vis:rectPic(L('가로','length'),L('세로','width')),a:A.n(la*k,{u:'cm'}),
+   hint:L('가로와 세로의 합은 둘레의 반이에요.','Length + width is half the perimeter.'),exp:L(`가로 + 세로 = ${P} ÷ 2 = ${P/2} (cm), ${P/2} × ${fr(la,s)} = ${la*k} (cm)`,`length + width = ${P} ÷ 2 = ${P/2} cm; ${P/2} × ${fr(la,s)} = ${la*k} cm`)}},
  quick(lv){const [a,b]=ratioPair(),s=a+b,k=R(2,Math.max(2,Math.floor((lv>1?60:30)/s))),T=s*k,x=a*k,y=b*k,ans=`${x}, ${y}`,w=[];
   for(const [p,q] of [[y,x],[x+k,y-k],[x-k,y+k],[x+1,y-1],[x-1,y+1],[a,b],[x+2,y-2],[x-2,y+2],[x+1,y+1],[2*x,2*y]]){const sx=`${p}, ${q}`;if(p>0&&q>0&&sx!==ans&&!w.includes(sx))w.push(sx);if(w.length===3)break}
   return {q:L(`${T}${eul(T)} ${a}:${b}${ro(b)}`,`${T} in ${a} : ${b}`),a:ans,w}}
@@ -6837,7 +6841,7 @@ S.push({id:'g6-17',icon:'🌡️',strand:'num',
    return {q:L(`수직선에서 0을 사이에 두고 ${N(v)}${gwa(N(v))} 같은 거리에 있는 수는 무엇일까요?`,`On a number line, which number is the same distance from 0 as ${N(v)}, on the other side?`),a:A.n(-v),
     hint:L('0에서의 거리는 같고 방향만 반대예요.','Same distance from 0, opposite direction.'),exp:L(`${N(v)}${eun(N(v))} 0에서 ${Math.abs(v)}만큼 떨어져 있으므로 반대쪽 수는 ${N(-v)}${ie(N(-v))}.`,`${N(v)} is ${Math.abs(v)} from 0, so the opposite number is ${N(-v)}.`)}}
   let a,b;do{a=R(-10,4);b=R(a+2,10)}while((b-a)%2||a>=0);const m=(a+b)/2;
-  return {q:L(`수직선에서 ${N(a)}${gwa(N(a))} ${b}의 한가운데에 있는 수는 무엇일까요?`,`What number is exactly halfway between ${N(a)} and ${b} on the number line?`),vis:V.numLine(-10,10,{step:1,lab:5,marks:[a,b]}),a:A.n(m),
+  return {q:L(`수직선에서 ${N(a)}${gwa(N(a))} ${N(b)}의 한가운데에 있는 수는 무엇일까요?`,`What number is exactly halfway between ${N(a)} and ${N(b)} on the number line?`),vis:V.numLine(-10,10,{step:1,lab:5,marks:[a,b]}),a:A.n(m),
    hint:L('두 수 사이의 거리를 반으로 나누어 보세요.','Find the distance between them and take half.'),exp:L(`두 수 사이의 거리는 ${b-a}, 그 반은 ${(b-a)/2}이므로 ${N(a)} + ${(b-a)/2} = ${N(m)}${ie(N(m))}.`,`They are ${b-a} apart; half of that is ${(b-a)/2}, so ${N(a)} + ${(b-a)/2} = ${N(m)}.`)}},
  quick(lv){let a,b,q,ans;
   if(lv===1||Math.random()<.4){a=R(-9,-1);b=R(1,12);q=`${N(a)} + ${b}`;ans=a+b}
@@ -6977,10 +6981,10 @@ S.push({id:'g6-20',icon:'🚗',strand:'fin',
    return {q:L(`매점에서 ${sn[0]} ${n}봉지를 ${money(u*n)}에 팔아요. 한 봉지는 얼마일까요?`,`The snack bar sells ${n} bags of ${sn[1]} for ${money(u*n)}. How much is one bag?`),a:A.money(u),hint:L('전체 가격을 봉지 수로 나누어요.','Divide the total price by the number of bags.'),exp:`${money(u*n)} ÷ ${n} = ${money(u)}`}}
   if(lv===2){const t=pick(['faster','cheaper','interest','interest','time']);
    if(t==='faster'){let s1,s2,h1,h2;do{s1=5*R(4,16);s2=5*R(4,16);h1=R(2,5);h2=R(2,5)}while(s1===s2||h1===h2);const [b1,b2]=sample(BOAT,2),win=s1>s2?0:1,nm=[L(b1[0],'the '+b1[1]),L(b2[0],'the '+b2[1])];
-    return {q:L(`${b1[0]}${eun(b1[0])} ${h1}시간 동안 ${s1*h1} km, ${b2[0]}${eun(b2[0])} ${h2}시간 동안 ${s2*h2} km를 갔어요. 더 빠른 배는?`,`The ${b1[1]} went ${s1*h1} km in ${h1} hours. The ${b2[1]} went ${s2*h2} km in ${h2} hours. Which boat is faster?`),a:A.c(nm[win],[nm[1-win]],{keep:true}),
+    return {q:L(`${b1[0]}${eun(b1[0])} ${h1}시간 동안 ${s1*h1} km, ${b2[0]}${eun(b2[0])} ${h2}시간 동안 ${s2*h2} km를 갔어요. 더 빠른 배는?`,`The ${b1[1]} went ${s1*h1} km in ${h1} hours. The ${b2[1]} went ${s2*h2} km in ${h2} hours. Which boat is faster?`),a:A.c(nm[win],[nm[1-win]],{keep:true,order:nm}),
      hint:L('두 배의 속력을 각각 구해 비교해요.','Find each speed and compare.'),exp:L(`${b1[0]}: ${s1*h1} ÷ ${h1} = ${s1}, ${b2[0]}: ${s2*h2} ÷ ${h2} = ${s2}이므로 ${win?b2[0]:b1[0]}${iga(win?b2[0]:b1[0])} 더 빨라요.`,`${b1[1]}: ${s1*h1} ÷ ${h1} = ${s1} km/h; ${b2[1]}: ${s2*h2} ÷ ${h2} = ${s2} km/h. The ${win?b2[1]:b1[1]} is faster.`)}}
    if(t==='cheaper'){let u1,u2,n1,n2;do{u1=unitP();u2=nearP(u1);n1=R(2,6);n2=R(2,6)}while(n1===n2||(u1<u2)===(n1>n2)&&Math.random()<.5);const win=u1<u2?0:1,nm=[L('가 묶음','pack A'),L('나 묶음','pack B')];
-    return {q:L(`${sn[0]}${eul(sn[0])} 두 가지 묶음으로 팔아요. 가 묶음은 ${n1}봉지에 ${money(u1*n1)}, 나 묶음은 ${n2}봉지에 ${money(u2*n2)}${ie(money(u2*n2))}. 한 봉지의 값이 더 싼 것은?`,`${cap(sn[1])} come in two packs. Pack A is ${n1} bags for ${money(u1*n1)}; pack B is ${n2} bags for ${money(u2*n2)}. Which costs less per bag?`),a:A.c(nm[win],[nm[1-win]],{keep:true}),
+    return {q:L(`${sn[0]}${eul(sn[0])} 두 가지 묶음으로 팔아요. 가 묶음은 ${n1}봉지에 ${money(u1*n1)}, 나 묶음은 ${n2}봉지에 ${money(u2*n2)}${ie(money(u2*n2))}. 한 봉지의 값이 더 싼 것은?`,`${cap(sn[1])} come in two packs. Pack A is ${n1} bags for ${money(u1*n1)}; pack B is ${n2} bags for ${money(u2*n2)}. Which costs less per bag?`),a:A.c(nm[win],[nm[1-win]],{keep:true,order:nm}),
      hint:L('한 봉지의 가격을 각각 구해요.','Find the price of one bag in each pack.'),exp:L(`가: ${money(u1*n1)} ÷ ${n1} = ${money(u1)}, 나: ${money(u2*n2)} ÷ ${n2} = ${money(u2)}이므로 ${win?'나':'가'} 묶음이 더 싸요.`,`A: ${money(u1*n1)} ÷ ${n1} = ${money(u1)}; B: ${money(u2*n2)} ÷ ${n2} = ${money(u2)}. Pack ${win?'B':'A'} costs less per bag.`)}}
    if(t==='interest'){const P=MONEY.kind==='krw'?R(1,20)*10000:R(1,20)*10000,r=R(2,5),I=P*r/100;
     return {q:L(`관장님이 해달 보호 기금 ${money(P)}${eul(money(P))} 이자율이 연 ${r}%인 통장에 1년 동안 저금했어요. 1년 뒤 이자는 얼마일까요?`,`The director saves ${money(P)} for the sea otter fund for 1 year at ${r}% interest per year. How much interest does it earn?`),a:A.money(I),
@@ -6995,7 +6999,7 @@ S.push({id:'g6-20',icon:'🚗',strand:'fin',
    return {q:L(`${money(P)}${eul(money(P))} 이자율이 연 ${r}%인 통장에 1년 동안 저금하면 1년 뒤에 통장에 있는 돈은 모두 얼마일까요?`,`You save ${money(P)} for 1 year at ${r}% interest per year. How much money is in the account after 1 year?`),a:A.money(P+I),
     hint:L('이자를 구해서 처음 저금한 돈에 더해요.','Find the interest, then add it to the savings.'),exp:L(`이자 ${money(P)} × ${N(r/100)} = ${money(I)}, ${money(P)} + ${money(I)} = ${money(P+I)}`,`Interest: ${money(P)} × ${N(r/100)} = ${money(I)}; ${money(P)} + ${money(I)} = ${money(P+I)}`)}}
   let us,ns;do{const u0=unitP();us=[u0,nearP(u0),nearP(u0)];ns=sample([2,3,4,5,6],3)}while(new Set(us).size<3);const best=us.indexOf(Math.min(...us)),nm=[L('가','A'),L('나','B'),L('다','C')];
-  return {q:L(`${sn[0]}를 세 가지 묶음으로 팔아요. 한 봉지의 값이 가장 싼 묶음은?`,`${cap(sn[1])} come in three packs. Which pack has the lowest price per bag?`),vis:V.table([L('묶음','Pack'),L('봉지 수','Bags'),L('가격','Price')],nm.map((x,i)=>[x,ns[i],money(us[i]*ns[i])])),a:A.c(nm[best],nm.filter((_,i)=>i!==best),{keep:true,order:nm}),
+  return {q:L(`${sn[0]}${eul(sn[0])} 세 가지 묶음으로 팔아요. 한 봉지의 값이 가장 싼 묶음은?`,`${cap(sn[1])} come in three packs. Which pack has the lowest price per bag?`),vis:V.table([L('묶음','Pack'),L('봉지 수','Bags'),L('가격','Price')],nm.map((x,i)=>[x,ns[i],money(us[i]*ns[i])])),a:A.c(nm[best],nm.filter((_,i)=>i!==best),{keep:true,order:nm}),
    hint:L('묶음마다 한 봉지의 값을 구해요.','Find the price of one bag in each pack.'),exp:nm.map((x,i)=>`${x}: ${money(us[i]*ns[i])} ÷ ${ns[i]} = ${money(us[i])}`).join(', ')}},
  quick(lv){const t=lv===1?'speed':pick(['speed','dist']),s=5*R(2,lv>2?18:12),h=R(2,lv>1?6:4),d=s*h;
   return t==='speed'?{q:L(`${d} km, ${h}시간`,`${d} km in ${h} h`),a:s,w:wq(s,[d-h,s+5,s-5,d/2])}:{q:L(`시속 ${s} km로 ${h}시간`,`${s} km/h for ${h} h`),a:d,w:wq(d,[s+h,d+s,d-s])}}
@@ -9287,7 +9291,7 @@ function update(dt){const s=C;s.lights+=dt;
    if(h){h.x=s.cx+h.gx*.9;h.y=tipY()+h.w*.18;if(s.shaky&&s.upFrom>0&&1-s.len/s.upFrom>=s.slipAt){h.st='fall';h.vy=0;s.held=null;s.shaky=false;s.open=.6;msg(L('아슬아슬! 조금만 더 가운데로!','So close! A little more to the middle!'),'warn',1.8);s.o.sfx&&s.o.sfx('bad')}}
    if(s.len<=0){if(!s.held){s.open=1;if(s.drops>=3){reveal();}else{if(!s.el.msg.classList.contains('warn'))msg(L('아깝다! 다시 해 봐요.','Missed! Try again.'),'warn',1.6);s.state='aim';s.el.drop.disabled=false}}
     else if(String(s.held.tag)===String(s.q.a)){s.state='carry';msg(L('정답 인형이에요! 🎉','That’s the answer! 🎉'),'good',2)}
-    else{s.state='wobble';s.timer=.7;const h2=s.held;s.wrong++;s.o.sfx&&s.o.sfx('bad');msg(L(`앗, 이 인형은 ${h2.tag}! 정답은 ${s.q.a}이에요.`,`Oops, this one is ${h2.tag}. The answer is ${s.q.a}.`),'bad',2.6);if(s.o.say)s.o.say(L(`정답은 ${s.q.a}`,`The answer is ${s.q.a}`))}}}
+    else{s.state='wobble';s.timer=.7;const h2=s.held;s.wrong++;s.o.sfx&&s.o.sfx('bad');msg(L(`앗, 이 인형은 ${h2.tag}! 정답은 ${s.q.a}${jA(s.q.a,'이에요','예요')}.`,`Oops, this one is ${h2.tag}. The answer is ${s.q.a}.`),'bad',2.6);if(s.o.say)s.o.say(L(`정답은 ${s.q.a}`,`The answer is ${s.q.a}`))}}}
  else if(s.state==='wobble'){s.timer-=dt;const h=s.held;if(h){h.x=s.cx+h.gx*.9+Math.sin(s.t*30)*4;h.y=tipY()+h.w*.18}if(s.timer<=0){if(h){h.st='fall';h.vy=0}s.held=null;s.open=1;showAnswer();s.state='wait';s.timer=2.2}}
  else if(s.state==='carry'){const d=DROP_X-s.cx;s.cx+=Math.sign(d)*Math.min(Math.abs(d),300*dt);const h=s.held;h.x=s.cx+h.gx*.9;h.y=tipY()+h.w*.18;if(Math.abs(d)<1){s.state='release';s.timer=.5;s.open=1;h.st='chute';h.vy=0;s.held=null;s.o.sfx&&s.o.sfx('splash')}}
  else if(s.state==='release'){s.timer-=dt;if(s.timer<=0){const p=s.plush.find(x=>x.st==='chute'||x.st==='gone');s.right++;s.prizes.push(p.id);s.el.pz.textContent=s.prizes.length;s.door={id:p.id,t:0};s.o.sfx&&s.o.sfx('catch');
@@ -9298,7 +9302,9 @@ function update(dt){const s=C;s.lights+=dt;
   else if(p.st==='chute'){p.vy+=900*dt;p.y+=p.vy*dt;if(p.y>GB+60)p.st='gone'}}
  if(s.door)s.door.t+=dt;
  if(s.msgT&&s.t>s.msgT){s.el.msg.classList.remove('on');s.msgT=0}}
-function reveal(){C.reveal=C.plush.find(p=>!p.back&&String(p.tag)===String(C.q.a));C.wrong++;msg(L(`정답은 ${C.q.a}이었어요. 다음 문제!`,`The answer was ${C.q.a}. Next one!`),'bad',2.4);C.o.say&&C.o.say(L(`정답은 ${C.q.a}`,`The answer is ${C.q.a}`));C.state='wait';C.timer=2.4}
+// particle after an answer as it is read aloud: 3/4 is read “4분의 3”, so the numerator decides (3/4이에요, 1/2예요)
+const jA=(a,x,y)=>{const m=String(a).match(/(\d+)\/\d+$/);return josa(m?m[1]:a,x,y)};
+function reveal(){C.reveal=C.plush.find(p=>!p.back&&String(p.tag)===String(C.q.a));C.wrong++;msg(L(`정답은 ${C.q.a}${jA(C.q.a,'이었어요','였어요')}. 다음 문제!`,`The answer was ${C.q.a}. Next one!`),'bad',2.4);C.o.say&&C.o.say(L(`정답은 ${C.q.a}`,`The answer is ${C.q.a}`));C.state='wait';C.timer=2.4}
 function showAnswer(){C.reveal=C.plush.find(p=>!p.back&&String(p.tag)===String(C.q.a))}
 
 // ---------------------------------------------------------------- drawing
@@ -9379,7 +9385,7 @@ const now=()=>Date.now();
 const T=pair=>L(pair[0],pair[1]);
 const fill=(s,o)=>String(s).replace(/\{(\w+)\}/g,(_,k)=>o[k]??'');
 const COIN='🪙',PEARL='🫧',TICKET='🎫';
-const COPYRIGHT=()=>`<footer class="copy">© 2026 Dongsun Moon. ${L('모든 권리 보유.','All rights reserved.')}<br>${L('문제, 그림, 캐릭터, 소리는 이 게임을 위해 새로 만들었어요. 바다 생물은 한국과 캐나다에 실제로 사는 동물이에요(전설의 물고기 6마리는 상상 속 물고기예요).','Questions, art, characters and sounds were made for this game. The sea animals really live in Korea and Canada (the six legendary fish are made up).')}</footer>`;
+const COPYRIGHT=()=>`<footer class="copy">© 2026 Dongsun Moon. ${L('모든 권리 보유.','All rights reserved.')}<br>${L('문제, 그림, 캐릭터, 소리는 이 게임을 위해 새로 만들었어요. 바다 생물은 한국과 캐나다에 실제로 사는 동물이에요(전설의 바다 친구 6마리는 상상 속 동물이에요).','Questions, art, characters and sounds were made for this game. The sea animals really live in Korea and Canada (the six legendary sea creatures are made up).')}</footer>`;
 
 // ---------------------------------------------------------------- save (one save per profile picked on the main page)
 const SAVE_KEY='mathAquarium.v1';
@@ -9625,7 +9631,7 @@ function speakable(t){t=String(t);const ko=LANG!=='en';
  t=t.replace(/[→➡]/g,ko?' 오른쪽 ':' right ').replace(/[←⬅]/g,ko?' 왼쪽 ':' left ').replace(/[↑⬆]/g,ko?' 위 ':' up ').replace(/[↓⬇]/g,ko?' 아래 ':' down ').replace(/[\[\]]/g,' ');
  t=t.replace(/\p{Extended_Pictographic}|‍|️|[①②③④]/gu,' ');
  const U=ko?[['km/h',' 킬로미터'],['cm³','세제곱센티미터'],['m³','세제곱미터'],['cm²','제곱센티미터'],['m²','제곱미터'],['km²','제곱킬로미터'],['mm²','제곱밀리미터'],['°C','도'],['mm','밀리미터'],['cm','센티미터'],['km','킬로미터'],['mL','밀리리터'],['kg','킬로그램'],['m','미터'],['L','리터'],['g','그램'],['t','톤'],['°','도'],['%','퍼센트'],['¢','센트']]
-  :[['km/h',' kilometres per hour'],['cm³',' cubic centimetres'],['m³',' cubic metres'],['cm²',' square centimetres'],['m²',' square metres'],['km²',' square kilometres'],['mm²',' square millimetres'],['°C',' degrees Celsius'],['mm',' millimetres'],['cm',' centimetres'],['km',' kilometres'],['mL',' millilitres'],['kg',' kilograms'],['m',' metres'],['L',' litres'],['g',' grams'],['t',' tonnes'],['°',' degrees'],['%',' percent'],['¢',' cents']];
+  :[['km/h',' kilometres per hour'],['cm³',' cubic centimetres'],['m³',' cubic metres'],['cm²',' square centimetres'],['m²',' square metres'],['km²',' square kilometres'],['mm²',' square millimetres'],['°C',' degrees Celsius'],['mm',' millimetres'],['cm',' centimetres'],['km',' kilometres'],['mL',' millilitres'],['kg',' kilograms'],['m',' metres'],['L',' litres'],['g',' grams'],['t',' tonnes'],['°',' degrees'],['%',' percent'],['¢',' cents'],['min',' minutes'],['h',' hours']];
  for(const [u,w] of U){const re=new RegExp('(\\d)\\s?'+u.replace(/[.*+?^${}()|[\]\\/]/g,'\\$&')+(/^[a-zA-Z]+$/.test(u)?'(?![a-zA-Z])':''),'g');t=t.replace(re,'$1'+(ko?' ':'')+w)}
  if(!ko)t=t.replace(/\$(\d+)\.(\d\d)/g,(m,d,c)=>`${d} dollar${d==='1'?'':'s'} and ${+c} cents`).replace(/\$(\d+)/g,(m,d)=>`${d} dollar${d==='1'?'':'s'}`);
  t=t.replace(/(\d+)\/(\d+)/g,(m,n,d)=>frSay(+n,+d));
@@ -9922,16 +9928,16 @@ function openRequest(){const r=REQ;if(!r)return;REQ=null;document.querySelectorA
 // a quick shop problem at the child's grade, in won or dollars
 function shopProblem(f,g){const money_=v=>money(v),krw=MONEY.kind==='krw',ye=v=>money_(v)+josa(money_(v),'이에요','예요'),eul=v=>money_(v)+josa(money_(v),'을','를'),an=w=>(/^[aeiou]/i.test(w)?'an ':'a ')+w,An=w=>{const x=an(w);return x[0].toUpperCase()+x.slice(1)};const ITEMS_={snack:[['🍦','아이스크림','ice cream cone'],['🌭','핫도그','hot dog'],['🥤','주스','juice cup'],['🍪','쿠키','cookie'],['🍿','팝콘','popcorn bucket']],gift:[['🧸','인형','plush toy'],['🔑','열쇠고리','key ring'],['🖍️','색연필','crayon set'],['📕','물고기 책','fish book'],['🧢','모자','cap']],mart:[['💧','생수','water bottle'],['🍙','주먹밥','rice ball'],['🧃','우유','milk carton'],['🍫','초콜릿','chocolate bar'],['🍌','바나나','banana']],ticket:[['🎫','입장권','ticket']]};
  const it=ITEMS_[f],A1=pick(it),B1=pick(it.filter(x=>x!==A1).length?it.filter(x=>x!==A1):it),nm=x=>L(x[1],x[2]);
- const unit=krw?(g<=2?10:100):(g<=2?5:25),pr=(lo,hi)=>R(lo,hi)*unit;
+ const unit=krw?(g<=2?10:100):(g<=2?5:g===3?100:25),pr=(lo,hi)=>R(lo,hi)*unit;
  if(f==='ticket'){if(g<=1){const a_=R(2,6),b_=R(1,4);return {q:L(`어른 ${a_}명과 어린이 ${b_}명이 왔어요. 입장권은 모두 몇 장 필요할까요?`,`${a_} adult${a_>1?'s':''} and ${b_} ${b_>1?'children':'child'} came. How many tickets do they need?`),vis:V.items(a_,'🧑')+V.items(b_,'🧒'),a:A.n(a_+b_,{u:L('장','')}),exp:L(`${a_} + ${b_} = ${a_+b_}, ${a_+b_}장이에요.`,`${a_} + ${b_} = ${a_+b_} tickets.`)}}
   const n1=R(2,g<=3?5:9),n2=R(1,g<=3?4:8),p1=g<=2?pr(2,5):pr(4,12),p2=Math.max(unit,p1-pr(1,3));if(g<=2){const t=n1+n2;return {q:L(`어른 ${n1}명, 어린이 ${n2}명이 줄을 섰어요. 모두 몇 명일까요?`,`${n1} adult${n1>1?'s':''} and ${n2} ${n2>1?'children':'child'} are in line. How many people in all?`),a:A.n(t),exp:L(`${n1} + ${n2} = ${t}명이에요.`,`${n1} + ${n2} = ${t} people.`)}}
   const tot=n1*p1+n2*p2;return {q:L(`입장권은 어른 ${money_(p1)}, 어린이 ${ye(p2)}. 어른 ${n1}명과 어린이 ${n2}명은 모두 얼마를 내야 할까요?`,`Tickets: adults ${money_(p1)}, children ${money_(p2)}. How much for ${n1} adult${n1>1?'s':''} and ${n2} ${n2>1?'children':'child'}?`),a:A.money(tot),hint:L('어른 값과 어린이 값을 따로 구해서 더해요.','Find the adults’ cost and the children’s cost, then add.'),exp:L(`${money_(p1)} × ${n1} = ${money_(n1*p1)}, ${money_(p2)} × ${n2} = ${money_(n2*p2)}. 모두 ${ye(tot)}.`,`${money_(p1)} × ${n1} = ${money_(n1*p1)}, ${money_(p2)} × ${n2} = ${money_(n2*p2)}. Total ${money_(tot)}.`)}}
  if(g<=1){const a_=R(2,6),b_=R(1,4);if(f==='mart'&&Math.random()<.5){const s_=R(6,10),k_=R(1,s_-1);return {q:L(`선반에 ${A1[0]} ${nm(A1)}${josa(nm(A1),'이','가')} ${s_}개 있었는데 ${k_}개가 팔렸어요. 남은 것은 몇 개일까요?`,`There were ${s_} ${nm(A1)}s on the shelf and ${k_} were sold. How many are left?`),vis:V.items(s_,A1[0],{cross:k_}),a:A.n(s_-k_),exp:L(`${s_} − ${k_} = ${s_-k_}개예요.`,`${s_} − ${k_} = ${s_-k_}.`)}}
   return {q:L(`손님이 ${A1[0]} ${a_}개와 ${B1[0]} ${b_}개를 샀어요. 모두 몇 개일까요?`,`A visitor bought ${a_} ${A1[0]} and ${b_} ${B1[0]}. How many items in all?`),vis:V.items(a_,A1[0])+V.items(b_,B1[0]),a:A.n(a_+b_),exp:L(`${a_} + ${b_} = ${a_+b_}개예요.`,`${a_} + ${b_} = ${a_+b_}.`)}}
- const pa=g<=2?pr(2,9):pr(4,30),pb=g<=2?pr(1,6):pr(3,24);
+ const small=g<=2||(!krw&&g===3),pa=small?pr(2,9):pr(4,30),pb=small?pr(1,6):pr(3,24);
  if(f==='gift'&&g>=6&&Math.random()<.5){const base=R(4,20)*(krw?1000:500),pct=pick([10,20,25,30,50]),sale=base*(100-pct)/100;return {q:L(`${A1[0]} ${nm(A1)}${josa(nm(A1),'이','가')} ${money_(base)}인데 오늘 ${pct}% 할인해요. 할인한 값은 얼마일까요?`,`${An(nm(A1))} costs ${money_(base)}, and today it’s ${pct}% off. What is the sale price?`),a:A.money(sale),hint:L(`${pct}%만큼 빼요.`,`Take away ${pct}%.`),exp:L(`${money_(base)}의 ${pct}%는 ${ye(base*pct/100)}. ${money_(base)} − ${money_(base*pct/100)} = ${money_(sale)}`,`${pct}% of ${money_(base)} is ${money_(base*pct/100)}. ${money_(base)} − ${money_(base*pct/100)} = ${money_(sale)}.`)}}
  if(f==='mart'&&g>=3&&Math.random()<.5){const sh=R(2,g>=4?8:5),each=R(3,g>=4?12:9),tot=sh*each;return {q:L(`${A1[0]} ${nm(A1)} ${tot}개를 선반 ${sh}칸에 똑같이 나누어 놓으려고 해요. 한 칸에 몇 개씩 놓을까요?`,`Put ${tot} ${nm(A1)}s equally on ${sh} shelves. How many on each shelf?`),a:A.n(each),exp:L(`${tot} ÷ ${sh} = ${each}개씩이에요.`,`${tot} ÷ ${sh} = ${each} on each shelf.`)}}
- if(f==='gift'||Math.random()<.4){const bill=krw?(g<=2?1000:g<=3?5000:10000):(g<=2?100:g<=3?500:2000);const cost=Math.min(bill-unit,f==='gift'&&g>=3?pa+pb:pa);const ch=bill-cost;return {q:L(`${A1[0]} ${nm(A1)}${josa(nm(A1),'은','는')} ${ye(cost)}. 손님이 ${eul(bill)} 냈어요. 거스름돈은 얼마일까요?`,`${An(nm(A1))} costs ${money_(cost)}. The visitor pays ${money_(bill)}. How much change?`),vis:V.coins([bill]),a:A.money(ch),hint:L('낸 돈에서 물건 값을 빼요.','Subtract the price from what was paid.'),exp:L(`${money_(bill)} − ${money_(cost)} = ${money_(ch)}`,`${money_(bill)} − ${money_(cost)} = ${money_(ch)}.`)}}
+ if(f==='gift'||Math.random()<.4){const bill=krw?(g<=2?100:g<=3?5000:10000):(g<=2?100:2000);const cost=Math.min(bill-unit,f==='gift'&&g>=3?pa+pb:pa);const ch=bill-cost;return {q:L(`${A1[0]} ${nm(A1)}${josa(nm(A1),'은','는')} ${ye(cost)}. 손님이 ${eul(bill)} 냈어요. 거스름돈은 얼마일까요?`,`${An(nm(A1))} costs ${money_(cost)}. The visitor pays ${money_(bill)}. How much change?`),vis:V.coins([bill]),a:A.money(ch),hint:L('낸 돈에서 물건 값을 빼요.','Subtract the price from what was paid.'),exp:L(`${money_(bill)} − ${money_(cost)} = ${money_(ch)}`,`${money_(bill)} − ${money_(cost)} = ${money_(ch)}.`)}}
  if(g>=3){const n=R(2,g>=4?9:5),tot=pa*n+pb;return {q:L(`${A1[0]} ${nm(A1)}${josa(nm(A1),'은','는')} ${money_(pa)}, ${B1[0]} ${nm(B1)}${josa(nm(B1),'은','는')} ${ye(pb)}. ${nm(A1)} ${n}개와 ${nm(B1)} 1개는 모두 얼마일까요?`,`${An(nm(A1))} is ${money_(pa)} and ${an(nm(B1))} is ${money_(pb)}. How much for ${n} ${nm(A1)}s and 1 ${nm(B1)}?`),a:A.money(tot),hint:L('같은 물건은 곱셈으로 계산해요.','Use multiplication for the same items.'),exp:L(`${money_(pa)} × ${n} = ${money_(pa*n)}, 여기에 ${eul(pb)} 더하면 ${ye(tot)}.`,`${money_(pa)} × ${n} = ${money_(pa*n)}, plus ${money_(pb)} makes ${money_(tot)}.`)}}
  const tot=pa+pb;return {q:L(`${A1[0]} ${nm(A1)}${josa(nm(A1),'은','는')} ${money_(pa)}, ${B1[0]} ${nm(B1)}${josa(nm(B1),'은','는')} ${ye(pb)}. 둘 다 사면 얼마일까요?`,`${An(nm(A1))} is ${money_(pa)} and ${an(nm(B1))} is ${money_(pb)}. How much for both?`),vis:V.coins(coinsFor(pa).concat(coinsFor(pb))),a:A.money(tot),exp:L(`${money_(pa)} + ${money_(pb)} = ${money_(tot)}`,`${money_(pa)} + ${money_(pb)} = ${money_(tot)}.`)}}
 function coinsFor(v){const list=[],cs=(MONEY.kind==='krw'?COINS.krw.concat(COINS.krwBills):COINS.cad.concat(COINS.cadBills)).slice().sort((a,b)=>b-a);for(const c of cs)while(v>=c&&list.length<8){list.push(c);v-=c}return list}
@@ -10214,7 +10220,7 @@ function graduation(g){const gd=S.G[g];gd.grad=dayKey();const t=tier(g,19),coins
  const stars=gd.aq.reduce((x,a)=>x+a.best,0),probs=SKILLS.filter(s=>s.id.startsWith(`g${g}-`)).reduce((x,s)=>x+(S.sk[s.id]?S.sk[s.id].c:0),0);
  logEvent('🎓',`${g}학년 수학 마스터! 졸업!`,`Grade ${g} math mastered! Graduated!`);checkAch();save();sfx('fanfare');celebrate('confetti',70);setTimeout(()=>celebrate('stars',40),900);
  modal(`<div class="diploma"><div class="dribbon">🎓</div><h2>${L(`${g}학년 수학 마스터 인증서`,`Grade ${g} Math Master Certificate`)}</h2><p class="dname">${esc(S.name)}</p><p>${L(`위 관장님은 꼬마 수학 아쿠아리움에서 ${g}학년 수학 단원 20개를 모두 마스터하였기에 이 인증서를 드립니다.`,`This certifies that our director mastered all 20 Grade ${g} math skills at Little Math Aquarium.`)}</p>
-  <div class="dstats"><span>⭐ ${stars}/60</span><span>✏️ ${num(probs)}</span><span>📅 ${gd.started||''} → ${gd.grad}</span></div><div class="dfish">${fishImgTag(leg,'big')}<b>${esc(fishName(leg))}</b><small>${L('전설의 물고기가 찾아왔어요!','A legendary fish came to you!')}</small></div><div class="dsign"><img src="images/coach-moon-medal.webp" alt="" width="46" height="56" onerror="this.remove()"><span>${L('문 코치','Coach Moon')}</span></div><div class="dstamp">© Little Math Aquarium · game.dongsunmoon.com · ${dayKey()}</div></div>
+  <div class="dstats"><span>⭐ ${stars}/60</span><span>✏️ ${num(probs)}</span><span>📅 ${gd.started||''} → ${gd.grad}</span></div><div class="dfish">${fishImgTag(leg,'big')}<b>${esc(fishName(leg))}</b><small>${g===6?L('전설의 고래가 찾아왔어요!','A legendary whale came to you!'):L('전설의 물고기가 찾아왔어요!','A legendary fish came to you!')}</small></div><div class="dsign"><img src="images/coach-moon-medal.webp" alt="" width="46" height="56" onerror="this.remove()"><span>${L('문 코치','Coach Moon')}</span></div><div class="dstamp">© Little Math Aquarium · game.dongsunmoon.com · ${dayKey()}</div></div>
   ${coachLine('big')}
   <div class="rew"><span>${COIN} +${short(coins)}</span><span>${PEARL} +20</span><span>${TICKET} +5</span><span>⚡ +2</span></div>
   ${g<6?`<button class="btn wide gold" data-act="next">${L(`${g+1}학년 바다로 출발!`,`Off to the Grade ${g+1} sea!`)} 🚗</button>`:`<p><b>${L('🎉 초등 수학 1~6학년을 모두 마스터했어요! 정말 대단해요!','🎉 You mastered all of elementary math, grades 1–6! Incredible!')}</b></p><button class="btn wide" data-act="close">${L('최고!','The best!')}</button>`}`,{cls:'wide',closable:g===6,acts:{next:()=>()=>{S.grade=g+1;startDrive({kind:'move',g:g+1,from:aqDef(g,19).name,to:aqDef(g+1,curIndex(g+1)).name,after:()=>arrive(g+1,curIndex(g+1))})}}});
@@ -10231,7 +10237,7 @@ function settings(){const g=S.grade||1;
   <div class="setrow col"><span>🎒 ${L('지금 공부하는 학년','Grade I’m working on')}</span><span class="seg six">${[1,2,3,4,5,6].map(x=>`<button class="${x===g?'on':''}" data-act="grade" data-g="${x}">${x}</button>`).join('')}</span><small class="muted">${L('학년을 바꾸면 그 학년의 아쿠아리움으로 가요. 다른 학년 기록은 그대로 남아요.','Switching takes you to that grade’s aquariums. Other grades keep their progress.')}</small></div>
   <div class="setrow"><span>🌐 ${L('언어','Language')}</span><span class="seg"><button class="${LANG==='ko'?'on':''}" data-act="lang" data-v="ko">한국어</button><button class="${LANG==='en'?'on':''}" data-act="lang" data-v="en">English</button></span></div>
   <p class="muted">${MGP.me?L(`${esc(S.av)} ${esc(S.name)}의 기록이에요. 플레이어는 첫 화면에서 바꿔요.`,`This is ${esc(S.name)}’s progress. Switch players on the main page.`):L('첫 화면에서 프로필을 만들면 형제자매가 따로 기록할 수 있어요.','Make profiles on the main page so siblings keep separate progress.')}</p>
-  <button class="btn ghost wide danger" data-act="reset">🗑️ ${L('이 게임 기록 지우기','Reset this game')}</button>${COPYRIGHT()}`,{acts:{
+  <button class="btn ghost wide danger" data-act="reset">🗑️ ${L('이 게임 기록 지우기','Reset this game')}</button><p class="muted">📚 ${L('학교마다 배우는 순서와 방법이 조금씩 다를 수 있어요. 헷갈리면 학교 선생님 설명을 따라 주세요.','Schools may teach things in a different order or in a different way. If something seems different, follow your teacher.')}</p>${COPYRIGHT()}`,{acts:{
   t:b=>{const k=b.dataset.k;S.opt[k]=!S.opt[k];if(!S.opt.voice)hush();save();b.classList.toggle('on',S.opt[k]);return false},
   money:b=>{S.opt.money=b.dataset.v;MONEY.kind=S.opt.money;save();return ()=>settings()},
   grade:b=>{const x=+b.dataset.g;S.grade=x;arrive(x,curIndex(x));toast(L(`${x}학년 아쿠아리움으로 왔어요!`,`Welcome to the Grade ${x} aquariums!`))},

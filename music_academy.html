@@ -783,7 +783,7 @@ const TRIADS={C:{n:'도·미·솔|C–E–G',ms:[60,64,67]},F:{n:'파·라·도|
 const SONGS={
  hotcross:{t:'뜨거운 빵|Hot Cross Buns',from:'영국 전래 동요|Traditional English',bpm:80,sig:4,lv:1,
   m:'E4/1 D4/1 C4/2 | E4/1 D4/1 C4/2 | C4/.5 C4/.5 C4/.5 C4/.5 D4/.5 D4/.5 D4/.5 D4/.5 | E4/1 D4/1 C4/2',c:'C/4 C/4 C/2 G/2 C/4'},
- mary:{t:'메리의 어린 양|Mary Had a Little Lamb',from:'미국 전래 동요|Traditional American',bpm:88,sig:4,lv:1,
+ mary:{t:'메리의 어린 양|Mary Had a Little Lamb',from:'미국 동요|American nursery rhyme',bpm:88,sig:4,lv:1,
   m:'E4/1 D4/1 C4/1 D4/1 | E4/1 E4/1 E4/2 | D4/1 D4/1 D4/2 | E4/1 G4/1 G4/2 | E4/1 D4/1 C4/1 D4/1 | E4/1 E4/1 E4/1 E4/1 | D4/1 D4/1 E4/1 D4/1 | C4/4',c:'C/4 C/4 G/4 C/4 C/4 C/4 G/4 C/4'},
  clair:{t:'달빛 아래서|Au Clair de la Lune',from:'프랑스 전래 동요|Traditional French',bpm:88,sig:4,lv:1,
   m:'C4/1 C4/1 C4/1 D4/1 | E4/2 D4/2 | C4/1 E4/1 D4/1 D4/1 | C4/4 | C4/1 C4/1 C4/1 D4/1 | E4/2 D4/2 | C4/1 E4/1 D4/1 D4/1 | C4/4',c:'C/4 C/2 G/2 C/2 G/2 C/4 C/4 C/2 G/2 C/2 G/2 C/4'},
@@ -798,7 +798,7 @@ const SONGS={
   c:'C/4 G/4 C/4 C/2 G/2 C/4 G/4 C/4 G/2 C/2'},
  jacques:{t:'자크 형제|Frère Jacques',from:'프랑스 전래 동요|Traditional French',bpm:100,sig:4,lv:2,
   m:'C4/1 D4/1 E4/1 C4/1 | C4/1 D4/1 E4/1 C4/1 | E4/1 F4/1 G4/2 | E4/1 F4/1 G4/2 | G4/.5 A4/.5 G4/.5 F4/.5 E4/1 C4/1 | G4/.5 A4/.5 G4/.5 F4/.5 E4/1 C4/1 | C4/1 G3/1 C4/2 | C4/1 G3/1 C4/2',
-  c:'C/4 C/4 C/4 C/4 C/4 C/4 C/2 G/2 C/2 G/2'},
+  c:'C/4 C/4 C/4 C/4 C/4 C/4 C/4 C/4'},
  oldmac:{t:'맥도널드 할아버지 농장|Old MacDonald Had a Farm',from:'미국 전래 동요|Traditional American',bpm:104,sig:4,lv:2,
   m:'C4/1 C4/1 C4/1 G3/1 | A3/1 A3/1 G3/2 | E4/1 E4/1 D4/1 D4/1 | C4/3 G3/1 | C4/1 C4/1 C4/1 G3/1 | A3/1 A3/1 G3/2 | E4/1 E4/1 D4/1 D4/1 | C4/4',
   c:'C/4 F/2 C/2 C/2 G/2 C/4 C/4 F/2 C/2 C/2 G/2 C/4'},
@@ -968,7 +968,7 @@ const LESSONS=[
   a:{type:'song',song:'hotcross',step:true}},
  {id:'b5',u:'B',t:'박자에 맞춰 뜨거운 빵|Hot Cross Buns in time',intro:[
   {t:'이제 음표가 내려와요. 선에 닿을 때 딱 맞춰 눌러요!|Now the notes fall down. Press when they touch the line!',v:{emoji:'⬇️🎹'}},
-  {t:'길쭉한 음표는 길게 쉬는 음이에요. 다음 음을 기다려요.|Long notes last longer. Wait for the next one.'}],
+  {t:'길쭉한 음표는 길게 이어지는 음이에요. 다음 음을 기다려요.|Long notes last longer. Wait for the next one.'}],
   a:{type:'song',song:'hotcross',speed:.85}},
  {id:'b6',u:'B',t:'메리의 어린 양|Mary Had a Little Lamb',intro:[
   {t:'이번 노래에는 “솔”도 나와요. 도·레·미·솔!|This song has Sol too. Do, Re, Mi, Sol!',v:{kbd:{from:60,to:67,labels:true,hi:{60:'#ff5a5f',62:'#ff9f1c',64:'#ffd23f',67:'#1fb5c9'}}},p:{song:'mary'}}],
@@ -1115,13 +1115,13 @@ const LESSONS=[
  // H ---- instruments
  {id:'h1',u:'H',t:'악기 가족|Instrument families',intro:[
   {t:'악기는 소리 내는 방법에 따라 가족이 있어요. 줄을 쓰면 현악기, 숨을 불면 관악기, 두드리면 타악기!|Instruments come in families by how they make sound: strings, wind instruments and percussion!',v:{instr:['violin','trumpet','drum','piano']}},
-  {t:'관악기는 다시 나무로 시작한 목관악기와 금속으로 만든 금관악기로 나눠요.|Wind instruments split into woodwinds and brass.',v:{instr:['flute','clarinet','trumpet','tuba']}}],
+  {t:'관악기는 다시 나무로 시작한 목관악기와 입술을 떨며 부는 금관악기로 나눠요.|Wind instruments split into woodwinds, first made of wood, and brass, played by buzzing your lips.',v:{instr:['flute','clarinet','trumpet','tuba']}}],
   a:{type:'quiz',bank:'family',count:6}},
  {id:'h2',u:'H',t:'소리 듣고 맞히기|Guess by ear',intro:[
   {t:'눈을 감고 들어 봐요. 줄을 뜯는 소리, 부는 소리, 두드리는 소리가 다 달라요.|Close your eyes and listen. Plucked, blown and struck sounds are all different.',p:{voices:['pluck','flute','mallet']}}],
   a:{type:'listen',task:'family',count:6}},
  {id:'h3',u:'H',t:'우리 악기|Korean instruments',intro:[
-  {t:'우리나라에도 멋진 악기가 많아요. 가야금, 해금, 대금, 장구를 만나 봐요!|Korea has wonderful instruments too: gayageum, haegeum, daegeum and janggu!',v:{instr:['gayageum','haegeum','daegeum','janggu']}},
+  {t:'우리나라에도 멋진 악기가 많아요. 가야금, 해금, 대금, 장구를 만나 봐요! 대금 말고는 비슷한 악기 소리로 들려줘요.|Korea has wonderful instruments too: gayageum, haegeum, daegeum and janggu! Except the daegeum, you’ll hear a similar instrument’s sound.',v:{instr:['gayageum','haegeum','daegeum','janggu']}},
   {t:'꽹과리·징·장구·북 네 악기로 하는 신나는 공연을 “사물놀이”라고 해요.|A lively show with four instruments, kkwaenggwari, jing, janggu and buk, is called “samulnori”.',v:{instr:['kkwaenggwari','jing','janggu','buk']}}],
   a:{type:'quiz',bank:'korean',count:6}},
  {id:'h4',u:'H',t:'오케스트라|The orchestra',intro:[
@@ -1130,10 +1130,10 @@ const LESSONS=[
  // I ---- dynamics, tempo, symbols
  {id:'i1',u:'I',t:'셈여림|Loud and soft',intro:[
   {t:'p(피아노)는 여리게, f(포르테)는 세게! 소리의 크기도 악보에 적어요.|p (piano) means soft and f (forte) means loud. Music tells you how loud to play!',v:{sym:[['p','여리게|soft'],['f','세게|loud']]},p:{dyn:true}},
-  {t:'“<” 모양은 점점 세게(크레셴도), “>” 모양은 점점 여리게(디크레셴도)예요.|“<” means get louder (crescendo) and “>” means get softer (decrescendo).',v:{sym:[['cresc','점점 세게|louder'],['decresc','점점 여리게|softer']]}}],
+  {t:'“<” 모양은 점점 세게(크레셴도), “>” 모양은 점점 여리게(데크레셴도)예요.|“<” means get louder (crescendo) and “>” means get softer (decrescendo).',v:{sym:[['cresc','점점 세게|louder'],['decresc','점점 여리게|softer']]}}],
   a:{type:'quiz',bank:'dyn',count:6}},
  {id:'i2',u:'I',t:'빠르기말|Tempo words',intro:[
-  {t:'알레그로는 빠르게, 모데라토는 보통 빠르게, 안단테는 조금 느리게, 아다지오는 느리게!|Allegro is fast, Moderato is medium, Andante is a walking pace and Adagio is slow!',v:{emoji:'🐇 🚶 🐢'},p:{tempo:true}}],
+  {t:'알레그로는 빠르게, 모데라토는 보통 빠르게, 안단테는 느리게, 아다지오는 아주 느리게!|Allegro is fast, Moderato is medium, Andante is a walking pace and Adagio is slow!',v:{emoji:'🐇 🚶 🐢'},p:{tempo:true}}],
   a:{type:'quiz',bank:'tempo',count:6}},
  {id:'i3',u:'I',t:'악보 기호|Music symbols',intro:[
   {t:'도돌이표를 만나면 앞으로 돌아가서 한 번 더! 끝세로줄은 곡이 끝났다는 뜻이에요.|A repeat sign says “go back and play again!” A final bar line means the end.',v:{sym:[['repeat','도돌이표|repeat'],['final','끝세로줄|the end']]}},
@@ -1237,12 +1237,12 @@ const QUIZ={
   if(r<.5){const up=Math.random()<.5;return mc('들어 보세요! 소리가 어떻게 변했나요?|Listen! How did the sound change?',up?'점점 세게|Getting louder':'점점 여리게|Getting softer',[up?'점점 여리게|Getting softer':'점점 세게|Getting louder','똑같아요|It stayed the same'],{listen:{dyn:up?'cresc':'decresc'}})}
   const D=[['p','여리게|Soft'],['f','세게|Loud'],['mp','조금 여리게|Medium soft'],['mf','조금 세게|Medium loud'],['pp','아주 여리게|Very soft'],['ff','아주 세게|Very loud'],['cresc','점점 세게|Gradually louder'],['decresc','점점 여리게|Gradually softer']];
   const v=pick(D);return mc('이 기호는 무슨 뜻일까요?|What does this sign mean?',v[1],shuffle(D.filter(x=>x!==v)).slice(0,3).map(x=>x[1]),{art:{sym:v[0]}})},
- tempo(){const r=Math.random();if(r<.4){const fast=Math.random()<.5;return mc('들어 보세요! 어떤 빠르기일까요?|Listen! What’s the tempo?',fast?'빠르게(알레그로)|Fast (Allegro)':'느리게(아다지오)|Slow (Adagio)',[fast?'느리게(아다지오)|Slow (Adagio)':'빠르게(알레그로)|Fast (Allegro)'],{listen:{tempo:fast?150:58}})}
+ tempo(){const r=Math.random();if(r<.4){const fast=Math.random()<.5;return mc('들어 보세요! 어떤 빠르기일까요?|Listen! What’s the tempo?',fast?'빠르게(알레그로)|Fast (Allegro)':'아주 느리게(아다지오)|Slow (Adagio)',[fast?'아주 느리게(아다지오)|Slow (Adagio)':'빠르게(알레그로)|Fast (Allegro)'],{listen:{tempo:fast?150:58}})}
   return pick([
   mc('알레그로(Allegro)는 무슨 뜻일까요?|What does Allegro mean?','빠르게|Fast',['느리게|Slow','보통 빠르게|Medium','점점 여리게|Getting softer']),
-  mc('아다지오(Adagio)는 무슨 뜻일까요?|What does Adagio mean?','느리게|Slow',['빠르게|Fast','세게|Loud','보통 빠르게|Medium']),
+  mc('아다지오(Adagio)는 무슨 뜻일까요?|What does Adagio mean?','아주 느리게|Slow',['빠르게|Fast','세게|Loud','보통 빠르게|Medium']),
   mc('모데라토(Moderato)는 무슨 뜻일까요?|What does Moderato mean?','보통 빠르게|Medium speed',['아주 빠르게|Very fast','느리게|Slow','여리게|Soft']),
-  mc('안단테(Andante)는 어떤 빠르기일까요?|What speed is Andante?','걷는 듯 조금 느리게|A walking pace, a bit slow',['뛰듯이 아주 빠르게|Running, very fast','멈춰요|Stop','점점 빠르게|Speeding up']),
+  mc('안단테(Andante)는 어떤 빠르기일까요?|What speed is Andante?','걷는 듯 느리게|A walking pace, a bit slow',['뛰듯이 아주 빠르게|Running, very fast','멈춰요|Stop','점점 빠르게|Speeding up']),
   mc('일정한 빠르기로 “똑딱똑딱” 박을 알려 주는 기계는?|What machine ticks to show a steady beat?','메트로놈|Metronome',['마이크|Microphone','스피커|Speaker','튜너|Tuner'])])},
  symbols(){return pick([
   mc('이 기호의 이름과 뜻은?|What is this sign?','도돌이표: 돌아가서 다시 연주|Repeat sign: go back and play again',['끝세로줄: 곡의 끝|Final bar line: the end','쉼표: 쉬어요|Rest: be quiet','늘임표: 길게 늘여요|Fermata: hold it'],{art:{sym:'repeat'}}),
@@ -1609,7 +1609,7 @@ function symbolSVG(k,{size=90,col='#1d2a4a'}={}){
  switch(k){
   case 'w':return note(4);case 'h':return note(2);case 'q':return note(1);case 'e':return note(.5);case 's':return note(.25);case 'dh':return note(2,1);case 'dq':return note(1,1);
   case 'ee':return box(headSVG(14,58,{col})+headSVG(44,58,{col})+`<line x1="19.6" y1="57" x2="19.6" y2="22" stroke="${col}" stroke-width="2"/><line x1="49.6" y1="57" x2="49.6" y2="22" stroke="${col}" stroke-width="2"/><rect x="18.7" y="20" width="31.8" height="5" fill="${col}"/>`);
-  case 'wr':case 'hr':case 'qr':case 'er':case 'sr':return box(`<line x1="6" y1="${k==='wr'?36:k==='hr'?44:40}" x2="54" y2="${k==='wr'?36:k==='hr'?44:40}" stroke="#c3cbe0" stroke-width="1.5"/>`+restSVG(k[0],30,44,col));
+  case 'wr':case 'hr':case 'qr':case 'er':case 'sr':return box(`<line x1="6" y1="${k==='wr'?34:k==='hr'?44:40}" x2="54" y2="${k==='wr'?34:k==='hr'?44:40}" stroke="#c3cbe0" stroke-width="1.5"/>`+restSVG(k[0],30,44,col));
   case 'clef':return box(clefSVG(18,18,1,col)+[0,1,2,3,4].map(i=>`<line x1="4" y1="${18+i*10}" x2="56" y2="${18+i*10}" stroke="#c3cbe0" stroke-width="1.2"/>`).join(''),60,90);
   case 'sharp':case 'flat':case 'natural':return box(`<text x="30" y="58" font-size="54" text-anchor="middle" fill="${col}">${{sharp:'♯',flat:'♭',natural:'♮'}[k]}</text>`);
   case 'repeat':return box(`${[0,1,2,3,4].map(i=>`<line x1="4" y1="${20+i*10}" x2="56" y2="${20+i*10}" stroke="#c3cbe0" stroke-width="1.2"/>`).join('')}<circle cx="30" cy="35" r="3" fill="${col}"/><circle cx="30" cy="45" r="3" fill="${col}"/><rect x="37" y="20" width="3" height="40" fill="${col}"/><rect x="44" y="20" width="7" height="40" fill="${col}"/>`);
@@ -1960,9 +1960,11 @@ function runHighway(spec,host,opt){
   c.fillStyle='rgba(255,95,162,.18)';c.fillRect(px-14,top-22,28,gap*4+44);c.fillStyle='#ff5fa2';c.fillRect(px-1.5,top-22,3,gap*4+44);
   for(const n of notes){const x=px+(n.t-now)*pxs;if(x<-20)continue;if(x>W2+20)break;const st=stepOf(n.m),y=bot-(st-2)*gap/2,col=n.j&&n.j!=='m'?JCOL[n.j]:n.j==='m'?'#ff7b8a':'#1d2a4a';
    c.strokeStyle='#9aa5c2';for(let k2=0;k2>=st;k2-=2){c.beginPath();c.moveTo(x-10,bot-(k2-2)*gap/2);c.lineTo(x+10,bot-(k2-2)*gap/2);c.stroke()}for(let k2=12;k2<=st;k2+=2){c.beginPath();c.moveTo(x-10,bot-(k2-2)*gap/2);c.lineTo(x+10,bot-(k2-2)*gap/2);c.stroke()}
-   const beats=n.d/spb;c.save();c.translate(x,y);c.rotate(-.38);c.beginPath();c.ellipse(0,0,6,4.3,0,0,7);if(beats>=2){c.lineWidth=2;c.strokeStyle=col;c.stroke()}else{c.fillStyle=col;c.fill()}c.restore();
+   const beats=n.d/spb*4/(song.sigD||4);c.save();c.translate(x,y);c.rotate(-.38);c.beginPath();c.ellipse(0,0,6,4.3,0,0,7);if(beats>=2){c.lineWidth=2;c.strokeStyle=col;c.stroke()}else{c.fillStyle=col;c.fill()}c.restore();
    if(isBlack(n.m)){c.fillStyle=col;c.font='bold 15px sans-serif';c.textAlign='center';c.fillText('♯',x-14,y+5)}
-   if(beats<4){const up=st<6;c.strokeStyle=col;c.lineWidth=1.6;c.beginPath();c.moveTo(up?x+5.5:x-5.5,y);c.lineTo(up?x+5.5:x-5.5,up?y-30:y+30);c.stroke()}
+   if(beats<4){const up=st<6,sx=up?x+5.5:x-5.5,sy=up?y-30:y+30;c.strokeStyle=col;c.lineWidth=1.6;c.beginPath();c.moveTo(sx,y);c.lineTo(sx,sy);c.stroke();
+    // a flag for an eighth note, two for a sixteenth (beats counted in quarter notes)
+    if(beats<.99){const v=up?1:-1;c.fillStyle=col;for(let f=0;f<(beats<.49?2:1);f++){const fy=sy+v*f*7;c.beginPath();c.moveTo(sx,fy);c.bezierCurveTo(sx+1,fy+v*7,sx+9,fy+v*9,sx+8,fy+v*18);c.bezierCurveTo(sx+12,fy+v*9,sx+3,fy+v*6,sx,fy);c.fill()}}}
    if(Math.abs(beats-1.5)<.01||Math.abs(beats-3)<.01){c.fillStyle=col;c.beginPath();c.arc(x+11,y-2,2,0,7);c.fill()}}}
  // ---- main loop
  function loop(ts){if(stopped)return;if(!cw)fit();let now;
@@ -2085,7 +2087,7 @@ function runKeys(spec,host,opt){
  function next(){if(stopped)return;clearMarks();fb.textContent='';stepsEl.innerHTML='';miss=0;sel.clear();ctl.innerHTML='';t0=performance.now();
   if(k>=N&&t!=='scale'){finish();return}
   if(t==='keys'){if(spec.task==='findCF'){const c=k%2===0?0:5;cur={pc:c};qEl.textContent=c===0?T('“도(C)”를 아무거나 하나 눌러요! (검은 건반 2개의 왼쪽)|Press any Do (C)! (left of the 2 black keys)'):T('“파(F)”를 아무거나 하나 눌러요! (검은 건반 3개의 왼쪽)|Press any Fa (F)! (left of the 3 black keys)')}
-   else if(spec.task==='name'){let m;do{m=pick(whitesIn(60,71))}while(m===last);last=m;cur={pc:m%12};qEl.textContent=T(`“${noteName(m,'solfege')}”를 찾아 눌러요!|Find and press ${noteName(m,'letter')} (${SOLF_EN[m%12]})!`)}
+   else if(spec.task==='name'){let m;do{m=pick(whitesIn(60,71))}while(m===last);last=m;cur={pc:m%12};qEl.textContent=T(`“${noteName(m,'solfege')}”${josaKo(noteName(m,'solfege'),'을','를')} 찾아 눌러요!|Find and press ${noteName(m,'letter')} (${SOLF_EN[m%12]})!`)}
    else{let m;do{m=pick([61,63,66,68,70])}while(m===last);last=m;cur={pc:m%12,exact:m};const up=noteName(m-1).split(' ')[0]+'♯',dn=noteName(m+1).split(' ')[0]+'♭';qEl.textContent=T(`“${up}”(=${dn}) 건반을 눌러요!|Press ${up} (= ${dn})!`)}
    art.innerHTML=''}
   else if(t==='notes'){let m;const pool=whitesIn(spec.range[0],spec.range[1]);do{m=pick(pool)}while(m===last&&pool.length>1);last=m;cur={exact:m};
@@ -2591,7 +2593,7 @@ async function demo(p,vis){stopDemo();const my=DEMO.n,ok=await ensureAudio();con
  if(p.majmin!=null){const [ma,mi]=MAJMIN_TUNES[p.majmin];const d1=notes(ma,110);at(0,()=>label('😊 '+L('장조','Major')));notes(mi,110,'piano',d1+.8);at(d1+.8,()=>label('😢 '+L('단조','Minor')))}
  if(p.voices){const names={pluck:'🎸 '+L('줄을 뜯는 소리','Plucked string'),flute:'🎶 '+L('부는 소리','Blown'),mallet:'🥁 '+L('두드리는 소리','Struck'),bow:'🎻 '+L('활로 켜는 소리','Bowed')};p.voices.forEach((v,i)=>{['C4','E4','G4','C5'].forEach((n,j)=>play(v,n,t0+i*2.2+j*.3,.28,.8,b));at(i*2.2,()=>label(names[v]||v))})}
  if(p.dyn){['C4','E4','G4','C5'].forEach((n,j)=>play('piano',n,t0+j*.35,.3,.18,b));at(0,()=>label('🐭 p · '+L('여리게','soft')));['C4','E4','G4','C5'].forEach((n,j)=>play('piano',n,t0+1.8+j*.35,.3,.95,b));at(1.8,()=>label('🦁 f · '+L('세게','loud')))}
- if(p.tempo){[0,1,2,3,4].forEach(j=>play('piano',[60,62,64,65,67][j],t0+j*1,.8,.7,b));at(0,()=>label('🐢 Adagio · '+L('느리게','slow')));[0,1,2,3,4,5,6,7].forEach(j=>play('piano',[60,62,64,65,67,65,64,62][j],t0+5.6+j*.25,.2,.7,b));at(5.6,()=>label('🐇 Allegro · '+L('빠르게','fast')))}}
+ if(p.tempo){[0,1,2,3,4].forEach(j=>play('piano',[60,62,64,65,67][j],t0+j*1,.8,.7,b));at(0,()=>label('🐢 Adagio · '+L('아주 느리게','slow')));[0,1,2,3,4,5,6,7].forEach(j=>play('piano',[60,62,64,65,67,65,64,62][j],t0+5.6+j*.25,.2,.7,b));at(5.6,()=>label('🐇 Allegro · '+L('빠르게','fast')))}}
 
 // ---------------------------------------------------------------- running an activity (lessons, daily tasks, practice rooms, contests)
 const HOWTO={
@@ -2737,7 +2739,7 @@ function stopMetro(){if(FREE.timer){clearInterval(FREE.timer);FREE.timer=null}}
 
 // ---------------------------------------------------------------- instrument book
 RENDER.instr=()=>{const fams=['key','string','wood','brass','perc'];
- $('v-instr').innerHTML=`<div class="room"><h2 class="h2w">🎺 ${L('악기 도감','Instrument book')}</h2><p class="sub wsub">${L('악기를 누르면 소리를 들을 수 있어요!','Tap an instrument to hear it!')}</p>
+ $('v-instr').innerHTML=`<div class="room"><h2 class="h2w">🎺 ${L('악기 도감','Instrument book')}</h2><p class="sub wsub">${L('악기를 누르면 소리를 들을 수 있어요! 대금을 뺀 우리 악기는 비슷한 악기 녹음으로 들려줘요.','Tap an instrument to hear it! Korean instruments other than the daegeum play a similar instrument’s recording.')}</p>
   ${fams.map(f=>`<div class="card fam"><b>${FAM[f].ic} ${esc(T(FAM[f].n))}</b><small class="sub"> · ${esc(T(FAM[f].how))}</small><div class="igrid">${INSTR.filter(x=>x[3]===f).map(x=>`<button type="button" class="icard" data-i="${x[0]}"><span class="ib">${instrPic(x[0])}</span><b>${esc(T(x[2]))}</b></button>`).join('')}</div></div>`).join('')}</div>`;
  $('v-instr').querySelectorAll('[data-i]').forEach(b=>b.addEventListener('click',()=>{const it=INSTR_BY[b.dataset.i];const bb=bus(1);want(instrVoices(it[0]),2500).then(()=>{if(AC)playInstr(it[0],bb,AC.currentTime+.05)});
   modal(`<div class="center"><div class="ibig">${instrPic(it[0])}</div><h2>${esc(T(it[2]))}</h2><p class="sub">${esc(T(FAM[it[3]].n))}</p><p>${esc(T(it[4]))}</p></div><div class="row"><button class="btn gold" data-act="close" type="button">${L('알았어요!','Got it!')}</button></div>`,{onOpen:()=>speak(T(it[2])+'. '+T(it[4]))})}))};
@@ -2851,12 +2853,12 @@ function openSettings(){const o=ROOT.opt;let renamed=false;
  modal(`<h2>⚙️ ${L('설정','Settings')}</h2><div class="sets">
   ${sw('snd',o.sound,'🔊',L('효과음','Sound effects'),L('악기와 박자 소리도 함께 켜고 꺼요','Also turns instruments and ticks on or off'))}
   ${sw('vce',o.voice,'🗣️',L('목소리','Voice'),L('선생님이 읽어 줘요','Teachers read everything aloud'))}
-  <div class="setrow"><span class="sl">🔤 ${L('음 이름','Note names')}</span>${seg('nm',L('음 이름','Note names'),[['solfege',L('도레미','Do Re Mi')],['letter','C D E'],['both',L('둘 다','Both')]],OPT_NAMES())}</div>
+  <div class="setrow"><span class="sl">🔤 ${L('계이름·음이름','Note names')}</span>${seg('nm',L('계이름·음이름','Note names'),[['solfege',L('도레미','Do Re Mi')],['letter','C D E'],['both',L('둘 다','Both')]],OPT_NAMES())}</div>
   <button type="button" class="setrow" data-act="cal"><span class="sl">⏱️ ${L('박자 맞추기 보정','Timing check')}<small>${L('무선 이어폰 소리가 늦을 때','If wireless headphones lag')}</small></span><b>${o.calib>0?'+':''}${o.calib}ms ›</b></button>
   <div class="setrow"><span class="sl">🌐 ${L('언어','Language')}</span>${seg('lang',L('언어','Language'),[['ko','한국어','ko'],['en','English','en']],LANG)}</div>
   ${MGP.me?`<p class="pnote">${esc(S.av)} ${L(`${esc(S.name)}의 기록이에요. 플레이어는 첫 화면에서 바꿔요.`,`This is ${esc(S.name)}’s progress. Switch players on the main page.`)}</p>`
    :`<button type="button" class="setrow" data-act="ppl"><span class="sl">👨‍👩‍👧 ${L('연습하는 친구 바꾸기','Switch player')}<small>${esc(S.av)} ${esc(S.name)}</small></span><b>›</b></button>`}
-  <button type="button" class="setrow danger" data-act="reset"><span class="sl">🗑️ ${L('이 게임 기록 지우기','Erase this game’s progress')}</span></button></div>${COPYRIGHT()}`,{
+  <button type="button" class="setrow danger" data-act="reset"><span class="sl">🗑️ ${L('이 게임 기록 지우기','Erase this game’s progress')}</span></button></div><p class="sub" style="margin:12px 4px 0;line-height:1.45">📚 ${L('학교마다 배우는 순서와 방법이 조금씩 다를 수 있어요. 헷갈리면 학교 선생님 설명을 따라 주세요.','Schools may teach things in a different order or in a different way. If something seems different, follow your teacher.')}</p>${COPYRIGHT()}`,{
   onClose:()=>{if(renamed&&VIEW!=='play')go(VIEW,false)},
   acts:{
   snd:b=>{o.sound=!o.sound;save();applyOpts();flip(b,o.sound);if(o.sound)SFX.click();return false},

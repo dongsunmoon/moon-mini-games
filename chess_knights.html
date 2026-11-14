@@ -2276,9 +2276,9 @@ const LESSONS=[
   demo:L('기물 점수로 계산해요. 비숍(3점)으로 룩(5점)을 잡고 비숍을 잃으면 5 − 3 = 2점 이득!','Count with piece points. Take a rook (5) with a bishop (3) and lose the bishop: 5 − 3 = 2 points ahead!'),values:true},
  {icon:'👑',title:SKILL_NAME.m1,text:L('체크메이트는 킹이 공격받았는데 ① 도망칠 칸이 없고 ② 막을 수 없고 ③ 공격한 기물을 잡을 수도 없을 때예요.','Checkmate is when the king is attacked and ① cannot run away, ② cannot block, and ③ cannot capture the attacker.'),
   demo:L('꿀팁: 체크하는 수를 모두 찾아서 하나씩 확인해요. 킹이 자기 폰들 뒤에 갇혀 있으면 맨 뒷줄을 노려요!','Tip: find every check and test each one. If the king is stuck behind its pawns, aim at the back row!')},
- {icon:'🍴',title:SKILL_NAME.f,text:L('포크는 한 기물이 상대 기물 두 개를 동시에 공격하는 기술이에요. 상대는 하나만 지킬 수 있어서 나머지 하나를 얻어요.','A fork is one piece attacking two enemy pieces at once. Your opponent can only save one, so you win the other.'),
+ {icon:'🍴',title:SKILL_NAME.f,text:L('포크는 한 기물이 상대 기물 두 개를 동시에 공격하는 기술이에요. 상대는 보통 하나만 지킬 수 있어서 나머지 하나를 얻어요.','A fork is one piece attacking two enemy pieces at once. Your opponent can usually save only one, so you win the other.'),
   demo:L('나이트 포크가 특히 강해요. 체크하면서 다른 기물까지 공격하면 최고의 포크!','Knight forks are extra strong. A check that also attacks another piece is the best fork!')},
- {icon:'📌',title:SKILL_NAME.p,text:L('핀: 뒤에 더 큰 기물이나 킹이 있어서 앞의 기물이 움직이지 못해요. 꼬치: 앞의 큰 기물이 비키면 뒤의 기물을 잡아요.','Pin: the front piece cannot move because a bigger piece or the king is behind it. Skewer: the big piece in front moves away and you take the one behind.'),
+ {icon:'📌',title:SKILL_NAME.p,text:L('핀: 앞의 기물이 비키면 뒤의 더 큰 기물이 잡혀서 함부로 못 움직여요. 뒤가 킹이면 아예 못 움직여요. 꼬치: 앞의 큰 기물이 비키면 뒤의 기물을 잡아요.','Pin: the front piece can’t safely move, or the bigger piece behind it gets taken. If the king is behind, it can’t move at all. Skewer: the big piece in front moves away and you take the one behind.'),
   demo:L('룩, 비숍, 퀸처럼 길게 움직이는 기물로 써요. 상대 기물 두 개가 한 줄에 서 있는지 찾아봐요!','Use long-range pieces: rooks, bishops and queens. Look for two enemy pieces on one line!')},
  {icon:'👑',title:SKILL_NAME.m2,text:L('첫 수로 상대를 꼼짝 못 하게 만들고, 두 번째 수로 체크메이트! 상대가 어떻게 막을지도 생각해요.','Use the first move to trap the opponent and the second move to checkmate. Think about how they will defend!'),
   demo:L('첫 수는 체크나 퀸을 내주는 깜짝 희생일 때도 있어요.','Sometimes the first move is a check or even a surprise queen sacrifice.')},
@@ -2733,7 +2733,7 @@ function mathChest(title,done){
  {closable:false,acts:{
   ans:b2=>{if(answered)return false;answered=true;const ok=+b2.dataset.v===ans;
    document.querySelectorAll('.choices button').forEach(x=>{if(+x.dataset.v===ans)x.classList.add('right');else if(x===b2)x.classList.add('wrong')});
-   $('chestMsg').textContent=ok?L(`정답! ${a} + ${b} = ${ans} · 보너스 +50!`,`Correct! ${a} + ${b} = ${ans} · +50 bonus!`):L(`정답은 ${ans}이에요. 그래도 ${ans}코인을 받아요!`,`The answer is ${ans}. You still get ${ans} coins!`);
+   $('chestMsg').textContent=ok?L(`정답! ${a} + ${b} = ${ans} · 보너스 +50!`,`Correct! ${a} + ${b} = ${ans} · +50 bonus!`):L(`정답은 ${ans}개예요. 그래도 ${ans}코인을 받아요!`,`The answer is ${ans}. You still get ${ans} coins!`);
    if(ok){SFX.good();celebrate()}else SFX.bad();
    $('chestTake').classList.remove('hidden');$('chestTake').dataset.coins=ans+(ok?50:0);return false},
   take:b2=>{const n=+b2.dataset.coins;const r=grant({coins:n,xp:30});flyCoins(null,r.coins);done&&done()}
@@ -3108,7 +3108,7 @@ function battleOver(res,why){
   coins=b.reward*(first?2:1);xp=40+bt.bi*15;
   if(bossFirst){S.bossWins.push(bt.boss);coins+=200+bt.boss*100;xp+=100;extra+=`<span class="item">🗺️ ${L('새 지역이 열렸어요!','A new land is open!')}</span>`}
   title=L('승리!','Victory!');icon='🏆';line=b.lose;SFX.win();celebrate();setTimeout(()=>celebrate('fireworks'),600);
- }else if(res==='draw'){coins=Math.round(b.reward/3);xp=20;title=L('무승부!','Draw!');icon='🤝';line=why==='stalemate'?L('스테일메이트! 킹이 갈 곳이 없지만 체크가 아니라서 무승부예요.','Stalemate! The king cannot move but is not in check, so it is a draw.'):why==='repeat'?L('같은 자리가 3번 나와서 무승부예요.','The same position happened 3 times, so it is a draw.'):L('기물이 부족해서 무승부예요.','Not enough pieces to checkmate, so it is a draw.');SFX.good()}
+ }else if(res==='draw'){coins=Math.round(b.reward/3);xp=20;title=L('무승부!','Draw!');icon='🤝';line=why==='stalemate'?L('스테일메이트! 둘 차례인데 둘 수 있는 수가 하나도 없고, 체크도 아니라서 무승부예요.','Stalemate! The player to move has no legal move and is not in check, so it is a draw.'):why==='fifty'?L('양쪽이 50수씩 두는 동안 잡기도 폰 이동도 없어서 무승부예요.','Both sides made 50 moves with no capture and no pawn move, so it is a draw.'):why==='repeat'?L('같은 자리가 3번 나와서 무승부예요.','The same position happened 3 times, so it is a draw.'):L('기물이 부족해서 무승부예요.','Not enough pieces to checkmate, so it is a draw.');SFX.good()}
  else{coins=10;xp=10;title=why==='resign'?L('기권했어요','You resigned'):L('아쉬워요!','So close!');icon='💪';line=b.win;SFX.lose()}
  const r=grant({coins,xp});save();
  say(res==='win'?`${b.icon} “${b.lose}” ${L('대단해요!','Amazing!')}`:res==='lose'?L('괜찮아요! 퍼즐로 연습하면 더 강해져요. 다시 도전해 봐요!','That’s okay! Practice puzzles to get stronger, then try again!'):line);

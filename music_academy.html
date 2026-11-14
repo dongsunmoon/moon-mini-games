@@ -289,7 +289,9 @@ main{width:min(980px,100%);margin:0 auto;padding:14px max(12px,env(safe-area-ins
 .bl-pad{position:relative;width:170px;height:170px;border-radius:50%;border:0;background:radial-gradient(circle at 40% 35%,#fff7e0,#ffcf6b 55%,#f29a1e);box-shadow:0 10px 0 #c97a10,0 18px 30px rgba(0,0,0,.25);display:grid;place-items:center;touch-action:none}
 .bl-pad.hit{animation:padhit2 .16s}
 @keyframes padhit2{50%{transform:translateY(6px) scale(.96);box-shadow:0 4px 0 #c97a10}}
-.bl-hop{font-size:56px;line-height:1}.bl-hop .ei{width:70px;height:70px}
+.bl-hop{font-size:56px;line-height:1;will-change:transform}.bl-hop .ei{width:70px;height:70px}
+/* Ms. Hop's shadow on the drum: small when she is high in the air, full when she lands on the beat */
+.bl-shadow{position:absolute;left:50%;top:62%;width:64px;height:14px;margin-left:-32px;border-radius:50%;background:rgba(122,67,0,.28);pointer-events:none}
 .bl-num{position:absolute;bottom:18px;font-size:22px;font-weight:900;color:#7a4300}
 .bl-meter{display:flex;align-items:center;gap:8px;font-size:12.5px;font-weight:900;color:var(--muted);margin:6px 0}
 .bl-bar{position:relative;flex:1;height:18px;border-radius:99px;background:linear-gradient(90deg,#ffd6dc,#fff 40%,#fff 60%,#ffd6dc)}
@@ -309,7 +311,7 @@ main{width:min(980px,100%);margin:0 auto;padding:14px max(12px,env(safe-area-ins
 .rl-top{display:flex;justify-content:space-between;align-items:center;gap:8px}
 .rl-top b{background:#f1edff;border-radius:99px;padding:3px 10px;font-size:13px}
 .rl-sheet{min-height:96px;display:grid;place-items:center;background:#fffaf0;border-radius:16px;margin:8px 0;padding:4px}
-.rl-sheet svg{width:100%;height:auto;max-height:120px}
+.rl-sheet svg{width:100%;height:auto;max-height:140px}
 .rl-hidden{font-size:22px;font-weight:900;color:var(--brand-d)}
 .rl-ctl{display:flex;gap:10px;justify-content:center;min-height:52px;flex-wrap:wrap}
 .rl-pad{width:150px;height:150px;margin:10px auto 4px;display:grid;font-size:56px}
@@ -323,7 +325,7 @@ main{width:min(980px,100%);margin:0 auto;padding:14px max(12px,env(safe-area-ins
 .bbar[data-ph="listen"] .bb-tag{background:#e0f3ff;color:#1b74b3}
 .bbar[data-ph="go"] .bb-tag{background:#ffe5f0;color:#c92a6f}
 .bbar[data-ph="quiet"] .bb-tag{background:#f3efff;color:#6a4be0}
-.bb-row{position:relative;display:flex;gap:10px;justify-content:center;align-items:center;margin:8px 0 14px;min-height:64px}
+.bb-row{position:relative;display:flex;gap:10px;justify-content:center;align-items:center;margin:18px 0 14px;min-height:64px}
 .bb-row i{position:relative;width:50px;height:50px;border-radius:50%;background:#efeafd;display:grid;place-items:center;font-style:normal;transition:background .1s,transform .1s,box-shadow .2s}
 .bb-row i.one{width:62px;height:62px;box-shadow:inset 0 0 0 3px #d6ccf7}
 .bb-row i b{font-size:21px;font-weight:900;color:#a395d6;transition:color .1s}
@@ -334,7 +336,8 @@ main{width:min(980px,100%);margin:0 auto;padding:14px max(12px,env(safe-area-ins
 .bbar[data-ph="go"] .bb-row i.on{background:#ff5fa2}
 .bbar[data-ph="quiet"] .bb-row i{background:transparent;box-shadow:inset 0 0 0 2px #cfc3f7}
 .bb-row i.jp{box-shadow:0 0 0 5px #ffd23f}.bb-row i.jg{box-shadow:0 0 0 5px #3ee07a}.bb-row i.jo{box-shadow:0 0 0 5px #5cc8ff}.bb-row i.jm{box-shadow:0 0 0 5px #ff7b8a}
-.bb-head{position:absolute;left:0;bottom:-12px;width:12px;height:12px;margin-left:-6px;border-radius:50%;background:var(--brand-d);opacity:0;text-decoration:none}
+/* the ball hops from bubble to bubble and lands on each one on its beat, so the next beat can be seen coming */
+.bb-head{position:absolute;left:0;top:0;z-index:3;width:16px;height:16px;margin:-8px 0 0 -8px;border-radius:50%;background:var(--brand-d);box-shadow:0 2px 4px rgba(0,0,0,.25);opacity:0;text-decoration:none;will-change:transform}
 .bbar[data-ph="listen"] .bb-head{background:#3daef5}.bbar[data-ph="go"] .bb-head{background:#ff5fa2}
 .bb-n{position:absolute;top:-9px;width:12px;height:12px;margin-left:-6px;border-radius:50%;background:#3daef5;text-decoration:none;animation:popin .2s}
 .bb-n.kid{top:auto;bottom:-26px;background:#ff5fa2}.bb-n.x{background:#ff7b8a;border-radius:3px}
@@ -366,6 +369,15 @@ main{width:min(980px,100%);margin:0 auto;padding:14px max(12px,env(safe-area-ins
 .hw-input.song{height:min(170px,24vh)}
 .hw-input.drum,.hw-input.chordplay{display:flex;gap:8px;height:min(150px,22vh)}
 .hw-hint{color:#e9e2ff!important;font-size:13px}
+.hw .cdown{top:24%;font-size:56px;opacity:.92}
+.hw-judge .hint{color:#fff;font-size:24px}
+/* keys and pads show the note colour, and fill up with it as their next note comes down: full = press now */
+.hw .pk.w:not(.rb){box-shadow:inset 0 -7px 0 var(--nc)}
+.hw .pk.b{box-shadow:0 3px 0 #0b0e1a,inset 0 -5px 0 var(--nc)}
+.hw .pk::before,.hw .pad::before{content:'';position:absolute;left:0;right:0;bottom:0;height:calc(var(--s,0)*100%);background:var(--nc,#fff);opacity:.55;border-radius:inherit;pointer-events:none;z-index:0}
+.hw .pad::before{background:#fff;opacity:.4}
+.hw .pk span,.hw .pad>:not(kbd){position:relative;z-index:1}.hw .pad kbd{z-index:1}
+.pad.want{animation:kglow .5s 2}
 .hw-rivals{display:grid;gap:3px;background:rgba(0,0,0,.25);border-radius:12px;padding:6px 8px}
 .rrow{position:relative;display:flex;gap:6px;align-items:center;color:#fff;font-size:12.5px;font-weight:800;height:20px}
 .rrow span{width:16px}.rrow b{position:relative;z-index:1;white-space:nowrap}
@@ -935,7 +947,7 @@ const LESSONS=[
  {id:'a1',u:'A',t:'심장처럼 똑같이|Steady like a heartbeat',intro:[
   {t:'음악에는 늘 똑같은 간격으로 계속되는 “박”이 있어요. 시계의 똑딱 소리처럼요!|Music has a “beat” that keeps going at the same speed, like a ticking clock!',v:{pulse:80},p:{metro:{bpm:80,beats:8}}},
   {t:'우리 심장도 콩닥콩닥 박을 가지고 있어요. 가슴에 손을 대 봐요.|Your heart has a beat too. Put your hand on your chest!',v:{emoji:'💓'}},
-  {t:'선생님이 “하나, 둘, 셋, 넷” 세어 주면, 다음 “하나”부터 똑딱 소리마다 북을 콩! 쳐요. 동그라미 불빛이 지금 몇 번째 박인지 알려 줘요.|I’ll count “one, two, three, four”. Then from the next “one”, hit the drum on every tick. The lights show which beat you’re on.',v:{bar:4},p:{metro:{bpm:76,beats:8}}}],
+  {t:'선생님이 “하나, 둘, 셋, 넷” 세어 주면, 다음 “하나”부터 똑딱 소리마다 북을 콩! 쳐요. 통통 튀는 공이 동그라미에 내려앉을 때가 바로 박이에요.|I’ll count “one, two, three, four”. Then from the next “one”, hit the drum on every tick. Each time the bouncing ball lands on a circle, that’s the beat.',v:{bar:4},p:{metro:{bpm:76,beats:8}}}],
   a:{type:'beat',bpm:76,beats:16}},
  {id:'a2',u:'A',t:'빠른 박, 느린 박|Fast beat, slow beat',intro:[
   {t:'박이 빠르게 갈 수도 있고 느리게 갈 수도 있어요. 이걸 “빠르기”라고 해요.|A beat can go fast or slow. That’s called the “tempo”.',p:{metro:{bpm:60,beats:4}}},
@@ -967,8 +979,8 @@ const LESSONS=[
   {t:'이번엔 천천히 기다려 주는 연습이에요. 빛나는 건반을 눌러요!|This is wait-for-me practice. Press the glowing key!'}],
   a:{type:'song',song:'hotcross',step:true}},
  {id:'b5',u:'B',t:'박자에 맞춰 뜨거운 빵|Hot Cross Buns in time',intro:[
-  {t:'이제 음표가 내려와요. 선에 닿을 때 딱 맞춰 눌러요!|Now the notes fall down. Press when they touch the line!',v:{emoji:'⬇️🎹'}},
-  {t:'길쭉한 음표는 길게 이어지는 음이에요. 다음 음을 기다려요.|Long notes last longer. Wait for the next one.'}],
+  {t:'이제 음표가 내려와요. 노란 선에 닿을 때 딱 맞춰 눌러요! 건반이 같은 색으로 꽉 차오르는 순간이 누를 때예요.|Now the notes fall down. Press when they touch the yellow line! When the key fills up with colour, it’s time to press.',v:{emoji:'⬇️🎹'}},
+  {t:'가로줄 하나가 한 박이에요. 길쭉한 음표는 길게 이어지는 음이니까 다음 음을 기다려요.|Each line across is one beat. Long notes last longer, so wait for the next one.'}],
   a:{type:'song',song:'hotcross',speed:.85}},
  {id:'b6',u:'B',t:'메리의 어린 양|Mary Had a Little Lamb',intro:[
   {t:'이번 노래에는 “솔”도 나와요. 도·레·미·솔!|This song has Sol too. Do, Re, Mi, Sol!',v:{kbd:{from:60,to:67,labels:true,hi:{60:'#ff5a5f',62:'#ff9f1c',64:'#ffd23f',67:'#1fb5c9'}}},p:{song:'mary'}}],
@@ -1007,7 +1019,7 @@ const LESSONS=[
   {t:'속이 빈 2분음표는 2박, 막대가 없는 온음표는 4박이에요!|A hollow half note lasts 2 beats, and a whole note with no stem lasts 4!',v:{sym:[['h','2박|2 beats'],['w','4박|4 beats']]},p:{rhy:{p:'h h w',bpm:80}}}],
   a:{type:'quiz',bank:'values',set:['q','h','w'],count:6}},
  {id:'c2',u:'C',t:'리듬 읽기|Reading rhythms',intro:[
-  {t:'악보의 리듬을 보고 북을 쳐요. 분홍 막대가 지금 칠 곳을 알려 줘요.|Read the rhythm and tap the drum. The pink bar shows where you are.',v:{rhy:'q q h'},p:{rhy:{p:'q q h',bpm:76}}},
+  {t:'악보의 리듬을 보고 북을 쳐요. 통통 튀는 공이 음표에 내려앉을 때 쳐요!|Read the rhythm and tap the drum. Tap when the bouncing ball lands on a note!',v:{rhy:'q q h'},p:{rhy:{p:'q q h',bpm:76}}},
   {t:'2분음표는 한 번 치고 2박을 기다려요. “따-안”!|For a half note, tap once and wait 2 beats: “taa-aa”!'}],
   a:{type:'read',level:1,count:4,bpm:72}},
  {id:'c3',u:'C',t:'쉼표는 쉬는 박|Rests are quiet beats',intro:[
@@ -1574,11 +1586,13 @@ const RTOK={w:[4,0],h:[2,0],q:[1,0],e:[.5,0],s:[.25,0],dq:[1.5,0],dh:[3,0],de:[.
 function parseRhythm(str){let t=0;return str.trim().split(/\s+/).filter(x=>x!=='|').map(k=>{const [d,r]=RTOK[k]||[1,0],o={k,d,rest:!!r,t};t+=d;return o})}
 const rhythmBeats=str=>parseRhythm(str).reduce((a,b)=>a+b.d,0);
 // draws the rhythm; cols[i] colours token i; returns {svg, xs}
-function rhythmSVG(str,{w=320,sig=4,cols=[],showSig=false,count=false,cursor=null}={}){
- const toks=parseRhythm(str),total=toks.reduce((a,b)=>a+b.d,0),bars=Math.max(1,Math.ceil(total/sig-1e-9)),h=count?92:78,line=46;
+// ball: room above the notes for the bouncing ball (see ballAt)
+const BALL_Y=3;
+function rhythmSVG(str,{w=320,sig=4,cols=[],showSig=false,count=false,cursor=null,ball=false}={}){
+ const toks=parseRhythm(str),total=toks.reduce((a,b)=>a+b.d,0),bars=Math.max(1,Math.ceil(total/sig-1e-9)),h=count?92:78,line=46,top=ball?-26:0;
  const x0=showSig?40:16,span=w-x0-14;
  // spacing grows with duration but never too tight
- const unit=span/(total+bars*.15),xs=[];let s=`<svg class="rhy" viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg"><line x1="8" y1="${line}" x2="${w-8}" y2="${line}" stroke="#9aa5c2" stroke-width="2"/>`;
+ const unit=span/(total+bars*.15),xs=[];let s=`<svg class="rhy" viewBox="0 ${top} ${w} ${h-top}" xmlns="http://www.w3.org/2000/svg"><line x1="8" y1="${line}" x2="${w-8}" y2="${line}" stroke="#9aa5c2" stroke-width="2"/>`;
  if(showSig)s+=`<text x="22" y="${line-4}" font-size="19" font-weight="900" text-anchor="middle" fill="#1d2a4a" font-family="Georgia,serif">${sig}</text><text x="22" y="${line+16}" font-size="19" font-weight="900" text-anchor="middle" fill="#1d2a4a" font-family="Georgia,serif">4</text>`;
  let x=x0+unit*.4,barAt=sig;
  toks.forEach((tk,i)=>{xs.push(x);x+=tk.d*unit;if(Math.abs(tk.t+tk.d-barAt)<1e-6&&i<toks.length-1){s+=`<line x1="${x-unit*.3}" y1="${line-16}" x2="${x-unit*.3}" y2="${line+16}" stroke="#9aa5c2" stroke-width="2"/>`;x+=unit*.15;barAt+=sig}});
@@ -1600,7 +1614,14 @@ function rhythmSVG(str,{w=320,sig=4,cols=[],showSig=false,count=false,cursor=nul
    if(nx!=null)s+=`<rect x="${xs[i]+4.7}" y="${line-27}" width="${nx-xs[i]-5.6+1.8}" height="4.6" fill="#1d2a4a"/>`;else if(!pv)s+=`<rect x="${xs[i]+4.7}" y="${line-27}" width="8" height="4.6" fill="#1d2a4a"/>`}})});
  if(count){toks.forEach((tk,i)=>{if(Math.abs(tk.t-Math.round(tk.t))<1e-6)s+=`<text x="${xs[i]}" y="${h-4}" font-size="13" font-weight="900" text-anchor="middle" fill="#7d88a6">${(Math.round(tk.t)%sig)+1}</text>`;else if(Math.abs(tk.t%1-.5)<1e-6)s+=`<text x="${xs[i]}" y="${h-4}" font-size="13" font-weight="900" text-anchor="middle" fill="#b0b8cf">&amp;</text>`})}
  if(cursor!=null)s+=`<line class="rcur" x1="${cursor}" y1="8" x2="${cursor}" y2="${line+22}" stroke="#ff5fa2" stroke-width="3" stroke-linecap="round"/>`;
+ if(ball)s+=`<circle class="rball" cx="-30" cy="${BALL_Y}" r="7.5" fill="#ff5fa2" stroke="#fff" stroke-width="1.5"/>`;
  return {svg:s+'</svg>',xs,unit,x0}}
+// The bouncing ball over a rhythm: it lands on every note (and on each count-in beat), so the child sees each tap coming.
+// lands: beat times, in order. A long hop (a long note or a rest) goes higher; big:true makes one hop a big jump (into the first note).
+// Returns the height y, the last landing k, and t: the beat to take x from (the ball stays on the last note once it has landed there).
+function ballAt(lands,b){let k=-1;while(k+1<lands.length&&lands[k+1].t<=b)k++;const t=lands.length?Math.min(b,lands[lands.length-1].t):b;
+ if(k<0||k>=lands.length-1)return {y:BALL_Y,k,t};const a=lands[k],len=lands[k+1].t-a.t,f=(b-a.t)/len,h=lands[k+1].big?24:clamp(5+len*9,6,22);
+ return {y:BALL_Y-h*4*f*(1-f),k,t}}
 
 // ---------------------------------------------------------------- single symbols for quizzes and lesson cards
 function symbolSVG(k,{size=90,col='#1d2a4a'}={}){
@@ -1665,26 +1686,30 @@ const isTapKey=e=>!e.repeat&&!e.metaKey&&!e.ctrlKey&&!e.altKey&&e.key!=='Escape'
 function bubble(host,txt,cls=''){const b=host.querySelector('.tbub');if(!b)return;b.textContent=T(txt);b.className='tbub show '+cls;clearTimeout(b._t);b._t=setTimeout(()=>b.classList.remove('show'),1600)}
 const tface=t=>`<span class="tface" style="background:${TEACHERS[t].bg}">${pic(TEACHERS[t].img,TEACHERS[t].icon)}</span>`;
 function countdownHTML(){return `<div class="cdown hidden"></div>`}
-function showCount(host,txt){const c=host.querySelector('.cdown');if(!c)return;c.textContent=txt;c.classList.remove('hidden','pop');void c.offsetWidth;c.classList.add('pop')}
+function showCount(host,txt){const c=host.querySelector('.cdown');if(!c||c.textContent===txt&&!c.classList.contains('hidden'))return;c.textContent=txt;c.classList.remove('hidden','pop');void c.offsetWidth;c.classList.add('pop')}
 const hideCount=host=>{const c=host.querySelector('.cdown');if(c)c.classList.add('hidden')};
 function simJ(acc){const r=Math.random();return r<acc*.8?'p':r<acc*.95?'g':r<acc*1.05?'o':'m'}
 
 // ================================================================ the beat bar: where am I in the bar, and whose turn is it?
-// One bubble per beat (beat 1, the strong beat, is the big one) lights in time with the clicks, and a dot glides between them.
+// One bubble per beat (beat 1, the strong beat, is the big one) lights in time with the clicks, and a ball hops between them,
+// landing on each bubble on its beat: the child sees the next beat coming. The hop back to beat 1 is higher, so a new bar shows too.
 // Phases colour it: ready = count-in, listen = the teacher plays, go = the child's turn, quiet = keep the beat inside.
 const CNT=[['하나','one'],['둘','two'],['셋','three'],['넷','four'],['다섯','five'],['여섯','six']];
 const cntWord=i=>L(...CNT[((i%CNT.length)+CNT.length)%CNT.length]);
 const barHTML=sig=>`<div class="bbar" data-ph="ready"><span class="bb-tag"></span><div class="bb-row">${Array.from({length:sig},(_,i)=>`<i class="${i?'':'one'}"><b>${i+1}</b></i>`).join('')}<u class="bb-head"></u></div><div class="bb-say"></div></div>`;
 function beatBar(el,sig){const row=el.querySelector('.bb-row'),bs=[...row.querySelectorAll('i')],head=row.querySelector('.bb-head'),tag=el.querySelector('.bb-tag'),sayEl=el.querySelector('.bb-say');
- let ph='',lit=-1,cs=null,said=null;
+ let ph='',lit=-1,cs=null,said=null,gs=null;
  const centers=()=>cs||(cs=bs.map(b=>b.offsetLeft+b.offsetWidth/2));
+ // where the ball lands: in the top of each bubble, above its number
+ const lands=()=>gs||(gs=bs.map(b=>({x:b.offsetLeft+b.offsetWidth/2,y:b.offsetTop+4})));
  const xOf=beat=>{const c=centers(),i=((Math.floor(beat)%sig)+sig)%sig,step=c.length>1?c[1]-c[0]:60;return c[i]+(beat-Math.floor(beat))*step};
  return {
-  phase(p,t){if(p!==ph){ph=p;el.dataset.ph=p;cs=null}if(t!=null&&tag.textContent!==t)tag.textContent=t},
+  phase(p,t){if(p!==ph){ph=p;el.dataset.ph=p;cs=gs=null}if(t!=null&&tag.textContent!==t)tag.textContent=t},
   // beat: beats counted from a bar line (0 = beat 1); null hides the light, as in the quiet part
   at(beat){if(beat==null){head.style.opacity=0;if(lit>=0){bs[lit].classList.remove('on');lit=-1}return}
    const i=((Math.floor(beat)%sig)+sig)%sig;if(i!==lit){if(lit>=0)bs[lit].classList.remove('on');lit=i;bs[i].classList.add('on')}
-   head.style.opacity=1;head.style.transform=`translateX(${xOf(beat).toFixed(1)}px)`},
+   const g=lands(),f=beat-Math.floor(beat),a=g[i],b=g[(i+1)%sig],h=sig>1&&i===sig-1?20:14;
+   head.style.opacity=1;head.style.transform=`translate(${(a.x+(b.x-a.x)*f).toFixed(1)}px,${(a.y+(b.y-a.y)*f-h*4*f*(1-f)).toFixed(1)}px)`},
   say(txt,cls=''){if(txt===said)return;said=txt;sayEl.textContent=txt;sayEl.className='bb-say '+cls;if(txt){void sayEl.offsetWidth;sayEl.classList.add('pop')}},
   // a tap or a note shown at its place in the bar
   dot(beat,cls){const d=document.createElement('u');d.className='bb-n '+cls;d.style.left=xOf(beat).toFixed(1)+'px';row.appendChild(d);return d},
@@ -1695,6 +1720,7 @@ let BEAT_TOLD=false,RHY_TOLD=false,COACH_BAR=false;
 // ================================================================ 1. beat tapping (steady beat, tempo changes, inner pulse)
 // The child presses Start when ready. The teacher counts in “1, 2, 3, 4” on the bar (two bars for the first few tries:
 // one to listen, one to count along), “Now!” marks the first beat, and missed beats before the first tap are not counted.
+// Ms. Hop hops on the drum and lands on every beat, so each beat can be seen coming; a big jump on the last count lands on the first beat.
 function runBeat(spec,host,opt){
  const segs=spec.segs||[[spec.bpm,spec.beats]],sig=spec.sig||4,w=WIN[opt.tier||1],fade=spec.fade||null;
  const beats=[];let t=0;segs.forEach(([b,n])=>{const spb=60/b;for(let i=0;i<n;i++){beats.push({t,spb,j:null});t+=spb}});
@@ -1705,15 +1731,18 @@ function runBeat(spec,host,opt){
   ${barHTML(sig)}
   <div class="bl-msg"></div>
   <div class="bl-ctl"></div>
-  <div class="bl-stage"><div class="bl-ring"></div><button class="bl-pad" type="button" aria-label="${esc(T('북|Drum'))}"><span class="bl-hop">${pic(TEACHERS.hop.img,'🦘')}</span><b class="bl-num"></b></button></div>
+  <div class="bl-stage"><div class="bl-ring"></div><button class="bl-pad" type="button" aria-label="${esc(T('북|Drum'))}"><i class="bl-shadow"></i><span class="bl-hop">${pic(TEACHERS.hop.img,'🦘')}</span><b class="bl-num"></b></button></div>
   <div class="bl-meter"><span>◀ ${T('빨라요|Early')}</span><div class="bl-bar"><em></em><i></i></div><span>${T('늦어요|Late')} ▶</span></div>
   <div class="bl-judge"></div>
   <div class="bl-dots">${beats.map((b,i)=>`<i class="${quiet(i)?'quiet':''}"></i>`).join('')}</div>
   <div class="center sub">${T('화면의 북을 누르거나 아무 키나 눌러요|Tap the drum or press any key')}</div></div>`;
- const $q=s=>host.querySelector(s),pad=$q('.bl-pad'),ring=$q('.bl-ring'),num=$q('.bl-num'),dots=[...host.querySelectorAll('.bl-dots i')],tick=$q('.bl-bar i'),jt=$q('.bl-judge'),msg=$q('.bl-msg'),ctl=$q('.bl-ctl');
+ const $q=s=>host.querySelector(s),pad=$q('.bl-pad'),ring=$q('.bl-ring'),num=$q('.bl-num'),hopEl=$q('.bl-hop'),shadow=$q('.bl-shadow'),dots=[...host.querySelectorAll('.bl-dots i')],tick=$q('.bl-bar i'),jt=$q('.bl-judge'),msg=$q('.bl-msg'),ctl=$q('.bl-ctl');
  const bar=beatBar($q('.bbar'),sig);
  const tl=tally();let stopped=false,raf=0,clk=null,t0=0,bs=null,lastBeat=-1,ended=false,tapped=false,run=0,msgKey='';
  const setMsg=(k,txt)=>{if(k===msgKey)return;msgKey=k;msg.textContent=txt;msg.classList.toggle('quietmsg',k==='quiet')};
+ // h: how high this hop goes (0 = sitting still), f: 0..1 of the way to the next landing
+ const hop=(h,f,dim)=>{const up=h*4*f*(1-f);hopEl.style.transform=`translateY(${(-up).toFixed(1)}px)`;hopEl.style.opacity=dim?.45:1;
+  shadow.style.transform=`scale(${(1-up/120).toFixed(3)})`;shadow.style.opacity=h?1:.6};
  const finish=()=>{if(ended)return;ended=true;stop();S.cnt=S.cnt||{};S.cnt.beat=(S.cnt.beat||0)+1;const r=tl.result({kind:'beat'});opt.done(r)};
  const stop=()=>{stopped=true;cancelAnimationFrame(raf);killBus(bs);window.removeEventListener('keydown',onKey)};
  const mark=(i,j,dt)=>{const b=beats[i];b.j=j;tl.add(j,dt);dots[i].className=(quiet(i)?'quiet ':'')+'j'+j;
@@ -1736,7 +1765,9 @@ function runBeat(spec,host,opt){
    const cb=lead+now/spb0,ci=Math.max(0,Math.floor(cb)),first=bars===2&&ci<sig,pre=cb<0;
    bar.phase('ready',first?T('👂 먼저 들어요|👂 Listen first'):T('🗣️ 같이 세요|🗣️ Count with me'));bar.at(pre?null:cb);bar.say(first||pre?'':cntWord(ci%sig));num.textContent=first||pre?'':cntWord(ci%sig);
    setMsg(first?'listen':ci===lead-1?'next':'count',first?T('똑딱 소리를 잘 들어요. 다음 마디에 같이 세요!|Listen to the ticks. Count along in the next bar!'):ci===lead-1?T('다음 “하나”에 북을 쳐요! 👇|Hit the drum on the next “one”! 👇'):T('“하나, 둘, 셋, 넷” 같이 세요|Count “one, two, three, four” with me'));
-   pad.classList.toggle('go',ci===lead-1)}
+   pad.classList.toggle('go',ci===lead-1);
+   // small hops while counting, then a big jump that lands on the first beat
+   if(pre)hop(0,0);else hop(ci===lead-1?66:16,cb-ci)}
   let cur=-1;for(let i=0;i<beats.length;i++)if(beats[i].t<=now)cur=i;else break;
   if(cur>=0){const b=beats[cur],q=quiet(cur);
    bar.phase(q?'quiet':'go',q?T('🤫 마음속으로 세요|🤫 Count inside'):T('👆 똑딱마다 콩!|👆 Tap every tick!'));bar.at(q?null:cur+clamp((now-b.t)/b.spb,0,.999));
@@ -1747,7 +1778,9 @@ function runBeat(spec,host,opt){
    else if(ch)setMsg(cur<ch.i?'soon'+ch.i:'now'+ch.i,cur<ch.i?(ch.faster?T('🐇 곧 빨라져요! 다음 “하나”부터|🐇 Getting faster from the next “one”!'):T('🐢 곧 느려져요! 다음 “하나”부터|🐢 Slowing down from the next “one”!')):(ch.faster?T('🐇 빨라졌어요! 새 똑딱에 맞춰요|🐇 Faster now! Follow the new ticks'):T('🐢 느려졌어요! 새 똑딱에 맞춰요|🐢 Slower now! Follow the new ticks')));
    else if(!tapped&&cur>=1)setMsg('late',T('지금부터 쳐도 괜찮아요! 똑딱에 맞춰 콩!|You can start now! Tap with the ticks!'));
    else setMsg('play',T('똑딱 소리에 맞춰 큰 북을 쳐요!|Hit the big drum with each tick!'));
-   if(cur!==lastBeat){lastBeat=cur;if(!q){ring.classList.remove('beat');void ring.offsetWidth;ring.classList.add('beat');num.textContent=(cur%sig)+1}else num.textContent='🤫'}}
+   if(cur!==lastBeat){lastBeat=cur;if(!q){ring.classList.remove('beat');void ring.offsetWidth;ring.classList.add('beat');num.textContent=(cur%sig)+1}else num.textContent='🤫'}
+   // no hops into or through the quiet part: there the beat lives only inside the child
+   const nx=cur+1<beats.length&&!q&&!quiet(cur+1);hop(nx?34:0,nx?clamp((now-b.t)/b.spb,0,1):0,q)}
   // a beat missed before the first tap of the first bar is the child finding the start, not a miss
   beats.forEach((b,i)=>{if(!b.j&&now-b.t>Math.min(b.spb*.5,.4)){if(!tapped&&i<sig){b.j='s';dots[i].className='skip'}else mark(i,'m',null)}});
   if(now>beats[beats.length-1].t+.7){finish();return}
@@ -1783,7 +1816,7 @@ function runRhythm(spec,host,opt){
  const tl=tally();let k=0,stopped=false,raf=0,bs=null,clk=null,phase=null,ended=false,hid='';
  const stop=()=>{stopped=true;cancelAnimationFrame(raf);killBus(bs);window.removeEventListener('keydown',onKey)};
  const finish=()=>{if(ended)return;ended=true;stop();opt.done(tl.result({kind:spec.type}))};
- const drawSheet=(p,cols,cursor,hidden)=>{const W=Math.min(560,host.clientWidth||340);const r=rhythmSVG(p,{w:W,sig,cols,count:!hidden,cursor,showSig:k===0&&!hidden});sheet.innerHTML=hidden?`<div class="rl-hidden">${hid||'👂 '+T('잘 들어요…|Listen closely…')}</div>`:r.svg;return r};
+ const drawSheet=(p,cols,cursor,hidden)=>{const W=Math.min(560,host.clientWidth||340);const r=rhythmSVG(p,{w:W,sig,cols,count:!hidden,cursor,showSig:k===0&&!hidden,ball:!hidden});sheet.innerHTML=hidden?`<div class="rl-hidden">${hid||'👂 '+T('잘 들어요…|Listen closely…')}</div>`:r.svg;return r};
  const setHid=txt=>{if(txt===hid)return;hid=txt;const h=sheet.querySelector('.rl-hidden');if(h)h.textContent=txt};
  const onKey=e=>{if(isTapKey(e)){e.preventDefault();tap(e.timeStamp)}};
  pad.addEventListener('pointerdown',e=>{e.preventDefault();tap(e.timeStamp)});
@@ -1810,14 +1843,17 @@ function runRhythm(spec,host,opt){
  // play the pattern once with a moving cursor, nothing is scored
  async function demo(p,toks,len){const ok=await ensureAudio();const c=makeClock(ok),b=bus(1),T0=startAt(c,ok,.3);if(ok)toks.forEach(tk=>{if(!tk.rest)drum('tom',T0+tk.t*spb,.8,b)});
   for(let i=0;i<len;i++)if(ok)drum(i%sig===0?'accent':'click',T0+i*spb,.6,b);
-  const r=drawSheet(p,[],0,false);const fr=()=>{if(stopped)return;const now=c()-T0;if(now>len*spb+.2){drawSheet(p,[],null,false);killBus(b);bar.at(null);bar.phase('ready',T('준비|Get ready'));return}
-   bar.phase('listen',T('👂 들어 보기|👂 Listen'));bar.at(now<0?null:now/spb);const cur=sheet.querySelector('.rcur');if(cur){const x=cursorX(r,toks,now/spb);cur.setAttribute('x1',x);cur.setAttribute('x2',x)}requestAnimationFrame(fr)};requestAnimationFrame(fr)}
+  const r=drawSheet(p,[],0,false),lands=toks.filter(t=>!t.rest).map(t=>({t:t.t}));const fr=()=>{if(stopped)return;const now=c()-T0;if(now>len*spb+.2){drawSheet(p,[],null,false);killBus(b);bar.at(null);bar.phase('ready',T('준비|Get ready'));return}
+   bar.phase('listen',T('👂 들어 보기|👂 Listen'));bar.at(now<0?null:now/spb);const x=cursorX(r,toks,now/spb),cur=sheet.querySelector('.rcur');if(cur){cur.setAttribute('x1',x);cur.setAttribute('x2',x)}
+   const bl=ballAt(lands,now/spb);setBall(cursorX(r,toks,bl.t)+4,bl.y,'#3daef5');requestAnimationFrame(fr)};requestAnimationFrame(fr)}
+ const setBall=(x,y,col)=>{const bl=sheet.querySelector('.rball');if(bl){bl.setAttribute('cx',x.toFixed(1));bl.setAttribute('cy',y.toFixed(1));bl.setAttribute('fill',col)}};
  function cursorX(r,toks,beat){let x=r.xs[0];for(let i=0;i<toks.length;i++){const a=toks[i].t,b2=a+toks[i].d;if(beat>=a&&beat<b2){const nx=i+1<toks.length?r.xs[i+1]:r.xs[i]+toks[i].d*r.unit;x=r.xs[i]+(nx-r.xs[i])*((beat-a)/toks[i].d);return x}if(beat>=b2)x=i+1<toks.length?r.xs[i+1]:r.xs[i]+toks[i].d*r.unit}return x}
  async function run(p,toks,len){const ok=await ensureAudio();if(stopped)return;clk=makeClock(ok);killBus(bs);bs=bus(1);
   const T0=startAt(clk,ok,.35),count=sig*spb,demoLen=echo?len*spb:0,kidStart=count+demoLen,kidEnd=kidStart+len*spb;
   phase={t0:T0,taking:false,extra:0,kidStart,kidEnd,exp:toks.filter(t=>!t.rest).map(t=>({t:kidStart+t.t*spb,j:null,dt:null}))};
   if(ok){const total=Math.round((kidEnd)/spb);for(let i=0;i<total;i++)drum(i%sig===0?'accent':'click',T0+i*spb,.75,bs);if(echo)toks.forEach(tk=>{if(!tk.rest)drum('tom',T0+count+tk.t*spb,.9,bs)})}
   const r=echo?null:drawSheet(p,[],0,false);bar.clear();
+  const lands=echo?null:[...Array.from({length:sig},(_,i)=>({t:i})),...toks.filter(t=>!t.rest).map((t,i)=>({t:sig+t.t,big:!i}))];
   const notes=echo?toks.filter(t=>!t.rest).map(t=>({b:t.t,shown:false})):[];
   const fr=()=>{if(stopped)return;const now=clk()-T0,b=now/spb;
    if(now<count){// count-in on the bar: “1, 2, 3, 4”, then the teacher (echo) or the child (read) starts on the next “1”
@@ -1831,7 +1867,8 @@ function runRhythm(spec,host,opt){
    else if(now<kidEnd+w.o){const kb=(now-kidStart)/spb;phase.taking=true;pad.classList.remove('listening');
     bar.phase('go',T('👆 내 차례|👆 Your turn'));bar.at(now<kidEnd?kb:null);bar.say(kb<.9?T('지금! 👆|Now! 👆'):'',kb<.9?'go':'');pad.classList.toggle('go',kb<.9);
     if(echo)setHid('👆 '+T('똑같이 쳐요!|Play it back!'));msg.textContent=T('🥁 이제 쳐요!|🥁 Your turn!')}
-   if(r&&now>=count){const cur=sheet.querySelector('.rcur');if(cur){const x=cursorX(r,toks,(now-kidStart)/spb);cur.setAttribute('x1',x);cur.setAttribute('x2',x)}}
+   if(r){const x=cursorX(r,toks,(now-kidStart)/spb),cur=sheet.querySelector('.rcur');if(cur&&now>=count){cur.setAttribute('x1',x);cur.setAttribute('x2',x)}
+    const bl=ballAt(lands,b);setBall(cursorX(r,toks,bl.t-sig)+4,bl.y,bl.k<sig?'#8d7bff':'#ff5fa2')}
    if(now>kidEnd+w.o+.15){phase.taking=false;score(p,toks);return}
    raf=requestAnimationFrame(fr)};raf=requestAnimationFrame(fr)}
  function score(p,toks){phase.scored=true;let ok=0;bar.at(null);bar.say('');pad.classList.remove('go');phase.exp.forEach(e=>{if(!e.j)e.j='m';tl.add(e.j,e.j==='m'?null:e.dt);if(e.j!=='m')ok++});tl.extra+=phase.extra;
@@ -1895,6 +1932,11 @@ function runHighway(spec,host,opt){
  const tl=tally(),parts=[],flash={};let stopped=false,raf=0,clk=null,t0=0,bs=null,ended=false,score=0,lastTick=0,started=false,cw=0,ch=0,dpr=1;
  const look=LOOK.stage,skin=LOOK.skin,lookAhead=(kind==='drum'?1.7:2.1)/(spec.speed&&spec.speed<1?1:1);
  const laneOf=n=>kind==='song'?n.m:n.lane;
+ // how long before its time a note starts filling its key: up to 0.8 s, shorter than the gap from the last note on that key
+ {const last={};judged.forEach(n=>{const l=laneOf(n),gap=last[l]!=null?n.t-last[l]:9;n.win=Math.min(.8,spb,gap*.85);last[l]=n.t})}
+ const fillEl=new Map();
+ function setFill(l,v){let e=fillEl.get(l);if(e===undefined){e=kind==='song'?keys.keyEl(l):inp.querySelector(`.pad[data-l="${l}"]`);fillEl.set(l,e)}if(!e)return;
+  const o=e._s||0;if(Math.abs(o-v)<.02&&(v>0||o===0))return;e._s=v;e.style.setProperty('--s',v.toFixed(3))}
  const stop=()=>{stopped=true;cancelAnimationFrame(raf);killBus(bs);window.removeEventListener('keydown',onKey);window.removeEventListener('resize',fit)};
  const finish=()=>{if(ended)return;ended=true;stop();opt.done(tl.result({kind,score,step}))};
  function fit(){const r=cv.parentElement.getBoundingClientRect();dpr=Math.min(2,window.devicePixelRatio||1);cw=Math.max(200,r.width);ch=Math.max(160,r.height);cv.width=cw*dpr;cv.height=ch*dpr;cv.style.width=cw+'px';cv.style.height=ch+'px';
@@ -1905,10 +1947,11 @@ function runHighway(spec,host,opt){
  window.addEventListener('resize',fit);
  const hitY=()=>ch-14,pps=()=>(ch-30)/lookAhead;
  function popJudge(j,extra=''){jEl.innerHTML=`<b style="color:${JCOL[j]}">${T(JTXT[j])}</b>${extra}`;jEl.classList.remove('pop');void jEl.offsetWidth;jEl.classList.add('pop')}
+ function popHint(txt){jEl.innerHTML=`<b class="hint">${esc(txt)}</b>`;jEl.classList.remove('pop');void jEl.offsetWidth;jEl.classList.add('pop')}
  function burst(x,y,col,n=10){for(let i=0;i<n;i++)parts.push({x,y,vx:(Math.random()-.5)*5,vy:-Math.random()*5-1,life:1,col})}
  function hitNote(n,j,dt){n.j=j;tl.add(j,dt);const pts={p:100,g:70,o:40,m:0}[j];score+=pts+(j!=='m'?Math.floor(tl.combo/10)*5:0);
   const g=laneGeo[laneOf(n)];if(g&&j!=='m')burst(g.x+g.w/2,hitY(),JCOL[j],j==='p'?14:8);
-  popJudge(j,tl.combo>=5&&j!=='m'?`<i>${tl.combo} ${T('콤보|combo')}</i>`:'');
+  popJudge(j,dt!=null&&(j==='g'||j==='o')?`<i>${dt<0?T('조금 빨랐어요|A bit early'):T('조금 늦었어요|A bit late')}</i>`:tl.combo>=5&&j!=='m'?`<i>${tl.combo} ${T('콤보|combo')}</i>`:'');
   if(COMBO_TXT[tl.combo])bubble(host,COMBO_TXT[tl.combo],'big');else if(j==='m'&&Math.random()<.25)bubble(host,pick(ENCOURAGE));
   $q('.hw-score').textContent=num(score);$q('.hw-combo').textContent=tl.combo>=2?`🔥${tl.combo}`:''}
  function soundFor(l,when){if(kind==='song')play('piano',l,when,.6,.85,bs);else if(kind==='drum')drum(lanes[l],when,1,bs);else{const tr=TRIADS[lanes[l]];if(tr)playChord('piano',tr.ms,when,.9,.55,bs)}}
@@ -1922,7 +1965,10 @@ function runHighway(spec,host,opt){
   soundFor(l,0);if(!clk)return;
   const now=clk(perf)-t0-TIMING.calib;let best=null,bd=9;
   for(const n of judged){if(n.j||laneOf(n)!==l)continue;const d=now-n.t;if(Math.abs(d)<Math.abs(bd)){bd=d;best=n}if(n.t-now>w.o+.2)break}
-  if(best&&Math.abs(bd)<=w.o)hitNote(best,judgeOf(bd,w),bd)}
+  if(best&&Math.abs(bd)<=w.o){hitNote(best,judgeOf(bd,w),bd);return}
+  // nothing to hit: too early on the right key, or the wrong key at the right time (the right one blinks)
+  if(judged.some(n=>!n.j&&laneOf(n)===l&&n.t-now>0&&n.t-now<.7)){popHint(T('조금만 기다려요 ✋|Wait for it ✋'));return}
+  const want=judged.find(n=>!n.j&&Math.abs(n.t-now)<=w.o);if(want){const e=kind==='song'?keys.keyEl(want.m):inp.querySelector(`.pad[data-l="${want.lane}"]`);if(e){const c=kind==='song'?'hint':'want';e.classList.remove(c);void e.offsetWidth;e.classList.add(c);setTimeout(()=>e.classList.remove(c),600)}}}
  // ---- drawing
  const STAGE_BG={night:['#1b1446','#3a1f6e'],ocean:['#06395c','#1593b8'],forest:['#0f3d26','#2f7f46'],candy:['#ff8fc0','#ffd1e8'],space:['#03030c','#1a1240']};
  const stars=Array.from({length:40},()=>({x:Math.random(),y:Math.random(),r:Math.random()*1.6+.4}));
@@ -1942,6 +1988,13 @@ function runHighway(spec,host,opt){
   const H=hitY(),P=pps(),tNow=performance.now();
   Object.entries(laneGeo).forEach(([l,gm])=>{ctx.fillStyle=gm.black?'rgba(0,0,0,.18)':'rgba(255,255,255,.05)';ctx.fillRect(gm.x+1,0,gm.w-2,H);
    const f=flash[l];if(f&&tNow-f<160){ctx.fillStyle=`rgba(255,255,255,${.28*(1-(tNow-f)/160)})`;ctx.fillRect(gm.x,0,gm.w,H)}});
+  // beat lines: one per beat and a brighter one at each bar, numbered, so the child can count the notes in;
+  // the count-in beats come down too (“one, two, three, four”), and the first note sits on the next line
+  ctx.textAlign='left';ctx.textBaseline='bottom';
+  for(let g=Math.max(step?0:-sig,Math.ceil((now-.2)/spb)),g1=Math.min(Math.floor((now+lookAhead)/spb),Math.ceil(songEnd/spb));g<=g1;g++){
+   const y=H-(g*spb-now)*P,pos=g<0?g+sig:((g-pick0)%sig+sig)%sig,bar=pos===0;
+   ctx.fillStyle=g<0?'rgba(255,210,63,.55)':bar?'rgba(255,255,255,.5)':'rgba(255,255,255,.17)';ctx.fillRect(0,y-(bar?1.5:.5),cw,bar?3:1);
+   ctx.font=`900 ${g<0?13:11}px system-ui,sans-serif`;ctx.fillStyle=g<0?'#ffd23f':'rgba(255,255,255,.7)';ctx.fillText(g<0?cntWord(pos):String(pos+1),5,y-3)}
   ctx.fillStyle='#ffd23f';ctx.fillRect(0,H-2,cw,4);ctx.fillStyle='rgba(255,210,63,.25)';ctx.fillRect(0,H-10,cw,20);
   // notes
   for(const n of notes){if(n.j&&n.j!=='m'&&!n.demo)continue;const dtv=n.t-now;if(dtv>lookAhead)break;if(dtv<-.5)continue;const gm=laneGeo[laneOf(n)];if(!gm)continue;
@@ -1971,8 +2024,10 @@ function runHighway(spec,host,opt){
   if(step){const target=notes[si]?notes[si].t:songEnd;vt+=(target-vt)*.15;now=vt;
    const n=notes[si];if(n){const el=keys.keyEl(n.m);if(el&&!el.classList.contains('glow')){host.querySelectorAll('.pk.glow').forEach(x=>x.classList.remove('glow'));el.classList.add('glow')}}
    $q('.hw-prog i').style.width=(100*si/notes.length)+'%'}
-  else{now=clk(ts)-t0;if(now<0){showCount(host,String(Math.min(sig,Math.ceil(-now/spb))))}else{hideCount(host);started=true}
+  else{now=clk(ts)-t0;if(now<0){const cb=sig+now/spb;showCount(host,cb<0?'':cntWord(Math.floor(cb)))}else{hideCount(host);started=true}
    for(const n of judged){if(n.j)continue;if(now-n.t>w.o)hitNote(n,'m',null);else break}
+   const fill={};for(const n of judged){if(n.j)continue;const d=n.t-now;if(d>.8)break;const l=laneOf(n);if(fill[l]==null)fill[l]=clamp(1-d/n.win,0,1)}
+   for(const l in laneGeo)setFill(+l,fill[l]||0);
    if(kind==='drum')for(const n of notes)if(n.demo&&!n.j&&now>=n.t){n.j='d';flash[n.lane]=performance.now();const gm=laneGeo[n.lane];if(gm)burst(gm.x+gm.w/2,hitY(),'#ffffff',5)}
    const frac=clamp(now/songEnd,0,1);$q('.hw-prog i').style.width=(frac*100)+'%';
    if(performance.now()-lastTick>180){lastTick=performance.now();const done2=judged.filter(n=>n.j).length;const live=done2?tl.acc():0;$q('.hw-acc').textContent=done2?Math.round(live*100)+'%':'';if(opt.tick)opt.tick(frac,live,score,host)}
@@ -1995,7 +2050,7 @@ function runHighway(spec,host,opt){
 function buildKeys(el,{from,to,labels=true,blackLabels=false,onDown}){
  const whites=[];for(let m=from;m<=to;m++)if(!isBlack(m))whites.push(m);const W=100/whites.length,rainbow=LOOK.keys==='rainbow',gold=LOOK.keys==='gold';
  let h='';whites.forEach((m,i)=>h+=`<button class="pk w${rainbow?' rb':''}${gold?' gd':''}" data-m="${m}" type="button" style="left:${i*W}%;width:${W}%;--nc:${colorOf(m)}"><span>${labels?esc(noteName(m).split(' ')[0]):''}</span></button>`);
- for(let m=from;m<=to;m++){if(!isBlack(m))continue;const i=whites.indexOf(m-1);if(i<0)continue;h+=`<button class="pk b${gold?' gd':''}" data-m="${m}" type="button" style="left:${(i+1)*W-W*.31}%;width:${W*.62}%"><span>${blackLabels?esc(noteName(m).split(' ')[0]):''}</span></button>`}
+ for(let m=from;m<=to;m++){if(!isBlack(m))continue;const i=whites.indexOf(m-1);if(i<0)continue;h+=`<button class="pk b${gold?' gd':''}" data-m="${m}" type="button" style="left:${(i+1)*W-W*.31}%;width:${W*.62}%;--nc:${colorOf(m)}"><span>${blackLabels?esc(noteName(m).split(' ')[0]):''}</span></button>`}
  el.innerHTML=`<div class="pkeys">${h}</div>`;
  el.querySelector('.pkeys').addEventListener('pointerdown',e=>{const k=e.target.closest('.pk');if(!k)return;e.preventDefault();k.classList.add('down');setTimeout(()=>k.classList.remove('down'),150);onDown(+k.dataset.m,e)});
  return {whites,keyEl:m=>el.querySelector(`.pk[data-m="${m}"]`),all:()=>[...el.querySelectorAll('.pk')]}}
@@ -2559,7 +2614,7 @@ function visHTML(v,p){let h='';v=v||{};
  if(v.bar)h+=`<div class="vbar">${barHTML(v.bar)}</div>`;
  if(v.kbd)h+=`<div class="vkbd">${keyboardSVG({...v.kbd,w:340})}</div>`;
  if(v.staff)h+=`<div class="vstaff">${staffSVG(staffNotes(v.staff.notes),{w:340,labels:v.staff.labels})}</div>`;
- if(v.rhy)h+=`<div class="vrhy">${rhythmSVG(v.rhy,{w:340,sig:v.sig3?3:4,showSig:!!(v.sig||v.sig3),count:true,cursor:-20}).svg}</div>`;
+ if(v.rhy)h+=`<div class="vrhy" data-ss="${v.sig||v.sig3?1:''}">${rhythmSVG(v.rhy,{w:340,sig:v.sig3?3:4,showSig:!!(v.sig||v.sig3),count:true,cursor:-20,ball:true}).svg}</div>`;
  if(v.sym)h+=`<div class="vsym">${v.sym.map(([k,c])=>`<div>${symbolSVG(k,{size:80})}<b>${esc(T(c))}</b></div>`).join('')}</div>`;
  if(v.instr)h+=`<div class="vinstr">${v.instr.map(id=>{const it=INSTR_BY[id];return `<div><span class="ib">${instrPic(id)}</span><b>${esc(T(it[2]))}</b></div>`}).join('')}</div>`;
  if(p&&(p.drum||p.drums)&&!v.kbd)h+=`<div class="vpads">${['kick','snare','hat'].map(k=>`<span class="vp" data-d="${k}" style="--c:${DRUM_LANES[k].col}">${DRUM_LANES[k].icon}<small>${esc(T(DRUM_LANES[k].name))}</small></span>`).join('')}</div>`;
@@ -2577,14 +2632,18 @@ async function demo(p,vis){stopDemo();const my=DEMO.n,ok=await ensureAudio();con
  const notes=(str,bpm,v='piano',off=0,vol=.8)=>{const spb=60/bpm,mel=parseMelody(str);let idx=0;mel.forEach(n=>{if(n.rest)return;const i=idx++;play(v,n.m,t0+off+n.b*spb,n.d*spb*.95,vol,b);at(off+n.b*spb,()=>{lightKey(n.m,n.d*spb*.9);lightNote(i,n.d*spb*.9)})});return mel.reduce((a,n)=>a+n.d,0)*spb};
  // with a beat bar on the slide, the first bar is the count-in and the second shows when to start tapping
  const vbEl=vis.querySelector('.bbar'),vb=vbEl?beatBar(vbEl,4):null;
- if(p.metro){const spb=60/p.metro.bpm;for(let i=0;i<p.metro.beats;i++){drum(i%4===0?'accent':'click',t0+i*spb,.9,b);at(i*spb,()=>{pulse();if(vb){const c=i<4;vb.phase(c?'ready':'go',c?'🗣️ '+L('하나 · 둘 · 셋 · 넷','one · two · three · four'):'👆 '+L('똑딱마다 콩!','Tap every tick!'));vb.at(i);vb.say(c?cntWord(i):i===4?L('지금! 👆','Now! 👆'):'',i===4?'go':'')}})}
+ if(p.metro){const spb=60/p.metro.bpm;for(let i=0;i<p.metro.beats;i++){drum(i%4===0?'accent':'click',t0+i*spb,.9,b);at(i*spb,()=>{pulse();if(vb){const c=i<4;vb.phase(c?'ready':'go',c?'🗣️ '+L('하나 · 둘 · 셋 · 넷','one · two · three · four'):'👆 '+L('똑딱마다 콩!','Tap every tick!'));if(!i)hopBar();vb.say(c?cntWord(i):i===4?L('지금! 👆','Now! 👆'):'',i===4?'go':'')}})}
+  // the ball follows the same clock as the sound (start = when the first click is heard)
+  const start=performance.now()+(t0-AC.currentTime+lag)*1000,n=p.metro.beats;
+  const hopBar=()=>{const fr=()=>{if(DEMO.n!==my||!vbEl.isConnected)return;const beat=(performance.now()-start)/1000/spb;if(beat>=n)return;if(beat>=0)vb.at(beat);requestAnimationFrame(fr)};requestAnimationFrame(fr)};
   if(vb)at(p.metro.beats*spb,()=>{vb.at(null);vb.say('')})}
  if(p.seq)notes(p.seq.notes,p.seq.bpm||90,p.seq.v||'piano');
  if(p.song){const s=SONGS[p.song],spb=60/s.bpm,mel=parseMelody(s.m);let beats=0,cut=mel.findIndex(n=>(beats+=n.d)>=s.sig*4);const part=mel.slice(0,cut<0?mel.length:cut+1).map(n=>(n.rest?'r':PC[n.m%12]+(Math.floor(n.m/12)-1))+'/'+n.d).join(' ');
   notes(part,s.bpm);schedBacking(parseChords(s.c).filter(c=>c.b<s.sig*4),spb,s.sig,t0+(s.pick||0)*0,b,.7)}
  if(p.rhy){const spb=60/p.rhy.bpm,sig=p.rhy.sig||4,toks=parseRhythm(p.rhy.p),len=Math.ceil(rhythmBeats(p.rhy.p)/sig)*sig;toks.forEach(tk=>{if(!tk.rest)drum('tom',t0+tk.t*spb,.9,b)});for(let i=0;i<len;i++)drum(i%sig===0?'accent':'click',t0+i*spb,.5,b);
-  const svg=vis.querySelector('.vrhy svg');if(svg){const r=rhythmSVG(p.rhy.p,{w:340,sig,count:true});const cur=svg.querySelector('.rcur');const start=performance.now()+(t0-AC.currentTime+lag)*1000;
-   const fr=()=>{if(!DEMO.bus||!cur.isConnected)return;const beat=(performance.now()-start)/1000/spb;if(beat>len+.3){cur.setAttribute('x1',-20);cur.setAttribute('x2',-20);return}let x=r.xs[0];for(let i=0;i<toks.length;i++){if(beat>=toks[i].t)x=r.xs[i]+(Math.min(beat,toks[i].t+toks[i].d)-toks[i].t)/toks[i].d*((i+1<toks.length?r.xs[i+1]:r.xs[i]+toks[i].d*r.unit)-r.xs[i])}if(beat<0)x=-20;cur.setAttribute('x1',x);cur.setAttribute('x2',x);requestAnimationFrame(fr)};requestAnimationFrame(fr)}}
+  const svg=vis.querySelector('.vrhy svg');if(svg){const r=rhythmSVG(p.rhy.p,{w:340,sig,count:true,showSig:!!vis.querySelector('.vrhy').dataset.ss});const cur=svg.querySelector('.rcur'),ball=svg.querySelector('.rball'),lands=toks.filter(t=>!t.rest).map(t=>({t:t.t}));const start=performance.now()+(t0-AC.currentTime+lag)*1000;
+   const xAt=beat=>{let x=r.xs[0];for(let i=0;i<toks.length;i++){if(beat>=toks[i].t)x=r.xs[i]+(Math.min(beat,toks[i].t+toks[i].d)-toks[i].t)/toks[i].d*((i+1<toks.length?r.xs[i+1]:r.xs[i]+toks[i].d*r.unit)-r.xs[i])}return beat<0?-20:x};
+   const fr=()=>{if(!DEMO.bus||!cur.isConnected)return;const beat=(performance.now()-start)/1000/spb;if(beat>len+.3){cur.setAttribute('x1',-20);cur.setAttribute('x2',-20);if(ball)ball.setAttribute('cx',-30);return}const x=xAt(beat);cur.setAttribute('x1',x);cur.setAttribute('x2',x);if(ball){const bl=ballAt(lands,beat);ball.setAttribute('cx',xAt(bl.t)+4);ball.setAttribute('cy',bl.y.toFixed(1))}requestAnimationFrame(fr)};requestAnimationFrame(fr)}}
  if(p.drum){const pt=DRUMS[p.drum.pattern],spb=60/(p.drum.bpm||pt.bpm),steps=pt.sig*4;for(let bar=0;bar<(p.drum.bars||2);bar++){const src=pt.fill&&(bar+1)%pt.every===0?pt.fill:pt;[['kick','k'],['snare','s'],['hat','h']].forEach(([k,c])=>{const s=src[c]||'';for(let i=0;i<steps;i++)if(s[i]==='x'){const tt=(bar*steps+i)*spb/4;drum(k,t0+tt,.9,b);at(tt,()=>pad(k))}})}}
  if(p.drums)p.drums.forEach((k,i)=>{drum(k,t0+i*.55,1,b);at(i*.55,()=>pad(k))});
  if(p.chord){playChord('piano',p.chord,t0,1.5,.6,b);at(0,()=>p.chord.forEach(m=>lightKey(m,1.4)))}
@@ -2598,18 +2657,19 @@ async function demo(p,vis){stopDemo();const my=DEMO.n,ok=await ensureAudio();con
 // ---------------------------------------------------------------- running an activity (lessons, daily tasks, practice rooms, contests)
 const HOWTO={
  songstep:['👣','빛나는 건반을 눌러요. 맞는 건반을 누를 때까지 음표가 기다려 줘요!|Press the glowing key. The notes wait until you find the right one!'],
- song:['🎹','음표가 노란 줄에 닿을 때 같은 색 건반을 눌러요. 길쭉한 음표는 긴 음이에요.|Press the matching key when a note reaches the yellow line. Long notes are long sounds.'],
- drum:['🥁','음표가 노란 줄에 닿을 때 그 아래 패드를 눌러요. 처음 한 마디는 선생님이 보여 줘요.|Tap the pad under each note as it reaches the yellow line. The teacher plays the first bar.'],
- chordplay:['🌈','화음 이름이 노란 줄에 닿을 때 같은 화음 버튼을 눌러요.|Press the chord button when its name reaches the yellow line.'],
+ song2:['🎹','음표가 노란 줄에 닿을 때 같은 색 건반을 눌러요. 건반이 같은 색으로 차오르다 꽉 차는 순간이 누를 때예요! 가로줄 하나가 한 박이에요.|Press the matching key when a note reaches the yellow line. The key fills up with its colour, and when it’s full, press! Each line across is one beat.'],
+ drum2:['🥁','음표가 노란 줄에 닿을 때 그 아래 패드를 눌러요. 패드가 하얗게 꽉 차오르면 칠 때예요. 처음 한 마디는 선생님이 보여 줘요.|Tap the pad under each note as it reaches the yellow line. When the pad fills up white, hit it! The teacher plays the first bar.'],
+ chordplay2:['🌈','화음 이름이 노란 줄에 닿을 때 같은 화음 버튼을 눌러요. 버튼이 꽉 차오르면 누를 때예요.|Press the chord button when its name reaches the yellow line. When the button fills up, press!'],
  breath:['🌬️','공이 커지면 들이마시고, 작아지면 “스~” 하고 내쉬어요.|Breathe in as the ball grows; let out a “sss” as it shrinks.'],
- beat2:['💓','선생님이 “하나, 둘, 셋, 넷” 세어 줘요. 그다음 “하나”부터 똑딱 소리마다 북을 콩! 위의 동그라미 불빛이 지금 몇 번째 박인지 알려 줘요.|First I count “one, two, three, four”. Then, from the next “one”, tap the drum on every tick! The lights on top show which beat you’re on.'],
- read2:['📖','“하나, 둘, 셋, 넷” 준비 박을 같이 세고, 다음 “하나”부터 시작해요. 분홍 막대가 음표에 닿을 때 북을 쳐요. 쉼표에서는 쉬어요!|Count “one, two, three, four” with me, then start on the next “one”. Tap when the pink bar reaches each note. Stay quiet on rests!'],
- echo2:['👂','준비 박 다음에 선생님이 한 마디를 쳐요(파란 불 👂). 불빛이 분홍색으로 바뀌면 내 차례(👆)! 똑같이 따라 쳐요.|After the count-in I play one bar (blue lights 👂). When the lights turn pink it’s your turn (👆)! Play it back.'],
+ beat3:['💓','선생님이 “하나, 둘, 셋, 넷” 세어 줘요. 북 위의 콩콩 선생님이 박마다 콩! 뛰어요. 마지막에 크게 뛰어 내려앉는 순간부터 시작! 콩콩 선생님이 북에 내려앉을 때마다 북을 쳐요.|First I count “one, two, three, four”. Ms. Hop jumps on the drum every beat. Start when she lands from her big last jump, then tap the drum each time she lands!'],
+ read3:['📖','“하나, 둘, 셋, 넷” 준비 박을 같이 세요. 통통 튀는 공이 음표 위에 내려앉는 순간 북을 쳐요. 공이 높이 떠 있는 동안은 기다리고, 쉼표에서는 쉬어요!|Count “one, two, three, four” with me. Tap the drum the moment the bouncing ball lands on a note. While it’s up high, wait, and stay quiet on rests!'],
+ echo3:['👂','준비 박 다음에 선생님이 한 마디를 쳐요(파란 불 👂). 공이 크게 뛰어 “1”에 내려앉고 불빛이 분홍색으로 바뀌면 내 차례(👆)! 똑같이 따라 쳐요.|After the count-in I play one bar (blue lights 👂). When the ball jumps back to “1” and the lights turn pink, it’s your turn (👆)! Play it back.'],
  sing2:['🎤','선생님 소리를 듣고 “아~” 하고 불러요. 내 목소리 공을 동그라미 과녁에 넣고 잠깐 버티면 성공! 화살표가 더 높게, 더 낮게를 알려 줘요.|Listen, then sing “ahh”. Move your voice ball into the circle and hold it there! The arrow tells you higher or lower.'],
  siren:['🚨','“우~” 하고 사이렌처럼 불러요. 내 목소리 선이 초록 길을 따라 올라갔다 내려와요.|Go “ooo~” like a siren. Your voice line follows the green path up and back down.'],
 };
-// the beat, rhythm and singing how-tos were remade with the beat bar and the voice target; the new keys show them once to everyone
-const howKey=spec=>spec.type==='song'&&spec.step?'songstep':spec.type==='sing'?(spec.task==='siren'?'siren':'sing2'):spec.type==='beat'||spec.type==='read'||spec.type==='echo'?spec.type+'2':spec.type;
+// a how-to gets a new key when its game changes, so everyone sees it once more (beat bar and voice target: 2; the bouncing ball,
+// Ms. Hop's hops, beat lines and filling keys: 3 for beat/read/echo, 2 for the falling-note games)
+const howKey=spec=>spec.type==='song'&&spec.step?'songstep':spec.type==='sing'?(spec.task==='siren'?'siren':'sing2'):spec.type==='beat'||spec.type==='read'||spec.type==='echo'?spec.type+'3':spec.type==='song'||spec.type==='drum'||spec.type==='chordplay'?spec.type+'2':spec.type;
 function withHowTo(spec,host,then){const k=howKey(spec),h=HOWTO[k]||HOWTO[spec.type];if(!h||S.how[k]){then();return}
  const anim=spec.type==='song'||spec.type==='drum'||spec.type==='chordplay'?`<div class="howroad"><i class="blk"></i><i class="line"></i><span class="hand">👆</span></div>`:spec.type==='beat'||spec.type==='read'||spec.type==='echo'?`<div class="howbar ${spec.type==='echo'?'echo':''}"><span class="hb-tag"><em>${spec.type==='echo'?'👂 '+L('선생님 차례','Teacher’s turn'):'🗣️ '+L('하나 · 둘 · 셋 · 넷','one · two · three · four')}</em><em>${spec.type==='echo'?'👆 '+L('내 차례','Your turn'):'👆 '+L('지금 쳐요!','Now tap!')}</em></span><div class="hb-row"><i></i><i></i><i></i><i></i></div><span class="hand">👆</span></div>`:spec.type==='sing'&&spec.task!=='siren'?`<div class="howsing"><i class="tg"></i><i class="ball">${esc(S.av||'🎤')}</i><b class="arr">⬆</b></div>`:`<div class="vemoji">${h[0]}</div>`;
  host.innerHTML=`<div class="howto card"><h2>${h[0]} ${L('이렇게 해요!','Here’s how!')}</h2>${anim}<p>${esc(T(h[1]))}</p><button class="btn green cta" id="howGo" type="button">👍 ${L('알겠어요! 시작','Got it! Start')}</button></div>`;

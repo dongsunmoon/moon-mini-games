@@ -2278,12 +2278,12 @@ const LESSONS=[
   demo:L('꿀팁: 체크하는 수를 모두 찾아서 하나씩 확인해요. 킹이 자기 폰들 뒤에 갇혀 있으면 맨 뒷줄을 노려요!','Tip: find every check and test each one. If the king is stuck behind its pawns, aim at the back row!')},
  {icon:'🍴',title:SKILL_NAME.f,text:L('포크는 한 기물이 상대 기물 두 개를 동시에 공격하는 기술이에요. 상대는 보통 하나만 지킬 수 있어서 나머지 하나를 얻어요.','A fork is one piece attacking two enemy pieces at once. Your opponent can usually save only one, so you win the other.'),
   demo:L('나이트 포크가 특히 강해요. 체크하면서 다른 기물까지 공격하면 최고의 포크!','Knight forks are extra strong. A check that also attacks another piece is the best fork!')},
- {icon:'📌',title:SKILL_NAME.p,text:L('핀: 앞의 기물이 비키면 뒤의 더 큰 기물이 잡혀서 함부로 못 움직여요. 뒤가 킹이면 아예 못 움직여요. 꼬치: 앞의 큰 기물이 비키면 뒤의 기물을 잡아요.','Pin: the front piece can’t safely move, or the bigger piece behind it gets taken. If the king is behind, it can’t move at all. Skewer: the big piece in front moves away and you take the one behind.'),
+ {icon:'📌',title:SKILL_NAME.p,text:L('핀: 앞의 기물이 비키면 뒤의 더 큰 기물이 잡혀서 함부로 못 움직여요. 뒤가 킹이면 그 줄을 아예 벗어날 수 없어요. 꼬치: 앞의 큰 기물이 비키면 뒤의 기물을 잡아요.','Pin: the front piece can’t safely move, or the bigger piece behind it gets taken. If the king is behind, it can’t leave that line at all. Skewer: the big piece in front moves away and you take the one behind.'),
   demo:L('룩, 비숍, 퀸처럼 길게 움직이는 기물로 써요. 상대 기물 두 개가 한 줄에 서 있는지 찾아봐요!','Use long-range pieces: rooks, bishops and queens. Look for two enemy pieces on one line!')},
  {icon:'👑',title:SKILL_NAME.m2,text:L('첫 수로 상대를 꼼짝 못 하게 만들고, 두 번째 수로 체크메이트! 상대가 어떻게 막을지도 생각해요.','Use the first move to trap the opponent and the second move to checkmate. Think about how they will defend!'),
   demo:L('첫 수는 체크나 퀸을 내주는 깜짝 희생일 때도 있어요.','Sometimes the first move is a check or even a surprise queen sacrifice.')},
  {icon:'🐉',title:SKILL_NAME.a,text:L('이제 모든 기술을 써요: 공짜 기물, 메이트, 포크, 핀, 숨은 공격! 문제를 보면 어떤 기술인지 먼저 생각해 봐요.','Now use every trick: free pieces, mates, forks, pins and discovered attacks. First think about which trick fits!'),
-  demo:L('숨은 공격: 내 기물 하나가 비키면 뒤에 있던 룩이나 비숍이 공격을 시작해요.','Discovered attack: when one of your pieces steps aside, the rook or bishop behind it starts attacking.')},
+  demo:L('숨은 공격: 내 기물 하나가 비키면 뒤에 있던 룩·비숍·퀸이 공격을 시작해요.','Discovered attack: when one of your pieces steps aside, the rook, bishop or queen behind it starts attacking.')},
 ];
 const COACHES={
  puppy:{icon:'🐶',img:'images/buddy-puppy.webp',name:L('멍멍 코치','Coach Woof'),price:0,pitch:1.15,say:L('멍멍!','Woof!')},
@@ -3026,7 +3026,7 @@ function bossIntro(c){
  const b=BOTS[CHAPTERS[c].boss];
  modal(`<div class="bot" style="box-shadow:none;justify-content:center;flex-direction:column;text-align:center"><span class="pt" style="width:120px;height:120px;font-size:80px">${pic(b.img,b.icon)}</span></div>
   <h2>BOSS · ${esc(b.name)}</h2><p>“${esc(b.hi)}”</p><div class="rewards"><span>💪 ${L('힘','Power')} ${b.power}</span><span class="coin">${COIN} ${S.bossWins.includes(c)?b.reward:L(`${b.reward*2} + 지역 보너스`,`${b.reward*2} + land bonus`)}</span></div>
-  <p>${L('보스를 이기면 다음 지역이 열려요! 나는 백(먼저 두기)이에요.','Beat the boss to open the next land! You play White and move first.')}</p>
+  <p>${L('보스를 이기면 다음 지역이 열려요! 내 기물은 백(먼저 두기)이에요.','Beat the boss to open the next land! You play White and move first.')}</p>
   <div class="row"><button class="btn red" type="button" data-act="fight">⚔️ ${L('도전!','Fight!')}</button></div>`,{acts:{fight:()=>()=>startBattle(CHAPTERS[c].boss,WHITE,{boss:c})},onOpen:()=>speak(b.hi)});
 }
 function startBattle(bi,me,{boss=null,resume=null}={}){

@@ -88,6 +88,11 @@ a{color:inherit}
 /* calendar */
 .cal-wrap{overflow-x:auto}
 .streak{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:900;color:#8a5a00;background:#fff0c9;border-radius:999px;padding:4px 10px}
+.calsub{display:flex;gap:6px;overflow-x:auto;padding:0 0 10px;margin:-4px 0 6px;scrollbar-width:none}
+.calsub::-webkit-scrollbar{display:none}
+@media (min-width:720px){.calsub{flex-wrap:wrap;overflow:visible}}
+.calsub button{flex:0 0 auto;min-height:44px;padding:0 12px;border-radius:999px;border:1px solid var(--line);background:#fff;font-size:13.5px;font-weight:800;color:var(--ink2);cursor:pointer}
+.calsub button[aria-pressed="true"]{background:var(--c,var(--navy));border-color:var(--c,var(--navy));color:#fff}
 /* time share bar */
 .share{display:flex;height:16px;border-radius:999px;overflow:hidden;background:var(--soft)}
 .share i{display:block;height:100%}
@@ -259,8 +264,9 @@ function ringSVG(p,c){const R=30,C=2*Math.PI*R,v=Math.max(0,Math.min(1,p));retur
 function sparkSVG(vals,c){const w=220,h=40,max=Math.max(60,...vals),n=vals.length;if(!n)return '';const x=i=>(i/(Math.max(1,n-1)))*(w-4)+2,y=v=>h-4-(v/max)*(h-10);
  const pts=vals.map((v,i)=>`${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(' ');
  return `<svg class="chart spark" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" aria-hidden="true"><polyline points="2,${h-4} ${pts} ${w-2},${h-4}" fill="${c}22" stroke="none"/><polyline points="${pts}" fill="none" stroke="${c}" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/></svg>`}
-function calendarSVG(day){const weeks=12,cs=15,gap=4,top=18,left=LANG==='en'?30:22;const start=new Date(TODAY);start.setDate(start.getDate()-((start.getDay()+6)%7)-(weeks-1)*7);
- const lvl=s=>s<=0?0:s<600?1:s<1200?2:s<2400?3:4,col=['#eef1f9','#c9d6ff','#8fa8ff','#4d6df0','#24346f'];
+const mixHex=(a,b,t)=>{const p=h=>[1,3,5].map(i=>parseInt(h.slice(i,i+2),16)),x=p(a),y=p(b);return '#'+x.map((v,i)=>Math.round(v+(y[i]-v)*t).toString(16).padStart(2,'0')).join('')};
+function calendarSVG(day,c){const weeks=12,cs=15,gap=4,top=18,left=LANG==='en'?30:22;const start=new Date(TODAY);start.setDate(start.getDate()-((start.getDay()+6)%7)-(weeks-1)*7);
+ const lvl=s=>s<=0?0:s<600?1:s<1200?2:s<2400?3:4,col=c?['#eef1f9',mixHex(c,'#ffffff',.72),mixHex(c,'#ffffff',.42),c,mixHex(c,'#000000',.35)]:['#eef1f9','#c9d6ff','#8fa8ff','#4d6df0','#24346f'];
  let cells='',mon='';const wd=LANG==='en'?['M','','W','','F','','S']:['월','','수','','금','','일'];
  for(let w=0;w<weeks;w++)for(let d=0;d<7;d++){const dt=new Date(start);dt.setDate(start.getDate()+w*7+d);if(dt>TODAY)continue;const k=dkey(dt),s=day[k]||0;
   if(d===0&&(w===0||dt.getDate()<=7))mon+=`<text x="${left+w*(cs+gap)}" y="11" font-size="10" font-weight="700" fill="#6b7499">${dt.toLocaleDateString(LANG==='en'?'en-US':'ko-KR',{month:'short'})}</text>`;
@@ -277,13 +283,23 @@ function radarSVG(items){const n=items.length,S=320,cx=S/2,cy=S/2+6,R=104;const 
  items.forEach((it,i)=>{const [x,y]=pt(i,Math.max(.04,it.v));g+=`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="5" fill="${it.c}" stroke="#fff" stroke-width="2"/>`;
   const [lx,ly]=pt(i,1.22),anc=Math.abs(lx-cx)<8?'middle':lx<cx?'end':'start';
   g+=`<text x="${lx.toFixed(1)}" y="${(ly-2).toFixed(1)}" text-anchor="${anc}" font-size="12.5" font-weight="800" fill="#17224d">${esc(it.icon+' '+it.label)}</text><text x="${lx.toFixed(1)}" y="${(ly+13).toFixed(1)}" text-anchor="${anc}" font-size="12" font-weight="800" fill="${it.c}" class="num">${pct(it.v)}%</text>`});
- return `<svg class="chart" viewBox="-30 -8 ${S+60} ${S+16}" style="max-width:420px;margin:0 auto" role="img" aria-label="${esc(L('과목별 진도','Progress by subject'))}">${g}</svg>`}
+ return `<svg class="chart" viewBox="-78 -8 ${S+156} ${S+16}" style="max-width:460px;margin:0 auto" role="img" aria-label="${esc(L('과목별 진도','Progress by subject'))}">${g}</svg>`}
 function trendSVG(pts){const w=480,h=170,l=42,b=24,t=12,r=26;const n=pts.length;const x=i=>l+(n<2?0:i*(w-l-r)/(n-1)),y=v=>t+(1-v)*(h-t-b);
  let g='';for(const v of [.5,.75,1]){g+=`<line x1="${l}" x2="${w-r}" y1="${y(v)}" y2="${y(v)}" stroke="#e3e7f3"/><text x="${l-6}" y="${y(v)+4}" font-size="11" text-anchor="end" fill="#6b7499" font-weight="700">${pct(v)}%</text>`}
  const ok=pts.map((p,i)=>p.v==null?null:[x(i),y(Math.max(.5,p.v))]);let path='',on=false;ok.forEach(q=>{if(!q){on=false;return}path+=(on?'L':'M')+q[0].toFixed(1)+','+q[1].toFixed(1);on=true});
  g+=`<path d="${path}" fill="none" stroke="#1f9d6a" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>`;
  pts.forEach((p,i)=>{g+=`<text x="${x(i)}" y="${h-6}" font-size="10.5" text-anchor="middle" fill="#6b7499" font-weight="700">${esc(p.lab)}</text>`;if(ok[i])g+=`<circle cx="${ok[i][0]}" cy="${ok[i][1]}" r="4.5" fill="#fff" stroke="#1f9d6a" stroke-width="2.4"><title>${pct(p.v)}% · ${p.n}</title></circle>`});
  return `<svg class="chart" viewBox="0 0 ${w} ${h}" role="img" aria-label="${esc(L('주별 정답률','Weekly accuracy'))}">${g}</svg>`}
+// ---------------------------------------------------------------- learning calendar: all subjects together, or one subject in its own colour
+let CAL=null,CALG='all';try{CALG=sessionStorage.getItem('moonGames.reportCal')||'all'}catch(e){}
+function calCard(){const {all,played,R}=CAL,g=GAMES.find(x=>x.id===CALG);let day=all;
+ if(g){day={};const d=R[g.id].r.days||{};for(const k in d)day[k]=d[k].s+(d[k].s<30&&d[k].r+d[k].w>0?30:0)}
+ let st=0;for(let i=(day[dkey(TODAY)]||0)>=30?0:1;i<400;i++){if((day[dkey(daysAgo(i))]||0)>=30)st++;else break}
+ let on=0;for(let i=0;i<84;i++)if((day[dkey(daysAgo(i))]||0)>=30)on++;
+ const chips=`<div class="calsub" role="group" aria-label="${esc(L('과목 고르기','Choose a subject'))}"><button type="button" data-cal="all" aria-pressed="${!g}">🗓️ ${L('전체','All')}</button>${played.map(x=>`<button type="button" data-cal="${x.id}" aria-pressed="${g===x}" style="--c:${x.c}">${esc(x.icon)} ${esc(T(x.subj).split(' · ')[0])}</button>`).join('')}</div>`;
+ return `<div class="h2"><h2>📅 ${L('학습 달력','Learning calendar')}</h2>${st>=2?`<span class="streak">🔥 ${L(`${st}일 연속`,`${st} days in a row`)}</span>`:`<span>${L('최근 12주','Last 12 weeks')}</span>`}</div>${played.length>1?chips:''}
+  ${calendarSVG(day,g?g.c:null)}<p class="note">${g?L(`최근 12주 동안 ${esc(T(g.subj))}${hasB(T(g.subj))?'을':'를'} 배운 날은 ${on}일이에요.`,`${esc(T(g.subj))} was practised on ${on} day${on===1?'':'s'} in the last 12 weeks.`):L(`최근 12주 동안 배운 날은 ${on}일이에요. 과목을 누르면 그 과목만 볼 수 있어요.`,`${on} day${on===1?'':'s'} of learning in the last 12 weeks. Tap a subject to see just that one.`)} ${L('하루 30초 이상 직접 조작한 날만 색칠돼요.','A day is coloured after at least 30 seconds of active play.')}</p>`}
+function bindCal(){const c=document.getElementById('calCard');if(!c)return;c.onclick=e=>{const b=e.target.closest('[data-cal]');if(!b)return;CALG=b.dataset.cal;try{sessionStorage.setItem('moonGames.reportCal',CALG)}catch(e){}c.innerHTML=calCard();const nb=c.querySelector(`[data-cal="${CALG}"]`);if(nb)nb.focus()}}
 // ---------------------------------------------------------------- page state
 let PER=7;try{PER=+sessionStorage.getItem('moonGames.reportPer')||7}catch(e){}
 function render(){const app=$('app'),R=records(),m=DEMO?{name:L('하늘','Sky'),av:'🦄'}:me();
@@ -331,7 +347,8 @@ function render(){const app=$('app'),R=records(),m=DEMO?{name:L('하늘','Sky'),
  // ---- calendar + subject balance
  const radarItems=played.map(g=>{const sk=allSkills(R[g.id].r.sum);return {label:T(g.subj).split(' · ')[0],icon:g.icon,c:g.c,v:sk.length?sk.reduce((t,k)=>t+(+k.p||0),0)/sk.length:0}});
  const shareT=played.reduce((t,g)=>t+P[g.id].s,0);
- h+=`<section class="two"><div class="card"><div class="h2"><h2>📅 ${L('학습 달력','Learning calendar')}</h2>${streak>=2?`<span class="streak">🔥 ${L(`${streak}일 연속`,`${streak} days in a row`)}</span>`:`<span>${L('최근 12주','Last 12 weeks')}</span>`}</div>${calendarSVG(dayAll)}<p class="note">${L('하루 30초 이상 화면을 보며 직접 조작한 날만 색칠돼요.','A day is coloured when your child actively played for at least 30 seconds.')}</p></div>
+ CAL={all:dayAll,played,R};if(CALG!=='all'&&!played.some(g=>g.id===CALG))CALG='all';
+ h+=`<section class="two"><div class="card" id="calCard">${calCard()}</div>
   <div class="card"><div class="h2"><h2>⏳ ${L('과목별 학습 시간','Time by subject')}</h2><span>${esc(perLab)}</span></div>${shareT?`<div class="share">${played.filter(g=>P[g.id].s).map(g=>`<i style="width:${(P[g.id].s/shareT*100).toFixed(2)}%;background:${g.c}" title="${esc(T(g.subj))}"></i>`).join('')}</div>
    <div class="slist">${played.slice().sort((a,b)=>P[b.id].s-P[a.id].s).map(g=>`<div class="srow"><i class="dot" style="background:${g.c}"></i><b>${esc(g.icon)} ${esc(T(g.subj))}</b><span class="num">${P[g.id].s?fmtMin(P[g.id].s)+` · ${pct(P[g.id].s/shareT)}%`:L('이 기간에는 쉬었어요','not this time')}</span></div>`).join('')}</div>`:`<p class="empty">${L('이 기간에는 학습 시간이 없어요.','No learning time in this period.')}</p>`}</div></section>`;
  // ---- progress radar + accuracy trend
@@ -404,7 +421,7 @@ function emptyPage(R,m){const any=GAMES.some(g=>R[g.id].saved);
   <div class="per noprint"><a class="go" style="background:var(--gold);color:#2a2300" href="report.html?demo=1&lang=${LANG}">👀 ${L('예시 리포트 보기','See a sample report')}</a><a class="go" style="background:#ffffff1f" href="index.html?lang=${LANG}">🎮 ${L('게임 하러 가기','Go to the games')}</a></div></section>
   ${GAMES.filter(g=>R[g.id].saved).map(g=>waitCard(g,true)).join('')}
   <footer>Moon Mini Games · © 2026 Dongsun Moon. ${L('모든 권리 보유.','All rights reserved.')}</footer>`}
-function bindCommon(){document.querySelectorAll('[data-per]').forEach(b=>b.onclick=()=>{PER=+b.dataset.per;try{sessionStorage.setItem('moonGames.reportPer',PER)}catch(e){}render()});
+function bindCommon(){bindCal();document.querySelectorAll('[data-per]').forEach(b=>b.onclick=()=>{PER=+b.dataset.per;try{sessionStorage.setItem('moonGames.reportPer',PER)}catch(e){}render()});
  document.querySelectorAll('[data-kid]').forEach(b=>b.onclick=()=>{PROF.cur=b.dataset.kid;const u=new URL(location.href);u.searchParams.set('p',PROF.cur);history.replaceState(null,'',u.href);render()})}
 // ---------------------------------------------------------------- the sample report (?demo=1): a made-up child, clearly labelled
 function demoRecords(){const out={};let seed=7;const rnd=()=>(seed=(seed*16807)%2147483647)/2147483647;

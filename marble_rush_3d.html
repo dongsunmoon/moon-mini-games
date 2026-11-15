@@ -326,6 +326,65 @@ button,input,select{font:inherit}button{cursor:pointer;touch-action:manipulation
 .badge.got{background:linear-gradient(160deg,#3a3315,#1c2236);border-color:#ffd84a;opacity:1}.badge .bi{font-size:28px;filter:grayscale(.9)}.badge.got .bi{filter:none}
 .badge b{font-size:15px}.badge small{font-size:12.5px;color:#b9c8e2;line-height:1.35}.badge .bp{font-weight:800}
 .badge .bar{height:8px;border-radius:99px;background:#263551;overflow:hidden;margin:3px 0}.badge .bar i{display:block;height:100%;background:linear-gradient(90deg,#65dbf8,#7df9c8)}
+.lab-mini{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:-4px 0 10px}.lab-mini .small-btn{padding:8px 6px;font-size:14px}
+.note-side{width:100%;margin-top:10px}
+/* design challenges: board, builder strip, time gauge, test result */
+.ch-intro{font-size:14px;color:#cfe0ff;margin:0 0 10px;line-height:1.5}
+.ch-steps{list-style:none;margin:0 0 10px;padding:0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px}
+.ch-steps li{background:#0f1d36;border:1px solid #2b3d61;border-radius:999px;padding:6px 4px;font-size:13px;font-weight:800;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#a9bbd8}
+.ch-steps li.on{background:#2a2a18;border-color:#ffd84a;color:#ffe9a0}
+.ch-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.ch-card{display:flex;gap:10px;align-items:flex-start;text-align:left;min-height:96px;border:1px solid #33486e;background:#132240;color:#fff;border-radius:14px;padding:10px 12px;box-shadow:0 2px 0 #050a16}
+.ch-card:active{transform:translateY(2px)}.ch-card.met{border-color:#ffd84a;background:linear-gradient(160deg,#2c2a17,#16223c)}
+.ch-card .ci{font-size:30px;line-height:1;flex:0 0 auto}.ch-card .ct{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
+.ch-card b{font-size:16px}.ch-card .cg{font-size:14px;line-height:1.35;color:#e6efff}.ch-card small{font-size:13px;color:#a9bbd8;line-height:1.3}
+.ch-stars{font-size:16px;letter-spacing:1px;white-space:nowrap}.ch-stars .off{filter:grayscale(1);opacity:.35}
+.ch-strip{background:#0c2a40;border:1px solid #2c6a8a;border-radius:14px;padding:10px 12px;margin:0 0 12px}
+.ch-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.ch-head b{font-size:17px;flex:1 1 auto;min-width:0}
+.ch-goal{font-size:15px;font-weight:800;margin:6px 0 4px;line-height:1.45}.ch-goal small{display:block;font-size:14px;color:#cfe0ff;font-weight:700}
+.ch-rule{font-size:14px;font-weight:800;margin:6px 0 0;line-height:1.45;color:#cfe0ff}.ch-rule.ok{color:#7df9c8}.ch-rule.no{color:#ffd84a}
+.ch-tools{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.guess{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:8px;font-size:14px;font-weight:800}
+.guess .mini-btn{width:44px;padding:0;font-size:18px}.guess output{min-width:62px;text-align:center;font-size:18px;font-weight:900;color:#ffe9a0}
+.guess small{flex-basis:100%;font-size:13px;color:#a9bbd8;font-weight:700}
+.gauge{margin:6px 2px 2px;text-align:left}
+.g-track{position:relative;height:18px;margin:30px 10px 0;border-radius:99px;background:#263551}
+.g-zone{position:absolute;top:-4px;bottom:-4px;border-radius:8px;background:#3fcf8e40;border:2px solid #3fcf8e}
+.g-old{position:absolute;top:50%;width:10px;height:10px;margin:-5px 0 0 -5px;border-radius:50%;background:#c8d4ea;opacity:.6}
+.g-base{position:absolute;top:50%;width:14px;height:14px;margin:-7px 0 0 -7px;transform:rotate(45deg);background:#c8d4ea;border:2px solid #0e1a30}
+.g-guess{position:absolute;top:50%;transform:translate(-50%,-50%);font-size:17px;line-height:1}
+.g-now{position:absolute;top:50%;width:18px;height:18px;margin:-9px 0 0 -9px;border-radius:50%;background:#fff;border:3px solid #0e1a30;box-shadow:0 0 0 2px #fff}
+.g-now em{position:absolute;bottom:22px;left:50%;transform:translateX(-50%);font-style:normal;font-size:14px;font-weight:900;white-space:nowrap;background:#fff;color:#0e1a30;border-radius:8px;padding:1px 7px}
+.g-ticks{position:relative;height:18px;margin:6px 10px 0}.g-ticks span{position:absolute;transform:translateX(-50%);font-size:12px;color:#a9bbd8;white-space:nowrap}
+.g-key{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:13px;color:#cfe0ff;margin:6px 0 0;padding:0;list-style:none}
+.g-key i{display:inline-block;vertical-align:-1px;margin-right:5px}.g-key .kz{width:16px;height:10px;border-radius:3px;background:#3fcf8e40;border:2px solid #3fcf8e}
+.g-key .kn{width:12px;height:12px;border-radius:50%;background:#fff}.g-key .kb{width:10px;height:10px;transform:rotate(45deg);background:#c8d4ea}.g-key .ko{width:9px;height:9px;border-radius:50%;background:#c8d4ea;opacity:.6}
+.ch-res{text-align:left}.ch-res .lab-head{text-align:center}
+.ch-time{font-size:22px;font-weight:1000;text-align:center;margin:2px 0}
+.ch-msg{border-radius:12px;padding:8px 12px;font-size:15px;font-weight:800;line-height:1.45;margin:8px 0}.ch-msg.ok{background:#173f2c;border:1px solid #3fcf8e}.ch-msg.new{background:#3a2f12;border:1px solid #f0b43c}.ch-msg.base{background:#0c2a40;border:1px solid #2c6a8a}
+.ch-msg small{display:block;font-size:14px;color:#dfe8f6;font-weight:700;margin-top:2px}
+.ch-star-list{list-style:none;margin:6px 0;padding:0;display:grid;gap:3px}.ch-star-list li{font-size:14px;line-height:1.4}.ch-star-list li.off{color:#8fa1c0}
+.ch-star-list .nw{font-size:12px;font-weight:900;color:#2b2100;background:#ffd84a;border-radius:6px;padding:0 5px;margin-left:5px;white-space:nowrap}
+.ch-guess{font-size:14px;color:#ffe9a0;font-weight:800;margin:4px 0}
+.ch-podium{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;margin:6px 0 8px;font-size:14px;font-weight:800}.ch-podium span{background:#0f1d36;border-radius:999px;padding:4px 10px}
+.ch-res .mcoach{max-width:100%}.ch-res .result-actions+.ch-star-list{margin-top:10px}
+/* lab notebook */
+.nb-sum{font-size:14px;color:#cfe0ff;margin:0 0 10px;line-height:1.5}.nb-list{display:grid;gap:10px}
+.nb{background:#101c33;border:1px solid #2b3d61;border-radius:14px;padding:10px 12px}
+.nb-h{display:flex;align-items:center;gap:8px;margin:0 0 6px;font-size:16px;color:#fff}.nb-h small{margin-left:auto;font-size:13px;color:#a9bbd8;font-weight:800;white-space:nowrap}
+.nb p{margin:3px 0;font-size:14px;line-height:1.45}
+.nb-tag{display:inline-block;font-size:13px;font-weight:900;border-radius:8px;padding:0 7px;margin-left:4px}.nb-tag.ok{background:#173f2c;color:#9ff5cb}.nb-tag.new{background:#3a2f12;color:#ffe39a}
+.bars{display:grid;grid-template-columns:minmax(0,max-content) minmax(0,1fr);gap:6px 10px;align-items:center;margin:8px 0 2px}
+.bars .bl{font-size:13px;font-weight:800;display:flex;align-items:center;gap:6px;min-width:0;max-width:160px}.bars .bl span{line-height:1.2;overflow-wrap:anywhere}
+.bars .sw{flex:0 0 20px;height:20px;border-radius:6px;display:grid;place-items:center;font-style:normal;font-size:12px;font-weight:900;color:#06121f}
+.bars .bt{position:relative;height:22px;border-left:1px solid #3b5073}
+.bars .bt i{position:absolute;left:0;top:0;bottom:0;border-radius:0 4px 4px 0;min-width:3px}
+.bars .bt em{position:absolute;top:50%;transform:translateY(-50%);font-style:normal;font-size:13px;font-weight:900;color:#f4f7ff;white-space:nowrap}
+.bars .a{background:#1fa2c4}.bars .b{background:#bd8410}
+.nb-axis{font-size:12.5px;color:#a9bbd8}.nb .nb-why{background:#0c172bcc;border-radius:10px;padding:6px 10px;margin-top:6px}
+.nb .small-btn{margin-top:8px}.nb-left{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}.nb-empty{font-size:15px;color:#cfe0ff;line-height:1.5;margin:0 0 10px}
+@media(max-width:520px){.ch-grid{grid-template-columns:1fr}.ch-card{min-height:0}.ch-steps li{font-size:12px;padding:6px 2px}.bars .bl{max-width:120px}.ch-time{font-size:20px}.guess>span:first-child{flex:1 1 100%}.ch-card small,.guess small{font-size:14px}}
+@media(max-width:400px){.ch-steps .se{display:none}}
 @media(max-width:520px){.lab-ov .lab-lanes,.lab-ov .lab-note{display:none}.lab-ov .lab-opts{grid-template-columns:repeat(3,1fr);gap:6px}.lab-ov .lab-opt{font-size:14px;padding:8px 5px;min-height:58px;line-height:1.25}.lab-ov .lab-diff{font-size:13px;padding:6px 9px}.lab-ov .lab-ask{margin:6px 0}.lab-ov .result-card{padding:12px}
  .lab-grid{grid-template-columns:1fr}.lab-steps{grid-template-columns:1fr}.lab-steps li{display:flex;gap:6px;align-items:baseline;text-align:left}.result-actions.three{grid-template-columns:1fr}.replay-skip{bottom:150px}.lab-q{font-size:16px}}
 /*COACH:BEGIN*/
@@ -372,10 +431,10 @@ button,input,select{font:inherit}button{cursor:pointer;touch-action:manipulation
    <div id="confettiLayer" class="confetti-layer"></div>
   </main>
   <section class="panel action-panel" aria-label="경기 진행" data-en-aria-label="Race controls"><button class="primary" id="startBtn" type="button">🏁 레이스 시작!</button><div class="controls"><button class="control" id="pauseBtn" type="button" disabled>⏸ 일시정지</button><button class="control" id="resetBtn" type="button" data-en="↻ Reset">↻ 다시 준비</button></div>
-   <div class="fun-row"><button class="fun-btn" id="buildBtn" type="button" data-en-html="<span>🛠️</span>Build a course"><span>🛠️</span>코스 만들기</button><button class="fun-btn" id="labBtn" type="button"><span>🔬</span>구슬 실험실</button><button class="fun-btn" id="skinBtn" type="button" data-en-html="<span>🎨</span>Decorate"><span>🎨</span>구슬 꾸미기</button><button class="fun-btn" id="badgeBtn" type="button"><span>🏅</span>배지</button></div>
+   <div class="fun-row"><button class="fun-btn" id="buildBtn" type="button" data-en-html="<span>🛠️</span>Build a course"><span>🛠️</span>코스 만들기</button><button class="fun-btn" id="chalBtn" type="button" aria-haspopup="dialog" data-en-html="<span>🎯</span>Design challenges"><span>🎯</span>설계 도전</button><button class="fun-btn" id="labBtn" type="button"><span>🔬</span>구슬 실험실</button><button class="fun-btn" id="noteBtn" type="button" aria-haspopup="dialog" data-en-html="<span>📒</span>Lab notebook"><span>📒</span>실험 노트</button><button class="fun-btn" id="skinBtn" type="button" data-en-html="<span>🎨</span>Decorate"><span>🎨</span>구슬 꾸미기</button><button class="fun-btn" id="badgeBtn" type="button"><span>🏅</span>배지</button></div>
    <p class="hint keys-hint" data-en="Keys: Space = pause · C = cheer · V = camera">단축키: 스페이스 = 일시정지 · C = 응원 · V = 카메라</p></section>
   <aside class="panel sidebar">
-   <section class="lab-only"><h2 class="label" data-en="🔬 Lab notebook">🔬 실험 노트</h2><div class="lab-grid compact" id="labList"></div><p class="hint" data-en="Pick an experiment. Guess first, then watch!">실험을 골라요. 먼저 예상하고, 그다음 지켜봐요!</p></section>
+   <section class="lab-only"><h2 class="label" data-en="🔬 Experiments">🔬 실험 고르기</h2><div class="lab-grid compact" id="labList"></div><p class="hint" data-en="Pick an experiment. Guess first, then watch!">실험을 골라요. 먼저 예상하고, 그다음 지켜봐요!</p><button type="button" class="small-btn note-side" id="noteSide" data-en="📒 Open the lab notebook">📒 실험 노트 보기</button></section>
    <section class="map-section race-only"><h2 class="label" data-en="🌎 Choose a world">🌎 레이스 월드</h2><div class="maps" id="maps"></div></section>
    <section class="mode-section race-only"><h2 class="label" data-en="🏆 Race type">🏆 경기 방식</h2><div class="seg" id="modeSeg"><button type="button" data-mode="single" data-en="Single race">단판 경기</button><button type="button" data-mode="league" data-en="League · 5 races">리그 5경기</button></div><p class="hint" id="leagueInfo"></p></section>
    <section class="race-only"><div class="field-line"><h2 class="label" style="margin:0" data-en="🔮 Marbles">🔮 출전하는 공</h2><div class="count-box"><input id="ballCount" aria-label="공 개수" data-en-aria-label="Number of marbles" type="number" inputmode="numeric" min="2" max="16" value="8"></div></div><input id="ballRange" class="range" aria-label="공 개수 조절" data-en-aria-label="Adjust the number of marbles" type="range" min="2" max="16" value="8"></section>
@@ -396,6 +455,14 @@ button,input,select{font:inherit}button{cursor:pointer;touch-action:manipulation
 <div class="modal hidden" id="labModal" role="dialog" aria-modal="true" aria-labelledby="labTitle">
  <div class="modal-card wide"><button class="modal-x" type="button" data-close aria-label="닫기" data-en-aria-label="Close">✕</button>
   <h2 id="labTitle" data-en="🔬 Marble lab">🔬 구슬 실험실</h2><div id="labBody"></div></div>
+</div>
+<div class="modal hidden" id="chalModal" role="dialog" aria-modal="true" aria-labelledby="chalTitle">
+ <div class="modal-card wide"><button class="modal-x" type="button" data-close aria-label="닫기" data-en-aria-label="Close">✕</button>
+  <h2 id="chalTitle" data-en="🎯 Design challenges">🎯 설계 도전</h2><div id="chalBody"></div></div>
+</div>
+<div class="modal hidden" id="noteModal" role="dialog" aria-modal="true" aria-labelledby="noteTitle">
+ <div class="modal-card wide"><button class="modal-x" type="button" data-close aria-label="닫기" data-en-aria-label="Close">✕</button>
+  <h2 id="noteTitle" data-en="📒 Lab notebook">📒 실험 노트</h2><div id="noteBody"></div></div>
 </div>
 <div class="modal hidden" id="skinModal" role="dialog" aria-modal="true" aria-labelledby="skinTitle">
  <div class="modal-card wide"><button class="modal-x" type="button" data-close aria-label="닫기" data-en-aria-label="Close">✕</button>
@@ -600,9 +667,16 @@ function build(mods,rng,labKind,labCfg){
     poly([[o+36,sy0-36],[o+36,sy0-8],...path,[o+340,ey+8]],{style:'track',k:.02});
     gateAt(sx0+2,sy0-40,sy0-6);const sx=sx0+2-T-R-1.5;slots.push([sx,sy0-8+(sx-o-36)*8/(sx0-o-36)-T-R-1]);
     poly([[o+40,440],[o+350,440]],{style:'tray',e:.05,k:6});L0.finX=ex;L0.finY=ey;L0.startX=sx;L0.floorY=440;
-   }else if(kind==='bounce'){ // a trapdoor drops the ball straight onto a hard floor
-    const cx=o+180;trap(cx,110);slots.push([cx,110-T-R-.5]);
-    poly([[o+40,520],[o+350,520]],{style:'track',e:.55,k:.3});L0.floorY=520;L0.dropY=110;L0.cx=cx;
+   }else if(kind==='bounce'){ // a trapdoor drops the ball straight onto a hard floor (dropY: how high the trapdoor is)
+    const cx=o+180,dy=c.dropY||110;trap(cx,dy);slots.push([cx,dy-T-R-.5]);
+    poly([[o+40,520],[o+350,520]],{style:'track',e:.55,k:.3});L0.floorY=520;L0.dropY=dy;L0.cx=cx;
+   }else if(kind==='roll'){ // the same ramp, bend and carpet in both lanes; only the start height (where the gate sits on the ramp) differs
+    const x0=o+40,y0=110,x1=o+120,y1=330,rampY=xx=>y0+(xx-x0)*(y1-y0)/(x1-x0),ang=Math.atan2(y1-y0,x1-x0),rb=40,cut=rb*Math.tan(ang/2),cx=x1+cut,cy=y1-rb,pts=[[x0,y0-30],[x0,y0]];
+    for(let i=0;i<=8;i++){const a=ang*(1-i/8);pts.push([cx-Math.sin(a)*rb,cy+Math.cos(a)*rb])}  // a round bend from the slope into the floor
+    poly(pts,{style:'track',k:.6});poly([[cx,y1],[o+346,y1]],{style:'carpet',e:.1,k:4.5});poly([[o+346,y1-50],[o+346,y1]]);
+    // the ball waits in the corner between the steep ramp and the gate, so the gate reaches well above the ball
+    const gx=o+(c.gx||72),sx=gx-T-R-1.5,sy=rampY(sx)-(T+R)/Math.cos(ang)-.5;gateAt(gx,sy-30,rampY(gx)-2);slots.push([sx,sy]);
+    L0.startX=cx;L0.floorY=y1;L0.h=y1-T-R-sy;L0.sx=sx;
    }else if(kind==='wind'){ // the ball falls through a side wind and lands on soft sand
     const cx=o+70;trap(cx,110);slots.push([cx,110-T-R-.5]);
     winds.push({x0:o+30,x1:o+360,y0:170,y1:470,wx:520,wy:0,kx:4,ky:0,sway:0});
@@ -617,7 +691,7 @@ function build(mods,rng,labKind,labCfg){
   }
   if(kind==='crash')for(const L0 of lanes)slots.push([L0.targetX,L0.floorY-T-R-.5]);
   gate=gates[0];lab={kind,lanes};sections.push({type:'lab',y0:0});
-  y=kind==='bounce'?560:kind==='wind'?600:kind==='crash'?380:480;gp(360,0);gp(360,y);
+  y=kind==='bounce'?560:kind==='wind'?600:kind==='crash'?380:kind==='roll'?420:480;gp(360,0);gp(360,y);
  }
  const MOD={ramps2:()=>ramps(2,-1),ramps3:()=>ramps(3,-1),ramps2b:()=>ramps(2,1),ramps3b:()=>ramps(3,1),wash2:()=>ramps(2,-1,true),
   pegs:pegField,zigzag,funnels2:()=>funnels(2),funnels3:()=>funnels(3),funnels4:()=>funnels(4),spinner:spinnerShaft,bumpers:bumperField,split,
@@ -793,6 +867,13 @@ const EXPS=[
   opts:[['A',L('가파른 길','The steep slide')],['B',L('완만한 길','The gentle slide')],['same',L('거의 동시에','About the same time')]],ans:'A',
   why:L('경사가 가파를수록 비탈을 따라 구슬을 끌어내리는 힘이 커서 더 빨리 내려와요.','The steeper the slope, the harder gravity pulls the marble down it, so it goes faster.'),
   life:L('그래서 가파른 미끄럼틀이 더 짜릿해요!','That is why steep slides feel more exciting!')},
+ {id:'height',ic:'🛷',kind:'roll',measure:'far',t:L('높은 출발, 낮은 출발','High start, low start'),
+  q:L('똑같은 비탈의 높은 곳과 낮은 곳에서 구슬이 출발해요. 비탈을 내려온 뒤 카펫에서 어느 구슬이 더 멀리 굴러갈까요?','Two marbles start on the same ramp, one high up and one low down. After the ramp, which one rolls farther on the carpet?'),
+  diff:L('다른 점은 딱 하나: 출발하는 높이예요 (비탈과 카펫은 똑같아요)','Only one thing is different: how high the marble starts (the ramp and the carpet are the same)'),
+  lanes:[{mat:'glass',gx:72,name:L('⬆️ 높은 출발','⬆️ High start')},{mat:'glass',gx:116,name:L('⬇️ 낮은 출발','⬇️ Low start')}],
+  opts:[['A',L('높은 곳에서 출발한 구슬','The one that starts high')],['B',L('낮은 곳에서 출발한 구슬','The one that starts low')],['same',L('똑같이 굴러가요','The same distance')]],ans:'A',
+  why:L('높은 곳에서 출발한 구슬은 내려오는 동안 더 빨라져서 더 멀리 굴러가요. 높은 곳에 있을수록 움직일 수 있는 에너지를 더 많이 가지고 있어요.','The marble that starts higher speeds up more on the way down, so it rolls farther. The higher something starts, the more energy it has for moving.'),
+  life:L('미끄럼틀도 꼭대기에서 출발해야 가장 빨라져요.','On a slide, too, you go fastest when you start from the very top.')},
  {id:'friction',ic:'🧊',kind:'race',measure:'time',t:L('얼음길과 카펫길','Ice or carpet'),
   q:L('매끈한 얼음길과 보송보송한 카펫길이 있어요. 누가 먼저 도착할까요?','One slide is smooth ice and one is fuzzy carpet. Which marble gets there first?'),
   diff:L('다른 점은 딱 하나: 길의 표면이에요','Only one thing is different: the surface of the slide'),
@@ -807,6 +888,13 @@ const EXPS=[
   opts:[['A',L('고무공','The rubber ball')],['B',L('찰흙공','The clay ball')],['same',L('똑같이 튀어요','The same height')]],ans:'A',
   why:L('고무는 눌렸다가 다시 펴지는 성질(탄성)이 커서 높이 튀어요. 찰흙은 눌린 채로 있어서 거의 안 튀어요.','Rubber springs back after it is squashed (it is elastic), so it bounces high. Clay stays squashed, so it hardly bounces.'),
   life:L('농구공과 탱탱볼이 잘 튀는 것도 탄성 덕분이에요.','Basketballs and bouncy balls bounce well because they are elastic.')},
+ {id:'drop',ic:'🎾',kind:'bounce',measure:'up',t:L('떨어뜨리는 높이','Drop height'),
+  q:L('똑같은 고무공을 높은 곳과 낮은 곳에서 떨어뜨려요. 어느 공이 더 높이 튀어 오를까요?','The same kind of rubber ball drops from high up and from lower down. Which one bounces higher?'),
+  diff:L('다른 점은 딱 하나: 떨어뜨리는 높이예요 (공과 바닥은 똑같아요)','Only one thing is different: the drop height (the balls and the floor are the same)'),
+  lanes:[{mat:'rubber',dropY:110,name:L('⬆️ 높은 곳에서','⬆️ From high up')},{mat:'rubber',dropY:330,name:L('⬇️ 낮은 곳에서','⬇️ From lower down')}],
+  opts:[['A',L('높은 곳에서 떨어뜨린 공','The one dropped from high up')],['B',L('낮은 곳에서 떨어뜨린 공','The one dropped from lower down')],['same',L('똑같이 튀어요','The same height')]],ans:'A',
+  why:L('높은 곳에서 떨어진 공은 바닥에 닿을 때 더 빨라서 더 높이 튀어 올라요. 그래도 처음 높이까지는 다시 올라오지 못해요.','A ball dropped from higher is moving faster when it hits the floor, so it bounces higher. It still does not come all the way back up to where it started.'),
+  life:L('공을 계속 튀기면 튈 때마다 조금씩 낮아져요.','When a ball keeps bouncing, each bounce is a little lower than the one before.')},
  {id:'wind',ic:'🌬️',kind:'wind',measure:'far',t:L('바람 실험','Wind test'),
   q:L('떨어지는 공에 옆에서 바람이 불어요. 어느 쪽이 더 멀리 밀려날까요?','Wind blows from the side while the balls fall. Which one gets pushed farther?'),
   diff:L('다른 점은 딱 하나: 무게예요 (크기는 같아요)','Only one thing is different: the weight (they are the same size)'),
@@ -830,21 +918,55 @@ const EXPS=[
   life:L('롤러코스터 첫 내리막이 아주 가파른 것도 빨리 속도를 내기 위해서예요.','Roller coasters start with a very steep drop to build up speed fast.')}];
 const EXP_IDS=EXPS.map(e=>e.id),UNIT=30;  // distances are counted in "칸" (squares) of 30 px, like a ruler
 // My marble's looks. Each one is earned by a badge for something the child did (never bought, never random).
-const PATTERNS=[['plain','⚪',L('기본','Classic')],['stripe','🦓',L('줄무늬','Stripes')],['face','😊',L('웃는 얼굴','Smiley')],['rainbow','🌈',L('무지개','Rainbow')],['galaxy','🌌',L('은하수','Galaxy')],['fire','🔥',L('불꽃','Flame')],['star','⭐',L('별','Star')]];
-const TRAILS=[['none','✖️',L('없음','None')],['sparkle','✨',L('반짝이','Sparkles')],['bubbles','💧',L('비눗방울','Bubbles')],['rainbow','🌈',L('무지개 꼬리','Rainbow tail')],['stars','🌟',L('별똥별','Shooting stars')],['fire','🔥',L('불꽃 꼬리','Flame tail')]];
+const PATTERNS=[['plain','⚪',L('기본','Classic')],['stripe','🦓',L('줄무늬','Stripes')],['face','😊',L('웃는 얼굴','Smiley')],['rainbow','🌈',L('무지개','Rainbow')],['galaxy','🌌',L('은하수','Galaxy')],['fire','🔥',L('불꽃','Flame')],['star','⭐',L('별','Star')],['blueprint','📐',L('설계도','Blueprint')]];
+const TRAILS=[['none','✖️',L('없음','None')],['sparkle','✨',L('반짝이','Sparkles')],['bubbles','💧',L('비눗방울','Bubbles')],['rainbow','🌈',L('무지개 꼬리','Rainbow tail')],['stars','🌟',L('별똥별','Shooting stars')],['fire','🔥',L('불꽃 꼬리','Flame tail')],['gears','⚙️',L('톱니 꼬리','Gear trail')]];
+
+// Design challenges (plan → build → test → improve). Every goal is measured by the real race on the child's own course:
+// the winner's race time in seconds (race time, so the ⚡ speed button does not change it). Stars: [goal, bonus, bonus].
+// Targets were set by running the simulation headless many times with 2, 8 and 16 marbles, so each one is reachable.
+const CHALS=[
+ {id:'slow',ic:'🐢',t:L('느림보 코스','Slowpoke course'),g:L('우승 구슬이 30초 이상 걸리게 만들어요','Make the winner take 30 seconds or more'),r:L('조각은 4개까지','Use up to 4 pieces'),start:['ramps2b','pegs','spinner'],
+  b:[L('조각 3개 이하로 성공','Do it with 3 pieces or fewer'),L('40초 이상','40 seconds or more')]},
+ {id:'fast',ic:'⚡',t:L('번개 코스','Lightning course'),g:L('우승 구슬이 16초 안에 들어오게 만들어요','Make the winner finish in 16 seconds or less'),r:L('조각은 5개 이상','Use at least 5 pieces'),start:['honey','zigzag','pegs','bumpers','ice'],
+  b:[L('조각 6개 이상으로 성공','Do it with 6 or more pieces'),L('13초 안에','13 seconds or less')]},
+ {id:'window',ic:'⏱️',t:L('딱 맞춰 코스','Bullseye course'),g:L('우승 시간을 20~24초 사이에 맞춰요','Land the winning time between 20 and 24 seconds'),r:L('조각 수는 자유예요','Any number of pieces'),start:['pegs','bumpers'],
+  b:[L('같은 코스로 두 번 연속 성공','Hit it twice in a row with the same course'),L('21~23초에 쏙','Land it between 21 and 23 seconds')]},
+ {id:'one',ic:'🔬',t:L('하나만 바꾸기','Change just one'),g:L('조각 하나만 바꿔서 우승 시간이 4초 이상 달라지게 해요','Change just one piece and make the winning time change by 4 seconds or more'),r:L('먼저 한 번 시험하고, 그다음 한 군데만 바꿔요','Test once first, then change only one spot'),start:['ramps3','pegs','funnels3'],
+  b:[L('7초 이상 달라지게','Make it change by 7 seconds or more'),L('빠르게도, 느리게도 한 번씩 성공','Make it faster once and slower once')]},
+ {id:'double',ic:'⏳',t:L('두 배로 느리게','Twice as long'),g:L('코스를 고쳐서 우승 시간을 지난 시험의 2배 이상으로 만들어요','Change your course so the winning time is at least double the last test'),r:L('먼저 한 번 시험해요','Test once first'),start:['bumpers','pegs'],
+  b:[L('3배 이상','Three times as long or more'),L('조각 하나만 바꿔서 성공','Do it by changing just one piece')]},
+ {id:'same',ic:'📏',t:L('똑같이 두 번','Same twice'),g:L('같은 코스를 두 번 시험해서 우승 시간 차이를 1초 안으로 만들어요','Test the same course twice and keep the two winning times within 1 second'),r:L('조각 4개 이상 · 두 번째 시험 전에 바꾸지 않아요','At least 4 pieces · no changes before the second test'),start:['pegs','bumpers','tramp','split'],
+  b:[L('0.3초 안으로','Within 0.3 seconds'),L('조각 6개 이상으로 성공','Do it with 6 or more pieces')]}];
+const CHAL_BY=Object.fromEntries(CHALS.map(c=>[c.id,c]));
+// About how many seconds each piece adds to a race in this simulation (measured headless; used only to pick a hint, never shown)
+const COST={zigzag:10.7,ramps3:9.6,honey:9,ice:6.7,wash2:4.9,tramp:4.6,ramps2b:4.1,jump:4,split:3.9,funnels3:3.9,fan:3.2,pegs:2.5,spinner:1.9,bumpers:1.6};
+// pieces where marbles bounce off things, so the same course gives a slightly different time each run
+const BUMPY=['pegs','bumpers','tramp','split','wash2','spinner'];
+// how many spots differ between two courses: 0 = same, 1 = one piece swapped, added or removed, 2 = more
+function diffN(a,b){if(a.join()===b.join())return 0;if(a.length===b.length)return Math.min(2,a.reduce((t,x,i)=>t+(x!==b[i]),0));
+ if(Math.abs(a.length-b.length)!==1)return 2;const [lo,hi]=a.length<b.length?[a,b]:[b,a];for(let i=0;i<hi.length;i++){if(hi.slice(0,i).concat(hi.slice(i+1)).join()===lo.join())return 1}return 2}
 
 // ---------------------------------------------------------------- settings
 let worldIdx=0,numBalls=8,voiceOn=true,sfxOn=true,mine=0,mineStats={races:0,wins:0},voicePick={},names=Array(16).fill(''),mode='single',league=null;
 // added later: my own courses, my marble's look, badge progress (cheers, worlds raced, experiments done…)
 // fixes: a saved course whose pieces were changed and raced again (build → test → improve), counted since 2026-11
-const freshStats=()=>({cheers:0,worlds:[],builds:0,customRaces:0,labs:{},leagues:0,replays:0,fixes:0});
-let customs=[],skin={pat:'plain',trail:'none'},stats=freshStats(),badges=[];
-function save(){try{localStorage.setItem('marbleRush.v2',JSON.stringify({worldIdx,numBalls,voiceOn,sfxOn,mine,mineStats,voicePick,names,mode,league,customs,skin,stats,badges}))}catch(e){}}
+// notes: times the lab notebook was opened (added 2026-11); labs[id] also keeps the last guess (p), result (w) and measured values (v) for the notebook
+const freshStats=()=>({cheers:0,worlds:[],builds:0,customRaces:0,labs:{},leagues:0,replays:0,fixes:0,notes:0});
+// chal[id]: design challenge progress. s = stars won (bits: 1 goal, 2 and 4 bonuses), n = test runs, met = runs that met the goal,
+// mods/theme = the challenge course, prev = the last test {m: pieces, t: winner's seconds}, hist = recent test times,
+// dirs = one-change wins that went slower (1) / faster (2), imp = goal met after an earlier test missed it, key = last run counted in the report
+let customs=[],skin={pat:'plain',trail:'none'},stats=freshStats(),badges=[],chal={};
+function save(){try{localStorage.setItem('marbleRush.v2',JSON.stringify({worldIdx,numBalls,voiceOn,sfxOn,mine,mineStats,voicePick,names,mode,league,customs,skin,stats,badges,chal}))}catch(e){}}
 (function load(){try{const d=JSON.parse(localStorage.getItem('marbleRush.v2')||'null')||JSON.parse(localStorage.getItem('marble3dsettings')||'{}');
  const nn=(v,max=1e6)=>Math.max(0,Math.min(max,Math.floor(Number(v)||0)));
  if(Array.isArray(d.customs))customs=d.customs.filter(c=>c&&Array.isArray(c.mods)).slice(0,6).map(c=>({name:String(c.name||'').replace(/[<>]/g,'').slice(0,12)||L('나의 코스','My course'),theme:clamp(nn(c.theme),0,WORLDS.length-1),mods:c.mods.filter(m=>PIECE_IDS.includes(m)).slice(0,8)})).filter(c=>c.mods.length);
  if(d.skin&&typeof d.skin==='object')skin={pat:String(d.skin.pat||'plain'),trail:String(d.skin.trail||'none')};
- if(d.stats&&typeof d.stats==='object'){const x=d.stats;stats={cheers:nn(x.cheers),worlds:Array.isArray(x.worlds)?x.worlds.filter(w=>WORLDS.some(W=>W.id===w)):[],builds:nn(x.builds),customRaces:nn(x.customRaces),labs:{},leagues:nn(x.leagues),replays:nn(x.replays),fixes:nn(x.fixes)};if(x.labs&&typeof x.labs==='object')for(const k in x.labs)if(EXP_IDS.includes(k))stats.labs[k]={n:nn(x.labs[k]?.n),right:nn(x.labs[k]?.right)}}
+ if(d.stats&&typeof d.stats==='object'){const x=d.stats;stats={cheers:nn(x.cheers),worlds:Array.isArray(x.worlds)?x.worlds.filter(w=>WORLDS.some(W=>W.id===w)):[],builds:nn(x.builds),customRaces:nn(x.customRaces),labs:{},leagues:nn(x.leagues),replays:nn(x.replays),fixes:nn(x.fixes),notes:nn(x.notes)};
+  const K=['A','B','same'];if(x.labs&&typeof x.labs==='object')for(const k in x.labs)if(EXP_IDS.includes(k)){const y=x.labs[k]||{},e={n:nn(y.n),right:nn(y.right)};if(K.includes(y.p))e.p=y.p;if(K.includes(y.w))e.w=y.w;if(Array.isArray(y.v)&&y.v.length===2&&y.v.every(q=>Number.isFinite(+q)))e.v=y.v.map(q=>clamp(+q,0,999));stats.labs[k]=e}}
+ const mods=a=>Array.isArray(a)?a.filter(m=>PIECE_IDS.includes(m)).slice(0,MAX_PIECES):[];
+ if(d.chal&&typeof d.chal==='object')for(const c of CHALS){const x=d.chal[c.id];if(!x||typeof x!=='object')continue;
+  const pv=x.prev&&typeof x.prev==='object'&&Number.isFinite(+x.prev.t)&&mods(x.prev.m).length?{m:mods(x.prev.m),t:clamp(+x.prev.t,0,999)}:null;
+  chal[c.id]={s:nn(x.s,7),n:nn(x.n),met:nn(x.met),dirs:nn(x.dirs,3),imp:x.imp?1:0,mods:mods(x.mods),theme:clamp(nn(x.theme),0,WORLDS.length-1),prev:pv,hist:Array.isArray(x.hist)?x.hist.map(Number).filter(Number.isFinite).map(t=>clamp(t,0,999)).slice(-5):[],key:String(x.key||'').slice(0,240)}}
  if(Array.isArray(d.badges))badges=d.badges.filter(b=>typeof b==='string');
  worldIdx=clamp(Number(d.worldIdx??d.mapIndex)||0,0,WORLDS.length+customs.length-1);numBalls=clamp(Number(d.numBalls)||8,2,16);voiceOn=d.voiceOn!==false;sfxOn=d.sfxOn!==false;mine=clamp(Number(d.mine)||0,0,numBalls-1);
  mineStats={races:Math.max(0,Number(d.mineStats?.races)||0),wins:Math.max(0,Number(d.mineStats?.wins)||0)};voicePick=d.voicePick&&typeof d.voicePick==='object'?d.voicePick:{};
@@ -905,6 +1027,7 @@ function prepare(){
  if('speechSynthesis' in window)speechSynthesis.cancel();
  rec=[];recEnd=Infinity;replay=null;trail.length=0;mine=clamp(mine,0,numBalls-1);
  if(labMode&&labExp)setupLab();
+ else if(chalRun){raceWorld=-1;theme=chalTheme(chalRun);course=Sim.build(chalRun.mods);st=Sim.createState(course,numBalls,shuffle([...Array(numBalls).keys()]));for(let i=0;i<40;i++)Sim.step(st,1/60)}
  else{raceWorld=raceWorldIdx();theme=worldAt(raceWorld);
   const mods=theme.mods||shuffle(CHAOS_POOL.slice()).slice(0,6);
   course=Sim.build(mods);
@@ -913,7 +1036,7 @@ function prepare(){
   for(let i=0;i<40;i++)Sim.step(st,1/60)}
  phase='ready';paused=false;timeScale=1;slowTarget=1;cheersLeft=CHEERS;leaderId=-1;leadChanges=0;secIdx=-1;winnerT=null;photo=false;sparks=[];rings=[];mineBestRank=99;slowShown=false;
  $('resultOverlay').classList.add('hidden');$('confettiLayer').innerHTML='';$('slowmo').classList.add('hidden');$('slowmo').textContent=L('🎬 슬로모션','🎬 SLOW MOTION');$('replaySkip').classList.add('hidden');$('peekBack').classList.add('hidden');
- $('startBanner').innerHTML=labMode?`<h2>🔬</h2><p>${esc(L('예상을 고르면 실험이 시작돼요!','Pick your guess to start the experiment!'))}</p>`:`<h2>${esc(L('준비됐나요?','READY?'))}</h2><p>${esc(L('출발 버튼을 누르면 문이 열려요!','Press Start to open the gate!'))}</p>`;$('startBanner').classList.remove('hidden');
+ $('startBanner').innerHTML=labMode?`<h2>🔬</h2><p>${esc(L('예상을 고르면 실험이 시작돼요!','Pick your guess to start the experiment!'))}</p>`:chalRun?`<h2>🎯</h2><p>${esc(L('시험 주행! 출발 버튼을 누르면 우승 시간을 재요.','Test run! Press Start to time the winner.'))}</p>`:`<h2>${esc(L('준비됐나요?','READY?'))}</h2><p>${esc(L('출발 버튼을 누르면 문이 열려요!','Press Start to open the gate!'))}</p>`;$('startBanner').classList.remove('hidden');
  $('scenePanel').classList.toggle('lab-scene',labMode);document.querySelector('.layout').classList.toggle('lab-on',labMode);if(labMode)$('labList').innerHTML=labListHTML();
  buildMinimap();updateCamera(0,true);renderMaps();renderMinePicker();renderNames();updateLeagueUI();setControls();updateHud(true);
 }
@@ -922,7 +1045,7 @@ function startRace(){
  if(phase==='countdown'||phase==='running'){prepare()}
  if(mode==='league'&&(!league||league.done)){startLeague();prepare()}
  else if(phase!=='ready')prepare();
- phase='countdown';countdownT=0;shownCount=-1;setControls();speak(pick(T.start),true);tone(400,140);
+ phase='countdown';countdownT=0;shownCount=-1;setControls();speak(chalRun?L('시험 주행이에요! 공정하게 재려고 이번에는 응원을 쉬어요. 우승 시간을 재 볼게요.','Test run! To keep it fair, there is no cheering this time. Let’s time the winner.'):pick(T.start),true);tone(400,140);
  // Phones stack the race options under the track, so bring the whole race view in when it starts.
  if(matchMedia('(max-width:860px)').matches)$('scenePanel').scrollIntoView({behavior:RM?'auto':'smooth',block:'start'});
 }
@@ -931,7 +1054,7 @@ function beginRunning(){
  st.raceT0=st.t;
 }
 function cheer(){
- const m=st&&st.marbles[mine];if(labMode||phase!=='running'||paused||cheersLeft<=0||!m||m.done)return;cheersLeft--;stats.cheers++;
+ const m=st&&st.marbles[mine];if(labMode||chalRun||phase!=='running'||paused||cheersLeft<=0||!m||m.done)return;cheersLeft--;stats.cheers++;
  const sp=Math.hypot(m.vx,m.vy);if(sp>60){m.vx+=m.vx/sp*230;m.vy+=m.vy/sp*230}else{m.vx+=rand(-90,90);m.vy-=200}
  for(let i=0;i<22;i++)sparks.push({x:m.x,y:m.y,vx:rand(-160,160),vy:rand(-220,60),life:rand(.4,.9),c:PALETTE[mine][1]});
  rings.push({x:m.x,y:m.y,t:clock,c:'#ffe16b'});
@@ -973,7 +1096,8 @@ function raceLogic(){
  if(slowTarget<1&&!slowShown){slowShown=true;speak(T.slow,true)}
  $('slowmo').classList.toggle('hidden',slowTarget>=1);
  const allDone=st.finishers.length===st.marbles.length;
- if(winnerT!==null&&(allDone||st.t-winnerT>15)&&phase==='running')showResults();
+ const top3=st.finishers.length>=Math.min(3,st.marbles.length);
+ if(winnerT!==null&&(allDone||st.t-winnerT>(chalRun?(top3?1.2:6):15))&&phase==='running')showResults();
 }
 
 // ---------------------------------------------------------------- camera
@@ -1163,12 +1287,12 @@ function updateLeagueUI(){
 }
 function setControls(){
  const running=phase==='running'||phase==='countdown';
- $('startBtn').textContent=labMode?(running?L('🔬 실험 다시 시작','🔬 Restart experiment'):phase==='finished'?L('🔁 다시 실험','🔁 Run it again'):L('🔬 예상하고 실험 시작!','🔬 Guess, then run it!')):mode==='league'&&league&&!league.done&&phase!=='running'?L(`🏁 ${league.race}경기 시작!`,`🏁 Start race ${league.race}!`):running?L('🏁 새 레이스','🏁 New race'):L('🏁 레이스 시작!','🏁 Start race!');
+ $('startBtn').textContent=labMode?(running?L('🔬 실험 다시 시작','🔬 Restart experiment'):phase==='finished'?L('🔁 다시 실험','🔁 Run it again'):L('🔬 예상하고 실험 시작!','🔬 Guess, then run it!')):chalRun?(running?L('🎯 시험 다시 시작','🎯 Restart the test'):phase==='finished'?L('🔁 그대로 다시 시험','🔁 Test it again'):L('🎯 시험 주행 시작!','🎯 Start the test run!')):mode==='league'&&league&&!league.done&&phase!=='running'?L(`🏁 ${league.race}경기 시작!`,`🏁 Start race ${league.race}!`):running?L('🏁 새 레이스','🏁 New race'):L('🏁 레이스 시작!','🏁 Start race!');
  $('pauseBtn').disabled=phase!=='running';$('pauseBtn').textContent=paused?L('▶ 이어하기','▶ Resume'):L('⏸ 일시정지','⏸ Pause');
  for(const [id,on] of [['voiceToggle',voiceOn],['sfxToggle',sfxOn]]){$(id).classList.toggle('on',on);$(id).setAttribute('aria-checked',String(on))}
  $('voiceSelect').disabled=!voiceOn||!langVoices().length;
  $('ballCount').value=numBalls;$('ballRange').value=numBalls;$('ballRange').style.setProperty('--p',((numBalls-2)/14*100).toFixed(1)+'%');
- const cb=$('cheerBtn');cb.classList.toggle('hidden',phase!=='running'||labMode);cb.disabled=cheersLeft<=0||paused||!!st?.marbles[mine]?.done;cb.textContent=L(`📣 응원! ×${cheersLeft}`,`📣 Cheer! ×${cheersLeft}`);
+ const cb=$('cheerBtn');cb.classList.toggle('hidden',phase!=='running'||labMode||!!chalRun);cb.disabled=cheersLeft<=0||paused||!!st?.marbles[mine]?.done;cb.textContent=L(`📣 응원! ×${cheersLeft}`,`📣 Cheer! ×${cheersLeft}`);
  $('cameraBtn').textContent=[L('🎥 자동','🎥 Auto'),`${MY} ${L('내 구슬','Mine')}`,L('🗺️ 전체','🗺️ All')][cam.mode];
  $('cameraBtn').setAttribute('aria-label',L('카메라 바꾸기: ','Change camera: ')+$('cameraBtn').textContent);$('speedBtn').setAttribute('aria-label',L(`경기 속도 ${raceRate}배`,`Race speed ${raceRate}×`));
  $('speedBtn').textContent=`⚡ ${raceRate}×`;
@@ -1178,7 +1302,7 @@ function setControls(){
  document.querySelectorAll('#maps .map').forEach(b=>b.disabled=running||mode==='league');
  document.querySelectorAll('#modeSeg button').forEach(b=>b.disabled=running);
  // builder, lab, workshop and badge buttons
- $('buildBtn').disabled=running;$('labBtn').disabled=running&&!labMode;
+ $('buildBtn').disabled=running;$('chalBtn').disabled=running;$('labBtn').disabled=running&&!labMode;
  $('labBtn').innerHTML=labMode?`<span>🏁</span>${L('레이스로','Races')}`:`<span>🔬</span>${L('구슬 실험실','Marble lab')}`;
  $('badgeBtn').innerHTML=`<span>🏅</span>${L('배지','Badges')} ${badges.length}/${BADGES.length}`;
 }
@@ -1202,6 +1326,7 @@ function showResults(){
  const myKo=ME?esc(ME.name)+'의 구슬':'내 구슬',myEn=ME?esc(ME.name)+"'s marble":'Your marble';
  mineStats.races++;if(won)mineStats.wins++;
  const wId=theme.custom?null:WORLDS[raceWorld]?.id;if(wId&&!stats.worlds.includes(wId))stats.worlds.push(wId);if(theme.custom)stats.customRaces++;
+ if(chalRun){chalShow(rank);return}
  const fmt=t=>{const s=Math.max(0,t);return `${Math.floor(s/60)}:${(s%60).toFixed(1).padStart(4,'0')}`};
  let table='',actions='',coachHtml=won?coachLine('race'):theme.custom?coachHere('clap','내가 만든 코스가 멋지게 굴러갔어요! 고쳐 보고 또 달려 봐요. 그게 엔지니어의 방법이에요 🌙','Your own course rolled beautifully! Tweak it and race again: that is how engineers work 🌙'):Math.random()<.6?coachHere('go',...pick(LOSE_LINES)):'',title,leagueDone=false,hero=champ.id,heroText=L(`${nameOf(champ.id)} 우승!`,`${nameOf(champ.id)} wins!`),heroSub='',mineLine=won?L(`🎉 ${myKo} ${esc(nameOf(mine))}${jo(nameOf(mine),'이','가')} 우승했어요! 응원 대성공!`,`🎉 ${myEn} ${esc(nameOf(mine))} won! Great cheering!`):L(`${esc(MY)} ${myKo} ${esc(nameOf(mine))}${jo(nameOf(mine),'은','는')} ${myRank}위! 다음엔 1등 할 수 있어요!`,`${esc(MY)} ${myEn} ${esc(nameOf(mine))} came ${ord(myRank)}. It could win next time!`);
  if(mode==='league'&&league&&!league.done){
@@ -1262,7 +1387,9 @@ const BADGES=[
  {id:'league',ic:'🏟️',n:L('리그 완주','League finisher'),d:L('리그 5경기를 끝까지 보기','Finish a 5-race league'),goal:1,val:()=>stats.leagues,prize:['pat','fire']},
  {id:'professor',ic:'🧪',n:L('실험 박사','Lab professor'),d:L(`실험 ${EXPS.length}가지 모두 하기`,`Do all ${EXPS.length} experiments`),goal:EXPS.length,val:()=>Object.keys(stats.labs).length,prize:['trail','stars']},
  {id:'marathon',ic:'🌟',n:L('레이스 30번','30 races'),d:L('레이스 30번 보기','Watch 30 races'),goal:30,val:()=>mineStats.races,prize:['pat','star']},
- {id:'lucky',ic:'🏆',n:L('첫 우승','First win'),d:L('응원한 구슬이 1등 하기','Your marble wins a race'),goal:1,val:()=>mineStats.wins,prize:['trail','fire']}];
+ {id:'lucky',ic:'🏆',n:L('첫 우승','First win'),d:L('응원한 구슬이 1등 하기','Your marble wins a race'),goal:1,val:()=>mineStats.wins,prize:['trail','fire']},
+ {id:'designer',ic:'🎯',n:L('도전 설계사','Challenge designer'),d:L('설계 도전 3가지 성공하기','Meet 3 design challenges'),goal:3,val:()=>chalMet(),prize:['pat','blueprint']},
+ {id:'chief',ic:'👷',n:L('수석 엔지니어','Chief engineer'),d:L(`설계 도전 ${CHALS.length}가지 모두 성공하기`,`Meet all ${CHALS.length} design challenges`),goal:CHALS.length,val:()=>chalMet(),prize:['trail','gears']}];
 const lookName=([k,id])=>((k==='pat'?PATTERNS:TRAILS).find(x=>x[0]===id)||['','',''])[2];
 const lookIcon=([k,id])=>((k==='pat'?PATTERNS:TRAILS).find(x=>x[0]===id)||['','',''])[1];
 const badgeFor=(k,id)=>BADGES.find(b=>b.prize[0]===k&&b.prize[1]===id);
@@ -1276,7 +1403,7 @@ const skinOk=()=>unlocked('pat',skin.pat)&&unlocked('trail',skin.trail);
 
 // ---------------------------------------------------------------- marble painting (patterns) and my marble's trail
 function paintBall(g,x,y,r,c,sh,ang,pat,time){
- const base=pat==='galaxy'?['#d9ccff','#5a3fc0','#120c3a']:pat==='fire'?['#fff6c0','#ffb347','#d8341a']:pat==='metal'?['#ffffff','#eef2f7','#7d8798']:[sh.lite,c,sh.dark];
+ const base=pat==='blueprint'?['#cfe6ff','#2a6fd6','#0f3474']:pat==='galaxy'?['#d9ccff','#5a3fc0','#120c3a']:pat==='fire'?['#fff6c0','#ffb347','#d8341a']:pat==='metal'?['#ffffff','#eef2f7','#7d8798']:[sh.lite,c,sh.dark];
  const gr=g.createRadialGradient(x-r*.38,y-r*.42,r*.1,x,y,r*1.05);gr.addColorStop(0,pat==='matte'?sh.lite:'#ffffff');gr.addColorStop(.28,base[0]);gr.addColorStop(.72,base[1]);gr.addColorStop(1,base[2]);
  g.fillStyle=gr;g.beginPath();g.arc(x,y,r,0,TAU);g.fill();
  g.save();g.beginPath();g.arc(x,y,r*.93,0,TAU);g.clip();g.translate(x,y);
@@ -1288,6 +1415,7 @@ function paintBall(g,x,y,r,c,sh,ang,pat,time){
   else if(pat==='galaxy'){g.fillStyle='#fff';for(let k=0;k<14;k++){const a=k*2.4,d=r*(.15+.06*k);g.beginPath();g.arc(Math.cos(a)*d,Math.sin(a)*d*.8,r*(k%4?.05:.09),0,TAU);g.fill()}g.strokeStyle='rgba(255,160,255,.45)';g.lineWidth=r*.12;g.beginPath();g.ellipse(0,0,r*.75,r*.25,.5,0,TAU);g.stroke()}
   else if(pat==='rainbow'){['#ff5d5d','#ffa53d','#ffe45c','#5ee38a','#4fb7ff','#8a6cff'].forEach((cc,k)=>{g.fillStyle=cc+'cc';g.fillRect(-r,-r+k*r/3,2*r,r/3)})}
   else if(pat==='fire'){g.fillStyle='rgba(255,240,150,.8)';for(let k=0;k<3;k++){g.rotate(TAU/3);g.beginPath();g.moveTo(0,r*.1);g.quadraticCurveTo(r*.45,-r*.2,0,-r*.85);g.quadraticCurveTo(-r*.2,-r*.3,0,r*.1);g.fill()}}
+  else if(pat==='blueprint'){g.strokeStyle='rgba(255,255,255,.6)';g.lineWidth=Math.max(1,r*.06);for(let k=-2;k<=2;k++){g.beginPath();g.moveTo(-r,k*r*.42);g.lineTo(r,k*r*.42);g.moveTo(k*r*.42,-r);g.lineTo(k*r*.42,r);g.stroke()}g.lineWidth=Math.max(1,r*.1);g.beginPath();g.arc(0,0,r*.5,0,TAU);g.stroke()}
   else if(pat==='plain'||pat==='metal'){g.fillStyle=pat==='metal'?'rgba(255,255,255,.55)':'rgba(255,255,255,.32)';g.beginPath();g.ellipse(0,0,r,r*.3,0,0,TAU);g.fill()}}
  g.restore();
  if(pat!=='matte'){g.fillStyle='rgba(255,255,255,.9)';g.beginPath();g.ellipse(x-r*.36,y-r*.42,r*.28,r*.17,-.6,0,TAU);g.fill()}
@@ -1306,6 +1434,7 @@ function trailDraw(g,pts,kind,now,s=1){
   else if(kind==='bubbles'){if(i%2)continue;g.strokeStyle='#bfefff';g.globalAlpha=a*.9;g.lineWidth=1.2*s;g.beginPath();g.arc(p.x+Math.sin(i)*3*s,p.y-(1-a)*10*s,(2+(1-a)*5)*s,0,TAU);g.stroke()}
   else if(kind==='rainbow'&&i>0){const q=pts[i-1];g.strokeStyle=`hsl(${(i*24+now*200)%360},95%,62%)`;g.globalAlpha=a;g.lineWidth=(2+a*6)*s;g.lineCap='round';g.beginPath();g.moveTo(q.x,q.y);g.lineTo(p.x,p.y);g.stroke()}
   else if(kind==='stars'){if(i%3)continue;g.globalAlpha=a;g.fillStyle='#ffe16b';g.font=`${Math.round((7+a*7)*s)}px system-ui`;g.textAlign='center';g.fillText('★',p.x,p.y+4*s)}
+  else if(kind==='gears'){if(i%3)continue;g.globalAlpha=a;g.fillStyle='#d6e4ff';g.font=`${Math.round((8+a*7)*s)}px system-ui`;g.textAlign='center';g.fillText('⚙',p.x,p.y+4*s)}
   else if(kind==='fire'){g.globalAlpha=a*.85;g.fillStyle=a>.6?'#fff3a0':a>.3?'#ffa53d':'#ff4d2e';g.beginPath();g.arc(p.x,p.y-(1-a)*6*s,(1.5+a*5)*s,0,TAU);g.fill()}}
  g.globalAlpha=1;g.textAlign='left';g.lineCap='round'}
 function stepTrail(){if(skin.trail==='none'||!st||course.lab){trail.length=0;return}const me=st.marbles[mine];if(!me)return;const last=trail[trail.length-1];if(!last||Math.hypot(me.x-last.x,me.y-last.y)>2.5)trail.push({x:me.x,y:me.y,t:clock});while(trail.length&&clock-trail[0].t>.7)trail.shift()}
@@ -1336,19 +1465,20 @@ function openBuilder(idx,opener){
  buildMsg='';renderBuilder();openModal('buildModal',opener||$('buildBtn'))}
 function renderBuilder(){
  const d=draft,full=d.mods.length>=MAX_PIECES;
- $('buildBody').innerHTML=`${customs.length?`<div class="b-saved"><span>${L('내 코스','My courses')}:</span>${customs.map((c,i)=>`<button type="button" class="chip${d.idx===i?' on':''}" data-b="edit" data-i="${i}">🛠️ ${esc(c.name)}</button>`).join('')}<button type="button" class="chip" data-b="new">➕ ${L('새 코스','New')}</button></div>`:''}
-  <label class="b-name"><span>🏷️ ${L('코스 이름','Course name')}</span><input id="bName" type="text" maxlength="12" value="${esc(d.name)}" aria-label="${L('코스 이름','Course name')}"></label>
+ $('buildTitle').textContent=d.ch?L('🎯 설계 도전 · 코스 만들기','🎯 Design challenge · Build'):L('🛠️ 나만의 코스 만들기','🛠️ Build your own course');
+ $('buildBody').innerHTML=`${d.ch?chalStripHTML(d):`<div class="b-saved">${customs.length?`<span>${L('내 코스','My courses')}:</span>${customs.map((c,i)=>`<button type="button" class="chip${d.idx===i?' on':''}" data-b="edit" data-i="${i}">🛠️ ${esc(c.name)}</button>`).join('')}<button type="button" class="chip" data-b="new">➕ ${L('새 코스','New')}</button>`:''}<button type="button" class="chip" data-b="board">🎯 ${L('설계 도전','Design challenges')}</button></div>
+  <label class="b-name"><span>🏷️ ${L('코스 이름','Course name')}</span><input id="bName" type="text" maxlength="12" value="${esc(d.name)}" aria-label="${L('코스 이름','Course name')}"></label>`}
   <h3>① ${L('조각을 눌러 코스에 넣어요','Tap a piece to add it')} <small>${d.mods.length}/${MAX_PIECES}</small></h3>
   <div class="b-pieces">${PIECES.map(([id,ic,n,desc])=>`<button type="button" class="piece" data-b="add" data-p="${id}" ${full?'disabled':''}><span class="pi">${ic}</span><b>${esc(n)}</b><small>${esc(desc)}</small></button>`).join('')}</div>
   <h3>② ${L('내 코스 순서','Your course, top to bottom')}</h3>
   <ol class="b-track"><li class="fixed">🚦 ${L('출발','Start')}</li>${d.mods.map((m,i)=>{const [,ic,n]=PIECE_BY[m];return `<li><span class="bt-n">${i+1}</span><span class="bt-ic">${ic}</span><b>${esc(n)}</b><span class="bt-tools"><button type="button" class="mini-btn" data-b="up" data-i="${i}" ${i?'':'disabled'} aria-label="${L('위로','Move up')}">▲</button><button type="button" class="mini-btn" data-b="down" data-i="${i}" ${i<d.mods.length-1?'':'disabled'} aria-label="${L('아래로','Move down')}">▼</button><button type="button" class="mini-btn" data-b="del" data-i="${i}" aria-label="${L('빼기','Remove')}">✕</button></span></li>`}).join('')}<li class="fixed">🏁 ${L('결승','Finish')}</li></ol>
   <h3>③ ${L('경기장 꾸미기','Pick a look')}</h3>
   <div class="b-themes">${WORLDS.map((w,i)=>`<button type="button" class="chip${d.theme===i?' on':''}" data-b="theme" data-i="${i}" style="--a:${w.bg[0]};--b:${w.bg[1]}"><i></i>${esc(w.name)}</button>`).join('')}</div>
-  <p class="b-tip">💡 ${L('엔지니어처럼 해 봐요: 만들기 → 달려 보기 → 고치기! 어떤 조각이 재밌을지 예상해 보세요.','Work like an engineer: build → test → improve! Guess which pieces will be the most fun.')}</p>
+  <p class="b-tip">💡 ${d.ch?L('시험 주행에서는 응원 없이 코스만으로 달려요. 결과를 보고 고쳐서 다시 시험해요!','Test runs have no cheering, so only the course decides. Look at the result, improve, and test again!'):L('엔지니어처럼 해 봐요: 만들기 → 달려 보기 → 고치기! 어떤 조각이 재밌을지 예상해 보세요.','Work like an engineer: build → test → improve! Guess which pieces will be the most fun.')}</p>
   ${buildMsg?`<p class="b-msg" role="status">${esc(buildMsg)}</p>`:''}
-  <div class="modal-actions"><button class="control" type="button" data-b="random">🎲 ${L('랜덤으로 채우기','Fill randomly')}</button><button class="primary" type="button" data-b="go" ${d.mods.length<2?'disabled':''}>🏁 ${L('저장하고 달리기!','Save and race!')}</button></div>
-  ${d.idx!=null?`<button class="danger-btn b-del" type="button" data-b="remove">🗑️ ${L('이 코스 지우기','Delete this course')}</button>`:''}`;
- $('bName').addEventListener('input',e=>{draft.name=e.target.value.replace(/[<>]/g,'').slice(0,12)})}
+  <div class="modal-actions"><button class="control" type="button" data-b="random">🎲 ${L('랜덤으로 채우기','Fill randomly')}</button><button class="primary" type="button" data-b="go" ${d.mods.length<2?'disabled':''}>${d.ch?'🎯 '+L('시험 주행!','Test run!'):'🏁 '+L('저장하고 달리기!','Save and race!')}</button></div>
+  ${d.idx!=null&&!d.ch?`<button class="danger-btn b-del" type="button" data-b="remove">🗑️ ${L('이 코스 지우기','Delete this course')}</button>`:''}`;
+ const bn=$('bName');if(bn)bn.addEventListener('input',e=>{draft.name=e.target.value.replace(/[<>]/g,'').slice(0,12)})}
 // Korean particle after a name: 받침 → first form (초록이), none → second (연두가)
 const jo=(w,a,b)=>{w=String(w);const c=w.charCodeAt(w.length-1)-44032;return c>=0&&c<11172&&c%28?a:b};
 function builderAct(b){
@@ -1362,13 +1492,191 @@ function builderAct(b){
  else if(a==='edit'){draft={...customs[i],mods:customs[i].mods.slice(),idx:i}}
  else if(a==='new'){if(customs.length>=MAX_CUSTOMS)buildMsg=L(`코스는 ${MAX_CUSTOMS}개까지 저장돼요. 하나를 지우고 만들어요.`,`You can keep ${MAX_CUSTOMS} courses. Delete one to make a new one.`);else draft={name:L(`나의 코스 ${customs.length+1}`,`My course ${customs.length+1}`),theme:customs.length%6,mods:[],idx:null}}
  else if(a==='remove'){askConfirm({title:L('🗑️ 코스를 지울까요?','🗑️ Delete this course?'),text:L(`“${d.name}” 코스가 사라져요.`,`“${d.name}” will be gone.`),no:L('아니요','No'),yes:L('지울래요','Delete'),opener:b,onYes:()=>{const k=d.idx;customs.splice(k,1);const ci=WORLDS.length+k;if(worldIdx===ci)worldIdx=0;else if(worldIdx>ci)worldIdx--;save();draft={name:L(`나의 코스 ${customs.length+1}`,`My course ${customs.length+1}`),theme:0,mods:['ramps3','jump','pegs'],idx:null};renderBuilder();renderMaps()}});return}
- else if(a==='go'){saveDraftAndRace();return}
+ else if(a==='go'){if(d.ch)chalTest();else saveDraftAndRace();return}
+ else if(a==='board'){openChalBoard(b);return}
+ else if(a==='free'){draft={name:L(`나의 코스 ${customs.length+1}`,`My course ${customs.length+1}`),theme:d.theme,mods:d.mods.slice(),idx:null}}
+ else if(a==='load'&&customs[i])d.mods=customs[i].mods.slice();
+ else if(a==='gm'||a==='gp'){const c=chalGet(d.ch);d.guess=d.guess==null?Math.round(c.prev?c.prev.t:({slow:30,fast:16,window:22})[d.ch]||20):clamp(d.guess+(a==='gp'?1:-1),1,120);tone(600+d.guess*4,50,'triangle',.05)}
  renderBuilder();const f=$('buildBody').querySelector(`[data-b="${a}"][data-i="${a==='up'?i-1:a==='down'?i+1:i}"]`)||$('buildBody').querySelector(`[data-b="${a}"]`);if(f&&!f.disabled)try{f.focus({preventScroll:true})}catch(e){}}
 function saveDraftAndRace(){
  const d=draft;if(d.mods.length<2)return;const c={name:(d.name||'').trim()||L('나의 코스','My course'),theme:d.theme,mods:d.mods.slice()};
  let k=d.idx;if(k!=null&&customs[k]){if(customs[k].mods.join()!==c.mods.join())stats.fixes++;customs[k]=c}else{if(customs.length>=MAX_CUSTOMS){buildMsg=L(`코스는 ${MAX_CUSTOMS}개까지 저장돼요. 하나를 지우고 만들어요.`,`You can keep ${MAX_CUSTOMS} courses. Delete one first.`);renderBuilder();return}customs.push(c);k=customs.length-1;stats.builds++}
- worldIdx=WORLDS.length+k;if(mode==='league')mode='single';if(labMode){labMode=false;labExp=null}save();closeModal('buildModal');prepare();checkBadges();startRace();
+ worldIdx=WORLDS.length+k;if(mode==='league')mode='single';if(labMode){labMode=false;labExp=null}chalRun=null;save();closeModal('buildModal');prepare();checkBadges();startRace();
  coachTell('clap',`직접 설계한 코스로 출발! 만들고, 시험하고, 고치는 게 진짜 엔지니어의 방법이에요 🌙`,`Off we go on the course you designed! Build, test, improve: that's how real engineers work 🌙`,{gap:20000})}
+
+// ---------------------------------------------------------------- design challenges: plan → build → test → improve
+// chalRun is set while the race view runs test runs of one challenge: {id, mods, theme, guess}. Test runs have no cheering,
+// so the measured time comes from the course alone (a fair test).
+let chalRun=null;
+const chalGet=id=>chal[id]||{s:0,n:0,met:0,dirs:0,imp:0,mods:[],theme:6,prev:null,hist:[],key:''};
+const chalOf=id=>chal[id]||(chal[id]=chalGet(id));
+const starN=s=>(s&1)+(s>>1&1)+(s>>2&1);
+function chalMet(){return CHALS.filter(c=>(chal[c.id]?.s||0)&1).length}
+function chalStars(){return CHALS.reduce((t,c)=>t+starN(chal[c.id]?.s||0),0)}
+const starsHTML=s=>`<span class="ch-stars" role="img" aria-label="${esc(L(`별 3개 중 ${starN(s)}개`,`${starN(s)} of 3 stars`))}">${[1,2,4].map(b=>`<span class="${s&b?'':'off'}" aria-hidden="true">⭐</span>`).join('')}</span>`;
+const sec=x=>x.toFixed(1)+L('초',' s');
+const STEPS=[['📝',L('계획','Plan')],['🛠️',L('만들기','Build')],['🏁',L('시험','Test')],['🔧',L('고치기','Improve')]];
+const stepsHTML=on=>`<ol class="ch-steps" aria-label="${esc(L('엔지니어의 방법','How engineers work'))}">${STEPS.map(([e,s],i)=>`<li class="${on.includes(i)?'on':''}"${on.includes(i)?' aria-current="step"':''}><span class="se" aria-hidden="true">${e} </span>${s}</li>`).join('')}</ol>`;
+const pieceName=id=>{const p=PIECE_BY[id];return p?p[1]+' '+p[2]:''};
+// the goal zone(s) on the time ruler for the next test, given the last test of this challenge
+function chalZones(id,prev){const p=prev?.t;
+ return id==='slow'?[[30,null]]:id==='fast'?[[0,16]]:id==='window'?[[20,24]]:!prev?[]:id==='one'?[[0,Math.max(0,p-4)],[p+4,null]]:id==='double'?[[2*p,null]]:[[Math.max(0,p-1),p+1]]}
+// judge one test run. run and prev are {m: pieces, t: winner's seconds}; prev is the last test of this challenge.
+// ready = this run can meet the goal (one/double/same need a baseline test first)
+function chalJudge(ch,run,prev,c){
+ const n=run.m.length,t=run.t,dc=prev?diffN(prev.m,run.m):-1,d=prev?t-prev.t:0,A=Math.abs(d);let ready=true,ok=false,b1=false,b2=false;
+ if(ch.id==='slow'){ok=n<=4&&t>=30;b1=n<=3;b2=t>=40}
+ else if(ch.id==='fast'){ok=n>=5&&t<=16;b1=n>=6;b2=t<=13}
+ else if(ch.id==='window'){ok=t>=20&&t<=24;b1=dc===0&&prev.t>=20&&prev.t<=24;b2=t>=21&&t<=23}
+ else if(ch.id==='one'){ready=dc===1;ok=ready&&A>=4;b1=A>=7;b2=((c.dirs||0)|(d>0?1:2))===3}
+ else if(ch.id==='double'){ready=dc>=1;ok=ready&&t>=2*prev.t;b1=ok&&t>=3*prev.t;b2=dc===1}
+ else if(ch.id==='same'){ready=dc===0;ok=ready&&n>=4&&A<1;b1=A<.3;b2=n>=6}
+ return {ready,ok,stars:ok?1|(b1?2:0)|(b2?4:0):0,dc,d,A,n,t}}
+// the builder's live check of the rule, before the test: [state (true ok, false not yet, null info), text]
+function chalRule(ch,mods,c){
+ const n=mods.length,p=c.prev,dc=p?diffN(p.m,mods):-1;
+ if(ch.id==='slow')return n<=4?[true,L(`✅ 조각 ${n}개 · 4개까지예요`,`✅ ${n} pieces · up to 4`)]:[false,L(`⚠️ 조각 ${n}개 · 4개까지만 써요`,`⚠️ ${n} pieces · use 4 or fewer`)];
+ if(ch.id==='fast')return n>=5?[true,L(`✅ 조각 ${n}개 · 5개 이상이에요`,`✅ ${n} pieces · at least 5`)]:[false,L(`⚠️ 조각 ${n}개 · 5개 이상 넣어요`,`⚠️ ${n} pieces · use at least 5`)];
+ if(ch.id==='window')return [null,L(`조각 ${n}개 · 조각 수는 자유예요`,`${n} pieces · any number is fine`)];
+ if(!p)return [null,ch.id==='same'?L('📏 먼저 한 번 시험해요. 그다음 그대로 한 번 더!','📏 Test once first, then test it again unchanged!'):L('📏 먼저 이 코스로 시험해서 기준 시간을 재요','📏 First test this course to measure a baseline time')];
+ if(ch.id==='one')return dc===0?[false,L('지난 시험과 같은 코스예요. 조각 하나만 바꿔요','Same course as the last test. Change one piece')]:dc===1?[true,L('✅ 한 군데만 바꿨어요','✅ Exactly one spot changed')]:[false,L('⚠️ 여러 군데가 바뀌었어요. 한 군데만 바꿔요','⚠️ Several spots changed. Change only one')];
+ if(ch.id==='double')return [dc?null:false,L(`기준 ${sec(p.t)} → 목표 ${sec(2*p.t)} 이상`,`Baseline ${sec(p.t)} → goal ${sec(2*p.t)} or more`)+(dc?'':L(' · 아직 바꾼 곳이 없어요',' · nothing changed yet'))];
+ return dc===0?(n>=4?[true,L('✅ 지난 시험과 같은 코스예요','✅ Same course as the last test')]:[false,L(`⚠️ 조각 ${n}개 · 4개 이상이 규칙이에요`,`⚠️ ${n} pieces · the rule is 4 or more`)]):[false,L('코스가 바뀌었어요. 이번 시험이 새 기준이 돼요','The course changed, so this test becomes the new baseline')]}
+// a time ruler: the goal zone in green, earlier tests as dots, the baseline as a diamond, the guess as 🤔 and this test as a white pin
+// near: zoom in around the baseline (±4 s), so a 1-second goal zone is wide enough to see
+function gaugeHTML({zones=[],now=null,base=null,old=[],guess=null,label,near=false}){
+ const vals=[now,base,guess,...old,...zones.flat()].filter(v=>v!=null&&Number.isFinite(v));let min=0,max,step;
+ if(near&&base!=null){min=Math.max(0,Math.floor(base-4));max=Math.ceil(base+4);for(const v of [now,guess])if(v!=null){min=Math.min(min,Math.floor(v-1));max=Math.max(max,Math.ceil(v+1))}min=Math.max(0,min);step=max-min<=10?1:max-min<=25?5:10;min=Math.floor(min/step)*step;max=Math.ceil(max/step)*step;old=old.filter(v=>v>=min&&v<=max)}
+ else{max=Math.max(10,...vals)*1.12;step=max<=25?5:max<=70?10:20;max=Math.ceil(max/step)*step}
+ const span=max-min,P=v=>clamp((v-min)/span*100,0,100).toFixed(2)+'%',key=[];
+ let h=zones.map(([a,b])=>[Math.max(a,min),Math.min(b??max,max)]).filter(([a,b])=>b-a>span*.004).map(([a,b])=>`<span class="g-zone" style="left:${P(a)};width:${((b-a)/span*100).toFixed(2)}%"></span>`).join('');
+ if(zones.length)key.push(`<li><i class="kz"></i>${L('목표','Goal')}</li>`);
+ if(old.length){h+=old.map(v=>`<span class="g-old" style="left:${P(v)}"></span>`).join('');key.push(`<li><i class="ko"></i>${L('이전 시험','Earlier tests')}</li>`)}
+ if(base!=null){h+=`<span class="g-base" style="left:${P(base)}"></span>`;key.push(`<li><i class="kb"></i>${L('기준','Baseline')} ${sec(base)}</li>`)}
+ if(guess!=null){h+=`<span class="g-guess" style="left:${P(guess)}">🤔</span>`;key.push(`<li>🤔 ${L('내 예상','My guess')} ${guess}${L('초',' s')}</li>`)}
+ if(now!=null){h+=`<span class="g-now" style="left:${P(now)}"><em>${sec(now)}</em></span>`;key.push(`<li><i class="kn"></i>${L('이번 시험','This test')}</li>`)}
+ let ticks='';for(let v=min;v<=max+1e-6;v+=step)ticks+=`<span style="left:${P(v)}">${v}${v+step>max+1e-6?L('초',' s'):''}</span>`;
+ return `<div class="gauge" role="img" aria-label="${esc(label)}"><div class="g-track" aria-hidden="true">${h}</div><div class="g-ticks" aria-hidden="true">${ticks}</div><ul class="g-key" aria-hidden="true">${key.join('')}</ul></div>`}
+const zoneText=(id,prev)=>({slow:L('30초 이상','30 s or more'),fast:L('16초 이하','16 s or less'),window:L('20~24초','20 to 24 s')})[id]||
+ (!prev?'':id==='one'?L(`${sec(prev.t)}에서 4초 이상 달라지게`,`at least 4 s away from ${sec(prev.t)}`):id==='double'?L(`${sec(2*prev.t)} 이상`,`${sec(2*prev.t)} or more`):L(`${sec(prev.t)}에서 1초 안`,`within 1 s of ${sec(prev.t)}`));
+// one short physics hint from Coach Moon, tied to what happened in this test
+const SLOW_WHY={honey:L('마찰이 커서 구슬을 붙잡아요','It has lots of friction, which holds the marbles back'),zigzag:L('왔다 갔다 하는 길이 길어요','Its back-and-forth path is long'),ramps3:L('왔다 갔다 하는 길이 길고 완만해요','Its back-and-forth path is long and gentle'),
+ ice:L('왔다 갔다 하는 길이 길어요','Its back-and-forth path is long'),wash2:L('왔다 갔다 하는 길이 길고 덜컹거려요','Its back-and-forth path is long and bumpy'),ramps2b:L('왔다 갔다 하는 길이 있어요','It has a back-and-forth path'),tramp:L('구슬이 통통 튀며 옆으로 오가요','Marbles bounce from side to side'),
+ fan:L('바람이 구슬을 받쳐 줘요','The air holds the marbles up'),funnels3:L('구슬이 빙글빙글 돌아요','Marbles go round and round'),split:L('한쪽 길이 더 길어요','One of its paths is longer'),jump:L('길이 꽤 길어요','Its path is fairly long'),pegs:L('핀에 부딪히며 내려와요','Marbles bump down through pegs'),spinner:L('팔에 부딪혀요','The arms knock the marbles'),bumpers:L('범퍼에 튕겨요','The bumpers bounce them')};
+function chalHint(ch,run,j,prev){
+ const m=run.m,has=p=>m.includes(p),byCost=m.slice().sort((a,b)=>(COST[b]||0)-(COST[a]||0)),slow=byCost[0],fast=byCost[byCost.length-1],bumpy=m.some(p=>BUMPY.includes(p));
+ const slowLine=()=>L(`가장 느린 조각은 ${pieceName(slow)}${jo(PIECE_BY[slow][2],'이에요','예요')}. ${SLOW_WHY[slow]}.`,`The slowest piece here is the ${pieceName(slow)}. ${SLOW_WHY[slow]}.`);
+ if(ch.id==='slow'){if(j.ok)return has('honey')?L('🍯 꿀 언덕은 마찰이 커서 구슬을 붙잡아요. 그래서 느려졌어요!','🍯 Honey hill has lots of friction, which holds the marbles back. That is what slowed them down!'):L('왔다 갔다 하는 길은 더 멀어서 시간이 오래 걸려요. 길이를 이용한 멋진 설계예요!','A back-and-forth path is longer, so it takes more time. Clever use of a long path!');
+  if(j.n>4)return L('조각이 4개보다 많아요. 가장 느릴 것 같은 조각 4개만 골라 봐요.','That is more than 4 pieces. Keep the 4 you think are slowest.');
+  if(!has('honey'))return L('🍯 꿀 언덕은 마찰이 커서 구슬이 느릿느릿 내려와요. 넣어 볼까요?','🍯 Honey hill has lots of friction, so marbles crawl down it. Want to try it?');
+  if(!has('zigzag'))return L('🗼 지그재그 탑처럼 왔다 갔다 하는 길은 멀어서 오래 걸려요.','Back-and-forth paths like the 🗼 zigzag tower are long, so they take a while.');
+  return L(`${pieceName(fast)}에서는 구슬이 금방 내려가요. 느린 조각으로 바꿔 봐요.`,`Marbles get through the ${pieceName(fast)} quickly. Swap it for a slower piece.`)}
+ if(ch.id==='fast'){if(j.ok)return L('💥 범퍼나 🎯 핀볼 숲에서는 구슬이 거의 곧장 아래로 떨어져요. 중력이 아래로 끌어당기니까 빨라요!','On 💥 bumpers and 🎯 pegs, marbles drop almost straight down, the way gravity pulls. That is fast!');
+  if(j.n<5)return L('조각이 5개보다 적어요. 빠른 조각으로 채워 봐요.','That is fewer than 5 pieces. Add some fast ones.');
+  return slowLine()+L(' 곧장 떨어지는 조각으로 바꿔 봐요.',' Try a piece where marbles drop straight down.')}
+ if(ch.id==='window'){if(j.ok)return bumpy?L('목표 안이에요! 핀이나 범퍼가 있으면 매번 조금씩 달라져요. 한 번 더 시험해도 안에 들어올까요?','In the zone! Pegs and bumpers make each run a little different. Will it land inside again?'):L('목표 안이에요! 매끈한 길은 매번 비슷한 시간이 나와서 맞추기 좋아요.','In the zone! Smooth tracks give similar times every run, so they are easy to tune.');
+  return j.t<20?L('조금 빨라요. 🍯 꿀 언덕처럼 느린 조각을 하나 더하거나 바꿔 봐요.','A little too fast. Add or swap in a slower piece, like 🍯 honey hill.'):slowLine()+L(' 이 조각을 빠른 조각으로 바꿔 봐요.',' Try swapping it for a faster one.')}
+ if(ch.id==='one'){if(!prev)return L('기준 시험 끝! 이제 조각 딱 하나만 바꿔서 다시 시험해요. 시간이 어떻게 달라질까요?','Baseline done! Now change exactly one piece and test again. How will the time change?');
+  if(j.dc===0)return L('지난번과 같은 코스예요. 조각 하나만 바꿔서 시험해 봐요.','That is the same course as last time. Change one piece, then test.');
+  if(j.dc>1)return L('여러 곳을 한꺼번에 바꾸면 무엇 때문에 달라졌는지 알 수 없어요. 이번 시험을 새 기준으로 삼고, 한 군데만 바꿔요.','With several changes at once you cannot tell which one made the difference. This run is the new baseline: change just one spot.');
+  return j.ok?L('딱 하나만 바꿨으니까 시간이 달라진 건 그 조각 때문이라고 말할 수 있어요. 이게 공정한 시험이에요!','You changed only one thing, so you can tell the difference came from that piece. That is a fair test!'):L('차이가 작았어요. 비슷한 조각끼리 바꾸면 시간도 비슷해요. 💥 범퍼와 🗼 지그재그 탑처럼 아주 다른 조각으로 바꿔 봐요.','Only a small difference. Similar pieces give similar times. Try a very different swap, like 💥 bumpers and 🗼 zigzag tower.')}
+ if(ch.id==='double'){if(!prev)return L(`기준 시험 끝! ${sec(run.t)}의 2배는 ${sec(2*run.t)}예요. 느린 조각을 넣어서 고쳐 봐요.`,`Baseline done! Double ${sec(run.t)} is ${sec(2*run.t)}. Add slower pieces and test again.`);
+  if(j.dc===0)return L('코스를 바꾸지 않았어요. 같은 코스도 매번 조금씩 달라지지만, 2배로 늘리려면 느린 조각을 넣어야 해요.','The course did not change. The same course varies a little each run, but to double the time you need slower pieces.');
+  return j.ok?L('2배가 넘었어요! 느린 조각 하나하나가 몇 초씩 더해져서, 모두 합치니 2배가 됐어요.','More than double! Each slow piece adds some seconds, and together they doubled the time.'):L('🗼 지그재그 탑이나 🍯 꿀 언덕 같은 느린 조각은 하나만 넣어도 시간이 많이 늘어요.','Slow pieces like the 🗼 zigzag tower or 🍯 honey hill add lots of time, even just one.')}
+ if(!prev||j.dc!==0)return L('이번 시험이 기준이에요. 코스를 그대로 두고 한 번 더 시험해요.','This run is the baseline. Keep the course the same and test it once more.');
+ if(j.n<4)return L('조각 4개 이상이 규칙이에요. 조각을 더 넣고 다시 두 번 시험해요.','The rule is 4 or more pieces. Add pieces, then test twice again.');
+ if(j.ok)return L('같은 결과가 또 나오면 믿을 수 있어요. 그래서 엔지니어도 여러 번 시험해요!','When a second test gives the same result, you can trust it. That is why engineers test more than once!');
+ return bumpy?L('핀·범퍼·트램펄린·갈림길·계단길·바람개비에서는 매번 다르게 튕겨서 시간이 들쭉날쭉해요. ❄️ 얼음이나 🍯 꿀 같은 매끈한 길로 바꿔 봐요.','On pegs, bumpers, trampolines, split paths, stairs and spinners, marbles bounce differently every time, so the times jump around. Try smooth tracks like ❄️ ice or 🍯 honey.'):L('같은 코스도 구슬의 출발 순서가 매번 달라서 조금씩 달라져요. 한 번 더 재 봐요.','Even the same course changes a little, because the marbles line up in a new order each time. Measure once more.')}
+// the result line under the gauge: what was measured against the goal
+function chalMsg(ch,j,prev,plus=0){
+ const b='base',head=j.ok?['ok',L('🎉 목표 달성!','🎉 Goal met!')+(plus?L(` ⭐ 새 별 ${plus}개!`,` ⭐ ${plus} new star${plus>1?'s':''}!`):'')]:!j.ready?[b,L('📏 기준을 쟀어요','📏 Baseline measured')]:['new',L('🔧 아직이에요. 고쳐서 다시 시험해요!','🔧 Not yet. Improve it and test again!')];
+ let x='';const n=j.n,t=j.t;
+ if(ch.id==='slow')x=n>4?L(`규칙: 조각 4개까지 (이번 ${n}개)`,`Rule: up to 4 pieces (this time ${n})`):t>=30?L(`목표 30초 이상 · 이번 ${sec(t)}`,`Goal 30 s or more · this time ${sec(t)}`):L(`${sec(30-t)} 더 느려야 해요`,`It needs to be ${sec(30-t)} slower`);
+ else if(ch.id==='fast')x=n<5?L(`규칙: 조각 5개 이상 (이번 ${n}개)`,`Rule: at least 5 pieces (this time ${n})`):t<=16?L(`목표 16초 이하 · 이번 ${sec(t)}`,`Goal 16 s or less · this time ${sec(t)}`):L(`${sec(t-16)} 더 빨라야 해요`,`It needs to be ${sec(t-16)} faster`);
+ else if(ch.id==='window')x=t<20?L(`${sec(20-t)} 더 느리게`,`${sec(20-t)} slower needed`):t>24?L(`${sec(t-24)} 더 빠르게`,`${sec(t-24)} faster needed`):L(`목표 20~24초 · 이번 ${sec(t)}`,`Goal 20 to 24 s · this time ${sec(t)}`);
+ else if(!prev)x=L('다음 시험과 비교할 기준 시간이에요','This is the time to compare the next test with');
+ else if(ch.id==='one')x=j.dc===1?L(`${sec(prev.t)} → ${sec(t)} · ${sec(j.A)} 차이 (목표 4초 이상)`,`${sec(prev.t)} → ${sec(t)} · ${sec(j.A)} apart (goal: 4 s or more)`):L(`바뀐 곳 ${j.dc?'여러 ':'0'}군데 · 한 군데만 바꿔야 비교할 수 있어요`,`${j.dc?'Several spots':'Nothing'} changed · change exactly one spot to compare`);
+ else if(ch.id==='double')x=j.dc===0?L('바뀐 곳이 없어요 · 이번 시험이 새 기준이에요','Nothing changed · this test is the new baseline'):L(`${sec(prev.t)} → ${sec(t)} · ${(t/prev.t).toFixed(1)}배 (목표 2배 이상)`,`${sec(prev.t)} → ${sec(t)} · ${(t/prev.t).toFixed(1)} times as long (goal: 2 or more)`);
+ else x=j.dc!==0?L('코스가 바뀌어서 새 기준이 됐어요','The course changed, so this is the new baseline'):n<4?L(`규칙: 조각 4개 이상 (이번 ${n}개)`,`Rule: at least 4 pieces (this time ${n})`):L(`두 번의 차이 ${j.A.toFixed(2)}초 (목표 1초 안)`,`The two runs were ${j.A.toFixed(2)} s apart (goal: within 1 s)`);
+ return `<p class="ch-msg ${head[0]}" role="status">${head[1]}<small>${esc(x)}</small></p>`}
+// a test run ended: measure, judge, keep the record, then show the result card
+function chalShow(rank){
+ const ch=CHAL_BY[chalRun.id],c=chalOf(ch.id),w=rank[0],t=Math.round(((w.finishTime||st.t)-st.raceT0)*100)/100,run={m:chalRun.mods.slice(),t},prev=c.prev,old=(c.hist||[]).slice(),guess=chalRun.guess;
+ const j=chalJudge(ch,run,prev,c),was=c.s,metBefore=c.met>0,fixed=!!prev&&j.dc>0;
+ c.n++;if(j.ok){if(fixed&&c.n>c.met+1)c.imp=1;c.met++;if(ch.id==='one')c.dirs|=j.d>0?1:2}
+ c.s|=j.stars;const gained=c.s&~was;
+ // the report counts each new version of the course once (a plain rerun is not counted twice)
+ const key=(['one','double'].includes(ch.id)&&prev?prev.m.join()+'>':'')+run.m.join();
+ if(j.ready&&key!==c.key){c.key=key;try{LR.ans(j.ok,'ch_'+ch.id)}catch(e){}}
+ if(fixed)stats.fixes++;
+ c.hist=old.concat(t).slice(-5);c.prev=run;c.mods=run.m.slice();chalRun.guess=null;save();
+ const zones=j.ready||['slow','fast','window'].includes(ch.id)?chalZones(ch.id,prev):[],base=['one','double','same'].includes(ch.id)&&prev?prev.t:null;
+ const label=L(`우승 시간 ${sec(t)}`,`Winning time ${sec(t)}`)+(zones.length?L(`, 목표 ${zoneText(ch.id,prev)}`,`, goal ${zoneText(ch.id,prev)}`):'');
+ const stars=`<ul class="ch-star-list">${[L(`목표: ${ch.g}`,`Goal: ${ch.g}`),...ch.b].map((txt,i)=>{const bit=1<<i,on=c.s&bit;return `<li class="${on?'':'off'}">${on?'⭐':'☆'} ${esc(txt)}${gained&bit?`<span class="nw">${L('새 별!','New!')}</span>`:''}</li>`}).join('')}</ul>`;
+ const top=rank.slice(0,3).filter(m=>m.done).map((m,i)=>`<span>${['🥇','🥈','🥉'][i]} ${esc(nameOf(m.id))} ${sec(m.finishTime-st.raceT0)}</span>`).join('');
+ const hint=chalHint(ch,run,j,prev);
+ $('resultCard').innerHTML=`<div class="ch-res"><div class="lab-head">🎯 ${L('설계 도전','Design challenge')} · ${ch.ic} ${esc(ch.t)}</div>${stepsHTML([2])}
+  <div class="ch-time">⏱️ ${L('우승 시간','Winning time')} ${sec(t)}</div>${gaugeHTML({zones,now:t,base,old:(base!=null?old.slice(0,-1):old).slice(-4),guess,label,near:ch.id==='same'&&base!=null})}${chalMsg(ch,j,prev,starN(gained))}
+  ${guess!=null?`<p class="ch-guess">🤔 ${L(`내 예상 ${guess}초 → 실제 ${sec(t)} (${sec(Math.abs(t-guess))} 차이)`,`My guess ${guess} s → actual ${sec(t)} (${sec(Math.abs(t-guess))} off)`)}</p>`:''}
+  ${coachHere(j.ok?'clap':'idea',hint,hint)}
+  <div class="result-actions"><button class="control" type="button" data-act="chAgain">🔁 ${L('그대로 다시 시험','Test it again')}</button><button class="primary" type="button" data-act="chFix">🔧 ${L('코스 고치기','Improve the course')}</button></div>
+  ${stars}<div class="ch-podium">${top}</div>
+  <div class="result-actions"><button class="control" type="button" data-act="chBoard">🎯 ${L('도전 목록','Challenges')}</button><button class="control" type="button" data-act="chExit">🏁 ${L('레이스로','Back to races')}</button></div></div>`;
+ $('resultOverlay').classList.remove('hidden');if(j.ok){confetti();setTimeout(jingle,400)}
+ setControls();setCaption(L(`⏱️ 우승 시간 ${sec(t)}`,`⏱️ Winning time ${sec(t)}`));speak(L(`우승 시간은 ${t.toFixed(1)}초예요. `,`The winning time is ${t.toFixed(1)} seconds. `)+hint,true);
+ if(j.ok&&!metBefore)setTimeout(()=>coachTell('medal',`${ch.ic} ${ch.t} 성공! 계획하고, 만들고, 시험하고, 고친 덕분이에요 🌙`,`${ch.ic} ${ch.t}: done! You planned, built, tested and improved 🌙`,{gap:4000,ms:6000}),1800);
+ checkBadges()}
+function openChalBoard(opener){
+ if(phase==='countdown'||phase==='running')return;
+ $('chalBody').innerHTML=`${stepsHTML([])}<p class="ch-intro">${L('엔지니어처럼 목표에 맞는 코스를 설계해요. 시험 주행에서 우승 시간을 진짜로 재서 확인해요. 시험 주행은 응원 없이 코스의 힘만으로 달려요.','Design a course that meets the goal, like an engineer. A test run measures the real winning time. Test runs have no cheering, so only the course decides.')} · ⭐ ${chalStars()}/${CHALS.length*3}</p>
+  <div class="ch-grid">${CHALS.map(ch=>{const c=chalGet(ch.id);return `<button type="button" class="ch-card${c.s&1?' met':''}" data-ch="${ch.id}"><span class="ci" aria-hidden="true">${ch.ic}</span><span class="ct"><b>${esc(ch.t)}</b><span class="cg">${esc(ch.g)}</span><small>📐 ${esc(ch.r)}</small>${starsHTML(c.s)}<small>${c.n?L(`시험 ${c.n}번`,`${c.n} test run${c.n===1?'':'s'}`)+(c.prev?' · '+L('지난 시험 ','last ')+sec(c.prev.t):''):L('새 도전','New challenge')}</small></span></button>`}).join('')}</div>`;
+ openModal('chalModal',opener||$('chalBtn'))}
+function startChallenge(id,opener){
+ const ch=CHAL_BY[id];if(!ch||phase==='countdown'||phase==='running')return;const c=chalGet(id);
+ draft={name:ch.t,theme:c.theme??6,mods:(c.mods.length?c.mods:ch.start).slice(),idx:null,ch:id,guess:null};buildMsg='';
+ closeModal('chalModal');renderBuilder();
+ if($('buildModal').classList.contains('hidden'))openModal('buildModal',opener||$('chalBtn'));else try{$('buildModal').querySelector('.modal-x').focus({preventScroll:true})}catch(e){}
+ $('buildModal').querySelector('.modal-card').scrollTop=0}
+function chalStripHTML(d){
+ const ch=CHAL_BY[d.ch],c=chalGet(d.ch),[rs,rt]=chalRule(ch,d.mods,c),zones=chalZones(ch.id,c.prev);
+ return `<div class="ch-strip"><div class="ch-head"><b>${ch.ic} ${esc(ch.t)}</b>${starsHTML(c.s)}</div>
+  <p class="ch-goal">🎯 ${esc(ch.g)}<small>📐 ${esc(ch.r)}</small></p>${stepsHTML(c.n?[3]:[0,1])}
+  ${c.prev?gaugeHTML({zones,base:c.prev.t,guess:d.guess,near:ch.id==='same',label:L(`지난 시험 ${sec(c.prev.t)}`,`Last test ${sec(c.prev.t)}`)+(zones.length?L(`, 목표 ${zoneText(ch.id,c.prev)}`,`, goal ${zoneText(ch.id,c.prev)}`):'')}):''}
+  <p class="ch-rule ${rs===true?'ok':rs===false?'no':''}" role="status">${esc(rt)}</p>
+  <div class="guess"><span>🤔 ${L('예상 우승 시간','Guess the winning time')}</span><button type="button" class="mini-btn" data-b="gm" aria-label="${L('예상 1초 줄이기','Guess 1 second less')}">−</button><output aria-live="polite">${d.guess==null?'?':d.guess+L('초',' s')}</output><button type="button" class="mini-btn" data-b="gp" aria-label="${L('예상 1초 늘리기','Guess 1 second more')}">+</button><small>${L('먼저 예상하고 시험하면 더 많이 배워요. 안 해도 괜찮아요.','Guessing before a test helps you learn. Skipping is fine too.')}</small></div>
+  <div class="ch-tools"><button type="button" class="chip" data-b="board">🎯 ${L('다른 도전','Other challenges')}</button><button type="button" class="chip" data-b="free">🛠️ ${L('자유롭게 만들기','Free build')}</button></div></div>
+  ${customs.length?`<div class="b-saved"><span>📂 ${L('내 코스 가져오기','Start from my course')}:</span>${customs.map((x,i)=>`<button type="button" class="chip" data-b="load" data-i="${i}">🛠️ ${esc(x.name)}</button>`).join('')}</div>`:''}`}
+function chalTest(){
+ const d=draft;if(!d||!d.ch||d.mods.length<2)return;const c=chalOf(d.ch);c.mods=d.mods.slice();c.theme=d.theme;
+ chalRun={id:d.ch,mods:d.mods.slice(),theme:d.theme,guess:d.guess??null};d.guess=null;
+ if(mode==='league')mode='single';if(labMode){labMode=false;labExp=null}save();closeModal('buildModal');prepare();startRace()}
+const chalTheme=r=>{const ch=CHAL_BY[r.id];return {...(WORLDS[r.theme]||WORLDS[6]),name:`${ch.ic} ${ch.t}`,desc:'',mods:r.mods.slice(),custom:true,chal:true}};
+function chalExit(){chalRun=null;prepare();setCaption(L('🏁 레이스로 돌아왔어요! 출발 버튼을 눌러요.','🏁 Back to racing! Press Start.'))}
+
+// ---------------------------------------------------------------- lab notebook: every experiment's guess, measured result and a bar graph
+const firstSentence=s=>(String(s).match(/^.*?[.!?](?=\s|$)/)||[s])[0];
+// the result headline for an experiment outcome (shared by the lab result card and the notebook)
+function labHead(ex,win){const nmOf=k=>ex.lanes['AB'.indexOf(k)]?.name||'';
+ return ex.measure==='time'?(win==='same'?L('🤝 거의 동시에 도착!','🤝 They arrived together!'):`🏁 ${L('먼저 도착','First to arrive')}: ${nmOf(win)}`):ex.measure==='up'?(win==='same'?L('🤝 비슷하게 튀었어요!','🤝 About the same bounce!'):`↕️ ${L('더 높이','Higher')}: ${nmOf(win)}`):(win==='same'?L('🤝 비슷하게 갔어요!','🤝 About the same distance!'):`↔️ ${L('더 멀리','Farther')}: ${nmOf(win)}`)}
+function noteEntryHTML(e,busy){
+ const r=stats.labs[e.id],time=e.measure==='time',vals=r.v.map(x=>time?(x>=99?null:x):sq(x)),txt=v=>v==null?'—':time?v.toFixed(2)+L('초',' s'):v+L('칸',' squares');
+ const mx=Math.max(time?.1:1,...vals.filter(v=>v!=null)),W=v=>v==null?0:v/mx*72;
+ const pred=e.opts.find(o=>o[0]===r.p)?.[1],same=r.p&&r.w&&r.p===r.w;
+ const axis=time?L('⏱️ 걸린 시간 · 막대가 짧을수록 먼저 도착했어요','⏱️ Time taken · a shorter bar arrived first'):e.measure==='up'?L('↕️ 튀어 오른 높이 · 막대가 길수록 높이 튀었어요','↕️ Bounce height · a longer bar bounced higher'):L('↔️ 간 거리 · 막대가 길수록 멀리 갔어요','↔️ Distance · a longer bar went farther');
+ const aria=e.lanes.map((ln,i)=>`${'AB'[i]} ${ln.name} ${txt(vals[i])}`).join(', ');
+ return `<article class="nb"><h3 class="nb-h"><span aria-hidden="true">${e.ic}</span>${esc(e.t)}<small>${L(`실험 ${r.n}번`,`${r.n} run${r.n===1?'':'s'}`)}</small></h3>
+  ${pred?`<p>🤔 <b>${L('내 예상','My guess')}</b> · ${esc(pred)}</p>`:''}<p>👀 <b>${L('결과','Result')}</b> · ${esc(labHead(e,r.w||'same'))}${pred?`<span class="nb-tag ${same?'ok':'new'}">${same?L('예상과 같아요','Matched my guess'):L('예상과 달라요','Different from my guess')}</span>`:''}</p>
+  <div class="bars" role="img" aria-label="${esc(aria)}">${e.lanes.map((ln,i)=>`<span class="bl" aria-hidden="true"><i class="sw ${'ab'[i]}">${'AB'[i]}</i><span>${esc(ln.name)}</span></span><span class="bt" aria-hidden="true"><i class="${'ab'[i]}" style="width:${W(vals[i]).toFixed(1)}%"></i><em style="left:calc(${W(vals[i]).toFixed(1)}% + 6px)">${txt(vals[i])}</em></span>`).join('')}</div>
+  <p class="nb-axis">${axis}</p><p class="nb-why">💡 ${esc(firstSentence(e.why))}</p>
+  <button type="button" class="small-btn" data-exp="${e.id}" ${busy?'disabled':''}>🔬 ${L('다시 해 보기','Try it again')}</button></article>`}
+function openNotebook(opener){
+ const busy=phase==='running'||phase==='countdown',rec=EXPS.filter(e=>stats.labs[e.id]?.v),older=EXPS.filter(e=>stats.labs[e.id]&&!stats.labs[e.id].v),left=EXPS.filter(e=>!stats.labs[e.id]);
+ stats.notes++;save();
+ $('noteBody').innerHTML=`<p class="nb-sum">${L('실험할 때마다 내 예상과 잰 결과가 여기에 적혀요. 막대그래프로 두 길을 비교해 봐요!','Every experiment writes your guess and the measured result here. Compare the two lanes on the bar graph!')} · ${L(`기록 ${rec.length}/${EXPS.length}`,`${rec.length}/${EXPS.length} recorded`)}</p>
+  ${rec.length?'':`<p class="nb-empty">📝 ${L('아직 적힌 실험이 없어요. 실험을 하나 하면 첫 기록이 생겨요!','Nothing written yet. Do one experiment and your first record appears!')}</p>`}
+  <div class="nb-list">${rec.map(e=>noteEntryHTML(e,busy)).join('')}${older.map(e=>`<article class="nb"><h3 class="nb-h"><span aria-hidden="true">${e.ic}</span>${esc(e.t)}<small>✅ ${L(`실험 ${stats.labs[e.id].n}번`,`${stats.labs[e.id].n} run${stats.labs[e.id].n===1?'':'s'}`)}</small></h3><p>${L('노트가 생기기 전에 한 실험이에요. 다시 하면 결과가 여기에 적혀요.','Done before the notebook existed. Run it again to write the result here.')}</p><button type="button" class="small-btn" data-exp="${e.id}" ${busy?'disabled':''}>🔬 ${L('다시 해 보기','Try it again')}</button></article>`).join('')}</div>
+  ${left.length?`<h3>${L('아직 안 해 본 실험','Not tried yet')}</h3><div class="nb-left">${left.map(e=>`<button type="button" class="chip" data-exp="${e.id}" ${busy?'disabled':''}>${e.ic} ${esc(e.t)}</button>`).join('')}</div>`:''}`;
+ openModal('noteModal',opener||$('noteBtn'));$('noteModal').querySelector('.modal-card').scrollTop=0}
 
 // ---------------------------------------------------------------- marble lab: predict → observe → explain
 // labFresh: the next result is the first test of a new guess (only that one counts in the parents' report; "Run again" keeps the guess)
@@ -1383,10 +1691,10 @@ function openLabPicker(opener){
  if(phase==='countdown'||phase==='running')return;
  const done=Object.keys(stats.labs).length;
  $('labBody').innerHTML=`<ol class="lab-steps"><li>🤔 <b>${L('예상하기','Predict')}</b> <span>${L('어떻게 될까?','What will happen?')}</span></li><li>👀 <b>${L('실험 보기','Watch')}</b> <span>${L('두 길을 나란히 비교해요','Two lanes side by side')}</span></li><li>💡 <b>${L('이유 알기','Explain')}</b> <span>${L('왜 그럴까?','Why did it happen?')}</span></li></ol>
-  <p class="lab-ok">${L('예상이 틀려도 괜찮아요! 틀린 예상에서 더 많이 배워요.','It is fine to guess wrong! Wrong guesses teach us the most.')} · ${L(`실험 노트 ${done}/${EXPS.length}`,`Lab notebook ${done}/${EXPS.length}`)}</p>
-  <div class="lab-grid">${labListHTML()}</div>`;
+  <p class="lab-ok">${L('예상이 틀려도 괜찮아요! 틀린 예상에서 더 많이 배워요.','It is fine to guess wrong! Wrong guesses teach us the most.')}</p>
+  <div class="lab-grid">${labListHTML()}</div><button type="button" class="small-btn note-side" data-note="1">📒 ${L(`실험 노트 보기 (${done}/${EXPS.length})`,`Open the lab notebook (${done}/${EXPS.length})`)}</button>`;
  openModal('labModal',opener||$('labBtn'))}
-function enterLab(id){const ex=EXPS.find(e=>e.id===id);if(!ex)return;labMode=true;labExp=ex;labPred=null;closeModal('labModal');prepare();labPredictCard();scrollToScene()}
+function enterLab(id){const ex=EXPS.find(e=>e.id===id);if(!ex)return;chalRun=null;labMode=true;labExp=ex;labPred=null;closeModal('labModal');prepare();labPredictCard();scrollToScene()}
 function exitLab(){labMode=false;labExp=null;labPred=null;prepare();setCaption(L('🏁 레이스로 돌아왔어요! 출발 버튼을 눌러요.','🏁 Back to racing! Press Start.'))}
 function labPredictCard(){
  const ex=labExp;phase='ready';
@@ -1401,7 +1709,8 @@ function labLogic(){
  const ex=labExp,lanes=course.lab.lanes,t=st.t-st.raceT0,floor=Sim.T+R;let slow=false;
  for(let l=0;l<2;l++){const m=st.marbles[l],L0=lanes[l],r=labRes[l];
   if(ex.measure==='time'){if(r.v==null&&m.x>=L0.finX){r.v=t;tone(1046+l*120,120,'triangle',.08)}else if(r.v==null&&m.x>L0.finX-80)slow=true}
-  else if(ex.kind==='bounce'){if(!r.hit&&m.y>=L0.floorY-floor-4&&m.vy<0){r.hit=1;tone(l?220:520,90,'sine',.07)}if(r.hit===1){r.peak=Math.min(r.peak??1e9,m.y);if(m.vy>0){r.hit=2;r.v=Math.max(0,L0.floorY-floor-r.peak)}}}
+  else if(ex.kind==='bounce'){if(m.vy>60)r.fell=1;if(r.fell&&!r.hit&&m.vy<0&&m.y>L0.floorY-floor-80){r.hit=1;tone(l?220:520,90,'sine',.07)}if(r.hit===1){r.peak=Math.min(r.peak??1e9,m.y);if(m.vy>0){r.hit=2;r.v=Math.max(0,L0.floorY-floor-r.peak)}}}
+  else if(ex.kind==='roll'){r.x=m.x;if(r.v==null&&m.x>L0.startX&&Math.hypot(m.vx,m.vy)<4&&t>.8){r.v=Math.max(0,m.x-L0.startX);tone(300+l*80,80,'sine',.06)}}
   else if(ex.kind==='wind'){if(r.v==null&&m.y>=L0.floorY-floor-1){r.v=Math.max(0,m.x-L0.startX);r.x=m.x;tone(300+l*80,80,'sine',.06)}}
   else if(ex.kind==='crash'){const tg=st.marbles[2+l],moved=Math.abs(tg.x-labStart[2+l]);if(!r.hit&&moved>1.5){r.hit=1;tone(l?400:180,110,'square',.05)}if(!r.hit&&tg.x-m.x<70)slow=true;r.x=tg.x;if(r.hit&&r.v==null&&Math.hypot(tg.vx,tg.vy)<4&&t>.8)r.v=moved}}
  slowTarget=slow?.35:1;$('slowmo').classList.toggle('hidden',!slow);
@@ -1412,18 +1721,19 @@ function labOutcome(){const ex=labExp,v=labRes.map(r=>r.v??(ex.measure==='time'?
  else{const mx=Math.max(v[0],v[1],1);win=Math.abs(v[0]-v[1])<mx*.12?'same':v[0]>v[1]?'A':'B'}return {win,v}}
 const sq=v=>Math.round(v/UNIT);
 function labExplain(){
- const ex=labExp,{win,v}=labOutcome(),right=labPred===win,nmOf=k=>ex.lanes['AB'.indexOf(k)]?.name||'';phase='finished';slowTarget=1;$('slowmo').classList.add('hidden');
+ const ex=labExp,{win,v}=labOutcome(),right=labPred===win;phase='finished';slowTarget=1;$('slowmo').classList.add('hidden');
  const f=x=>x>=99?'—':x.toFixed(2);
- const head=ex.measure==='time'?(win==='same'?L('🤝 거의 동시에 도착!','🤝 They arrived together!'):`🏁 ${L('먼저 도착','First to arrive')}: ${nmOf(win)}`):ex.measure==='up'?(win==='same'?L('🤝 비슷하게 튀었어요!','🤝 About the same bounce!'):`↕️ ${L('더 높이','Higher')}: ${nmOf(win)}`):(win==='same'?L('🤝 비슷하게 갔어요!','🤝 About the same distance!'):`↔️ ${L('더 멀리','Farther')}: ${nmOf(win)}`);
+ const head=labHead(ex,win);
  const detail=ex.measure==='time'?`A ${f(v[0])}${L('초','s')} · B ${f(v[1])}${L('초','s')}`:`A ${sq(v[0])}${L('칸',' squares')} · B ${sq(v[1])}${L('칸',' squares')}`;
- const r=stats.labs[ex.id]||{n:0,right:0};r.n++;if(right)r.right++;stats.labs[ex.id]=r;save();
+ // the notebook keeps the latest guess, outcome and measured values (seconds, or pixels shown as 칸)
+ const r=stats.labs[ex.id]||{n:0,right:0};r.n++;if(right)r.right++;if(labPred)r.p=labPred;r.w=win;r.v=v.map(x=>Math.round(x*1000)/1000);stats.labs[ex.id]=r;save();
  if(labFresh){labFresh=false;try{LR.ans(right,'exp_'+ex.id)}catch(e){}}
  const predTxt=ex.opts.find(o=>o[0]===labPred)?.[1]||'';
  $('resultCard').innerHTML=`<div class="lab-head">${ex.ic} ${esc(ex.t)}</div><div class="lab-result">${esc(head)}</div><p class="lab-detail">${esc(detail)}</p>
   <p class="lab-fb ${right?'ok':'new'}">${right?L('🎯 예상이 맞았어요! 과학자처럼 생각했어요.','🎯 Your guess was right! You thought like a scientist.'):L('🔍 예상과 달랐어요! 그래서 실험이 재밌어요. 과학자들도 이렇게 새로 알게 돼요.','🔍 Not what you guessed! That is what makes experiments fun. Scientists learn new things exactly like this.')}<small>${L('내 예상','My guess')}: ${esc(predTxt)}</small></p>
   <div class="lab-why"><b>💡 ${L('왜 그럴까요?','Why?')}</b>${esc(ex.why)}</div><p class="lab-life">🏠 ${esc(ex.life)}</p>
   ${right?coachHere('clap','예상하고, 지켜보고, 확인까지! 진짜 과학자의 방법이에요 🌙','Predict, watch, check: that is exactly how real scientists work 🌙'):coachHere('idea','예상이 달라도 괜찮아요. 왜 그런지 알게 된 게 더 멋진 일이에요 🌙','A different result is okay. Finding out why is the best part 🌙')}
-  <button class="small-btn replay-btn" type="button" data-act="peek">👀 ${L('실험 장면 다시 보기','Look at the experiment')}</button>
+  <div class="lab-mini"><button class="small-btn" type="button" data-act="peek">👀 ${L('실험 장면 다시 보기','Look at the experiment')}</button><button class="small-btn" type="button" data-act="note">📒 ${L('노트에 적었어요','Saved in my notebook')}</button></div>
   <div class="result-actions three"><button class="control" type="button" data-act="labAgain">🔁 ${L('다시 실험','Run again')}</button><button class="primary" type="button" data-act="labNext">🔬 ${L('다음 실험','Next experiment')}</button><button class="control" type="button" data-act="labExit">🏁 ${L('레이스로','Back to races')}</button></div>`;
  $('resultOverlay').classList.add('lab-ov');$('resultOverlay').classList.remove('hidden');speak(head.replace(/[🤝🏁↕️↔️]/gu,'')+'. '+ex.why,true);setControls();checkBadges()}
 function drawLab(){
@@ -1434,10 +1744,12 @@ function drawLab(){
    if(r.v!=null){const other=labRes[1-l].v,first=other==null||r.v<=other-.03,tie=other!=null&&Math.abs(r.v-other)<.03;ctx.font=F(900,14);const lab2=`${tie?L('동시!','Tie!'):first?L('1등!','1st!'):L('2등','2nd')} ${r.v.toFixed(2)}${L('초','s')}`,w2=ctx.measureText(lab2).width+16*k,h2=24*k;ctx.fillStyle=tie?'#7df9c8':first?'#ffd84a':'#c8d4ea';rr(Math.min(L0.finX-w2/2,L0.off+352-w2),fy-70-h2,w2,h2,h2/2);ctx.fill();ctx.fillStyle='#14203a';ctx.fillText(lab2,Math.min(L0.finX,L0.off+352-w2/2),fy-70-h2/2)}}
   else if(ex.kind==='bounce'){const top=L0.floorY-Sim.T-R,x=L0.off+300;ctx.strokeStyle='rgba(255,255,255,.55)';ctx.fillStyle='rgba(255,255,255,.75)';ctx.font=F(700,11);ctx.lineWidth=1.5;
    for(let q=0,yy=top;yy>L0.dropY;q++,yy-=UNIT){ctx.beginPath();ctx.moveTo(x,yy);ctx.lineTo(x+(q%5?8:14),yy);ctx.stroke();if(q&&q%5===0)ctx.fillText(q,x+20+8*k,yy)}
+   if(ex.id==='drop'){const sy=L0.dropY-Sim.T-R-.5;ctx.font=F(900,14);ctx.fillStyle='rgba(255,255,255,.85)';ctx.fillText(L(`${sq(top-sy)}칸 높이에서`,`from ${sq(top-sy)} sq`),L0.off+262,sy)}
    if(r.peak!=null){const py=r.peak;ctx.setLineDash([6,5]);ctx.strokeStyle=l?'#ffd84a':'#7df9ff';ctx.lineWidth=2.5;ctx.beginPath();ctx.moveTo(L0.off+70,py);ctx.lineTo(x,py);ctx.stroke();ctx.setLineDash([]);if(r.v!=null){ctx.font=F(900,15);ctx.fillStyle=l?'#ffd84a':'#7df9ff';ctx.fillText(`↕ ${sq(r.v)}${L('칸',' sq')}`,L0.off+120,py-14*k)}}}
   else{const fy=L0.floorY+16,x0=ex.kind==='crash'?labStart[2+l]:L0.startX;ctx.strokeStyle='rgba(255,255,255,.6)';ctx.lineWidth=1.5;ctx.fillStyle='rgba(255,255,255,.75)';ctx.font=F(700,11);
    for(let q=0,xx=x0;xx<L0.off+346;q++,xx+=UNIT){ctx.beginPath();ctx.moveTo(xx,fy);ctx.lineTo(xx,fy+(q%5?6:11));ctx.stroke();if(q&&q%5===0)ctx.fillText(q,xx,fy+14+6*k)}
-   const xe=r.x;if(xe!=null&&(ex.kind!=='crash'||r.hit)){ctx.strokeStyle=l?'#ffd84a':'#7df9ff';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(x0,fy-6);ctx.lineTo(xe,fy-6);ctx.stroke();if(r.v!=null){ctx.font=F(900,15);ctx.fillStyle=l?'#ffd84a':'#7df9ff';ctx.fillText(`↔ ${sq(r.v)}${L('칸',' sq')}`,(x0+xe)/2,fy+22+16*k)}}
+   if(ex.kind==='roll'){const sy=L0.floorY-L0.h;ctx.font=F(900,14);ctx.fillStyle='rgba(255,255,255,.85)';ctx.fillText(L(`출발 높이 ${sq(L0.h)}칸`,`start: ${sq(L0.h)} sq high`),L0.sx+78,sy-6)}
+   const xe=r.x;if(xe!=null&&(ex.kind!=='crash'||r.hit)&&(ex.kind!=='roll'||xe>x0)){ctx.strokeStyle=l?'#ffd84a':'#7df9ff';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(x0,fy-6);ctx.lineTo(xe,fy-6);ctx.stroke();if(r.v!=null){ctx.font=F(900,15);ctx.fillStyle=l?'#ffd84a':'#7df9ff';ctx.fillText(`↔ ${sq(r.v)}${L('칸',' sq')}`,(x0+xe)/2,fy+22+16*k)}}
    if(ex.kind==='crash'){ctx.setLineDash([3,4]);ctx.strokeStyle='rgba(255,255,255,.5)';ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(x0,L0.floorY-Sim.T-R,R+3,0,TAU);ctx.stroke();ctx.setLineDash([])}}
  });
  // a ring and the material's emoji follow each ball, so it stays easy to spot on a small phone screen
@@ -1463,8 +1775,8 @@ function scrollToScene(){if(matchMedia('(max-width:860px)').matches)$('scenePane
 // ---------------------------------------------------------------- wiring
 function togglePause(){if(phase!=='running')return;paused=!paused;setControls();try{paused?speechSynthesis.pause():speechSynthesis.resume()}catch(e){}setCaption(paused?L('⏸ 일시정지! 이어하기를 눌러 주세요.','⏸ Paused. Press Resume to keep going.'):L('▶ 다시 출발!','▶ Back to the race!'))}
 function setCount(v){const n=clamp(parseInt(v,10)||8,2,16);if(n===numBalls)return;numBalls=n;if(league&&!league.done){league=null;setCaption(L('구슬 수가 바뀌어서 리그를 새로 시작해요.','The number of marbles changed, so the league starts over.'))}save();prepare()}
-$('maps').addEventListener('click',e=>{if(e.target.closest('[data-build]')){const b=e.target.closest('[data-build]');if(!b.disabled)openBuilder(null,b);return}const b=e.target.closest('[data-world]');if(!b||b.disabled)return;worldIdx=+b.dataset.world;if(labMode){labMode=false;labExp=null}save();prepare();const w=worldAt(worldIdx);speak(L(`${w.name} 코스예요! 출발대에 구슬들이 줄을 섰어요.`,`Welcome to ${w.name}! The marbles are lined up at the gate.`),true)});
-$('modeSeg').addEventListener('click',e=>{const b=e.target.closest('[data-mode]');if(!b||b.disabled)return;mode=b.dataset.mode;if(mode==='league'&&(!league||league.done))startLeague();save();prepare()});
+$('maps').addEventListener('click',e=>{if(e.target.closest('[data-build]')){const b=e.target.closest('[data-build]');if(!b.disabled)openBuilder(null,b);return}const b=e.target.closest('[data-world]');if(!b||b.disabled)return;worldIdx=+b.dataset.world;if(labMode){labMode=false;labExp=null}chalRun=null;save();prepare();const w=worldAt(worldIdx);speak(L(`${w.name} 코스예요! 출발대에 구슬들이 줄을 섰어요.`,`Welcome to ${w.name}! The marbles are lined up at the gate.`),true)});
+$('modeSeg').addEventListener('click',e=>{const b=e.target.closest('[data-mode]');if(!b||b.disabled)return;mode=b.dataset.mode;chalRun=null;if(mode==='league'&&(!league||league.done))startLeague();save();prepare()});
 $('ballCount').addEventListener('change',e=>setCount(e.target.value));$('ballRange').addEventListener('input',e=>setCount(e.target.value));
 $('minePicker').addEventListener('click',e=>{const b=e.target.closest('[data-mine]');if(!b||b.disabled)return;mine=+b.dataset.mine;save();renderMinePicker();updateHud(true);setCaption(L(`💖 ${nameOf(mine)} 구슬을 응원해요! 레이스 중 📣 응원 버튼을 눌러 힘을 주세요.`,`💖 You're cheering for ${nameOf(mine)}! Press 📣 Cheer during the race to give it a push.`));tone(660,80,'triangle',.07);setTimeout(()=>tone(990,110,'triangle',.07),80)});
 $('namesBtn').addEventListener('click',()=>{$('namesPanel').classList.toggle('hidden');renderNames()});
@@ -1472,14 +1784,19 @@ $('namesPanel').addEventListener('input',e=>{const i=e.target.dataset.name;if(i=
 $('startBtn').addEventListener('click',startRace);$('pauseBtn').addEventListener('click',togglePause);
 $('resetBtn').addEventListener('click',()=>{prepare();if(labMode){labPred=null;labPredictCard();return}setCaption(L('↻ 다시 준비했어요. 출발 버튼을 눌러 주세요!','↻ Reset. Press Start when you are ready!'))});
 $('cheerBtn').addEventListener('click',cheer);
-$('buildBtn').addEventListener('click',e=>openBuilder(worldIdx>=WORLDS.length&&!labMode?worldIdx-WORLDS.length:null,e.currentTarget));
+// during design challenge tests the build button improves the challenge course (the builder's 🛠️ Free build leaves the challenge)
+$('buildBtn').addEventListener('click',e=>{if(chalRun)startChallenge(chalRun.id,e.currentTarget);else openBuilder(worldIdx>=WORLDS.length&&!labMode?worldIdx-WORLDS.length:null,e.currentTarget)});
 $('labBtn').addEventListener('click',e=>{if(labMode)exitLab();else openLabPicker(e.currentTarget)});
 $('skinBtn').addEventListener('click',e=>openSkins(e.currentTarget));
 $('badgeBtn').addEventListener('click',e=>{renderBadges();openModal('badgeModal',e.currentTarget)});
+$('chalBtn').addEventListener('click',e=>openChalBoard(e.currentTarget));
+$('noteBtn').addEventListener('click',e=>openNotebook(e.currentTarget));$('noteSide').addEventListener('click',e=>openNotebook(e.currentTarget));
+$('chalBody').addEventListener('click',e=>{const b=e.target.closest('[data-ch]');if(b)startChallenge(b.dataset.ch)});
+$('noteBody').addEventListener('click',e=>{const b=e.target.closest('[data-exp]');if(!b||b.disabled||phase==='running'||phase==='countdown')return;closeModal('noteModal');closeModal('labModal');enterLab(b.dataset.exp)});
 $('replaySkip').addEventListener('click',endReplay);
 $('peekBack').addEventListener('click',()=>{$('peekBack').classList.add('hidden');$('resultOverlay').classList.remove('hidden')});
 $('buildBody').addEventListener('click',e=>{const b=e.target.closest('[data-b]');if(b&&!b.disabled)builderAct(b)});
-$('labBody').addEventListener('click',e=>{const b=e.target.closest('[data-exp]');if(b)enterLab(b.dataset.exp)});
+$('labBody').addEventListener('click',e=>{if(e.target.closest('[data-note]')){openNotebook(e.target.closest('[data-note]'));return}const b=e.target.closest('[data-exp]');if(b)enterLab(b.dataset.exp)});
 $('labList').addEventListener('click',e=>{const b=e.target.closest('[data-exp]');if(b&&phase!=='running'&&phase!=='countdown')enterLab(b.dataset.exp)});
 $('skinBody').addEventListener('click',e=>{const b=e.target.closest('[data-look]');if(!b)return;const k=b.dataset.look,id=b.dataset.id;
  if(!unlocked(k,id)){const bd=badgeFor(k,id);setCaption(L(`🔒 ${bd?bd.ic+' '+bd.n+' 배지('+bd.d+')를 받으면 열려요!':'아직 잠겨 있어요.'}`,`🔒 ${bd?'Earn the '+bd.ic+' '+bd.n+' badge ('+bd.d+') to open it!':'Still locked.'}`));const sb=$('skinBody').querySelector('.skin-top p');if(sb)sb.textContent=$('caption').textContent;tone(260,90);return}
@@ -1495,6 +1812,8 @@ $('resultCard').addEventListener('click',e=>{const a=e.target.closest('[data-act
  else if(a==='replay')startReplay();else if(a==='peek'){$('resultOverlay').classList.add('hidden');$('peekBack').classList.remove('hidden');try{$('peekBack').focus({preventScroll:true})}catch(e){}}else if(a==='edit')openBuilder(worldIdx-WORLDS.length,e.target.closest('[data-act]'));
  else if(a==='pred'){labPred=e.target.closest('[data-k]').dataset.k;labFresh=true;tone(700,80,'triangle',.07);coachTell('idea','좋은 예상이에요! 이제 실험으로 확인해 봐요 🌙','Great guess! Now let’s test it 🌙',{gap:45000,ms:3500});startRace()}
  else if(a==='labAgain'){prepare();startRace()}else if(a==='labList')openLabPicker(e.target.closest('[data-act]'));else if(a==='labExit')exitLab();
+ else if(a==='note')openNotebook(e.target.closest('[data-act]'));
+ else if(a==='chAgain'){if(chalRun){prepare();startRace()}}else if(a==='chFix'){if(chalRun)startChallenge(chalRun.id,e.target.closest('[data-act]'))}else if(a==='chBoard')openChalBoard(e.target.closest('[data-act]'));else if(a==='chExit')chalExit();
  else if(a==='labNext'){const k=EXPS.indexOf(labExp),nx=EXPS.find((x,i)=>i>k&&!stats.labs[x.id])||EXPS.find(x=>!stats.labs[x.id])||EXPS[(k+1)%EXPS.length];enterLab(nx.id)}
  else if(a==='next'){prepare();startRace()}else if(a==='newLeague'){startLeague();prepare();startRace()}});
 // ---------------------------------------------------------------- top bar, settings and confirm windows
@@ -1525,12 +1844,12 @@ function resetGame(){
  try{localStorage.removeItem('marbleRush.v2');localStorage.removeItem('marble3dsettings')}catch(e){}
  try{LR.forget()}catch(e){}  // the parents' report forgets this game too (no save can run until LR.resume below)
  worldIdx=0;numBalls=8;voiceOn=true;sfxOn=true;mine=0;mineStats={races:0,wins:0};voicePick={};names=Array(16).fill('');mode='single';league=null;
- customs=[];skin={pat:'plain',trail:'none'};stats=freshStats();badges=[];labMode=false;labExp=null;labPred=null;labFresh=false;
+ customs=[];skin={pat:'plain',trail:'none'};stats=freshStats();badges=[];chal={};chalRun=null;draft=null;labMode=false;labExp=null;labPred=null;labFresh=false;
  try{LR.resume()}catch(e){}  // a fresh record from the fresh state above
  $('namesPanel').classList.add('hidden');fillVoiceSelect();prepare();closeModal('settingsModal');
  setCaption(L('🗑️ 마블 레이스 기록을 지웠어요. 처음부터 다시 시작해요!','🗑️ Marble Rush records erased. A fresh start!'))}
 $('resetDataBtn').addEventListener('click',e=>askConfirm({title:L('🗑️ 정말 지울까요?','🗑️ Really erase?'),
- text:L(`${ME?ME.name+'의 ':''}마블 레이스 기록(응원 기록, 구슬 이름, 리그 점수, 내 코스, 배지, 실험 노트, 설정)만 지워져요. 다른 게임${ME?'과 다른 플레이어':''} 기록은 그대로예요. 되돌릴 수 없어요.`,`Only ${ME?ME.name+"'s ":''}Marble Rush records (cheering record, marble names, league points, courses, badges, lab notebook, settings) are erased. Other games${ME?' and other players':''} keep theirs. This cannot be undone.`),
+ text:L(`${ME?ME.name+'의 ':''}마블 레이스 기록(응원 기록, 구슬 이름, 리그 점수, 내 코스, 설계 도전, 배지, 실험 노트, 설정)만 지워져요. 다른 게임${ME?'과 다른 플레이어':''} 기록은 그대로예요. 되돌릴 수 없어요.`,`Only ${ME?ME.name+"'s ":''}Marble Rush records (cheering record, marble names, league points, courses, design challenges, badges, lab notebook, settings) are erased. Other games${ME?' and other players':''} keep theirs. This cannot be undone.`),
  no:L('아니요','No'),yes:L('지울래요','Erase'),opener:e.currentTarget,onYes:resetGame}));
 if(ME){$('meAv').textContent=ME.av;$('meName').textContent=ME.name;$('meChip').title=L(`플레이어: ${ME.name}`,`Player: ${ME.name}`);$('meChip').classList.remove('hidden');$('mineLabel').textContent=L(`${ME.av} ${ME.name}의 응원 구슬`,`${ME.av} ${ME.name}'s marble`)}
 window.addEventListener('keydown',e=>{if(modalStack.length||['INPUT','SELECT','TEXTAREA'].includes(e.target.tagName))return;if(e.code==='Space'){e.preventDefault();togglePause()}else if(e.code==='KeyC')cheer();else if(e.code==='KeyV'){cam.mode=(cam.mode+1)%3;setControls()}});
@@ -1554,29 +1873,49 @@ const RX={weight:{t:['무게 경주','Heavy vs light'],n:['무게가 다른 두 
   q:['옆에서 바람이 불 때 무거운 구슬과 가벼운 구슬 중 어느 쪽이 더 멀리 밀렸어?','When wind blew from the side, which was pushed farther: the heavy ball or the light one?','가벼운 구슬이요. 무거울수록 움직임을 바꾸기 어려워요.','The light one. The heavier something is, the harder it is to change how it moves.']},
  crash:{t:['쾅! 부딪치기','Crash test'],n:['부딪칠 때 무게에 따라 달라지는 움직임','What happens when a heavy and a light ball crash'],
   q:['무거운 구슬이 가벼운 구슬을 치면 어떻게 됐어? 반대로 치면?','What happened when the heavy ball hit the light one? And the other way around?','가벼운 구슬이 멀리 굴러가요. 반대로 치면 무거운 구슬은 조금만 움직여요.','The light ball rolled far. When the light one hit, the heavy one barely moved.']},
+ height:{t:['높은 출발, 낮은 출발','High start, low start'],n:['출발 높이와 굴러가는 거리 (높이와 에너지)','How the starting height changes how far a ball rolls (height and energy)'],
+  q:['똑같은 비탈에서 높은 곳과 낮은 곳에서 출발한 구슬 중 어느 쪽이 카펫에서 더 멀리 굴러갔어?','On the same ramp, which marble rolled farther on the carpet: the one that started high or the one that started low?','높은 곳에서 출발한 구슬이요. 내려오면서 더 빨라져서 더 멀리 가요.','The one that started high. It sped up more on the way down, so it went farther.']},
+ drop:{t:['떨어뜨리는 높이','Drop height'],n:['떨어뜨리는 높이와 튀어 오르는 높이','How the drop height changes the bounce height'],
+  q:['같은 고무공을 높은 곳과 낮은 곳에서 떨어뜨리면 어느 쪽이 더 높이 튀었어?','When the same kind of rubber ball dropped from high up and from lower down, which bounced higher?','높은 곳에서 떨어뜨린 공이요. 그래도 처음 높이까지는 올라오지 못해요.','The one dropped from higher up. It still did not come all the way back up to where it started.']},
  curve:{t:['지름길의 비밀','The shortcut secret'],n:['곧은 길과 휘어진 길, 어느 쪽이 빠를까','Straight path or curved path: which is faster'],
   q:['곧은 길과 휘어진 길 중 어느 구슬이 먼저 도착했어? 휘어진 길이 더 긴데 왜 그럴까?','Which marble arrived first, on the straight path or the curved one? The curved one is longer, so why?','휘어진 길이요. 처음에 가파르게 떨어져서 금방 빨라져요.','The curved path. It drops steeply at the start, so the marble speeds up early.']}};
 const HOME={ramp:['책 두세 권에 쟁반이나 두꺼운 종이를 기대어 낮은 비탈을 만들고 장난감 자동차를 굴려 봐요. 책을 한 권씩 더 쌓으며 얼마나 멀리 가는지 비교해요.','Lean a tray or stiff cardboard on two or three books to make a low ramp and roll a toy car down. Add one book at a time and compare how far it goes.'],
  surface:['같은 비탈에 수건, 종이, 알루미늄 포일을 차례로 깔고 같은 자동차를 굴려 봐요. 바꾸는 것은 표면 하나뿐이에요.','Cover the same ramp with a towel, then paper, then foil, and roll the same car each time. Only the surface changes.'],
  bounce:['고무공, 탁구공, 돌돌 만 양말을 허리 높이에서 함께 떨어뜨려 어느 것이 가장 높이 튀는지 봐요.','Drop a rubber ball, a table-tennis ball and a rolled-up sock together from waist height and see which bounces highest.'],
- track:['휴지심과 종이컵을 테이프로 이어 탁구공이 굴러가는 길을 만들고, 굴려 본 뒤 한 군데를 고쳐 다시 굴려 봐요.','Tape paper tubes and paper cups into a track for a table-tennis ball, test it, change one part, then test again.']};
+ track:['휴지심과 종이컵을 테이프로 이어 탁구공이 굴러가는 길을 만들고, 굴려 본 뒤 한 군데를 고쳐 다시 굴려 봐요.','Tape paper tubes and paper cups into a track for a table-tennis ball, test it, change one part, then test again.'],
+ drop:['같은 공을 무릎 높이와 허리 높이에서 떨어뜨려 보고, 어느 쪽이 더 높이 튀는지 봐요.','Drop the same ball from knee height and from waist height, and see which one bounces higher.'],
+ time:['책 비탈에 장난감 자동차를 굴리며 “하나, 둘, 셋…” 세어 시간을 재 봐요. 비탈에 수건을 깔고 다시 재서 비교해요.','Roll a toy car down a book ramp and count “one, two, three…” to time it. Lay a towel on the ramp, time it again and compare.']};
+// design challenges for parents: titles in both languages and one skill per challenge
+const CHT={slow:['느림보 코스','Slowpoke course'],fast:['번개 코스','Lightning course'],window:['딱 맞춰 코스','Bullseye course'],one:['하나만 바꾸기','Change just one'],double:['두 배로 느리게','Twice as long'],same:['똑같이 두 번','Same twice']};
+const CHN={slow:['마찰과 긴 길을 이용해 느린 코스 설계하기','Designing a slow course with friction and longer paths'],fast:['곧장 떨어지는 조각을 골라 빠른 코스 설계하기','Designing a fast course with pieces that drop straight down'],
+ window:['우승 시간이 목표 범위(20~24초)에 들도록 코스 조정하기','Tuning a course so the winning time lands in a target range (20–24 s)'],one:['한 가지만 바꿔 다시 시험하고 차이 재기 (공정한 시험)','Changing one thing, testing again and measuring the difference (a fair test)'],
+ double:['시험 결과를 비교해 시간을 2배로 늘리기','Comparing test results to make the time twice as long'],same:['같은 코스를 두 번 시험해 결과가 비슷하게 나오는지 확인하기','Testing the same course twice to check the results agree']};
 function learnSummary(){
  const pl=(n,w)=>n+' '+w+(n===1?'':'s'),done=id=>(stats.labs[id]?.n||0)>0;
  const bd=id=>{const b=BADGES.find(x=>x.id===id);return b?Math.min(1,b.val()/b.goal):0};
  const sk=(id,name,p)=>({id,name,st:p>=1?2:p>0?1:0,p:Math.round(p*100)/100});
  const lab=EXPS.map(e=>{const r=stats.labs[e.id],ok=done(e.id)&&r.right>0,c=LR.stat('exp_'+e.id),k={id:'exp_'+e.id,name:RX[e.id].n,st:ok?2:done(e.id)?1:0,p:ok?1:done(e.id)?.5:0};if(c){k.r=c.r;k.w=c.w}return k});
  const kinds=EXPS.filter(e=>done(e.id)).length,runs=EXPS.reduce((t,e)=>t+(stats.labs[e.id]?.n||0),0),B=stats.builds,W=stats.worlds.length,nb=badges.length;
+ // lab notebook: experiments with a written result; mastered once 3 are written and the child has opened the notebook
+ const rec=EXPS.filter(e=>stats.labs[e.id]?.v).length,recSt=rec>=3&&stats.notes>0?2:rec?1:0;
+ // design challenges: a challenge is mastered once a test run met its goal (the game's 🎉 and first star)
+ const C=CHALS.map(ch=>chalGet(ch.id)),tests=C.reduce((t,c)=>t+c.n,0),met=chalMet(),stars=chalStars(),imp=C.some(c=>c.imp);
+ const chSk=CHALS.map((ch,i)=>{const c=C[i],x=LR.stat('ch_'+ch.id),ok=c.s&1,k={id:'ch_'+ch.id,name:CHN[ch.id],st:ok?2:c.n?1:0,p:ok?1:c.n?.5:0};if(x){k.r=x.r;k.w=x.w}return k});
  const areas=[
-  {id:'inquiry',icon:'🔬',name:['과학 탐구 과정','Science inquiry'],school:['초등 과학 탐구 과정 (예상·관찰·변인 통제)','Inquiry skills: predict, observe, fair test (Ontario Science and Technology, Strand A)'],skills:[
+  {id:'inquiry',icon:'🔬',name:['과학 탐구 과정','Science inquiry'],school:['초등 과학 탐구 과정 (예상·관찰·측정·변인 통제)','Inquiry skills: predict, observe, measure, fair test (Ontario Science and Technology, Strand A)'],skills:[
    sk('inq_predict',['실험 전에 결과를 예상하고 실험으로 확인하기','Predicting a result, then checking it with a test'],bd('scientist')),
-   sk('inq_fair',['한 가지만 다른 두 길을 나란히 비교하기 (공정한 실험)','Comparing two lanes that differ in only one thing (a fair test)'],bd('professor'))]},
+   sk('inq_fair',['한 가지만 다른 두 길을 나란히 비교하기 (공정한 실험)','Comparing two lanes that differ in only one thing (a fair test)'],bd('professor')),
+   {id:'inq_record',name:['실험 결과를 노트에 기록하고 막대그래프로 비교하기','Recording results in a notebook and comparing them on bar graphs'],st:recSt,p:recSt===2?1:recSt?Math.min(.9,Math.round(rec/3*100)/100):0}]},
   {id:'forces',icon:'⛰️',name:['힘과 운동','Forces and motion'],school:['초등 과학 ‘운동과 에너지’ 영역','Forces and motion (Ontario Grade 3: Forces Causing Movement)'],skills:lab},
   {id:'design',icon:'🛠️',name:['설계하고 만들기','Designing and building'],skills:[
    sk('build_design',['조각을 고르고 순서를 정해 코스 설계하기','Designing a course by choosing pieces and their order'],bd('engineer')),
    sk('build_test',['직접 만든 코스를 달려 보며 시험하기','Testing their own course by racing on it'],bd('builder')),
-   {id:'build_fix',name:['시험해 본 코스를 고쳐서 다시 달려 보기','Changing a tested course and racing it again'],st:stats.fixes?1:0,p:stats.fixes?.5:0}]}];
+   {id:'build_fix',name:['시험해 본 코스를 고쳐서 다시 달려 보기','Changing a tested course and racing it again'],st:stats.fixes?1:0,p:stats.fixes?.5:0}]},
+  {id:'challenge',icon:'🎯',name:['설계 도전 (계획·만들기·시험·고치기)','Design challenges (plan, build, test, improve)'],school:['초등 과학 탐구 과정 (측정하고 결과 비교하기)','Engineering design process (Ontario Science and Technology, Strand A: STEM skills)'],skills:[...chSk,
+   {id:'ch_cycle',name:['시험 결과를 보고 코스를 고쳐서 목표에 맞추기','Using test results to improve a design until it meets a goal'],st:imp?2:tests?1:0,p:imp?1:tests?.5:0}]}];
  const facts=[];
  if(runs)facts.push(['🔬',`실험 ${runs}번 · ${kinds}/${EXPS.length}가지`,`${pl(runs,'experiment run')} · ${kinds} of ${EXPS.length} kinds`]);
+ if(tests)facts.push(['🎯',`설계 도전 성공 ${met}/${CHALS.length} · 별 ${stars}개 · 시험 주행 ${tests}번`,`${met} of ${CHALS.length} design challenges met · ${pl(stars,'star')} · ${pl(tests,'test run')}`]);
  if(B)facts.push(['🛠️',`직접 설계한 코스 ${B}개`+(stats.customRaces?` · 내 코스 레이스 ${stats.customRaces}번`:''),`${pl(B,'course')} designed`+(stats.customRaces?` · ${pl(stats.customRaces,'race')} on them`:'')]);
  if(mineStats.races)facts.push(['🏁',`레이스 ${mineStats.races}번`,pl(mineStats.races,'race')]);
  if(W)facts.push(['🗺️',`월드 ${W}/${WORLDS.length}곳에서 레이스`,`Raced in ${W} of ${WORLDS.length} worlds`]);
@@ -1584,24 +1923,31 @@ function learnSummary(){
  if(mineStats.wins)facts.push(['🏆',`응원한 구슬 1등 ${mineStats.wins}번`,`Their marble came first ${mineStats.wins===1?'once':mineStats.wins+' times'}`]);
  // talk about experiments played since the report began first (they have counts), then mastered ones, then the rest that were run
  const ex=lab.filter(k=>k.st).map((k,i)=>[(k.r!=null?0:4)+(k.st===2?0:2),i,k]).sort((a,b)=>a[0]-b[0]||a[1]-b[1]).map(x=>RX[x[2].id.slice(4)].q);
- const talk=[...(kinds?[['실험할 때 두 길은 왜 딱 한 가지만 다르게 했을까?','Why was only one thing different between the two lanes in each experiment?','그래야 결과가 무엇 때문에 달라졌는지 알 수 있어요.','So you can tell what made the difference.']]:[]),...ex.slice(0,B?2:3),
+ const tried=id=>chalGet(id).n>0,chq=[...(tried('one')?[['설계 도전에서 조각을 딱 하나만 바꾸고 다시 시험한 이유가 뭘까?','In the design challenge, why did you change only one piece before testing again?','그래야 시간이 달라진 게 그 조각 때문인지 알 수 있어요.','So you know the time changed because of that one piece.']]:[]),
+  ...(tried('slow')?[['느림보 코스를 만들 때 어떤 조각을 넣었어? 그 조각은 왜 느릴까?','For the slowpoke course, which pieces did you use? Why are they slow?','예: 꿀 언덕은 마찰이 커서, 지그재그 탑은 길이 길어서 느려요.','For example: honey hill has lots of friction, and the zigzag tower is a long path.']]:[]),
+  ...(tried('same')?[['같은 코스를 두 번 달리면 시간이 똑같았어? 왜 조금 달라질까?','When you tested the same course twice, was the time exactly the same? Why might it change a little?','부딪히는 조각에서 매번 다르게 튕기고 출발 순서도 바뀌어서 조금씩 달라져요.','Marbles bounce a little differently each time, and the start order changes too.']]:[]),
+  ...(tried('fast')?[['번개 코스는 어떻게 빠르게 만들었어?','How did you make the lightning course fast?','구슬이 거의 곧장 아래로 떨어지는 조각(범퍼, 핀볼 숲)을 많이 넣었어요.','With pieces where marbles drop almost straight down, like bumpers and pegs.']]:[])];
+ const talk=[...(kinds?[['실험할 때 두 길은 왜 딱 한 가지만 다르게 했을까?','Why was only one thing different between the two lanes in each experiment?','그래야 결과가 무엇 때문에 달라졌는지 알 수 있어요.','So you can tell what made the difference.']]:[]),...chq.slice(0,kinds?1:2),...ex.slice(0,B?2:3),
   ...(B?[['네가 만든 코스에는 어떤 조각을 어떤 순서로 넣었어? 달려 보고 바꾸고 싶은 곳이 있었어?','Which pieces did you put in your course, and in what order? After racing it, what would you change?','조각 이름과 순서, 그리고 고치고 싶은 점 한 가지','The pieces and their order, plus one thing to change']]:[]),
   ...(mineStats.races?[['레이스에서 구슬 순서가 많이 바뀌는 곳은 어디였어?','Where in a race did the marbles change places the most?','핀이나 범퍼, 바람개비처럼 부딪히는 곳이요.','Places where they bump into things, like pegs, bumpers or spinners.']]:[])].slice(0,4);
  const home=[],add=x=>{if(!home.includes(x)&&home.length<3)home.push(x)};
- if(done('friction'))add(HOME.surface);if(done('slope')||done('weight')||done('curve'))add(HOME.ramp);if(done('bounce'))add(HOME.bounce);if(B)add(HOME.track);
+ if(done('friction'))add(HOME.surface);if(done('slope')||done('weight')||done('curve')||done('height'))add(HOME.ramp);if(done('bounce'))add(HOME.bounce);if(done('drop'))add(HOME.drop);if(tests)add(HOME.time);if(B)add(HOME.track);
  add(HOME.ramp);add(HOME.surface);add(HOME.bounce);
  const next=[],left=EXPS.filter(e=>!done(e.id)).slice(0,2).map(e=>RX[e.id].t),miss=lab.find(k=>k.st===1);
  if(left.length)next.push([`실험실에서 아직 안 해 본 실험: ${left.map(t=>'“'+t[0]+'”').join(', ')}`,`Lab experiments still to try: ${left.map(t=>'“'+t[1]+'”').join(', ')}`]);
+ const unmet=CHALS.find(ch=>!(chalGet(ch.id).s&1));
+ if(!tests)next.push(['설계 도전에서 목표 시간에 맞는 코스를 설계하고 시험해 보기','Try a design challenge: build a course that meets a time goal, then test it']);
+ else if(unmet)next.push([`아직 성공하지 않은 설계 도전 “${CHT[unmet.id][0]}”에 도전해 보기`,`Try a design challenge they have not met yet: “${CHT[unmet.id][1]}”`]);
  if(miss){const t=RX[miss.id.slice(4)].t;next.push([`예상과 결과가 달랐던 실험 “${t[0]}”${jo(t[0],'을','를')} 다시 예상하고 확인해 보기`,`Predict again and re-test the experiment that surprised them: “${t[1]}”`])}
  if(!B)next.push(['코스 만들기에서 조각을 골라 나만의 코스를 설계하고 달려 보기','Design a course in the course builder and race on it']);
  else if(!stats.fixes)next.push(['만든 코스를 한 군데만 고쳐 다시 달려 보고 무엇이 달라졌는지 말해 보기','Change one part of their course, race it again and say what changed']);
  if(!stats.leagues)next.push(['5경기 리그를 끝까지 해 보기','Finish a 5-race league']);
  if(!next.length)next.push(['집에서 책 비탈로 직접 실험해 보기','Try a book-ramp experiment at home']);
  return {v:1,level:[`배지 ${nb}/${BADGES.length}`,`${nb}/${BADGES.length} badges`],
-  focus:['구슬 레이스를 즐기면서, 실험실에서는 결과를 먼저 예상하고 한 가지만 다른 두 길을 비교해 비탈·마찰·무게·튀기를 알아보고, 코스 만들기에서는 직접 설계하고 시험해 봐요.','Mostly a marble race to watch and cheer; in the lab, children predict first and then compare two lanes that differ in one thing (slope, surface, weight, bounce), and in the builder they design and test their own courses.'],
-  unit:['실험 예상','predictions'],areas,facts:facts.slice(0,6),talk,home,next:next.slice(0,3)}}
+  focus:['구슬 레이스를 즐기면서, 실험실에서는 결과를 먼저 예상하고 한 가지만 다른 두 길을 비교해 비탈·높이·마찰·무게·튀기를 알아보고 실험 노트의 막대그래프로 결과를 비교해요. 설계 도전에서는 목표 시간에 맞는 코스를 계획하고, 만들고, 시험하고, 고쳐요.','Mostly a marble race to watch and cheer. In the lab, children predict first, compare two lanes that differ in one thing (slope, height, surface, weight, bounce) and compare the results on bar graphs in a lab notebook. In design challenges they plan, build, test and improve a course to meet a time goal.'],
+  unit:['실험 예상·설계 시험','predictions and design tests'],areas,facts:facts.slice(0,6),talk,home,next:next.slice(0,3)}}
 try{LR.set(learnSummary)}catch(e){}
-window.__marble={get:()=>({phase,st,course,cam,league,mode,timeScale,labMode,lab:labExp&&labExp.id,labPred,labRes,stats,badges,skin,customs,worldIdx,rec:rec.length}),start:startRace,prepare,cheer,showResults,setMine:i=>{mine=i}};
+window.__marble={get:()=>({phase,st,course,cam,league,mode,timeScale,labMode,lab:labExp&&labExp.id,labPred,labRes,stats,badges,skin,customs,worldIdx,rec:rec.length,chal,chalRun,draft}),start:startRace,prepare,cheer,showResults,setMine:i=>{mine=i},setDraft:m=>{if(draft){draft.mods=m.slice();renderBuilder()}}};
 requestAnimationFrame(frame);
 })();
 </script>

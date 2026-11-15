@@ -1,0 +1,458 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#17224d">
+<title data-en="Learning Report | Moon Mini Games">학습 리포트 | Moon Mini Games</title>
+<meta name="description" content="우리 아이가 게임에서 무엇을 배웠는지 과목별로 보여 주는 학부모 학습 리포트 · A learning report for parents.">
+<meta name="robots" content="noindex">
+<link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32.png">
+<link rel="icon" type="image/png" sizes="64x64" href="images/favicon-64.png">
+<link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+<script>
+/* Language: ?lang=ko|en, then the saved choice, then the device language. Shared by every page on this site. */
+const LANG=(()=>{let q=null,s=null;try{q=new URLSearchParams(location.search).get('lang')}catch(e){}try{s=localStorage.getItem('moonGames.lang')}catch(e){}const l=q==='ko'||q==='en'?q:s==='ko'||s==='en'?s:/^ko/i.test(navigator.language||'')?'ko':'en';if(q===l){try{localStorage.setItem('moonGames.lang',l)}catch(e){}}document.documentElement.lang=l;return l})();
+const L=(ko,en)=>LANG==='en'?en:ko;
+</script>
+<style>
+:root{
+  color-scheme:light;
+  --paper:#f5f6fb;--card:#ffffff;--ink:#17224d;--ink2:#3a4675;--muted:#6b7499;--line:#e3e7f3;--soft:#eef1f9;
+  --navy:#17224d;--navy2:#24346f;--gold:#ffd66b;--good:#1f9d6a;--warn:#e0892b;
+  --shadow:0 10px 30px rgba(23,34,77,.08);
+  --r:22px;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--paper);color:var(--ink);font-family:system-ui,-apple-system,'Apple SD Gothic Neo','Noto Sans KR','Malgun Gothic',sans-serif;-webkit-tap-highlight-color:transparent;line-height:1.5}
+button{font:inherit;color:inherit}
+a{color:inherit}
+.num{font-variant-numeric:tabular-nums}
+:focus-visible{outline:3px solid #ffb84d;outline-offset:3px}
+/* ---- top bar */
+.bar{position:sticky;top:0;z-index:20;background:rgba(23,34,77,.96);backdrop-filter:blur(8px);color:#fff;padding:max(8px,env(safe-area-inset-top)) max(12px,env(safe-area-inset-right)) 8px max(12px,env(safe-area-inset-left))}
+.bar-in{max-width:1040px;margin:0 auto;display:flex;align-items:center;gap:10px}
+.ib{display:grid;place-items:center;min-width:44px;height:44px;border-radius:14px;border:0;background:#ffffff1a;color:#fff;text-decoration:none;font-size:20px;cursor:pointer}
+.ib:hover{background:#ffffff2b}
+.bar h1{flex:1;min-width:0;margin:0;font-size:17px;font-weight:900;letter-spacing:-.2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bar h1 small{font-weight:700;color:#a9bbff;margin-left:6px;font-size:13px}
+@media (max-width:480px){.bar h1 small{display:none}}
+.seg{display:inline-flex;padding:3px;border-radius:999px;background:#ffffff1a}
+.seg button{border:0;background:transparent;color:#d4dcff;font-size:13px;font-weight:800;min-height:38px;padding:0 12px;border-radius:999px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:#fff;color:var(--navy)}
+/* ---- page */
+.wrap{max-width:1040px;margin:0 auto;padding:18px max(16px,env(safe-area-inset-right)) 40px max(16px,env(safe-area-inset-left));display:grid;gap:18px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);padding:20px}
+.h2{display:flex;align-items:baseline;justify-content:space-between;gap:10px;flex-wrap:wrap;margin:0 0 14px}
+.h2 h2{margin:0;font-size:19px;letter-spacing:-.3px;text-wrap:balance}
+.h2 span{font-size:13px;color:var(--muted);font-weight:700}
+.kick{font-size:12px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+/* ---- child header */
+.hero{background:radial-gradient(circle at 100% 0%,#3d5bd6 0,transparent 42%),linear-gradient(135deg,#17224d,#24346f 62%,#2c4189);color:#fff;border:0;padding:22px 22px 20px;position:relative;overflow:hidden}
+.hero .kick{color:#a9bbff}
+.who{display:flex;align-items:center;gap:14px}
+.av{width:64px;height:64px;flex:0 0 64px;border-radius:50%;display:grid;place-items:center;font-size:38px;background:#ffffff1f;box-shadow:inset 0 0 0 2px #ffffff40}
+.who h2{margin:2px 0 0;font-size:clamp(24px,5.4vw,32px);letter-spacing:-.6px;line-height:1.15}
+.who p{margin:2px 0 0;color:#c7d2ff;font-size:14px;font-weight:700}
+.kids{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.kid{display:inline-flex;align-items:center;gap:6px;min-height:40px;padding:0 14px 0 8px;border-radius:999px;border:1px solid #ffffff40;background:#ffffff14;color:#fff;font-weight:800;font-size:14px;cursor:pointer}
+.kid[aria-pressed="true"]{background:#fff;color:var(--navy)}
+.say{margin:16px 0 0;font-size:clamp(16px,3.9vw,19px);font-weight:800;line-height:1.55;text-wrap:pretty;max-width:62ch}
+.say b{color:var(--gold)}
+.per{display:flex;gap:8px;margin-top:16px;flex-wrap:wrap}
+.per button{min-height:40px;padding:0 16px;border-radius:12px;border:1px solid #ffffff40;background:transparent;color:#d4dcff;font-weight:800;font-size:14px;cursor:pointer}
+.per button[aria-pressed="true"]{background:var(--gold);border-color:var(--gold);color:#2a2300}
+/* ---- KPI tiles */
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:14px 16px;box-shadow:var(--shadow);min-width:0}
+.kpi i{font-style:normal;font-size:20px}
+.kpi b{display:block;font-size:clamp(22px,5vw,30px);letter-spacing:-.6px;line-height:1.15;margin-top:4px}
+.kpi b small{font-size:.5em;font-weight:800;margin-left:2px;color:var(--muted)}
+.kpi span{display:block;font-size:13px;font-weight:800;color:var(--muted)}
+.kpi em{display:block;font-style:normal;font-size:12.5px;font-weight:800;margin-top:4px;color:var(--muted)}
+.kpi em.up{color:var(--good)}
+@media (max-width:720px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.jump{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 6px;scrollbar-width:none}
+.jump::-webkit-scrollbar{display:none}
+.jump a{flex:0 0 auto;display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:0 14px;border-radius:999px;background:#fff;border:1px solid var(--line);border-left:5px solid var(--c);text-decoration:none;font-weight:800;font-size:14px}
+.subj{scroll-margin-top:76px}
+/* ---- two-up grid */
+.two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px}
+@media (max-width:820px){.two{grid-template-columns:minmax(0,1fr)}}
+.chart{width:100%;height:auto;display:block}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:10px;font-size:13px;font-weight:700;color:var(--ink2)}
+.legend i{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+.note{font-size:13px;color:var(--muted);font-weight:600;margin:8px 0 0}
+.empty{font-size:14px;color:var(--muted);font-weight:700;background:var(--soft);border-radius:14px;padding:16px;text-align:center}
+/* calendar */
+.cal-wrap{overflow-x:auto}
+.streak{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:900;color:#8a5a00;background:#fff0c9;border-radius:999px;padding:4px 10px}
+/* time share bar */
+.share{display:flex;height:16px;border-radius:999px;overflow:hidden;background:var(--soft)}
+.share i{display:block;height:100%}
+.slist{display:grid;gap:8px;margin-top:14px}
+.srow{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:10px;align-items:center;font-size:14px;font-weight:800}
+.srow .dot{width:12px;height:12px;border-radius:4px}
+.srow span{color:var(--muted);font-weight:700}
+/* ---- subject cards */
+.subj{padding:0;overflow:hidden}
+.s-top{display:flex;align-items:center;gap:14px;padding:18px 20px 14px;border-top:6px solid var(--c)}
+.s-ic{width:52px;height:52px;flex:0 0 52px;border-radius:16px;display:grid;place-items:center;font-size:28px;background:color-mix(in srgb,var(--c) 14%,#fff)}
+.s-tt{flex:1;min-width:0}
+.s-tt h3{margin:0;font-size:21px;letter-spacing:-.4px}
+.s-tt p{margin:1px 0 0;font-size:13px;color:var(--muted);font-weight:700}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.chip{font-size:12.5px;font-weight:800;border-radius:999px;padding:3px 10px;background:var(--soft);color:var(--ink2)}
+.chip.c{background:color-mix(in srgb,var(--c) 14%,#fff);color:color-mix(in srgb,var(--c) 70%,#000)}
+.ring{flex:0 0 auto;text-align:center}
+.ring svg{width:76px;height:76px;display:block}
+.ring span{display:block;font-size:11.5px;font-weight:800;color:var(--muted);margin-top:2px}
+.s-body{padding:0 20px 20px;display:grid;gap:16px}
+.focus{margin:0;font-size:15px;font-weight:700;color:var(--ink2);max-width:70ch}
+.mini{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.mini div{background:var(--soft);border-radius:14px;padding:10px 12px;min-width:0}
+.mini b{display:block;font-size:19px;letter-spacing:-.3px}
+.mini span{font-size:12.5px;font-weight:800;color:var(--muted)}
+.chart.spark{height:44px;margin-top:2px}
+.areas{display:grid;gap:8px}
+.area{border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.area summary{list-style:none;cursor:pointer;display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:4px 12px;align-items:center;padding:12px 14px}
+.area summary::-webkit-details-marker{display:none}
+.a-ic{font-size:22px;grid-row:span 2}
+.a-nm{font-weight:900;font-size:15px;min-width:0}
+.a-pc{font-weight:900;font-size:15px;color:color-mix(in srgb,var(--c) 75%,#000)}
+.a-bar{grid-column:2/4;display:flex;height:10px;border-radius:999px;overflow:hidden;background:var(--soft)}
+.a-bar i{display:block;height:100%}
+.a-sub{grid-column:2/4;font-size:12.5px;font-weight:700;color:var(--muted);display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.a-sub u{text-decoration:none;color:var(--ink2)}
+.area[open] summary{background:var(--soft)}
+.skills{list-style:none;margin:0;padding:6px 14px 12px;display:grid;gap:2px}
+.skills li{display:grid;grid-template-columns:22px minmax(0,1fr) auto;gap:2px 10px;align-items:start;padding:8px 0;border-bottom:1px dashed var(--line)}
+.skills li:last-child{border-bottom:0}
+.skills .st{font-size:15px;line-height:1.4}
+.skills b{font-size:14.5px;font-weight:800}
+.skills small{grid-column:2/3;font-size:12.5px;color:var(--muted);font-weight:700}
+.skills .acc{font-size:12.5px;font-weight:900;color:var(--ink2);text-align:right;white-space:nowrap}
+.sw{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px}
+@media (max-width:640px){.sw{grid-template-columns:minmax(0,1fr)}.mini{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.box{border-radius:16px;padding:14px 16px;background:var(--soft)}
+.box h4{margin:0 0 8px;font-size:14px;font-weight:900}
+.box ul{margin:0;padding:0;list-style:none;display:grid;gap:7px}
+.box li{font-size:14px;font-weight:700;color:var(--ink2);display:flex;gap:8px}
+.box li small{display:block;color:var(--muted);font-size:12.5px}
+.box.good{background:#e9f7f0}.box.good h4{color:#13724c}
+.box.next{background:#fff4e5}.box.next h4{color:#9a5a00}
+.facts{display:flex;flex-wrap:wrap;gap:8px}
+.fact{display:inline-flex;align-items:center;gap:6px;font-size:13.5px;font-weight:800;background:#fff;border:1px solid var(--line);border-radius:12px;padding:6px 10px}
+.talk{display:grid;gap:8px}
+.talk details{border:1px solid var(--line);border-radius:14px;background:#fff}
+.talk summary{cursor:pointer;list-style:none;padding:12px 14px;font-weight:800;font-size:14.5px;display:flex;gap:10px;align-items:flex-start}
+.talk summary::-webkit-details-marker{display:none}
+.talk summary::after{content:attr(data-a);margin-left:auto;flex:0 0 auto;font-size:12px;font-weight:900;color:var(--muted);background:var(--soft);border-radius:999px;padding:3px 9px}
+.talk details[open] summary::after{content:attr(data-h)}
+.talk p{margin:0;padding:0 14px 12px 40px;font-size:14px;color:var(--ink2);font-weight:700}
+.home{margin:0;padding:0;list-style:none;display:grid;gap:7px}
+.home li{font-size:14px;font-weight:700;color:var(--ink2);display:flex;gap:8px}
+.sec-t{margin:0 0 8px;font-size:14px;font-weight:900;color:var(--ink)}
+.s-wait{padding:0 20px 20px}
+.s-wait .empty{text-align:left}
+.go{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 16px;border-radius:14px;background:var(--navy);color:#fff;text-decoration:none;font-weight:900;font-size:14.5px}
+/* timeline */
+.tl{list-style:none;margin:0;padding:0;display:grid;gap:0}
+.tl li{display:grid;grid-template-columns:76px 14px minmax(0,1fr);gap:10px;align-items:start;padding:6px 0}
+.tl time{font-size:12.5px;font-weight:800;color:var(--muted);text-align:right;padding-top:2px}
+.tl .d{width:14px;height:14px;border-radius:50%;margin-top:4px;box-shadow:0 0 0 3px #fff,0 0 0 4px var(--line)}
+.tl b{font-size:14.5px;font-weight:800}
+.tl small{display:block;font-size:12.5px;color:var(--muted);font-weight:700}
+/* coach note */
+.coach{display:flex;gap:16px;align-items:flex-start}
+.coach img{width:84px;height:102px;object-fit:contain;flex:0 0 84px}
+.coach ul{margin:6px 0 0;padding-left:18px;display:grid;gap:6px}
+.coach li{font-size:14.5px;font-weight:700;color:var(--ink2)}
+.coach h2{margin:0;font-size:18px}
+@media (max-width:480px){.coach img{width:64px;height:78px;flex-basis:64px}}
+/* how it works */
+.how{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:12px}
+.how div{background:var(--soft);border-radius:16px;padding:14px}
+.how b{display:block;font-size:14px;margin-bottom:4px}
+.how p{margin:0;font-size:13px;color:var(--muted);font-weight:600}
+footer{text-align:center;color:#8a93b8;font-size:12px;margin-top:6px}
+.demo{background:#fff4d6;border:1px solid #f1d27a;color:#6b4c00;border-radius:16px;padding:12px 14px;font-weight:800;font-size:14px;display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+/* parent gate */
+.gate{position:fixed;inset:0;z-index:60;background:rgba(14,20,48,.72);display:grid;place-items:center;padding:16px}
+.gate-box{width:min(420px,100%);background:#fff;border-radius:26px;padding:24px 20px 20px;text-align:center;box-shadow:0 24px 60px rgba(0,0,0,.35)}
+.gate-box h2{margin:0 0 4px;font-size:22px}
+.gate-box p{margin:0 0 14px;color:var(--muted);font-weight:700;font-size:14.5px}
+.gate-q{font-size:34px;font-weight:900;letter-spacing:1px;margin:6px 0 12px}
+.gate-box input{width:100%;font:inherit;font-size:24px;font-weight:900;text-align:center;padding:12px;border-radius:14px;border:2px solid var(--line)}
+.gate-box .row{display:flex;gap:10px;margin-top:12px}
+.gate-box .row>*{flex:1}
+.btn{min-height:48px;border-radius:14px;border:0;background:var(--navy);color:#fff;font-weight:900;font-size:16px;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center}
+.btn.ghost{background:var(--soft);color:var(--ink)}
+.shake{animation:shake .4s}
+@keyframes shake{25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+@media (prefers-reduced-motion:reduce){.shake{animation:none}}
+@media print{
+  body{background:#fff}
+  .bar,.per,.kids,.noprint,.gate{display:none!important}
+  .wrap{padding:0;gap:12px}
+  .card,.kpi{box-shadow:none;break-inside:avoid}
+  .hero{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .subj{break-inside:auto}
+  details>*{display:block}
+}
+</style>
+</head>
+<body>
+<header class="bar">
+  <div class="bar-in">
+    <a class="ib" id="home" href="index.html" aria-label="처음 화면" data-en-aria-label="Home">🏠</a>
+    <h1><span data-en="Learning report">학습 리포트</span><small>Moon Mini Games</small></h1>
+    <button type="button" class="ib noprint" id="print" aria-label="인쇄하거나 PDF로 저장" data-en-aria-label="Print or save as PDF">🖨️</button>
+    <div class="seg" role="group" aria-label="언어 · Language"><button type="button" data-lang="ko" lang="ko">한국어</button><button type="button" data-lang="en" lang="en">EN</button></div>
+  </div>
+</header>
+<main class="wrap" id="app" aria-live="polite"></main>
+<div id="gate"></div>
+<script>
+// ---------------------------------------------------------------- the games and where their learning records live
+// Each game's shared recorder (LR, in the coach block) writes "<save prefix>learn@profileId"; see _src/report/SPEC.md.
+const GAMES=[
+ {id:'math',file:'math_aquarium.html',key:'mathAquarium.learn',save:'mathAquarium.v1',subj:['수학','Math'],game:['꼬마 수학 아쿠아리움','Little Math Aquarium'],icon:'🧮',c:'#2f6ff0'},
+ {id:'music',file:'music_academy.html',key:'musicAcademy.learn',save:'musicAcademy.v1',subj:['음악','Music'],game:['꼬마 음악 아카데미','Little Music Academy'],icon:'🎵',c:'#9050e8'},
+ {id:'science',file:'science_guardians.html',key:'scienceGuardians.learn',save:'scienceGuardians.v1',subj:['과학','Science'],game:['꼬마 과학 수호대','Little Science Guardians'],icon:'🔬',c:'#0f9e7b'},
+ {id:'coding',file:'coding_island.html',key:'pythonIsland.learn',save:'pythonIsland.v1',subj:['코딩','Coding'],game:['꼬마 코딩 섬','Little Coding Island'],icon:'💻',c:'#ec7c1c'},
+ {id:'chess',file:'chess_knights.html',key:'chessKnights.learn',save:'chessKnights.v1',subj:['체스 · 전략','Chess · Strategy'],game:['꼬마 체스 기사단','Little Chess Knights'],icon:'♞',c:'#b0832a'},
+ {id:'detective',file:'detective_game.html',key:'little-detective-learn',save:'little-detective-v3',subj:['추리 · 듣기','Reasoning · Listening'],game:['꼬마 탐정단','Little Detectives'],icon:'🕵️',c:'#dc4a76'},
+ {id:'marble',file:'marble_rush_3d.html',key:'marbleRush.learn',save:'marbleRush.v2',subj:['과학 탐구','Science inquiry'],game:['마블 레이스','Marble Rush'],icon:'🔮',c:'#1d9fbe'}];
+const T=p=>Array.isArray(p)?L(p[0],p[1]):'';
+const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const $=id=>document.getElementById(id);
+const getJ=k=>{try{return JSON.parse(localStorage.getItem(k)||'null')}catch(e){return null}};
+const Q=new URLSearchParams(location.search),DEMO=Q.get('demo')==='1';
+// ---------------------------------------------------------------- Korean particles after a name
+const hasB=w=>{const c=String(w).trim().slice(-1);const n=c.charCodeAt(0);if(n>=0xAC00&&n<=0xD7A3)return (n-0xAC00)%28>0;return /[013678]$/.test(c)};
+const nmK=w=>hasB(w)?w+'이':w;  // 도준 → 도준이, 윤아 → 윤아 (then 는/가/의 follow a vowel)
+// ---------------------------------------------------------------- dates
+const dkey=d=>d.toLocaleDateString('en-CA');
+const TODAY=new Date();TODAY.setHours(12,0,0,0);
+const daysAgo=n=>{const d=new Date(TODAY);d.setDate(d.getDate()-n);return d};
+const ago=k=>{if(!k)return L('예전에','earlier');const d=new Date(k+'T12:00:00'),n=Math.round((TODAY-d)/864e5);return n<=0?L('오늘','today'):n===1?L('어제','yesterday'):n<7?L(`${n}일 전`,`${n} days ago`):d.toLocaleDateString(LANG==='en'?'en-US':'ko-KR',{month:'short',day:'numeric'})};
+const fmtMin=s=>{if(s>0&&s<30)return L('1분 미만','under 1 min');const m=Math.round(s/60);if(m<60)return LANG==='en'?`${m} min`:`${m}분`;const h=Math.floor(m/60),r=m%60;return LANG==='en'?`${h} h${r?` ${r} min`:''}`:`${h}시간${r?` ${r}분`:''}`};
+const pct=x=>Math.round(x*100);
+// ---------------------------------------------------------------- data
+let PROF={list:[],cur:null};
+function loadProfiles(){const p=getJ('moonGames.profiles');PROF=p&&Array.isArray(p.list)?p:{list:[],cur:null};
+ const want=Q.get('p');if(want&&PROF.list.some(x=>x.id===want))PROF.cur=want;
+ if(!PROF.list.some(x=>x.id===PROF.cur))PROF.cur=PROF.list[0]?PROF.list[0].id:null}
+const me=()=>PROF.list.find(x=>x.id===PROF.cur)||null;
+function records(){if(DEMO)return demoRecords();const m=me(),sfx=m?'@'+m.id:'';const out={};
+ for(const g of GAMES){const r=getJ(g.key+sfx);const saved=localStorage.getItem(g.save+sfx)!=null||(g.id==='marble'&&localStorage.getItem('marble3dsettings'+sfx)!=null);
+  out[g.id]={r:r&&r.v===1?r:null,saved}}
+ return out}
+// period totals from the per-day log
+function span(days,n,off=0){const t={s:0,r:0,w:0,on:0,daily:[]};for(let i=n-1+off;i>=off;i--){const k=dkey(daysAgo(i)),x=days&&days[k];const s=x?x.s:0;t.daily.push(s);if(x){t.s+=x.s;t.r+=x.r;t.w+=x.w;if(x.s>=30||x.r+x.w>0)t.on++}}return t}
+function allSkills(sum){const out=[];(sum&&sum.areas||[]).forEach(a=>(a.skills||[]).forEach(k=>out.push({...k,area:a})));return out}
+// ---------------------------------------------------------------- charts (plain SVG)
+function ringSVG(p,c){const R=30,C=2*Math.PI*R,v=Math.max(0,Math.min(1,p));return `<svg viewBox="0 0 76 76" role="img" aria-label="${pct(v)}%"><circle cx="38" cy="38" r="${R}" fill="none" stroke="#eef1f9" stroke-width="9"/><circle cx="38" cy="38" r="${R}" fill="none" stroke="${c}" stroke-width="9" stroke-linecap="round" stroke-dasharray="${(C*v).toFixed(1)} ${C.toFixed(1)}" transform="rotate(-90 38 38)"/><text x="38" y="43" text-anchor="middle" font-size="16" font-weight="900" fill="#17224d" class="num">${pct(v)}%</text></svg>`}
+function sparkSVG(vals,c){const w=220,h=40,max=Math.max(60,...vals),n=vals.length;if(!n)return '';const x=i=>(i/(Math.max(1,n-1)))*(w-4)+2,y=v=>h-4-(v/max)*(h-10);
+ const pts=vals.map((v,i)=>`${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(' ');
+ return `<svg class="chart spark" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" aria-hidden="true"><polyline points="2,${h-4} ${pts} ${w-2},${h-4}" fill="${c}22" stroke="none"/><polyline points="${pts}" fill="none" stroke="${c}" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/></svg>`}
+function calendarSVG(day){const weeks=12,cs=15,gap=4,top=18,left=LANG==='en'?30:22;const start=new Date(TODAY);start.setDate(start.getDate()-((start.getDay()+6)%7)-(weeks-1)*7);
+ const lvl=s=>s<=0?0:s<600?1:s<1200?2:s<2400?3:4,col=['#eef1f9','#c9d6ff','#8fa8ff','#4d6df0','#24346f'];
+ let cells='',mon='';const wd=LANG==='en'?['M','','W','','F','','S']:['월','','수','','금','','일'];
+ for(let w=0;w<weeks;w++)for(let d=0;d<7;d++){const dt=new Date(start);dt.setDate(start.getDate()+w*7+d);if(dt>TODAY)continue;const k=dkey(dt),s=day[k]||0;
+  if(d===0&&(w===0||dt.getDate()<=7))mon+=`<text x="${left+w*(cs+gap)}" y="11" font-size="10" font-weight="700" fill="#6b7499">${dt.toLocaleDateString(LANG==='en'?'en-US':'ko-KR',{month:'short'})}</text>`;
+  cells+=`<rect x="${left+w*(cs+gap)}" y="${top+d*(cs+gap)}" width="${cs}" height="${cs}" rx="4" fill="${col[lvl(s)]}"${k===dkey(TODAY)?' stroke="#ffb84d" stroke-width="2"':''}><title>${esc(dt.toLocaleDateString(LANG==='en'?'en-US':'ko-KR',{month:'long',day:'numeric',weekday:'short'}))} · ${esc(s?fmtMin(s):L('쉬는 날','rest day'))}</title></rect>`}
+ const labs=wd.map((t,i)=>t?`<text x="${left-6}" y="${top+i*(cs+gap)+11}" font-size="10" font-weight="700" fill="#6b7499" text-anchor="end">${t}</text>`:'').join('');
+ const W=left+weeks*(cs+gap),H=top+7*(cs+gap);
+ const leg=`<div class="legend"><span>${L('적게','Less')}</span>${col.map(c=>`<i style="background:${c};margin:0"></i>`).join('')}<span>${L('많이 (40분 이상)','More (40+ min)')}</span></div>`;
+ return `<div class="cal-wrap"><svg class="chart" viewBox="0 0 ${W} ${H}" style="max-width:${W*1.6}px" role="img" aria-label="${esc(L('최근 12주 학습 달력','Learning calendar, last 12 weeks'))}">${mon}${labs}${cells}</svg></div>${leg}`}
+function radarSVG(items){const n=items.length,S=320,cx=S/2,cy=S/2+6,R=104;const ang=i=>-Math.PI/2+i*2*Math.PI/n,pt=(i,v)=>[cx+Math.cos(ang(i))*R*v,cy+Math.sin(ang(i))*R*v];
+ let g='';for(const lv of [.25,.5,.75,1])g+=`<polygon points="${items.map((_,i)=>pt(i,lv).map(x=>x.toFixed(1)).join(',')).join(' ')}" fill="${lv===1?'#f7f8fd':'none'}" stroke="#e3e7f3" stroke-width="1"/>`;
+ items.forEach((_,i)=>{const [x,y]=pt(i,1);g+=`<line x1="${cx}" y1="${cy}" x2="${x.toFixed(1)}" y2="${y.toFixed(1)}" stroke="#e3e7f3"/>`});
+ const poly=items.map((it,i)=>pt(i,Math.max(.04,it.v)).map(x=>x.toFixed(1)).join(',')).join(' ');
+ g+=`<polygon points="${poly}" fill="#4d6df033" stroke="#4d6df0" stroke-width="2.5" stroke-linejoin="round"/>`;
+ items.forEach((it,i)=>{const [x,y]=pt(i,Math.max(.04,it.v));g+=`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="5" fill="${it.c}" stroke="#fff" stroke-width="2"/>`;
+  const [lx,ly]=pt(i,1.22),anc=Math.abs(lx-cx)<8?'middle':lx<cx?'end':'start';
+  g+=`<text x="${lx.toFixed(1)}" y="${(ly-2).toFixed(1)}" text-anchor="${anc}" font-size="12.5" font-weight="800" fill="#17224d">${esc(it.icon+' '+it.label)}</text><text x="${lx.toFixed(1)}" y="${(ly+13).toFixed(1)}" text-anchor="${anc}" font-size="12" font-weight="800" fill="${it.c}" class="num">${pct(it.v)}%</text>`});
+ return `<svg class="chart" viewBox="-30 -8 ${S+60} ${S+16}" style="max-width:420px;margin:0 auto" role="img" aria-label="${esc(L('과목별 진도','Progress by subject'))}">${g}</svg>`}
+function trendSVG(pts){const w=480,h=170,l=42,b=24,t=12,r=26;const n=pts.length;const x=i=>l+(n<2?0:i*(w-l-r)/(n-1)),y=v=>t+(1-v)*(h-t-b);
+ let g='';for(const v of [.5,.75,1]){g+=`<line x1="${l}" x2="${w-r}" y1="${y(v)}" y2="${y(v)}" stroke="#e3e7f3"/><text x="${l-6}" y="${y(v)+4}" font-size="11" text-anchor="end" fill="#6b7499" font-weight="700">${pct(v)}%</text>`}
+ const ok=pts.map((p,i)=>p.v==null?null:[x(i),y(Math.max(.5,p.v))]);let path='',on=false;ok.forEach(q=>{if(!q){on=false;return}path+=(on?'L':'M')+q[0].toFixed(1)+','+q[1].toFixed(1);on=true});
+ g+=`<path d="${path}" fill="none" stroke="#1f9d6a" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>`;
+ pts.forEach((p,i)=>{g+=`<text x="${x(i)}" y="${h-6}" font-size="10.5" text-anchor="middle" fill="#6b7499" font-weight="700">${esc(p.lab)}</text>`;if(ok[i])g+=`<circle cx="${ok[i][0]}" cy="${ok[i][1]}" r="4.5" fill="#fff" stroke="#1f9d6a" stroke-width="2.4"><title>${pct(p.v)}% · ${p.n}</title></circle>`});
+ return `<svg class="chart" viewBox="0 0 ${w} ${h}" role="img" aria-label="${esc(L('주별 정답률','Weekly accuracy'))}">${g}</svg>`}
+// ---------------------------------------------------------------- page state
+let PER=7;try{PER=+sessionStorage.getItem('moonGames.reportPer')||7}catch(e){}
+function render(){const app=$('app'),R=records(),m=DEMO?{name:L('하늘','Sky'),av:'🦄'}:me();
+ const played=GAMES.filter(g=>R[g.id].r);
+ if(!played.length&&!DEMO){app.innerHTML=emptyPage(R,m);bindCommon();return}
+ // ---- numbers for the chosen period
+ const n=PER>=9999?120:PER,P={},Prev={};let tot={s:0,r:0,w:0},prev={s:0,r:0,w:0};const dayAll={};
+ for(const g of played){const d=R[g.id].r.days||{};P[g.id]=span(d,n);Prev[g.id]=PER>=9999?null:span(d,n,n);
+  tot.s+=P[g.id].s;tot.r+=P[g.id].r;tot.w+=P[g.id].w;if(Prev[g.id]){prev.s+=Prev[g.id].s;prev.r+=Prev[g.id].r;prev.w+=Prev[g.id].w}
+  for(const k in d)dayAll[k]=(dayAll[k]||0)+d[k].s}
+ let onDays=0,streak=0;for(let i=0;i<n;i++){const k=dkey(daysAgo(i));if((dayAll[k]||0)>=30)onDays++}
+ for(let i=((dayAll[dkey(TODAY)]||0)>=30?0:1);i<400;i++){const k=dkey(daysAgo(i));if((dayAll[k]||0)>=30)streak++;else break}
+ const cutoff=PER>=9999?'':dkey(daysAgo(n-1));
+ let mastered=0,newM=0,school=0;const grow=[];
+ for(const g of played){const rec=R[g.id].r;for(const k of allSkills(rec.sum)){if(k.st===2){mastered++;const w=rec.when&&rec.when[k.id];if(w&&w>=cutoff)newM++;if(w)grow.push({g,k,w})}if(k.school&&k.st>=1)school++}}
+ grow.sort((a,b)=>a.w<b.w?1:-1);
+ const acc=tot.r+tot.w?tot.r/(tot.r+tot.w):null,accPrev=prev.r+prev.w?prev.r/(prev.r+prev.w):null;
+ const active=played.filter(g=>P[g.id].s>=60||P[g.id].r+P[g.id].w>0);
+ const top=active.slice().sort((a,b)=>P[b.id].s-P[a.id].s)[0];
+ const perLab=PER>=9999?L('지금까지','so far'):L(`최근 ${n}일`,`in the last ${n} days`);
+ // ---- headline sentence
+ const nm=m?m.name:L('우리 아이','your child'),nk=m?nmK(m.name):nm;
+ let say;
+ const ever=Object.keys(dayAll).length>0||mastered>0;
+ if(!active.length&&!ever)say=L(`${esc(nk)}의 학습 기록이 이제 막 시작됐어요. 게임을 하면 배운 시간과 익힌 기술이 여기에 차곡차곡 쌓여요.`,`${esc(nm)}’s learning record has just started. As ${esc(nm)} plays, learning time and mastered skills will build up here.`);
+ else if(!active.length)say=L(`${esc(nk)}는 ${perLab} 동안 쉬어 갔어요. 짧게 10분부터 다시 시작해 보세요.${mastered?` 그동안 익힌 기술 <b>${mastered}개</b>는 그대로 남아 있어요.`:''}`,`${esc(nm)} took a break ${perLab}. Starting again with 10 minutes is plenty.${mastered?` The <b>${mastered} skill${mastered>1?'s':''}</b> already mastered are all still here.`:''}`);
+ else say=L(`${esc(nk)}는 ${perLab} 동안 <b>${active.length}과목</b>에서 ${tot.s>=30?`<b>${fmtMin(tot.s)}</b> 배웠어요.`:`<b>${tot.r+tot.w}번</b> 답하며 배웠어요.`}${newM?` 새 기술 <b>${newM}개</b>를 익혔고,`:''} 가장 많이 한 과목은 <b>${esc(T(top.subj))}</b>${hasB(T(top.subj))?'이에요':'예요'}.${acc!=null?` 정답률은 <b>${pct(acc)}%</b>예요.`:''}`,
+  `${perLab[0].toUpperCase()+perLab.slice(1)}, ${esc(nm)} learned ${tot.s>=30?`for <b>${fmtMin(tot.s)}</b>`:`with <b>${tot.r+tot.w} answers</b>`} across <b>${active.length} subject${active.length>1?'s':''}</b>.${newM?` ${esc(nm)} mastered <b>${newM} new skill${newM>1?'s':''}</b>, and`:''} the most practised subject was <b>${esc(T(top.subj))}</b>.${acc!=null?` Accuracy was <b>${pct(acc)}%</b>.`:''}`);
+ const diff=(a,b,fmt)=>b==null||PER>=9999?'':a>b?`<em class="up">▲ ${fmt(a-b)} ${L('지난 기간보다','vs. the period before')}</em>`:a<b?`<em>${L('지난 기간보다 조금 적어요','a little less than the period before')}</em>`:'';
+ let h='';
+ if(DEMO)h+=`<div class="demo"><span>👀 ${L('예시 리포트예요. 실제 아이의 기록이 아니라 보기용으로 만든 기록이에요.','This is a sample report made up for preview. It is not a real child’s record.')}</span><a class="go" href="report.html?lang=${LANG}">${L('우리 아이 리포트로','Go to my child’s report')}</a></div>`;
+ h+=`<section class="card hero"><span class="kick">${L('학습 리포트','Learning report')} · ${esc(TODAY.toLocaleDateString(LANG==='en'?'en-US':'ko-KR',{year:'numeric',month:'long',day:'numeric'}))} ${L('기준','')}</span>
+  <div class="who" style="margin-top:8px"><div class="av">${esc(m?m.av:'🙂')}</div><div><h2>${esc(nm)}</h2><p>${played.map(g=>esc(g.icon)).join(' ')} · ${L(`${played.length}개 게임에서 배우는 중`,`Learning in ${played.length} game${played.length>1?'s':''}`)}</p></div></div>
+  ${!DEMO&&PROF.list.length>1?`<div class="kids" role="group" aria-label="${esc(L('아이 고르기','Choose a child'))}">${PROF.list.map(p=>`<button type="button" class="kid" data-kid="${esc(p.id)}" aria-pressed="${p.id===PROF.cur}">${esc(p.av)} ${esc(p.name)}</button>`).join('')}</div>`:''}
+  <p class="say">${say}</p>
+  <div class="per" role="group" aria-label="${esc(L('기간','Period'))}">${[[7,L('최근 7일','7 days')],[30,L('최근 30일','30 days')],[9999,L('전체','All time')]].map(([v,t])=>`<button type="button" data-per="${v}" aria-pressed="${PER===v}">${t}</button>`).join('')}</div></section>`;
+ // ---- KPI tiles
+ h+=`<section class="kpis">
+  <div class="kpi"><i>⏱️</i><b class="num">${fmtMin(tot.s)}</b><span>${L('집중해서 배운 시간','Focused learning time')}</span>${diff(tot.s,PER>=9999?null:prev.s,v=>fmtMin(v))}</div>
+  <div class="kpi"><i>📅</i><b class="num">${onDays}<small>${L('일','days')}</small></b><span>${L('배운 날','Days of learning')}</span>${streak>=2?`<em class="up">🔥 ${L(`${streak}일 연속`,`${streak}-day streak`)}</em>`:`<em>${L(`${n>=9999?'':n+'일 중 '}${onDays}일`,`${onDays} of ${n} days`)}</em>`}</div>
+  <div class="kpi"><i>🎯</i><b class="num">${acc==null?'–':pct(acc)+'%'}</b><span>${L('정답률','Accuracy')} · ${(tot.r+tot.w).toLocaleString()}${L('번 답함',' answers')}</span>${acc!=null&&accPrev!=null&&PER<9999?(Math.round(acc*100)>Math.round(accPrev*100)?`<em class="up">▲ ${pct(acc)-pct(accPrev)}%p</em>`:`<em>${L(`지난 기간 ${pct(accPrev)}%`,`${pct(accPrev)}% the period before`)}</em>`):''}</div>
+  <div class="kpi"><i>🏅</i><b class="num">${mastered}<small>${L('개','')}</small></b><span>${L('익힌 기술','Skills mastered')}</span><em class="${newM?'up':''}">${newM?L(`▲ 새로 ${newM}개`,`▲ ${newM} new`):L(`학교 교과 연결 ${school}개`,`${school} linked to school`)}</em></div></section>`;
+ // ---- jump to a subject
+ h+=`<nav class="jump noprint" aria-label="${esc(L('과목 바로가기','Jump to a subject'))}">${GAMES.filter(g=>R[g.id].r&&R[g.id].r.sum).map(g=>`<a href="#s-${g.id}" style="--c:${g.c}">${esc(g.icon)} ${esc(T(g.subj).split(' · ')[0])}</a>`).join('')}</nav>`;
+ // ---- calendar + subject balance
+ const radarItems=played.map(g=>{const sk=allSkills(R[g.id].r.sum);return {label:T(g.subj).split(' · ')[0],icon:g.icon,c:g.c,v:sk.length?sk.reduce((t,k)=>t+(+k.p||0),0)/sk.length:0}});
+ const shareT=played.reduce((t,g)=>t+P[g.id].s,0);
+ h+=`<section class="two"><div class="card"><div class="h2"><h2>📅 ${L('학습 달력','Learning calendar')}</h2>${streak>=2?`<span class="streak">🔥 ${L(`${streak}일 연속`,`${streak} days in a row`)}</span>`:`<span>${L('최근 12주','Last 12 weeks')}</span>`}</div>${calendarSVG(dayAll)}<p class="note">${L('하루 30초 이상 화면을 보며 직접 조작한 날만 색칠돼요.','A day is coloured when your child actively played for at least 30 seconds.')}</p></div>
+  <div class="card"><div class="h2"><h2>⏳ ${L('과목별 학습 시간','Time by subject')}</h2><span>${esc(perLab)}</span></div>${shareT?`<div class="share">${played.filter(g=>P[g.id].s).map(g=>`<i style="width:${(P[g.id].s/shareT*100).toFixed(2)}%;background:${g.c}" title="${esc(T(g.subj))}"></i>`).join('')}</div>
+   <div class="slist">${played.slice().sort((a,b)=>P[b.id].s-P[a.id].s).map(g=>`<div class="srow"><i class="dot" style="background:${g.c}"></i><b>${esc(g.icon)} ${esc(T(g.subj))}</b><span class="num">${P[g.id].s?fmtMin(P[g.id].s)+` · ${pct(P[g.id].s/shareT)}%`:L('이 기간에는 쉬었어요','not this time')}</span></div>`).join('')}</div>`:`<p class="empty">${L('이 기간에는 학습 시간이 없어요.','No learning time in this period.')}</p>`}</div></section>`;
+ // ---- progress radar + accuracy trend
+ const weeks=[];for(let w=7;w>=0;w--){let r=0,x=0;for(let d=0;d<7;d++){const k=dkey(daysAgo(w*7+d));for(const g of played){const y=(R[g.id].r.days||{})[k];if(y){r+=y.r;x+=y.w}}}const s=daysAgo(w*7+6);weeks.push({lab:w===0?L('이번 주','This wk'):s.toLocaleDateString(LANG==='en'?'en-US':'ko-KR',{month:'numeric',day:'numeric'}),v:r+x>=5?r/(r+x):null,n:r+x})}
+ const trendOK=weeks.filter(w=>w.v!=null).length>=2;
+ h+=`<section class="two"><div class="card"><div class="h2"><h2>🧭 ${L('과목별 진도','Progress by subject')}</h2><span>${L('게임 속 기술을 얼마나 익혔는지','How far through each game’s skills')}</span></div>${radarItems.length>=3?radarSVG(radarItems):`<div class="slist">${radarItems.map(it=>`<div class="srow"><i class="dot" style="background:${it.c}"></i><b>${esc(it.icon+' '+it.label)}</b><span class="num">${pct(it.v)}%</span></div>`).join('')}</div>`}</div>
+  <div class="card"><div class="h2"><h2>📈 ${L('주별 정답률','Weekly accuracy')}</h2><span>${L('최근 8주','Last 8 weeks')}</span></div>${trendOK?trendSVG(weeks):`<p class="empty">${L('2주 이상 기록이 쌓이면 정답률 흐름을 보여 드려요.','Once there are two or more weeks of answers, the trend shows up here.')}</p>`}<p class="note">${L('한 주에 5번 이상 답한 주만 표시해요. 새 단원에 들어가면 정답률이 잠깐 내려가는 게 자연스러워요.','Weeks with at least 5 answers are shown. A short dip when a new unit starts is normal.')}</p></div></section>`;
+ // ---- one card per subject
+ for(const g of GAMES){const x=R[g.id];if(x.r&&x.r.sum)h+=subjectCard(g,x.r,P[g.id],cutoff);else if(x.r||x.saved)h+=waitCard(g,!!x.saved)}
+ // ---- growth timeline
+ if(grow.length)h+=`<section class="card"><div class="h2"><h2>🌱 ${L('최근 성장 기록','Recent milestones')}</h2><span>${L('새로 익힌 기술','Newly mastered skills')}</span></div><ol class="tl">${grow.slice(0,12).map(o=>`<li><time>${esc(ago(o.w))}</time><i class="d" style="background:${o.g.c}"></i><div><b>${esc(T(o.k.name))}</b><small>${esc(o.g.icon+' '+T(o.g.subj))}${o.k.school?' · '+esc(T(o.k.school)):''}</small></div></li>`).join('')}</ol></section>`;
+ // ---- Coach Moon's note to parents
+ h+=coachNote({active,played,P,tot,acc,streak,nm,nk,shareT,ever});
+ // ---- how this report is made
+ h+=`<section class="card"><div class="h2"><h2>🔎 ${L('이 리포트는 이렇게 만들어져요','How this report works')}</h2></div><div class="how">
+  <div><b>🔒 ${L('기록은 이 기기에만','Saved on this device only')}</b><p>${L('아이의 기록은 서버로 보내지 않고 이 브라우저에만 저장돼요. 다른 기기에서는 따로 쌓여요.','Your child’s record is not sent anywhere. It stays in this browser, and each device keeps its own.')}</p></div>
+  <div><b>⏱️ ${L('집중한 시간만','Only focused time')}</b><p>${L('화면이 켜져 있고 2분 안에 직접 누르거나 입력한 시간만 세요. 틀어 두기만 한 시간은 빠져요.','Time counts only while the page is open and your child tapped or typed in the last 2 minutes.')}</p></div>
+  <div><b>🏅 ${L('익힘은 게임의 기준으로','Mastery by each game’s rule')}</b><p>${L('단원 완료, 별 3개처럼 게임마다 정한 기준을 넘으면 ‘익힘’으로 표시해요.','A skill shows as mastered when it passes that game’s own rule, like finishing a unit or earning 3 stars.')}</p></div>
+  <div><b>📚 ${L('학교 교과 연결','Links to school')}</b><p>${L('한국 2022 개정 교육과정과 캐나다 온타리오 교육과정을 기준으로 연결했어요. 학교마다 배우는 순서와 방법이 조금씩 다를 수 있어요.','Links follow Korea’s 2022 national curriculum and the Ontario curriculum. Schools may teach things in a different order or in a different way.')}</p></div></div></section>`;
+ h+=`<footer>Moon Mini Games · © 2026 Dongsun Moon. ${L('모든 권리 보유.','All rights reserved.')}</footer>`;
+ app.innerHTML=h;bindCommon()}
+function subjectCard(g,rec,p,cutoff){const S=rec.sum,sk=allSkills(S),prog=sk.length?sk.reduce((t,k)=>t+(+k.p||0),0)/sk.length:0;
+ const nM=sk.filter(k=>k.st===2).length,nP=sk.filter(k=>k.st===1).length;
+ const lastDay=Object.keys(rec.days||{}).filter(k=>rec.days[k].s>=30||rec.days[k].r+rec.days[k].w>0).sort().pop();
+ const acc=p.r+p.w?p.r/(p.r+p.w):null;
+ const stat=k=>{const r=k.r!=null?k.r:(rec.sk&&rec.sk[k.id]?rec.sk[k.id][0]:null),w=k.w!=null?k.w:(rec.sk&&rec.sk[k.id]?rec.sk[k.id][1]:null);return r!=null&&r+w>=3?{r,w,a:r/(r+w)}:null};
+ const strong=sk.filter(k=>k.st===2).map(k=>({k,w:rec.when&&rec.when[k.id]||'',s:stat(k)})).sort((a,b)=>a.w!==b.w?(a.w<b.w?1:-1):(b.k.g||0)!==(a.k.g||0)?(b.k.g||0)-(a.k.g||0):((b.s?b.s.a:0)-(a.s?a.s.a:0))).slice(0,3);
+ let next=sk.filter(k=>k.st===1).map(k=>({k,s:stat(k)})).sort((a,b)=>((a.s?a.s.a:1)*.5+(+a.k.p||0)*.5)-((b.s?b.s.a:1)*.5+(+b.k.p||0)*.5)).slice(0,3);
+ const areas=(S.areas||[]).map(a=>{const ks=a.skills||[],m=ks.filter(k=>k.st===2).length,pr=ks.filter(k=>k.st===1).length,z=ks.length-m-pr,av=ks.length?ks.reduce((t,k)=>t+(+k.p||0),0)/ks.length:0;
+  return `<details class="area"><summary><span class="a-ic">${esc(a.icon||'•')}</span><span class="a-nm">${esc(T(a.name))}</span><span class="a-pc num">${pct(av)}%</span>
+   <span class="a-bar" aria-hidden="true"><i style="width:${m/ks.length*100}%;background:var(--c)"></i><i style="width:${pr/ks.length*100}%;background:color-mix(in srgb,var(--c) 38%,#fff)"></i></span>
+   <span class="a-sub"><u>${L(`익힘 ${m} · 연습 중 ${pr} · 아직 ${z}`,`Mastered ${m} · Practising ${pr} · Not yet ${z}`)}</u>${a.school&&T(a.school)!==T(a.name)?`<span>📚 ${esc(T(a.school))}</span>`:''}</span></summary>
+   <ul class="skills">${ks.map(k=>{const s=stat(k),w=rec.when&&rec.when[k.id];return `<li><span class="st" aria-label="${esc(k.st===2?L('익힘','Mastered'):k.st===1?L('연습 중','Practising'):L('아직','Not yet'))}">${k.st===2?'✅':k.st===1?'🟡':'⚪'}</span><b>${esc(T(k.name))}</b><span class="acc num">${s?`${pct(s.a)}% (${s.r}/${s.r+s.w})`:k.st===1?pct(+k.p||0)+'%':''}</span>${k.school||k.g||w?`<small>${[k.g?L(`${k.g}학년`,`Grade ${k.g}`):'',k.school?T(k.school):'',k.st===2&&w?L(`${ago(w)} 익힘`,`mastered ${ago(w)}`):''].filter(Boolean).map(esc).join(' · ')}</small>`:''}</li>`}).join('')}</ul></details>`}).join('');
+ const fx=(S.facts||[]).slice(0,6).map(f=>`<span class="fact">${esc(f[0])} ${esc(L(f[1],f[2]))}</span>`).join('');
+ const talk=(S.talk||[]).slice(0,4).map(t=>`<details><summary data-a="${esc(L('답 보기','Answer'))}" data-h="${esc(L('접기','Hide'))}">💬 <span>${esc(L(t[0],t[1]))}</span></summary><p>👉 ${esc(L(t[2],t[3]))}</p></details>`).join('');
+ const home=(S.home||[]).slice(0,3).map(t=>`<li>🏠 <span>${esc(T(t))}</span></li>`).join('');
+ const nx=next.length?next.map(o=>`<li>🎯 <span>${esc(T(o.k.name))}${o.s?`<small>${L(`정답률 ${pct(o.s.a)}%`,`${pct(o.s.a)}% right`)}</small>`:o.k.school?`<small>📚 ${esc(T(o.k.school))}</small>`:''}</span></li>`).join(''):(S.next||[]).map(t=>`<li>🎯 <span>${esc(T(t))}</span></li>`).join('');
+ return `<section class="card subj" style="--c:${g.c}" id="s-${g.id}">
+  <div class="s-top"><div class="s-ic">${esc(g.icon)}</div><div class="s-tt"><h3>${esc(T(g.subj))}</h3><p>${esc(T(g.game))} · ${lastDay?L(`최근 학습 ${ago(lastDay)}`,`Last played ${ago(lastDay)}`):L('아직 기록 없음','No play yet')}</p>
+   <div class="chips">${S.level?`<span class="chip c">📍 ${esc(T(S.level))}</span>`:''}<span class="chip">✅ ${L(`익힘 ${nM}`,`${nM} mastered`)}</span>${nP?`<span class="chip">🟡 ${L(`연습 중 ${nP}`,`${nP} practising`)}</span>`:''}</div></div>
+   <div class="ring">${ringSVG(prog,g.c)}<span>${L('진도','Progress')}</span></div></div>
+  <div class="s-body">
+   ${S.focus?`<p class="focus">${esc(T(S.focus))}</p>`:''}
+   <div class="mini"><div><b class="num">${fmtMin(p.s)}</b><span>${L('이 기간 학습','This period')}</span></div><div><b class="num">${(p.r+p.w).toLocaleString()}</b><span>${esc(S.unit?L(`${S.unit[0]} 수`,S.unit[1][0].toUpperCase()+S.unit[1].slice(1)):L('답한 수','Answers'))}</span></div><div><b class="num">${acc==null?'–':pct(acc)+'%'}</b><span>${L('정답률','Accuracy')}</span></div></div>
+   ${p.daily.some(v=>v)&&p.daily.length>=7?`<div><p class="note" style="margin:0">${L('하루하루 학습 시간','Learning time day by day')}</p>${sparkSVG(p.daily.slice(-30),g.c)}</div>`:''}
+   <div><h4 class="sec-t">${L('배우는 영역','What it covers')}</h4><div class="areas">${areas}</div></div>
+   ${strong.length||nx?`<div class="sw"><div class="box good"><h4>👏 ${L('잘하고 있어요','Doing well')}</h4><ul>${strong.length?strong.map(o=>`<li>✅ <span>${esc(T(o.k.name))}<small>${o.s?L(`정답률 ${pct(o.s.a)}%`,`${pct(o.s.a)}% right`):''}${o.s&&o.w?' · ':''}${o.w?esc(L(`${ago(o.w)} 익힘`,`mastered ${ago(o.w)}`)):''}</small></span></li>`).join(''):`<li>🌱 <span>${L('첫 기술을 익히는 중이에요. 곧 여기에 보여요!','Working on a first skill. It’ll show up here soon!')}</span></li>`}</ul></div>
+    <div class="box next"><h4>🎯 ${L('다음 목표','Next goals')}</h4><ul>${nx||`<li>🌟 <span>${L('지금 단계를 모두 익혔어요. 다음 단계에 도전할 때예요!','Everything at this stage is mastered. Time for the next stage!')}</span></li>`}</ul></div></div>`:''}
+   ${fx?`<div><h4 class="sec-t">${L('게임 속 성과','In-game achievements')}</h4><div class="facts">${fx}</div></div>`:''}
+   ${talk?`<div><h4 class="sec-t">${L('아이에게 물어보세요','Ask your child')}</h4><div class="talk">${talk}</div><p class="note">${L('정답을 맞히는 것보다, 아이가 자기 말로 설명해 보는 게 가장 좋은 복습이에요.','The best review is your child explaining it in their own words, more than getting it exactly right.')}</p></div>`:''}
+   ${home?`<div><h4 class="sec-t">${L('집에서 함께 해 보기','Try it together at home')}</h4><ul class="home">${home}</ul></div>`:''}
+  </div></section>`}
+function waitCard(g,saved){return `<section class="card subj" style="--c:${g.c}"><div class="s-top"><div class="s-ic">${esc(g.icon)}</div><div class="s-tt"><h3>${esc(T(g.subj))}</h3><p>${esc(T(g.game))}</p></div></div>
+  <div class="s-wait"><p class="empty">${saved?L('이 게임의 기록이 있어요. 게임을 한 번 열면 배운 내용이 여기에 정리돼요.','There is progress in this game. Open it once and what your child learned will be summarised here.'):L('아직 기록이 없어요.','No record yet.')}</p><p style="margin:12px 0 0"><a class="go" href="${esc(g.file)}?lang=${LANG}">▶ ${esc(T(g.game))} ${L('열기','open')}</a></p></div></section>`}
+function coachNote(o){const tips=[];const {active,played,P,tot,acc,streak,nk,nm}=o;
+ if(streak>=3)tips.push(L(`${esc(nk)}가 ${streak}일 연속으로 배웠어요. 오래 하는 것보다 매일 조금씩이 실력을 키워요. 꾸준함을 꼭 칭찬해 주세요.`,`${esc(nm)} has learned ${streak} days in a row. A little every day builds skills better than long sessions. Please praise that steady effort.`));
+ const learn=played.filter(g=>['math','music','science','coding'].includes(g.id));
+ if(active.length&&o.shareT){const big=active.slice().sort((a,b)=>P[b.id].s-P[a.id].s)[0];if(P[big.id].s/o.shareT>.7&&played.length>1){const other=GAMES.find(g=>g.id!==big.id&&['math','music','science','coding'].includes(g.id)&&(!P[g.id]||P[g.id].s<P[big.id].s/4));
+  if(other)tips.push(L(`요즘은 ${esc(T(big.subj))}에 푹 빠져 있어요. 이번 주에 ${esc(T(other.subj))}도 10분쯤 함께 해 보면 균형이 좋아져요.`,`${esc(T(big.subj))} is the favourite right now. Adding about 10 minutes of ${esc(T(other.subj))} this week would keep things balanced.`))}}
+ if(acc!=null&&tot.r+tot.w>=30){if(acc>=.92)tips.push(L('문제를 거의 다 맞히고 있어요. 지금 단계가 쉬워졌을 수 있으니 다음 단계에 도전하도록 격려해 주세요.','Almost every answer is right. The current level may have become easy, so encourage the next step up.'));
+  else if(acc<.6)tips.push(L('어려운 내용을 만나고 있어요. 틀리면서 배우는 중이니, 점수보다 끝까지 해 본 노력을 칭찬해 주세요.','Your child is meeting harder material and learning from mistakes. Praise the effort of sticking with it rather than the score.'))}
+ if(!active.length&&o.ever)tips.push(L('이번 기간에는 쉬어 갔어요. 탓하기보다 “오늘 10분만 같이 해 볼까?”처럼 가볍게 권해 보세요.','This period was a break. Instead of pointing it out, try a light “Shall we do 10 minutes together today?”'));
+ tips.push(L('“몇 점이야?”보다 “어떻게 풀었어?”라고 물어봐 주세요. 자기 생각을 설명하면서 더 깊이 배워요.','Ask “How did you solve it?” rather than “What did you score?” Explaining their thinking helps children learn more deeply.'));
+ tips.push(L('화면 학습은 짧게 끊어서, 하루 15~20분 안팎이 적당해요. 게임 속 문 코치도 20분이 지나면 쉬자고 말해요.','Keep screen learning in short sessions; about 15–20 minutes a day is plenty. Coach Moon also suggests a break after 20 minutes.'));
+ return `<section class="card"><div class="coach"><img src="images/coach-moon-idea.webp" alt="" onerror="this.remove()"><div><span class="kick">${L('문 코치가 학부모님께','A note from Coach Moon')}</span><h2>${L('이렇게 도와주세요','How you can help')}</h2><ul>${tips.slice(0,4).map(t=>`<li>${t}</li>`).join('')}</ul></div></div></section>`}
+function emptyPage(R,m){const any=GAMES.some(g=>R[g.id].saved);
+ return `<section class="card hero"><span class="kick">${L('학습 리포트','Learning report')}</span><div class="who" style="margin-top:8px"><div class="av">${esc(m?m.av:'👨‍👩‍👧')}</div><div><h2>${esc(m?m.name:L('학부모님, 반가워요','Welcome, parents'))}</h2><p>${L('아이가 게임을 하면 배운 내용이 여기에 쌓여요.','As your child plays, what they learn builds up here.')}</p></div></div>
+  ${PROF.list.length>1?`<div class="kids">${PROF.list.map(p=>`<button type="button" class="kid" data-kid="${esc(p.id)}" aria-pressed="${p.id===PROF.cur}">${esc(p.av)} ${esc(p.name)}</button>`).join('')}</div>`:''}
+  <p class="say">${any?L('예전 게임 기록이 있어요. 아래 게임을 한 번씩 열면 그동안 배운 내용이 리포트로 정리돼요.','There is earlier progress. Open each game below once and everything learned so far is summarised here.'):L('수학, 음악, 과학, 코딩, 체스까지, 아이가 어떤 기술을 익혔고 다음에 무엇을 배우면 좋은지 학교 교과와 연결해서 보여 드려요.','Math, music, science, coding and chess: see which skills your child has mastered and what comes next, linked to what schools teach.')}</p>
+  <div class="per noprint"><a class="go" style="background:var(--gold);color:#2a2300" href="report.html?demo=1&lang=${LANG}">👀 ${L('예시 리포트 보기','See a sample report')}</a><a class="go" style="background:#ffffff1f" href="index.html?lang=${LANG}">🎮 ${L('게임 하러 가기','Go to the games')}</a></div></section>
+  ${GAMES.filter(g=>R[g.id].saved).map(g=>waitCard(g,true)).join('')}
+  <footer>Moon Mini Games · © 2026 Dongsun Moon. ${L('모든 권리 보유.','All rights reserved.')}</footer>`}
+function bindCommon(){document.querySelectorAll('[data-per]').forEach(b=>b.onclick=()=>{PER=+b.dataset.per;try{sessionStorage.setItem('moonGames.reportPer',PER)}catch(e){}render()});
+ document.querySelectorAll('[data-kid]').forEach(b=>b.onclick=()=>{PROF.cur=b.dataset.kid;const u=new URL(location.href);u.searchParams.set('p',PROF.cur);history.replaceState(null,'',u.href);render()})}
+// ---------------------------------------------------------------- the sample report (?demo=1): a made-up child, clearly labelled
+function demoRecords(){const out={};let seed=7;const rnd=()=>(seed=(seed*16807)%2147483647)/2147483647;
+ const mk=(sum,mins,acc,skip)=>{const days={};for(let i=0;i<84;i++){if(i%9===4||(i>1&&rnd()<skip))continue;const d=dkey(daysAgo(i)),s=Math.round(mins*(.6+.8*rnd())*6)*10,n=Math.max(1,Math.round(s/50));const r=Math.max(0,Math.min(n,Math.round(n*(acc-.08+rnd()*.1+(84-i)/84*.08))));days[d]={s,r,w:n-r}}
+  const when={};allSkills(sum).forEach((k,i)=>{if(k.st===2)when[k.id]=i%3===0?'':dkey(daysAgo(Math.floor(rnd()*40)))});return {v:1,days,sum,when,at:Date.now()}};
+ for(const g of GAMES){const s=DEMO_SUM[g.id];if(s)out[g.id]={r:mk(s,g.id==='math'?14:g.id==='music'?8:g.id==='science'?7:g.id==='coding'?6:3,g.id==='chess'?.74:.86,g.id==='math'?.25:g.id==='marble'?.8:.55),saved:true};else out[g.id]={r:null,saved:false}}
+ return out}
+const sk=(id,ko,en,st,p,x={})=>({id,name:[ko,en],st,p,...x});
+const DEMO_SUM={
+ math:{v:1,level:['3학년','Grade 3'],focus:['학년 교과 순서대로 수와 연산, 도형과 측정, 자료를 아쿠아리움을 키우며 연습해요.','Practises number, shapes and measurement, and data in school order while running an aquarium.'],unit:['문제','questions'],
+  areas:[{id:'num',name:['수와 계산','Numbers and operations'],icon:'🔢',school:['2022 개정 교육과정 · 수와 연산 영역','Ontario: Number'],skills:[sk('m1','세 자리 수의 덧셈','Adding 3-digit numbers',2,1,{g:3,r:46,w:4}),sk('m2','세 자리 수의 뺄셈','Subtracting 3-digit numbers',2,1,{g:3,r:38,w:6}),sk('m3','곱셈구구 활용','Using times tables',1,.6,{g:3,r:22,w:7}),sk('m4','나눗셈의 뜻','What division means',1,.3,{g:3,r:9,w:5}),sk('m5','분수로 나타내기','Writing fractions',0,0,{g:3})]},
+   {id:'geo',name:['도형과 측정','Geometry and measurement'],icon:'📐',school:['2022 개정 교육과정 · 도형과 측정 영역','Ontario: Spatial Sense'],skills:[sk('m6','평면도형 알아보기','Flat shapes',2,1,{g:3,r:30,w:3}),sk('m7','길이 재기 (mm, km)','Measuring length (mm, km)',1,.5,{g:3,r:12,w:5}),sk('m8','시각과 시간','Telling time',2,1,{g:3,r:27,w:2})]},
+   {id:'pat',name:['규칙과 관계','Patterns and relationships'],icon:'🔁',school:['2022 개정 교육과정 · 변화와 관계 영역','Ontario: Algebra'],skills:[sk('m9','규칙 찾기','Finding patterns',2,1,{g:3,r:18,w:1}),sk('m10','□ 구하기','Finding the missing number',1,.4,{g:3,r:8,w:4})]},
+   {id:'dat',name:['자료와 가능성','Data and probability'],icon:'📊',school:['2022 개정 교육과정 · 자료와 가능성 영역','Ontario: Data'],skills:[sk('m11','그림그래프','Pictographs',0,0,{g:3})]}],
+  total:{r:612,w:88},facts:[['🐠','수조 14곳 오픈','14 tanks opened'],['👨‍👩‍👧','손님 1,240명','1,240 visitors'],['🎓','2학년 마스터','Grade 2 mastered']],
+  talk:[['234 + 158을 어떻게 계산했는지 설명해 줄래?','How did you work out 234 + 158?','일의 자리부터 더하고, 10이 넘으면 받아올림해요 (392).','Add the ones first and regroup when it’s 10 or more (392).'],['한 시간은 몇 분이야?','How many minutes are in an hour?','60분이에요.','60 minutes.']],
+  home:[['장 볼 때 두 물건의 가격을 더해 보게 해 주세요.','At the store, have your child add the prices of two items.'],['시계를 보고 “10분 뒤는 몇 시야?” 물어봐 주세요.','Look at a clock and ask, “What time will it be in 10 minutes?”']]},
+ music:{v:1,level:['Lv.9','Lv. 9'],focus:['박자 감각을 시작으로 건반, 악보 읽기, 노래, 리듬을 매일 조금씩 연습해요.','Builds beat sense first, then keyboard, reading music, singing and rhythm, a little each day.'],unit:['연주','plays'],
+  areas:[{id:'beat',name:['박자·리듬','Beat and rhythm'],icon:'🥁',skills:[sk('b1','일정한 박 맞추기','Keeping a steady beat',2,1),sk('b2','4분음표와 2분음표','Quarter and half notes',2,1),sk('b3','쉼표 지키기','Rests',1,.6)]},{id:'key',name:['건반·가락','Keyboard and melody'],icon:'🎹',skills:[sk('k1','도레미 위치 찾기','Finding C, D, E',2,1),sk('k2','다섯 손가락 노래','Five-finger tunes',1,.5),sk('k3','높은음 낮은음','High and low notes',2,1)]},{id:'read',name:['악보 읽기·음악 기호','Reading music and symbols'],icon:'🎼',skills:[sk('r1','오선 위의 도레미','C, D, E on the staff',1,.4),sk('r2','높은음자리표','The treble clef',0,0)]}],
+  facts:[['🔥','7일 연속 연습','7-day practice streak'],['🥈','음악 대회 은메달','Silver medal in a contest']],talk:[['4분음표는 몇 박이야?','How many beats is a quarter note?','1박이에요.','One beat.']],home:[['좋아하는 노래에 맞춰 함께 손뼉으로 박자를 쳐 보세요.','Clap the beat together to a favourite song.']]},
+ science:{v:1,level:['3학년','Grade 3'],focus:['생활 속 과학 개념을 퀴즈와 실험으로 익히고, 안전 수칙도 함께 배워요.','Learns everyday science through quizzes and hands-on labs, with safety rules along the way.'],unit:['문제','questions'],
+  areas:[{id:'force',name:['힘과 에너지','Forces and energy'],icon:'🧲',skills:[sk('s1','자석의 성질','Magnets',2,1),sk('s2','그림자와 빛','Shadows and light',2,1),sk('s3','전기 회로','Electric circuits',1,.4)]},{id:'earth',name:['지구와 우주','Earth and space'],icon:'🌍',skills:[sk('s4','지진','Earthquakes',1,.6),sk('s5','공룡 화석','Dinosaur fossils',2,1)]},{id:'safe',name:['안전과 건강','Safety and health'],icon:'🚒',skills:[sk('s6','불이 나면','If there is a fire',2,1),sk('s7','멈추고 엎드려 구르기','Stop, drop and roll',2,1)]}],
+  facts:[['📚','과학 카드 48장','48 science cards'],['🔬','실험 9가지 완료','9 labs done']],talk:[['저녁에 그림자가 길어지는 이유는?','Why do shadows get longer in the evening?','해가 낮게 있어서 빛이 비스듬히 비추기 때문이에요.','The sun is low, so light comes in at a slant.']],home:[['해 질 무렵 함께 산책하며 그림자 길이를 비교해 보세요.','Compare your shadows on a walk near sunset.']]},
+ coding:{v:1,level:['Lv.6','Lv. 6'],focus:['진짜 파이썬 코드로 순서, 반복, 조건을 배우고 로봇 가게를 직접 움직여요.','Learns sequence, loops and conditions with real Python code that runs a robot shop.'],unit:['미션','missions'],
+  areas:[{id:'seq',name:['순서대로 명령하기','Step-by-step instructions'],icon:'👣',skills:[sk('c1','출력하기 (print)','Printing (print)',2,1),sk('c2','순서대로 움직이기','Moving in order',2,1)]},{id:'loop',name:['반복하기','Repeating'],icon:'🔁',skills:[sk('c3','반복하기 (for 반복문)','Repeating steps (for loops)',1,.6),sk('c4','범위 (range)','Ranges (range)',1,.3)]},{id:'if',name:['조건 · 판단','Decisions'],icon:'🔀',skills:[sk('c5','만약에 (if)','If statements (if)',0,0)]}],
+  facts:[['🍔','로봇 버거 손님 85명','85 burger customers served'],['🐛','버그 보스 2명 물리침','2 bug bosses beaten']],talk:[['for 반복문은 무엇을 해?','What does a for loop do?','같은 명령을 정해진 횟수만큼 되풀이해요.','It repeats the same steps a set number of times.']],home:[['샌드위치 만들기 순서를 로봇에게 말하듯 하나씩 말해 보게 해 주세요.','Have your child give “robot” step-by-step instructions to make a sandwich.']]},
+ chess:{v:1,level:['Lv.12','Lv. 12'],focus:['체스 퍼즐로 패턴을 알아보고 몇 수 앞을 내다보는 힘을 길러요.','Chess puzzles build pattern spotting and thinking a few moves ahead.'],unit:['퍼즐','puzzles'],
+  areas:[{id:'mate',name:['체크메이트 패턴','Checkmate patterns'],icon:'👑',skills:[sk('h1','한 수 메이트','Mate in one',2,1),sk('h2','두 수 메이트','Mate in two',1,.5)]},{id:'tac',name:['전술: 포크·핀·숨은 공격','Tactics: forks, pins, discovered attacks'],icon:'⚔️',skills:[sk('h3','포크 (양쪽 공격)','Forks',2,1),sk('h4','핀','Pins',1,.4)]},{id:'base',name:['기본기: 기물 가치와 잡기','Basics: piece value and captures'],icon:'♟️',skills:[sk('h5','기물 움직임','How pieces move',2,1)]}],
+  facts:[['🧩','퍼즐 142개 해결','142 puzzles solved'],['🏰','보스 3명 격파','3 bosses beaten']],talk:[['포크가 뭐야?','What is a fork?','말 하나로 상대 말 두 개를 한꺼번에 공격하는 거예요.','One piece attacks two pieces at once.']],home:[['짧게 한 판 같이 두고, 아이에게 다음 수를 설명하게 해 보세요.','Play a short game and ask your child to explain their next move.']]},
+ detective:{v:1,level:['탐정 Lv.5','Detective Lv. 5'],focus:['단서를 듣고 아닌 사람을 하나씩 지우며 논리적으로 추론하는 힘을 길러요.','Builds listening and reasoning: hear the clues, then rule people out one by one.'],unit:['사건','cases'],
+  areas:[{id:'listen',name:['듣기와 추리','Listening and reasoning'],icon:'👂',skills:[sk('d1','단서 두 개 기억하기','Remembering two clues',2,1),sk('d2','단서 세 개 기억하기','Remembering three clues',1,.5)]},{id:'logic',name:['관찰력·기억력','Observation and memory'],icon:'🧠',skills:[sk('d3','사진 속 단서 기억하기','Remembering details in a picture',2,1)]},{id:'map',name:['위치와 방향','Positions and directions'],icon:'🗺️',skills:[sk('d4','동서남북','Compass directions',1,.4)]}],
+  facts:[['🔎','해결한 사건 23개','23 cases solved']]},
+ marble:{v:1,level:['리그 2시즌','League season 2'],focus:['예상하고, 실험하고, 비교하며 경사와 마찰 같은 힘의 원리를 놀이로 탐구해요.','Predict, test and compare: explores slopes, friction and other forces through play.'],unit:['예상','predictions'],
+  areas:[{id:'inq',name:['과학 탐구 과정','Science inquiry'],icon:'🔬',skills:[sk('x1','결과 예상하기','Making predictions',2,1),sk('x2','공정한 실험 (한 가지만 바꾸기)','Fair tests (change one thing)',1,.5)]},{id:'force',name:['힘과 운동','Forces & motion'],icon:'⛰️',skills:[sk('x3','경사와 속도','Slopes and speed',1,.6)]},{id:'build',name:['설계하고 만들기','Designing and building'],icon:'🛠️',skills:[sk('x4','코스 만들기','Building a course',1,.3)]}],
+  facts:[['🏆','내 구슬 우승 6번','Your marble won 6 times']]}};
+// ---------------------------------------------------------------- parent check: a quick sum that young children can't do yet
+function gate(){if(DEMO){render();return}let ok=false;try{ok=sessionStorage.getItem('moonGames.parentOK')==='1'}catch(e){}if(ok){render();return}
+ const a=12+Math.floor(Math.random()*8),b=6+Math.floor(Math.random()*4);
+ $('gate').innerHTML=`<div class="gate"><div class="gate-box" role="dialog" aria-modal="true" aria-labelledby="gT"><h2 id="gT">👨‍👩‍👧 ${L('보호자 확인','Grown-ups only')}</h2><p>${L('학부모님을 위한 화면이에요. 아래 계산의 답을 입력해 주세요.','This page is for parents. Please type the answer below.')}</p>
+  <div class="gate-q num" aria-hidden="true">${a} × ${b} = ?</div><input id="gA" inputmode="numeric" autocomplete="off" aria-label="${esc(L(`${a} 곱하기 ${b}의 답`,`${a} times ${b}`))}">
+  <div class="row"><a class="btn ghost" href="index.html?lang=${LANG}">${L('돌아가기','Back')}</a><button type="button" class="btn" id="gGo">${L('확인','Continue')}</button></div></div></div>`;
+ const go=()=>{if(+$('gA').value===a*b){try{sessionStorage.setItem('moonGames.parentOK','1')}catch(e){}$('gate').innerHTML='';render()}else{const bx=document.querySelector('.gate-box');bx.classList.remove('shake');void bx.offsetWidth;bx.classList.add('shake');$('gA').value='';$('gA').focus()}};
+ $('gGo').onclick=go;$('gA').addEventListener('keydown',e=>{if(e.key==='Enter')go()});setTimeout(()=>$('gA').focus(),60)}
+// ---------------------------------------------------------------- start
+document.querySelectorAll('[data-lang]').forEach(b=>{b.setAttribute('aria-pressed',b.dataset.lang===LANG);b.onclick=()=>{try{localStorage.setItem('moonGames.lang',b.dataset.lang)}catch(e){}const u=new URL(location.href);u.searchParams.set('lang',b.dataset.lang);location.replace(u.href)}});
+if(LANG==='en'){document.querySelectorAll('[data-en]').forEach(el=>{el.textContent=el.dataset.en});document.querySelectorAll('[data-en-aria-label]').forEach(el=>el.setAttribute('aria-label',el.dataset.enAriaLabel));document.title=document.querySelector('title').dataset.en}
+$('home').href=`index.html?lang=${LANG}`;$('print').onclick=()=>{document.querySelectorAll('details').forEach(d=>d.open=true);window.print()};
+loadProfiles();gate();
+</script>
+</body>
+</html>

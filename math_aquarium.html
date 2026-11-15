@@ -22,6 +22,33 @@ const L=(ko,en)=>LANG==='en'?en:ko;
 // · coachPop(pose,ko,en) shows a small bubble in the corner at good moments. It never blocks a tap and
 //   waits between appearances, so he never nags. He only praises and encourages.
 // Source: _src/coach/coach.js, copied into every game by _src/coach/inject.py.
+// LR keeps the learning record that the parents' report (report.html) reads. Each game has one record per player,
+// stored under its save prefix + "learn", so the profile script files it as "...@profileId". It holds:
+// · days: play time in seconds and right/wrong answers per day (the last 120 days). Time counts only while the
+//   page is visible and the player touched or typed in the last 2 minutes.
+// · sum: the game's own summary of skills, built by the function passed to LR.set() (see _src/report/SPEC.md).
+// · when: the day each skill first reached "mastered" ('' = before the record started).
+// · sk: right/wrong counts per skill, from coachAnswer(ok,skillId).
+// A game's reset must call LR.forget() so the report forgets only that game; LR.resume() starts a fresh record.
+const LR=(()=>{const f=(location.pathname.split('/').pop()||'').replace(/\.html$/,'');
+ const KEY={math_aquarium:'mathAquarium.learn',science_guardians:'scienceGuardians.learn',music_academy:'musicAcademy.learn',chess_knights:'chessKnights.learn',detective_game:'little-detective-learn',marble_rush_3d:'marbleRush.learn',coding_island:'pythonIsland.learn',python_island:'pythonIsland.learn'}[f];
+ const day=()=>new Date().toLocaleDateString('en-CA');let R=null,fn=null,off=!KEY,dirty=false,last=0;
+ const load=()=>{if(R)return R;try{R=JSON.parse(localStorage.getItem(KEY)||'null')}catch(e){}if(!R||R.v!==1)R={v:1,days:{},when:{}};return R};
+ const today=()=>{const r=load(),d=day();return r.days[d]||(r.days[d]={s:0,r:0,w:0})};
+ const save=()=>{if(off)return;const r=load();
+  if(fn){try{const s=fn();if(s){const first=!r.sum,d=day();r.sum=s;(s.areas||[]).forEach(a=>(a.skills||[]).forEach(k=>{if(k.st===2&&r.when[k.id]==null)r.when[k.id]=first?'':d}))}}catch(e){}}
+  const ks=Object.keys(r.days).sort();ks.slice(0,Math.max(0,ks.length-120)).forEach(k=>delete r.days[k]);
+  r.at=Date.now();try{localStorage.setItem(KEY,JSON.stringify(r))}catch(e){}dirty=false};
+ ['pointerdown','keydown','touchstart','wheel'].forEach(e=>addEventListener(e,()=>{last=Date.now()},{passive:true,capture:true}));
+ setInterval(()=>{if(off||document.hidden||Date.now()-last>120000)return;today().s+=10;dirty=true},10000);
+ setInterval(()=>{if(dirty)save()},30000);
+ addEventListener('pagehide',save);document.addEventListener('visibilitychange',()=>{if(document.hidden&&dirty)save()});
+ return {
+  ans(ok,skill){if(off)return;const t=today();ok?t.r++:t.w++;if(skill!=null){const r=load(),sk=r.sk||(r.sk={}),x=sk[skill]||(sk[skill]=[0,0]);x[ok?0:1]++}dirty=true},
+  set(f){fn=f;setTimeout(save,1500)},save,
+  stat(id){const x=(load().sk||{})[id];return x?{r:x[0],w:x[1]}:null},
+  forget(){off=true;R=null;try{localStorage.removeItem(KEY)}catch(e){}},
+  resume(){off=!KEY;R=null;dirty=false}}})();
 const coachEsc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const coachNm=()=>{try{return MGP.me&&MGP.me.name||''}catch(e){return ''}};
 const coachPick=a=>a[Math.random()*a.length|0];
@@ -41,8 +68,9 @@ function coachPop(pose,ko,en,o={}){const now=Date.now();if(!o.force&&now-coachAt
  let el=document.getElementById('coachPop');if(!el){el=document.createElement('div');el.id='coachPop';el.setAttribute('role','status');document.body.appendChild(el)}
  el.innerHTML=`<img src="images/coach-moon-${pose}.webp" alt="" onerror="this.remove()"><p><b>${L('문 코치','Coach Moon')}</b>${L(ko,en)}</p>`;
  el.classList.remove('show');void el.offsetWidth;el.classList.add('show');clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove('show'),o.ms||4500);return true}
-// call with every final answer: praise runs of right answers, and help after two misses in a row
-function coachAnswer(ok){
+// call with every final answer: praise runs of right answers, and help after two misses in a row.
+// The optional skill id (one of the skill ids in the game's LR summary) counts the answer for that skill in the report.
+function coachAnswer(ok,skill){try{LR.ans(ok,skill)}catch(e){}
  if(ok){coachRun++;coachMiss=0;if(![3,5,10,15,20,30].includes(coachRun))return;const n=coachRun,t=coachPick([[`${n}번 연속 성공! 집중력이 대단해요 🌙`,`${n} in a row! Amazing focus 🌙`],[`와, ${n}번 연속이에요! 문 코치가 박수 쳐요 👏`,`Wow, ${n} in a row! Coach Moon is clapping 👏`],[`${n}번 연속! 오늘 머리가 반짝반짝해요 ✨`,`${n} straight! Your brain is sparkling today ✨`]]);coachPop('clap',t[0],t[1],{gap:20000});return}
  coachRun=0;coachMiss++;if(coachMiss!==2)return;const nm=coachEsc(coachNm()),t=coachPick([['괜찮아요! 틀리면서 배우는 거예요. 천천히 다시 봐요 🌙','That’s okay! Mistakes help us learn. Take another look 🌙'],[nm?`${nm}, 할 수 있어요! 문 코치가 응원해요 🌙`:'할 수 있어요! 문 코치가 응원해요 🌙',nm?`You can do it, ${nm}! Coach Moon is cheering 🌙`:'You can do it! Coach Moon is cheering 🌙'],['실수는 배움의 친구예요. 한 번 더 해 봐요!','Mistakes are friends of learning. One more try!']]);coachPop('go',t[0],t[1],{gap:30000})}
 // Once a day per game he says hello, a few minutes in he shares a tip, and after 20 minutes he suggests a little rest.
@@ -9592,10 +9620,12 @@ function checkAch(){for(const [id,ic,ko,en,f] of ACH){if(S.ach.includes(id))cont
 function addDex(id,n=1){const was=!!S.dex[id];S.dex[id]=(S.dex[id]||0)+n;return !was}
 
 // ---------------------------------------------------------------- per-skill learning record (accuracy, speed, spaced review)
-function recordAnswer(sid,ok,secs,first){coachAnswer(ok);const r=S.sk[sid]=S.sk[sid]||{n:0,c:0,t:0,m:0,last:'',first:[],recent:[]};r.n++;if(ok)r.c++;r.t+=secs;r.last=dayKey();
+function recordAnswer(sid,ok,secs,first){coachAnswer(ok,sid);const r=S.sk[sid]=S.sk[sid]||{n:0,c:0,t:0,m:0,last:'',first:[],recent:[]};r.n++;if(ok)r.c++;r.t+=secs;r.last=dayKey();
  if(ok&&first){if(r.first.length<6)r.first.push(Math.round(secs*10)/10);r.recent.push(Math.round(secs*10)/10);r.recent=r.recent.slice(-8)}
  const t=dayKey(),h=S.hist[t]=S.hist[t]||{n:0,c:0,s:0};h.n++;if(ok)h.c++;h.s+=Math.min(secs,120);
  const keys=Object.keys(S.hist).sort();if(keys.length>90)for(const k of keys.slice(0,keys.length-90))delete S.hist[k]}
+// answers in the drive, sea and claw games come back as totals; they count for the day in the parents' report
+const lrCount=(right,wrong)=>{for(let k=0;k<(right||0);k++)LR.ans(true);for(let k=0;k<(wrong||0);k++)LR.ans(false)};
 const speedGain=sid=>{const r=S.sk[sid];if(!r||r.first.length<4||r.recent.length<6)return 0;const a=r.first.reduce((x,y)=>x+y,0)/r.first.length,b=r.recent.slice(-5).reduce((x,y)=>x+y,0)/5;return a-b};
 
 // ---------------------------------------------------------------- sound effects (made in the browser)
@@ -9839,7 +9869,7 @@ function finishStage(){const L_=LES,{g,i,sk,stage,mode,spec}=L_,a=aqState(g,i),d
  earn(coins,{pop:false});addXP(xp);
  let grand=false;if((stage===4||mode==='test')&&!a.done){a.done=true;a.best=stars;grand=true;S.stats.aqs++;const r=S.sk[sk.id]=S.sk[sk.id]||{n:0,c:0,t:0,m:0,last:'',first:[],recent:[]};r.m=1;r.last=dayKey();const bonus=Math.round(200*Math.pow(tier(g,i),.8));earn(bonus,{pop:false});coins+=bonus;S.pearls+=stars===3?3:2;if(stars===3)S.sp++;logEvent('🏛️',`${aqDef(g,i).name} 완성 · ${sk.name} 마스터`,`${aqDef(g,i).name} finished · ${sk.name} mastered`)}
  else if(stage===4&&a.done)a.best=Math.max(a.best,stars);
- checkAch();save();
+ checkAch();save();if(grand)LR.save();
  const tankFish=opened.map(k=>d.tanks[k]);
  body.innerHTML=`<div class="result"><div class="stars3">${[1,2,3].map(k=>`<span class="${k<=stars?'on':''}" style="animation-delay:${k*.25}s">⭐</span>`).join('')}</div>
   <h2>${grand?L(`🎉 ${d.name} 그랜드 오픈!`,`🎉 ${d.name} grand opening!`):opened.length?L(`${opened.map(k=>k+1).join(', ')}번 수조가 열렸어요!`,`${opened.length>1?'Tanks':'Tank'} ${opened.map(k=>k+1).join(', ')} ${opened.length>1?'are':'is'} open!`):L('수업 완료!','Lesson complete!')}</h2>${coachLine(grand?'big':stars===3?'up':'good')}
@@ -9925,7 +9955,7 @@ const REQ_FAC={snack:'🍦',gift:'🎁',mart:'🛒',ticket:'🎫'};
 function maybeRequest(){if(REQ||!UNLOCK.orders()||VIEW!=='home'||modalOpen()||LES)return;if(Math.random()>1/40)return;const opts=['ticket',...['snack','gift','mart'].filter(k=>S.fac[k])];REQ={f:pick(opts),until:now()+70000};showReqBubble()}
 function showReqBubble(){if(!REQ)return;if(REQ.until<now()){REQ=null;document.querySelectorAll('.reqb').forEach(x=>x.remove());return}const host=document.querySelector(`[data-f="${REQ.f}"]`);if(!host||host.querySelector('.reqb'))return;const b=document.createElement('span');b.className='reqb';b.textContent='🙋❓';host.appendChild(b)}
 function openRequest(){const r=REQ;if(!r)return;REQ=null;document.querySelectorAll('.reqb').forEach(x=>x.remove());const {g}=here(),p=shopProblem(r.f,S.grade||g);
- modal(`<h2>${REQ_FAC[r.f]} ${L('손님이 물어봐요!','A visitor needs help!')}</h2><div id="reqQ"></div>`,{cls:'qmodal',busy:true,onOpen:box=>{let v=mountProblem(box.querySelector('#reqQ'),p,{g:S.grade||g,autoRead:S.opt.readQ,onAnswer:(ok,secs,card)=>{S.stats.solved++;if(ok){S.stats.correct++;S.stats.orders++;const c=Math.round(6*ticketPrice(S.at.g,S.at.i));earn(c,{at:card.querySelector('.qtext')});sfx('coin');const m=T(pick([['손님이 아주 기뻐해요! 팁을 받았어요.','The visitor is so happy! You got a tip.'],['고마워요, 관장님! 계산 척척!','Thank you, director! Perfect math!'],['손님 만족도 최고!','Five-star service!']]));say(m,{raw:true});card.insertAdjacentHTML('beforeend',`<div class="okmsg">😊 ${m} <b>+${short(c)} ${COIN}</b></div><button class="btn wide" data-act="close">${L('좋아요!','Great!')}</button>`);mission('order');markPractice();addXP(5)}
+ modal(`<h2>${REQ_FAC[r.f]} ${L('손님이 물어봐요!','A visitor needs help!')}</h2><div id="reqQ"></div>`,{cls:'qmodal',busy:true,onOpen:box=>{let v=mountProblem(box.querySelector('#reqQ'),p,{g:S.grade||g,autoRead:S.opt.readQ,onAnswer:(ok,secs,card)=>{LR.ans(ok);S.stats.solved++;if(ok){S.stats.correct++;S.stats.orders++;const c=Math.round(6*ticketPrice(S.at.g,S.at.i));earn(c,{at:card.querySelector('.qtext')});sfx('coin');const m=T(pick([['손님이 아주 기뻐해요! 팁을 받았어요.','The visitor is so happy! You got a tip.'],['고마워요, 관장님! 계산 척척!','Thank you, director! Perfect math!'],['손님 만족도 최고!','Five-star service!']]));say(m,{raw:true});card.insertAdjacentHTML('beforeend',`<div class="okmsg">😊 ${m} <b>+${short(c)} ${COIN}</b></div><button class="btn wide" data-act="close">${L('좋아요!','Great!')}</button>`);mission('order');markPractice();addXP(5)}
    else{S.stats.wrong++;sfx('bad');card.querySelector('.qexp').insertAdjacentHTML('beforeend',`<button class="btn wide" data-act="close">${L('알겠어요!','Got it!')}</button>`);say(speechOf(p.exp),{raw:true})}checkAch();save(true)}});box._v=v},onClose:()=>{}})}
 // a quick shop problem at the child's grade, in won or dollars
 function shopProblem(f,g){const money_=v=>money(v),krw=MONEY.kind==='krw',ye=v=>money_(v)+josa(money_(v),'이에요','예요'),eul=v=>money_(v)+josa(money_(v),'을','를'),an=w=>(/^[aeiou]/i.test(w)?'an ':'a ')+w,An=w=>{const x=an(w);return x[0].toUpperCase()+x.slice(1)};const ITEMS_={snack:[['🍦','아이스크림','ice cream cone'],['🌭','핫도그','hot dog'],['🥤','주스','juice cup'],['🍪','쿠키','cookie'],['🍿','팝콘','popcorn bucket']],gift:[['🧸','인형','plush toy'],['🔑','열쇠고리','key ring'],['🖍️','색연필','crayon set'],['📕','물고기 책','fish book'],['🧢','모자','cap']],mart:[['💧','생수','water bottle'],['🍙','주먹밥','rice ball'],['🧃','우유','milk carton'],['🍫','초콜릿','chocolate bar'],['🍌','바나나','banana']],ticket:[['🎫','입장권','ticket']]};
@@ -10036,7 +10066,7 @@ function startClaw(from){if(typeof Claw==='undefined')return;if(!UNLOCK.claw()){
  modal(`<div class="big">🕹️</div><h2>${L('인형뽑기 한 판 더?','One more claw game?')}</h2><p>${L(`오늘 무료 판은 다 했어요. 한 판에 ${COIN} ${short(c)}${josa(short(c),'이에요','예요')}. 문제 3개, 정답 인형을 뽑으면 내 것!`,`Today’s free games are used. One game costs ${COIN} ${short(c)}: 3 questions, and every right plush is yours!`)}</p>
   <div class="row"><button class="btn" data-act="go">🕹️ ${L('하기','Play')} · ${COIN}${short(c)}</button><button class="btn ghost" data-act="close">${L('내일 할래요','Tomorrow')}</button></div>`,{acts:{go:()=>()=>play()}})}
 function finishClaw(res,from){const news=[];res.prizes.forEach(id=>{if(!S.plush[id])news.push(id);S.plush[id]=(S.plush[id]||0)+1});
- S.stats.correct+=res.right;S.stats.wrong+=res.wrong;S.stats.solved+=res.right+res.wrong;S.stats.plush=(S.stats.plush||0)+res.prizes.length;if(res.prizes.length)mission('claw',res.prizes.length);
+ lrCount(res.right,res.wrong);S.stats.correct+=res.right;S.stats.wrong+=res.wrong;S.stats.solved+=res.right+res.wrong;S.stats.plush=(S.stats.plush||0)+res.prizes.length;if(res.prizes.length)mission('claw',res.prizes.length);
  const c=Math.round(res.right*6*Math.pow(tier(S.at.g,S.at.i),.6));earn(c,{pop:false});checkAch();save();
  let again=false;const back=()=>{if(again)return;if(from==='walk')startWalk('claw');else go(VIEW)};
  if(res.quit&&!res.prizes.length&&!res.right&&!res.wrong){back();return}
@@ -10075,7 +10105,7 @@ const quickVal=s=>{s=String(s).replace(/[$¢₩,]|원/g,'').replace(/−/g,'-').
 function askQuick(){const pool=[];const G=S.grade||S.at.g||1;
  for(let g=1;g<=G;g++)for(let i=0;i<20;i++){const sk=skillOf(g,i);if(!sk||!sk.quick)continue;const a=aqState(g,i);if(a.done||a.open||(g===S.at.g&&i===S.at.i))pool.push({sk,w:g===G?3:1})}
  for(let tries=0;tries<6&&pool.length;tries++){const tot=pool.reduce((t,x)=>t+x.w,0);let r=Math.random()*tot,c=pool[0];for(const x of pool){r-=x.w;if(r<=0){c=x;break}}
-  try{const p=c.sk.quick(R(1,3));const a=String(p.a),av=quickVal(a),w=[...new Set(p.w.map(String))].filter(x=>x!==a&&(av==null||quickVal(x)==null||Math.abs(quickVal(x)-av)>1e-9)).slice(0,3);if(w.length>=2&&p.q.length<=24)return {q:p.q,a,w}}catch(e){}}
+  try{const p=c.sk.quick(R(1,3));const a=String(p.a),av=quickVal(a),w=[...new Set(p.w.map(String))].filter(x=>x!==a&&(av==null||quickVal(x)==null||Math.abs(quickVal(x)-av)>1e-9)).slice(0,3);if(w.length>=2&&p.q.length<=24)return {q:p.q,a,w,id:c.sk.id}}catch(e){}}
  const a_=R(2,9+G*2),b_=R(1,9);return {q:`${a_} + ${b_}`,a:String(a_+b_),w:near(a_+b_,{n:3}).map(String)}}
 function startDrive(o){if(typeof Drive==='undefined'){o.after&&o.after();return}audio();const st=openStage();st.className='stage game';const turbo=(S.items.turbo||0)>0;if(turbo)S.items.turbo--;
  const car=CARS.find(c=>c[0]===S.car.model)||CARS[0];
@@ -10083,7 +10113,7 @@ function startDrive(o){if(typeof Drive==='undefined'){o.after&&o.after();return}
   onEnd:res=>{try{Drive.stop()}catch(e){}closeStage();finishDrive(o,res)}})}catch(e){console.warn(e);closeStage();o.after&&o.after()}}
 function finishDrive(o,res){if(res.quit&&o.kind!=='move'){go(VIEW);return}const t=Math.pow(tier(S.at.g,S.at.i),.6);let coins=Math.round(((res.right||0)*14+(res.coins||0))*t*(1+.15*skl('drive')));
  if(o.kind==='delivery'){const d=S.deliveries.day===dayKey()?S.deliveries:{day:dayKey(),n:0};if(d.n>=3)coins=Math.round(coins*.25);d.n++;S.deliveries=d}
- S.stats.drives++;mission('drive');S.stats.correct+=res.right||0;S.stats.solved+=(res.right||0)+(res.wrong||0);
+ S.stats.drives++;mission('drive');lrCount(res.right,res.wrong);S.stats.correct+=res.right||0;S.stats.solved+=(res.right||0)+(res.wrong||0);
  earn(coins,{pop:false});if((res.stars||0)>=3)S.pearls++;checkAch();save();
  modal(`<div class="big">${carEmoji()}</div><h2>${o.kind==='move'?L('도착했어요!','We made it!'):L('배달 완료!','Delivery done!')}</h2><div class="stars3">${[1,2,3].map(k=>`<span class="${k<=(res.stars||1)?'on':''}">⭐</span>`).join('')}</div><div class="rew"><span>✅ ${res.right||0}</span><span>${COIN} +${short(coins)}</span>${(res.stars||0)>=3?`<span>${PEARL} +1</span>`:''}</div><p>${(res.right||0)>=(res.right||0)+(res.wrong||0)-1?L('수학 표지판을 척척 맞혔어요! 운전 실력도 수학 실력도 최고!','You aced the math signs! Great driving and great math!'):L('안전 운전 최고! 다음엔 표지판을 더 많이 맞혀 봐요.','Safe driving! Try to get more signs next time.')}</p><button class="btn wide" data-act="close">${L('좋아요!','Great!')}</button>`,{onClose:()=>{o.after&&o.after()}})}
 
@@ -10111,7 +10141,7 @@ function ticketQuiz(then){const need=5;let right=0;
   const dots=box.querySelectorAll('.tqdots i'),host=box.querySelector('#tqBox');
   const ask=()=>{const p=askQuick(),opts=shuffle([p.a,...p.w.slice(0,3)]);host.innerHTML=`<div class="tqq">${esc(p.q)}</div><div class="tqo">${opts.map(o=>`<button type="button" class="tqb" data-v="${esc(o)}">${esc(o)}</button>`).join('')}</div>`;
    if(S.opt.readQ)say(p.q);let lock=false;
-   host.querySelectorAll('.tqb').forEach(b=>b.addEventListener('click',()=>{if(lock)return;lock=true;const ok=b.dataset.v===p.a;S.stats.solved++;
+   host.querySelectorAll('.tqb').forEach(b=>b.addEventListener('click',()=>{if(lock)return;lock=true;const ok=b.dataset.v===p.a;LR.ans(ok,p.id);S.stats.solved++;
     if(ok){S.stats.correct++;right++;dots[right-1].classList.add('on');b.classList.add('ok');sfx('good')}else{S.stats.wrong++;b.classList.add('bad');host.querySelectorAll('.tqb').forEach(x=>{if(x.dataset.v===p.a)x.classList.add('ok')});sfx('bad')}
     setTimeout(()=>{if(!document.body.contains(host))return;if(right>=need)done();else ask()},ok?650:1400)}))};
   const done=()=>{S.tickets++;save();updateHud();sfx('catch');celebrate('stars',16);const m=T(pick([['바다 티켓을 받았어요! 수학 실력 최고!','You earned a sea ticket! Math star!'],['척척 맞혔어요! 바다로 가 볼까요?','Spot on! Off to the sea?']]));say(m,{raw:true});
@@ -10122,7 +10152,7 @@ function startSea(mode){const g=TAB.sea||S.at.g;if(S.tickets<1){const c=itemCost
  if(typeof Sea==='undefined')return;S.tickets--;S.stats.trips++;audio();const st=openStage();st.className='stage game';const bait=(S.items.bait||0)>0&&mode==='fish',air=(S.items.air||0)>0&&mode==='dive';if(bait)S.items.bait--;if(air)S.items.air--;save();
  const o={g,pool:seaPool(g),bait:bait?2:0,casts:6+(skl('dive')>=2?1:0)+(skl('dive')>=4?1:0),oxygen:60+8*skl('dive')+(air?20:0)+5*staffPower('diver'),ask:askQuick,sfx,say:t=>say(t),onEnd:res=>{try{Sea.stop()}catch(e){}closeStage();finishSea(mode,res)}};
  try{mode==='fish'?Sea.fish(st,o):Sea.dive(st,o)}catch(e){console.warn(e);closeStage();S.tickets++}}
-function finishSea(mode,res){const caught=res.caught||[];const news=[];caught.forEach(id=>{if(addDex(id))news.push(id);S.store[id]=(S.store[id]||0)+1});S.stats.caught+=caught.length;S.pearls+=res.pearls||0;S.stats.correct+=res.right||0;S.stats.solved+=(res.right||0)+(res.wrong||0);
+function finishSea(mode,res){const caught=res.caught||[];const news=[];caught.forEach(id=>{if(addDex(id))news.push(id);S.store[id]=(S.store[id]||0)+1});S.stats.caught+=caught.length;S.pearls+=res.pearls||0;lrCount(res.right,res.wrong);S.stats.correct+=res.right||0;S.stats.solved+=(res.right||0)+(res.wrong||0);
  if(caught.length)mission('catch',caught.length);const c=Math.round((res.right||0)*8*Math.pow(tier(S.at.g,S.at.i),.6));earn(c,{pop:false});checkAch();save();
  modal(`<h2>${mode==='fish'?'🎣':'🤿'} ${caught.length?L(`${caught.length}마리를 데려왔어요!`,`You brought back ${caught.length}!`):L('오늘은 바다 구경을 했어요','A lovely day at sea')}</h2>
   ${caught.length?`<div class="shopgrid">${caught.map(id=>`<div class="sitem ${news.includes(id)?'new':''}">${fishImgTag(id)}<b>${esc(fishName(id))}</b><small>${news.includes(id)?'✨ '+L('새 친구!','New!'):'★'.repeat(FISH_BY[id].r)}</small></div>`).join('')}</div>`:''}
@@ -10246,7 +10276,7 @@ function settings(){const g=S.grade||1;
   money:b=>{S.opt.money=b.dataset.v;MONEY.kind=S.opt.money;save();return ()=>settings()},
   grade:b=>{const x=+b.dataset.g;S.grade=x;arrive(x,curIndex(x));toast(L(`${x}학년 아쿠아리움으로 왔어요!`,`Welcome to the Grade ${x} aquariums!`))},
   lang:b=>{save();setLang(b.dataset.v);return false},
-  reset:()=>()=>modal(`<h2>🗑️ ${L('정말 지울까요?','Really reset?')}</h2><p>${L('꼬마 수학 아쿠아리움 기록만 지워져요. 다른 게임 기록은 그대로예요. 되돌릴 수 없어요.','Only Little Math Aquarium progress is erased. Other games keep theirs. This cannot be undone.')}</p><div class="row"><button class="btn ghost" data-act="close">${L('아니요','No')}</button><button class="btn danger" data-act="yes">${L('지울래요','Erase')}</button></div>`,{acts:{yes:()=>{try{localStorage.removeItem(SAVE_KEY)}catch(e){}S=freshS();if(MGP.me){S.name=MGP.me.name;S.av=MGP.me.av}location.reload()}}})}})}
+  reset:()=>()=>modal(`<h2>🗑️ ${L('정말 지울까요?','Really reset?')}</h2><p>${L('꼬마 수학 아쿠아리움 기록만 지워져요. 다른 게임 기록은 그대로예요. 되돌릴 수 없어요.','Only Little Math Aquarium progress is erased. Other games keep theirs. This cannot be undone.')}</p><div class="row"><button class="btn ghost" data-act="close">${L('아니요','No')}</button><button class="btn danger" data-act="yes">${L('지울래요','Erase')}</button></div>`,{acts:{yes:()=>{try{localStorage.removeItem(SAVE_KEY)}catch(e){}LR.forget();S=freshS();if(MGP.me){S.name=MGP.me.name;S.av=MGP.me.av}location.reload()}}})}})}
 
 // ---------------------------------------------------------------- first visit: say hello and pick a grade
 function welcome(){modal(`<div class="big">🦦</div><h2>${L('꼬마 수학 아쿠아리움에 온 걸 환영해요!','Welcome to Little Math Aquarium!')}</h2><p>${L('나는 수달 선생님 <b>무니</b>예요. 수학을 풀면 수조가 열리고, 물고기가 이사 오고, 손님이 찾아와요. 아쿠아리움 20곳을 완성하면 그 학년의 수학 단원 20개를 모두 마스터해요!','I’m <b>Mooni</b> the otter, your teacher. Solve math to open tanks, welcome fish and bring in visitors. Finish 20 aquariums and you master 20 math skills for your grade!')}</p>
@@ -10324,6 +10354,193 @@ function boot(){applyLang();$('homeBtn').href=`index.html?lang=${LANG}`;wire();r
  go('home');
  if(back&&back.inc>0)modal(`<div class="big">🐠</div><h2>${L('다시 와 줘서 고마워요!','Welcome back!')}</h2><p>${L(`관장님이 없는 동안 아쿠아리움이 ${COIN} <b>${short(back.inc)}</b> 코인을 벌었어요.`,`While you were away, the aquarium earned ${COIN} <b>${short(back.inc)}</b> coins.`)}</p>${here().a.dirt>50?`<p>🚻 ${L('화장실 청소가 필요해요!','The restrooms need cleaning!')}</p>`:''}<button class="btn wide" data-act="close">${L('좋아요!','Great!')}</button>`,{onOpen:()=>say(L('다시 와 줘서 고마워요! 물고기들이 기다렸어요.','Welcome back! The fish missed you.'),{raw:true})});
  setTimeout(tips,1500)}
+// ---------------------------------------------------------------- the parents' learning report (report.html reads it; rules in _src/report/SPEC.md)
+// Coach Moon's LR stores this summary of the save. One skill = one aquarium; mastered = the aquarium is finished
+// (all 5 steps, or the skip-ahead check). Areas are the game's strands, with fractions and decimals split off from
+// numbers so no area holds more than 40 skills. The grade files keep only the current language, so each skill row here
+// has its name in both, then a question a parent can ask and the short answer to listen for: [name ko, en, ask ko, en, answer ko, en].
+const LR_SK={
+ 'g1-01':['9까지의 수','Numbers to 9','7 다음에 오는 수는 뭐야?','What number comes after 7?','8','8'],
+ 'g1-02':['9까지 수의 순서와 크기 비교','Ordering and comparing numbers to 9','5와 8 중에서 어느 수가 더 커?','Which is bigger, 5 or 8?','8','8'],
+ 'g1-03':['수 모으기와 가르기','Putting numbers together and taking them apart','7은 3과 몇으로 가를 수 있어?','7 can be split into 3 and what number?','4','4'],
+ 'g1-04':['덧셈 (합이 10까지)','Adding within 10','4 더하기 5는 얼마야?','What is 4 + 5?','9','9'],
+ 'g1-05':['뺄셈 (10까지)','Subtracting within 10','9 빼기 3은 얼마야?','What is 9 − 3?','6','6'],
+ 'g1-06':['여러 가지 모양 (상자·둥근 기둥·공 모양)','3-D shapes (boxes, cylinders, balls)','상자 모양, 둥근 기둥 모양, 공 모양 중에서 잘 굴러가지만 쌓을 수 없는 건 뭐야?','Which one rolls easily but can’t be stacked: a box, a can or a ball?','공 모양','A ball'],
+ 'g1-07':['비교하기 (길이·무게·넓이·담을 수 있는 양)','Comparing length, mass, area and capacity','두 연필의 길이를 비교할 때 어떻게 놓아야 해?','How do you line up two pencils to compare their lengths?','한쪽 끝을 맞춰서 놓아요','Line up one end of each'],
+ 'g1-08':['50까지의 수','Numbers to 50','10개씩 묶음 3개와 낱개 4개는 몇이야?','What number is 3 tens and 4 ones?','34','34'],
+ 'g1-09':['100까지의 수','Numbers to 100','99 다음 수는 뭐야?','What number comes after 99?','100','100'],
+ 'g1-10':['짝수와 홀수','Even and odd numbers','7은 짝수야, 홀수야?','Is 7 even or odd?','홀수','Odd'],
+ 'g1-11':['2씩, 5씩, 10씩 뛰어 세기','Skip counting by 2s, 5s and 10s','5씩 뛰어 세면 5, 10, 15 다음은 뭐야?','Count by 5s: 5, 10, 15… what comes next?','20','20'],
+ 'g1-12':['두 자리 수의 덧셈 (받아올림 없이)','Adding 2-digit numbers (no regrouping)','23 더하기 14는 얼마야?','What is 23 + 14?','37','37'],
+ 'g1-13':['두 자리 수의 뺄셈 (받아내림 없이)','Subtracting 2-digit numbers (no regrouping)','48 빼기 25는 얼마야?','What is 48 − 25?','23','23'],
+ 'g1-14':['시계 보기 (몇 시, 몇 시 30분)','Telling time to the hour and half hour','긴바늘이 12, 짧은바늘이 3을 가리키면 몇 시야?','The long hand points to 12 and the short hand to 3. What time is it?','3시','3 o’clock'],
+ 'g1-15':['네모·세모·동그라미 모양','Flat shapes (rectangles, triangles, circles)','세모 모양은 뾰족한 곳이 몇 군데야?','How many corners does a triangle have?','3군데','3'],
+ 'g1-16':['10 만들기와 세 수의 덧셈','Making 10 and adding three numbers','6 + 4 + 3은 얼마야? 10을 먼저 만들어 볼래?','What is 6 + 4 + 3? Can you make 10 first?','13 (6 + 4 = 10, 10 + 3 = 13)','13 (6 + 4 = 10, then 10 + 3 = 13)'],
+ 'g1-17':['받아올림이 있는 덧셈 (몇 + 몇)','Adding to 20 (make a 10 first)','8 더하기 5는 얼마야?','What is 8 + 5?','13','13'],
+ 'g1-18':['받아내림이 있는 뺄셈 (십몇 − 몇)','Subtracting from teen numbers (like 13 − 5)','13 빼기 5는 얼마야?','What is 13 − 5?','8','8'],
+ 'g1-19':['규칙 찾기 (모양과 수의 규칙)','Patterns with shapes and numbers','동그라미, 세모, 동그라미, 세모, 동그라미 다음에는 뭐가 와?','Circle, triangle, circle, triangle, circle… what comes next?','세모','A triangle'],
+ 'g1-20':['동전 세기','Counting coins','100원짜리 동전 2개와 10원짜리 동전 3개는 모두 얼마야?','How much are 2 dimes and 1 nickel?','230원','25¢'],
+ 'g2-01':['세 자리 수','3-digit numbers (hundreds, tens and ones)','100이 3개, 10이 5개, 1이 2개이면 얼마야?','What number is 3 hundreds, 5 tens and 2 ones?','352','352'],
+ 'g2-02':['세 자리 수의 크기 비교와 뛰어 세기','Comparing 3-digit numbers and counting by 1s, 10s and 100s','450에서 10씩 뛰어 세면 다음 수는 뭐야?','Count on by 10s from 450. What comes next?','460','460'],
+ 'g2-03':['여러 가지 도형 (삼각형·사각형·오각형·육각형·원)','2-D shapes and their sides and vertices','육각형은 변이 몇 개야?','How many sides does a hexagon have?','6개','6'],
+ 'g2-04':['받아올림이 있는 두 자리 수의 덧셈','Adding 2-digit numbers with regrouping','38 더하기 25는 얼마야?','What is 38 + 25?','63','63'],
+ 'g2-05':['받아내림이 있는 두 자리 수의 뺄셈','Subtracting 2-digit numbers with regrouping','52 빼기 17은 얼마야?','What is 52 − 17?','35','35'],
+ 'g2-06':['덧셈과 뺄셈의 관계 (□ 구하기)','Fact families and missing numbers (□)','□ + 5 = 12에서 □는 얼마야?','In □ + 5 = 12, what number goes in the box?','7','7'],
+ 'g2-07':['길이 재기 (cm)','Measuring length in cm','자로 길이를 잴 때 물건의 한쪽 끝을 어디에 맞춰?','When you measure with a ruler, where do you line up one end of the object?','자의 눈금 0','At the 0 mark'],
+ 'g2-08':['분류하기','Sorting by a rule','장난감을 나눌 때 어떤 기준으로 나눌 수 있어?','What rule could you use to sort your toys?','색깔·모양·크기처럼 누가 해도 똑같이 나뉘는 기준 (‘예쁜 것’은 안 돼요)','A clear rule anyone would use the same way, like size or shape (not “pretty”)'],
+ 'g2-09':['곱셈의 뜻','What multiplication means (equal groups)','3씩 4묶음을 곱셈식으로 말해 볼래?','How do you write 4 groups of 3 with a × sign?','3 × 4 = 12 (4 × 3이라고 해도 답은 같아요)','4 × 3 = 12 (3 × 4 gives the same answer)'],
+ 'g2-10':['곱셈구구 2·5·3·6단','Times tables: 2, 5, 3 and 6','6 × 7은 얼마야?','What is 6 × 7?','42','42'],
+ 'g2-11':['곱셈구구 4·8·7·9단','Times tables: 4, 8, 7 and 9','8 × 7은 얼마야?','What is 8 × 7?','56','56'],
+ 'g2-12':['1단·0단과 곱셈표','Multiplying by 1 and 0, and the times-table chart','어떤 수에 0을 곱하면 얼마가 돼?','What do you get when you multiply any number by 0?','0','0'],
+ 'g2-13':['네 자리 수','4-digit numbers','1000이 2개, 100이 4개이면 얼마야?','What number is 2 thousands and 4 hundreds?','2400','2,400'],
+ 'g2-14':['길이 재기 (m와 cm)','Length in m and cm','1 m는 몇 cm야?','How many cm are in 1 m?','100 cm','100 cm'],
+ 'g2-15':['시각과 시간 (분 단위 시계, 걸린 시간, 달력)','Time to the minute, elapsed time and calendars','1시간은 몇 분이야?','How many minutes are in 1 hour?','60분','60 minutes'],
+ 'g2-16':['표와 그래프','Tables and graphs','표와 그래프 중에서 가장 많은 것을 한눈에 알아보기 쉬운 건 어느 거야?','Which makes it easier to see the most popular choice at a glance: a table or a graph?','그래프','A graph'],
+ 'g2-17':['규칙 찾기 (되풀이되는 규칙, 늘어나는 규칙)','Repeating and growing patterns','2, 4, 6, 8 다음에 올 수는 뭐야?','What comes next: 2, 4, 6, 8, …?','10','10'],
+ 'g2-18':['분수의 시작 (똑같이 나눈 부분)','First fractions (equal parts of a whole)','피자를 똑같이 4조각으로 나눈 것 중 1조각은 전체의 얼마야?','A pizza is cut into 4 equal slices. What fraction of the pizza is 1 slice?','4분의 1','One fourth, or one quarter (1/4)'],
+ 'g2-19':['돈 계산 (동전과 지폐)','Counting money (coins and bills)','1000원짜리 지폐 1장, 500원짜리 동전 1개, 100원짜리 동전 2개는 모두 얼마야?','How much are a $5 bill, 1 quarter and 1 dime?','1700원','$5.35'],
+ 'g2-20':['똑같이 나누기','Sharing equally','사탕 12개를 3명이 똑같이 나누면 한 명이 몇 개씩 가져?','12 candies are shared equally by 3 children. How many does each child get?','4개','4'],
+ 'g3-01':['세 자리 수의 덧셈','Adding 3-digit numbers','247 더하기 365는 얼마야?','What is 247 + 365?','612','612'],
+ 'g3-02':['세 자리 수의 뺄셈','Subtracting 3-digit numbers','503 빼기 278은 얼마야?','What is 503 − 278?','225','225'],
+ 'g3-03':['선분·반직선·직선과 각','Line segments, rays, lines and angles','선분과 직선은 어떻게 달라?','How is a line segment different from a line?','선분은 두 점을 곧게 이은 선이고, 직선은 양쪽으로 끝없이 늘인 곧은 선이에요','A segment has two endpoints; a line goes on forever in both directions'],
+ 'g3-04':['직각삼각형·직사각형·정사각형','Right triangles, rectangles and squares','정사각형은 직사각형이라고 할 수 있어?','Is a square a rectangle?','네, 네 각이 모두 직각이니까요','Yes. It has four right angles, so it is a special rectangle'],
+ 'g3-05':['나눗셈의 뜻','What division means','12 ÷ 3 = 4는 무슨 뜻이야?','What does 12 ÷ 3 = 4 mean?','12를 3묶음으로 똑같이 나누면 한 묶음에 4개예요 (12를 3씩 덜어 내면 4번이에요)','12 shared equally into 3 groups is 4 in each group (or 12 makes 4 groups of 3)'],
+ 'g3-06':['곱셈구구로 나눗셈하기','Division facts from the times tables','56 ÷ 8은 얼마야? 어떤 곱셈구구를 쓰면 돼?','What is 56 ÷ 8? Which times-table fact helps?','7 (8 × 7 = 56)','7 (because 8 × 7 = 56)'],
+ 'g3-07':['곱셈 (두 자리 수 × 한 자리 수)','Multiplying 2-digit by 1-digit numbers','23 × 4는 얼마야?','What is 23 × 4?','92','92'],
+ 'g3-08':['길이 (mm, km)','Length in mm and km','1 km는 몇 m야?','How many m are in 1 km?','1000 m','1,000 m'],
+ 'g3-09':['시간의 덧셈과 뺄셈 (초, 걸린 시간)','Seconds and elapsed time','1분은 몇 초야?','How many seconds are in 1 minute?','60초','60 seconds'],
+ 'g3-10':['분수 (단위분수의 크기 비교)','Fractions and unit fractions','2분의 1과 3분의 1 중에서 어느 것이 더 커?','Which is bigger, 1/2 or 1/3?','2분의 1','1/2 (one half)'],
+ 'g3-11':['소수 (소수 한 자리 수)','Decimals: tenths','0.1이 7개이면 얼마야?','How do you write seven tenths as a decimal?','0.7','0.7'],
+ 'g3-12':['곱셈 (세 자리 × 한 자리, 두 자리 × 두 자리)','Multiplying 3-digit by 1-digit and 2-digit by 2-digit numbers','24 × 13은 얼마야?','What is 24 × 13?','312','312'],
+ 'g3-13':['나머지가 있는 나눗셈','Division with remainders','17 ÷ 5의 몫과 나머지는 뭐야?','What is 17 ÷ 5? Give the quotient and the remainder.','몫 3, 나머지 2','3 remainder 2'],
+ 'g3-14':['원 (반지름과 지름)','Circles: radius and diameter','반지름이 4 cm인 원의 지름은 몇 cm야?','A circle has a radius of 4 cm. What is its diameter?','8 cm','8 cm'],
+ 'g3-15':['진분수·가분수·대분수','Proper and improper fractions, and mixed numbers','3분의 7을 대분수로 나타내면 뭐야?','Write 7/3 as a mixed number.','2와 3분의 1','2 1/3 (two and one third)'],
+ 'g3-16':['들이 (L, mL)','Capacity (L and mL)','1 L는 몇 mL야?','How many mL are in 1 L?','1000 mL','1,000 mL'],
+ 'g3-17':['무게 (kg, g)','Mass (kg and g)','1 kg은 몇 g이야?','How many grams are in 1 kilogram?','1000 g','1,000 g'],
+ 'g3-18':['그림그래프','Pictographs','그림그래프에서 큰 그림이 10, 작은 그림이 1이면, 큰 그림 2개와 작은 그림 3개는 얼마야?','In a pictograph a big picture means 10 and a small one means 1. What do 2 big and 3 small pictures show?','23','23'],
+ 'g3-19':['둘레와 넓이 시작','Perimeter and area: first steps','가로 5 cm, 세로 3 cm인 직사각형의 둘레는 몇 cm야?','What is the perimeter of a rectangle 5 cm long and 3 cm wide?','16 cm','16 cm'],
+ 'g3-20':['규칙과 코딩 (반복 명령)','Patterns and coding (repeat loops)','"앞으로 2칸"을 3번 반복하면 모두 몇 칸 가?','If you repeat “forward 2 steps” 3 times, how many steps is that?','6칸','6 steps'],
+ 'g4-01':['큰 수 (천만까지)','Large numbers up to the ten millions','3000000은 어떻게 읽어?','How do you say 3,000,000 in words?','삼백만','Three million'],
+ 'g4-02':['큰 수의 크기 비교와 뛰어 세기','Comparing and counting on with big numbers','45000과 54000 중에서 어느 수가 더 커?','Which is bigger, 45,000 or 54,000?','54000','54,000'],
+ 'g4-03':['각도 (재기, 예각·직각·둔각)','Measuring angles (acute, right, obtuse)','90°보다 크고 180°보다 작은 각을 뭐라고 해?','What do we call an angle bigger than 90° but less than 180°?','둔각','An obtuse angle'],
+ 'g4-04':['삼각형과 사각형의 각의 합','Angle sums in triangles and quadrilaterals','삼각형의 세 각의 크기를 모두 더하면 몇 도야?','What do the three angles of a triangle add up to?','180°','180°'],
+ 'g4-05':['곱셈 (세 자리 수 × 두 자리 수)','Multiplying 3-digit by 2-digit numbers','125 × 12는 얼마야?','What is 125 × 12?','1500','1,500'],
+ 'g4-06':['나눗셈 (세 자리 수 ÷ 두 자리 수)','Dividing 3-digit numbers by 2-digit numbers','156 ÷ 12는 얼마야?','What is 156 ÷ 12?','13','13'],
+ 'g4-07':['평면도형의 이동 (밀기·뒤집기·돌리기)','Slides, flips and turns','도형을 시계 방향으로 90°씩 4번 돌리면 어떻게 돼?','If you turn a shape a quarter turn clockwise 4 times, what happens?','처음 모양과 같아져요 (모두 360° 돌린 거예요)','It looks the same as at the start (a full 360° turn)'],
+ 'g4-08':['막대그래프','Bar graphs','막대그래프에서 막대의 길이는 무엇을 나타내?','What does the length of each bar in a bar graph show?','그 항목의 수나 양','How many or how much for that category'],
+ 'g4-09':['규칙과 계산식','Number patterns and rules','3, 7, 11, 15 다음 수는 뭐야? 규칙은?','What comes next: 3, 7, 11, 15, …? What is the rule?','19, 4씩 커지는 규칙','19. Add 4 each time'],
+ 'g4-10':['분모가 같은 분수의 덧셈','Adding fractions with the same denominator','5분의 2 더하기 5분의 4는 얼마야?','What is 2/5 + 4/5?','5분의 6, 또는 1과 5분의 1','6/5, or 1 1/5'],
+ 'g4-11':['분모가 같은 분수의 뺄셈','Subtracting fractions with the same denominator','1 빼기 4분의 1은 얼마야?','What is 1 − 1/4?','4분의 3','3/4'],
+ 'g4-12':['삼각형 (변과 각에 따라 분류)','Kinds of triangles (by sides and by angles)','세 변의 길이가 모두 같은 삼각형을 뭐라고 해?','What do we call a triangle with all three sides the same length?','정삼각형','An equilateral triangle'],
+ 'g4-13':['소수 두 자리 수와 세 자리 수','Decimals: hundredths and thousandths','0.25에서 5는 어느 자리 숫자야?','In 0.25, which place is the 5 in?','소수 둘째 자리','The hundredths place'],
+ 'g4-14':['소수의 덧셈과 뺄셈','Adding and subtracting decimals','1.5 더하기 2.75는 얼마야?','What is 1.5 + 2.75?','4.25','4.25'],
+ 'g4-15':['수직과 평행','Perpendicular and parallel lines','두 직선이 만나서 직각을 이루면 두 직선은 어떤 관계야?','Two lines meet at a right angle. What do we call them?','서로 수직이에요','Perpendicular lines'],
+ 'g4-16':['여러 가지 사각형','Kinds of quadrilaterals','마주 보는 두 쌍의 변이 서로 평행한 사각형을 뭐라고 해?','What is a quadrilateral with two pairs of parallel sides called?','평행사변형','A parallelogram'],
+ 'g4-17':['꺾은선그래프','Line graphs','꺾은선그래프는 어떤 자료를 나타내기 좋아?','What kind of data is a line graph good for?','시간에 따라 변하는 양 (예: 기온의 변화)','Something that changes over time, like the temperature'],
+ 'g4-18':['다각형','Polygons','변이 5개인 다각형을 뭐라고 해?','What do we call a polygon with 5 sides?','오각형','A pentagon'],
+ 'g4-19':['직사각형의 넓이','Area of rectangles','가로 6 cm, 세로 4 cm인 직사각형의 넓이는 얼마야?','What is the area of a rectangle 6 cm by 4 cm?','24 cm²','24 cm²'],
+ 'g4-20':['돈 계산 (여러 물건 값과 거스름돈)','Shopping: totals and change','3500원짜리 물건을 사고 5000원을 내면 거스름돈은 얼마야?','Something costs $3.50 and you pay with a $5 bill. How much change do you get?','1500원','$1.50'],
+ 'g5-01':['자연수의 혼합 계산','Order of operations','3 + 4 × 2는 얼마야?','What is 3 + 4 × 2?','11 (곱셈을 먼저 해요)','11 (multiply first)'],
+ 'g5-02':['약수와 배수','Factors and multiples','12의 약수를 모두 말해 볼래?','What are all the factors of 12?','1, 2, 3, 4, 6, 12','1, 2, 3, 4, 6 and 12'],
+ 'g5-03':['최대공약수와 최소공배수','Greatest common factor and least common multiple','4와 6의 최소공배수는 뭐야?','What is the least common multiple of 4 and 6?','12','12'],
+ 'g5-04':['규칙과 대응','Input and output rules','식탁 하나에 의자가 4개씩 있어. 식탁이 5개이면 의자는 몇 개야?','Each table has 4 chairs. How many chairs go with 5 tables?','20개 (의자 수 = 식탁 수 × 4)','20 (chairs = tables × 4)'],
+ 'g5-05':['약분과 통분','Equivalent fractions and common denominators','6분의 4를 기약분수로 나타내면 뭐야?','Write 4/6 in lowest terms.','3분의 2','2/3'],
+ 'g5-06':['분모가 다른 분수의 덧셈','Adding fractions with different denominators','2분의 1 더하기 3분의 1은 얼마야?','What is 1/2 + 1/3?','6분의 5','5/6'],
+ 'g5-07':['분모가 다른 분수의 뺄셈','Subtracting fractions with different denominators','4분의 3 빼기 3분의 1은 얼마야?','What is 3/4 − 1/3?','12분의 5','5/12'],
+ 'g5-08':['다각형의 둘레','Perimeter of polygons','한 변이 5 cm인 정육각형의 둘레는 몇 cm야?','What is the perimeter of a regular hexagon with 5 cm sides?','30 cm','30 cm'],
+ 'g5-09':['다각형의 넓이','Area of parallelograms, triangles and trapezoids','밑변이 6 cm, 높이가 4 cm인 삼각형의 넓이는 얼마야?','What is the area of a triangle with a base of 6 cm and a height of 4 cm?','12 cm²','12 cm²'],
+ 'g5-10':['수의 범위 (이상·이하·초과·미만)','Number ranges (at least, at most, more than, less than)','"10 이상"인 수에 10이 들어갈까?','Does “at least 10” include 10?','네, 들어가요 (10 초과에는 안 들어가요)','Yes (but “more than 10” does not)'],
+ 'g5-11':['어림하기 (올림·버림·반올림)','Rounding','3746을 반올림하여 백의 자리까지 나타내면 얼마야?','Round 3,746 to the nearest hundred.','3700','3,700'],
+ 'g5-12':['분수의 곱셈','Multiplying fractions','3분의 2 곱하기 4분의 3은 얼마야?','What is 2/3 × 3/4?','2분의 1 (12분의 6을 약분)','1/2 (6/12 simplified)'],
+ 'g5-13':['합동과 대칭','Congruence and symmetry','정사각형의 대칭축은 몇 개야?','How many lines of symmetry does a square have?','4개','4'],
+ 'g5-14':['소수의 곱셈','Multiplying decimals','0.3 × 0.4는 얼마야?','What is 0.3 × 0.4?','0.12','0.12'],
+ 'g5-15':['직육면체와 정육면체','Rectangular prisms and cubes','직육면체의 면은 몇 개야?','How many faces does a rectangular prism have?','6개','6'],
+ 'g5-16':['평균','Mean (average)','2, 4, 9의 평균은 얼마야?','What is the mean (average) of 2, 4 and 9?','5','5'],
+ 'g5-17':['가능성','Probability','동전을 한 번 던질 때 그림 면이 나올 가능성을 수로 나타내면?','You flip a coin once. What is the chance of heads, as a number?','2분의 1','1/2'],
+ 'g5-18':['좌표평면','The coordinate grid (x, y)','점 (3, 5)에서 3은 무엇을 나타내?','In the point (3, 5), what does the 3 tell you?','x좌표예요. 가로로 3만큼 간 곳이에요','How far across to go, along the x-axis (the x-coordinate)'],
+ 'g5-19':['분수와 소수, 백분율 시작','Fractions, decimals and first percents','4분의 1을 소수로 나타내면? 백분율로는?','What is 1/4 as a decimal? As a percent?','0.25, 25%','0.25 and 25%'],
+ 'g5-20':['예산과 이익','Budgets and profit','1000원에 사서 1500원에 팔면 이익은 얼마야?','You buy something for $10 and sell it for $15. What is the profit?','500원','$5'],
+ 'g6-01':['(분수) ÷ (자연수)','Dividing a fraction by a whole number','5분의 4 ÷ 2는 얼마야?','What is 4/5 ÷ 2?','5분의 2','2/5'],
+ 'g6-02':['각기둥과 각뿔','Prisms and pyramids','삼각기둥의 면은 모두 몇 개야?','How many faces does a triangular prism have?','5개','5'],
+ 'g6-03':['(소수) ÷ (자연수)','Dividing a decimal by a whole number','6.4 ÷ 4는 얼마야?','What is 6.4 ÷ 4?','1.6','1.6'],
+ 'g6-04':['비와 비율','Ratios and rates','빨간 물고기 3마리, 파란 물고기 5마리가 있어. 빨간 물고기 수와 파란 물고기 수의 비는?','There are 3 red fish and 5 blue fish. What is the ratio of red fish to blue fish?','3 : 5','3 : 5 (3 to 5)'],
+ 'g6-05':['백분율','Percent','20000원짜리 물건을 20% 할인한 가격은 얼마야?','A $20 item is 20% off. What is the sale price?','16000원','$16'],
+ 'g6-06':['띠그래프와 원그래프','Strip graphs and circle graphs','원그래프 전체는 몇 %를 나타내?','What percent does a whole circle graph stand for?','100%','100%'],
+ 'g6-07':['직육면체의 부피','Volume of rectangular prisms','가로 3 cm, 세로 4 cm, 높이 5 cm인 직육면체의 부피는 얼마야?','What is the volume of a box 3 cm by 4 cm by 5 cm?','60 cm³','60 cm³'],
+ 'g6-08':['직육면체의 겉넓이','Surface area of rectangular prisms','한 모서리가 2 cm인 정육면체의 겉넓이는 얼마야?','What is the surface area of a cube with 2 cm edges?','24 cm²','24 cm²'],
+ 'g6-09':['(분수) ÷ (분수)','Dividing a fraction by a fraction','4분의 3 ÷ 8분의 3은 얼마야?','What is 3/4 ÷ 3/8?','2','2'],
+ 'g6-10':['(소수) ÷ (소수)','Dividing a decimal by a decimal','1.2 ÷ 0.3은 얼마야?','What is 1.2 ÷ 0.3?','4','4'],
+ 'g6-11':['쌓기나무 (위·앞·옆에서 본 모양)','Cube structures (top, front and side views)','한 층에 2 × 2로 놓은 쌓기나무를 2층으로 쌓으면 모두 몇 개야?','A stack of cubes is 2 by 2 on each layer and 2 layers high. How many cubes is that?','8개','8'],
+ 'g6-12':['비례식','Proportions','2 : 3 = 6 : □에서 □는 얼마야?','In 2 : 3 = 6 : □, what number goes in the box?','9','9'],
+ 'g6-13':['비례배분','Sharing in a ratio','사탕 20개를 2 : 3으로 나누면 각각 몇 개야?','Share 20 candies in the ratio 2 : 3. How many go in each part?','8개와 12개','8 and 12'],
+ 'g6-14':['원주와 원주율','Circumference and pi','원주는 지름의 약 몇 배야?','The circumference is about how many times the diameter?','약 3.14배 (원주율)','About 3.14 times (pi)'],
+ 'g6-15':['원의 넓이','Area of a circle','반지름이 10 cm인 원의 넓이는 얼마야? (원주율 3.14)','What is the area of a circle with a radius of 10 cm? (Use 3.14 for pi.)','314 cm²','314 cm²'],
+ 'g6-16':['원기둥, 원뿔, 구','Cylinders, cones and spheres','원기둥과 원뿔은 어떻게 달라?','How is a cone different from a cylinder?','원기둥은 밑면이 2개이고, 원뿔은 밑면이 1개이고 뾰족한 꼭짓점이 있어요','A cylinder has two circular bases; a cone has one base and a point (apex)'],
+ 'g6-17':['정수 (음수)','Integers (negative numbers)','기온이 영하 3도에서 5도 오르면 몇 도야?','The temperature is −3° and it rises 5°. What is it now?','영상 2도','2°'],
+ 'g6-18':['좌표평면과 이동 (네 사분면)','Coordinates in all four quadrants','점 (2, 3)을 x축에 대하여 대칭이동하면 어디로 가?','Reflect the point (2, 3) across the x-axis. Where does it land?','(2, −3)','(2, −3)'],
+ 'g6-19':['평균·중앙값·최빈값·범위','Mean, median, mode and range','2, 2, 5, 7, 9의 중앙값과 최빈값은 뭐야?','What are the median and the mode of 2, 2, 5, 7, 9?','중앙값 5, 최빈값 2','Median 5, mode 2'],
+ 'g6-20':['속력과 비율의 활용','Speed, unit price and interest','3시간 동안 180 km를 가는 자동차의 속력은?','A car goes 180 km in 3 hours. What is its speed?','시속 60 km (한 시간에 60 km)','60 km per hour']};
+const LR_AREAS=[
+ ['num','🔢',['수와 계산','Numbers and operations'],['2022 개정 교육과정 · 대부분 수와 연산 영역','Ontario curriculum: mostly the Number strand']],
+ ['frac','🍕',['분수·소수·백분율','Fractions, decimals and percents'],['2022 개정 교육과정 · 주로 수와 연산 영역','Ontario curriculum: the Number strand']],
+ ['alg','🔁',['규칙과 관계','Patterns and relationships'],['2022 개정 교육과정 · 주로 변화와 관계 영역','Ontario curriculum: mostly the Algebra strand']],
+ ['geo','🔺',['도형','Geometry: shapes and space'],['2022 개정 교육과정 · 주로 도형과 측정 영역','Ontario curriculum: the Spatial Sense strand']],
+ ['mea','📏',['측정','Measurement'],['2022 개정 교육과정 · 도형과 측정 영역','Ontario curriculum: the Spatial Sense strand']],
+ ['dat','📊',['자료와 가능성','Data and probability'],['2022 개정 교육과정 · 자료와 가능성 영역','Ontario curriculum: the Data strand']],
+ ['fin','🪙',['돈 계산','Money'],['캐나다 온타리오 교육과정 · 금융 영역','Ontario curriculum: the Financial Literacy strand']]];
+const LR_FRAC=new Set('g2-18 g3-10 g3-11 g3-15 g4-10 g4-11 g4-13 g4-14 g5-05 g5-06 g5-07 g5-12 g5-14 g5-19 g6-01 g6-03 g6-05 g6-09 g6-10'.split(' '));
+// at-home ideas per area: [for grades 1–3, for grades 4–6]
+const LR_HOME={
+ num:[['장난감이나 간식을 세어 보고, 몇 개가 더 있으면 10이 되는지 말해 보기','Count toys or snacks, and say how many more would make 10'],['장 볼 때 계산하기 전에 모두 얼마쯤인지 어림하고, 영수증으로 함께 확인해 보기','At the store, estimate the total before paying, then check the receipt together']],
+ frac:[['어른이 피자나 케이크를 똑같이 자르면, 한 조각이 전체의 몇 분의 몇인지 말해 보기','When a grown-up cuts a pizza or cake into equal slices, say what fraction one slice is'],['어른과 함께 요리하며 레시피의 재료 양을 절반이나 2배로 바꿔 계산해 보기','Cook with a grown-up and work out the amounts for half or double a recipe']],
+ alg:[['숟가락과 포크나 블록으로 규칙을 만들고, 다음에 올 것을 맞혀 보기','Make a pattern with spoons and forks or blocks, and guess what comes next'],['매주 같은 돈을 모으면 몇 주 뒤에 얼마가 되는지 표로 만들어 보기','If you save the same amount each week, make a table of the total week by week']],
+ geo:[['집 안에서 상자·둥근 기둥·공 모양과 세모·네모·동그라미 모양 찾아보기','Find boxes, cans and balls, and triangles, rectangles and circles, around the house'],['집 안에서 직각, 평행한 선, 대칭인 물건 찾아보기','Hunt for right angles, parallel lines and symmetry around the house']],
+ mea:[['시계를 보고 저녁 먹을 때까지 몇 분 남았는지 말해 보기','Read a clock and say how many minutes are left until dinner'],['줄자로 책상이나 방의 가로와 세로를 재고 넓이 구해 보기','Measure a table or a room with a tape measure and work out its area']],
+ dat:[['가족이 가장 좋아하는 과일을 조사해 표와 그래프로 나타내 보기','Ask your family which fruit they like best, then make a table and a graph'],['일주일 동안 매일 같은 시각의 기온을 적고 꺾은선그래프로 그려 보기','Write down the temperature at the same time each day for a week, then draw a line graph']],
+ fin:[['저금통의 동전을 세어 모두 얼마인지 말해 보기','Count the coins in a piggy bank and say how much money there is'],['장 볼 때 예산을 정하고, 살 물건의 합계와 거스름돈을 계산해 보기','Set a budget for a shopping trip, then work out the total and the change']]};
+function lrSummary(){const G=S.grade||1,st=S.stats,aq=(g,i)=>S.G[g]&&S.G[g].aq[i]; // never gradeData(): the summary must not change the save
+ const nm=id=>LR_SK[id]?[LR_SK[id][0],LR_SK[id][1]]:[id,id],areaOf=id=>LR_FRAC.has(id)?'frac':SKILL_BY[id].strand;
+ const areas={};for(const [id,icon,name,school] of LR_AREAS)areas[id]={id,name,icon,school,skills:[]};
+ // this grade's 20 skills, and any other skill already started or mastered
+ const rows=[];
+ for(let g=1;g<=6;g++)for(let i=0;i<20;i++){const id=skillId(g,i);if(!SKILL_BY[id])continue;const a=aq(g,i),r=S.sk[id],tried=!!(r&&r.n),open=a?a.open:0,done=!!(a&&a.done);
+  if(g!==G&&!done&&!open&&!tried)continue;
+  const k={id,name:nm(id),st:done?2:open||tried?1:0,p:done?1:open/5,g};if(tried){k.r=r.c;k.w=Math.max(0,r.n-r.c)}
+  const ar=areas[areaOf(id)]||areas.num;ar.skills.push(k);rows.push({k,ar,open,last:r&&r.last||''})}
+ // at most 40 skills an area: this grade first, then skills in progress, then the most recent grades
+ const keep=new Set();
+ for(const ar of Object.values(areas)){if(ar.skills.length>40){const rank=k=>(k.g===G?0:k.st===1?10:20)+6-k.g;ar.skills=ar.skills.slice().sort((x,y)=>rank(x)-rank(y)).slice(0,40).sort((x,y)=>x.id<y.id?-1:1)}ar.skills.forEach(k=>keep.add(k.id))}
+ // most recently practised first (a later topic first on the same day)
+ const recent=rows.filter(x=>keep.has(x.k.id)&&x.k.st).sort((x,y)=>x.last!==y.last?(y.last>x.last?1:-1):(y.k.id>x.k.id?1:-1));
+ // questions: up to 3 recent mastered topics, then the topic in progress (once a step is passed), then more mastered ones
+ const mast=recent.filter(x=>x.k.st===2),prog=recent.filter(x=>x.k.st===1&&x.open).slice(0,1);
+ const talk=mast.slice(0,3).concat(prog,mast.slice(3)).slice(0,4).map(x=>LR_SK[x.k.id]).filter(Boolean).map(s=>[s[2],s[3],s[4],s[5]]);
+ const home=[],hs=new Set(),cur=S.grade&&SKILL_BY[skillId(S.at.g,S.at.i)]?[{ar:areas[areaOf(skillId(S.at.g,S.at.i))],k:{g:S.at.g}}]:[];
+ for(const x of recent.concat(cur)){if(!x.ar||hs.has(x.ar.id)||!LR_HOME[x.ar.id])continue;hs.add(x.ar.id);home.push(LR_HOME[x.ar.id][x.k.g<=3?0:1]);if(home.length>=3)break}
+ const next=[];let now_='';
+ if(!S.grade)next.push(['처음에 학년을 고르면 그 학년의 첫 단원부터 시작해요','The game starts by picking a grade, then begins with its first topic']);
+ else{const gd=S.G[G],ci=gd?gd.aq.findIndex(a=>!a.done):0;
+  if(ci<0)next.push(G<6?[`${G+1}학년 단원으로 넘어가요`,`Next up: Grade ${G+1} topics`]:['1~6학년 단원을 모두 마스터했어요. 오늘의 복습으로 잊지 않게 해요','Every Grade 1–6 topic is mastered; the daily review keeps them fresh']);
+  else{const ah=S.at.g===G&&aq(G,S.at.i)&&!aq(G,S.at.i).done,i=ah?S.at.i:ci,o=aq(G,i)?aq(G,i).open:0,n=nm(skillId(G,i));now_=skillId(G,i);
+   next.push([`지금 배우는 단원: ${n[0]} · 5단계 중 ${o}단계 통과`,`Learning now: ${n[1]} · ${o} of 5 steps passed`]);
+   const j=gd?gd.aq.findIndex((x,k)=>k>i&&!x.done):-1;
+   if(j>=0){const m=nm(skillId(G,j));next.push([`다음 단원: ${m[0]}`,`Next topic: ${m[1]}`])}else if(G<6)next.push([`이 단원을 마치면 ${G+1}학년으로 넘어가요`,`After this topic: Grade ${G+1}`])}}
+ const acc=k=>k.r/(k.r+k.w),weak=rows.filter(x=>keep.has(x.k.id)&&x.k.id!==now_&&x.k.r!=null&&x.k.r+x.k.w>=10&&acc(x.k)<.7).sort((x,y)=>acc(x.k)-acc(y.k))[0];
+ if(weak){const p=Math.round(100*acc(weak.k));next.push([`${weak.k.name[0]} 다시 연습하기 · 지금까지 정답률 ${p}%`,`More practice: ${weak.k.name[1]} · ${p}% right so far`])}
+ // facts read from the save
+ const pl=(n,one,many)=>n===1?one:many,f=[],done=totalDone(),tanks=totalTanks(),grads=[1,2,3,4,5,6].filter(g=>S.G[g]&&S.G[g].grad),best=S.streak.best||0;
+ if(done)f.push(['🏛️',`마스터한 단원 ${done}개`,`${done} math ${pl(done,'topic','topics')} mastered`]);
+ if(grads.length)f.push(['🎓',`${grads.join('·')}학년 단원 모두 마스터 (졸업)`,`Grade${pl(grads.length,'','s')} ${grads.length>1?grads.slice(0,-1).join(', ')+' and '+grads[grads.length-1]:grads[0]}: every topic mastered`]);
+ if(tanks)f.push(['🐠',`단계를 통과해 연 수조 ${tanks}개`,`${tanks} fish ${pl(tanks,'tank','tanks')} opened by passing lesson steps`]);
+ if(best)f.push(['🔥',`최고 ${best}일 연속 공부 (하루 5문제 이상 정답)`,`Longest streak: ${best} ${pl(best,'day','days')} in a row (5+ right answers a day)`]);
+ if(st.reviews)f.push(['🧠',`오늘의 복습 ${st.reviews}번`,`${st.reviews} daily ${pl(st.reviews,'review','reviews')} done`]);
+ if(st.orders)f.push(['🙋',`손님 계산 문제 ${st.orders}개 해결`,`${st.orders} visitor word ${pl(st.orders,'problem','problems')} solved`]);
+ if(st.bestCombo>=3)f.push(['☄️',`최고 ${st.bestCombo}문제 연속 정답`,`Best run: ${st.bestCombo} right in a row`]);
+ return {v:1,level:grads.includes(6)?['6학년까지 졸업','Graduated Grade 6']:S.grade?[`${G}학년`,`Grade ${G}`]:['학년 고르기 전','Grade not chosen yet'],
+  focus:['한국(2022 개정)과 캐나다 온타리오(2020) 교육과정을 합친 1~6학년 수학을 단원 하나씩 그림 설명, 연습 문제, 마지막 8문제 확인으로 익혀요.','Grade 1–6 math built from Korea’s 2022 and Ontario’s 2020 curricula, one topic at a time: picture lessons, practice problems, then a final 8-question check to master the topic.'],
+  unit:['문제','problems'],areas:LR_AREAS.map(x=>areas[x[0]]).filter(a=>a.skills.length),
+  total:{r:st.correct||0,w:Math.max(0,(st.solved||0)-(st.correct||0))},facts:f.slice(0,6),talk,home,next:next.slice(0,3)}}
+LR.set(lrSummary);
 window.__aq={get S(){return S},go,startWalk,walkAct,startLesson,openRequest,finishStage:()=>finishStage(),graduation,travelTo,arrive,askQuick,shopProblem,speakable,speechOf,checkAnswer,tick,catchUp};
 boot();
 </script>

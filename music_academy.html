@@ -22,6 +22,33 @@ const L=(ko,en)=>LANG==='en'?en:ko;
 // · coachPop(pose,ko,en) shows a small bubble in the corner at good moments. It never blocks a tap and
 //   waits between appearances, so he never nags. He only praises and encourages.
 // Source: _src/coach/coach.js, copied into every game by _src/coach/inject.py.
+// LR keeps the learning record that the parents' report (report.html) reads. Each game has one record per player,
+// stored under its save prefix + "learn", so the profile script files it as "...@profileId". It holds:
+// · days: play time in seconds and right/wrong answers per day (the last 120 days). Time counts only while the
+//   page is visible and the player touched or typed in the last 2 minutes.
+// · sum: the game's own summary of skills, built by the function passed to LR.set() (see _src/report/SPEC.md).
+// · when: the day each skill first reached "mastered" ('' = before the record started).
+// · sk: right/wrong counts per skill, from coachAnswer(ok,skillId).
+// A game's reset must call LR.forget() so the report forgets only that game; LR.resume() starts a fresh record.
+const LR=(()=>{const f=(location.pathname.split('/').pop()||'').replace(/\.html$/,'');
+ const KEY={math_aquarium:'mathAquarium.learn',science_guardians:'scienceGuardians.learn',music_academy:'musicAcademy.learn',chess_knights:'chessKnights.learn',detective_game:'little-detective-learn',marble_rush_3d:'marbleRush.learn',coding_island:'pythonIsland.learn',python_island:'pythonIsland.learn'}[f];
+ const day=()=>new Date().toLocaleDateString('en-CA');let R=null,fn=null,off=!KEY,dirty=false,last=0;
+ const load=()=>{if(R)return R;try{R=JSON.parse(localStorage.getItem(KEY)||'null')}catch(e){}if(!R||R.v!==1)R={v:1,days:{},when:{}};return R};
+ const today=()=>{const r=load(),d=day();return r.days[d]||(r.days[d]={s:0,r:0,w:0})};
+ const save=()=>{if(off)return;const r=load();
+  if(fn){try{const s=fn();if(s){const first=!r.sum,d=day();r.sum=s;(s.areas||[]).forEach(a=>(a.skills||[]).forEach(k=>{if(k.st===2&&r.when[k.id]==null)r.when[k.id]=first?'':d}))}}catch(e){}}
+  const ks=Object.keys(r.days).sort();ks.slice(0,Math.max(0,ks.length-120)).forEach(k=>delete r.days[k]);
+  r.at=Date.now();try{localStorage.setItem(KEY,JSON.stringify(r))}catch(e){}dirty=false};
+ ['pointerdown','keydown','touchstart','wheel'].forEach(e=>addEventListener(e,()=>{last=Date.now()},{passive:true,capture:true}));
+ setInterval(()=>{if(off||document.hidden||Date.now()-last>120000)return;today().s+=10;dirty=true},10000);
+ setInterval(()=>{if(dirty)save()},30000);
+ addEventListener('pagehide',save);document.addEventListener('visibilitychange',()=>{if(document.hidden&&dirty)save()});
+ return {
+  ans(ok,skill){if(off)return;const t=today();ok?t.r++:t.w++;if(skill!=null){const r=load(),sk=r.sk||(r.sk={}),x=sk[skill]||(sk[skill]=[0,0]);x[ok?0:1]++}dirty=true},
+  set(f){fn=f;setTimeout(save,1500)},save,
+  stat(id){const x=(load().sk||{})[id];return x?{r:x[0],w:x[1]}:null},
+  forget(){off=true;R=null;try{localStorage.removeItem(KEY)}catch(e){}},
+  resume(){off=!KEY;R=null;dirty=false}}})();
 const coachEsc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const coachNm=()=>{try{return MGP.me&&MGP.me.name||''}catch(e){return ''}};
 const coachPick=a=>a[Math.random()*a.length|0];
@@ -41,8 +68,9 @@ function coachPop(pose,ko,en,o={}){const now=Date.now();if(!o.force&&now-coachAt
  let el=document.getElementById('coachPop');if(!el){el=document.createElement('div');el.id='coachPop';el.setAttribute('role','status');document.body.appendChild(el)}
  el.innerHTML=`<img src="images/coach-moon-${pose}.webp" alt="" onerror="this.remove()"><p><b>${L('문 코치','Coach Moon')}</b>${L(ko,en)}</p>`;
  el.classList.remove('show');void el.offsetWidth;el.classList.add('show');clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove('show'),o.ms||4500);return true}
-// call with every final answer: praise runs of right answers, and help after two misses in a row
-function coachAnswer(ok){
+// call with every final answer: praise runs of right answers, and help after two misses in a row.
+// The optional skill id (one of the skill ids in the game's LR summary) counts the answer for that skill in the report.
+function coachAnswer(ok,skill){try{LR.ans(ok,skill)}catch(e){}
  if(ok){coachRun++;coachMiss=0;if(![3,5,10,15,20,30].includes(coachRun))return;const n=coachRun,t=coachPick([[`${n}번 연속 성공! 집중력이 대단해요 🌙`,`${n} in a row! Amazing focus 🌙`],[`와, ${n}번 연속이에요! 문 코치가 박수 쳐요 👏`,`Wow, ${n} in a row! Coach Moon is clapping 👏`],[`${n}번 연속! 오늘 머리가 반짝반짝해요 ✨`,`${n} straight! Your brain is sparkling today ✨`]]);coachPop('clap',t[0],t[1],{gap:20000});return}
  coachRun=0;coachMiss++;if(coachMiss!==2)return;const nm=coachEsc(coachNm()),t=coachPick([['괜찮아요! 틀리면서 배우는 거예요. 천천히 다시 봐요 🌙','That’s okay! Mistakes help us learn. Take another look 🌙'],[nm?`${nm}, 할 수 있어요! 문 코치가 응원해요 🌙`:'할 수 있어요! 문 코치가 응원해요 🌙',nm?`You can do it, ${nm}! Coach Moon is cheering 🌙`:'You can do it! Coach Moon is cheering 🌙'],['실수는 배움의 친구예요. 한 번 더 해 봐요!','Mistakes are friends of learning. One more try!']]);coachPop('go',t[0],t[1],{gap:30000})}
 // Once a day per game he says hello, a few minutes in he shares a tip, and after 20 minutes he suggests a little rest.
@@ -1881,7 +1909,7 @@ function runRhythm(spec,host,opt){
   let ei=0;const cols=toks.map(t=>t.rest?'#c3cbe0':JCOL[phase.exp[ei++].j]);drawSheet(p,cols,null,false);
   const all=ok===phase.exp.length&&!phase.extra;
   msg.textContent=all?T(pick(PRAISE_SHORT)):phase.extra?(toks.some(x=>x.rest)?T('쉼표에서는 쉬어요! 거의 다 왔어요.|Stay quiet on the rests! Almost there.'):T('음표가 없는 곳에서는 기다려요! 거의 다 왔어요.|Wait where there’s no note! Almost there.')):T(pick(ENCOURAGE));
-  bubble(host,all?pick(PRAISE_SHORT):pick(ENCOURAGE));(all?SFX.good:SFX.pop)();if(typeof coachAnswer==='function')coachAnswer(all);
+  bubble(host,all?pick(PRAISE_SHORT):pick(ENCOURAGE));(all?SFX.good:SFX.pop)();if(typeof coachAnswer==='function')coachAnswer(all,lrSkill(spec));
   k++;if(auto){setTimeout(item,1500);return}
   ctl.innerHTML=`<button class="btn ghost small again" type="button">↻ ${T('다시 듣기|Hear it again')}</button><button class="btn gold next" type="button">${k>=items.length?T('결과 보기|See results'):T('다음 ▶|Next ▶')}</button>`;
   ctl.querySelector('.next').addEventListener('click',item);ctl.querySelector('.again').addEventListener('click',()=>demo(p,toks,Math.ceil(rhythmBeats(p)/sig-1e-9)*sig))}
@@ -2124,7 +2152,7 @@ function runQuiz(spec,host,opt){
    <div class="opts n${opts.length}">${opts.map((o,i)=>`<button class="opt" type="button" data-i="${i}">${esc(T(o))}</button>`).join('')}</div><div class="qfb"></div>`;
   card.classList.remove('in');void card.offsetWidth;card.classList.add('in');
   const hear=()=>{const b=bus(1);playClip(clip,b)};if(clip){card.querySelector('.hear').addEventListener('click',hear);setTimeout(()=>{if(!stopped)hear()},350)}else speak(T(q.q));
-  card.querySelector('.opts').addEventListener('click',e=>{const b=e.target.closest('.opt');if(!b||card.dataset.done===String(k))return;card.dataset.done=String(k);const ok=opts[+b.dataset.i]===q.a;
+  card.querySelector('.opts').addEventListener('click',e=>{const b=e.target.closest('.opt');if(!b||card.dataset.done===String(k))return;card.dataset.done=String(k);const ok=opts[+b.dataset.i]===q.a;try{LR.ans(ok,lrSkill(spec))}catch(e){}
    card.querySelectorAll('.opt').forEach(x=>{x.disabled=true;if(opts[+x.dataset.i]===q.a)x.classList.add('right')});
    dots[k].className=ok?'ok':'no';
    if(ok){right++;b.classList.add('right');SFX.good();const pr=pick(PRAISE_SHORT);bubble(host,pr);sparkle(b);k++;setTimeout(next,q.why?1500:950);if(q.why)card.querySelector('.qfb').innerHTML=`💡 ${esc(T(q.why))}`;return}
@@ -2174,19 +2202,21 @@ function runKeys(spec,host,opt){
    stepsEl.innerHTML=steps.map((s,i)=>`<span class="ss" data-i="${i}">${esc(T(s))}</span>`).join('');const el=kb.keyEl(scaleSeq[0]);if(el)el.classList.add('start','good');play('piano',scaleSeq[0],0,.5,.7,bs);scaleIdx=1;glowNext()}
   const tb=host.querySelector('.tbub');if(tb)tb.classList.remove('show');speak(qEl.textContent)}
  function glowNext(){if(miss>=2)hint(scaleSeq[scaleIdx])}
- function right(val=1){score+=val;markDot(k,val);SFX.good();const dt=performance.now()-t0;if(dt<1500)fastN++;bubble(host,dt<1500&&t==='notes'?'⚡ '+T('번개 손!|Lightning fast!'):pick(PRAISE_SHORT));k++;setTimeout(next,750)}
+ // the report counts a key task as right only when it was found on the first try
+ const lrAns=ok=>{try{LR.ans(ok,lrSkill(spec))}catch(e){}};
+ function right(val=1){lrAns(val>=1);score+=val;markDot(k,val);SFX.good();const dt=performance.now()-t0;if(dt<1500)fastN++;bubble(host,dt<1500&&t==='notes'?'⚡ '+T('번개 손!|Lightning fast!'):pick(PRAISE_SHORT));k++;setTimeout(next,750)}
  function wrong(m,correct){miss++;SFX.pop();const el=kb.keyEl(m);if(el){el.classList.remove('bad');void el.offsetWidth;el.classList.add('bad');setTimeout(()=>el.classList.remove('bad'),600)}
-  if(miss>=2){markDot(k,0);fb.textContent='👀 '+T('정답은 반짝이는 건반이에요!|The answer is the sparkly key!');(Array.isArray(correct)?correct:[correct]).forEach(hint);k++;setTimeout(next,1500)}
+  if(miss>=2){lrAns(false);markDot(k,0);fb.textContent='👀 '+T('정답은 반짝이는 건반이에요!|The answer is the sparkly key!');(Array.isArray(correct)?correct:[correct]).forEach(hint);k++;setTimeout(next,1500)}
   else{fb.textContent=T(pick(ENCOURAGE));bubble(host,pick(ENCOURAGE))}}
  function onKey(m){if(stopped)return;
   if(t==='chord'){play('piano',m,0,.6,.7,bs);const el=kb.keyEl(m);if(sel.has(m)){sel.delete(m);el&&el.classList.remove('sel');return}if(sel.size>=3)return;sel.add(m);el&&el.classList.add('sel');
    if(sel.size===3){const pcs=new Set([...sel].map(x=>x%12)),ok=pcs.size===3&&[...cur.set].every(p=>pcs.has(p));setTimeout(()=>{playChord('piano',[...sel],0,1.2,.55,bs);
     if(ok){kb.all().forEach(x=>{if(sel.has(+x.dataset.m))x.classList.add('good')});right(miss?0.5:1)}
-    else{miss++;kb.all().forEach(x=>{if(sel.has(+x.dataset.m))x.classList.add('bad')});if(miss>=2){markDot(k,0);TRIADS[cur.chord].ms.forEach(hint);fb.textContent=T(`정답: ${T(TRIADS[cur.chord].n)}|Answer: ${T(TRIADS[cur.chord].n)}`);k++;setTimeout(next,1800)}
+    else{miss++;kb.all().forEach(x=>{if(sel.has(+x.dataset.m))x.classList.add('bad')});if(miss>=2){lrAns(false);markDot(k,0);TRIADS[cur.chord].ms.forEach(hint);fb.textContent=T(`정답: ${T(TRIADS[cur.chord].n)}|Answer: ${T(TRIADS[cur.chord].n)}`);k++;setTimeout(next,1800)}
      else{fb.textContent=T('다시 해 봐요! 하나 건너 하나씩 눌러요.|Try again! Skip one key between each.');setTimeout(()=>{sel.clear();clearMarks()},700)}}},250)}
    return}
   if(t==='scale'){play('piano',m,0,.5,.8,bs);const want=scaleSeq[scaleIdx];
-   if(m===want){fb.textContent='';const el=kb.keyEl(m);el&&el.classList.add('good');const s=stepsEl.querySelector(`.ss[data-i="${scaleIdx-1}"]`);if(s)s.classList.add(miss?'half':'ok');score+=miss?.5:1;markDot(k,miss?.5:1);k++;miss=0;scaleIdx++;
+   if(m===want){fb.textContent='';const el=kb.keyEl(m);el&&el.classList.add('good');const s=stepsEl.querySelector(`.ss[data-i="${scaleIdx-1}"]`);if(s)s.classList.add(miss?'half':'ok');lrAns(!miss);score+=miss?.5:1;markDot(k,miss?.5:1);k++;miss=0;scaleIdx++;
     if(scaleIdx>=scaleSeq.length){SFX.good();bubble(host,pick(PRAISE_SHORT));const b=bus(1);scaleSeq.forEach((x,i)=>play('piano',x,AC?AC.currentTime+.3+i*.22:0,.25,.7,b));scaleKey++;
      if(scaleKey>=scaleKeys.length)setTimeout(finish,2400);else setTimeout(next,2400)}}
    else{miss++;SFX.pop();const el=kb.keyEl(m);if(el){el.classList.remove('bad');void el.offsetWidth;el.classList.add('bad');setTimeout(()=>el.classList.remove('bad'),600)}if(miss>=2)hint(want);fb.textContent=T(`다음은 ${T(cur.steps[scaleIdx-1])==='반'||T(cur.steps[scaleIdx-1])==='H'?'반음':'온음'} 위예요!|Next is a ${T(cur.steps[scaleIdx-1])==='H'?'half':'whole'} step up!`)}
@@ -2207,6 +2237,11 @@ function runActivity(spec,host,opt){stopActivity();host.scrollTop=0;
  if(t==='song'||t==='drum'||t==='chordplay')return runHighway(spec,host,opt);
  if(t==='quiz'||t==='pitch'||t==='listen'||(t==='steps'&&spec.task==='name')||(t==='scale'&&spec.task==='majmin')||(t==='chord'&&spec.task==='majmin'))return runQuiz(spec,host,opt);
  return runKeys(spec,host,opt)}
+// the parents' report skill (a lesson id) an answer belongs to: the lesson being played,
+// or, in daily practice and contests, the lesson that teaches the same task
+function lrSkill(spec){if(RUN&&RUN.kind==='lesson')return RUN.id;if(!spec)return undefined;
+ const same=a=>a.type===spec.type&&['bank','task','level','song','pattern'].every(k=>spec[k]==null||a[k]===spec[k])&&(spec.type!=='notes'||!spec.range||!a.range||a.range[1]===spec.range[1]);
+ const l=LESSONS.find(l=>same(l.a));return l?l.id:undefined}
 // how long an activity takes, roughly, for the lesson list
 const ACT_ICON={breath:'🌬️',sing:'🎤',beat:'💓',echo:'👂',read:'📖',song:'🎹',drum:'🥁',chordplay:'🌈',quiz:'❓',pitch:'🎵',keys:'🎹',notes:'🎼',steps:'🪜',scale:'🌈',chord:'🎶',listen:'👂'};
 </script>
@@ -2322,10 +2357,10 @@ function runSing(spec,host,opt){
    const sang=ctl.querySelector('.sang');if(sang)sang.addEventListener('click',()=>{if(phase==='done')return;phase='done';sc+=.75;chip[i].className='half';nextNote()});
    listen()};
   const lock=()=>{phase='done';caught=true;sc+=wide?.85:1;chip[i].className='ok';SFX.good();sparkle(cv);bubble(host,pick(PRAISE_SHORT));setTip('🎉 '+T('딱 맞았어요!|You got it!'),'ok');
-   if(typeof coachAnswer==='function')coachAnswer(true);
+   if(typeof coachAnswer==='function')coachAnswer(true,lrSkill(spec));
    if(!SING_FIRST&&typeof coachPop==='function'){SING_FIRST=true;coachPop('clap','첫 음을 딱 맞췄어요! 귀와 목소리가 친구가 됐어요 🌙','You matched your first note! Your ears and voice are a team now 🌙',{gap:20000})}
    nextNote()};
-  function skip(){if(phase==='done')return;phase='done';caught=false;const part=clamp(best/need,0,1)*.5;sc+=part;chip[i].className=part>.15?'half':'';bubble(host,pick(ENCOURAGE));nextNote()}
+  function skip(){if(phase==='done')return;phase='done';caught=false;try{LR.ans(false,lrSkill(spec))}catch(e){}const part=clamp(best/need,0,1)*.5;sc+=part;chip[i].className=part>.15?'half':'';bubble(host,pick(ENCOURAGE));nextNote()}
   const nextNote=()=>{clearTimeout(timer);i++;
    if(i<seq.length){timer=setTimeout(begin,song?500:800);return}
    chip.forEach(x=>x.classList.remove('cur'));if(!useMic){selfRate(host,finish);return}
@@ -2701,7 +2736,7 @@ function lessonDone2(id,r){const l=LESSON_BY[id],prev=S.lessons[id]||{s:0,best:0
  const rec={s:Math.max(prev.s,r.stars),best:Math.max(prev.best||0,r.acc),n:(prev.n||0)+1,pass:prev.pass||r.stars>=1||fails>=3};S.lessons[id]=rec;
  trackStats(r);if(l.a.type==='song')recordSong(l.a.song,r);if(l.a.type==='drum')recordDrum(l.a.pattern,r);
  const xp=10+r.stars*10,coins=r.stars*10+(first&&rec.pass?20:0);const st=first&&rec.pass?giveSticker():null;
- save();showResult(r,{teacher:teacherOf(l),title:T(l.t),prevBest:prev.best,first:first&&rec.pass,unlockedByEffort:!r.stars&&fails>=3,xp,coins,sticker:st,
+ save();try{LR.save()}catch(e){}showResult(r,{teacher:teacherOf(l),title:T(l.t),prevBest:prev.best,first:first&&rec.pass,unlockedByEffort:!r.stars&&fails>=3,xp,coins,sticker:st,
   again:()=>startLessonActivity(id),easy:(l.a.type==='song'||l.a.type==='drum'||l.a.type==='read'||l.a.type==='echo'||l.a.type==='beat')&&r.stars<2?()=>startLessonActivity(id,{easy:true}):null,
   step:l.a.type==='song'&&!l.a.step&&r.stars<2?()=>{const host=playView(T(l.t));RUN={kind:'room'};runActivity({type:'song',song:l.a.song,step:true},host,{teacher:'mia',done:r2=>showResult(r2,{teacher:'mia',title:T(l.t),again:()=>startLessonActivity(id),xp:5,coins:5})})}:null,
   next:rec.pass?()=>{const n=LESSONS[lessonIdx(id)+1];if(n)openLesson(n.id);else go('path')}:null})}
@@ -2860,7 +2895,7 @@ function ceremony(){CT.over=true;const c=CT.c,host=$('host'),n=CT.accs.length,me
  const all=[{n:S.name,ic:S.av,v:me,me:true},...c.rivals.map((id,i)=>({id,n:T(RIVALS[id].name),ic:RIVALS[id].icon,v:CT.riv[i].reduce((a,b)=>a+b,0)/n}))].sort((a,b)=>b.v-a.v);
  const place=all.findIndex(x=>x.me)+1,medal=place<=3?4-place:0,rec=S.contests[c.id]||{medal:0,best:0,n:0};
  const firstGold=medal===3&&rec.medal<3;S.contests[c.id]={medal:Math.max(rec.medal,medal),best:Math.max(rec.best,me/100),n:rec.n+1};
- const coins=Math.round(c.prize*[.2,.4,.6,1][medal]),st=firstGold?giveSticker(pick(['🏅','👑','💎','🏰']))||giveSticker():null;save();
+ const coins=Math.round(c.prize*[.2,.4,.6,1][medal]),st=firstGold?giveSticker(pick(['🏅','👑','💎','🏰']))||giveSticker():null;save();try{LR.save()}catch(e){}
  host.innerHTML=`<div class="ceremony card"><h2>${c.icon} ${L('최종 결과','Final results')}</h2><div class="drumroll">🥁 ${L('두구두구두구…','Drumroll…')}</div>
   <div class="podium">${[2,1,3].map(p=>{const x=all[p-1];return x?`<div class="pod p${p} hide" data-p="${p}"><span class="pic">${esc(x.ic)}</span><b>${esc(x.n)}</b><em>${Math.round(x.v*10)}${L('점',' pts')}</em><div class="blk">${['','🥇','🥈','🥉'][p]}</div></div>`:''}).join('')}</div>
   <div class="finalmsg hide"></div><div class="rewards hide">${COIN} +${coins}${st?` <span class="stk">${st}</span>`:''}</div>
@@ -2943,7 +2978,9 @@ function openSettings(){const o=ROOT.opt;let renamed=false;
   cal:()=>()=>calibrate(),
   lang:b=>{const v=b.dataset.v;if(v===LANG)return false;const f=()=>{save();setLang(v)};if(busy())return ()=>askQuit(f);pickSeg(b);f();return false},
   ppl:()=>()=>switchPlayer(),
-  reset:()=>()=>modal(`<div class="center"><div class="big">🗑️</div><h2>${L('이 게임 기록을 지울까요?','Erase this game’s progress?')}</h2><p>${L(`${esc(S.name)}의 꼬마 음악 아카데미 기록(별, 스티커, 코인, 메달)만 지워져요. 다른 게임 기록은 그대로예요. 지우면 되돌릴 수 없어요.`,`Only ${esc(S.name)}’s Little Music Academy progress (stars, stickers, coins and medals) will be erased. Other games keep their progress. This can’t be undone.`)}</p></div><div class="row"><button class="btn ghost" data-act="close" type="button">${L('아니요','No')}</button><button class="btn red" data-act="yes" type="button">${L('지울래요','Erase')}</button></div>`,{acts:{yes:()=>()=>{const n=S.name,a=S.av,fs=S.faceSet;S=freshP();S.name=n;S.av=a;S.intro=true;if(fs)S.faceSet=true;ROOT.P[ROOT.cur]=S;save();applyOpts();go('home',false)}}})}})}
+  reset:()=>()=>modal(`<div class="center"><div class="big">🗑️</div><h2>${L('이 게임 기록을 지울까요?','Erase this game’s progress?')}</h2><p>${L(`${esc(S.name)}의 꼬마 음악 아카데미 기록(별, 스티커, 코인, 메달)만 지워져요. 다른 게임 기록은 그대로예요. 지우면 되돌릴 수 없어요.`,`Only ${esc(S.name)}’s Little Music Academy progress (stars, stickers, coins and medals) will be erased. Other games keep their progress. This can’t be undone.`)}</p></div><div class="row"><button class="btn ghost" data-act="close" type="button">${L('아니요','No')}</button><button class="btn red" data-act="yes" type="button">${L('지울래요','Erase')}</button></div>`,{acts:{yes:()=>()=>{const n=S.name,a=S.av,fs=S.faceSet;S=freshP();S.name=n;S.av=a;S.intro=true;if(fs)S.faceSet=true;ROOT.P[ROOT.cur]=S;save();
+   // the parents' report forgets this game too, then starts a fresh record from the fresh player
+   try{LR.forget();LR.resume()}catch(e){}applyOpts();go('home',false)}}})}})}
 // tap along with ticks; the average delay becomes the timing correction
 function calibrate(){let taps=[],clk=null,t0=0,b=null,spb=60/90,N=12;
  modal(`<h2>⏱️ ${L('박자 맞추기 보정','Timing check')}</h2><p>${L('블루투스 이어폰이나 화면 반응이 느리면 박자가 늦게 판정될 수 있어요. “똑딱” 소리에 맞춰 버튼을 12번 눌러 주세요.','Wireless headphones or slow screens can make taps seem late. Tap the button along with the 12 ticks.')}</p>
@@ -2962,6 +2999,116 @@ function welcome(){const ts=Object.values(TEACHERS);
   <div class="row"><button class="btn green cta" data-act="go" type="button">🎵 ${L('시작하기','Let’s start')}</button></div>`,{closable:false,onOpen:()=>{SFX.open();speak(L(`${S.name}, 꼬마 음악 아카데미에 온 걸 환영해요! 여섯 선생님과 함께 음악을 배워 봐요!`,`${S.name}, welcome to Little Music Academy! Let’s learn music with six teachers!`))},
   acts:{go:()=>()=>{S.intro=true;save();if(!S.faceSet)playerForm(false)}}})}
 
+// ---------------------------------------------------------------- parents' report: the summary LR keeps for report.html (see _src/report/SPEC.md)
+// Lessons are grouped by musical skill. A lesson counts as mastered once it earned at least one star, the game's pass mark.
+// A lesson that opened only because the child tried three times without a star still counts as practising.
+const LR_AREAS=[
+ {id:'beat',icon:'💓',name:'박자·리듬|Beat and rhythm',school:'초등 음악 · 연주 (박·리듬)|Music: duration (beat and rhythm)',ls:{
+  a1:'일정한 박에 맞춰 치기|Tapping a steady beat',a2:'빠르기가 바뀌어도 박 지키기|Keeping the beat when the tempo changes',a3:'소리 없이 마음속으로 박 세기|Keeping the beat in silence',a4:'센박과 여린박|Strong and weak beats',
+  c1:'음표의 길이 (온음표·2분음표·4분음표)|Note lengths (whole, half and quarter notes)',c2:'리듬 악보 보고 치기|Reading and tapping rhythms',c3:'쉼표 읽기|Reading rests',c4:'들은 리듬 따라 치기|Copying a rhythm by ear',
+  c5:'8분음표 리듬|Eighth-note rhythms',c6:'8분음표가 있는 리듬 따라 치기|Copying rhythms with eighth notes',f1:'마디와 박자표|Bars (measures) and time signatures',f2:'3박자 왈츠 리듬 치기|Playing a waltz beat in 3/4',
+  f3:'3박자 리듬 읽기|Reading rhythms in 3/4',f4:'2박자 행진곡 리듬 치기|Playing a march beat in 2/4',j1:'점음표 리듬|Dotted rhythms',j5:'16분음표 리듬|Sixteenth-note rhythms'}},
+ {id:'keys',icon:'🎹',name:'건반·가락|Keyboard and melody',school:'초등 음악 · 연주 (가락·악기 연주)|Music: pitch and melody; performing',ls:{
+  b1:'높은 소리와 낮은 소리 구별|Telling high sounds from low sounds',b2:'건반에서 도와 파 찾기|Finding C and F on the keyboard',b3:'흰 건반 이름 (도레미파솔라시)|Naming the white keys (C D E F G A B)',
+  b4:'첫 곡 한 음씩 치기: 뜨거운 빵|First song, note by note: Hot Cross Buns',b5:'박자에 맞춰 곡 치기: 뜨거운 빵|Playing in time: Hot Cross Buns',b6:'건반 곡: 메리의 어린 양|Keyboard song: Mary Had a Little Lamb',
+  b7:'가락이 올라가는지 내려가는지 듣기|Hearing whether a melody goes up or down',e4:'건반 곡: 반짝반짝 작은 별|Keyboard song: Twinkle, Twinkle, Little Star',e6:'건반 곡: 환희의 송가|Keyboard song: Ode to Joy',
+  e7:'건반 곡: 작은 한스|Keyboard song: Lightly Row',f5:'건반 곡: 자크 형제|Keyboard song: Frère Jacques',i4:'건반 곡: 런던 다리|Keyboard song: London Bridge',i5:'건반 곡: 징글벨|Keyboard song: Jingle Bells',
+  j3:'검은 건반 이름 (♯·♭)|Naming the black keys (sharps and flats)',j4:'건반 곡: 엘리제를 위하여 (앞부분)|Keyboard song: Für Elise (opening)'}},
+ {id:'read',icon:'🎼',name:'악보 읽기·음악 기호|Reading music and symbols',school:'초등 음악 · 연주 (악보·셈여림·빠르기)|Music: notation, dynamics and tempo',ls:{
+  e1:'오선과 높은음자리표|The staff and the treble clef',e2:'오선의 음 읽기: 도·레·미|Reading notes on the staff: C, D, E',e3:'오선의 음 읽기: 도~솔|Reading notes on the staff: C to G',e5:'오선의 음 읽기: 높은 도까지|Reading notes on the staff: up to high C',
+  i1:'셈여림 (p·f, 점점 세게·여리게)|Dynamics: soft and loud (p, f, getting louder or softer)',i2:'빠르기말 (알레그로·모데라토·안단테·아다지오)|Tempo words (Allegro, Moderato, Andante, Adagio)',i3:'악보 기호 (도돌이표·♯·♭·♮·늘임표)|Music symbols (repeat sign, sharp, flat, natural, fermata)'}},
+ {id:'sing',icon:'🎤',name:'노래|Singing',school:'초등 음악 · 연주 (노래 부르기)|Music: performing (singing)',ls:{
+  s1:'노래하는 바른 자세와 숨쉬기|Singing posture and breathing',s2:'목 풀기 (허밍·입술 떨기·사이렌)|Voice warm-ups (humming, lip trills, sirens)',s3:'들은 음을 같은 높이로 부르기|Singing back a note at the same pitch',
+  s4:'도레미파솔 계이름으로 부르기|Singing up the scale: Do Re Mi Fa Sol',s5:'계이름으로 노래 부르기: 반짝반짝 작은 별|Singing a song in Do-Re-Mi: Twinkle, Twinkle',s6:'목소리 건강 지키기|Taking care of the voice'}},
+ {id:'drum',icon:'🥁',name:'드럼|Drums',school:'초등 음악 · 연주 (리듬 악기)|Music: rhythm; performing on percussion',ls:{
+  d1:'드럼 세트의 소리와 치는 법|Drum kit parts and sounds',d2:'쿵-짝 기본 리듬 (베이스 드럼·스네어 드럼)|Basic boom-clap beat (bass and snare drum)',d3:'하이햇 8비트 록 리듬|Eight-beat rock pattern with hi-hat',
+  d4:'필인으로 마무리하기|Ending a phrase with a drum fill',d5:'디스코 리듬|Disco beat',j2:'싱코페이션(엇박) 리듬|Syncopated (off-beat) drum pattern'}},
+ {id:'harmony',icon:'🌈',name:'음계·화음|Scales and chords',school:'초등 음악 · 연주·감상 (화음)|Music: harmony',ls:{
+  g1:'반음과 온음 구별|Half steps and whole steps',g2:'건반에서 반음·온음 찾기|Finding half and whole steps on the keyboard',g3:'다장조 음계 만들기|Building the C major scale',g4:'장조와 단조 듣고 구별|Hearing major and minor',
+  g5:'화음 만들기: 도·미·솔|Building a chord: C–E–G',g6:'으뜸·버금딸림·딸림화음|The three main chords (I, IV, V)',g7:'장화음과 단화음 듣고 구별|Hearing major and minor chords',g8:'화음 반주 치기|Playing chords to go with a melody'}},
+ {id:'instr',icon:'🎺',name:'악기 알기|Instruments',school:'초등 음악 · 감상 (악기의 음색)|Music: timbre (how instruments sound)',ls:{
+  h1:'악기 가족 (현악기·목관악기·금관악기·타악기·건반악기)|Instrument families (strings, woodwinds, brass, percussion, keyboards)',h2:'소리 듣고 악기 가족 맞히기|Naming the instrument family by ear',
+  h3:'우리 악기 (가야금·해금·장구 등)|Korean traditional instruments (gayageum, haegeum, janggu…)',h4:'오케스트라|The orchestra'}},
+];
+// questions a parent can ask after a lesson, with the answer the lesson teaches: 'question ko|question en|answer ko|answer en'
+const LR_TALK={
+ a1:'음악의 “박”은 어떻게 흘러가? 손뼉으로 보여 줄래?|What is the beat in music? Can you clap it for me?|시계처럼 똑같은 간격으로 계속돼요|It keeps going at the same even speed, like a clock',
+ a2:'박이 빠르거나 느린 정도를 뭐라고 해?|What do we call how fast or slow the beat is?|빠르기|The tempo',
+ a4:'박을 넷씩 묶으면 몇 번째 박이 가장 힘차?|When beats come in groups of four, which beat is the strongest?|첫째 박 (센박)|The first beat (the strong beat)',
+ b1:'피아노에서 오른쪽으로 갈수록 소리는 어떻게 돼?|On a piano, what happens to the sound as you move to the right?|점점 높아져요|It gets higher',
+ b2:'건반에서 “도”는 어떻게 찾아?|How do you find C on a keyboard?|검은 건반 2개 묶음의 바로 왼쪽 흰 건반|The white key just left of a pair of black keys',
+ b3:'흰 건반 이름을 도부터 차례로 말해 줄래?|Can you name the white keys in order, starting from C?|도 레 미 파 솔 라 시, 그리고 다시 도|C D E F G A B, then C again (Do Re Mi Fa Sol La Ti Do)',
+ c1:'4분음표는 몇 박이야? 2분음표랑 온음표는?|How many beats does a quarter note last? A half note? A whole note?|4분음표 1박, 2분음표 2박, 온음표 4박|Quarter note 1 beat, half note 2 beats, whole note 4 beats',
+ c3:'악보에 쉼표가 나오면 어떻게 해?|What do you do when the music shows a rest?|그 길이만큼 소리 내지 않고 쉬어요|Stay silent for that many beats',
+ c5:'8분음표 두 개를 합치면 몇 박이야?|How many beats do two eighth notes make?|1박|One beat',
+ d1:'드럼 세트에서 가장 낮게 “쿵” 하는 드럼은? 어떻게 쳐?|Which drum in a drum kit makes the deepest boom, and how is it played?|베이스 드럼, 발로 페달을 밟아요|The bass drum; you press a pedal with your foot',
+ d4:'드럼의 “필인”은 무슨 신호야?|What does a drum fill tell the band?|곧 다음 부분으로 넘어간다는 신호|That a new part of the song is coming',
+ e1:'오선은 줄이 몇 개야? 어느 줄부터 세?|How many lines does a staff have, and which one is line 1?|5개, 맨 아래 줄부터 세요|5 lines, counted from the bottom',
+ e2:'가운데 도는 오선의 어디에 그려?|Where is middle C written on the staff?|오선 아래 짧은 덧줄 위|On a short ledger line below the staff',
+ f1:'4분의 4박자에서 한 마디에 4분음표가 몇 개 들어가?|In 4/4 time, how many quarter notes fit in one bar?|4개|Four',
+ f2:'왈츠는 박을 어떻게 세?|How do you count the beat in a waltz?|쿵-짝-짝, 3박자로 세요|In 3: boom-tick-tick',
+ g1:'미와 파 사이는 반음일까, 온음일까?|Are E and F (Mi and Fa) a half step or a whole step apart?|반음 (사이에 검은 건반이 없어요)|A half step (there is no black key between them)',
+ g3:'다장조 음계에서 반음인 곳은 어디야?|Where are the half steps in the C major scale?|미-파, 시-도|E–F and B–C (Mi–Fa and Ti–Do)',
+ g4:'장조와 단조는 느낌이 어떻게 달라?|How do major and minor usually sound different?|장조는 대개 밝고, 단조는 슬프거나 신비로운 느낌이 많아요|Major usually sounds bright; minor often sounds sad or mysterious',
+ g5:'다장조 으뜸화음은 어떤 음 세 개로 만들어?|Which three notes make the C major chord?|도·미·솔|C, E and G',
+ g6:'다장조에서 솔·시·레 화음은 이름이 뭐야?|In C major, what is the G–B–D chord called?|딸림화음 (V)|The V chord (the dominant)',
+ g7:'도·미·솔에서 미를 반음 내리면 느낌이 어떻게 돼?|What happens to C–E–G if you lower the E a half step?|단화음이 돼요. 흔히 슬픈 느낌이 나요|It becomes a minor chord, which often sounds sad',
+ h1:'악기 가족에는 어떤 것들이 있어?|What instrument families do you know?|현악기, 목관악기, 금관악기, 타악기, 건반악기|Strings, woodwinds, brass, percussion and keyboards',
+ h3:'줄 12개를 손가락으로 뜯어 연주하는 우리 악기는?|Which Korean instrument has 12 strings you pluck with your fingers?|가야금|The gayageum',
+ h4:'오케스트라 앞에서 빠르기와 셈여림을 알려 주는 사람은?|Who stands in front of an orchestra and shows how fast and how loud to play?|지휘자|The conductor',
+ i1:'악보에 p가 있으면 어떻게 연주해? f는?|How do you play when the music says p? And f?|p는 여리게, f는 세게|p means soft, f means loud',
+ i2:'안단테는 어떤 빠르기야? 알레그로는?|What speed is Andante? And Allegro?|안단테는 걷는 듯 느리게, 알레그로는 빠르게|Andante is a walking pace, a bit slow; Allegro is fast',
+ i3:'♯(올림표)가 붙으면 음이 어떻게 돼?|What does a sharp (♯) do to a note?|반음 올라가요|It raises the note a half step',
+ j1:'점4분음표는 몇 박이야?|How many beats does a dotted quarter note last?|1박 반|One and a half beats',
+ j3:'도 바로 오른쪽 검은 건반의 이름은?|What is the black key just right of C called?|도♯(올림 도), 레♭이라고도 해요|C sharp, also called D flat',
+ j5:'16분음표 몇 개가 모여야 1박이야?|How many sixteenth notes make one beat?|4개|Four',
+ s1:'노래할 때 숨을 들이마시면 배는 어떻게 돼?|When you breathe in to sing, what does your tummy do?|풍선처럼 불룩해져요|It puffs out like a balloon',
+ s2:'노래하기 전에 목은 어떻게 풀어?|How do you warm up your voice before singing?|허밍이나 입술 “부르르” 떨기|Humming or lip trills (“brrr”)',
+ s6:'목이 아프고 목소리가 쉬면 어떻게 해야 해?|What should you do if your throat hurts and your voice is hoarse?|노래를 쉬고 물을 마시며 목을 아껴요|Rest your voice and sip water',
+};
+// one short activity at home for each area
+const LR_HOME={
+ beat:'아이가 좋아하는 노래를 틀고 박에 맞춰 함께 손뼉을 쳐 보세요.|Play a song your child likes and clap along to the beat together.',
+ keys:'집 안에서 높은 소리와 낮은 소리를 찾아 비교해 보세요 (새소리, 냉장고 소리 등).|Hunt for high and low sounds at home, like a bird’s chirp or the fridge’s hum, and compare them.',
+ read:'노래 한 곡을 여리게(p) 또는 세게(f) 불러 주고 아이가 어느 쪽인지 맞혀 보게 한 뒤, 역할을 바꿔 보세요.|Sing a song softly (p) or loudly (f), let your child guess which it was, then swap roles.',
+ sing:'노래하기 전에 함께 “음~” 허밍과 입술 떨기로 목을 풀어 보세요.|Before singing together, warm up with humming and lip trills.',
+ drum:'무릎이나 쿠션을 두드리며 “쿵-짝 쿵-짝” 리듬을 함께 쳐 보세요.|Tap a boom-clap beat together on your knees or a cushion.',
+ harmony:'노래 몇 곡을 들으며 밝은 느낌(장조)인지 슬픈 느낌(단조)인지 이야기해 보세요.|Listen to a few songs and talk about whether each sounds bright (major) or sad (minor).',
+ instr:'음악을 들으며 어떤 악기 소리가 들리는지 번갈아 맞혀 보세요.|While listening to music, take turns naming the instruments you hear.',
+};
+const lrTwo=s=>{const i=s.indexOf('|');return [s.slice(0,i),s.slice(i+1)]};
+const lrNum=n=>String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g,',');
+// built from the current player's saved progress only (no DOM), every time LR saves
+function learnSummary(){const N=LESSONS.length,rec=id=>S.lessons[id]||null,mast=id=>{const r=rec(id);return !!(r&&r.s>=1)},tried=id=>{const r=rec(id);return !!(r&&(r.n||r.pass||r.s))};
+ const NAME={},AREA={};LR_AREAS.forEach(a=>Object.keys(a.ls).forEach(id=>{NAME[id]=lrTwo(a.ls[id]);AREA[id]=a.id}));
+ const areas=LR_AREAS.map(a=>({id:a.id,name:lrTwo(a.name),icon:a.icon,school:lrTwo(a.school),skills:LESSONS.filter(l=>a.ls[l.id]).map(l=>{const r=rec(l.id),st=mast(l.id)?2:tried(l.id)?1:0;
+  // practising: how close the best try came to the one-star mark
+  const k={id:l.id,name:NAME[l.id],st,p:st===2?1:st?Math.min(.95,Math.round((r.best||0)/.45*100)/100):0},x=LR.stat(l.id);if(x){k.r=x.r;k.w=x.w}return k})}));
+ const passed=LESSONS.filter(l=>mast(l.id)).length,stars=starTotal(),three=LESSONS.filter(l=>(rec(l.id)||{}).s>=3).length;
+ const medals=CONTESTS.map(c=>(S.contests[c.id]||{}).medal||0),mN=medals.filter(m=>m>0).length,mc=k=>medals.filter(m=>m===k).length;
+ const songs=Object.keys(SONGS).filter(id=>S.songs[id]&&S.songs[id].n).length,drums=Object.keys(DRUMS).filter(id=>S.drums[id]&&S.drums[id].n).length,st=S.stats||{},facts=[];
+ if(passed)facts.push(['🎓',`별을 받고 통과한 레슨 ${passed}개 (전체 ${N}개)`,`${passed} of ${N} lessons passed with stars`]);
+ if(stars)facts.push(['⭐',`모은 별 ${stars}개 · 별 3개를 받은 레슨 ${three}개`,`${stars} stars earned · ${three} lessons with all 3 stars`]);
+ if(mN)facts.push(['🏅',`메달을 딴 음악 대회 ${mN}개 (금 ${mc(3)} · 은 ${mc(2)} · 동 ${mc(1)})`,`Medals in ${mN} music contests (${mc(3)} gold, ${mc(2)} silver, ${mc(1)} bronze)`]);
+ if(songs||drums)facts.push(['🎹',[songs?`건반으로 연주한 곡 ${songs}곡`:'',drums?`드럼 리듬 ${drums}가지`:''].filter(Boolean).join(' · '),[songs?`${songs} songs played on the keyboard`:'',drums?`${drums} drum patterns played`:''].filter(Boolean).join(' · ')]);
+ if(st.taps>=20){const pc=Math.round(100*(st.perfect||0)/st.taps);facts.push(['🎯',`박자에 맞춰 친 음 ${lrNum(st.taps)}개 (그중 ‘완벽’ 판정 ${pc}%)`,`${lrNum(st.taps)} notes and beats hit in time (${pc}% rated “perfect”)`])}
+ if(S.streak.best>=2)facts.push(['🔥',`가장 긴 연속 연습 ${S.streak.best}일`,`Longest practice streak: ${S.streak.best} days`]);
+ // lessons open one after another, so the furthest ones tried are the most recent
+ const recent=LESSONS.map(l=>l.id).filter(tried).reverse();
+ const cand=[...recent.filter(mast),...recent.filter(id=>!mast(id))].filter(id=>LR_TALK[id]),tk=[],seen=new Set();
+ cand.forEach(id=>{if(tk.length<4&&!seen.has(AREA[id])){tk.push(id);seen.add(AREA[id])}});cand.forEach(id=>{if(tk.length<4&&!tk.includes(id))tk.push(id)});
+ const hz=[...new Set(recent.map(id=>AREA[id]))].slice(0,3);if(!hz.length)hz.push('beat','keys');
+ const next=[],nl=nextLesson();
+ next.push(nl?[`다음 레슨: ${NAME[nl.id][0]}`,`Next lesson: ${NAME[nl.id][1]}`]:[`${N}개 레슨을 모두 마쳤어요. 모든 레슨 별 3개와 대회 금메달에 도전해 보세요`,`All ${N} lessons are finished. Next: 3 stars in every lesson and contest gold`]);
+ const redo=recent.find(id=>!mast(id)&&(!nl||id!==nl.id))||recent.find(id=>(rec(id)||{}).s===1);
+ if(redo)next.push(mast(redo)?[`별 더 모으기: ${NAME[redo][0]} (지금 별 1개)`,`Replay for more stars: ${NAME[redo][1]} (1 star so far)`]:[`다시 도전하기: ${NAME[redo][0]} (아직 별 없음)`,`Try again for a first star: ${NAME[redo][1]}`]);
+ const ct=CONTESTS.find(c=>contestOpen(c)&&((S.contests[c.id]||{}).medal||0)<3);
+ if(ct){const n=lrTwo(ct.name);next.push([`음악 대회 금메달 도전: ${n[0]}`,`Go for gold in a music contest: ${n[1]}`])}
+ else next.push(['매일 “오늘의 연습” 세 가지로 연속 연습 이어 가기','Do the three daily practice tasks to keep the streak going']);
+ return {v:1,level:[`레슨 ${passed}/${N} 통과 · Lv.${S.lvl}`,`${passed}/${N} lessons passed · Lv. ${S.lvl}`],
+  focus:['62개의 짧은 레슨에서 여섯 선생님 캐릭터와 함께 박 지키기, 리듬과 음표 읽기, 화면 건반으로 쉬운 곡 치기, 음 높이 맞춰 노래하기, 드럼 리듬, 화음, 악기 구별을 익혀요.','In 62 short lessons with six teacher characters, children work on keeping a steady beat, reading rhythms and notes, playing simple songs on an on-screen keyboard, singing in tune, drum patterns, chords and recognizing instruments.'],
+  unit:['문제','questions'],areas,facts:facts.slice(0,6),talk:tk.map(id=>LR_TALK[id].split('|')),home:hz.map(a=>lrTwo(LR_HOME[a])),next:next.slice(0,3)}}
+
 // ---------------------------------------------------------------- start
 function returnGreeting(){const gap=daysSince(S.streak.last);if(S.intro&&S.streak.last&&gap>=3){const t=TEACHERS[pick(Object.keys(TEACHERS))];
  modal(`<div class="center"><span class="tface huge" style="background:${t.bg}">${pic(t.img,t.icon)}</span><h2>${L('보고 싶었어요!','We missed you!')}</h2><p>${L('오늘은 가볍게 “오늘의 연습” 하나만 해 볼까요? 1분이면 돼요!','How about just one quick task today? It only takes a minute!')}</p></div><div class="row"><button class="btn green" data-act="close" type="button">${L('좋아요!','Okay!')}</button></div>`,{onOpen:()=>speak(L('보고 싶었어요! 오늘은 가볍게 하나만 해 볼까요?','We missed you! Just one quick task today?'))})}}
@@ -2970,6 +3117,7 @@ $('gearBtn').addEventListener('click',openSettings);$('coinPill').addEventListen
 $('lvlBtn').addEventListener('click',()=>{SFX.click();openMe()});$('homeLink').href=homeHref();
 // with more than one player, always ask who is practicing first so progress never mixes
 applyLang();applyOpts();save();if(!MGP.me&&ROOT.P.length>1)go('who',false);else{go('home',false);if(!S.intro)welcome();else returnGreeting()}
+try{LR.set(learnSummary)}catch(e){}
 window.__musTest={get:()=>S,root:()=>ROOT,selectPlayer,set:o=>{Object.assign(S,o);save();updateHud()},go,openLesson,startLessonActivity,startDaily,contestLobby,act:()=>ACT,sim:acc=>ACT&&ACT.sim(acc),LESSONS,CONTESTS,SONGS,DRUMS,playSong,playDrum,modalFlush:()=>{while(CUR)closeModal();MQ.length=0}};
 </script>
 <script>/* Coach Moon says hello once a day, shares a tip and suggests a break after a long session */try{coachStart(["오늘도 즐겁게 연주해 봐요!", "Let’s make music today!"],[["박자는 발로 콩콩 세면 더 쉬워요.", "Tap your foot to count the beat. It makes it easier!"], ["어려운 곡은 느리게 연습하면 금방 늘어요.", "Practice hard songs slowly and you’ll improve fast."], ["매일 조금씩 연습하는 게 제일 좋아요.", "A little practice every day works best."]])}catch(e){}</script>

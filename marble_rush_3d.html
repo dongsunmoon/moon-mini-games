@@ -22,6 +22,33 @@ const L=(ko,en)=>LANG==='en'?en:ko;
 // · coachPop(pose,ko,en) shows a small bubble in the corner at good moments. It never blocks a tap and
 //   waits between appearances, so he never nags. He only praises and encourages.
 // Source: _src/coach/coach.js, copied into every game by _src/coach/inject.py.
+// LR keeps the learning record that the parents' report (report.html) reads. Each game has one record per player,
+// stored under its save prefix + "learn", so the profile script files it as "...@profileId". It holds:
+// · days: play time in seconds and right/wrong answers per day (the last 120 days). Time counts only while the
+//   page is visible and the player touched or typed in the last 2 minutes.
+// · sum: the game's own summary of skills, built by the function passed to LR.set() (see _src/report/SPEC.md).
+// · when: the day each skill first reached "mastered" ('' = before the record started).
+// · sk: right/wrong counts per skill, from coachAnswer(ok,skillId).
+// A game's reset must call LR.forget() so the report forgets only that game; LR.resume() starts a fresh record.
+const LR=(()=>{const f=(location.pathname.split('/').pop()||'').replace(/\.html$/,'');
+ const KEY={math_aquarium:'mathAquarium.learn',science_guardians:'scienceGuardians.learn',music_academy:'musicAcademy.learn',chess_knights:'chessKnights.learn',detective_game:'little-detective-learn',marble_rush_3d:'marbleRush.learn',coding_island:'pythonIsland.learn',python_island:'pythonIsland.learn'}[f];
+ const day=()=>new Date().toLocaleDateString('en-CA');let R=null,fn=null,off=!KEY,dirty=false,last=0;
+ const load=()=>{if(R)return R;try{R=JSON.parse(localStorage.getItem(KEY)||'null')}catch(e){}if(!R||R.v!==1)R={v:1,days:{},when:{}};return R};
+ const today=()=>{const r=load(),d=day();return r.days[d]||(r.days[d]={s:0,r:0,w:0})};
+ const save=()=>{if(off)return;const r=load();
+  if(fn){try{const s=fn();if(s){const first=!r.sum,d=day();r.sum=s;(s.areas||[]).forEach(a=>(a.skills||[]).forEach(k=>{if(k.st===2&&r.when[k.id]==null)r.when[k.id]=first?'':d}))}}catch(e){}}
+  const ks=Object.keys(r.days).sort();ks.slice(0,Math.max(0,ks.length-120)).forEach(k=>delete r.days[k]);
+  r.at=Date.now();try{localStorage.setItem(KEY,JSON.stringify(r))}catch(e){}dirty=false};
+ ['pointerdown','keydown','touchstart','wheel'].forEach(e=>addEventListener(e,()=>{last=Date.now()},{passive:true,capture:true}));
+ setInterval(()=>{if(off||document.hidden||Date.now()-last>120000)return;today().s+=10;dirty=true},10000);
+ setInterval(()=>{if(dirty)save()},30000);
+ addEventListener('pagehide',save);document.addEventListener('visibilitychange',()=>{if(document.hidden&&dirty)save()});
+ return {
+  ans(ok,skill){if(off)return;const t=today();ok?t.r++:t.w++;if(skill!=null){const r=load(),sk=r.sk||(r.sk={}),x=sk[skill]||(sk[skill]=[0,0]);x[ok?0:1]++}dirty=true},
+  set(f){fn=f;setTimeout(save,1500)},save,
+  stat(id){const x=(load().sk||{})[id];return x?{r:x[0],w:x[1]}:null},
+  forget(){off=true;R=null;try{localStorage.removeItem(KEY)}catch(e){}},
+  resume(){off=!KEY;R=null;dirty=false}}})();
 const coachEsc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const coachNm=()=>{try{return MGP.me&&MGP.me.name||''}catch(e){return ''}};
 const coachPick=a=>a[Math.random()*a.length|0];
@@ -41,8 +68,9 @@ function coachPop(pose,ko,en,o={}){const now=Date.now();if(!o.force&&now-coachAt
  let el=document.getElementById('coachPop');if(!el){el=document.createElement('div');el.id='coachPop';el.setAttribute('role','status');document.body.appendChild(el)}
  el.innerHTML=`<img src="images/coach-moon-${pose}.webp" alt="" onerror="this.remove()"><p><b>${L('문 코치','Coach Moon')}</b>${L(ko,en)}</p>`;
  el.classList.remove('show');void el.offsetWidth;el.classList.add('show');clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove('show'),o.ms||4500);return true}
-// call with every final answer: praise runs of right answers, and help after two misses in a row
-function coachAnswer(ok){
+// call with every final answer: praise runs of right answers, and help after two misses in a row.
+// The optional skill id (one of the skill ids in the game's LR summary) counts the answer for that skill in the report.
+function coachAnswer(ok,skill){try{LR.ans(ok,skill)}catch(e){}
  if(ok){coachRun++;coachMiss=0;if(![3,5,10,15,20,30].includes(coachRun))return;const n=coachRun,t=coachPick([[`${n}번 연속 성공! 집중력이 대단해요 🌙`,`${n} in a row! Amazing focus 🌙`],[`와, ${n}번 연속이에요! 문 코치가 박수 쳐요 👏`,`Wow, ${n} in a row! Coach Moon is clapping 👏`],[`${n}번 연속! 오늘 머리가 반짝반짝해요 ✨`,`${n} straight! Your brain is sparkling today ✨`]]);coachPop('clap',t[0],t[1],{gap:20000});return}
  coachRun=0;coachMiss++;if(coachMiss!==2)return;const nm=coachEsc(coachNm()),t=coachPick([['괜찮아요! 틀리면서 배우는 거예요. 천천히 다시 봐요 🌙','That’s okay! Mistakes help us learn. Take another look 🌙'],[nm?`${nm}, 할 수 있어요! 문 코치가 응원해요 🌙`:'할 수 있어요! 문 코치가 응원해요 🌙',nm?`You can do it, ${nm}! Coach Moon is cheering 🌙`:'You can do it! Coach Moon is cheering 🌙'],['실수는 배움의 친구예요. 한 번 더 해 봐요!','Mistakes are friends of learning. One more try!']]);coachPop('go',t[0],t[1],{gap:30000})}
 // Once a day per game he says hello, a few minutes in he shares a tip, and after 20 minutes he suggests a little rest.
@@ -808,14 +836,15 @@ const TRAILS=[['none','✖️',L('없음','None')],['sparkle','✨',L('반짝이
 // ---------------------------------------------------------------- settings
 let worldIdx=0,numBalls=8,voiceOn=true,sfxOn=true,mine=0,mineStats={races:0,wins:0},voicePick={},names=Array(16).fill(''),mode='single',league=null;
 // added later: my own courses, my marble's look, badge progress (cheers, worlds raced, experiments done…)
-const freshStats=()=>({cheers:0,worlds:[],builds:0,customRaces:0,labs:{},leagues:0,replays:0});
+// fixes: a saved course whose pieces were changed and raced again (build → test → improve), counted since 2026-11
+const freshStats=()=>({cheers:0,worlds:[],builds:0,customRaces:0,labs:{},leagues:0,replays:0,fixes:0});
 let customs=[],skin={pat:'plain',trail:'none'},stats=freshStats(),badges=[];
 function save(){try{localStorage.setItem('marbleRush.v2',JSON.stringify({worldIdx,numBalls,voiceOn,sfxOn,mine,mineStats,voicePick,names,mode,league,customs,skin,stats,badges}))}catch(e){}}
 (function load(){try{const d=JSON.parse(localStorage.getItem('marbleRush.v2')||'null')||JSON.parse(localStorage.getItem('marble3dsettings')||'{}');
  const nn=(v,max=1e6)=>Math.max(0,Math.min(max,Math.floor(Number(v)||0)));
  if(Array.isArray(d.customs))customs=d.customs.filter(c=>c&&Array.isArray(c.mods)).slice(0,6).map(c=>({name:String(c.name||'').replace(/[<>]/g,'').slice(0,12)||L('나의 코스','My course'),theme:clamp(nn(c.theme),0,WORLDS.length-1),mods:c.mods.filter(m=>PIECE_IDS.includes(m)).slice(0,8)})).filter(c=>c.mods.length);
  if(d.skin&&typeof d.skin==='object')skin={pat:String(d.skin.pat||'plain'),trail:String(d.skin.trail||'none')};
- if(d.stats&&typeof d.stats==='object'){const x=d.stats;stats={cheers:nn(x.cheers),worlds:Array.isArray(x.worlds)?x.worlds.filter(w=>WORLDS.some(W=>W.id===w)):[],builds:nn(x.builds),customRaces:nn(x.customRaces),labs:{},leagues:nn(x.leagues),replays:nn(x.replays)};if(x.labs&&typeof x.labs==='object')for(const k in x.labs)if(EXP_IDS.includes(k))stats.labs[k]={n:nn(x.labs[k]?.n),right:nn(x.labs[k]?.right)}}
+ if(d.stats&&typeof d.stats==='object'){const x=d.stats;stats={cheers:nn(x.cheers),worlds:Array.isArray(x.worlds)?x.worlds.filter(w=>WORLDS.some(W=>W.id===w)):[],builds:nn(x.builds),customRaces:nn(x.customRaces),labs:{},leagues:nn(x.leagues),replays:nn(x.replays),fixes:nn(x.fixes)};if(x.labs&&typeof x.labs==='object')for(const k in x.labs)if(EXP_IDS.includes(k))stats.labs[k]={n:nn(x.labs[k]?.n),right:nn(x.labs[k]?.right)}}
  if(Array.isArray(d.badges))badges=d.badges.filter(b=>typeof b==='string');
  worldIdx=clamp(Number(d.worldIdx??d.mapIndex)||0,0,WORLDS.length+customs.length-1);numBalls=clamp(Number(d.numBalls)||8,2,16);voiceOn=d.voiceOn!==false;sfxOn=d.sfxOn!==false;mine=clamp(Number(d.mine)||0,0,numBalls-1);
  mineStats={races:Math.max(0,Number(d.mineStats?.races)||0),wins:Math.max(0,Number(d.mineStats?.wins)||0)};voicePick=d.voicePick&&typeof d.voicePick==='object'?d.voicePick:{};
@@ -1337,12 +1366,13 @@ function builderAct(b){
  renderBuilder();const f=$('buildBody').querySelector(`[data-b="${a}"][data-i="${a==='up'?i-1:a==='down'?i+1:i}"]`)||$('buildBody').querySelector(`[data-b="${a}"]`);if(f&&!f.disabled)try{f.focus({preventScroll:true})}catch(e){}}
 function saveDraftAndRace(){
  const d=draft;if(d.mods.length<2)return;const c={name:(d.name||'').trim()||L('나의 코스','My course'),theme:d.theme,mods:d.mods.slice()};
- let k=d.idx;if(k!=null&&customs[k])customs[k]=c;else{if(customs.length>=MAX_CUSTOMS){buildMsg=L(`코스는 ${MAX_CUSTOMS}개까지 저장돼요. 하나를 지우고 만들어요.`,`You can keep ${MAX_CUSTOMS} courses. Delete one first.`);renderBuilder();return}customs.push(c);k=customs.length-1;stats.builds++}
+ let k=d.idx;if(k!=null&&customs[k]){if(customs[k].mods.join()!==c.mods.join())stats.fixes++;customs[k]=c}else{if(customs.length>=MAX_CUSTOMS){buildMsg=L(`코스는 ${MAX_CUSTOMS}개까지 저장돼요. 하나를 지우고 만들어요.`,`You can keep ${MAX_CUSTOMS} courses. Delete one first.`);renderBuilder();return}customs.push(c);k=customs.length-1;stats.builds++}
  worldIdx=WORLDS.length+k;if(mode==='league')mode='single';if(labMode){labMode=false;labExp=null}save();closeModal('buildModal');prepare();checkBadges();startRace();
  coachTell('clap',`직접 설계한 코스로 출발! 만들고, 시험하고, 고치는 게 진짜 엔지니어의 방법이에요 🌙`,`Off we go on the course you designed! Build, test, improve: that's how real engineers work 🌙`,{gap:20000})}
 
 // ---------------------------------------------------------------- marble lab: predict → observe → explain
-let labMode=false,labExp=null,labPred=null,labRes=[{},{}],labStart=[],labEndAt=0;
+// labFresh: the next result is the first test of a new guess (only that one counts in the parents' report; "Run again" keeps the guess)
+let labMode=false,labExp=null,labPred=null,labFresh=false,labRes=[{},{}],labStart=[],labEndAt=0;
 function setupLab(){
  const ex=labExp;course=Sim.build(null,null,ex.kind,ex.lanes);theme=LAB_THEME;
  const n=ex.kind==='crash'?4:2,mats=ex.kind==='crash'?[ex.lanes[0].mat,ex.lanes[1].mat,ex.lanes[0].target,ex.lanes[1].target]:ex.lanes.map(l=>l.mat);
@@ -1387,6 +1417,7 @@ function labExplain(){
  const head=ex.measure==='time'?(win==='same'?L('🤝 거의 동시에 도착!','🤝 They arrived together!'):`🏁 ${L('먼저 도착','First to arrive')}: ${nmOf(win)}`):ex.measure==='up'?(win==='same'?L('🤝 비슷하게 튀었어요!','🤝 About the same bounce!'):`↕️ ${L('더 높이','Higher')}: ${nmOf(win)}`):(win==='same'?L('🤝 비슷하게 갔어요!','🤝 About the same distance!'):`↔️ ${L('더 멀리','Farther')}: ${nmOf(win)}`);
  const detail=ex.measure==='time'?`A ${f(v[0])}${L('초','s')} · B ${f(v[1])}${L('초','s')}`:`A ${sq(v[0])}${L('칸',' squares')} · B ${sq(v[1])}${L('칸',' squares')}`;
  const r=stats.labs[ex.id]||{n:0,right:0};r.n++;if(right)r.right++;stats.labs[ex.id]=r;save();
+ if(labFresh){labFresh=false;try{LR.ans(right,'exp_'+ex.id)}catch(e){}}
  const predTxt=ex.opts.find(o=>o[0]===labPred)?.[1]||'';
  $('resultCard').innerHTML=`<div class="lab-head">${ex.ic} ${esc(ex.t)}</div><div class="lab-result">${esc(head)}</div><p class="lab-detail">${esc(detail)}</p>
   <p class="lab-fb ${right?'ok':'new'}">${right?L('🎯 예상이 맞았어요! 과학자처럼 생각했어요.','🎯 Your guess was right! You thought like a scientist.'):L('🔍 예상과 달랐어요! 그래서 실험이 재밌어요. 과학자들도 이렇게 새로 알게 돼요.','🔍 Not what you guessed! That is what makes experiments fun. Scientists learn new things exactly like this.')}<small>${L('내 예상','My guess')}: ${esc(predTxt)}</small></p>
@@ -1462,7 +1493,7 @@ $('voiceSelect').addEventListener('change',e=>{voicePick[LANG]=e.target.value;sa
 $('resultCard').addEventListener('click',e=>{const a=e.target.closest('[data-act]')?.dataset.act;if(!a)return;
  if(a==='again'){prepare();startRace()}else if(a==='nextWorld'){worldIdx=(worldIdx+1)%WORLDS.length;save();prepare();startRace()}
  else if(a==='replay')startReplay();else if(a==='peek'){$('resultOverlay').classList.add('hidden');$('peekBack').classList.remove('hidden');try{$('peekBack').focus({preventScroll:true})}catch(e){}}else if(a==='edit')openBuilder(worldIdx-WORLDS.length,e.target.closest('[data-act]'));
- else if(a==='pred'){labPred=e.target.closest('[data-k]').dataset.k;tone(700,80,'triangle',.07);coachTell('idea','좋은 예상이에요! 이제 실험으로 확인해 봐요 🌙','Great guess! Now let’s test it 🌙',{gap:45000,ms:3500});startRace()}
+ else if(a==='pred'){labPred=e.target.closest('[data-k]').dataset.k;labFresh=true;tone(700,80,'triangle',.07);coachTell('idea','좋은 예상이에요! 이제 실험으로 확인해 봐요 🌙','Great guess! Now let’s test it 🌙',{gap:45000,ms:3500});startRace()}
  else if(a==='labAgain'){prepare();startRace()}else if(a==='labList')openLabPicker(e.target.closest('[data-act]'));else if(a==='labExit')exitLab();
  else if(a==='labNext'){const k=EXPS.indexOf(labExp),nx=EXPS.find((x,i)=>i>k&&!stats.labs[x.id])||EXPS.find(x=>!stats.labs[x.id])||EXPS[(k+1)%EXPS.length];enterLab(nx.id)}
  else if(a==='next'){prepare();startRace()}else if(a==='newLeague'){startLeague();prepare();startRace()}});
@@ -1492,8 +1523,10 @@ document.querySelectorAll('[data-lang]').forEach(b=>b.addEventListener('click',(
 function resetGame(){
  // MGP keeps this player's copy under "key@profileId", so this clears only this game for this player
  try{localStorage.removeItem('marbleRush.v2');localStorage.removeItem('marble3dsettings')}catch(e){}
+ try{LR.forget()}catch(e){}  // the parents' report forgets this game too (no save can run until LR.resume below)
  worldIdx=0;numBalls=8;voiceOn=true;sfxOn=true;mine=0;mineStats={races:0,wins:0};voicePick={};names=Array(16).fill('');mode='single';league=null;
- customs=[];skin={pat:'plain',trail:'none'};stats=freshStats();badges=[];labMode=false;labExp=null;labPred=null;
+ customs=[];skin={pat:'plain',trail:'none'};stats=freshStats();badges=[];labMode=false;labExp=null;labPred=null;labFresh=false;
+ try{LR.resume()}catch(e){}  // a fresh record from the fresh state above
  $('namesPanel').classList.add('hidden');fillVoiceSelect();prepare();closeModal('settingsModal');
  setCaption(L('🗑️ 마블 레이스 기록을 지웠어요. 처음부터 다시 시작해요!','🗑️ Marble Rush records erased. A fresh start!'))}
 $('resetDataBtn').addEventListener('click',e=>askConfirm({title:L('🗑️ 정말 지울까요?','🗑️ Really erase?'),
@@ -1505,6 +1538,69 @@ window.addEventListener('resize',resize);
 if('speechSynthesis' in window){speechSynthesis.getVoices();speechSynthesis.addEventListener?.('voiceschanged',fillVoiceSelect)}
 fillVoiceSelect();setTimeout(fillVoiceSelect,600);
 checkBadges(true);resize();prepare();setCaption(L('환영합니다! 응원할 구슬을 고르고 출발 버튼을 눌러요!','Welcome! Pick your marble and press Start!'));
+// ---------------------------------------------------------------- parents' report (report.html, see _src/report/SPEC.md)
+// Read from this save only. Lab notebook (stats.labs: runs and runs where the guess matched), builds, badges and races are
+// lifetime numbers; per-experiment right/wrong counts (LR.ans) and course fixes start when this was added.
+// An experiment is mastered once it was run and the child's guess matched the result at least once (the game's 🎯 message).
+const RX={weight:{t:['무게 경주','Heavy vs light'],n:['무게가 다른 두 구슬이 같은 비탈을 굴러 내려오는 빠르기','How fast a heavy and a light ball roll down the same slope'],
+  q:['무거운 쇠구슬과 가벼운 유리구슬이 같은 비탈을 굴러 내려가면 누가 먼저 도착했어?','When a heavy steel ball and a light glass marble rolled down the same slide, which got there first?','거의 동시에요. 무게가 달라도 굴러 내려오는 빠르기는 거의 같아요.','About the same time. Heavy or light, they rolled down at almost the same speed.']},
+ slope:{t:['가파른 길, 완만한 길','Steep or gentle'],n:['비탈의 기울기와 굴러 내려오는 빠르기','How the steepness of a slope changes speed'],
+  q:['가파른 길과 완만한 길 중 어느 쪽 구슬이 먼저 도착했어? 왜 그럴까?','Which marble reached the end first, on the steep slide or the gentle one? Why?','가파른 길이요. 가파를수록 비탈을 따라 끌어내리는 힘이 커요.','The steep one. The steeper the slope, the harder gravity pulls the marble down it.']},
+ friction:{t:['얼음길과 카펫길','Ice or carpet'],n:['길의 표면과 마찰력 (얼음길과 카펫길)','Surfaces and friction (ice or carpet)'],
+  q:['얼음길과 카펫길 중 어디에서 구슬이 더 빨랐어? 왜?','Was the marble faster on the ice slide or the carpet slide? Why?','얼음길이요. 카펫은 마찰력이 커서 구슬을 붙잡아요.','On the ice. Carpet has more friction, which holds the marble back.']},
+ bounce:{t:['통통 튀기','Bounce test'],n:['재료에 따라 튀어 오르는 높이 (고무공과 찰흙공)','How high balls of different materials bounce (rubber or clay)'],
+  q:['고무공과 찰흙공을 같은 높이에서 떨어뜨리면 어느 공이 더 높이 튀었어?','When a rubber ball and a clay ball dropped from the same height, which bounced higher?','고무공이요. 고무는 눌렸다가 다시 펴지는 성질(탄성)이 있어요.','The rubber ball. Rubber springs back after it is squashed (it is elastic).']},
+ wind:{t:['바람 실험','Wind test'],n:['같은 바람에 밀리는 거리와 무게','How far the same wind pushes a heavy and a light ball'],
+  q:['옆에서 바람이 불 때 무거운 구슬과 가벼운 구슬 중 어느 쪽이 더 멀리 밀렸어?','When wind blew from the side, which was pushed farther: the heavy ball or the light one?','가벼운 구슬이요. 무거울수록 움직임을 바꾸기 어려워요.','The light one. The heavier something is, the harder it is to change how it moves.']},
+ crash:{t:['쾅! 부딪치기','Crash test'],n:['부딪칠 때 무게에 따라 달라지는 움직임','What happens when a heavy and a light ball crash'],
+  q:['무거운 구슬이 가벼운 구슬을 치면 어떻게 됐어? 반대로 치면?','What happened when the heavy ball hit the light one? And the other way around?','가벼운 구슬이 멀리 굴러가요. 반대로 치면 무거운 구슬은 조금만 움직여요.','The light ball rolled far. When the light one hit, the heavy one barely moved.']},
+ curve:{t:['지름길의 비밀','The shortcut secret'],n:['곧은 길과 휘어진 길, 어느 쪽이 빠를까','Straight path or curved path: which is faster'],
+  q:['곧은 길과 휘어진 길 중 어느 구슬이 먼저 도착했어? 휘어진 길이 더 긴데 왜 그럴까?','Which marble arrived first, on the straight path or the curved one? The curved one is longer, so why?','휘어진 길이요. 처음에 가파르게 떨어져서 금방 빨라져요.','The curved path. It drops steeply at the start, so the marble speeds up early.']}};
+const HOME={ramp:['책 두세 권에 쟁반이나 두꺼운 종이를 기대어 낮은 비탈을 만들고 장난감 자동차를 굴려 봐요. 책을 한 권씩 더 쌓으며 얼마나 멀리 가는지 비교해요.','Lean a tray or stiff cardboard on two or three books to make a low ramp and roll a toy car down. Add one book at a time and compare how far it goes.'],
+ surface:['같은 비탈에 수건, 종이, 알루미늄 포일을 차례로 깔고 같은 자동차를 굴려 봐요. 바꾸는 것은 표면 하나뿐이에요.','Cover the same ramp with a towel, then paper, then foil, and roll the same car each time. Only the surface changes.'],
+ bounce:['고무공, 탁구공, 돌돌 만 양말을 허리 높이에서 함께 떨어뜨려 어느 것이 가장 높이 튀는지 봐요.','Drop a rubber ball, a table-tennis ball and a rolled-up sock together from waist height and see which bounces highest.'],
+ track:['휴지심과 종이컵을 테이프로 이어 탁구공이 굴러가는 길을 만들고, 굴려 본 뒤 한 군데를 고쳐 다시 굴려 봐요.','Tape paper tubes and paper cups into a track for a table-tennis ball, test it, change one part, then test again.']};
+function learnSummary(){
+ const pl=(n,w)=>n+' '+w+(n===1?'':'s'),done=id=>(stats.labs[id]?.n||0)>0;
+ const bd=id=>{const b=BADGES.find(x=>x.id===id);return b?Math.min(1,b.val()/b.goal):0};
+ const sk=(id,name,p)=>({id,name,st:p>=1?2:p>0?1:0,p:Math.round(p*100)/100});
+ const lab=EXPS.map(e=>{const r=stats.labs[e.id],ok=done(e.id)&&r.right>0,c=LR.stat('exp_'+e.id),k={id:'exp_'+e.id,name:RX[e.id].n,st:ok?2:done(e.id)?1:0,p:ok?1:done(e.id)?.5:0};if(c){k.r=c.r;k.w=c.w}return k});
+ const kinds=EXPS.filter(e=>done(e.id)).length,runs=EXPS.reduce((t,e)=>t+(stats.labs[e.id]?.n||0),0),B=stats.builds,W=stats.worlds.length,nb=badges.length;
+ const areas=[
+  {id:'inquiry',icon:'🔬',name:['과학 탐구 과정','Science inquiry'],school:['초등 과학 탐구 과정 (예상·관찰·변인 통제)','Inquiry skills: predict, observe, fair test (Ontario Science and Technology, Strand A)'],skills:[
+   sk('inq_predict',['실험 전에 결과를 예상하고 실험으로 확인하기','Predicting a result, then checking it with a test'],bd('scientist')),
+   sk('inq_fair',['한 가지만 다른 두 길을 나란히 비교하기 (공정한 실험)','Comparing two lanes that differ in only one thing (a fair test)'],bd('professor'))]},
+  {id:'forces',icon:'⛰️',name:['힘과 운동','Forces and motion'],school:['초등 과학 ‘운동과 에너지’ 영역','Forces and motion (Ontario Grade 3: Forces Causing Movement)'],skills:lab},
+  {id:'design',icon:'🛠️',name:['설계하고 만들기','Designing and building'],skills:[
+   sk('build_design',['조각을 고르고 순서를 정해 코스 설계하기','Designing a course by choosing pieces and their order'],bd('engineer')),
+   sk('build_test',['직접 만든 코스를 달려 보며 시험하기','Testing their own course by racing on it'],bd('builder')),
+   {id:'build_fix',name:['시험해 본 코스를 고쳐서 다시 달려 보기','Changing a tested course and racing it again'],st:stats.fixes?1:0,p:stats.fixes?.5:0}]}];
+ const facts=[];
+ if(runs)facts.push(['🔬',`실험 ${runs}번 · ${kinds}/${EXPS.length}가지`,`${pl(runs,'experiment run')} · ${kinds} of ${EXPS.length} kinds`]);
+ if(B)facts.push(['🛠️',`직접 설계한 코스 ${B}개`+(stats.customRaces?` · 내 코스 레이스 ${stats.customRaces}번`:''),`${pl(B,'course')} designed`+(stats.customRaces?` · ${pl(stats.customRaces,'race')} on them`:'')]);
+ if(mineStats.races)facts.push(['🏁',`레이스 ${mineStats.races}번`,pl(mineStats.races,'race')]);
+ if(W)facts.push(['🗺️',`월드 ${W}/${WORLDS.length}곳에서 레이스`,`Raced in ${W} of ${WORLDS.length} worlds`]);
+ if(stats.leagues)facts.push(['🏟️',`5경기 리그 완주 ${stats.leagues}번`,stats.leagues===1?'Finished a 5-race league':`Finished ${stats.leagues} five-race leagues`]);
+ if(mineStats.wins)facts.push(['🏆',`응원한 구슬 1등 ${mineStats.wins}번`,`Their marble came first ${mineStats.wins===1?'once':mineStats.wins+' times'}`]);
+ // talk about experiments played since the report began first (they have counts), then mastered ones, then the rest that were run
+ const ex=lab.filter(k=>k.st).map((k,i)=>[(k.r!=null?0:4)+(k.st===2?0:2),i,k]).sort((a,b)=>a[0]-b[0]||a[1]-b[1]).map(x=>RX[x[2].id.slice(4)].q);
+ const talk=[...(kinds?[['실험할 때 두 길은 왜 딱 한 가지만 다르게 했을까?','Why was only one thing different between the two lanes in each experiment?','그래야 결과가 무엇 때문에 달라졌는지 알 수 있어요.','So you can tell what made the difference.']]:[]),...ex.slice(0,B?2:3),
+  ...(B?[['네가 만든 코스에는 어떤 조각을 어떤 순서로 넣었어? 달려 보고 바꾸고 싶은 곳이 있었어?','Which pieces did you put in your course, and in what order? After racing it, what would you change?','조각 이름과 순서, 그리고 고치고 싶은 점 한 가지','The pieces and their order, plus one thing to change']]:[]),
+  ...(mineStats.races?[['레이스에서 구슬 순서가 많이 바뀌는 곳은 어디였어?','Where in a race did the marbles change places the most?','핀이나 범퍼, 바람개비처럼 부딪히는 곳이요.','Places where they bump into things, like pegs, bumpers or spinners.']]:[])].slice(0,4);
+ const home=[],add=x=>{if(!home.includes(x)&&home.length<3)home.push(x)};
+ if(done('friction'))add(HOME.surface);if(done('slope')||done('weight')||done('curve'))add(HOME.ramp);if(done('bounce'))add(HOME.bounce);if(B)add(HOME.track);
+ add(HOME.ramp);add(HOME.surface);add(HOME.bounce);
+ const next=[],left=EXPS.filter(e=>!done(e.id)).slice(0,2).map(e=>RX[e.id].t),miss=lab.find(k=>k.st===1);
+ if(left.length)next.push([`실험실에서 아직 안 해 본 실험: ${left.map(t=>'“'+t[0]+'”').join(', ')}`,`Lab experiments still to try: ${left.map(t=>'“'+t[1]+'”').join(', ')}`]);
+ if(miss){const t=RX[miss.id.slice(4)].t;next.push([`예상과 결과가 달랐던 실험 “${t[0]}”${jo(t[0],'을','를')} 다시 예상하고 확인해 보기`,`Predict again and re-test the experiment that surprised them: “${t[1]}”`])}
+ if(!B)next.push(['코스 만들기에서 조각을 골라 나만의 코스를 설계하고 달려 보기','Design a course in the course builder and race on it']);
+ else if(!stats.fixes)next.push(['만든 코스를 한 군데만 고쳐 다시 달려 보고 무엇이 달라졌는지 말해 보기','Change one part of their course, race it again and say what changed']);
+ if(!stats.leagues)next.push(['5경기 리그를 끝까지 해 보기','Finish a 5-race league']);
+ if(!next.length)next.push(['집에서 책 비탈로 직접 실험해 보기','Try a book-ramp experiment at home']);
+ return {v:1,level:[`배지 ${nb}/${BADGES.length}`,`${nb}/${BADGES.length} badges`],
+  focus:['구슬 레이스를 즐기면서, 실험실에서는 결과를 먼저 예상하고 한 가지만 다른 두 길을 비교해 비탈·마찰·무게·튀기를 알아보고, 코스 만들기에서는 직접 설계하고 시험해 봐요.','Mostly a marble race to watch and cheer; in the lab, children predict first and then compare two lanes that differ in one thing (slope, surface, weight, bounce), and in the builder they design and test their own courses.'],
+  unit:['실험 예상','predictions'],areas,facts:facts.slice(0,6),talk,home,next:next.slice(0,3)}}
+try{LR.set(learnSummary)}catch(e){}
 window.__marble={get:()=>({phase,st,course,cam,league,mode,timeScale,labMode,lab:labExp&&labExp.id,labPred,labRes,stats,badges,skin,customs,worldIdx,rec:rec.length}),start:startRace,prepare,cheer,showResults,setMine:i=>{mine=i}};
 requestAnimationFrame(frame);
 })();

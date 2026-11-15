@@ -7,13 +7,14 @@ Mini games for kids that run right in the browser on phones, tablets and PCs.
 
 | 게임 | 파일 | 설명 |
 |---|---|---|
+| 🐠 꼬마 수학 아쿠아리움 · Little Math Aquarium | `math_aquarium.html` | 1~6학년 수학(한국·캐나다 교육과정 통합)을 풀며 아쿠아리움 키우기 · 학년마다 아쿠아리움 20곳 = 단원 20개 · 매점·기프트샵·마트·화장실·직원·스킬 · 낚시·다이빙·운전 미션 |
+| 🎵 꼬마 음악 아카데미 · Little Music Academy | `music_academy.html` | 여섯 선생님과 박자·피아노·악보·노래·드럼·화음·악기 배우기 · 레슨 62개 · 매일 연습과 연속 기록 · 음악 대회 6개 |
+| 🔬 꼬마 과학 수호대 · Little Science Guardians | `science_guardians.html` | 초등 과학 퀴즈와 실험으로 악당 물리치기 · 9지역 · 학년별 난이도 4단계 · 보물상자와 과학 스티커 72장 · 대원(플레이어) 여러 명 |
+| 💻 꼬마 코딩 섬 · Little Coding Island | `coding_island.html` | 파이의 로봇 버거 가게: 내 캐릭터로 걸어 다니며 장사하고, 진짜 파이썬으로 로봇을 가르쳐 가게 키우기 · 코딩 학교 미션 84개 · 주민 부탁 · 보스전 13 · 미니게임 4(진짜 낚시 포함) |
+| ♞ 꼬마 체스 기사단 · Little Chess Knights | `chess_knights.html` | 체스 퍼즐 모험 6지역 · 보스 AI 대결 · 번개 퍼즐 · 레벨업과 상점 |
 | 🕵️ 꼬마 탐정단 · Little Detectives | `detective_game.html` | 목격자 단서로 범인 찾기, 순찰 미니게임 7종 |
 | 🔮 마블 레이스 · Marble Rush | `marble_rush_3d.html` | 진짜 물리로 튕기는 마블런 레이스, 내 구슬 응원 · 리그 5경기 · 나만의 코스 만들기 · 구슬 실험실 · 배지와 꾸미기 |
-| ♞ 꼬마 체스 기사단 · Little Chess Knights | `chess_knights.html` | 체스 퍼즐 모험 6지역 · 보스 AI 대결 · 번개 퍼즐 · 레벨업과 상점 |
-| 🔬 꼬마 과학 수호대 · Little Science Guardians | `science_guardians.html` | 초등 과학 퀴즈와 실험으로 악당 물리치기 · 9지역 · 학년별 난이도 4단계 · 보물상자와 과학 스티커 72장 · 대원(플레이어) 여러 명 |
-| 🎵 꼬마 음악 아카데미 · Little Music Academy | `music_academy.html` | 여섯 선생님과 박자·피아노·악보·노래·드럼·화음·악기 배우기 · 레슨 62개 · 매일 연습과 연속 기록 · 음악 대회 6개 |
-| 🐍 꼬마 파이썬 섬 · Little Python Island | `python_island.html` | 파이의 로봇 버거 가게: 내 캐릭터로 걸어 다니며 장사하고, 진짜 파이썬으로 로봇을 가르쳐 가게 키우기 · 코딩 학교 미션 84개 · 주민 부탁 · 보스전 13 · 미니게임 4(진짜 낚시 포함) |
-| 🐠 꼬마 수학 아쿠아리움 · Little Math Aquarium | `math_aquarium.html` | 1~6학년 수학(한국·캐나다 교육과정 통합)을 풀며 아쿠아리움 키우기 · 학년마다 아쿠아리움 20곳 = 단원 20개 · 매점·기프트샵·마트·화장실·직원·스킬 · 낚시·다이빙·운전 미션 |
+| 📊 학부모 학습 리포트 · Learning report | `report.html` | 아이가 게임마다 무엇을 배웠는지 학교 교과와 연결해 보여 주는 학부모용 화면 · 학습 시간·정답률·익힌 기술·학습 달력·과목별 진도 · 아이에게 물어볼 질문과 집에서 해 볼 활동 · 예시 리포트(`report.html?demo=1`) |
 
 ## 저작권 · 사용 제한 (Copyright)
 
@@ -21,9 +22,9 @@ Mini games for kids that run right in the browser on phones, tablets and PCs.
 
 이 저장소와 https://game.dongsunmoon.com/ 의 게임 코드, 그림, 캐릭터, 효과음과 음악 편곡, 문제와 설명 글은 저작권으로 보호됩니다. **저작권자의 허락 없이 복제, 배포, 수정, 다른 사이트·앱·서비스에 올리기, 상업적 이용을 하는 것을 금지합니다.** 사이트에서 게임을 플레이하는 것은 누구나 자유롭게 할 수 있습니다.
 
-다만 다른 사람의 저작물이 아닌 공개 자료는 원래 조건을 따릅니다. 체스 퍼즐 데이터(Lichess, CC0), `sounds/` 폴더의 악기 녹음(Versilian Studios VCSL·VSCO 2 CE, Freesound bletort, 모두 CC0, 출처는 [sounds/README.md](sounds/README.md)), 저작권이 끝난 전래 동요·클래식 곡의 원래 가락, 실제 바다 생물에 관한 일반적인 사실은 이 제한에 포함되지 않으며, 이 저장소에서 새로 만든 편곡·코드·그림·글에만 위 제한이 적용됩니다. 파이썬 섬의 파이썬 실행기는 이 게임을 위해 새로 만든 코드이고, “Python”은 Python Software Foundation의 상표입니다. 파이썬 언어 문법 자체는 누구나 쓸 수 있습니다.
+다만 다른 사람의 저작물이 아닌 공개 자료는 원래 조건을 따릅니다. 체스 퍼즐 데이터(Lichess, CC0), `sounds/` 폴더의 악기 녹음(Versilian Studios VCSL·VSCO 2 CE, Freesound bletort, 모두 CC0, 출처는 [sounds/README.md](sounds/README.md)), 저작권이 끝난 전래 동요·클래식 곡의 원래 가락, 실제 바다 생물에 관한 일반적인 사실은 이 제한에 포함되지 않으며, 이 저장소에서 새로 만든 편곡·코드·그림·글에만 위 제한이 적용됩니다. 코딩 섬의 파이썬 실행기는 이 게임을 위해 새로 만든 코드입니다. “Python”은 Python Software Foundation(PSF)의 등록 상표이며, 이 게임은 PSF와 관련이 없고 PSF의 승인을 받지 않았습니다. 그래서 게임 이름에는 Python을 쓰지 않고, 게임이 가르치는 언어를 설명할 때만 씁니다. 파이썬 언어 문법 자체는 누구나 쓸 수 있습니다.
 
-All code, artwork, characters, sounds and musical arrangements, questions and text in this repository and on https://game.dongsunmoon.com/ are protected by copyright. **Copying, redistributing, modifying, re-hosting on other sites, apps or services, or using them commercially without the copyright holder’s permission is prohibited.** Anyone is welcome to play the games on the site. Public material keeps its own terms: the Lichess puzzle data (CC0), the instrument recordings in `sounds/` (Versilian Studios VCSL and VSCO 2 CE, and bletort on Freesound, all CC0; see [sounds/README.md](sounds/README.md)) the original public-domain melodies and general facts about real sea animals are not restricted; the restriction covers the arrangements, code, art and text created for this project.
+All code, artwork, characters, sounds and musical arrangements, questions and text in this repository and on https://game.dongsunmoon.com/ are protected by copyright. **Copying, redistributing, modifying, re-hosting on other sites, apps or services, or using them commercially without the copyright holder’s permission is prohibited.** Anyone is welcome to play the games on the site. Public material keeps its own terms: the Lichess puzzle data (CC0), the instrument recordings in `sounds/` (Versilian Studios VCSL and VSCO 2 CE, and bletort on Freesound, all CC0; see [sounds/README.md](sounds/README.md)) the original public-domain melodies and general facts about real sea animals are not restricted; the restriction covers the arrangements, code, art and text created for this project. “Python” is a registered trademark of the Python Software Foundation; Little Coding Island is not affiliated with or endorsed by the PSF, so the product name does not use it and the word only describes the language taught.
 
 ## GitHub Pages로 공개하기
 
@@ -54,7 +55,16 @@ All code, artwork, characters, sounds and musical arrangements, questions and te
 - HTML에 직접 쓴 문장은 `data-en="English"` 속성을 붙이면 영어 모드에서 바뀝니다.
 - 새 게임을 추가하려면 `index.html`의 `GAMES` 목록에 항목 하나를 복사해 `file`과 문구를 바꾸면 됩니다.
 - 새 게임이 기록을 저장한다면 각 게임 `<head>`의 프로필 코드(`MGP`)에 있는 저장 키 목록과 `index.html`의 `GAME_KEYS`에 그 키를 함께 넣어 주세요.
+- 새 게임은 학부모 리포트에도 나오도록 `LR.set(()=>요약)`으로 배운 내용을 정리해 주세요. 형식과 규칙은 `_src/report/SPEC.md`(git 제외)에 있고, `report.html`의 `GAMES` 목록에 항목을 하나 추가합니다.
 - 새 게임에도 문 코치를 넣으려면 다른 게임의 `/*COACH:BEGIN*/ … /*COACH:END*/` 부분(스크립트와 스타일 두 곳)을 복사하고, `</body>` 앞에 `coachStart(...)`를 넣은 뒤 결과 창에 `coachLine(...)`, 정답 처리에 `coachAnswer(ok)`를 붙여 주세요.
+
+## 학부모 학습 리포트 (report.html)
+
+- 첫 화면의 “학습 리포트” 카드나 프로필 옆 📊 버튼으로 엽니다. 들어갈 때 간단한 곱셈으로 보호자인지 확인합니다.
+- 게임마다 공통 기록기(`LR`, 문 코치 코드 안)가 하루 학습 시간과 정답·오답을 세고, 게임이 정리한 “배운 기술” 요약을 `<저장 키 앞부분>learn@프로필ID`에 저장합니다. 학습 시간은 화면이 켜져 있고 2분 안에 직접 누르거나 입력한 시간만 셉니다.
+- 리포트는 과목별 진도와 익힌 기술, 학교 교과 연결(한국 2022 개정 교육과정 · 온타리오 교육과정), 잘하는 것과 다음 목표, 아이에게 물어볼 질문(답 포함), 집에서 해 볼 활동, 학습 달력과 주별 정답률을 보여 줍니다.
+- 기록은 이 기기에만 있고 서버로 보내지 않습니다. 게임에서 “이 게임 기록 지우기”를 하면 그 게임의 리포트 기록만 지워지고, 프로필을 지우면 그 사람의 리포트 기록도 함께 지워집니다.
+- `report.html?demo=1`은 지어낸 아이의 예시 리포트입니다(화면에 예시라고 표시됩니다).
 
 ## 문 코치 (Coach Moon)
 
@@ -183,9 +193,9 @@ All code, artwork, characters, sounds and musical arrangements, questions and te
 - **🎡 과학 놀이공원:** 새 조각들로 만든 7번째 월드입니다.
 - 문 코치가 예상한 것, 직접 만든 코스, 새 배지를 칭찬하고, 해설은 마찰·중력 같은 과학 낱말을 자연스럽게 들려줍니다.
 
-## 파이썬 섬 내용
+## 코딩 섬 내용
 
-`python_island.html`은 초등학생(8살 기준, 고학년도 도전 가능)이 진짜 파이썬(Python 3) 문법으로 코딩을 배우는 게임입니다. **게임이 먼저이고 배움은 그 안에 녹아 있도록** 만들었습니다. 첫 화면은 퀴즈가 아니라 **파이의 로봇 버거 가게**입니다. 아이들이 가장 몰입했던 과학 게임의 햄버거 가게와 수학 아쿠아리움의 운영 방식을 참고했습니다. 빨리 많이 배우는 것보다 흥미를 잃지 않고 꾸준히 자라는 것을 목표로 설계했습니다.
+`coding_island.html`(꼬마 코딩 섬, 예전 이름 꼬마 파이썬 섬)은 초등학생(8살 기준, 고학년도 도전 가능)이 진짜 파이썬(Python 3) 문법으로 코딩을 배우는 게임입니다. **게임이 먼저이고 배움은 그 안에 녹아 있도록** 만들었습니다. 첫 화면은 퀴즈가 아니라 **파이의 로봇 버거 가게**입니다. 아이들이 가장 몰입했던 과학 게임의 햄버거 가게와 수학 아쿠아리움의 운영 방식을 참고했습니다. 빨리 많이 배우는 것보다 흥미를 잃지 않고 꾸준히 자라는 것을 목표로 설계했습니다.
 
 - **🍔 로봇 버거 가게 (첫 화면):** 아이 자신의 캐릭터(첫 화면에서 고른 동물, 다른 게임과 같은 3D 그림)가 가게를 걸어 다닙니다. 화면 아무 데나 끌면 조이스틱, 누르면 그 자리로 걸어가기, 방향키도 됩니다. 동물 손님이 들어와 메뉴판 그림으로 주문하면, 로봇 앞 주황 바닥에서 버거를 받아 손님 테이블로 가져다주고, 테이블에 남은 🍎 사과를 줍습니다. 파이는 옆에서 따라다니고, 업그레이드하면 사과를 대신 주워 옵니다.
 - **로봇은 코드대로만 요리해요:** 로봇을 누르면 코딩 화면이 열리고, 버거 레시피를 타일 코드(`bun()`, `patty()`, `serve()` …)로 가르칩니다. ▶ 실행해서 주문대로 쌓이면 그 코드가 로봇에 저장되고, 그때부터 로봇이 그 코드를 진짜로 실행해서 버거를 만듭니다. 손님을 대접할수록 가게가 8단계로 자라며 새 메뉴(치즈·채소·달걀·생선·치즈 타워·더블·무지개 버거)가 열립니다.

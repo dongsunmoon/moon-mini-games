@@ -7,7 +7,7 @@
 <title data-en="Moon Mini Games">문 미니 게임 | Moon Mini Games</title>
 <meta name="description" content="어린이를 위한 무료 웹 미니 게임 · Free mini games for kids. 휴대폰·PC 모두 가능, 한국어/English.">
 <meta property="og:title" content="Moon Mini Games · 문 미니 게임">
-<meta property="og:description" content="꼬마 탐정단 · 마블 레이스 · 꼬마 체스 기사단 · 꼬마 과학 수호대 · 꼬마 음악 아카데미 · 꼬마 수학 아쿠아리움 · 꼬마 파이썬 섬 — 휴대폰과 PC에서 바로 플레이! Play right away on phone or PC.">
+<meta property="og:description" content="꼬마 수학 아쿠아리움 · 꼬마 음악 아카데미 · 꼬마 과학 수호대 · 꼬마 코딩 섬 · 꼬마 체스 기사단 · 꼬마 탐정단 · 마블 레이스 — 휴대폰과 PC에서 바로 플레이! Play right away on phone or PC.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://game.dongsunmoon.com/">
 <meta property="og:image" content="https://game.dongsunmoon.com/images/og-image.jpg">
@@ -141,6 +141,17 @@ a{color:inherit}
 @keyframes sway{from{transform:rotate(-6deg)}to{transform:rotate(6deg)}}
 @keyframes riseB{to{transform:translateY(-150px);opacity:0}}
 @media (prefers-reduced-motion:reduce){.t-marble .m,.t-chess .knight,.t-science .atom,.t-music .ic,.t-aqua .ic,.t-aqua .kelp,.t-aqua .bb{animation:none}.card{transition:none}}
+/* parents' learning report: a calm, grown-up card under the games */
+.parent{margin-top:22px;display:flex;align-items:center;gap:18px;text-decoration:none;color:#fff;border-radius:26px;padding:18px 20px;background:radial-gradient(circle at 92% 0%,#3d5bd6 0,transparent 46%),linear-gradient(135deg,#17224d,#24346f 60%,#2b3f86);box-shadow:0 16px 36px rgba(23,34,77,.28);position:relative;overflow:hidden}
+.parent:hover{transform:translateY(-2px)}
+.parent:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+.pa-art{flex:0 0 92px;width:92px;height:92px}
+.pa-text{flex:1;min-width:0}
+.pa-kick{display:block;font-size:12px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;color:#a9bbff}
+.pa-text b{display:block;font-size:clamp(19px,4.4vw,23px);margin:2px 0 4px;letter-spacing:-.3px}
+.pa-text p{margin:0;color:#d4dcff;font-size:14.5px;line-height:1.5;font-weight:600}
+.pa-go{flex:0 0 auto;display:inline-flex;align-items:center;min-height:48px;padding:0 18px;border-radius:16px;background:#ffd66b;color:#2a2300;font-weight:900;font-size:16px;box-shadow:0 5px 0 #d9a92a}
+@media (max-width:560px){.parent{flex-wrap:wrap;gap:12px 14px;padding:16px}.pa-art{flex-basis:64px;width:64px;height:64px}.pa-go{width:100%;justify-content:center}}
 .tips{margin:22px 0 0;padding:0;list-style:none;display:flex;flex-wrap:wrap;gap:8px}
 .tips li{background:#ffffffc7;border:1px solid var(--line);border-radius:14px;padding:9px 12px;font-size:13.5px;font-weight:700;color:var(--muted)}
 footer{margin-top:22px;text-align:center;color:#8a93b8;font-size:12px}
@@ -156,6 +167,9 @@ footer{margin-top:22px;text-align:center;color:#8a93b8;font-size:12px}
 .who{margin:18px 0 0}
 .pbar,.psetup{background:#fff;border:1px solid var(--line);border-radius:22px;box-shadow:var(--shadow);padding:12px 14px}
 .plabel{display:block;font-size:13px;font-weight:800;color:var(--muted);margin-bottom:8px}
+.ptop{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:6px}.ptop .plabel{margin:0}
+.prep{display:inline-flex;align-items:center;min-height:44px;padding:0 14px;border-radius:999px;background:#17224d;color:#fff;text-decoration:none;font-size:13.5px;font-weight:900}
+.prep:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
 .pchips{display:flex;flex-wrap:wrap;gap:8px}
 .pchip{font:inherit;display:inline-flex;align-items:center;gap:8px;border:2px solid var(--line);background:#f6f7ff;border-radius:999px;padding:6px 14px 6px 6px;min-height:48px;cursor:pointer;color:var(--ink)}
 .pchip .pav{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;font-size:24px;background:#fff;box-shadow:0 2px 6px rgba(54,72,160,.15)}
@@ -218,6 +232,11 @@ footer{margin-top:22px;text-align:center;color:#8a93b8;font-size:12px}
 
   <main class="games" id="games" aria-label="게임 목록" data-en-aria-label="Games"></main>
 
+  <a class="parent" id="parentCard" href="report.html">
+    <svg class="pa-art" viewBox="0 0 92 92" aria-hidden="true"><circle cx="46" cy="46" r="38" fill="none" stroke="#ffffff22" stroke-width="10"/><circle cx="46" cy="46" r="38" fill="none" stroke="#ffd66b" stroke-width="10" stroke-linecap="round" stroke-dasharray="172 239" transform="rotate(-90 46 46)"/><rect x="30" y="44" width="7" height="18" rx="3" fill="#7fe0b4"/><rect x="42.5" y="34" width="7" height="28" rx="3" fill="#8fb0ff"/><rect x="55" y="26" width="7" height="36" rx="3" fill="#ff9fc4"/></svg>
+    <div class="pa-text"><span class="pa-kick" data-en="For parents">학부모님께</span><b data-en="Learning report">학습 리포트</b><p data-en="See what your child learned in each subject, linked to what schools teach.">우리 아이가 과목마다 무엇을 배웠는지, 학교 교과와 연결해서 한눈에 보여 드려요.</p></div>
+    <span class="pa-go" data-en="View report →">리포트 보기 →</span>
+  </a>
   <ul class="tips">
     <li data-en="🔊 Turn the sound on to hear the voice guide">🔊 소리를 켜면 음성 안내가 나와요</li>
     <li data-en="📱 Works on phones, tablets and computers">📱 휴대폰 · 태블릿 · 컴퓨터 모두 OK</li>
@@ -240,6 +259,51 @@ footer{margin-top:22px;text-align:center;color:#8a93b8;font-size:12px}
 // To add a game: copy one entry, point `file` at the new HTML file, and fill both languages.
 const GAMES=[
   {
+    file:'math_aquarium.html',
+    thumb:'<div class="thumb t-aqua" aria-hidden="true"><img class="cover" src="images/cover-aquarium.webp" alt="" onerror="this.remove()"><div class="kelp" style="left:6%"></div><div class="kelp" style="left:88%;animation-delay:-1.4s"></div><span class="ic" style="left:12%;top:18%">🐠</span><span class="ic" style="left:70%;top:14%">🐙</span><span class="ic big" style="left:40%;top:34%">🐳</span><span class="ic" style="left:18%;top:60%">🦀</span><span class="ic" style="left:72%;top:58%">🐡</span><span class="math" style="left:56%;top:12%">7×8</span><span class="math" style="left:8%;top:42%">½+¼</span><span class="math" style="left:78%;top:36%">+</span><i class="bb" style="left:30%"></i><i class="bb" style="left:62%;animation-delay:-1.5s"></i><i class="bb" style="left:84%;animation-delay:-2.6s"></i></div>',
+    title:['꼬마 수학 아쿠아리움','Little Math Aquarium'],
+    age:['6~12세','Ages 6–12'],
+    desc:['수학을 풀면 수조가 열리고 손님이 와요! 학년마다 아쿠아리움 20곳을 키우면 1~6학년 수학을 한 학년씩 마스터해요. 매점·직원·낚시·다이빙·운전 미션까지!','Solve math to open tanks and welcome visitors! Grow 20 aquariums per grade to master Grade 1–6 math, one grade at a time. Shops, staff, fishing, diving and driving too!'],
+    tags:[['🧮 1~6학년 수학','🧮 Grades 1–6 math'],['🐠 아쿠아리움 경영','🐠 Run an aquarium'],['🇰🇷🇨🇦 한국·캐나다 교육과정','🇰🇷🇨🇦 Korea + Canada curricula']],
+    stat:()=>{const d=readSave('mathAquarium.v1');if(!d||!d.stats||!d.stats.correct)return '';const n=Object.values(d.G||{}).reduce((t,g)=>t+(g.aq||[]).filter(a=>a&&a.done).length,0);return L(`🐠 ${d.grade}학년 · 마스터한 단원 ${n}개 · 맞힌 문제 ${d.stats.correct}개`,`🐠 Grade ${d.grade} · ${n} skill${n===1?'':'s'} mastered · ${d.stats.correct} right`)}
+  },
+  {
+    file:'music_academy.html',
+    thumb:'<div class="thumb t-music" aria-hidden="true"><img class="cover" src="images/cover-music.webp" alt="" onerror="this.remove()"><div class="keys"></div><span class="ic" style="left:9%;top:12%">🎵</span><span class="ic" style="left:40%;top:6%">🎤</span><span class="ic" style="left:76%;top:12%">🥁</span><span class="ic" style="left:60%;top:34%">🎺</span><span class="ic" style="left:20%;top:36%">🎹</span></div>',
+    title:['꼬마 음악 아카데미','Little Music Academy'],
+    age:['6~11세','Ages 6–11'],
+    desc:['박자, 피아노, 악보, 노래, 드럼, 화음, 악기까지! 여섯 선생님과 매일 조금씩 연습하고 음악 대회에서 메달을 따요.','Beat, piano, reading music, singing, drums, chords and instruments! Practice a little every day with six teachers and win medals in music contests.'],
+    tags:[['🎓 레슨 62개','🎓 62 lessons'],['🏆 음악 대회','🏆 Music contests'],['🔥 매일 연습','🔥 Daily streaks']],
+    stat:()=>{const r=readSave('musicAcademy.v1'),d=r&&r.P&&r.P[r.cur];return d&&d.stats&&d.stats.plays>0?L(`🎵 ${d.name} Lv.${d.lvl} · 🔥 ${d.streak.n}일 연속`,`🎵 ${d.name} Lv.${d.lvl} · 🔥 ${d.streak.n}-day streak`):''}
+  },
+  {
+    file:'science_guardians.html',
+    thumb:'<div class="thumb t-science" aria-hidden="true"><img class="cover" src="images/cover-science.webp" alt="" onerror="this.remove()"><div class="atom"><div class="ring" style="--r:0deg"></div><div class="ring" style="--r:60deg"></div><div class="ring" style="--r:120deg"></div></div><div class="core"></div><span class="ic" style="left:9%;top:14%">🧭</span><span class="ic" style="left:78%;top:12%">🧲</span><span class="ic" style="left:12%;top:62%">🔦</span><span class="ic" style="left:76%;top:60%">🦹</span></div>',
+    title:['꼬마 과학 수호대','Little Science Guardians'],
+    age:['6~11세','Ages 6–11'],
+    desc:['그림자, 자석, 전기, 산과 염기, 부력, 지진, 우주, 공룡 화석까지! 과학 퀴즈와 실험으로 헷갈 박사의 악당들을 물리쳐요.','Shadows, magnets, electricity, acids and bases, buoyancy, earthquakes, space and dinosaur fossils! Beat Dr. Mix-Up’s villains with science quizzes and hands-on labs.'],
+    tags:[['🔬 실험 26가지','🔬 26 labs'],['📚 과학 카드 164장','📚 164 science cards'],['🎚️ 학년별 난이도','🎚️ Grade levels']],
+    stat:()=>{const r=readSave('scienceGuardians.v1'),d=r&&r.P&&r.P[r.cur];return d&&d.correct>0?L(`🔬 ${d.name} Lv.${d.lvl} · 과학 카드 ${Object.keys(d.cards||{}).length}장`,`🔬 ${d.name} Lv.${d.lvl} · ${Object.keys(d.cards||{}).length} science cards`):''}
+  },
+  {
+    file:'coding_island.html',
+    thumb:'<div class="thumb t-py" aria-hidden="true"><img class="cover" src="images/cover-python.webp" alt="" onerror="this.remove()"><div class="isle"></div><span class="ic big" style="left:40%;top:30%">🐍</span><span class="ic" style="left:12%;top:16%">🐢</span><span class="ic" style="left:76%;top:12%">🍎</span><span class="code" style="left:8%;top:58%">for i in range(3):</span><span class="code" style="left:58%;top:62%">print("안녕!")</span></div>',
+    title:['꼬마 코딩 섬','Little Coding Island'],
+    age:['6~12세','Ages 6–12'],
+    desc:['파이의 로봇 버거 가게! 로봇은 진짜 파이썬 코드대로만 요리해요. 내 캐릭터로 버거를 나르고, 로봇에게 코드를 가르쳐 가게를 키우고, 학교에서 문 코치와 배우고, 버그 보스를 물리쳐요.','Py’s Robot Burger shop! The robots cook only by real Python code. Carry burgers as yourself, teach the robots code to grow the shop, learn with Coach Moon at school and beat bug bosses.'],
+    tags:[['💻 진짜 파이썬 코드','💻 Real Python code'],['🍔 로봇 버거 가게','🍔 Robot burger shop'],['⚔️ 버그 보스 13','⚔️ 13 bug bosses']],
+    stat:()=>{const d=readSave('pythonIsland.v1');const n=d&&d.done?Object.keys(d.done).length:0,sv=d&&d.rb?+d.rb.served||0:0;return n||sv?L(`🐍 Lv.${d.lvl} · 🍔 손님 ${sv}명 · 마친 미션 ${n}개 · 고친 버그 ${(d.stats&&d.stats.fixed)||0}개`,`🐍 Lv.${d.lvl} · 🍔 ${sv} diners · ${n} mission${n===1?'':'s'} · ${(d.stats&&d.stats.fixed)||0} bugs fixed`):''}
+  },
+  {
+    file:'chess_knights.html',
+    thumb:'<div class="thumb t-chess" aria-hidden="true"><img class="cover" src="images/cover-chess.webp" alt="" onerror="this.remove()"><div class="board"></div><svg class="knight" viewBox="0 0 100 100"><defs><linearGradient id="tkG" x1="0" y1="0" x2=".3" y2="1"><stop offset="0" stop-color="#fff8cf"/><stop offset=".5" stop-color="#ffd659"/><stop offset="1" stop-color="#d99a0b"/></linearGradient></defs><g fill="url(#tkG)" stroke="#7a5200" stroke-width="3.2" stroke-linejoin="round"><path d="M71 81H30Q29 67 38 59Q45 53 46 46Q40 50 33 53Q26 56 22 51Q19 47 23 42L38 27Q42 19 49 15L50 6L58 13Q74 18 76 40Q78 62 71 81Z"/><path d="M22 89Q22 81 30 81H70Q78 81 78 89V90Q78 94 74 94H26Q22 94 22 90Z"/></g><circle cx="44" cy="29" r="3.6" fill="#5c3d00"/></svg><span class="spark" style="left:14%;top:16%">⭐</span><span class="spark" style="left:78%;top:20%">👑</span><span class="spark" style="left:80%;top:66%">🪙</span></div>',
+    title:['꼬마 체스 기사단','Little Chess Knights'],
+    age:['6세 이상','Ages 6+'],
+    desc:['체스 퍼즐을 풀고 보스를 이겨 새 지역을 열어요! 코인을 모아 체스판과 기물을 꾸며요.','Solve chess puzzles, beat the bosses and open new lands! Spend coins on boards and pieces.'],
+    tags:[['♞ 체스 퍼즐','♞ Chess puzzles'],['⚔️ AI 대결','⚔️ AI battles'],['📈 레벨업','📈 Level up']],
+    stat:()=>{const d=readSave('chessKnights.v1');return d&&d.solved>0?L(`♞ Lv.${d.lvl} · 퍼즐 점수 ${d.rating} · 푼 퍼즐 ${d.solved}개`,`♞ Lv.${d.lvl} · Puzzle score ${d.rating} · ${d.solved} solved`):''}
+  },
+  {
     file:'detective_game.html',
     thumb:'<div class="thumb t-detective" aria-hidden="true"><img class="cover" src="images/cover-detective.webp" alt="" onerror="this.remove()"><div class="road"></div><span class="pin" style="left:9%;top:14%">🏙️</span><span class="pin" style="left:76%;top:62%">🍪</span><span class="pin" style="left:14%;top:64%">🐶</span><span class="glass">🔍</span><span class="hero">🕵️</span></div>',
     title:['꼬마 탐정단','Little Detectives'],
@@ -256,51 +320,6 @@ const GAMES=[
     desc:['진짜처럼 통통 튕기는 구슬 레이스! 내 구슬을 응원하고 5경기 리그 우승에 도전해요.','Marbles really bounce! Cheer for yours and go for the 5-race league title.'],
     tags:[['🌈 7개 월드','🌈 7 worlds'],['🏆 리그전','🏆 League'],['📣 내 구슬 응원','📣 Cheer your marble']],
     stat:()=>{const m=(readSave('marbleRush.v2')||readSave('marble3dsettings'))?.mineStats;return m&&m.races>0?L(`🏆 내 구슬 우승 ${m.wins}번 / ${m.races}경기`,`🏆 Your marble won ${m.wins} of ${m.races} race${m.races===1?'':'s'}`):''}
-  },
-  {
-    file:'chess_knights.html',
-    thumb:'<div class="thumb t-chess" aria-hidden="true"><img class="cover" src="images/cover-chess.webp" alt="" onerror="this.remove()"><div class="board"></div><svg class="knight" viewBox="0 0 100 100"><defs><linearGradient id="tkG" x1="0" y1="0" x2=".3" y2="1"><stop offset="0" stop-color="#fff8cf"/><stop offset=".5" stop-color="#ffd659"/><stop offset="1" stop-color="#d99a0b"/></linearGradient></defs><g fill="url(#tkG)" stroke="#7a5200" stroke-width="3.2" stroke-linejoin="round"><path d="M71 81H30Q29 67 38 59Q45 53 46 46Q40 50 33 53Q26 56 22 51Q19 47 23 42L38 27Q42 19 49 15L50 6L58 13Q74 18 76 40Q78 62 71 81Z"/><path d="M22 89Q22 81 30 81H70Q78 81 78 89V90Q78 94 74 94H26Q22 94 22 90Z"/></g><circle cx="44" cy="29" r="3.6" fill="#5c3d00"/></svg><span class="spark" style="left:14%;top:16%">⭐</span><span class="spark" style="left:78%;top:20%">👑</span><span class="spark" style="left:80%;top:66%">🪙</span></div>',
-    title:['꼬마 체스 기사단','Little Chess Knights'],
-    age:['6세 이상','Ages 6+'],
-    desc:['체스 퍼즐을 풀고 보스를 이겨 새 지역을 열어요! 코인을 모아 체스판과 기물을 꾸며요.','Solve chess puzzles, beat the bosses and open new lands! Spend coins on boards and pieces.'],
-    tags:[['♞ 체스 퍼즐','♞ Chess puzzles'],['⚔️ AI 대결','⚔️ AI battles'],['📈 레벨업','📈 Level up']],
-    stat:()=>{const d=readSave('chessKnights.v1');return d&&d.solved>0?L(`♞ Lv.${d.lvl} · 퍼즐 점수 ${d.rating} · 푼 퍼즐 ${d.solved}개`,`♞ Lv.${d.lvl} · Puzzle score ${d.rating} · ${d.solved} solved`):''}
-  },
-  {
-    file:'science_guardians.html',
-    thumb:'<div class="thumb t-science" aria-hidden="true"><img class="cover" src="images/cover-science.webp" alt="" onerror="this.remove()"><div class="atom"><div class="ring" style="--r:0deg"></div><div class="ring" style="--r:60deg"></div><div class="ring" style="--r:120deg"></div></div><div class="core"></div><span class="ic" style="left:9%;top:14%">🧭</span><span class="ic" style="left:78%;top:12%">🧲</span><span class="ic" style="left:12%;top:62%">🔦</span><span class="ic" style="left:76%;top:60%">🦹</span></div>',
-    title:['꼬마 과학 수호대','Little Science Guardians'],
-    age:['6~11세','Ages 6–11'],
-    desc:['그림자, 자석, 전기, 산과 염기, 부력, 지진, 우주, 공룡 화석까지! 과학 퀴즈와 실험으로 헷갈 박사의 악당들을 물리쳐요.','Shadows, magnets, electricity, acids and bases, buoyancy, earthquakes, space and dinosaur fossils! Beat Dr. Mix-Up’s villains with science quizzes and hands-on labs.'],
-    tags:[['🔬 실험 26가지','🔬 26 labs'],['📚 과학 카드 164장','📚 164 science cards'],['🎚️ 학년별 난이도','🎚️ Grade levels']],
-    stat:()=>{const r=readSave('scienceGuardians.v1'),d=r&&r.P&&r.P[r.cur];return d&&d.correct>0?L(`🔬 ${d.name} Lv.${d.lvl} · 과학 카드 ${Object.keys(d.cards||{}).length}장`,`🔬 ${d.name} Lv.${d.lvl} · ${Object.keys(d.cards||{}).length} science cards`):''}
-  },
-  {
-    file:'music_academy.html',
-    thumb:'<div class="thumb t-music" aria-hidden="true"><img class="cover" src="images/cover-music.webp" alt="" onerror="this.remove()"><div class="keys"></div><span class="ic" style="left:9%;top:12%">🎵</span><span class="ic" style="left:40%;top:6%">🎤</span><span class="ic" style="left:76%;top:12%">🥁</span><span class="ic" style="left:60%;top:34%">🎺</span><span class="ic" style="left:20%;top:36%">🎹</span></div>',
-    title:['꼬마 음악 아카데미','Little Music Academy'],
-    age:['6~11세','Ages 6–11'],
-    desc:['박자, 피아노, 악보, 노래, 드럼, 화음, 악기까지! 여섯 선생님과 매일 조금씩 연습하고 음악 대회에서 메달을 따요.','Beat, piano, reading music, singing, drums, chords and instruments! Practice a little every day with six teachers and win medals in music contests.'],
-    tags:[['🎓 레슨 62개','🎓 62 lessons'],['🏆 음악 대회','🏆 Music contests'],['🔥 매일 연습','🔥 Daily streaks']],
-    stat:()=>{const r=readSave('musicAcademy.v1'),d=r&&r.P&&r.P[r.cur];return d&&d.stats&&d.stats.plays>0?L(`🎵 ${d.name} Lv.${d.lvl} · 🔥 ${d.streak.n}일 연속`,`🎵 ${d.name} Lv.${d.lvl} · 🔥 ${d.streak.n}-day streak`):''}
-  },
-  {
-    file:'math_aquarium.html',
-    thumb:'<div class="thumb t-aqua" aria-hidden="true"><img class="cover" src="images/cover-aquarium.webp" alt="" onerror="this.remove()"><div class="kelp" style="left:6%"></div><div class="kelp" style="left:88%;animation-delay:-1.4s"></div><span class="ic" style="left:12%;top:18%">🐠</span><span class="ic" style="left:70%;top:14%">🐙</span><span class="ic big" style="left:40%;top:34%">🐳</span><span class="ic" style="left:18%;top:60%">🦀</span><span class="ic" style="left:72%;top:58%">🐡</span><span class="math" style="left:56%;top:12%">7×8</span><span class="math" style="left:8%;top:42%">½+¼</span><span class="math" style="left:78%;top:36%">+</span><i class="bb" style="left:30%"></i><i class="bb" style="left:62%;animation-delay:-1.5s"></i><i class="bb" style="left:84%;animation-delay:-2.6s"></i></div>',
-    title:['꼬마 수학 아쿠아리움','Little Math Aquarium'],
-    age:['6~12세','Ages 6–12'],
-    desc:['수학을 풀면 수조가 열리고 손님이 와요! 학년마다 아쿠아리움 20곳을 키우면 1~6학년 수학을 한 학년씩 마스터해요. 매점·직원·낚시·다이빙·운전 미션까지!','Solve math to open tanks and welcome visitors! Grow 20 aquariums per grade to master Grade 1–6 math, one grade at a time. Shops, staff, fishing, diving and driving too!'],
-    tags:[['🧮 1~6학년 수학','🧮 Grades 1–6 math'],['🐠 아쿠아리움 경영','🐠 Run an aquarium'],['🇰🇷🇨🇦 한국·캐나다 교육과정','🇰🇷🇨🇦 Korea + Canada curricula']],
-    stat:()=>{const d=readSave('mathAquarium.v1');if(!d||!d.stats||!d.stats.correct)return '';const n=Object.values(d.G||{}).reduce((t,g)=>t+(g.aq||[]).filter(a=>a&&a.done).length,0);return L(`🐠 ${d.grade}학년 · 마스터한 단원 ${n}개 · 맞힌 문제 ${d.stats.correct}개`,`🐠 Grade ${d.grade} · ${n} skill${n===1?'':'s'} mastered · ${d.stats.correct} right`)}
-  },
-  {
-    file:'python_island.html',
-    thumb:'<div class="thumb t-py" aria-hidden="true"><img class="cover" src="images/cover-python.webp" alt="" onerror="this.remove()"><div class="isle"></div><span class="ic big" style="left:40%;top:30%">🐍</span><span class="ic" style="left:12%;top:16%">🐢</span><span class="ic" style="left:76%;top:12%">🍎</span><span class="code" style="left:8%;top:58%">for i in range(3):</span><span class="code" style="left:58%;top:62%">print("안녕!")</span></div>',
-    title:['꼬마 파이썬 섬','Little Python Island'],
-    age:['6~12세','Ages 6–12'],
-    desc:['파이의 로봇 버거 가게! 로봇은 진짜 파이썬 코드대로만 요리해요. 내 캐릭터로 버거를 나르고, 로봇에게 코드를 가르쳐 가게를 키우고, 학교에서 문 코치와 배우고, 버그 보스를 물리쳐요.','Py’s Robot Burger shop! The robots cook only by real Python code. Carry burgers as yourself, teach the robots code to grow the shop, learn with Coach Moon at school and beat bug bosses.'],
-    tags:[['🐍 진짜 파이썬','🐍 Real Python'],['🍔 로봇 버거 가게','🍔 Robot burger shop'],['⚔️ 버그 보스 13','⚔️ 13 bug bosses']],
-    stat:()=>{const d=readSave('pythonIsland.v1');const n=d&&d.done?Object.keys(d.done).length:0,sv=d&&d.rb?+d.rb.served||0:0;return n||sv?L(`🐍 Lv.${d.lvl} · 🍔 손님 ${sv}명 · 마친 미션 ${n}개 · 고친 버그 ${(d.stats&&d.stats.fixed)||0}개`,`🐍 Lv.${d.lvl} · 🍔 ${sv} diners · ${n} mission${n===1?'':'s'} · ${(d.stats&&d.stats.fixed)||0} bugs fixed`):''}
   }
 ];
 const pick=pair=>L(pair[0],pair[1]);
@@ -311,7 +330,7 @@ const $=id=>document.getElementById(id);
 // Profiles live only on this device. Every game stores its save under "key@profileId", so each player keeps
 // separate progress and resetting one game never touches another game or another player.
 const PKEY='moonGames.profiles',LKEY='moonGames.legacy';
-const GAME_KEYS=[['little-detective-v3','🕵️','꼬마 탐정단|Little Detectives'],['marbleRush.v2','🔮','마블 레이스|Marble Rush'],['marble3dsettings','🔮','마블 레이스(예전 설정)|Marble Rush (old settings)'],['chessKnights.v1','♞','꼬마 체스 기사단|Little Chess Knights'],['scienceGuardians.v1','🔬','꼬마 과학 수호대|Little Science Guardians'],['musicAcademy.v1','🎵','꼬마 음악 아카데미|Little Music Academy'],['pythonIsland.v1','🐍','꼬마 파이썬 섬|Little Python Island'],['mathAquarium.v1','🐠','꼬마 수학 아쿠아리움|Little Math Aquarium']];
+const GAME_KEYS=[['little-detective-v3','🕵️','꼬마 탐정단|Little Detectives'],['marbleRush.v2','🔮','마블 레이스|Marble Rush'],['marble3dsettings','🔮','마블 레이스(예전 설정)|Marble Rush (old settings)'],['chessKnights.v1','♞','꼬마 체스 기사단|Little Chess Knights'],['scienceGuardians.v1','🔬','꼬마 과학 수호대|Little Science Guardians'],['musicAcademy.v1','🎵','꼬마 음악 아카데미|Little Music Academy'],['pythonIsland.v1','🐍','꼬마 코딩 섬|Little Coding Island'],['mathAquarium.v1','🐠','꼬마 수학 아쿠아리움|Little Math Aquarium']];
 const AV=['🐰','🐻','🦊','🐼','🐨','🐯','🦁','🐸','🐱','🐶','🐥','🦄','🐙','🐬','🦖','⭐'];
 const T2=s=>{const [k,e]=s.split('|');return L(k,e||k)};
 const getJ=(k,d=null)=>{try{const v=JSON.parse(localStorage.getItem(k)||'null');return v==null?d:v}catch(e){return d}};
@@ -321,6 +340,8 @@ const me=()=>PROF.list.find(p=>p.id===PROF.cur)||null;
 const saveProf=()=>setJ(PKEY,PROF);
 // Each game saves its own progress in this browser; show the current player's progress on the card.
 const readSave=key=>{const m=me();return getJ(m?key+'@'+m.id:key)};
+// the parents' report opens for the player chosen here
+function renderParent(){const m=me();$('parentCard').href=`report.html?lang=${LANG}${m?'&p='+encodeURIComponent(m.id):''}`}
 function renderGames(){document.getElementById('games').innerHTML=GAMES.map(g=>`
   <a class="card" href="${esc(g.file)}?lang=${LANG}">
     ${g.thumb}
@@ -332,10 +353,10 @@ function renderGames(){document.getElementById('games').innerHTML=GAMES.map(g=>`
       <span class="play">▶ ${L('플레이','Play')}</span>
     </div>
   </a>`).join('');
- renderCoach()}
+ renderParent();renderCoach()}
 function renderWho(){const el=$('who');
  if(!PROF.list.length){el.innerHTML=`<div class="psetup"><b>👨‍👩‍👧 ${L('프로필을 만들면 형제자매가 모든 게임 기록을 따로 가질 수 있어요!','Make a profile for each player so everyone keeps their own progress in every game!')}</b><button type="button" class="pbtn" data-pa="add">➕ ${L('프로필 만들기','Make a profile')}</button></div>`}
- else el.innerHTML=`<div class="pbar"><span class="plabel">🎮 ${L('지금 플레이하는 사람 (눌러서 바꿔요)','Now playing (tap to switch)')}</span><div class="pchips">${PROF.list.map(p=>`<button type="button" class="pchip ${p.id===PROF.cur?'on':''}" data-pid="${p.id}"><span class="pav">${esc(p.av)}</span><b>${esc(p.name)}</b></button>`).join('')}<button type="button" class="pchip add" data-pa="add" aria-label="${esc(L('프로필 추가','Add a profile'))}">➕</button><button type="button" class="pchip edit" data-pa="manage" aria-label="${esc(L('프로필 고치기','Edit profiles'))}">✏️</button></div></div>`}
+ else el.innerHTML=`<div class="pbar"><div class="ptop"><span class="plabel">🎮 ${L('지금 플레이하는 사람 (눌러서 바꿔요)','Now playing (tap to switch)')}</span><a class="prep" href="report.html?lang=${LANG}&p=${encodeURIComponent(PROF.cur||'')}">📊 ${L('학부모 리포트','Parent report')}</a></div><div class="pchips">${PROF.list.map(p=>`<button type="button" class="pchip ${p.id===PROF.cur?'on':''}" data-pid="${p.id}"><span class="pav">${esc(p.av)}</span><b>${esc(p.name)}</b></button>`).join('')}<button type="button" class="pchip add" data-pa="add" aria-label="${esc(L('프로필 추가','Add a profile'))}">➕</button><button type="button" class="pchip edit" data-pa="manage" aria-label="${esc(L('프로필 고치기','Edit profiles'))}">✏️</button></div></div>`}
 function choose(id){PROF.cur=id;coachWait=false;saveProf();try{sessionStorage.setItem('moonGames.picked','1')}catch(e){}closeP();renderWho();renderGames()}
 // ---- small dialogs
 function openP(html,bind){$('pm').innerHTML=`<div class="pmask"><div class="pmodal" role="dialog">${html}</div></div>`;bind&&bind($('pm').querySelector('.pmodal'))}
@@ -359,7 +380,8 @@ function manage(){openP(`<h2>✏️ ${L('프로필 고치기','Edit profiles')}<
 function confirmDelete(p){openP(`<h2>🗑️ ${L(`${esc(p.name)} 프로필을 지울까요?`,`Delete ${esc(p.name)}?`)}</h2><p>${L('이 프로필의 모든 게임 기록이 사라지고 되돌릴 수 없어요. 다른 프로필의 기록은 그대로 남아요.','All game progress for this profile will be gone for good. Other profiles keep theirs.')}</p>
  <div class="prow3"><button type="button" class="pbtn ghost" data-pa="cancel">${L('아니요','No')}</button><button type="button" class="pbtn red" data-pa="yes">${L('지울래요','Delete')}</button></div>`,
  box=>box.addEventListener('click',e=>{const b=e.target.closest('[data-pa]');if(!b)return;if(b.dataset.pa==='cancel'){manage();return}
-  GAME_KEYS.forEach(([k])=>{try{localStorage.removeItem(k+'@'+p.id)}catch(e){}});try{localStorage.removeItem(CKEY+'@'+p.id)}catch(e){}PROF.list=PROF.list.filter(x=>x!==p);if(PROF.cur===p.id)PROF.cur=null;saveProf();renderWho();renderGames();if(PROF.list.length&&!me())picker();else closeP()}))}
+  GAME_KEYS.forEach(([k])=>{try{localStorage.removeItem(k+'@'+p.id)}catch(e){}});try{localStorage.removeItem(CKEY+'@'+p.id)}catch(e){}
+  try{Object.keys(localStorage).filter(k=>k.endsWith('@'+p.id)).forEach(k=>localStorage.removeItem(k))}catch(e){}PROF.list=PROF.list.filter(x=>x!==p);if(PROF.cur===p.id)PROF.cur=null;saveProf();renderWho();renderGames();if(PROF.list.length&&!me())picker();else closeP()}))}
 // ---- progress saved before profiles existed: let the family hand it to the right player once
 function legacyOffers(np){const done=getJ(LKEY,{moved:{},names:{}}),out=[];
  GAME_KEYS.forEach(([k,ic,nm])=>{if(done.moved[k])return;const raw=localStorage.getItem(k);if(raw==null)return;let d=null;try{d=JSON.parse(raw)}catch(e){}
@@ -404,13 +426,13 @@ const CPROG={
   more:d=>L(`체스 퍼즐을 ${d}개 더 풀었어요!`,`You solved ${d} more chess puzzle${d>1?'s':''}!`),big:[25,50,100,200,500,1000],bigMsg:n=>L(`체스 퍼즐 ${n}개 돌파!`,`${n} chess puzzles solved!`)},
  'detective_game.html':{get:()=>{const d=readSave('little-detective-v3');return d&&d.caught>0?{lv:+d.level||0,n:+d.caught||0}:null},
   more:d=>L(`사건을 ${d}개 더 해결했어요!`,`You solved ${d} more case${d>1?'s':''}!`),big:[10,25,50,100,200],bigMsg:n=>L(`해결한 사건 ${n}개 돌파!`,`${n} cases solved!`)},
- 'python_island.html':{get:()=>{const d=readSave('pythonIsland.v1');const n=d&&d.done?Object.keys(d.done).length:0;return n?{lv:+d.lvl||0,n}:null},
-  more:d=>L(`파이썬 미션을 ${d}개 더 해냈어요!`,`You finished ${d} more Python mission${d>1?'s':''}!`),big:[7,14,28,42,63,84],bigMsg:n=>L(`파이썬 미션 ${n}개 완료!`,`${n} Python missions done!`)},
+ 'coding_island.html':{get:()=>{const d=readSave('pythonIsland.v1');const n=d&&d.done?Object.keys(d.done).length:0;return n?{lv:+d.lvl||0,n}:null},
+  more:d=>L(`코딩 미션을 ${d}개 더 해냈어요!`,`You finished ${d} more coding mission${d>1?'s':''}!`),big:[7,14,28,42,63,84],bigMsg:n=>L(`코딩 미션 ${n}개 완료!`,`${n} coding missions done!`)},
  'marble_rush_3d.html':{get:()=>{const m=(readSave('marbleRush.v2')||readSave('marble3dsettings'))?.mineStats;return m&&m.races>0?{lv:0,n:+m.wins||0}:null},
   more:d=>L(`내 구슬이 ${d}번 더 우승했어요!`,`Your marble won ${d} more race${d>1?'s':''}!`),big:[5,10,25,50,100],bigMsg:n=>L(`내 구슬 우승 ${n}번!`,`Your marble has won ${n} races!`)}
 };
 // the learning games the coach suggests, least recently opened first
-const CREC=['science_guardians.html','math_aquarium.html','python_island.html','music_academy.html','chess_knights.html','detective_game.html'];
+const CREC=['math_aquarium.html','music_academy.html','science_guardians.html','coding_island.html','chess_knights.html','detective_game.html'];
 const CTIPS=[
  ['과학 가게에 실험 주문이 오면 실험대를 눌러 봐요. 직접 실험하고 배워요!','When a science shop order needs an experiment, tap the lab table and try it yourself!'],
  ['과학 퀴즈에서 이기면 상자가 열려요. 스티커 앨범을 채워 봐요!','Win a science quiz battle to open a chest, and fill up your sticker album!'],
@@ -419,7 +441,7 @@ const CTIPS=[
  ['체스 퍼즐은 먼저 체크, 잡을 수 있는 말, 공격을 찾아봐요!','In chess puzzles, look for checks, captures and attacks first!'],
  ['탐정 놀이는 목격자 단서를 잘 듣고, 아닌 사람을 하나씩 지워 봐요.','As a detective, listen to the clues and rule people out one by one.'],
  ['마블 레이스에서는 내 구슬을 골라 응원해요. 리그 우승에 도전!','In Marble Rush, pick your marble and cheer it on to win the league!'],
- ['파이썬 섬에서 코드가 안 될 때는 👣 한 줄씩 실행해 봐요. 버그가 잘 보여요!','On Python Island, step through code 👣 line by line when it doesn’t work. Bugs show up!'],
+ ['코딩 섬에서 코드가 안 될 때는 👣 한 줄씩 실행해 봐요. 버그가 잘 보여요!','On Coding Island, step through code 👣 line by line when it doesn’t work. Bugs show up!'],
  ['마블 레이스의 🛠️ 코스 만들기로 나만의 코스를 짓고, 🔬 실험실에서 예상해 봐요!','Build your own course 🛠️ in Marble Rush, and make predictions in the 🔬 lab!']];
 const CGO=[
  ['조금씩 매일 하는 게 최고예요. 오늘도 한 판 해 볼까요?','A little every day works best. Shall we play one round?'],

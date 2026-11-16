@@ -202,6 +202,7 @@ footer{margin-top:22px;text-align:center;color:#8a93b8;font-size:12px}
 .mig label{display:flex;gap:10px;align-items:center;background:#f6f7ff;border-radius:14px;padding:10px 12px;font-weight:800;cursor:pointer}
 .mig input{width:22px;height:22px}
 .prow3{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:6px}
+.plab{display:block;font-weight:900;font-size:15px;margin:2px 0 2px}.phint{font-size:13.5px!important;margin:0 0 10px!important;line-height:1.5!important}.pnote{display:block;font-size:13px;font-weight:800;color:var(--muted);margin-top:4px}
 </style>
 </head>
 <body>
@@ -355,7 +356,7 @@ function renderGames(){document.getElementById('games').innerHTML=GAMES.map(g=>`
   </a>`).join('');
  renderParent();renderCoach()}
 function renderWho(){const el=$('who');
- if(!PROF.list.length){el.innerHTML=`<div class="psetup"><b>👨‍👩‍👧 ${L('프로필을 만들면 형제자매가 모든 게임 기록을 따로 가질 수 있어요!','Make a profile for each player so everyone keeps their own progress in every game!')}</b><button type="button" class="pbtn" data-pa="add">➕ ${L('프로필 만들기','Make a profile')}</button></div>`}
+ if(!PROF.list.length){el.innerHTML=`<div class="psetup"><b>👨‍👩‍👧 ${L('프로필을 만들면 형제자매가 모든 게임 기록을 따로 가질 수 있어요!','Make a profile for each player so everyone keeps their own progress in every game!')}</b><small class="pnote">🔒 ${L('별명으로 만들어요. 이 기기에만 저장돼요.','Use a nickname. It stays on this device.')}</small><button type="button" class="pbtn" data-pa="add">➕ ${L('프로필 만들기','Make a profile')}</button></div>`}
  else el.innerHTML=`<div class="pbar"><div class="ptop"><span class="plabel">🎮 ${L('지금 플레이하는 사람 (눌러서 바꿔요)','Now playing (tap to switch)')}</span><a class="prep" href="report.html?lang=${LANG}&p=${encodeURIComponent(PROF.cur||'')}">📊 ${L('학부모 리포트','Parent report')}</a></div><div class="pchips">${PROF.list.map(p=>`<button type="button" class="pchip ${p.id===PROF.cur?'on':''}" data-pid="${p.id}"><span class="pav">${esc(p.av)}</span><b>${esc(p.name)}</b></button>`).join('')}<button type="button" class="pchip add" data-pa="add" aria-label="${esc(L('프로필 추가','Add a profile'))}">➕</button><button type="button" class="pchip edit" data-pa="manage" aria-label="${esc(L('프로필 고치기','Edit profiles'))}">✏️</button></div></div>`}
 function choose(id){PROF.cur=id;coachWait=false;saveProf();try{sessionStorage.setItem('moonGames.picked','1')}catch(e){}closeP();renderWho();renderGames()}
 // ---- small dialogs
@@ -365,7 +366,8 @@ function picker(){const last=PROF.cur;openP(`<h2>🎮 ${L('누가 놀까요?','W
  <div class="pgrid">${PROF.list.map(p=>`<button type="button" class="pbig ${p.id===last?'last':''}" data-pid="${p.id}"><span class="pav">${esc(p.av)}</span><b>${esc(p.name)}</b></button>`).join('')}</div>
  <div class="prow3"><button type="button" class="pbtn ghost" data-pa="add">➕ ${L('새 프로필','New profile')}</button></div>`,box=>box.addEventListener('click',onAct))}
 function profileForm(p){const isNew=!p;let av=p?p.av:AV.find(a=>!PROF.list.some(x=>x.av===a))||AV[0];
- openP(`<h2>${isNew?L('새 프로필','New profile'):L('프로필 고치기','Edit profile')}</h2><input class="pin" id="pName" maxlength="10" value="${esc(p?p.name:'')}" placeholder="${esc(L('이름','Name'))}" autocomplete="off">
+ openP(`<h2>${isNew?L('새 프로필','New profile'):L('프로필 고치기','Edit profile')}</h2><label class="plab" for="pName">${L('부르는 이름 (별명)','Nickname (what we call you)')}</label><input class="pin" id="pName" maxlength="10" value="${esc(p?p.name:'')}" placeholder="${esc(L('예: 별빛, 콩이','e.g. Star, Bean'))}" autocomplete="off" aria-describedby="pNameHint">
+  <p class="phint" id="pNameHint">${L('진짜 이름 대신 별명도 좋아요. 성은 쓰지 않아요.','A nickname works great. Please don’t use a last name.')}<br>🔒 ${L('이 기기에만 저장되고, 어디로도 보내지 않아요.','Saved only on this device and never sent anywhere.')}</p>
   <div class="avgrid">${AV.map(a=>`<button type="button" data-av="${a}" class="${a===av?'on':''}">${a}</button>`).join('')}</div>
   <div class="prow3">${isNew?'':`<button type="button" class="pbtn red" data-pa="del" data-pid="${p.id}">🗑️ ${L('지우기','Delete')}</button>`}<button type="button" class="pbtn ghost" data-pa="cancel">${L('취소','Cancel')}</button><button type="button" class="pbtn" data-pa="ok">${L('저장','Save')}</button></div>`,
   box=>{box.querySelector('.avgrid').addEventListener('click',e=>{const b=e.target.closest('[data-av]');if(!b)return;av=b.dataset.av;box.querySelectorAll('[data-av]').forEach(x=>x.classList.toggle('on',x===b))});

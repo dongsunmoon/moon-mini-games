@@ -760,7 +760,7 @@ button.dtl-card{cursor:pointer}
 
  <section class="detectiveProfile" id="detectiveProfile" aria-label="내 탐정 이름 등록" data-en-aria-label="Register my detective name">
    <div class="profileWho"><span class="profileIcon" aria-hidden="true"><img class="ei" src="images/detective-hero.webp" data-emoji="🕵️" alt="" draggable="false" onerror="this.replaceWith(document.createTextNode(this.dataset.emoji))"></span><div><strong id="namedGreeting" data-en="Welcome, new detective!">새로운 탐정님, 반가워요!</strong><small data-en="Save it once and we&#x27;ll remember it next time.">한 번 등록하면 다음에도 이름을 기억해요.</small></div><button type="button" class="nameEdit" id="nameEdit"></button></div>
-   <form class="profileForm" id="nameForm" autocomplete="off"><label for="detectiveNameInput" data-en="📛 Detective name">📛 탐정 이름</label><input id="detectiveNameInput" type="text" inputmode="text" maxlength="12" placeholder="예: 민준" data-en-placeholder="e.g. Alex" aria-describedby="nameStatus" required><button class="saveName" type="submit" data-en="💜 Save name">💜 이름 저장</button><button class="nameSkip" id="nameSkip" type="button" data-en="Later">나중에</button><div class="nameStatus" id="nameStatus" role="status" aria-live="polite" data-en="Save your name and the police radio will call you by it!">이름을 등록하면 경찰 무전과 칭찬에서 불러줘요!</div></form>
+   <form class="profileForm" id="nameForm" autocomplete="off"><label for="detectiveNameInput" data-en="📛 Detective name">📛 탐정 이름</label><input id="detectiveNameInput" type="text" inputmode="text" maxlength="12" placeholder="예: 번개 탐정" data-en-placeholder="e.g. Captain Clue" aria-describedby="nameStatus" required><button class="saveName" type="submit" data-en="💜 Save name">💜 이름 저장</button><button class="nameSkip" id="nameSkip" type="button" data-en="Later">나중에</button><div class="nameStatus" id="nameStatus" role="status" aria-live="polite" data-en="Save a detective nickname and the police radio will call you by it! 🔒 It stays on this device.">탐정 별명을 등록하면 경찰 무전과 칭찬에서 불러줘요! 🔒 이 기기에만 저장돼요.</div></form>
  </section>
  <section class="buddyDock" aria-label="내 탐정 친구" data-en-aria-label="My detective buddy">
  <div id="buddyFace" class="buddyFace" aria-hidden="true">🐶</div>
@@ -919,7 +919,7 @@ function showDetectiveName(){
  const compact=(!!detectiveName()||!!state.nameSkip)&&!nameEditing;$('detectiveProfile').classList.toggle('compact',compact);$('nameEdit').textContent=detectiveName()?L('✏️ 이름 바꾸기','✏️ Change name'):L('📛 이름 등록','📛 Add name');
  $('namedGreeting').textContent=detectiveName()?L(`🌟 ${detectiveName()} 탐정님, 출동 준비!`,`🌟 Detective ${detectiveName()}, ready for action!`):L('🌟 새로운 탐정님, 반가워요!','🌟 Welcome, new detective!');
  $('detectiveNameInput').value=detectiveName();
- $('nameStatus').textContent=detectiveName()?L(`✅ ${detectiveName()} 탐정의 이름을 기억하고 있어요.`,`✅ I remember your name, Detective ${detectiveName()}.`):L('이름을 등록하면 경찰 무전과 칭찬에서 불러줘요!','Save your name and the police radio will call you by it!');
+ $('nameStatus').textContent=detectiveName()?L(`✅ ${detectiveName()} 탐정의 이름을 기억하고 있어요.`,`✅ I remember your name, Detective ${detectiveName()}.`):L('탐정 별명을 등록하면 경찰 무전과 칭찬에서 불러줘요! 🔒 이 기기에만 저장돼요.','Save a detective nickname and the police radio will call you by it! 🔒 It stays on this device.');
  $('detectiveProfile').hidden=!!PROFILE_NAME;renderWho();
 }
 // Top bar: the profile's avatar and name, or the in-game detective name.

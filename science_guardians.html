@@ -701,6 +701,7 @@ main{width:min(980px,100%);margin:0 auto;padding:14px max(12px,env(safe-area-ins
 .trophy{display:flex;gap:12px;align-items:center;background:#fff;border-radius:18px;padding:12px;box-shadow:var(--shadow)}
 .trophy .ic{flex:0 0 auto;width:56px;height:56px;border-radius:16px;display:grid;place-items:center;font-size:34px;background:#fff4cc}
 .trophy.lock .ic{filter:grayscale(1);opacity:.45;background:#eee}
+.trophy .ic .ei{width:48px;height:48px}
 .trophy b{display:block;font-weight:900}
 .trophy small{display:block;font-weight:700;color:var(--muted)}
 .trophy .act{margin-left:auto;flex:0 0 auto}
@@ -1050,6 +1051,7 @@ main{width:min(980px,100%);margin:0 auto;padding:14px max(12px,env(safe-area-ins
 .ty-cap{background:rgba(255,255,255,.96);border-radius:18px;padding:10px 12px;font-weight:800;font-size:15.5px;line-height:1.45;display:flex;gap:8px;align-items:flex-start;box-shadow:0 8px 20px rgba(0,0,0,.16);min-height:48px}
 .ty-cap:empty{display:none}
 .ty-cap .ic{font-size:24px;line-height:1.1;flex:none}
+.ty-cap .ic img.upi{display:block;width:30px;height:30px;object-fit:contain}
 .ty-cap.good{background:#ecfbf1}.ty-cap.bad{background:#fff3e6}
 .ty-cap.in{animation:lsFb .35s}
 .ty-joy{position:absolute;width:92px;height:92px;margin:-46px 0 0 -46px;border-radius:50%;background:rgba(255,255,255,.28);border:3px solid rgba(255,255,255,.75);pointer-events:none}
@@ -1063,12 +1065,14 @@ main{width:min(980px,100%);margin:0 auto;padding:14px max(12px,env(safe-area-ins
 /* home: the path through the current world */
 .journey{display:flex;align-items:center;gap:6px;width:100%;margin:10px 0 14px;border:0;border-radius:18px;background:#fff;box-shadow:var(--shadow);padding:8px 10px;min-height:52px}
 .journey .jw{font-size:26px;flex:none}
+.journey .jw .ei{display:block;width:36px;height:36px;border-radius:10px;object-fit:cover}
 .journey i{flex:1;font-style:normal;height:34px;border-radius:12px;background:#eef2fb;color:#93a1bd;font-weight:900;font-size:15px;display:grid;place-items:center}
 .journey i.done{background:#fff4cc;color:#b77900;font-size:14px}
 .journey i small{font-size:12px;margin-left:1px}
 .journey i.cur{background:linear-gradient(180deg,#5ee08f,var(--green));color:#fff;font-size:18px;box-shadow:0 3px 0 var(--green-d);animation:lsGlow 1.4s ease-in-out infinite}
 .journey i.boss{flex:none;width:40px;background:#ffe3e8}
 .journey i.boss.cur{background:linear-gradient(180deg,#ff8a95,var(--red));box-shadow:0 3px 0 var(--red-d)}
+.journey i.boss .ei{width:32px;height:32px}
 .cards-album{margin:-4px 0 10px}
 @media (max-width:400px){.ty-order{font-size:14px;min-height:46px;padding:6px 8px}.ty-order .w{font-size:26px}.ty-cap{font-size:14.5px;padding:8px 10px;min-height:42px}.ty-prog{width:104px}}
 .ty-order .tx small{display:block;font-size:12px;color:var(--muted);font-weight:800;line-height:1.2}
@@ -1099,6 +1103,7 @@ button.ty-prog:active{transform:translateY(2px)}
 .ty-up.up{animation:tyUp .8s}
 @keyframes tyUp{30%{transform:scale(1.03);background:#fff3b0}}
 .ty-up .ic{font-size:30px;flex:none;width:38px;text-align:center}
+.ty-up .ic img.upi{display:block;width:38px;height:38px;object-fit:contain}
 .ty-up .tx{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
 .ty-up b{font-size:15.5px;line-height:1.25}
 .ty-up .lv{font-size:12px;background:#ffe9a8;color:#8a5a00;border-radius:8px;padding:1px 6px;margin-left:2px;vertical-align:1px}
@@ -5593,8 +5598,8 @@ const ACH=[
  {id:'call',icon:'🏛️',name:L('과학 박물관','Science museum'),desc:L(`과학 카드 ${CARDS.length}장 모두 모으기`,`Collect all ${CARDS.length} cards`),test:s=>Object.keys(s.cards).length>=CARDS.length,coins:800},
  {id:'g5',icon:'🥇',name:L('반짝 골드','Shiny gold'),desc:L('골드 카드 5장','5 gold cards'),test:s=>Object.values(s.cards).filter(c=>tierOf(c.m)===3).length>=5,coins:200},
  {id:'g20',icon:'🏅',name:L('골드 컬렉션','Gold collection'),desc:L('골드 카드 20장','20 gold cards'),test:s=>Object.values(s.cards).filter(c=>tierOf(c.m)===3).length>=20,coins:500},
- ...WORLDS.map((w,i)=>({id:'boss'+i,icon:w.boss.icon,name:L(`${w.boss.name} 격파`,`Beat ${w.boss.name}`),desc:L(`${w.name}의 보스 물리치기`,`Defeat the boss of ${w.name}`),test:s=>s.bossWins.includes(i),coins:100+i*40})),
- {id:'final',icon:'🦹',name:L('헷갈 박사를 막았다!','Stopped Dr. Mix-Up!'),desc:L('최종 보스 물리치기','Defeat the final boss'),test:s=>s.finalWin,coins:1000},
+ ...WORLDS.map((w,i)=>({id:'boss'+i,icon:w.boss.icon,img:w.boss.img,name:L(`${w.boss.name} 격파`,`Beat ${w.boss.name}`),desc:L(`${w.name}의 보스 물리치기`,`Defeat the boss of ${w.name}`),test:s=>s.bossWins.includes(i),coins:100+i*40})),
+ {id:'final',icon:'🦹',img:FINAL.img,name:L('헷갈 박사를 막았다!','Stopped Dr. Mix-Up!'),desc:L('최종 보스 물리치기','Defeat the final boss'),test:s=>s.finalWin,coins:1000},
  {id:'cb5',icon:'🔥',name:L('5콤보','5-combo'),desc:L('연속 5문제 정답','5 right answers in a row'),test:s=>s.bestCombo>=5,coins:80},
  {id:'cb12',icon:'🔥',name:L('불꽃 콤보','Blazing combo'),desc:L('연속 12문제 정답','12 right answers in a row'),test:s=>s.bestCombo>=12,coins:250},
  {id:'st30',icon:'⭐',name:L('별 30개','30 stars'),desc:L('모험에서 별 30개 모으기','Collect 30 adventure stars'),test:s=>totalStars(s)>=30,coins:150},
@@ -5640,6 +5645,9 @@ $('lvlBtn').addEventListener('click',()=>{SFX.click();const t=titleOf(S.lvl),nt=
 $('gearBtn').addEventListener('click',()=>{SFX.click();openSettings()});
 
 // ---------------------------------------------------------------- home
+// home tile pictures (images/sci-tile-<id>.webp): add an id to TILE_HAVE once its file is in images/; until then the emoji shows
+const TILE_HAVE=new Set([]);
+const tileIc=(id,e)=>TILE_HAVE.has(id)?pic(`images/sci-tile-${id}.webp`,e):e;
 function tile(go,cls,ic,name,small,dot=0){return `<button class="tile ${cls}" type="button" data-go="${go}">${dot?`<span class="dot">${dot===true?'!':dot}</span>`:''}<span class="ic">${ic}</span><div><b>${name}</b><small>${small}</small></div></button>`}
 function reviewList(){
  const ok=id=>CARD[id]&&cardOk(CARD[id]);
@@ -5649,8 +5657,8 @@ function reviewList(){
 }
 // One way forward: each store day ends with a monster, the strip shows where you are in this world
 function journeyHTML(nx){if(nx.final||nx.all)return '';const w=nx.w;
- return `<button class="journey" type="button" data-go="map" aria-label="${L('모험 지도','Adventure map')}"><span class="jw">${WORLDS[w].icon}</span>${Array.from({length:STAGES},(_,k)=>{const st=S.stars[w+'-'+k]||0,cur=!nx.boss&&nx.s===k;
-  return `<i class="${st?'done':cur?'cur':''}">${st?`⭐<small>${st}</small>`:cur?'🏪':k+1}</i>`}).join('')}<i class="boss ${nx.boss?'cur':''}">👑</i></button>`}
+ return `<button class="journey" type="button" data-go="map" aria-label="${L('모험 지도','Adventure map')}"><span class="jw">${pic(WORLDS[w].img,WORLDS[w].icon)}</span>${Array.from({length:STAGES},(_,k)=>{const st=S.stars[w+'-'+k]||0,cur=!nx.boss&&nx.s===k;
+  return `<i class="${st?'done':cur?'cur':''}">${st?`⭐<small>${st}</small>`:cur?'🏪':k+1}</i>`}).join('')}<i class="boss ${nx.boss?'cur':''}">${pic(WORLDS[w].boss.img,'👑')}</i></button>`}
 function renderHome(){
  const t=titleOf(S.lvl),nx=nextStage(),w=WORLDS[nx.w],d=D(),claim=ACH.filter(a=>a.test(S)&&!S.ach.includes(a.id)).length;
  const day=(S.shopX.days||0)+1,cta=nx.final?L('헷갈 박사와 최종 대결!','Final battle with Dr. Mix-Up!'):nx.boss?L(`🏪 ${day}일째 가게 열기 · 보스가 와요!`,`🏪 Open the store, day ${day} · boss night!`):nx.all?L('모험 다시 하기','Replay the adventure'):L(`🏪 ${day}일째 가게 열기`,`🏪 Open the store, day ${day}`);
@@ -5662,10 +5670,10 @@ function renderHome(){
  <button class="btn green cta" type="button" data-go="continue">${cta}<small>${sub}</small></button>
  ${journeyHTML(nx)}
  <div class="tiles">
-  ${tile('map','t-adv','🗺️',L('모험 지도','Adventure map'),`⭐ ${totalStars()}/${WORLDS.length*STAGES*3}`)}
-  ${tile('cards','t-cards','📚',L('과학 카드','Science cards'),`${Object.keys(S.cards).length}/${CARDS.length} · 📒 ${stkCount()}`)}
+  ${tile('map','t-adv',tileIc('map','🗺️'),L('모험 지도','Adventure map'),`⭐ ${totalStars()}/${WORLDS.length*STAGES*3}`)}
+  ${tile('cards','t-cards',tileIc('cards','📚'),L('과학 카드','Science cards'),`${Object.keys(S.cards).length}/${CARDS.length} · 📒 ${stkCount()}`)}
   ${tile('shop','t-shop',COIN,L('꾸미기 상점','Style shop'),`${num(S.coins)} ${L('코인','coins')}`)}
-  ${tile('trophy','t-trophy','🏆',L('업적','Trophies'),`${ACH.filter(a=>S.ach.includes(a.id)).length}/${ACH.length}`,claim)}
+  ${tile('trophy','t-trophy',tileIc('trophy','🏆'),L('업적','Trophies'),`${ACH.filter(a=>S.ach.includes(a.id)).length}/${ACH.length}`,claim)}
  </div>
  <p class="foot">© 2026 Dongsun Moon. ${L('모든 권리 보유.','All rights reserved.')}<br>${L('모든 문제와 그림, 소리는 이 게임을 위해 직접 만들었어요.','All questions, pictures and sounds were made for this game.')}</p>
  </div>`;
@@ -5694,7 +5702,7 @@ function openMissionChest(){
 function mathChest(title,done){
  const easy=S.diff===1,a=easy?10+rnd(40):100+rnd(150),b=easy?2+rnd(8):60+rnd(140),ans=a+b,opts=shuffle([ans,...shuffle([ans+1,ans-1,ans+10,ans-10]).slice(0,2)]);
  let answered=false;
- modal(`<div style="font-size:70px">🎁</div><h2>${esc(title)}</h2><p>${L('상자 안에 코인 주머니가 2개 있어요. 모두 몇 개일까요? 맞히면 보너스 +50!','There are two coin bags inside. How many coins in total? Get it right for +50 bonus!')}</p>
+ modal(`<div style="font-size:70px;line-height:1">${pic('images/sci-chest-wood.webp','🎁')}</div><h2>${esc(title)}</h2><p>${L('상자 안에 코인 주머니가 2개 있어요. 모두 몇 개일까요? 맞히면 보너스 +50!','There are two coin bags inside. How many coins in total? Get it right for +50 bonus!')}</p>
   <div class="math" style="font-size:24px">${COIN} ${a} + ${COIN} ${b} = ?</div>
   <div class="choices">${opts.map(o=>`<button type="button" data-act="ans" data-v="${o}">${o}</button>`).join('')}</div>
   <p id="chestMsg" style="min-height:24px"></p><div class="row"><button class="btn gold hidden" id="chestTake" type="button" data-act="take">${L('받기','Collect')}</button></div>`,
@@ -5899,6 +5907,10 @@ let Y=null;
 
 function img(src){const m=new Image();m.src=src;return m}
 const ok_=m=>m&&m.complete&&m.naturalWidth;
+// the coin picture for the canvas (the top bar uses the same one); null until it has loaded, and the 🪙 emoji is drawn instead
+function coinIm(){if(!PICS.coin)PICS.coin=img('images/coin.webp');return ok_(PICS.coin)?PICS.coin:null}
+// café food in the page (what you hold): the painted food when there is one, else the emoji
+function foodPic(e){const k=EMO_PIC[e];return k&&SHOP_HAVE.has(k)?`<img class="ei" src="images/sci-${k}.webp" data-emoji="${esc(e)}" alt="" draggable="false">`:e}
 function shopPic(k){if(!SHOP_HAVE.has(k))return null;if(!PICS[k])PICS[k]=img(`images/sci-${k}.webp`);return ok_(PICS[k])?PICS[k]:null}
 // a customer's painted face for the page around the café (order card, buttons, captions, the recap and battle hints);
 // anything without a picture stays as it was. A picture that fails to load turns back into its emoji (data-emoji).
@@ -6016,7 +6028,7 @@ function canUI(){if(!Y)return;const can=!!nextBuy();Y.el.upBtn.classList.toggle(
  // the tip waits for a quiet moment, so it never covers what a science customer just explained
  if(can&&!S.shopX.boardTip&&!Y.saidBoard&&S.shopX.tut&&Y.t>8&&Y.t-(Y.capAt||-99)>6&&Y.phase==='open'&&!(Y.O&&!Y.O.done&&Y.hold.some(h=>!h.food))){Y.saidBoard=1;caption('🛠️',L('동전이 모였어요! 오른쪽 위 🛠️ 업그레이드를 눌러 가게를 키워 봐요.','You have coins! Tap 🛠️ Upgrades at the top right to grow your café.'),null,true)}}
 function handUI(){if(!Y)return;actsUI();const sci=Y.hold.filter(h=>!h.food),fd={};Y.hold.filter(h=>h.food).forEach(h=>fd[h.e]=(fd[h.e]||0)+1);
- Y.el.hand.innerHTML=Y.hold.length?`<b>🖐️</b>${sci.map(h=>`<span>${richE(h.e)}<small>${esc(h.l)}</small></span>`).join('')}${Object.entries(fd).map(([e,n])=>`<span>${e}<small>×${n}</small></span>`).join('')}`:'';Y.el.hand.classList.toggle('hidden',!Y.hold.length)}
+ Y.el.hand.innerHTML=Y.hold.length?`<b>🖐️</b>${sci.map(h=>`<span>${richE(h.e)}<small>${esc(h.l)}</small></span>`).join('')}${Object.entries(fd).map(([e,n])=>`<span>${foodPic(e)}<small>×${n}</small></span>`).join('')}`:'';Y.el.hand.classList.toggle('hidden',!Y.hold.length)}
 // Handing over: once you hold a science item, a big button names the customer (one per customer when sorting).
 // Tapping it, or the customer, walks you to the counter in front of them and hands the item over there.
 function giveTo(c){const O=Y.O;if(!O||O.done||!c||c.state!=='wait')return;
@@ -6030,7 +6042,8 @@ function actsUI(){if(!Y)return;const O=Y.O,box=Y.el.acts;let html='';
   html=`<button type="button" class="ty-give one food" data-food="${t.i}"><span class="w">${face(d.e)}</span><span class="t"><b>${L('🍽️ 손님께 음식 갖다 주기','🍽️ Take the food to the diner')}</b><small>${[...new Set(fd.filter(f=>(d.want[f]||0)>(d.got[f]||0)))].map(f=>FOOD[f]).join(' ')} ${L('기다리는 손님이 있어요','A diner is waiting')}</small></span></button>`}}
  if(!html&&Y.phase==='open'&&Y.mess&&!atTable(Y.mess.t))html=`<button type="button" class="ty-give one wipe" data-wipe="1"><span class="w">🧽</span><span class="t"><b>${L('테이블 닦으러 가기','Go wipe the table')}</b><small>${L('헷갈 박사가 어질러 놓았어요. 닦으면 보너스!','Dr. Mix-Up made a mess. Wipe it for a bonus!')}</small></span></button>`;
  if(html!==Y.actsHtml){Y.actsHtml=html;box.innerHTML=html;box.classList.toggle('hidden',!html)}}
-function caption(ic,txt,good,say){if(!Y)return;Y.capAt=Y.t;const c=Y.el.cap;c.className='ty-cap'+(good===true?' good':good===false?' bad':'');c.innerHTML=`<span class="ic">${face(ic)}</span><span>${esc(txt)}</span>`;void c.offsetWidth;c.classList.add('in');if(say!==false)speak(txt)}
+// ic: an emoji (a customer's becomes their painted face), or {html} for a ready picture
+function caption(ic,txt,good,say){if(!Y)return;Y.capAt=Y.t;const c=Y.el.cap;c.className='ty-cap'+(good===true?' good':good===false?' bad':'');c.innerHTML=`<span class="ic">${ic&&ic.html?ic.html:face(ic)}</span><span>${esc(txt)}</span>`;void c.offsetWidth;c.classList.add('in');if(say!==false)speak(txt)}
 function banner(html,ms){if(!Y)return;const b=Y.el.ban;b.innerHTML=html;b.classList.remove('hidden','in');void b.offsetWidth;b.classList.add('in');clearTimeout(Y.banT);Y.banT=setTimeout(()=>{if(Y)b.classList.add('hidden')},ms)}
 function mood(c,m,t=1.6){c.mood=m;c.moodT=t}
 function pop(x,y,txt,col){Y.pops.push({x,y,txt,col,t:0})}
@@ -6199,10 +6212,12 @@ function upSpots(u,v){const m=Y.mach.find(m=>m.id===u.id);if(m)return [[m.x+.5,m
 function openCard(u,v,from){if(!Y||Y.card||v>upMax(u))return;if(Y.board)closeBoard();
  Y.card={u,v,from};Y.joy=null;Y.keys={};Y.el.joy.classList.add('hidden');Y.focus=upSpots(u,v)[0];SFX.hint();cardUI();Y.el.pv.classList.remove('hidden');
  speak(`${upAct(u,v)}. ${T(v===1&&u.first?u.first:u.what)}`)}
+// an upgrade's picture at level v: its own (some change with the level), your buddy for the coin buddy, the new helper for
+// staff, else its emoji. The card, the board and the caption after buying all use it.
+function upPic(u,v,cls=''){const pn=Array.isArray(u.pic)?u.pic[v]:u.pic,bd=BUDDIES[S.equip.buddy]||BUDDIES.puppy,c=cls?` class="${cls}"`:'';
+ return pn?`<img${c} src="images/sci-${pn}.webp" alt="" onerror="this.replaceWith('${u.ic}')">`:u.id==='buddy'&&bd.img?`<img${c} src="${bd.img}" alt="" onerror="this.replaceWith('${bd.icon}')">`:u.id==='staff'&&Y.crew[v-1]?`<img${c} src="${Y.crew[v-1].src}" alt="" onerror="this.replaceWith('${u.ic}')">`:u.ic}
 function cardUI(){const C=Y&&Y.card;if(!C)return;const {u,v}=C,p=u.price[v],can=S.coins>=p,rows=upChange(u,v-1,v,true);
- // the picture: the upgrade's own (some change with the level), your buddy for the coin buddy, the new helper for staff
- const pn=Array.isArray(u.pic)?u.pic[v]:u.pic,bd=BUDDIES[S.equip.buddy]||BUDDIES.puppy;
- const pic=pn?`<img src="images/sci-${pn}.webp" alt="" onerror="this.replaceWith('${u.ic}')">`:u.id==='buddy'&&bd.img?`<img src="${bd.img}" alt="" onerror="this.replaceWith('${bd.icon}')">`:u.id==='staff'&&Y.crew[v-1]?`<img src="${Y.crew[v-1].src}" alt="">`:u.ic;
+ const pic=upPic(u,v);
  Y.el.pv.innerHTML=`<div class="ty-pvin" role="dialog" aria-label="${esc(upAct(u,v))}"><div class="ty-pvh"><span class="pic">${pic}</span><div class="t"><b>${esc(upAct(u,v))}</b><small>${esc(T(u.name))} · <em>${esc(upStep(u,v))}</em></small></div></div>
   <p class="ty-pvw">${esc(T(v===1&&u.first?u.first:u.what))}</p>
   ${rows.length?`<ul class="ty-pvc">${rows.map(r=>`<li><span class="k">${r[0]} ${esc(r[1])}</span><span class="v"><s>${esc(r[2])}</s> → <b>${esc(r[3])}</b></span></li>`).join('')}</ul>`:''}
@@ -6216,7 +6231,7 @@ function buyCard(){const C=Y&&Y.card;if(!C)return;const {u,v}=C,p=u.price[v];if(
 function levelUp(u,v){if(S.shopX.fast4&&v===1&&Y.mach.some(m=>m.id===u.id))v=4;// old saves with "faster machines" get new ones fast too
  shopLvs()[u.id]=v;save();SFX.level();syncStaff();unstick();
  upSpots(u,v).forEach(([x,y],k)=>{if(k<3)burst(x,y)});const [x,y]=upSpots(u,v)[0];pop(x,y-.6,`Lv.${v}!`,'#ff7a00');
- caption(u.ic,`${T(u.name)} Lv.${v}! ${upChange(u,v-1,v)}`,true);hud()}
+ caption({html:upPic(u,v,'upi')},`${T(u.name)} Lv.${v}! ${upChange(u,v-1,v)}`,true);hud()}
 // The upgrade board: every upgrade with its level, what the next level changes (before → after) and its price.
 // Picking a line opens the card for it.
 function openBoard(){if(!Y||Y.board||Y.card)return;Y.board=true;Y.joy=null;Y.keys={};Y.el.joy.classList.add('hidden');SFX.click();
@@ -6227,7 +6242,7 @@ function boardRow(u){const v=lvOf(u.id),mx=upMax(u),st=u.start||0,max=v>=mx,lock
  const btn=max?`<span class="ty-ubtn max">✅<small>${L('최고 레벨','Max level')}</small></span>`
   :lock?`<span class="ty-ubtn lock">🔒<small>${L('알바생 먼저','Hire first')}</small></span>`
   :`<button type="button" class="ty-ubtn ${can?'buy':'no'}" data-up="${u.id}">${COIN} ${p}<small>${can?L('올리기 ›','Upgrade ›'):L(`${p-S.coins} 더 모아요`,`${p-S.coins} more`)}</small></button>`;
- return `<div class="ty-up${can?' can':''}${max?' max':''}" data-u="${u.id}"><span class="ic">${u.ic}</span><div class="tx"><b>${esc(max?T(u.name):upAct(u,v+1))} <span class="lv">${max?`Lv.${v}`:esc(upStep(u,v+1))}</span></b><span class="pips">${pips}</span><small class="ch">${esc(max?T(u.what):upChange(u,v,v+1))}</small></div>${btn}</div>`}
+ return `<div class="ty-up${can?' can':''}${max?' max':''}" data-u="${u.id}"><span class="ic">${upPic(u,max?v:v+1,'upi')}</span><div class="tx"><b>${esc(max?T(u.name):upAct(u,v+1))} <span class="lv">${max?`Lv.${v}`:esc(upStep(u,v+1))}</span></b><span class="pips">${pips}</span><small class="ch">${esc(max?T(u.what):upChange(u,v,v+1))}</small></div>${btn}</div>`}
 function boardUI(){if(!Y||!Y.board)return;const box=Y.el.board,sc=box.querySelector('.ty-labin'),top=sc?sc.scrollTop:0,n=upHave(),all=upAll();
  box.innerHTML=`<div class="ty-labin ty-boardin"><div class="ty-labh"><b>🛠️ ${L('가게 업그레이드','Café upgrades')}</b><span class="ty-bcoin">${COIN} ${S.coins.toLocaleString()}</span><button type="button" class="ty-x" data-bx aria-label="${L('닫기','Close')}">✕</button></div>
   <div class="ty-bsum"><span>${L(`가게 키우기 ${n}/${all} · 줄을 누르면 자세히 보여요`,`Upgrades ${n}/${all} · tap one to see it`)}</span><div class="ty-bar"><i style="width:${n/all*100}%"></i></div></div>
@@ -6308,6 +6323,13 @@ function emo(c,e,x,y,size){const im=EMO_PIC[e]&&shopPic(EMO_PIC[e]);
 function emo_(c,e,x,y,size){if(e&&e.includes('@')){const parts=e.split(/(@[a-z]+)/).filter(Boolean);let w=0;const ws=parts.map(p=>{let v;if(p[0]==='@')v=size;else{c.font=`${size}px ${EF}`;v=c.measureText(p).width}w+=v;return v});let px=x-w/2;
   parts.forEach((p,k)=>{if(p[0]==='@'){const im=icoImg(p.slice(1));if(im)c.drawImage(im,px,y-size/2,size,size)}else{c.font=`${size}px ${EF}`;c.textAlign='left';c.textBaseline='middle';c.fillText(p,px,y)}px+=ws[k]});return}
  c.font=`${size}px ${EF}`;c.textAlign='center';c.textBaseline='middle';c.fillText(e,x,y)}
+// words with the coin picture in front (🪙 + words until the picture has loaded), centred on x; uses the current font and fill
+function coinText(c,t,x,y,s){const im=coinIm();if(!im){c.fillText(`🪙${t}`,x,y);return}const al=c.textAlign,tw=c.measureText(t).width,lx=x-(tw+s+1)/2;
+ c.drawImage(im,lx,y-s/2-.5,s,s);c.textAlign='left';c.fillText(t,lx+s+1,y);c.textAlign=al}
+// a little tag with a coin and a number (coins waiting on a table, the pile by the door)
+function coinLabel(c,n,x,y,bg){const im=coinIm();if(!im){label(c,`🪙 ${n}`,x,y,bg);return}c.font=`800 13px ${TF}`;const t=String(n),w=Math.min(96,c.measureText(t).width+30);
+ c.fillStyle=bg;c.beginPath();c.roundRect(x-w/2,y-10,w,20,9);c.fill();c.strokeStyle='rgba(0,0,0,.08)';c.stroke();c.drawImage(im,x-w/2+5,y-7.5,15,15);
+ c.fillStyle='#24304a';c.textAlign='center';c.textBaseline='middle';c.fillText(t,x+8,y+.5,w-24)}
 function label(c,t,x,y,bg,fg='#24304a'){c.font=`800 13px ${TF}`;const w=Math.min(96,c.measureText(t).width+12);c.fillStyle=bg;c.beginPath();c.roundRect(x-w/2,y-10,w,20,9);c.fill();c.strokeStyle='rgba(0,0,0,.08)';c.stroke();c.fillStyle=fg;c.textAlign='center';c.textBaseline='middle';c.fillText(t,x,y+.5,w-8)}
 function wallQuad(c,x0,y0,x1,y1,h0,h1,fill){const a=iso(x0,y0),b=iso(x1,y1);poly(c,[[a[0],a[1]-h0],[b[0],b[1]-h0],[b[0],b[1]-h1],[a[0],a[1]-h1]],fill)}
 function draw(){const c=Y.ctx,me=Y.me,O=Y.O,dec=lvOf('decor'),sg=lvOf('sign');c.lineJoin='round';
@@ -6325,12 +6347,15 @@ function draw(){const c=Y.ctx,me=Y.me,O=Y.O,dec=lvOf('decor'),sg=lvOf('sign');c.
  wallQuad(c,0,0,MW,0,wh,wh+10,'#ffffff');wallQuad(c,0,0,0,MH,wh,wh+10,'#f2f6fb');
  wallQuad(c,0,0,MW,0,0,16,'#f0a76a');wallQuad(c,0,0,0,MH,0,16,'#8fbfe8');
  const mb=iso(9.2,0);c.save();c.translate(mb[0],mb[1]-wh+28);c.transform(1,.5,0,1,0,0);c.fillStyle='#3a2b26';c.beginPath();c.roundRect(-4,-14,132,52,8);c.fill();
- [['🍔',5],['🍟',3],['🥤',2]].forEach(([e,p],k)=>{emo(c,e,18+k*44,4,22);c.font=`900 12px ${TF}`;c.textAlign='center';c.textBaseline='middle';c.fillStyle='#ffd23f';c.fillText(`🪙${p}`,18+k*44,27)});c.restore();
+ [['🍔',5],['🍟',3],['🥤',2]].forEach(([e,p],k)=>{emo(c,e,18+k*44,4,22);c.font=`900 12px ${TF}`;c.textAlign='center';c.textBaseline='middle';c.fillStyle='#ffd23f';coinText(c,String(p),18+k*44,27,12)});c.restore();
  const sp=iso(3.8,0);c.save();c.translate(sp[0],sp[1]-wh+30);c.transform(1,.5,0,1,0,0);c.fillStyle=sg?'#ffd23f':'#ffffff';c.beginPath();c.roundRect(-84,-18,168,34,12);c.fill();if(sg){c.strokeStyle='#ff9f1a';c.lineWidth=3;c.stroke();c.lineWidth=1}
  const nm=T(SHOP_LV[shopLv()][2]);c.fillStyle='#e0533d';c.font=`900 16px ${TF}`;c.textAlign='center';c.textBaseline='middle';
  if(shopPic('food-burger')){const w=Math.min(134,c.measureText(nm).width),x0=-(w+26)/2;emo(c,'🍔',x0+10,0,20);c.fillStyle='#e0533d';c.font=`900 16px ${TF}`;c.fillText(nm,x0+26+w/2,0,134)}
  else c.fillText(`🍔 ${nm}`,0,0,160);c.restore();
- [['🧲',0,3.2],['🌍',0,5.6],['🔬',0,8]].forEach(([e,x,y])=>{const p=iso(x,y);c.save();c.translate(p[0],p[1]-wh+46);c.transform(1,-.5,0,1,0,0);c.fillStyle='#ffffff';c.strokeStyle='#9fb6d6';c.lineWidth=3;c.beginPath();c.roundRect(-22,-26,44,50,6);c.fill();c.stroke();c.lineWidth=1;c.font=`26px ${EF}`;c.textAlign='center';c.textBaseline='middle';c.fillText(e,0,0);c.restore()});
+ // science posters: painted ones (images/sci-shop-poster-<key>.webp) once their keys are in SHOP_HAVE, else a white frame with an emoji
+ [['magnet','🧲',0,3.2],['earth','🌍',0,5.6],['micro','🔬',0,8]].forEach(([pk_,e,x,y])=>{const p=iso(x,y),im=shopPic('shop-poster-'+pk_);c.save();c.translate(p[0],p[1]-wh+46);c.transform(1,-.5,0,1,0,0);
+  if(im){const h=56,w=h*im.naturalWidth/im.naturalHeight;c.drawImage(im,-w/2,-h/2,w,h);c.restore();return}
+  c.fillStyle='#ffffff';c.strokeStyle='#9fb6d6';c.lineWidth=3;c.beginPath();c.roundRect(-22,-26,44,50,6);c.fill();c.stroke();c.lineWidth=1;c.font=`26px ${EF}`;c.textAlign='center';c.textBaseline='middle';c.fillText(e,0,0);c.restore()});
  // decorations: a picture on the café wall, then a radio playing music
  if(dec>=3&&shopPic('shop-picture')){const p=iso(8.45,0);c.save();c.translate(p[0],p[1]-wh+52);c.transform(1,.5,0,1,0,0);c.drawImage(shopPic('shop-picture'),-23,-27,46,46);c.restore()}
  else if(dec>=3){const p=iso(8.45,0);c.save();c.translate(p[0],p[1]-wh+52);c.transform(1,.5,0,1,0,0);c.fillStyle='#ffffff';c.strokeStyle='#e0a33a';c.lineWidth=4;c.beginPath();c.roundRect(-18,-20,36,36,4);c.fill();c.stroke();c.lineWidth=1;c.font=`22px ${EF}`;c.textAlign='center';c.textBaseline='middle';c.fillStyle='#000';c.fillText('🌈',0,-2);c.restore()}
@@ -6350,7 +6375,7 @@ function draw(){const c=Y.ctx,me=Y.me,O=Y.O,dec=lvOf('decor'),sg=lvOf('sign');c.
   c.fillStyle='rgba(60,60,80,.28)';c.beginPath();c.ellipse(cx,cy+3,32,16,0,0,TAU);c.fill();
   c.fillStyle=S.coins>=p.price?'#eafff0':'#ffffff';c.beginPath();c.ellipse(cx,cy,32,16,0,0,TAU);c.fill();
   c.strokeStyle=`rgba(51,196,107,${.35+.3*pulse})`;c.lineWidth=2;c.setLineDash([5,4]);c.beginPath();c.ellipse(cx,cy,32,16,0,0,TAU);c.stroke();c.setLineDash([]);c.lineWidth=1;
-  emo(c,u.ic,cx,cy-1,22)});
+  const tim=u.id==='tables'&&shopPic('shop-table');if(tim){const w=34,h=w*tim.naturalHeight/tim.naturalWidth;c.drawImage(tim,cx-w/2,cy-1-h/2,w,h)}else emo(c,u.ic,cx,cy-1,22)});
  // gold rings where it will happen
  if(hu){const k=.5+.5*Math.sin(Y.hl*6);upSpots(hu.u,hu.v).forEach(([x,y])=>{const [a,b]=iso(x,y);c.fillStyle=`rgba(255,214,60,${.18+.12*k})`;c.beginPath();c.ellipse(a,b,42+6*k,21+3*k,0,0,TAU);c.fill();c.strokeStyle=`rgba(255,170,0,${.65+.35*k})`;c.lineWidth=4;c.stroke();c.lineWidth=1})}
  const zl=(x,y,col)=>poly(c,quad(x+.1,y+.1,x+.9,y+.9),col);
@@ -6404,12 +6429,18 @@ function draw(){const c=Y.ctx,me=Y.me,O=Y.O,dec=lvOf('decor'),sg=lvOf('sign');c.
 }
 // a two-line tag under each pad (above it stands the see-through picture): what you buy in words, then the step
 // and the price, green when you can afford it. Tags that would overlap are stacked downward.
-function padTags(c){const done=[],hid=(Y.card&&Y.card.u)||(Y.nearPad&&Y.nearPad.u);pads().forEach(p=>{if(p.u===hid)return;const [x,y0]=iso(p.x+.5,p.y+.5),can=S.coins>=p.price,l1=`${p.u.ic} ${upAct(p.u,p.v)}`,l2=`${upStep(p.u,p.v)} · 🪙${p.price}`;
- c.font=`900 13px ${TF}`;const w1=c.measureText(l1).width;c.font=`800 12px ${TF}`;const w=Math.min(160,Math.max(w1,c.measureText(l2).width)+18);let y=y0+56;
+// the pad's own little picture: machines show their food, tables a table (null until it has loaded)
+const padIm=u=>u.id==='tables'?shopPic('shop-table'):EMO_PIC[u.ic]?shopPic(EMO_PIC[u.ic]):null;
+function padTags(c){const done=[],hid=(Y.card&&Y.card.u)||(Y.nearPad&&Y.nearPad.u);pads().forEach(p=>{if(p.u===hid)return;const [x,y0]=iso(p.x+.5,p.y+.5),can=S.coins>=p.price,pim=padIm(p.u),l1=pim?upAct(p.u,p.v):`${p.u.ic} ${upAct(p.u,p.v)}`,l2=`${upStep(p.u,p.v)} · `;
+ c.font=`900 13px ${TF}`;const w1=c.measureText(l1).width+(pim?19:0);c.font=`800 12px ${TF}`;const w=Math.min(160,Math.max(w1,c.measureText(l2+'🪙'+p.price).width)+18);let y=y0+56;
  for(let k=0;k<4&&done.some(r=>Math.abs(r[0]-x)<(r[1]+w)/2&&Math.abs(r[2]-y)<40);k++)y+=40;done.push([x,w,y]);
  c.fillStyle=can?'#eafff0':'#ffffff';c.strokeStyle=can?'#33c46b':'#b9c6dc';c.lineWidth=2;c.beginPath();c.roundRect(x-w/2,y-36,w,36,10);c.fill();c.stroke();c.lineWidth=1;
  if(y===y0+56){c.beginPath();c.moveTo(x-6,y-35);c.lineTo(x+6,y-35);c.lineTo(x,y-42);c.fill()}
- c.textAlign='center';c.textBaseline='middle';c.fillStyle='#24304a';c.font=`900 13px ${TF}`;c.fillText(l1,x,y-25,w-10);c.fillStyle=can?'#1f9a4f':'#5f6b8f';c.font=`800 12px ${TF}`;c.fillText(l2,x,y-10,w-10)})}
+ c.textAlign='center';c.textBaseline='middle';c.fillStyle='#24304a';c.font=`900 13px ${TF}`;
+ if(pim){const tw=Math.min(c.measureText(l1).width,w-29),lx=x-(tw+19)/2,r=pim.naturalWidth/pim.naturalHeight,iw=r>1?17:17*r,ih=r>1?17/r:17;c.drawImage(pim,lx+8-iw/2,y-25-ih/2,iw,ih);c.textAlign='left';c.fillText(l1,lx+19,y-25,w-29);c.textAlign='center'}
+ else c.fillText(l1,x,y-25,w-10);
+ c.fillStyle=can?'#1f9a4f':'#5f6b8f';c.font=`800 12px ${TF}`;const tw2=c.measureText(l2).width;c.textAlign='left';const lx2=x-(tw2+c.measureText('🪙'+p.price).width)/2;c.fillText(l2,lx2,y-10);c.textAlign='center';
+ coinText(c,String(p.price),lx2+tw2+c.measureText('🪙'+p.price).width/2,y-10,13)})}
 function furn(c,k,cx,by,w){const im=shopPic('shop-'+k);if(!im)return false;const h=w*im.naturalHeight/im.naturalWidth;c.drawImage(im,cx-w/2,by-h,w,h);return true}
 function drawShelf(c,s){const g=s.g,glow=s.glow&&Math.sin(Y.t*8)>0,[bx]=iso(s.x+.5,s.y+.5),[,by]=iso(s.x+1,s.y+1);
  if(!furn(c,'stand',bx,by+6,76))box(c,s.x+.07,s.y+.07,.86,.86,28,glow?'#ffe27a':'#c5b2ff','#9a82ea','#8468da');
@@ -6430,7 +6461,7 @@ function drawCounter(c){const [cx]=iso(7.5,6.5),[,cy]=iso(8,8);if(!furn(c,'count
  if(!Y.cust.some(p=>p.state==='wait')){const [lx,ly]=iso(7.5,6.5);label(c,L('🔬 과학 계산대','🔬 Science counter'),lx,ly-58,'#e6f4ff')}
  const O=Y.O;if(O&&O.t==='order'&&O.stack.length){const [a,b]=iso(7.5,7.4);O.stack.forEach((e,k)=>emo(c,e,a,b-46-k*15,22))}}
 function coinStack(c,x,y,n){const h=Math.min(16,2+Math.ceil(n/5));for(let k=0;k<h;k++){c.fillStyle=k%2?'#ffd23f':'#f4b400';c.beginPath();c.ellipse(x,y-k*4,14,7,0,0,TAU);c.fill();c.strokeStyle='#c98a00';c.stroke()}return h}
-function drawPile(c){const n=Math.round(Y.pileShow);if(n<=0)return;const [x,y]=iso(COINS.x+.5,COINS.y+.5),h=coinStack(c,x,y,n);label(c,`🪙 ${n}`,x,y-h*4-16,'#fff6d0')}
+function drawPile(c){const n=Math.round(Y.pileShow);if(n<=0)return;const [x,y]=iso(COINS.x+.5,COINS.y+.5),h=coinStack(c,x,y,n);coinLabel(c,n,x,y-h*4-16,'#fff6d0')}
 // a machine shows its level: a glow on the floor (bronze, silver, gold, then rainbow), stars on the front,
 // a ring filling up for the next one and a puff of steam each time one is made
 function drawMach(c,m){const v=lvOf(m.id),[cook,max]=MLV[v],[x,y]=iso(m.x+.5,m.y+.5),[,by]=iso(m.x+1,m.y+1);
@@ -6453,7 +6484,7 @@ function drawTable(c,t){const [x,y]=iso(t.x+.5,t.y+.5),[,by]=iso(t.x+1,t.y+1);
   c.fillStyle='rgba(255,255,255,.75)';c.beginPath();c.ellipse(x-4,y-29,6,2.5,0,0,TAU);c.fill();c.globalAlpha=1;
   const by2=y-62+Math.sin(Y.t*5)*2;bubble(c,x,by2,'🧽');
   if(M.prog>0){c.lineWidth=4;c.strokeStyle='#33c46b';c.beginPath();c.arc(x,by2-12,17,-Math.PI/2,-Math.PI/2+TAU*M.prog);c.stroke();c.lineWidth=1;emo(c,'🧽',x+Math.sin(Y.t*18)*10,y-34,20)}}
- const n=Math.round(t.coinShow);if(n>0){const h=coinStack(c,x+14,y-22,n);label(c,`🪙 ${n}`,x+14,y-38-h*4,'#fff6d0')}}
+ const n=Math.round(t.coinShow);if(n>0){const h=coinStack(c,x+14,y-22,n);coinLabel(c,n,x+14,y-38-h*4,'#fff6d0')}}
 function shadow(c,x,y,r){c.fillStyle='rgba(0,0,0,.16)';c.beginPath();c.ellipse(x,y,r,r/2,0,0,TAU);c.fill()}
 function legs(c,x,y,ph,moving,pants,shoe){const sw=moving?Math.sin(ph):0;
  [[-5,sw],[5,-sw]].forEach(([dx,s])=>{c.fillStyle=pants;c.beginPath();c.roundRect(x+dx-3.5,y-17+(s<0?-s*2:0),7,14,3.5);c.fill();c.fillStyle=shoe;c.beginPath();c.ellipse(x+dx+s*2,y-2+(s<0?s*2:0),5.5,3.4,0,0,TAU);c.fill()})}
@@ -7015,7 +7046,7 @@ function renderShop(){
  const buyBtn=(kind,id,price,owned,on)=>owned?(on?`<button class="btn small ghost" type="button" disabled>✅ ${L('사용 중','Equipped')}</button>`:`<button class="btn small green" type="button" data-equip="${kind}:${id}">${L('사용하기','Equip')}</button>`):`<button class="btn small gold" type="button" data-buy="${kind}:${id}" ${S.coins<price?'disabled':''}>${COIN} ${num(price)}</button>`;
  let list='';
  if(shopTab==='items')list=Object.entries(ITEMS).map(([id,it])=>`<div class="item"><span class="own">${L('보유','Own')} ${S.inv[id]||0}</span><div class="pv">${pic(it.img,it.icon)}</div><b>${esc(it.name)} ×${it.pack}</b><small>${esc(it.desc)}</small><button class="btn small gold" type="button" data-buy="items:${id}" ${S.coins<it.price?'disabled':''}>${COIN} ${num(it.price)}</button></div>`).join('');
- else if(shopTab==='suit')list=SUITS.map(s=>{const own=S.owned.suit.includes(s.id);return `<div class="item">${own?`<span class="own">✓</span>`:''}<div class="pv"><span class="ava big" style="background:${s.bg}">${esc(S.av)}</span></div><b>${esc(s.name)}</b>${buyBtn('suit',s.id,s.price,own,S.equip.suit===s.id)}</div>`}).join('');
+ else if(shopTab==='suit')list=SUITS.map(s=>{const own=S.owned.suit.includes(s.id);return `<div class="item">${own?`<span class="own">✓</span>`:''}<div class="pv"><span class="ava big" style="background:${s.bg}">${coachMe(S.av)}</span></div><b>${esc(s.name)}</b>${buyBtn('suit',s.id,s.price,own,S.equip.suit===s.id)}</div>`}).join('');
  else if(shopTab==='beam')list=BEAMS.map(b=>{const own=S.owned.beam.includes(b.id);return `<div class="item">${own?`<span class="own">✓</span>`:''}<div class="pv" style="background:radial-gradient(circle,${b.color}66,#f3f4ff 70%)">${b.icon}</div><b>${esc(b.name)}</b><small>${L('정답일 때 날아가는 공격','Flies at the monster when you’re right')}</small>${buyBtn('beam',b.id,b.price,own,S.equip.beam===b.id)}</div>`}).join('');
  else if(shopTab==='buddy')list=Object.entries(BUDDIES).map(([id,c])=>{const own=S.owned.buddy.includes(id);return `<div class="item">${own?`<span class="own">✓</span>`:''}<div class="pv">${pic(c.img,c.icon)}</div><b>${esc(c.name)}</b><small>✨ ${esc(c.perk)}</small>${buyBtn('buddy',id,c.price,own,S.equip.buddy===id)}</div>`}).join('');
  else list=EFFECTS.map(f=>{const own=S.owned.fx.includes(f.id);return `<div class="item">${own?`<span class="own">✓</span>`:''}<div class="pv">${f.icon}</div><b>${esc(f.name)}</b><button class="btn small ghost" type="button" data-preview="${f.id}">👀 ${L('미리 보기','Preview')}</button>${buyBtn('fx',f.id,f.price,own,S.equip.fx===f.id)}</div>`}).join('');
@@ -7030,7 +7061,7 @@ $('v-shop').addEventListener('click',e=>{
   SFX.click();const [k,id]=b.dataset.buy.split(':');
   const def=k==='items'?ITEMS[id]:k==='suit'?SUITS.find(x=>x.id===id):k==='beam'?BEAMS.find(x=>x.id===id):k==='fx'?EFFECTS.find(x=>x.id===id):BUDDIES[id];
   const price=def.price;if(S.coins<price)return;
-  const art=k==='items'||k==='buddy'?pic(def.img,def.icon):k==='suit'?`<span class="ava big" style="background:${def.bg}">${esc(S.av)}</span>`:def.icon;
+  const art=k==='items'||k==='buddy'?pic(def.img,def.icon):k==='suit'?`<span class="ava big" style="background:${def.bg}">${coachMe(S.av)}</span>`:def.icon;
   modal(`<div style="font-size:60px">${art}</div><h2>${esc(def.name)}${k==='items'?' ×'+def.pack:''}</h2><p>${L('살까요? 남는 코인을 계산해 봐요!','Buy it? Let’s count the coins left!')}</p>
    <div class="math" style="font-size:22px">${COIN} ${num(S.coins)} − ${num(price)} = ${num(S.coins-price)}</div>
    <div class="row"><button class="btn ghost" type="button" data-act="close">${L('아니요','No')}</button><button class="btn gold" type="button" data-act="buy">${L('살래요!','Buy!')}</button></div>`,
@@ -7043,7 +7074,7 @@ $('v-shop').addEventListener('click',e=>{
 // ---------------------------------------------------------------- trophies
 function renderTrophies(){
  $('v-trophy').innerHTML=`<h2 class="section-title">🏆 ${L('업적','Trophies')} <small>${S.ach.length}/${ACH.length}</small></h2><div class="grid2">${ACH.map(a=>{const done=a.test(S),got=S.ach.includes(a.id);
-  return `<div class="trophy ${done?'':'lock'}"><span class="ic">${a.icon}</span><div><b>${esc(a.name)}</b><small>${esc(a.desc)}</small></div><div class="act">${got?`<span class="got">✅ ${L('받음','Claimed')}</span>`:done?`<button class="btn small gold" type="button" data-ach="${a.id}">${COIN} +${a.coins}</button>`:`<span class="sub">${COIN} ${a.coins}</span>`}</div></div>`}).join('')}</div>`;
+  return `<div class="trophy ${done?'':'lock'}"><span class="ic">${a.img?pic(a.img,a.icon):a.icon}</span><div><b>${esc(a.name)}</b><small>${esc(a.desc)}</small></div><div class="act">${got?`<span class="got">✅ ${L('받음','Claimed')}</span>`:done?`<button class="btn small gold" type="button" data-ach="${a.id}">${COIN} +${a.coins}</button>`:`<span class="sub">${COIN} ${a.coins}</span>`}</div></div>`}).join('')}</div>`;
 }
 $('v-trophy').addEventListener('click',e=>{const b=e.target.closest('[data-ach]');if(!b)return;const a=ACH.find(x=>x.id===b.dataset.ach);if(!a||S.ach.includes(a.id)||!a.test(S))return;S.ach.push(a.id);const r=grant({coins:a.coins,xp:20});flyCoins(b,r.coins);SFX.win();celebrate('stars');renderTrophies()});
 
@@ -7106,7 +7137,7 @@ function openDifficulty(){
 function playerForm(p,{isNew}){
  let av=p.av,diff=diffKey(p);
  modal(`<h2>${isNew?L('🧑‍🚀 새 수호대원','🧑‍🚀 New guardian'):L('✏️ 내 정보','✏️ My profile')}</h2>
-  ${MGP.me?`<p class="center" style="font-size:40px;margin:4px 0">${esc(MGP.me.av)}</p><p class="center"><b>${esc(MGP.me.name)}</b></p>`:`<label class="field"><span>${L('이름','Name')}</span><input id="pName" maxlength="12" value="${esc(p.name)}" autocomplete="off"></label>
+  ${MGP.me?`<p class="center" style="margin:4px 0">${avatarHTML({...p,av:MGP.me.av})}</p><p class="center"><b>${esc(MGP.me.name)}</b></p>`:`<label class="field"><span>${L('이름','Name')}</span><input id="pName" maxlength="12" value="${esc(p.name)}" autocomplete="off"></label>
   <div class="avs">${AVATARS.map(a=>`<button type="button" data-act="av" data-a="${a}" class="${a===av?'on':''}">${a}</button>`).join('')}</div>`}
   <p class="sub" style="margin-top:10px">${L('몇 학년이에요?','Which grade are you in?')}</p>${diffButtons(diff)}
   <div class="row">${!isNew&&ROOT.order.length>1&&!MGP.me?`<button class="btn small red" type="button" data-act="del">🗑️ ${L('삭제','Delete')}</button>`:''}<button class="btn green" type="button" data-act="ok">${isNew?L('시작!','Start!'):L('저장','Save')}</button></div>`,
@@ -7122,7 +7153,7 @@ function playerForm(p,{isNew}){
 }
 function openPlayers(){
  // players are chosen on the main page; here you can only change your grade
- if(MGP.me){modal(`<div class="center"><p style="font-size:46px;margin:0">${esc(MGP.me.av)}</p><h2>${esc(MGP.me.name)}</h2><p>${L('플레이하는 사람은 첫 화면에서 바꿔요.','Switch players on the main page.')}</p></div>
+ if(MGP.me){modal(`<div class="center"><p style="margin:0">${avatarHTML({...S,av:MGP.me.av})}</p><h2>${esc(MGP.me.name)}</h2><p>${L('플레이하는 사람은 첫 화면에서 바꿔요.','Switch players on the main page.')}</p></div>
   <div class="row"><button class="btn ghost" type="button" data-act="edit">🎚️ ${L('학년 바꾸기','Change grade')}</button><button class="btn green" type="button" data-act="home">🏠 ${L('첫 화면으로','Main page')}</button></div>`,{acts:{edit:()=>()=>playerForm(S,{isNew:false}),home:()=>{location.href='index.html?lang='+LANG}}});return}
  modal(`<h2>👥 ${L('수호대원 바꾸기','Switch player')}</h2><p>${L('형제자매가 각자 기록을 따로 가질 수 있어요.','Brothers and sisters can each keep their own progress.')}</p>
   <div class="plist">${ROOT.order.map(id=>{const p=id===ROOT.cur?S:merge(ROOT.P[id]);return `<button type="button" class="pl ${id===ROOT.cur?'on':''}" data-act="p_${id}">${avatarHTML(p)}<span><b>${esc(p.name)}</b><small>Lv.${p.lvl} · ${diffOf(p).icon} ${esc(diffOf(p).name)} · 📚 ${Object.keys(p.cards).length}</small></span>${id===ROOT.cur?'<em>✅</em>':''}</button>`}).join('')}</div>

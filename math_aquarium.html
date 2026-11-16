@@ -588,6 +588,14 @@ img.cur{display:inline-block;width:auto!important;height:1.25em;vertical-align:-
 .carshow .carpic{height:104px;width:auto;filter:drop-shadow(0 6px 6px rgba(0,0,0,.18))}
 .big .carpic.hero{width:170px;margin:0 auto}.bb-ic .carpic{width:48px}
 .vis-p .vpic{height:42px;width:auto}.vis-p .vpic.kid{height:35px}.vis-p .vpic+.vpic{margin-left:-10px}.vis-p i.roll{animation:none}
+/* little pictures for the ticket, fish food, staff props, fishing, the mission chest and shop goods (artPic in core.js; each falls back to its emoji) */
+img.api{display:inline-block;width:auto;height:1.25em;vertical-align:-.28em;object-fit:contain;-webkit-user-drag:none;user-select:none}
+.hungrytag img.api{display:block;height:24px}.vis-p b img.api{height:22px;vertical-align:bottom}
+.tip img.cur{height:26px;vertical-align:middle}
+.sitem .sic img.api,.skill .sic img.api{width:auto;height:40px;vertical-align:middle}
+.bb-ic img.api{height:42px}.wk-ci img.api{width:auto;height:40px;vertical-align:middle}
+.toast .carpic{display:inline-block;height:26px;width:auto;vertical-align:middle}
+.big .mooni-big{display:block;height:120px;width:auto;margin:0 auto;object-fit:contain;-webkit-user-drag:none;user-select:none}
 @media (min-width:700px){.decor .dpic{height:38px}.tank.wide .decor .dpic{height:44px}}
 .mav img{object-fit:cover;object-position:50% 18%}
 .mepic{display:block;-webkit-user-drag:none;user-select:none}
@@ -7559,6 +7567,7 @@ const CSS=`.drv{position:absolute;inset:0;overflow:hidden;background:#9fd8ff;fon
 .drv-gd.now{border-color:#ffa91a;transform:scale(1.3)}.drv-gd.ok{background:#3ccf7a;border-color:#fff}.drv-gd.no{background:#ffb04a;border-color:#fff}
 .drv-flag{position:absolute;right:-18px;top:50%;transform:translateY(-56%);font-size:17px}
 .drv-me{position:absolute;left:0;top:50%;font-size:24px;line-height:1;transform:translate(-50%,-62%) scaleX(-1);filter:drop-shadow(0 2px 2px rgba(0,0,0,.25));z-index:1}
+.drv-me.pic{transform:translate(-50%,-66%)}.drv-me img{display:block;height:24px;width:auto}
 .drv-cmp .drv-prog{order:2;flex:1 1 140px;padding:3px 12px 6px}.drv-cmp .drv-chips{order:3;margin-left:0}.drv-cmp .drv-names{font-size:12px;margin-bottom:2px}
 .drv-q{position:absolute;left:50%;top:110px;z-index:3;width:min(94%,560px);transform:translate(-50%,-12px) scale(.94);opacity:0;transition:opacity .25s,transform .3s cubic-bezier(.2,1.4,.4,1);pointer-events:none;border-radius:24px;padding:8px 12px 12px;text-align:center}
 .drv-q.on{opacity:1;transform:translate(-50%,0)}
@@ -7596,7 +7605,7 @@ function start(host,o={}){
  const nG=clamp(Math.round(o.gates==null?6:+o.gates)||6,1,12);
  const lv=v=>clamp(Math.round(+v||0),0,5);
  const col=/^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(car.color||'')?car.color:'#ff6a5a';
- S={host,o,g,th:TH[g],reg,nG,car:{speed:lv(car.speed),magnet:lv(car.magnet),shield:lv(car.shield)},col,emoji:car.emoji||reg.car||'🚐',
+ S={host,o,g,th:TH[g],reg,nG,car:{speed:lv(car.speed),magnet:lv(car.magnet),shield:lv(car.shield)},col,emoji:car.emoji||reg.car||'🚐',pic:/^[a-z]+$/.test(car.model||'')?`images/aq-car-${car.model}.webp`:'',
   from:o.from||T('출발','Start'),to:o.to||T('아쿠아리움','Aquarium'),spr:{},t:0,dist:0,v:0,lane:0,carX:0,carVX:0,camX:0,wob:0,nudge:0,sl:0,slV:0,
   slowMul:1,boostT:0,right:0,wrong:0,coins:0,crashes:0,shields:lv(car.shield),phase:'drive',finT:0,ended:false,endCalls:0,result:null,
   items:[],gates:[],gi:0,ii:0,nextGateT:0,timers:[],parts:[],amb:[],clouds:[],birds:[],aiT:0,shieldFx:0,flash:0,flashCol:'',puffT:0,hp:-1,coinSfxT:0,
@@ -7660,7 +7669,7 @@ function buildDom(){
  const root=document.createElement('div');root.className='drv';
  root.innerHTML=`<style>${CSS}</style><canvas class="drv-cv" aria-label="${H_(T('운전 미션','Driving mission'))}"></canvas>
 <div class="drv-top"><button type="button" class="drv-quit drv-glass" aria-label="${H_(quit)}"><i>✕</i><b>${H_(quit)}</b></button>
-<div class="drv-prog drv-glass"><div class="drv-names"><span>🏠 ${H_(s.from)}</span><span>${H_(s.to)}</span></div><div class="drv-track"><div class="drv-fill"></div>${dots}<span class="drv-flag">🏁</span><span class="drv-me">${H_(s.emoji)}</span></div></div>
+<div class="drv-prog drv-glass"><div class="drv-names"><span>🏠 ${H_(s.from)}</span><span>${H_(s.to)}</span></div><div class="drv-track"><div class="drv-fill"></div>${dots}<span class="drv-flag">🏁</span><span class="drv-me${s.pic?' pic':''}">${s.pic?`<img src="${s.pic}" alt="" draggable="false" onerror="this.parentNode.classList.remove('pic');this.replaceWith('${H_(s.emoji)}')">`:H_(s.emoji)}</span></div></div>
 <div class="drv-chips"><span class="drv-chip drv-glass drv-cg"><small>${H_(T('문제','Gates'))}</small><b>${s.nG}</b></span><span class="drv-chip drv-glass drv-cc"><i class="drv-coin"></i><b>0</b></span>${s.shields>0?`<span class="drv-chip drv-glass drv-cs">🛡️<b>${s.shields}</b></span>`:''}</div></div>
 <div class="drv-q drv-glass" aria-live="polite"><div class="drv-qh">${H_(T('정답이 적힌 길로 달려요!','Drive through the right answer!'))}</div><div class="drv-qt">&nbsp;</div><div class="drv-qa">${[0,1,2].map(i=>`<button type="button" data-l="${i}" style="--c:${LCOL[i]};--s:${LSOFT[i]}">&nbsp;</button>`).join('')}</div></div>
 <div class="drv-toast"></div><div class="drv-hint"></div><div class="drv-arr drv-al">‹</div><div class="drv-arr drv-ar">›</div>
@@ -9118,6 +9127,12 @@ function emo(ch,size){size=Math.round(size/2)*2;const key='e|'+ch+'|'+size;let s
  const sc=W.k*W.dpr,fs=Math.max(4,size*sc),cv=mk(fs*1.3,fs*1.3),c=cv.getContext('2d');c.font=`${fs}px ${EFONT}`;c.textAlign='center';c.textBaseline='middle';c.fillText(ch,cv.width/2,cv.height/2+fs*.06);
  sp={cv,w:cv.width/sc,h:cv.height/sc};W.spr.set(key,sp);return sp}
 const put=(c,sp,x,y)=>c.drawImage(sp.cv,x-sp.w/2,y-sp.h/2,sp.w,sp.h);
+// a small thing (shop goods, a staff prop, the ticket, fish food, a coin) drawn as its painted picture once that has loaded
+// (artName / FAC_PIC in core.js say which pictures exist); until then, or without one, its emoji is drawn as before.
+// rot tilts the picture only (litter lies on the floor); the emoji stays upright.
+function thing(c,name,e,size,x,y,rot){const im=name?picImg(name):null;if(!im){put(c,emo(e,size),x,y);return}
+ const s=size*1.15,r=im.naturalWidth/im.naturalHeight,w=r>1?s:s*r,h=r>1?s/r:s;
+ if(rot){c.save();c.translate(x,y);c.rotate(rot);c.drawImage(im,-w/2,-h/2,w,h);c.restore()}else c.drawImage(im,x-w/2,y-h/2,w,h)}
 // fish pictures are scale-free, so they live across walks; a dark copy is the "coming soon" shadow
 function fspr(id,dark){const key=id+(dark?'#':'');if(FSPR[key])return FSPR[key];let im=null;try{im=fishImg(id)}catch(e){}
  if(!im||!im.complete||!im.naturalWidth)return null;const cv=mk(330,220),c=cv.getContext('2d');try{c.drawImage(im,0,0,330,220)}catch(e){return null}
@@ -9156,7 +9171,7 @@ function dom(){const d=W.d,R_=W.R;
  <div class="wk-bot"><div class="wk-pad"><button type="button" data-w="hold" data-d="-1" aria-label="${esc(L('왼쪽','left'))}">◀</button><button type="button" data-w="hold" data-d="1" aria-label="${esc(L('오른쪽','right'))}">▶</button></div><div class="wk-card" id="wkCard"></div></div></div>`;
  const q=s=>W.host.querySelector(s);W.el={head:q('.wk-head'),bot:q('.wk-bot'),card:q('#wkCard'),map:q('#wkMap'),me:q('.wk-me'),coins:q('#wkCoins'),sub:q('#wkSub'),fact:q('#wkFact'),flash:q('.wk-flash')};
  W.cv=q('.wk-cv');W.ctx=W.cv.getContext('2d')}
-function secIcon(s){if(s.kind==='tank')return `<img src="${fishURL(W.d.tanks[s.k])}" alt="">`;return {entry:'🎫',toilet:'🚻',snack:'🍦',gift:'🎁',claw:'🕹️',mart:'🛒',tunnel:'🌊',photo:'📸'}[s.kind]}
+function secIcon(s){if(s.kind==='tank')return `<img src="${fishURL(W.d.tanks[s.k])}" alt="">`;if(s.kind==='entry')return TICKET;const e={toilet:'🚻',snack:'🍦',gift:'🎁',claw:'🕹️',mart:'🛒',tunnel:'🌊',photo:'📸'}[s.kind];return FAC_PIC[s.kind]?artTag(FAC_PIC[s.kind],e):e}
 
 // the scene keeps signs-to-feet (design y 56…596) between the top bar and the bottom card; wider screens see more of the hall
 function resize(){if(!W)return;const r=W.host.getBoundingClientRect(),cw=Math.max(1,r.width),ch=Math.max(1,r.height);
@@ -9199,7 +9214,7 @@ function buildStaff(){const a=W.a;W.staff=[];const n={};
 function mkPerson(o){const head=o.head||pk(HEADS);return {x:0,y:530,dir:1,ph:rnd(0,6),moving:false,head,shirt:o.shirt||pk(SHIRTS),pants:o.pants||pk(PANTS),s:o.s||(KIDS.has(head)?.82:1),sp:rnd(70,100),stops:[],si:0,wait:0,held:'',emo:'',emoT:0,badge:''}}
 // a visitor pays at the booth, looks at a few tanks, shops where they bought, maybe uses the restroom, then heads back out
 function spawn(v,mid){if(!W)return;if(W.people.filter(p=>!p.ask).length>=16)return;const a=W.a,p=mkPerson({});p.kind='vis';p.vk=VIS_KEY[p.head]||'';p.x=118;p.y=rnd(505,565);
- const st=[{x:W.secs[0].x0+360+rnd(-24,24),y:Y0+rnd(4,16),wait:1,on:q=>{if(v&&v.c&&Math.random()<.4)pop(q.x,q.y-130,`+${short(v.c)} ${COIN_T}`)}}];
+ const st=[{x:W.secs[0].x0+360+rnd(-24,24),y:Y0+rnd(4,16),wait:1,on:q=>{if(v&&v.c&&Math.random()<.4)pop(q.x,q.y-130,`+${short(v.c)}`,'coin')}}];
  const open=[];for(let k=0;k<Math.min(4,a.open);k++)open.push(k);open.sort(()=>Math.random()-.5);
  for(const k of open.slice(0,Math.max(1,Math.round(rnd(1,Math.min(3,open.length)))))){const s=W.secs.find(x=>x.k===k);st.push({x:s.cx+rnd(-110,110),y:rnd(Y0+2,Y0+40),wait:rnd(2.5,5),on:q=>emote(q,pk(['😍','🤩','😮','👀','💙','🥰']))})}
  for(const f of (v&&v.bought)||[]){const s=secOf(f);if(!s)continue;st.push({x:s.cx+rnd(-60,60),y:Y0+rnd(2,10),wait:rnd(2,3.5),on:q=>{q.held=pk(HELD[f]);if(Math.random()<.1)dropTrash(q)}})}
@@ -9221,7 +9236,8 @@ function asker(){const f=REQ?REQ.f:null;let p=W.people.find(x=>x.ask);
   p.stops=[{x:sx+side*52,y:Y0+18,wait:Infinity,on:q=>{q.dir=-side}},{x:112,y:530,wait:.01,on:q=>{q.gone=true}}];W.people.push(p)}
  else if(p&&p.ask!==f){p.ask=false;if(p.wait>0)p.wait=.01;else p.si=1;emote(p,'😊')}}
 const emote=(p,e)=>{p.emo=e;p.emoT=W.t+1.7};
-const pop=(x,y,text)=>W.pops.push({x,y,text,t:0});
+// ic: a picture drawn after the words (a coin), with its emoji as the stand-in
+const pop=(x,y,text,ic)=>W.pops.push({x,y,text,ic,t:0});
 function bubble(who,text,secs=3.4){W.bubbles=W.bubbles.filter(b=>b.who!==who);W.bubbles.push({who,text,until:W.t+secs})}
 function moSay(text){if(!W)return;bubble(W.mo,text,4.2);if(W.t-W.lastSay>2.5){W.lastSay=W.t;say(noEmoji(text),{raw:true})}}
 function dropTip(q){W.items.push({kind:'tip',x:cl(q.x+q.dir*22,60,W.len-60),y:cl(q.y+8,Y0,Y1),born:W.t,val:Math.max(1,Math.round(ticketPrice(W.g,W.i)*3))})}
@@ -9284,15 +9300,15 @@ function intro(s){const a=W.a,r=REQ;
 function panel(){const s=W.cur;if(!s)return;const {g,i}=W,a=W.a,r=REQ;let ic='',ti='',st='';const bt=[];
  const B=(k,v,label,cls='')=>bt.push(`<button type="button" class="${cls}" data-w="act" data-k="${k}" data-v="${v}">${label}</button>`);
  if(r&&(r.f==='ticket'&&s.kind==='entry'||r.f===s.f))B('request','',`🙋 ${L('손님 도와주기','Help the visitor')}`,'hot');
- if(s.kind==='entry'){const F=FAC.ticket;ic='🎫';ti=`${L(F.ko,F.en)} Lv.${S.fac.ticket}`;st=a.open?L(`입장료 ${COIN}${ticketPrice(g,i)} · 손님 ${visitorsPerMin(g,i).toFixed(1)}명/분`,`Ticket ${COIN}${ticketPrice(g,i)} · ${visitorsPerMin(g,i).toFixed(1)} visitors/min`):L('첫 수조를 열면 손님이 와요.','Visitors come once the first tank is open.');
+ if(s.kind==='entry'){const F=FAC.ticket;ic=TICKET;ti=`${L(F.ko,F.en)} Lv.${S.fac.ticket}`;st=a.open?L(`입장료 ${COIN}${ticketPrice(g,i)} · 손님 ${visitorsPerMin(g,i).toFixed(1)}명/분`,`Ticket ${COIN}${ticketPrice(g,i)} · ${visitorsPerMin(g,i).toFixed(1)} visitors/min`):L('첫 수조를 열면 손님이 와요.','Visitors come once the first tank is open.');
   B('fac','ticket',`⬆️ ${L('매표소','Booth')}`);B('exit','',`🚪 ${L('밖으로','Go outside')}`)}
  else if(s.kind==='tank'||s.kind==='tunnel'){const k=s.k,id=W.d.tanks[k],tun=s.kind==='tunnel';
   if(a.open<=k){ic='🔒';ti=tun?L('해저 터널 · 5번 수조','Undersea tunnel · tank 5'):L(`${k+1}번 수조`,`Tank ${k+1}`);st=L(`${STAGES[k].icon} ${stageName(k)} 수업을 마치면 열려요.`,`Opens after the ${STAGES[k].icon} ${stageName(k)} lesson.`);if(k===nextStageOf(a))B('lesson',k,`▶ ${L('수업 시작','Start lesson')}`,'main')}
   else{const hung=hungry(a,k)&&UNLOCK.feed();ic=`<img src="${fishURL(id)}" alt="">`;ti=(tun?`🌊 ${L('해저 터널','Undersea tunnel')} · `:`${k+1}. `)+esc(fishName(id));
-   st=`🐟 ${a.fish[k].length}/${tankCap(a,k)} · ⭐ ${Math.round(tankPower(a,k))}`+(hung?` · 🍤 ${L('배고파요!','Hungry!')}`:` · ${L('물고기를 눌러 보세요','tap a fish')}`);
-   if(UNLOCK.feed())B('feed',k,`🍤 ${L('먹이','Feed')}`,hung?'hot':'');if(W.tanks[k].fish.length)B('look',k,`🔍 ${L('물고기 이야기','Fish story')}`,hung?'':'main');B('tank',k,`⚙️ ${L('수조 관리','Tank')}`)}}
+   st=`🐟 ${a.fish[k].length}/${tankCap(a,k)} · ⭐ ${Math.round(tankPower(a,k))}`+(hung?` · ${artPic('🍤')} ${L('배고파요!','Hungry!')}`:` · ${L('물고기를 눌러 보세요','tap a fish')}`);
+   if(UNLOCK.feed())B('feed',k,`${artPic('🍤')} ${L('먹이','Feed')}`,hung?'hot':'');if(W.tanks[k].fish.length)B('look',k,`🔍 ${L('물고기 이야기','Fish story')}`,hung?'':'main');B('tank',k,`⚙️ ${L('수조 관리','Tank')}`)}}
  else if(s.kind==='toilet'){ic='🚻';ti=L('화장실','Restrooms');if(!UNLOCK.toilet())st=T(UNLOCK_HINT.toilet);else{const c=Math.round(100-a.dirt);st=L(`깨끗함 ${c}%`,`${c}% clean`)+(a.dirt>60?` · ${L('청소해 주세요!','Needs cleaning!')}`:'');B('clean','',`🧽 ${L('청소하기','Clean')}`,a.dirt>60?'hot':'');B('fac','toilet',`⚙️ ${L('관리','Manage')}`)}}
- else if(s.f){const F=FAC[s.f],lv=S.fac[s.f];ic=F.icon;ti=`${L(F.ko,F.en)}${lv?' Lv.'+lv:''}`;
+ else if(s.f){const F=FAC[s.f],lv=S.fac[s.f];ic=artTag(FAC_PIC[s.f],F.icon);ti=`${L(F.ko,F.en)}${lv?' Lv.'+lv:''}`;
   if(!UNLOCK[s.f]()){ic='🔒';st=T(UNLOCK_HINT[s.f])}
   else if(!lv){st=L('아직 빈 가게예요. 지으면 손님이 물건을 사요.','An empty shop. Build it and visitors will buy things.');B('fac',s.f,`🏗️ ${L('짓기','Build')} ${COIN}${short(facCost(s.f,0))}`,'main')}
   else{st=L(`손님 ${Math.round(shopChance(s.f)*100)}%가 사요 · ${COIN}${shopPrice(s.f,g,i)}`,`${Math.round(shopChance(s.f)*100)}% of visitors buy · ${COIN}${shopPrice(s.f,g,i)}`);B('fac',s.f,lv<FAC_MAX?`⬆️ ${L('업그레이드','Upgrade')}`:`👑 ${L('최고 레벨','Max level')}`)}}
@@ -9376,8 +9392,10 @@ function ceiling(c,s){if(s.kind==='tunnel'&&W.a.open>=5)return;const cols=[W.col
 function lights(c,s){if(s.kind==='tunnel'&&W.a.open>=5)return;for(const x of s.kind==='entry'?[s.x0+130,s.x0+360]:s.kind==='tunnel'?[s.x0+300,s.x1-300]:[s.cx]){
  c.fillStyle='rgba(255,246,200,.08)';c.beginPath();c.moveTo(x-22,52);c.lineTo(x+22,52);c.lineTo(x+150,FY);c.lineTo(x-150,FY);c.closePath();c.fill();
  c.fillStyle=shade(W.col.ceil,.2);c.fillRect(x-26,38,52,9);oval(c,x,50,22,6,'#fff6c8')}}
-function sign(c,cx,cy,text,bg,maxW){const sp=fit(text,26,'#ffffff',maxW,{stroke:'rgba(0,0,0,.18)'}),w=sp.w+26,h=sp.h+8;
- c.fillStyle='rgba(0,0,0,.16)';rr(c,cx-w/2,cy-h/2+4,w,h,14);c.fill();c.fillStyle=bg;rr(c,cx-w/2,cy-h/2,w,h,14);c.fill();c.fillStyle='rgba(255,255,255,.2)';rr(c,cx-w/2+4,cy-h/2+3,w-8,h*.42,10);c.fill();put(c,sp,cx,cy)}
+// a hanging sign; im (a loaded picture) goes before the words in place of an emoji
+function sign(c,cx,cy,text,bg,maxW,im){const iw=im?36:0,sp=fit(text,26,'#ffffff',maxW-iw,{stroke:'rgba(0,0,0,.18)'}),w=sp.w+26+iw,h=sp.h+8;
+ c.fillStyle='rgba(0,0,0,.16)';rr(c,cx-w/2,cy-h/2+4,w,h,14);c.fill();c.fillStyle=bg;rr(c,cx-w/2,cy-h/2,w,h,14);c.fill();c.fillStyle='rgba(255,255,255,.2)';rr(c,cx-w/2+4,cy-h/2+3,w-8,h*.42,10);c.fill();
+ if(!im){put(c,sp,cx,cy);return}const x0=cx-(iw+sp.w)/2,r=im.naturalWidth/im.naturalHeight,pw=r>1?32:32*r,ph=r>1?32/r:32;c.drawImage(im,x0+16-pw/2,cy-ph/2,pw,ph);put(c,sp,x0+iw+sp.w/2,cy)}
 function awning(c,x,y,w,h,col){const n=Math.max(4,Math.round(w/34)),sw=w/n;for(let j=0;j<n;j++){c.fillStyle=j%2?'#ffffff':col;c.fillRect(x+j*sw,y,sw+.6,h);c.beginPath();c.arc(x+j*sw+sw/2,y+h,sw/2,0,Math.PI);c.fill()}c.fillStyle='rgba(0,0,0,.1)';c.fillRect(x,y,w,5)}
 function pillar(c,x){const t=W.col.trim;c.fillStyle=shade(t,-.15);c.fillRect(x-15,56,30,FY-56);c.fillStyle='rgba(255,255,255,.22)';c.fillRect(x-11,56,7,FY-56);
  c.fillStyle=shade(t,-.32);c.fillRect(x-20,56,40,12);c.fillRect(x-20,FY-16,40,16);dot(c,x,172,26,'rgba(255,240,180,.22)');dot(c,x,172,8,'#fff3c0')}
@@ -9393,11 +9411,11 @@ function entry(c,s){const R_=W.R,col=W.col,dx=s.x0+40,dw=180,dy=152;
  {const im=DECO_E[W.d.deco]&&picImg('aq-plant-'+W.d.deco);if(im){const h=104,w=h*im.naturalWidth/im.naturalHeight;c.drawImage(im,dx+46-w/2,FY-34-h,w,h)}else put(c,emo(DECO_E[W.d.deco]||'🌴',70),dx+46,FY-78)}c.fillStyle='rgba(255,255,255,.2)';c.beginPath();c.moveTo(dx+20,dy);c.lineTo(dx+70,dy);c.lineTo(dx+10,FY);c.lineTo(dx-40,FY);c.closePath();c.fill();c.restore();
  c.fillStyle=shade(col.trim,-.25);c.fillRect(dx+dw/2-3,dy,6,FY-dy);c.fillStyle='#e8eef8';rr(c,dx+dw/2-17,dy+140,8,44,4);c.fill();rr(c,dx+dw/2+9,dy+140,8,44,4);c.fill();
  sign(c,dx+dw/2,100,`${R_.flag} ${W.d.name}`,col.trim,250);
- const bx=s.x0+272,bw=176,cx=bx+bw/2;sign(c,cx,152,`🎫 ${L('매표소','Tickets')}`,shade(col.trim,-.15),160);awning(c,bx-8,184,bw+16,36,col.trim);
+ const bx=s.x0+272,bw=176,cx=bx+bw/2,tim=picImg(artOf(FAC_PIC.ticket));sign(c,cx,152,tim?L('매표소','Tickets'):`🎫 ${L('매표소','Tickets')}`,shade(col.trim,-.15),160,tim);awning(c,bx-8,184,bw+16,36,col.trim);
  c.fillStyle=mix(col.trim,'#ffffff',.72);c.fillRect(bx,220,bw,FY-220);c.fillStyle=shade(col.wall,-.5);rr(c,bx+16,236,bw-32,104,10);c.fill();
  const cs=W.staff.find(p=>p.bust&&p.role==='cashier');if(cs)person(c,cs);else put(c,emo('🛎️',26),cx+44,322);
  c.fillStyle=shade(col.trim,.35);rr(c,bx-6,334,bw+12,16,6);c.fill();c.fillStyle=col.trim;c.fillRect(bx,350,bw,FY-350);c.fillStyle='rgba(255,255,255,.16)';c.fillRect(bx,350,bw,14);
- put(c,emo('🎫',36),cx-40,398);const ci=picImg('coin'),pt=txt(`${ci?'':COIN_T}${short(ticketPrice(W.g,W.i))}`,20,'#ffffff',{stroke:'rgba(0,0,0,.25)'});
+ thing(c,artOf(FAC_PIC.ticket),'🎫',36,cx-40,398);const ci=picImg('coin'),pt=txt(`${ci?'':COIN_T}${short(ticketPrice(W.g,W.i))}`,20,'#ffffff',{stroke:'rgba(0,0,0,.25)'});
  if(ci){const x0=cx+26-(pt.w+18)/2;c.drawImage(ci,x0,386,24,24);put(c,pt,x0+18+pt.w/2,398)}else put(c,pt,cx+26,398)}
 function winPath(c,x,y,w,h,shape){if(shape==='arch'){const ah=Math.min(h*.36,92);c.beginPath();c.moveTo(x,y+h);c.lineTo(x,y+ah);c.ellipse(x+w/2,y+ah,w/2,ah,0,Math.PI,TAU);c.lineTo(x+w,y+h);c.closePath()}else rr(c,x,y,w,h,shape==='port'?Math.min(w,h)*.3:20)}
 function tankSec(c,s){const a=W.a,k=s.k,b=s.win,open=a.open>k,shape=W.d.win;
@@ -9409,7 +9427,7 @@ function tankSec(c,s){const a=W.a,k=s.k,b=s.win,open=a.open>k,shape=W.d.win;
  badge(c,b.x+10,b.y+10,String(k+1));
  const id=W.d.tanks[k],tx=open?`${fishName(id)} ${'★'.repeat(FISH_BY[id].r)}`:L(`${k+1}번 수조 · 곧 열려요`,`Tank ${k+1} · soon`),sp=fit(tx,17,'#2a3350',230),w=Math.max(120,sp.w+26);
  c.fillStyle='rgba(0,0,0,.12)';rr(c,s.cx-w/2,403,w,30,10);c.fill();c.fillStyle='#fffdf6';rr(c,s.cx-w/2,399,w,30,10);c.fill();put(c,sp,s.cx,414);
- if(open&&hungry(a,k)&&UNLOCK.feed()){dot(c,b.x+b.w-22,b.y+22,20,'#ffffff');put(c,emo('🍤',26),b.x+b.w-22,b.y+22+Math.sin(W.t*5)*3)}}
+ if(open&&hungry(a,k)&&UNLOCK.feed()){dot(c,b.x+b.w-22,b.y+22,20,'#ffffff');thing(c,artName('🍤'),'🍤',26,b.x+b.w-22,b.y+22+Math.sin(W.t*5)*3)}}
 function water(c,s){const b=s.win,k=s.k,T=W.tanks[k],w=b.w,h=b.h,t=W.t;
  c.fillStyle=W.gWater;c.fillRect(0,0,w,h);c.fillStyle='rgba(255,255,255,.07)';
  for(let j=0;j<3;j++){const x=(t*14+j*130+k*40)%(w+160)-80;c.beginPath();c.moveTo(x,0);c.lineTo(x+44,0);c.lineTo(x+110,h);c.lineTo(x+40,h);c.closePath();c.fill()}
@@ -9438,12 +9456,13 @@ function tunnel(c,s){const a=W.a,b=s.win,col=W.col;if(a.open<5){curtain(c,s);ret
  // a shimmering school of little silver fish
  const sx=b.w*(.5+.38*Math.sin(t*.13)),sy=150+60*Math.sin(t*.21),sd=Math.cos(t*.13)>0?1:-1;for(let j=0;j<22;j++){const ox=Math.cos(j*2.4)*70*(.35+(j%5)/6),oy=Math.sin(j*1.7)*34+Math.sin(t*2+j)*3,x=sx+ox,y=sy+oy;oval(c,x,y,9,3.6,'#cfdbe8');oval(c,x+sd*3,y-1,4,1.6,'#ffffff');c.fillStyle='#9fb2c8';c.beginPath();c.moveTo(x-sd*8,y);c.lineTo(x-sd*14,y-4);c.lineTo(x-sd*14,y+4);c.closePath();c.fill()}
  const dv=W.staff.find(p=>p.swim);if(dv){const x=b.w*(.5+.42*Math.sin(t*.09+1)),y=250+40*Math.sin(t*.3),dir=Math.cos(t*.09+1)>0?1:-1,dim=staffImg(dv.pic);
-  if(dim){const w=64,h=w*dim.naturalHeight/dim.naturalWidth;c.save();c.translate(x,y);c.rotate(dir*.22);c.drawImage(dim,-w/2,-h/2,w,h);c.restore();put(c,emo('🤿',24),x+dir*16,y+h*.3)}else{put(c,emo(dv.head,50),x,y);oval(c,x+dir*4,y-6,17,8,'rgba(80,200,255,.5)')}c.strokeStyle='rgba(255,255,255,.6)';c.lineWidth=1.5;for(let j=0;j<3;j++){c.beginPath();c.arc(x+dir*10,y-30-((t*40+j*20)%60),3+j,0,TAU);c.stroke()}}
+  // the painted diver wears the painted mask over the face; the emoji mask stays by the hand
+  if(dim){const w=64,h=w*dim.naturalHeight/dim.naturalWidth,mk=picImg(artName('🤿'));c.save();c.translate(x,y);c.rotate(dir*.22);c.drawImage(dim,-w/2,-h/2,w,h);if(mk){const mw=40,mh=mw*mk.naturalHeight/mk.naturalWidth;c.drawImage(mk,-mw/2,-h*.18-mh/2,mw,mh)}c.restore();if(!mk)put(c,emo('🤿',24),x+dir*16,y+h*.3)}else{put(c,emo(dv.head,50),x,y);oval(c,x+dir*4,y-6,17,8,'rgba(80,200,255,.5)')}c.strokeStyle='rgba(255,255,255,.6)';c.lineWidth=1.5;for(let j=0;j<3;j++){c.beginPath();c.arc(x+dir*10,y-30-((t*40+j*20)%60),3+j,0,TAU);c.stroke()}}
  for(const f of W.tanks[4].food)dot(c,f.x,f.y,4,'#c8762a');for(const f of W.tanks[4].fish)fish(c,f);c.restore();
  for(let x=b.x+100;x<b.x+b.w-60;x+=200){c.fillStyle='rgba(255,255,255,.16)';c.fillRect(x-7,top,14,FY-top);c.fillStyle='rgba(20,40,80,.16)';c.fillRect(x+7,top,3,FY-top)}
  for(const x of [b.x,b.x+b.w]){c.fillStyle=shade(col.trim,-.25);c.fillRect(x-14,top,28,FY-top);c.fillStyle='rgba(255,255,255,.18)';c.fillRect(x-10,top,6,FY-top)}
  sign(c,b.x+170,76,`🌊 ${L('해저 터널','Undersea tunnel')}`,shade(col.trim,-.1),260);
- if(hungry(a,4)&&UNLOCK.feed()){dot(c,b.x+330,76,20,'#ffffff');put(c,emo('🍤',26),b.x+330,76+Math.sin(W.t*5)*3)}}
+ if(hungry(a,4)&&UNLOCK.feed()){dot(c,b.x+330,76,20,'#ffffff');thing(c,artName('🍤'),'🍤',26,b.x+330,76+Math.sin(W.t*5)*3)}}
 function curtain(c,s){const x=s.x0+40,w=s.w-80,y=64,h=FY-64,a=W.a;c.fillStyle='#7a1f3a';c.fillRect(x,y,w,h);
  for(let j=0,xx=x;xx<x+w;j++,xx+=46){c.fillStyle=j%2?'rgba(255,255,255,.08)':'rgba(0,0,0,.14)';c.fillRect(xx,y,23,h)}
  c.fillStyle='#f0b52a';c.fillRect(x,y,w,20);for(let xx=x;xx<x+w;xx+=40){c.beginPath();c.arc(xx+20,y+20,20,0,Math.PI);c.fill()}
@@ -9456,12 +9475,12 @@ function shop(c,s){const col=W.col,f=s.f,lv=S.fac[f],x=s.x0+22,w=s.w-44,cx=s.cx,
   c.strokeStyle=unl?'#b8894a':'#8a8b95';c.lineWidth=16;c.lineCap='round';c.beginPath();c.moveTo(x+24,156);c.lineTo(x+w-24,FY-30);c.moveTo(x+w-24,156);c.lineTo(x+24,FY-30);c.stroke();
   sign(c,cx,96,`${unl?F.icon:'🔒'} ${L(F.ko,F.en)}`,unl?'#ff9a3a':'#8a90a8',w-24);
   c.fillStyle='#fffdf6';rr(c,cx-112,232,224,62,10);c.fill();put(c,emo(unl?'🏗️':'🔒',30),cx,250);put(c,fit(unl?L('여기에 지을 수 있어요!','Build here!'):L('아직 잠겨 있어요','Still locked'),16,'#4a3a20',200),cx,278);return}
- sign(c,cx,92,`${F.icon} ${L(F.ko,F.en)}`,col.trim,w-14);awning(c,x-6,118,w+12,40,col.trim);
+ const fim=picImg(artOf(FAC_PIC[f]));sign(c,cx,92,fim?L(F.ko,F.en):`${F.icon} ${L(F.ko,F.en)}`,col.trim,w-14,fim);awning(c,x-6,118,w+12,40,col.trim);
  c.fillStyle=shade(col.wall,-.38);c.fillRect(x,158,w,FY-158);c.fillStyle='#b98a5a';c.fillRect(x+10,234,w-20,8);c.fillRect(x+10,302,w-20,8);
- const goods=GOODS[f],n=Math.min(goods.length,2+Math.ceil(lv/2)*2),per=Math.ceil(n/2);for(let j=0;j<n;j++)put(c,emo(goods[j],30),x+24+(w-48)*(Math.floor(j/2)+.5)/per,j%2?284:216);
+ const goods=GOODS[f],n=Math.min(goods.length,2+Math.ceil(lv/2)*2),per=Math.ceil(n/2);for(let j=0;j<n;j++)thing(c,artName(goods[j],true),goods[j],30,x+24+(w-48)*(Math.floor(j/2)+.5)/per,j%2?284:216);
  const cs=W.staff.find(p=>p.bust&&p.role===f);if(cs)person(c,cs);
  c.fillStyle=shade(col.trim,.35);rr(c,x-6,344,w+12,16,6);c.fill();c.fillStyle=col.trim;c.fillRect(x,360,w,FY-360);c.fillStyle='rgba(255,255,255,.15)';c.fillRect(x,360,w,12);
- put(c,emo(F.icon,38),cx-34,404);put(c,txt('Lv.'+lv,20,'#ffffff',{stroke:'rgba(0,0,0,.25)'}),cx+28,404)}
+ thing(c,artOf(FAC_PIC[f]),F.icon,38,cx-34,404);put(c,txt('Lv.'+lv,20,'#ffffff',{stroke:'rgba(0,0,0,.25)'}),cx+28,404)}
 function toilet(c,s){const a=W.a,x=s.x0+22,w=s.w-44,cx=s.cx,unl=UNLOCK.toilet(),dirt=unl?a.dirt:0;
  sign(c,cx,92,`🚻 ${L('화장실','Restrooms')}`,'#4a90d9',w-14);
  c.fillStyle='#eef6ff';c.fillRect(x,122,w,FY-122);c.strokeStyle='rgba(120,160,210,.35)';c.lineWidth=1.5;c.beginPath();for(let yy=150;yy<FY;yy+=28){c.moveTo(x,yy);c.lineTo(x+w,yy)}for(let xx=x+28;xx<x+w;xx+=28){c.moveTo(xx,122);c.lineTo(xx,FY)}c.stroke();
@@ -9499,7 +9518,7 @@ function floor(c,x0,x1){const yb=W.yBot+4,mid=W.cam+W.vw/2;c.fillStyle=W.gFloor;
   if(s.f==='toilet'&&UNLOCK.toilet()&&W.a.dirt>50){oval(c,s.cx-40,FY+24,46,9,'rgba(150,120,60,.28)');oval(c,s.cx+52,FY+40,30,7,'rgba(150,120,60,.22)')}
   if(s.kind==='photo'){c.strokeStyle='rgba(255,255,255,.85)';c.lineWidth=3;c.setLineDash([10,8]);c.beginPath();c.ellipse(s.cx,522,80,20,0,0,TAU);c.stroke();c.setLineDash([]);put(c,emo('👣',26),s.cx,522)}}}
 function item(c,it){const bob=Math.sin(W.t*4+it.x)*3;oval(c,it.x,it.y,14,4,'rgba(20,30,60,.16)');
- if(it.kind==='tip'){dot(c,it.x,it.y-18+bob,20,'rgba(255,220,80,.35)');put(c,emo('💰',28),it.x,it.y-18+bob)}else put(c,emo(it.e,24),it.x,it.y-10)}
+ if(it.kind==='tip'){dot(c,it.x,it.y-18+bob,20,'rgba(255,220,80,.35)');thing(c,'coin','💰',26,it.x,it.y-18+bob)}else thing(c,artName(it.e,true),it.e,24,it.x,it.y-10,Math.round(it.x)%2?1.2:-1.2)}
 // a chibi person: emoji head on a round glossy body; feet at (p.x,p.y). Shop clerks stand behind their counters (bust)
 function person(c,p){const s=(p.bust?1:scaleAt(p.y))*(p.s||1),mv=p.moving?1:0,sw=Math.sin(p.ph)*mv,bob=mv?Math.abs(Math.cos(p.ph))*2.4:0,dir=p.dir||1;
  c.save();c.translate(p.x,p.y);c.scale(s,s);
@@ -9507,12 +9526,12 @@ function person(c,p){const s=(p.bust?1:scaleAt(p.y))*(p.s||1),mv=p.moving?1:0,sw
   oval(c,-5+sw*7+dir*2,-3,5.5,3.2,'#3a3f58');oval(c,5-sw*7+dir*2,-3,5.5,3.2,'#3a3f58')}
  const pim=p.pic?staffImg(p.pic):p.vk?picImg('aq-visitor-'+p.vk):null;
  if(pim){const w=p.bust?76:70,h=w*pim.naturalHeight/pim.naturalWidth,by=p.bust?10:-22-bob;c.drawImage(pim,-w/2,by-h,w,h);
-  if(p.held)put(c,emo(p.held,24),dir*31,by-20);if(p.badge){dot(c,-w*.34,by-16,11,'#ffffff');put(c,emo(p.badge,15),-w*.34,by-16)}c.restore();return}
+  if(p.held)thing(c,artName(p.held,true),p.held,24,dir*31,by-20);if(p.badge){dot(c,-w*.34,by-16,11,'#ffffff');put(c,emo(p.badge,15),-w*.34,by-16)}c.restore();return}
  const ty=(p.bust?0:-26-bob)-38;if(!p.g||p.gb!==!!p.bust){p.gb=!!p.bust;p.g=lg(c,-16,ty,16,ty+40,[[0,shade(p.shirt,.32)],[1,shade(p.shirt,-.18)]])}
  c.lineCap='round';c.strokeStyle=shade(p.shirt,-.08);c.lineWidth=7;c.beginPath();c.moveTo(-14,ty+9);c.lineTo(-17-sw*6,ty+30);c.moveTo(14,ty+9);c.lineTo(17+sw*6,ty+30);c.stroke();
  dot(c,-17-sw*6,ty+31,4.5,'#ffd9b8');dot(c,17+sw*6,ty+31,4.5,'#ffd9b8');
  c.fillStyle=p.g;rr(c,-16,ty,32,40,13);c.fill();c.fillStyle='rgba(255,255,255,.24)';rr(c,-11,ty+4,8,18,4);c.fill();
- if(p.badge)put(c,emo(p.badge,14),7,ty+14);if(p.held)put(c,emo(p.held,22),dir*21,ty+28);
+ if(p.badge)put(c,emo(p.badge,14),7,ty+14);if(p.held)thing(c,artName(p.held,true),p.held,22,dir*21,ty+28);
  const hd=emo(p.head,48);c.drawImage(hd.cv,-hd.w/2,ty-20-hd.h/2,hd.w,hd.h);c.restore()}
 // the child as a chibi aquarium director: navy cap with a gold fish, teal vest, white sneakers (like the cover)
 function meDraw(c){const p=W.me,s=scaleAt(p.y),mv=p.moving?1:0,sw=Math.sin(p.ph)*mv,bob=mv?Math.abs(Math.cos(p.ph))*2.6:0,dir=p.dir;
@@ -9545,7 +9564,8 @@ function overlays(c,x0,x1){const t=W.t;
   else if(p.emoT>t)put(c,emo(p.emo,26),p.x,headY(p)-8)}
  const m=W.me,y=headY(m)-10+Math.sin(t*4)*4;c.fillStyle='#ffcf33';c.strokeStyle='#ffffff';c.lineWidth=3;c.beginPath();c.moveTo(m.x-11,y-13);c.lineTo(m.x+11,y-13);c.lineTo(m.x,y);c.closePath();c.fill();c.stroke();
  for(const b of W.bubbles)speech(c,b.who.x,headY(b.who)-8,b.text);
- for(const p of W.pops){c.globalAlpha=Math.max(0,1-p.t/1.3);put(c,txt(p.text,20,'#ffd23f',{stroke:'rgba(60,40,0,.6)'}),p.x,p.y-p.t*42);c.globalAlpha=1}}
+ for(const p of W.pops){c.globalAlpha=Math.max(0,1-p.t/1.3);const im=p.ic?picImg(p.ic):null,sp=txt(p.ic&&!im?`${p.text} ${COIN_T}`:p.text,20,'#ffd23f',{stroke:'rgba(60,40,0,.6)'}),y=p.y-p.t*42;
+  if(im){const x0=p.x-(sp.w+20)/2;put(c,sp,x0+sp.w/2,y);c.drawImage(im,x0+sp.w-2,y-11,22,22)}else put(c,sp,p.x,y);c.globalAlpha=1}}
 
 return {start,stop,on:()=>!!W,visitor:v=>{if(W)spawn(v,false)},
  _state:()=>W&&{x:Math.round(W.me.x),y:Math.round(W.me.y),cam:Math.round(W.cam),k:+W.k.toFixed(3),dpr:+W.dpr.toFixed(2),vw:Math.round(W.vw),len:W.len,sec:W.cur&&W.cur.kind,people:W.people.length,staff:W.staff.length,items:W.items.length,ask:!!W.people.find(p=>p.ask),fish:W.tanks.map(T=>T.fish.length),panel:W.el.card.textContent},
@@ -9724,10 +9744,28 @@ const weekKey=(d=new Date())=>{const t=new Date(d.getFullYear(),d.getMonth(),d.g
 const now=()=>Date.now();
 const T=pair=>L(pair[0],pair[1]);
 const fill=(s,o)=>String(s).replace(/\{(\w+)\}/g,(_,k)=>o[k]??'');
-const COIN_T='🪙',PEARL_T='🫧',TICKET='🎫';
+const COIN_T='🪙',PEARL_T='🫧',TICKET_T='🎫';
 // coins and pearls show as little pictures in the page (the emoji stands in if one cannot load); canvas and plain text use COIN_T / PEARL_T
 const curPic=(src,e)=>`<img class="cur" src="${src}" alt="${e}" draggable="false" onerror="this.replaceWith('${e}')">`;
 const COIN=curPic('images/coin.webp',COIN_T),PEARL=curPic('images/aq-pearl.webp',PEARL_T);
+// pictures for small things, by emoji: ICON_PIC for icons (the sea ticket, fish food, staff props, fishing, the mission chest),
+// GOOD_PIC for what the snack bar, gift shop and mart sell (shelves, what visitors carry, litter), FAC_PIC for the shops' own icon.
+// Pictures in ART_HAVE are in images/ already (some are shared with the science café and Coding Island); the rest are ready
+// for art still to come: add the name to ART_HAVE once images/<name>.webp exists. Until then nothing is requested and the emoji shows.
+const ICON_PIC={'🎫':'aq-ticket','🍤':'aq-food','🧹':'aq-prop-broom','🚩':'aq-prop-flag','🤿':'aq-prop-mask','🪣':'pg-bucket','🎣':'pg-fish-rod','🧰':'sci-chest-gold'};
+const GOOD_PIC={'🍦':'aq-good-icecream','🌭':'aq-good-hotdog','🥤':'sci-food-drink','🍿':'aq-good-popcorn','🍪':'aq-good-cookie','🧁':'aq-good-cupcake','🍩':'aq-good-donut','🧃':'aq-good-juice',
+ '🧸':'aq-good-teddy','🐠':'aq-good-fishplush','🔑':'aq-good-keyring','🧢':'aq-good-cap','📕':'pg-fish-book','🎈':'aq-good-balloon','🐬':'aq-good-dolphin','🖍️':'aq-good-crayons',
+ '💧':'aq-good-water','🍙':'aq-good-riceball','🥛':'aq-good-milk','🍫':'aq-good-choco','🍌':'aq-good-banana','🍞':'aq-good-bread','🧻':'aq-good-tissue','🍎':'aq-good-apple','🛍️':'aq-good-bag'};
+const FAC_PIC={ticket:'aq-ticket',snack:'aq-good-icecream',gift:'aq-good-teddy',mart:'aq-good-bag'};
+const ART_HAVE=new Set(['sci-food-drink','pg-fish-book','pg-bucket','pg-fish-rod','sci-chest-gold']);
+const artOf=n=>n&&ART_HAVE.has(n)?n:'';
+// the picture's name for an emoji ('' when there is none yet); goods=true looks in the shop goods too
+const artName=(e,goods)=>artOf(ICON_PIC[e]||(goods?GOOD_PIC[e]:''));
+// in the page: a little picture that sits in a line of text like an emoji (it turns back into the emoji if it cannot load)
+const artTag=(n,e,cls='')=>artOf(n)?`<img class="api ${cls}" src="images/${n}.webp" alt="" draggable="false" onerror="this.replaceWith('${e}')">`:e;
+const artPic=(e,cls='',goods)=>artTag(artName(e,goods),e,cls);
+const TICKET=artOf('aq-ticket')?curPic('images/aq-ticket.webp',TICKET_T):TICKET_T;
+if(TICKET!==TICKET_T){const p=$('hudTicketPill');if(p&&p.firstChild&&p.firstChild.nodeType===3)p.firstChild.replaceWith(document.createRange().createContextualFragment(TICKET))}
 const COPYRIGHT=()=>`<footer class="copy">© 2026 Dongsun Moon. ${L('모든 권리 보유.','All rights reserved.')}<br>${L('문제, 그림, 캐릭터, 소리는 이 게임을 위해 새로 만들었어요. 게임 속 동물은 한국이나 캐나다에 실제로 사는 동물이에요(전설의 바다 친구 6마리는 상상 속 동물이에요).','Questions, art, characters and sounds were made for this game. The animals really live in Korea or Canada (the six legendary sea creatures are made up).')}</footer>`;
 
 // ---------------------------------------------------------------- save (one save per profile picked on the main page)
@@ -11741,7 +11779,7 @@ function swimmersHTML(list){return list.slice(0,7).map((id,j)=>{const w=fishW(id
 function tankHTML(g,i,k){const a=aqState(g,i),d=aqDef(g,i),R_=REGIONS[g],id=d.tanks[k];
  if(a.open<=k){const nextS=k===a.open;return `<div class="tank locked ${k===4?'wide':''}" data-a="tank" data-k="${k}"><div class="water" style="--w1:${R_.water[0]};--w2:${R_.water[1]}"><span class="ghost">${fishImgTag(id,'shadow')}</span></div><div class="tlabel">🔒 ${L(`${k+1}번 수조`,`Tank ${k+1}`)} · ${nextS?`<b>${STAGES[k].icon} ${stageName(k)}</b>`:L('잠겨 있어요','locked')}</div></div>`}
  const hungryNow=hungry(a,k)&&UNLOCK.feed();
- return `<div class="tank ${k===4?'wide':''} ${hungryNow?'hungry':''}" data-a="tank" data-k="${k}"><div class="water" style="--w1:${R_.water[0]};--w2:${R_.water[1]}">${swimmersHTML(a.fish[k])}<div class="decor">${a.decor[k].map(x=>`<span>${decoPic(x)}</span>`).join('')}</div><span class="bub1"></span><span class="bub2"></span>${hungryNow?'<span class="hungrytag">🍤</span>':''}</div>
+ return `<div class="tank ${k===4?'wide':''} ${hungryNow?'hungry':''}" data-a="tank" data-k="${k}"><div class="water" style="--w1:${R_.water[0]};--w2:${R_.water[1]}">${swimmersHTML(a.fish[k])}<div class="decor">${a.decor[k].map(x=>`<span>${decoPic(x)}</span>`).join('')}</div><span class="bub1"></span><span class="bub2"></span>${hungryNow?`<span class="hungrytag">${artPic('🍤')}</span>`:''}</div>
   <div class="tlabel">${k+1}. ${esc(fishName(id))} <small>×${a.fish[k].length}</small>${a.st[k]?` <span class="tst">${'⭐'.repeat(a.st[k])}</span>`:''}</div></div>`}
 function nextStageOf(a){if(a.done)return -1;return Math.min(a.open,4)}
 function ctaHTML(){const {g,i,d,a}=here(),sk=skillOf(g,i),s=nextStageOf(a);
@@ -11759,8 +11797,8 @@ const carPic=(id,cls='')=>{const c=CARS.find(x=>x[0]===(id||S.car.model))||CARS[
 function facCardHTML(k){const f=FAC[k],lv=S.fac[k],{a}=here();
  if(k==='toilet'){if(!UNLOCK.toilet())return '';const c=Math.round(100-a.dirt);return `<button type="button" class="fac ${a.dirt>60?'dirty':''}" data-a="fac" data-f="toilet"><span class="fic">${a.dirt>85?'🤢':f.icon}</span><b>${L(f.ko,f.en)}</b><span class="meter"><i style="width:${c}%;background:${c<40?'#ff5a6a':c<70?'#ffb020':'#3ccf7a'}"></i></span><small>${a.dirt>60?L('청소해 주세요!','Needs cleaning!'):L(`깨끗함 ${c}%`,`${c}% clean`)}</small></button>`}
  const open=k==='ticket'||UNLOCK[k]();if(!open)return `<div class="fac lockf"><span class="fic">🔒</span><b>${L(f.ko,f.en)}</b><small>${T(UNLOCK_HINT[k])}</small></div>`;
- if(!lv)return `<button type="button" class="fac build" data-a="fac" data-f="${k}"><span class="fic">${f.icon}</span><b>${L(f.ko,f.en)}</b><small>${L('짓기','Build')} ${COIN}${short(facCost(k,0))}</small></button>`;
- return `<button type="button" class="fac" data-a="fac" data-f="${k}" id="fac-${k}"><span class="fic">${f.icon}</span><b>${L(f.ko,f.en)}</b><small>Lv.${lv}</small></button>`}
+ if(!lv)return `<button type="button" class="fac build" data-a="fac" data-f="${k}"><span class="fic">${artPic(f.icon)}</span><b>${L(f.ko,f.en)}</b><small>${L('짓기','Build')} ${COIN}${short(facCost(k,0))}</small></button>`;
+ return `<button type="button" class="fac" data-a="fac" data-f="${k}" id="fac-${k}"><span class="fic">${artPic(f.icon)}</span><b>${L(f.ko,f.en)}</b><small>Lv.${lv}</small></button>`}
 function renderHome(){const {g,i,d,a}=here(),el=$('v-home');const stars=a.done?'⭐'.repeat(a.best):'';
  el.innerHTML=`<div class="aqhead"><div class="bldwrap" data-a="walk" role="button" aria-label="${esc(L('아쿠아리움 안으로 들어가기','Walk inside the aquarium'))}">${buildingSVG(d)}<span class="walkin">🚶 ${L('안으로 들어가기','Walk inside')}</span></div><div class="aqname"><span class="flag">${REGIONS[g].flag}</span><b>${esc(d.name)}</b><small>${L(`${g}학년 · ${REGIONS[g].ko} · ${i+1}/20`,`Grade ${g} · ${REGIONS[g].en} · ${i+1}/20`)}</small>${stars?`<span class="aqstars">${stars}</span>`:''}</div></div>
  <div class="chips" id="homeChips"></div>
@@ -11776,7 +11814,7 @@ function sizeScene(root=document){root.querySelectorAll('.water').forEach(w=>w.s
 let sizeT=0;window.addEventListener('resize',()=>{clearTimeout(sizeT);sizeT=setTimeout(()=>sizeScene(),150)});
 function updateChips(){const el=$('homeChips');if(!el)return;const {g,i,a}=here();if(!a.open){el.innerHTML=`<span>🐟 ${L('첫 수조를 열면 손님이 와요!','Visitors come once the first tank is open!')}</span>`;return}
  const vpm=visitorsPerMin(g,i),ipm=incomePerMin(g,i)+chainPerMin(),h=Math.round(100*happiness(a)*(Array.from({length:a.open}).some((_,k)=>hungry(a,k))?.9:1));
- el.innerHTML=`<span title="${L('손님/분','visitors/min')}">👥 ${vpm.toFixed(1)}${L('명/분','/min')}</span><span>😊 ${h}%</span><span>${COIN} +${short(ipm)}${L('/분','/min')}</span>${Object.keys(S.boosts).filter(boostOn).map(k=>`<span class="boost">${(ITEMS.find(x=>x.boost===k)||{}).icon||'✨'} ${Math.ceil((S.boosts[k]-now())/60000)}${L('분','m')}</span>`).join('')}`}
+ el.innerHTML=`<span title="${L('손님/분','visitors/min')}">👥 ${vpm.toFixed(1)}${L('명/분','/min')}</span><span>😊 ${h}%</span><span>${COIN} +${short(ipm)}${L('/분','/min')}</span>${Object.keys(S.boosts).filter(boostOn).map(k=>`<span class="boost">${artPic((ITEMS.find(x=>x.boost===k)||{}).icon||'✨')} ${Math.ceil((S.boosts[k]-now())/60000)}${L('분','m')}</span>`).join('')}`}
 function flashTank(k){const t=document.querySelector(`.tank[data-k="${k}"]`);if(!t)return;t.scrollIntoView({behavior:'smooth',block:'center'});t.classList.add('flash');setTimeout(()=>t.classList.remove('flash'),2200)}
 
 // visitors walking through the lobby (only drawn when the aquarium is on screen)
@@ -11784,9 +11822,9 @@ const PEOPLE=['🧒','👧','👦','👩','👨','👵','👴','🧑','👩‍�
 // painted busts (visPic in core.js); a parent and child walk side by side, and the wheelchair rolls instead of stepping
 const PAIRS={'👨‍👧':['👨','👧'],'👩‍👦':['👩','👦']};
 function walkVisitor(v){if(typeof Walk!=='undefined'&&Walk.on()){Walk.visitor(v);return}const lob=$('lobby');if(!lob||VIEW!=='home'||document.hidden||document.body.classList.contains('staged')||modalOpen())return;if(lob.querySelectorAll('.vis-p').length>9)return;
- const p=document.createElement('span');p.className='vis-p';p.style.setProperty('--dur',(9+Math.random()*5)+'s');p.style.bottom=(6+Math.random()*16)+'px';const shop=v.bought.length?{snack:'🍦',gift:'🧸',mart:'🛍️'}[pick(v.bought)]:'';
+ const p=document.createElement('span');p.className='vis-p';p.style.setProperty('--dur',(9+Math.random()*5)+'s');p.style.bottom=(6+Math.random()*16)+'px';const shop=v.bought.length?artPic({snack:'🍦',gift:'🧸',mart:'🛍️'}[pick(v.bought)],'',true):'';
  const who=pick(PEOPLE);p.innerHTML=`<i class="${who==='🧑‍🦽'?'roll':''}">${(PAIRS[who]||[who]).map(e=>visPic(e)).join('')}</i>${shop?`<b>${shop}</b>`:''}`;lob.appendChild(p);p.addEventListener('animationend',()=>p.remove());
- if(Math.random()<.13){const tip=document.createElement('button');tip.type='button';tip.className='tip';tip.textContent='💰';p.appendChild(tip);const val=Math.round(ticketPrice(S.at.g,S.at.i)*3);
+ if(Math.random()<.13){const tip=document.createElement('button');tip.type='button';tip.className='tip';tip.innerHTML=COIN;p.appendChild(tip);const val=Math.round(ticketPrice(S.at.g,S.at.i)*3);
   const grab=()=>{if(tip.dataset.got)return;tip.dataset.got=1;earn(val,{at:tip});sfx('coin');tip.remove()};tip.addEventListener('pointerdown',e=>{e.stopPropagation();grab()});if(boostOn('magnet'))setTimeout(grab,1500)}
  if(Math.random()<.35)popAt(lob,`+${short(v.c)}`)}
 
@@ -11822,8 +11860,8 @@ function openTank_(k){const {g,i,d,a}=here(),id=d.tanks[k];sfx('tap');
  const counts={};a.fish[k].forEach(x=>counts[x]=(counts[x]||0)+1);
  const html=()=>`<h2>${k+1}. ${esc(fishName(id))} ${L('수조','tank')}</h2>
   <div class="tankbig"><div class="water" style="--w1:${REGIONS[g].water[0]};--w2:${REGIONS[g].water[1]}">${swimmersHTML(a.fish[k])}<div class="decor">${a.decor[k].map(x=>`<span>${decoPic(x)}</span>`).join('')}</div></div></div>
-  <div class="tstats"><span>🐟 ${a.fish[k].length}/${cap}</span><span>⭐ ${L('인기','Popularity')} ${Math.round(tankPower(a,k))}</span><span>Lv.${a.lv[k]}</span>${hung?`<span class="warn">🍤 ${L('배고파요!','Hungry!')}</span>`:''}</div>
-  <div class="row wrap">${UNLOCK.feed()?`<button class="btn ${hung?'':'ghost'}" data-act="feed">🍤 ${L('먹이 주기','Feed')}</button>`:''}<button class="btn ghost" data-act="buy">🐠 ${L('물고기 더 넣기','Add fish')}</button><button class="btn ghost" data-act="decor">🪸 ${L('꾸미기','Decorate')}</button>${a.lv[k]<5?`<button class="btn ghost" data-act="up">⬆️ ${L('수조 넓히기','Bigger tank')} ${COIN}${short(tankUpCost(k,a))}</button>`:''}</div>
+  <div class="tstats"><span>🐟 ${a.fish[k].length}/${cap}</span><span>⭐ ${L('인기','Popularity')} ${Math.round(tankPower(a,k))}</span><span>Lv.${a.lv[k]}</span>${hung?`<span class="warn">${artPic('🍤')} ${L('배고파요!','Hungry!')}</span>`:''}</div>
+  <div class="row wrap">${UNLOCK.feed()?`<button class="btn ${hung?'':'ghost'}" data-act="feed">${artPic('🍤')} ${L('먹이 주기','Feed')}</button>`:''}<button class="btn ghost" data-act="buy">🐠 ${L('물고기 더 넣기','Add fish')}</button><button class="btn ghost" data-act="decor">🪸 ${L('꾸미기','Decorate')}</button>${a.lv[k]<5?`<button class="btn ghost" data-act="up">⬆️ ${L('수조 넓히기','Bigger tank')} ${COIN}${short(tankUpCost(k,a))}</button>`:''}</div>
   <div class="fishlist">${Object.entries(counts).map(([x,n])=>`<button type="button" class="fl" data-act="info" data-id="${x}">${fishImgTag(x)}<b>${esc(fishName(x))}</b><small>×${n} ${flagsOf(FISH_BY[x])}</small></button>`).join('')}</div>`;
  modal(html(),{cls:'tankm',onOpen:box=>sizeScene(box),acts:{
   feed:(b,box)=>{if(!hung&&now()-(a.fed[k]||0)<60000){toast(L('방금 먹었어요! 배불러요 😋','They just ate! Full 😋'));return false}a.fed[k]=now();S.stats.feeds++;mission('feed');sfx('bubble');const w=box.querySelector('.water');for(let j=0;j<14;j++){const p=document.createElement('i');p.className='food';p.style.left=(20+Math.random()*60)+'%';p.style.animationDelay=(j*.06)+'s';w.appendChild(p)}w.querySelectorAll('.sw').forEach(s=>s.classList.add('eat'));say(T(pick([['냠냠! 물고기들이 신났어요!','Yum! The fish are so happy!'],['맛있게 먹어요!','They love it!']])),{raw:true});save(true);setTimeout(()=>{renderHome()},400);return false},
@@ -11852,7 +11890,7 @@ function facModal(k,o={}){const f=FAC[k],lv=S.fac[k],{g,i,a}=here();sfx('tap');i
  const what={ticket:L(`입장료 ${COIN}${ticketPrice(g,i)}`,`Ticket ${COIN}${ticketPrice(g,i)}`),snack:L(`손님 ${Math.round(shopChance('snack')*100)}%가 사 먹어요 · ${COIN}${shopPrice('snack',g,i)}`,`${Math.round(shopChance('snack')*100)}% of visitors buy · ${COIN}${shopPrice('snack',g,i)}`),gift:L(`손님 ${Math.round(shopChance('gift')*100)}%가 기념품을 사요 · ${COIN}${shopPrice('gift',g,i)}`,`${Math.round(shopChance('gift')*100)}% of visitors buy · ${COIN}${shopPrice('gift',g,i)}`),mart:L(`손님 ${Math.round(shopChance('mart')*100)}%가 장을 봐요 · ${COIN}${shopPrice('mart',g,i)}`,`${Math.round(shopChance('mart')*100)}% of visitors buy · ${COIN}${shopPrice('mart',g,i)}`)}[k];
  const desc={ticket:L('손님이 입장료를 내는 곳이에요.','Where visitors buy tickets.'),snack:L('아이스크림, 핫도그, 주스를 팔아요.','Sells ice cream, hot dogs and juice.'),gift:L('물고기 인형과 기념품을 팔아요. 물고기가 많을수록 인기가 많아요.','Sells fish plushies and souvenirs.'),mart:L('물, 간식, 우유 같은 생활용품을 팔아요.','Sells water, snacks, milk and more.')}[k];
  const staffN=S.staff.filter(x=>x.role===(k==='ticket'?'cashier':k)).length;
- modal(`<h2>${f.icon} ${L(f.ko,f.en)} ${lv?`Lv.${lv}`:''}</h2><p>${desc}</p>${lv?`<p><b>${what}</b></p>`:''}<p class="muted">👥 ${L(`담당 직원 ${staffN}명`,`${staffN} staff here`)}</p>
+ modal(`<h2>${artPic(f.icon)} ${L(f.ko,f.en)} ${lv?`Lv.${lv}`:''}</h2><p>${desc}</p>${lv?`<p><b>${what}</b></p>`:''}<p class="muted">👥 ${L(`담당 직원 ${staffN}명`,`${staffN} staff here`)}</p>
   ${lv<FAC_MAX?`<button class="btn wide" data-act="up">${lv?`⬆️ ${L('업그레이드','Upgrade')} → Lv.${lv+1}`:`🏗️ ${L('짓기','Build')}`} · ${COIN} ${short(facCost(k,lv))}</button>`:`<p>👑 ${L('최고 레벨이에요!','Max level!')}</p>`}
   ${k==='gift'?`<div class="row wrap"><button class="btn ghost" data-act="shelf">🧸 ${L('인형 진열장','Plush shelf')} ${plushKinds()}</button>${UNLOCK.claw()?`<button class="btn ghost" data-act="claw">🕹️ ${L('인형뽑기','Claw machine')}</button>`:''}</div>`:''}`,{acts:{shelf:()=>()=>plushShelf(),claw:()=>()=>startClaw('home'),up:()=>{if(!spend(facCost(k,lv)))return false;S.fac[k]++;sfx('open');if(!lv){celebrate('confetti',20);toast(L(`${f.icon} ${f.ko} 개장!`,`${f.icon} ${f.en} is open!`))}save();renderHome()}}})}
 // scrub the dirt away with your finger
@@ -11961,7 +11999,7 @@ function quickAns(ok,x,got){ok?QA.r++:QA.w++;try{LR.ans(ok,x&&x.id,got===undefin
 function lrRest(res){lrCount(Math.max(0,(res.right||0)-QA.r),Math.max(0,(res.wrong||0)-QA.w));QA={r:0,w:0}}
 function startDrive(o){if(typeof Drive==='undefined'){o.after&&o.after();return}audio();const st=openStage();st.className='stage game';const turbo=(S.items.turbo||0)>0;if(turbo)S.items.turbo--;
  const car=CARS.find(c=>c[0]===S.car.model)||CARS[0];
- QA={r:0,w:0};try{Drive.start(st,{g:o.g||S.at.g,car:{emoji:car[1],color:S.car.color,speed:S.car.speed,magnet:S.car.magnet,shield:S.car.shield+(turbo?2:0)},from:o.from,to:o.to,gates:Math.min(10,5+Math.floor((S.grade||1)/2)),ask:askQuick,ans:quickAns,sfx,say:t=>say(t),
+ QA={r:0,w:0};try{Drive.start(st,{g:o.g||S.at.g,car:{emoji:car[1],model:car[0],color:S.car.color,speed:S.car.speed,magnet:S.car.magnet,shield:S.car.shield+(turbo?2:0)},from:o.from,to:o.to,gates:Math.min(10,5+Math.floor((S.grade||1)/2)),ask:askQuick,ans:quickAns,sfx,say:t=>say(t),
   onEnd:res=>{try{Drive.stop()}catch(e){}closeStage();finishDrive(o,res)}})}catch(e){console.warn(e);closeStage();o.after&&o.after()}}
 function finishDrive(o,res){if(res.quit&&o.kind!=='move'){go(VIEW);return}const t=Math.pow(tier(S.at.g,S.at.i),.6);let coins=Math.round(((res.right||0)*14+(res.coins||0))*t*(1+.15*skl('drive')));
  if(o.kind==='delivery'){const d=S.deliveries.day===dayKey()?S.deliveries:{day:dayKey(),n:0};if(d.n>=3)coins=Math.round(coins*.25);d.n++;S.deliveries=d}
@@ -11977,7 +12015,7 @@ function renderSea(){const el=$('v-sea');if(!UNLOCK.sea()){el.innerHTML=`<div cl
  el.innerHTML=`<div class="seahead"><h2>🌊 ${L('바다로 나가요','Out to sea')}</h2><span class="pill">${TICKET} ${S.tickets}</span></div>
  <div class="spots">${[1,2,3,4,5,6].map(x=>`<button type="button" class="spot ${x===g?'on':''} ${x>mg?'lock':''}" data-a="spot" data-g="${x}" style="--w1:${REGIONS[x].water[0]};--w2:${REGIONS[x].water[1]}"><b>${REGIONS[x].flag} ${regionName(x)}</b><small>${x>mg?L(`${x}학년에 열려요`,`Opens in Grade ${x}`):`📖 ${FISH.filter(f=>f.reg===x&&S.dex[f.id]).length}/${FISH.filter(f=>f.reg===x).length}`}</small></button>`).join('')}</div>
  <div class="seacard" style="--w1:${R_.water[0]};--w2:${R_.water[1]}"><div class="seafish">${FISH.filter(f=>f.reg===g).slice(0,8).map(f=>S.dex[f.id]?fishImgTag(f.id):fishImgTag(f.id,'shadow')).join('')}</div><p>${L(`이 바다 친구 ${got}/${all}마리를 만났어요.`,`You’ve met ${got}/${all} animals here.`)}</p>
- <div class="row"><button type="button" class="bigbtn half" data-a="fish"><span class="bb-ic">🎣</span><span class="bb-t"><b>${L('낚시','Fishing')}</b><small>${TICKET} 1${S.items.bait?` · 🪱×${S.items.bait}`:''}</small></span></button><button type="button" class="bigbtn half" data-a="dive"><span class="bb-ic">🤿</span><span class="bb-t"><b>${L('다이빙','Diving')}</b><small>${TICKET} 1${S.items.air?` · 🧯×${S.items.air}`:''}</small></span></button></div>
+ <div class="row"><button type="button" class="bigbtn half" data-a="fish"><span class="bb-ic">${artPic('🎣')}</span><span class="bb-t"><b>${L('낚시','Fishing')}</b><small>${TICKET} 1${S.items.bait?` · 🪱×${S.items.bait}`:''}</small></span></button><button type="button" class="bigbtn half" data-a="dive"><span class="bb-ic">${artPic('🤿')}</span><span class="bb-t"><b>${L('다이빙','Diving')}</b><small>${TICKET} 1${S.items.air?` · 🧯×${S.items.air}`:''}</small></span></button></div>
  </div>
  <div class="card tkbox"><div class="tkrow"><b>${TICKET} ${L(`바다 티켓 ${S.tickets}장`,`${S.tickets} sea ticket${S.tickets===1?'':'s'}`)}</b><span id="tkClock">${tkLine()}</span></div>
   <div class="tkmath"><span>🧮 ${L(`정답 ${rightToward()}/${TK_RIGHT} · ${TK_RIGHT}개 맞힐 때마다 ${TICKET} +1`,`${rightToward()}/${TK_RIGHT} right answers → ${TICKET} +1`)}</span><i class="tkbar"><b style="width:${rightToward()/TK_RIGHT*100}%"></b></i></div>
@@ -11997,7 +12035,7 @@ function ticketQuiz(then){const need=5;let right=0;
     if(ok){S.stats.correct++;right++;dots[right-1].classList.add('on');b.classList.add('ok');sfx('good')}else{S.stats.wrong++;b.classList.add('bad');host.querySelectorAll('.tqb').forEach(x=>{if(x.dataset.v===p.a)x.classList.add('ok')});sfx('bad')}
     setTimeout(()=>{if(!document.body.contains(host))return;if(right>=need)done();else ask()},ok?650:1400)}))};
   const done=()=>{S.tickets++;save();updateHud();sfx('catch');celebrate('stars',16);const m=T(pick([['바다 티켓을 받았어요! 수학 실력 최고!','You earned a sea ticket! Math star!'],['척척 맞혔어요! 바다로 가 볼까요?','Spot on! Off to the sea?']]));say(m,{raw:true});
-   host.innerHTML=`<div class="big">🎫</div><p class="center"><b>${m}</b></p><button class="btn wide" data-act="go">🌊 ${L('바다로 가요!','To the sea!')}</button>`};
+   host.innerHTML=`<div class="big">${artPic('🎫')}</div><p class="center"><b>${m}</b></p><button class="btn wide" data-act="go">🌊 ${L('바다로 가요!','To the sea!')}</button>`};
   ask()},acts:{go:()=>()=>{if(then)then();else{go('sea')}}},onClose:()=>{if(VIEW==='sea')renderSea()}})}
 function startSea(mode){const g=TAB.sea||S.at.g;if(S.tickets<1){const c=itemCost(ITEM_BY.seaticket);modal(`<h2>${TICKET} ${L('바다 티켓이 없어요','No sea tickets')}</h2><p>${tkLine()}</p><p>${L('기다리지 않아도 돼요! 문제를 풀거나 코인으로 살 수 있어요.','No need to wait! Solve some problems or buy one with coins.')}</p>
   <div class="row wrap"><button class="btn" data-act="quiz">🧮 ${L('문제 5개 맞히기','Get 5 right')}</button><button class="btn ghost" data-act="buy">${L('코인으로 사기','Buy')} · ${COIN} ${short(c)}</button></div>`,{acts:{quiz:()=>()=>ticketQuiz(()=>startSea(mode)),buy:()=>{if(!spend(c))return false;S.tickets++;sfx('coin');toast(`${TICKET} +1`);save();return ()=>startSea(mode)}}});return}
@@ -12006,7 +12044,7 @@ function startSea(mode){const g=TAB.sea||S.at.g;if(S.tickets<1){const c=itemCost
  try{mode==='fish'?Sea.fish(st,o):Sea.dive(st,o)}catch(e){console.warn(e);closeStage();S.tickets++}}
 function finishSea(mode,res){const caught=res.caught||[];const news=[];caught.forEach(id=>{if(addDex(id))news.push(id);S.store[id]=(S.store[id]||0)+1});S.stats.caught+=caught.length;S.pearls+=res.pearls||0;lrRest(res);S.stats.correct+=res.right||0;S.stats.solved+=(res.right||0)+(res.wrong||0);
  if(caught.length)mission('catch',caught.length);const c=Math.round((res.right||0)*8*Math.pow(tier(S.at.g,S.at.i),.6));earn(c,{pop:false});checkAch();save();
- modal(`<h2>${mode==='fish'?'🎣':'🤿'} ${caught.length?L(`${caught.length}마리를 데려왔어요!`,`You brought back ${caught.length}!`):L('오늘은 바다 구경을 했어요','A lovely day at sea')}</h2>
+ modal(`<h2>${artPic(mode==='fish'?'🎣':'🤿')} ${caught.length?L(`${caught.length}마리를 데려왔어요!`,`You brought back ${caught.length}!`):L('오늘은 바다 구경을 했어요','A lovely day at sea')}</h2>
   ${caught.length?`<div class="shopgrid">${caught.map(id=>`<div class="sitem ${news.includes(id)?'new':''}">${fishImgTag(id)}<b>${esc(fishName(id))}</b><small>${news.includes(id)?'✨ '+L('새 친구!','New!'):'★'.repeat(FISH_BY[id].r)}</small></div>`).join('')}</div>`:''}
   ${news.length?`<p class="fact">🦦 ${esc(fishName(news[0]))}: ${esc(fishFact(news[0]))}</p>`:''}
   <div class="rew"><span>✅ ${res.right||0}</span><span>${COIN} +${short(c)}</span>${res.pearls?`<span>${PEARL} +${res.pearls}</span>`:''}</div>
@@ -12016,7 +12054,7 @@ function finishSea(mode,res){const caught=res.caught||[];const news=[];caught.fo
 // ---------------------------------------------------------------- shop: items, decorations, fish and cars
 function renderShop(){const el=$('v-shop'),t=TAB.shop;
  let body='';
- if(t==='items')body=`<div class="shopgrid big">${ITEMS.map(x=>{const own=S.items[x.id]||0,on=x.boost&&boostOn(x.boost);return `<button type="button" class="sitem" data-a="buyitem" data-id="${x.id}"><span class="sic">${x.icon}</span><b>${L(x.ko,x.en)}</b><small class="d">${L(x.dk,x.de)}</small><small class="price">${x.pearl?`${PEARL} ${x.pearl}`:`${COIN} ${short(itemCost(x))}`}</small>${own?`<span class="own">×${own}</span>`:''}${on?`<span class="own on">⏱ ${Math.ceil((S.boosts[x.boost]-now())/60000)}${L('분','m')}</span>`:''}</button>`}).join('')}</div>`;
+ if(t==='items')body=`<div class="shopgrid big">${ITEMS.map(x=>{const own=S.items[x.id]||0,on=x.boost&&boostOn(x.boost);return `<button type="button" class="sitem" data-a="buyitem" data-id="${x.id}"><span class="sic">${artPic(x.icon)}</span><b>${L(x.ko,x.en)}</b><small class="d">${L(x.dk,x.de)}</small><small class="price">${x.pearl?`${PEARL} ${x.pearl}`:`${COIN} ${short(itemCost(x))}`}</small>${own?`<span class="own">×${own}</span>`:''}${on?`<span class="own on">⏱ ${Math.ceil((S.boosts[x.boost]-now())/60000)}${L('분','m')}</span>`:''}</button>`}).join('')}</div>`;
  else if(t==='decor'){const {a}=here();body=a.open?`<p class="muted">${L('꾸밀 수조를 고르세요.','Pick a tank to decorate.')}</p><div class="row wrap">${Array.from({length:a.open},(_,k)=>`<button class="btn ghost" data-a="decor" data-k="${k}">🪸 ${L(`${k+1}번 수조`,`Tank ${k+1}`)} (${a.decor[k].length}/3)</button>`).join('')}</div>`:lockCard('toilet')}
  else if(t==='fish'){const {d,a}=here();body=a.open?`<p class="muted">${L('물고기를 넣을 수조를 고르세요.','Pick a tank for new fish.')}</p><div class="row wrap">${Array.from({length:a.open},(_,k)=>`<button class="btn ghost" data-a="fishbuy" data-k="${k}">${fishImgTag(d.tanks[k],'tiny')} ${L(`${k+1}번`,`Tank ${k+1}`)} (${a.fish[k].length}/${tankCap(a,k)})</button>`).join('')}</div>`:`<p class="muted">${L('첫 수조를 열면 물고기를 살 수 있어요.','Open your first tank to buy fish.')}</p>`}
  else if(t==='car'){body=`<div class="carshow" style="--c:${S.car.color}">${carPic()}</div><h3>${L('자동차','Cars')}</h3><div class="shopgrid">${CARS.map(([id,ic,ko,en,c])=>{const own=S.car.owned.includes(id);return `<button type="button" class="sitem ${S.car.model===id?'sel':''}" data-a="car" data-id="${id}">${carPic(id)}<b>${L(ko,en)}</b><small>${own?(S.car.model===id?L('타는 중','Driving'):L('고르기','Choose')):`${COIN} ${short(c)}`}</small></button>`}).join('')}</div>
@@ -12026,23 +12064,23 @@ function renderShop(){const el=$('v-shop'),t=TAB.shop;
 const itemCost=x=>Math.round(x.cost*Math.pow(tier(S.at.g,S.at.i),.45));
 const carUpCost=k=>Math.round(150*Math.pow(2.2,S.car[k]));
 function buyItem(id){const x=ITEM_BY[id];if(x.pearl){if(!spend(x.pearl,'pearls'))return}else if(!spend(itemCost(x)))return;sfx('coin');
- if(x.boost){startBoost(x.boost,x.min);if(x.id==='food'){const {a}=here();for(let k=0;k<a.open;k++)a.fed[k]=now()}toast(`${x.icon} ${L(x.ko,x.en)} ${L('시작!','on!')}`)}
+ if(x.boost){startBoost(x.boost,x.min);if(x.id==='food'){const {a}=here();for(let k=0;k<a.open;k++)a.fed[k]=now()}toast(`${artPic(x.icon)} ${L(x.ko,x.en)} ${L('시작!','on!')}`)}
  else if(x.id==='seaticket'){S.tickets++;toast(`${TICKET} +1`)}else if(x.id==='soap'||x.id==='hint'||x.id==='shield'||x.id==='turbo'||x.id==='bait'||x.id==='air'){S.items[x.id]=(S.items[x.id]||0)+1;toast(`${x.icon} ${L(x.ko,x.en)} +1`)}
  save();updateHud();renderShop()}
 
 // ---------------------------------------------------------------- headquarters: facilities, staff, skills, the chain
 function renderHQ(){const el=$('v-hq'),t=TAB.hq;let body='';
- if(t==='fac')body=`<div class="list">${Object.keys(FAC).map(k=>{const f=FAC[k],lv=S.fac[k],open=k==='ticket'||k==='toilet'?(k==='ticket'||UNLOCK.toilet()):UNLOCK[k]();return `<div class="lrow"><span class="lic">${f.icon}</span><div class="lt"><b>${L(f.ko,f.en)} ${lv?'Lv.'+lv:''}</b><small>${open?(lv?'●'.repeat(Math.min(lv,10))+'○'.repeat(Math.max(0,10-lv)):L('아직 안 지었어요','Not built yet')):T(UNLOCK_HINT[k]||['',''])}</small></div>${open&&lv<FAC_MAX?`<button class="btn small" data-a="facup" data-f="${k}">${lv?'⬆️':'🏗️'} ${COIN}${short(facCost(k,lv))}</button>`:''}</div>`}).join('')}</div><p class="muted">${L('시설 레벨은 모든 아쿠아리움에 똑같이 적용돼요.','Facility levels count in every aquarium.')}</p>`;
- else if(t==='staff'){if(!UNLOCK.staff())body=lockCard('staff');else{refreshBoard();body=`<h3>👥 ${L('우리 직원','Our team')} ${S.staff.length}/${staffSlots()}</h3><div class="list">${S.staff.map(x=>{const r=ROLES[x.role];return `<div class="lrow"><span class="lic">${staffPic(x)}</span><div class="lt"><b>${esc(staffName(x))} ${'⭐'.repeat(x.stars)}</b><small>${r.icon} ${L(r.ko,r.en)} · Lv.${x.lv}</small></div>${x.lv<10?`<button class="btn small" data-a="train" data-id="${x.id}">📚 ${COIN}${short(trainCost(x))}</button>`:''}</div>`}).join('')||`<p class="muted">${L('아직 직원이 없어요. 아래 게시판에서 뽑아 보세요!','No staff yet. Hire someone from the board below!')}</p>`}</div>
-  <h3>📋 ${L('오늘의 채용 게시판','Today’s job board')}</h3><div class="cands">${S.board.c.map(c=>{const r=ROLES[c.role];return `<div class="cand"><span class="cav">${staffPic(c)}</span><b>${esc(staffName(c))}</b><span class="st">${'⭐'.repeat(c.stars)}</span><small>${r.icon} ${L(r.ko,r.en)}</small><small class="d">${L(r.dk,r.de)}</small><button class="btn small" data-a="hire" data-id="${c.id}">${L('채용','Hire')} ${COIN}${short(hireCost(c))}</button></div>`}).join('')||`<p class="muted">${L('오늘 지원자를 모두 만났어요. 내일 새 지원자가 와요!','You met everyone today. New applicants tomorrow!')}</p>`}</div>
+ if(t==='fac')body=`<div class="list">${Object.keys(FAC).map(k=>{const f=FAC[k],lv=S.fac[k],open=k==='ticket'||k==='toilet'?(k==='ticket'||UNLOCK.toilet()):UNLOCK[k]();return `<div class="lrow"><span class="lic">${artPic(f.icon)}</span><div class="lt"><b>${L(f.ko,f.en)} ${lv?'Lv.'+lv:''}</b><small>${open?(lv?'●'.repeat(Math.min(lv,10))+'○'.repeat(Math.max(0,10-lv)):L('아직 안 지었어요','Not built yet')):T(UNLOCK_HINT[k]||['',''])}</small></div>${open&&lv<FAC_MAX?`<button class="btn small" data-a="facup" data-f="${k}">${lv?'⬆️':'🏗️'} ${COIN}${short(facCost(k,lv))}</button>`:''}</div>`}).join('')}</div><p class="muted">${L('시설 레벨은 모든 아쿠아리움에 똑같이 적용돼요.','Facility levels count in every aquarium.')}</p>`;
+ else if(t==='staff'){if(!UNLOCK.staff())body=lockCard('staff');else{refreshBoard();body=`<h3>👥 ${L('우리 직원','Our team')} ${S.staff.length}/${staffSlots()}</h3><div class="list">${S.staff.map(x=>{const r=ROLES[x.role];return `<div class="lrow"><span class="lic">${staffPic(x)}</span><div class="lt"><b>${esc(staffName(x))} ${'⭐'.repeat(x.stars)}</b><small>${artPic(r.icon)} ${L(r.ko,r.en)} · Lv.${x.lv}</small></div>${x.lv<10?`<button class="btn small" data-a="train" data-id="${x.id}">📚 ${COIN}${short(trainCost(x))}</button>`:''}</div>`}).join('')||`<p class="muted">${L('아직 직원이 없어요. 아래 게시판에서 뽑아 보세요!','No staff yet. Hire someone from the board below!')}</p>`}</div>
+  <h3>📋 ${L('오늘의 채용 게시판','Today’s job board')}</h3><div class="cands">${S.board.c.map(c=>{const r=ROLES[c.role];return `<div class="cand"><span class="cav">${staffPic(c)}</span><b>${esc(staffName(c))}</b><span class="st">${'⭐'.repeat(c.stars)}</span><small>${artPic(r.icon)} ${L(r.ko,r.en)}</small><small class="d">${L(r.dk,r.de)}</small><button class="btn small" data-a="hire" data-id="${c.id}">${L('채용','Hire')} ${COIN}${short(hireCost(c))}</button></div>`}).join('')||`<p class="muted">${L('오늘 지원자를 모두 만났어요. 내일 새 지원자가 와요!','You met everyone today. New applicants tomorrow!')}</p>`}</div>
   <button class="btn ghost wide" data-a="reboard">🔄 ${L('새 지원자 부르기','Call new applicants')} · ${PEARL} 2</button>`}}
- else if(t==='skills'){if(!UNLOCK.skills())body=lockCard('skills');else body=`<p class="spbox">⚡ ${L(`스킬 포인트 ${S.sp}개`,`${S.sp} skill point${S.sp===1?'':'s'}`)}<small>${L('레벨이 오르거나 별 3개로 아쿠아리움을 완성하면 받아요.','Earn them by levelling up or finishing an aquarium with 3 stars.')}</small></p><div class="skills">${SKILLTREE.map(x=>{const l=skl(x.id);return `<button type="button" class="skill ${l>=5?'max':''}" data-a="skill" data-id="${x.id}"><span class="sic">${x.icon}</span><b>${L(x.ko,x.en)}</b><small>${L(x.dk,x.de)}</small><span class="lv">${'●'.repeat(l)}${'○'.repeat(5-l)}</span></button>`}).join('')}</div>`}
+ else if(t==='skills'){if(!UNLOCK.skills())body=lockCard('skills');else body=`<p class="spbox">⚡ ${L(`스킬 포인트 ${S.sp}개`,`${S.sp} skill point${S.sp===1?'':'s'}`)}<small>${L('레벨이 오르거나 별 3개로 아쿠아리움을 완성하면 받아요.','Earn them by levelling up or finishing an aquarium with 3 stars.')}</small></p><div class="skills">${SKILLTREE.map(x=>{const l=skl(x.id);return `<button type="button" class="skill ${l>=5?'max':''}" data-a="skill" data-id="${x.id}"><span class="sic">${artPic(x.icon)}</span><b>${L(x.ko,x.en)}</b><small>${L(x.dk,x.de)}</small><span class="lv">${'●'.repeat(l)}${'○'.repeat(5-l)}</span></button>`}).join('')}</div>`}
  else if(t==='chain'){const {g,i}=here();const rows=[];for(const gg in S.G)S.G[gg].aq.forEach((a,ii)=>{if(a.done)rows.push([+gg,ii,a])});
-  body=`<div class="bigstats"><div><b>${short(incomePerMin(g,i))}</b><small>${COIN} ${L('이곳 수입/분','here per min')}</small></div><div><b>${short(chainPerMin())}</b><small>${COIN} ${L('다른 곳 수입/분','others per min')}</small></div><div><b>${ticketPrice(g,i)}</b><small>🎫 ${L('입장료','ticket')}</small></div><div><b>${visitorsPerMin(g,i).toFixed(1)}</b><small>👥 ${L('손님/분','visitors/min')}</small></div></div>
+  body=`<div class="bigstats"><div><b>${short(incomePerMin(g,i))}</b><small>${COIN} ${L('이곳 수입/분','here per min')}</small></div><div><b>${short(chainPerMin())}</b><small>${COIN} ${L('다른 곳 수입/분','others per min')}</small></div><div><b>${ticketPrice(g,i)}</b><small>${TICKET} ${L('입장료','ticket')}</small></div><div><b>${visitorsPerMin(g,i).toFixed(1)}</b><small>👥 ${L('손님/분','visitors/min')}</small></div></div>
   <p class="muted">${L(`쉬는 동안에도 최대 ${2+skl('idle')}시간까지 돈을 벌어요.`,`You keep earning for up to ${2+skl('idle')} hours while away.`)}</p><h3>🏛️ ${L('완성한 아쿠아리움','Finished aquariums')} ${rows.length}</h3><div class="minis">${rows.map(([gg,ii,a])=>`<span title="${esc(aqDef(gg,ii).name)}">${fishImgTag(aqDef(gg,ii).star,'tiny')}<small>${gg}-${ii+1}</small></span>`).join('')||'—'}</div>`}
  el.innerHTML=`<h2 class="vtitle">🏢 ${L('본부','Headquarters')}</h2>${tabsHTML('hq',[['fac','🏪','시설','Facilities'],['staff','👥','직원','Staff',!UNLOCK.staff()],['skills','⚡','스킬','Skills',!UNLOCK.skills()],['chain','💼','수입','Income']])}${body}`}
 function hire(id){const c=S.board.c.find(x=>x.id===id);if(!c)return;if(S.staff.length>=staffSlots()){toast(L('직원 자리가 꽉 찼어요. 스킬 ‘인사 담당’으로 늘릴 수 있어요.','All staff slots are full. The “Team leader” skill adds more.'));return}if(!spend(hireCost(c)))return;
- S.staff.push({...c,hired:dayKey()});S.board.c=S.board.c.filter(x=>x!==c);S.stats.hired++;sfx('fanfare');celebrate('confetti',18);const r=ROLES[c.role];modal(`<div class="big">${staffPic(c,'hero')}</div><h2>${L(`${staffName(c)} 입사!`,`${staffName(c)} joined!`)}</h2><p>${r.icon} ${L(r.ko,r.en)} · ${L(r.dk,r.de)}</p><p class="fact">${c.av} ${L('“관장님, 열심히 할게요!”','“I’ll do my best, director!”')}</p><button class="btn wide" data-act="close">${L('환영해요!','Welcome!')}</button>`);checkAch();save();renderHQ()}
+ S.staff.push({...c,hired:dayKey()});S.board.c=S.board.c.filter(x=>x!==c);S.stats.hired++;sfx('fanfare');celebrate('confetti',18);const r=ROLES[c.role];modal(`<div class="big">${staffPic(c,'hero')}</div><h2>${L(`${staffName(c)} 입사!`,`${staffName(c)} joined!`)}</h2><p>${artPic(r.icon)} ${L(r.ko,r.en)} · ${L(r.dk,r.de)}</p><p class="fact">${c.av} ${L('“관장님, 열심히 할게요!”','“I’ll do my best, director!”')}</p><button class="btn wide" data-act="close">${L('환영해요!','Welcome!')}</button>`);checkAch();save();renderHQ()}
 // ================================================================ growth, curriculum, dex, trophies, daily routine, graduation, settings and start-up
 
 // ---------------------------------------------------------------- my growth
@@ -12083,14 +12121,14 @@ function growAch(){return `<div class="achs">${ACH.map(([id,ic,ko,en])=>`<div cl
 // ---------------------------------------------------------------- the daily routine panel on the aquarium screen
 function renderDailyMini(){const el=$('dailyMini');if(!el)return;const d=S.daily,allDone=d.tasks.length&&d.tasks.every(x=>x.done),week=S.week.key===weekKey()?S.week.days.length:0;
  el.innerHTML=`<div class="daily ${allDone?'alldone':''}"><div class="dtop"><b>📅 ${L('오늘의 미션','Today’s missions')}</b><span class="dweek" title="${L('이번 주','this week')}">${'🟢'.repeat(Math.min(5,week))}${'⚪'.repeat(Math.max(0,5-week))}</span></div>
- ${d.tasks.map(t=>{const m=MISSIONS.find(x=>x.id===t.id);return `<div class="dt ${t.done?'done':''}"><span>${t.done?'✅':m.icon}</span><span class="dtt">${fill(L(m.ko,m.en),{n:t.goal})}</span><small>${Math.min(t.n,t.goal)}/${t.goal}</small></div>`}).join('')}
- <div class="drow">${!d.gift?`<button type="button" class="btn small gold" data-a="gift">🎁 ${L('오늘의 선물','Daily gift')}</button>`:''}${allDone&&!d.chest?`<button type="button" class="btn small gold" data-a="chest">🧰 ${L('미션 보물상자','Mission chest')}</button>`:''}${reviewReady()&&!d.review?`<button type="button" class="btn small" data-a="review">🧠 ${L('오늘의 복습','Daily review')}</button>`:''}</div></div>`}
+ ${d.tasks.map(t=>{const m=MISSIONS.find(x=>x.id===t.id);return `<div class="dt ${t.done?'done':''}"><span>${t.done?'✅':artPic(m.icon)}</span><span class="dtt">${fill(L(m.ko,m.en),{n:t.goal})}</span><small>${Math.min(t.n,t.goal)}/${t.goal}</small></div>`}).join('')}
+ <div class="drow">${!d.gift?`<button type="button" class="btn small gold" data-a="gift">🎁 ${L('오늘의 선물','Daily gift')}</button>`:''}${allDone&&!d.chest?`<button type="button" class="btn small gold" data-a="chest">${artPic('🧰')} ${L('미션 보물상자','Mission chest')}</button>`:''}${reviewReady()&&!d.review?`<button type="button" class="btn small" data-a="review">🧠 ${L('오늘의 복습','Daily review')}</button>`:''}</div></div>`}
 function dailyGift(){if(S.daily.gift)return;S.daily.gift=true;const t=tier(S.at.g,S.at.i);const opts=[{k:'coins',v:Math.round(80*t)},{k:'tickets',v:1},{k:'pearls',v:2},{k:'item',v:pick(['hint','shield','soap','flyer'])}];const r=pick(opts);
  if(r.k==='coins')earn(r.v,{pop:false});else if(r.k==='item')S.items[r.v]=(S.items[r.v]||0)+1;else S[r.k]+=r.v;S.tickets+=2;save();sfx('catch');celebrate('confetti',20);
  const label=r.k==='coins'?`${COIN} ${short(r.v)}`:r.k==='tickets'?`${TICKET} ${r.v}`:r.k==='pearls'?`${PEARL} ${r.v}`:`${ITEM_BY[r.v].icon} ${L(ITEM_BY[r.v].ko,ITEM_BY[r.v].en)}`;
  modal(`<div class="big">🎁</div><h2>${L('오늘의 선물!','Today’s gift!')}</h2><div class="rew"><span>${label}</span><span>${TICKET} +2</span></div><p>${L('매일 오면 선물이 있어요. 오늘도 수학 한 판 해 볼까요?','A gift every day you come. Ready for some math today?')}</p><button class="btn wide" data-act="close">${L('고마워요!','Thanks!')}</button>`);renderDailyMini();updateHud()}
 function missionChest(){if(S.daily.chest)return;S.daily.chest=true;const c=Math.round(150*tier(S.at.g,S.at.i));earn(c,{pop:false});S.pearls+=3;const it=pick(['hint','shield','flyer','food','turbo']);S.items[it]=(S.items[it]||0)+1;S.tickets+=2;save();sfx('fanfare');celebrate('confetti',40);
- modal(`<div class="big">🧰</div><h2>${L('오늘의 미션 완료!','All missions done!')}</h2><div class="rew"><span>${COIN} +${short(c)}</span><span>${PEARL} +3</span><span>${ITEM_BY[it].icon} +1</span><span>${TICKET} +2</span></div><p>${L('매일매일 해내는 관장님, 정말 멋져요!','A director who shows up every day — amazing!')}</p><button class="btn wide" data-act="close">${L('최고!','Awesome!')}</button>`);say(L('오늘의 미션을 모두 해냈어요! 정말 대단해요!','You finished all of today’s missions! Amazing!'),{raw:true});renderDailyMini();updateHud()}
+ modal(`<div class="big">${artPic('🧰')}</div><h2>${L('오늘의 미션 완료!','All missions done!')}</h2><div class="rew"><span>${COIN} +${short(c)}</span><span>${PEARL} +3</span><span>${artPic(ITEM_BY[it].icon)} +1</span><span>${TICKET} +2</span></div><p>${L('매일매일 해내는 관장님, 정말 멋져요!','A director who shows up every day — amazing!')}</p><button class="btn wide" data-act="close">${L('최고!','Awesome!')}</button>`);say(L('오늘의 미션을 모두 해냈어요! 정말 대단해요!','You finished all of today’s missions! Amazing!'),{raw:true});renderDailyMini();updateHud()}
 // five problems from skills already mastered: the oldest ones come back first
 function dailyReview(){const ids=Object.keys(S.sk).filter(id=>S.sk[id].m&&SKILL_BY[id]).sort((x,y)=>(S.sk[x].last||'')<(S.sk[y].last||'')?-1:1);if(!ids.length)return;
  const list=Array.from({length:5},(_,k)=>SKILL_BY[ids[k%ids.length]]);let n=0,right=0;
@@ -12101,7 +12139,7 @@ function dailyReview(){const ids=Object.keys(S.sk).filter(id=>S.sk[id].m&&SKILL_
 
 // ---------------------------------------------------------------- after a grand opening: on to the next aquarium, or graduation
 function afterGrandOpening(g,i){if(gradeDone(g)&&!S.G[g].grad){graduation(g);return}
- if(i<19&&!aqState(g,i+1).done){const nx=aqDef(g,i+1);modal(`<div class="big">🚗</div><h2>${L('다음 아쿠아리움이 기다려요!','The next aquarium is waiting!')}</h2><p><b>${esc(nx.name)}</b> · ${skillOf(g,i+1)?esc(skillOf(g,i+1).name):''}</p><div class="row"><button class="btn ghost" data-act="close">${L('조금 있다가','Later')}</button><button class="btn" data-act="go">${L('운전해서 가기','Drive there')} ▶</button></div>`,{acts:{go:()=>()=>travelTo(g,i+1)}})}}
+ if(i<19&&!aqState(g,i+1).done){const nx=aqDef(g,i+1);modal(`<div class="big">${carPic('','hero')}</div><h2>${L('다음 아쿠아리움이 기다려요!','The next aquarium is waiting!')}</h2><p><b>${esc(nx.name)}</b> · ${skillOf(g,i+1)?esc(skillOf(g,i+1).name):''}</p><div class="row"><button class="btn ghost" data-act="close">${L('조금 있다가','Later')}</button><button class="btn" data-act="go">${L('운전해서 가기','Drive there')} ▶</button></div>`,{acts:{go:()=>()=>travelTo(g,i+1)}})}}
 function graduation(g){const gd=S.G[g];gd.grad=dayKey();const t=tier(g,19),coins=Math.round(1500*t);earn(coins,{pop:false});S.pearls+=20;S.tickets+=5;const leg='leg'+g;addDex(leg);S.store[leg]=(S.store[leg]||0)+1;S.sp+=2;
  const stars=gd.aq.reduce((x,a)=>x+a.best,0),probs=SKILLS.filter(s=>s.id.startsWith(`g${g}-`)).reduce((x,s)=>x+(S.sk[s.id]?S.sk[s.id].c:0),0);
  logEvent('🎓',`${g}학년 수학 마스터! 졸업!`,`Grade ${g} math mastered! Graduated!`);checkAch();save();sfx('fanfare');celebrate('confetti',70);setTimeout(()=>celebrate('stars',40),900);
@@ -12131,7 +12169,9 @@ function settings(){const g=S.grade||1;
   reset:()=>()=>modal(`<h2>🗑️ ${L('정말 지울까요?','Really reset?')}</h2><p>${L('꼬마 수학 아쿠아리움 기록만 지워져요. 다른 게임 기록은 그대로예요. 되돌릴 수 없어요.','Only Little Math Aquarium progress is erased. Other games keep theirs. This cannot be undone.')}</p><div class="row"><button class="btn ghost" data-act="close">${L('아니요','No')}</button><button class="btn danger" data-act="yes">${L('지울래요','Erase')}</button></div>`,{acts:{yes:()=>{try{localStorage.removeItem(SAVE_KEY)}catch(e){}LR.forget();S=freshS();if(MGP.me){S.name=MGP.me.name;S.av=MGP.me.av}location.reload()}}})}})}
 
 // ---------------------------------------------------------------- first visit: say hello and pick a grade
-function welcome(){modal(`<div class="big">🦦</div><h2>${L('꼬마 수학 아쿠아리움에 온 걸 환영해요!','Welcome to Little Math Aquarium!')}</h2><p>${L('나는 수달 선생님 <b>무니</b>예요. 수학을 풀면 수조가 열리고, 물고기가 이사 오고, 손님이 찾아와요. 아쿠아리움 20곳을 완성하면 그 학년의 수학 단원 20개를 모두 마스터해요!','I’m <b>Mooni</b> the otter, your teacher. Solve math to open tanks, welcome fish and bring in visitors. Finish 20 aquariums and you master 20 math skills for your grade!')}</p>
+// Mooni's painted picture for the big hello and tip windows (MAV is the small round one)
+const mooniBig=()=>ART.mooni?`<img class="mooni-big" src="images/aq-mooni.webp" alt="" draggable="false" onerror="this.replaceWith('🦦')">`:'🦦';
+function welcome(){modal(`<div class="big">${mooniBig()}</div><h2>${L('꼬마 수학 아쿠아리움에 온 걸 환영해요!','Welcome to Little Math Aquarium!')}</h2><p>${L('나는 수달 선생님 <b>무니</b>예요. 수학을 풀면 수조가 열리고, 물고기가 이사 오고, 손님이 찾아와요. 아쿠아리움 20곳을 완성하면 그 학년의 수학 단원 20개를 모두 마스터해요!','I’m <b>Mooni</b> the otter, your teacher. Solve math to open tanks, welcome fish and bring in visitors. Finish 20 aquariums and you master 20 math skills for your grade!')}</p>
  <h3>🎒 ${L('몇 학년이에요?','What grade are you in?')}</h3><div class="gradepick">${[1,2,3,4,5,6].map(x=>`<button class="gp" data-act="g" data-g="${x}"><b>${x}</b><small>${L('학년','Grade')}</small><span>${REGIONS[x].flag}</span></button>`).join('')}</div>
  <p class="muted">${L('쉬운 학년부터 차근차근 해도 좋아요. 학년은 나중에 설정에서 바꿀 수 있어요.','You can also start with an easier grade. Change it any time in settings.')}</p>
  <div class="setrow"><span>💵 ${L('돈 문제 단위','Money in problems')}</span><span class="seg"><button class="${S.opt.money==='krw'?'on':''}" data-act="money" data-v="krw">🇰🇷 ${L('원','Won')}</button><button class="${S.opt.money==='cad'?'on':''}" data-act="money" data-v="cad">🇨🇦 ${L('달러','Dollars')}</button></span></div>`,{closable:false,cls:'wide',
@@ -12139,8 +12179,8 @@ function welcome(){modal(`<div class="big">🦦</div><h2>${L('꼬마 수학 아�
  acts:{money:b=>{S.opt.money=b.dataset.v;MONEY.kind=S.opt.money;b.parentNode.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));return false},
   g:b=>{const x=+b.dataset.g;S.grade=x;S.start=x;S.at={g:x,i:0};gradeData(x);S.tut.hello=1;save();go('home');setTimeout(()=>say(L(`좋아요! ${x}학년 바다의 첫 아쿠아리움이에요. 큰 버튼을 눌러 첫 수조를 열어 봐요!`,`Great! This is the first aquarium of the Grade ${x} sea. Tap the big button to open the first tank!`),{raw:true}),500)}}})}
 // one-time tips as new things open up
-function tips(){const t=S.tut;const tip=(k,ko,en)=>{if(t[k])return false;t[k]=1;save(true);modal(`<div class="big">🦦</div><p>${L(ko,en)}</p><button class="btn wide" data-act="close">${L('알겠어요!','OK!')}</button>`,{onOpen:()=>say(L(ko,en).replace(/<[^>]+>/g,''),{raw:false})});return true};
- if(UNLOCK.toilet()&&tip('t1','물고기가 이사 왔어요! 이제 손님이 와서 입장료를 내요. 손님 머리 위 <b>💰</b>를 누르면 팁을 받아요. <b>🚻 화장실</b>은 더러워지면 청소해 주세요.','Fish moved in! Visitors now come and pay for tickets. Tap the <b>💰</b> above visitors for tips. Clean the <b>🚻 restrooms</b> when they get dirty.'))return;
+function tips(){const t=S.tut;const tip=(k,ko,en)=>{if(t[k])return false;t[k]=1;save(true);modal(`<div class="big">${mooniBig()}</div><p>${L(ko,en)}</p><button class="btn wide" data-act="close">${L('알겠어요!','OK!')}</button>`,{onOpen:()=>say(L(ko,en).replace(/<[^>]+>/g,''),{raw:false})});return true};
+ if(UNLOCK.toilet()&&tip('t1',`물고기가 이사 왔어요! 이제 손님이 와서 입장료를 내요. 손님 머리 위 <b>${COIN} 코인</b>을 누르면 팁을 받아요. <b>🚻 화장실</b>은 더러워지면 청소해 주세요.`,`Fish moved in! Visitors now come and pay for tickets. Tap the <b>${COIN} coin</b> above visitors for tips. Clean the <b>🚻 restrooms</b> when they get dirty.`))return;
  if(UNLOCK.toilet()&&here().a.open&&tip('t6','아쿠아리움 <b>건물 그림</b>을 누르면 안으로 들어가서 걸어 다닐 수 있어요! 물고기를 가까이 보고, 손님과 직원도 만나 봐요. 🚶','Tap the <b>aquarium building</b> to go inside and walk around! See the fish up close and meet visitors and staff. 🚶'))return;
  if(UNLOCK.snack()&&tip('t2','<b>🍦 매점</b>을 지을 수 있어요! 그리고 손님이 <b>🙋❓</b> 질문을 하면 눌러서 계산을 도와주세요. 팁을 많이 줘요.','You can build a <b>🍦 snack bar</b>! When a visitor shows <b>🙋❓</b>, tap it and help with the math for a big tip.'))return;
  if(UNLOCK.sea()&&tip('t3','이제 <b>🌊 바다</b>에 나갈 수 있어요! 낚시나 다이빙으로 새 친구를 데려와요. 바다 티켓은 수업을 끝낼 때마다 받아요.','You can go out to <b>🌊 sea</b> now! Fish or dive to bring back new friends. You get a sea ticket for every lesson.'))return;
@@ -12174,7 +12214,7 @@ function wire(){
    case 'tquiz':sfx('tap');ticketQuiz();break;
    case 'fish':startSea('fish');break;case 'dive':startSea('dive');break;case 'placeall':placeAll();break;
    case 'buyitem':buyItem(b.dataset.id);break;case 'decor':decorModal(+b.dataset.k);break;case 'fishbuy':buyFishModal(+b.dataset.k);break;
-   case 'car':{const c=CARS.find(x=>x[0]===b.dataset.id);if(!S.car.owned.includes(c[0])){if(!spend(c[4]))break;S.car.owned.push(c[0]);sfx('fanfare');toast(`${c[1]} ${L('새 차!','New car!')}`)}S.car.model=c[0];save();renderShop();break}
+   case 'car':{const c=CARS.find(x=>x[0]===b.dataset.id);if(!S.car.owned.includes(c[0])){if(!spend(c[4]))break;S.car.owned.push(c[0]);sfx('fanfare');toast(`${carPic(c[0])} ${L('새 차!','New car!')}`)}S.car.model=c[0];save();renderShop();break}
    case 'color':S.car.color=b.dataset.c;sfx('tap');save();renderShop();break;
    case 'carup':{const k=b.dataset.k;if(S.car[k]>=5)break;if(!spend(carUpCost(k)))break;S.car[k]++;sfx('open');save();renderShop();break}
    case 'facup':{const k=b.dataset.f;if(!spend(facCost(k,S.fac[k])))break;S.fac[k]++;sfx('open');save();renderHQ();break}
@@ -12195,7 +12235,7 @@ function tick(){if(document.hidden)return;tickN++;const {g,i,a}=here();
  if((tk1||tk2)&&VIEW==='sea'&&!modalOpen())renderSea();else if(VIEW==='sea'){const c=$('tkClock');if(c)c.textContent=tkLine()}
  if(a.open){visAcc+=visitorsPerMin(g,i)/60;while(visAcc>=1){visAcc--;const v=visitorArrives();walkVisitor(v)}}
  chainAcc+=chainPerMin()/60;if(chainAcc>=1){const c=Math.floor(chainAcc);chainAcc-=c;S.coins+=c;S.stats.earned+=c}
- if(tickN%30===0){const w=staffWork();if(w==='clean'&&VIEW==='home'){toast(L('🧹 청소 담당이 화장실을 청소했어요!','🧹 Your cleaner cleaned the restrooms!'));renderHome()}if(w==='feed'&&VIEW==='home'){toast(L('🐟 사육 담당이 먹이를 줬어요!','🐟 Your keeper fed the fish!'));renderHome()}}
+ if(tickN%30===0){const w=staffWork();if(w==='clean'&&VIEW==='home'){toast(`${artPic('🧹')} ${L('청소 담당이 화장실을 청소했어요!','Your cleaner cleaned the restrooms!')}`);renderHome()}if(w==='feed'&&VIEW==='home'){toast(L('🐟 사육 담당이 먹이를 줬어요!','🐟 Your keeper fed the fish!'));renderHome()}}
  maybeRequest();if(REQ&&REQ.until<now()){REQ=null;document.querySelectorAll('.reqb').forEach(x=>x.remove())}
  if(tickN%3===0&&VIEW==='home'&&!document.body.classList.contains('staged')){updateChips();const tc=document.querySelector('[data-f="toilet"]');if(tc&&!LES){const want=a.dirt>60;if(want!==tc.classList.contains('dirty')||tickN%15===0){const x=document.createElement('div');x.innerHTML=facCardHTML('toilet');tc.replaceWith(x.firstElementChild);if(REQ)showReqBubble()}}}
  if(tickN%20===0){rollDaily()&&VIEW==='home'&&renderHome();if(VIEW==='home'&&!LES&&!modalOpen()&&!document.body.classList.contains('staged'))tips()}

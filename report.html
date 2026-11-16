@@ -198,6 +198,108 @@ footer{text-align:center;color:#8a93b8;font-size:12px;margin-top:6px}
 .shake{animation:shake .4s}
 @keyframes shake{25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
 @media (prefers-reduced-motion:reduce){.shake{animation:none}}
+/* ---- key findings */
+.ins{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+@media (max-width:820px){.ins{grid-template-columns:minmax(0,1fr)}}
+.in{font:inherit;text-align:left;display:flex;flex-direction:column;gap:4px;background:var(--card);border:1px solid var(--line);border-top:5px solid var(--k);border-radius:18px;padding:16px;box-shadow:var(--shadow);cursor:pointer;min-width:0;color:var(--ink)}
+.in:hover:not([disabled]){transform:translateY(-1px)}
+.in[disabled]{cursor:default}
+.in-good{--k:#1f9d6a}.in-up{--k:#2f6ff0}.in-focus{--k:#e0682b}.in-wait{--k:#c3c9dc}
+.in-t{font-size:12.5px;font-weight:900;letter-spacing:.04em;color:var(--k)}
+.in b{font-size:18px;letter-spacing:-.3px;line-height:1.3;overflow-wrap:anywhere}
+.in-p{font-size:14px;font-weight:700;color:var(--ink2);line-height:1.5}
+.in-go{margin-top:auto;padding-top:6px;font-size:13px;font-weight:900;color:var(--k)}
+@media (max-width:820px){.in{padding:12px 14px;display:grid;grid-template-columns:minmax(0,1fr) auto;column-gap:10px;row-gap:2px}.in-t,.in b,.in-p{grid-column:1}.in-go{grid-column:2;grid-row:1/4;align-self:center;padding:0;font-size:0;margin:0}.in-go::after{content:'›';font-size:28px;line-height:1}}
+/* ---- tabs */
+.tabs{position:sticky;top:calc(52px + max(8px,env(safe-area-inset-top,0px)));z-index:15;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;padding:6px;background:#fff;border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow)}
+.tabs button{min-height:48px;border:0;border-radius:13px;background:transparent;font-weight:900;font-size:14.5px;color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;padding:0 6px;min-width:0}
+.tabs button[aria-selected="true"]{background:var(--navy);color:#fff}
+.cnt{font-style:normal;background:#e0682b;color:#fff;border-radius:999px;font-size:11.5px;padding:1px 7px}
+@media (max-width:520px){.tabs button{flex-direction:column;gap:0;font-size:12.5px;min-height:56px}.tabs button span{font-size:19px;line-height:1.2}}
+.panel{display:grid;gap:18px;min-width:0}
+.panel[hidden],[data-subjcard][hidden]{display:none}
+em.up{color:var(--good);font-style:normal;font-weight:900}em.dn{color:#c2410c;font-style:normal;font-weight:900}
+/* ---- status board */
+.board{display:grid;gap:8px}
+.brow{font:inherit;color:var(--ink);text-align:left;display:grid;grid-template-columns:32px minmax(0,1.2fr) 168px minmax(0,1fr) 150px;gap:6px 14px;align-items:center;padding:12px 14px;border:1px solid var(--line);border-left:5px solid var(--c);border-radius:16px;cursor:pointer;background:#fff;min-height:56px}
+.brow:hover{background:var(--soft)}
+.b-ic{font-size:24px}
+.brow .lv{justify-self:start}
+.b-nm{display:flex;flex-direction:column;min-width:0}.b-nm b{font-size:15.5px}.b-nm small{font-size:12.5px;color:var(--muted);font-weight:700}
+.b-pg{display:flex;flex-direction:column;gap:4px;font-size:12.5px;font-weight:800;color:var(--muted);min-width:0}
+.b-bar{height:8px;border-radius:999px;background:var(--soft);overflow:hidden}.b-bar i{display:block;height:100%;background:var(--c)}
+.b-acc{font-size:13px;font-weight:800;color:var(--ink2);white-space:nowrap;text-align:right}
+@media (max-width:720px){.brow{grid-template-columns:32px minmax(0,1fr) auto}.brow .lv{justify-self:end}.b-pg,.b-acc{grid-column:2/4;text-align:left}}
+.lv{display:inline-flex;align-items:center;gap:4px;font-size:12.5px;font-weight:900;border-radius:999px;padding:4px 10px;white-space:nowrap}
+.lv-good{background:#e6f6ee;color:#13724c}.lv-ok{background:#fff6d9;color:#8a6100}.lv-help{background:#ffeadd;color:#b14a12}.lv-rest{background:#eef1f9;color:#5d6688}
+/* ---- subject picker + analysis */
+.subnav{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding:2px}
+.subnav::-webkit-scrollbar{display:none}
+@media (min-width:720px){.subnav{flex-wrap:wrap}}
+.subnav button{flex:0 0 auto;min-height:44px;padding:0 14px;border-radius:999px;border:1px solid var(--line);background:#fff;font-weight:800;font-size:14px;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+.subnav button[aria-pressed="true"]{background:var(--c);border-color:var(--c);color:#fff}
+.dotlv{width:9px;height:9px;border-radius:50%;display:inline-block;padding:0}
+.dotlv.lv-good{background:#1f9d6a}.dotlv.lv-ok{background:#e0b000}.dotlv.lv-help{background:#e0682b}.dotlv.lv-rest{background:#b8bfd4}
+.anal{display:grid;gap:8px}
+.an{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:10px;align-items:center;border-radius:14px;padding:10px 12px;background:var(--soft)}
+.an-k{font-size:12.5px;font-weight:900;white-space:nowrap}
+.an b{font-size:14.5px;font-weight:800;min-width:0}
+.an-v{font-size:13px;font-weight:800;color:var(--ink2);text-align:right}
+.an-good{background:#e9f7f0}.an-good .an-k{color:#13724c}.an-up{background:#eaf1ff}.an-up .an-k{color:#2456c9}.an-focus{background:#fff4e5}.an-focus .an-k{color:#9a5a00}
+@media (max-width:520px){.an{grid-template-columns:minmax(0,1fr)}.an-v{text-align:left}}
+/* ---- missed questions */
+.mxl{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr));gap:10px}
+.mx{border:1px solid var(--line);border-top:4px solid var(--c);border-radius:16px;padding:12px 14px;background:#fff;display:grid;gap:8px;min-width:0;align-content:start}
+.mx header{display:flex;justify-content:space-between;gap:8px;font-size:12.5px;font-weight:800;color:var(--muted)}
+.mx-st{flex:0 0 auto;font-size:12px;font-weight:900;border-radius:999px;padding:2px 8px;background:#fff4e5;color:#9a5a00;height:fit-content}
+.mx-st.ok{background:#e9f7f0;color:#13724c}.mx-st.once{background:#eef1f9;color:#5d6688}
+.mx-q{margin:0;font-size:16.5px;font-weight:900;line-height:1.4;overflow-wrap:anywhere}
+.mx-ans{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,120px),1fr));gap:8px}
+.mx-ans>div{border-radius:12px;padding:8px 10px;display:flex;flex-direction:column;gap:2px;min-width:0}
+.mx-ans span{font-size:12px;font-weight:800;color:var(--muted)}
+.mx-ans b{font-size:15px;overflow-wrap:anywhere}
+.mx-g{background:#fff0f0}.mx-a{background:#e9f7f0}
+.mx.hid .ans{filter:blur(7px);user-select:none}
+.reveal{justify-self:start;min-height:44px;padding:0 14px;border-radius:12px;border:0;background:var(--navy);color:#fff;font-weight:900;cursor:pointer}
+.mx-meta{margin:0;font-size:12.5px;color:var(--muted);font-weight:700}
+.mx-tip{margin:0;font-size:13.5px;font-weight:700;color:var(--ink2);background:var(--soft);border-radius:10px;padding:8px 10px}
+.more{margin-top:10px;min-height:44px;padding:0 14px;border-radius:12px;border:1px solid var(--line);background:#fff;font-weight:900;cursor:pointer}
+.pat{display:grid;gap:8px;margin-bottom:14px}
+.pat-row{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr) auto;gap:10px;align-items:center;font-size:14px;font-weight:700}
+.pat-bar{height:10px;border-radius:999px;background:var(--soft);overflow:hidden}.pat-bar i{display:block;height:100%;background:var(--c)}
+.mxctl{display:grid;gap:8px;margin-bottom:12px}
+.seg2{display:flex;flex-wrap:wrap;gap:6px}
+.seg2 button{min-height:44px;padding:0 13px;border-radius:999px;border:1px solid var(--line);background:#fff;font-weight:800;font-size:13.5px;cursor:pointer}
+.seg2 button{flex:0 0 auto}
+@media (max-width:620px){.seg2.scr{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}.seg2.scr::-webkit-scrollbar{display:none}}
+.seg2 button[aria-pressed="true"]{background:var(--navy);border-color:var(--navy);color:#fff}
+.hidesw{display:flex;align-items:center;gap:10px;min-height:48px;font-weight:800;font-size:14px;cursor:pointer;background:#fff4d6;border-radius:12px;padding:0 12px}
+.hidesw input{width:22px;height:22px;flex:0 0 auto}
+/* ---- at home */
+.plan{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.plan li{display:flex;gap:8px;align-items:stretch}
+.pl{font:inherit;color:var(--ink);flex:1;min-width:0;display:grid;grid-template-columns:auto auto minmax(0,1fr) auto;gap:10px;align-items:center;text-align:left;padding:12px;border:1px solid var(--line);border-radius:16px;background:#fff;cursor:pointer}
+.pl.on{background:#f0faf5;border-color:#bfe5d2}
+.pl-ck{width:26px;height:26px;border-radius:8px;border:2px solid #c3c9dc;display:grid;place-items:center;font-weight:900;color:#fff}
+.pl.on .pl-ck{background:var(--good);border-color:var(--good)}
+.pl-ic{font-size:22px}
+.pl-tx{display:flex;flex-direction:column;min-width:0}.pl-tx b{font-size:14.5px}.pl-tx small{font-size:13px;color:var(--muted);font-weight:700;line-height:1.45}
+.pl.on .pl-tx b{text-decoration:line-through;text-decoration-color:#9bd3b8}
+.pl-d{font-size:12.5px;font-weight:900;color:var(--ink2);background:var(--soft);border-radius:999px;padding:3px 9px;white-space:nowrap}
+.pl-go{flex:0 0 48px;display:grid;place-items:center;border-radius:14px;background:var(--navy);color:#fff;text-decoration:none;font-weight:900;border:0;cursor:pointer;font-size:16px;font-family:inherit}
+@media (max-width:520px){.pl{grid-template-columns:auto auto minmax(0,1fr)}.pl-d{grid-column:3;justify-self:start}}
+.goal{display:grid;gap:12px}
+.g-days{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}
+.gd{display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 0;border-radius:12px;background:var(--soft)}
+.gd i{font-style:normal;font-size:12px;font-weight:800;color:var(--muted)}
+.gd b{font-size:18px;min-height:24px}
+.gd.ok{background:#fff4d6}.gd.now{box-shadow:inset 0 0 0 2px #ffb84d}.gd.fut{opacity:.5}
+.g-set{display:flex;flex-wrap:wrap;align-items:center;gap:8px;font-size:14px;font-weight:800}
+.g-set .st{width:44px;height:44px;border-radius:12px;border:1px solid var(--line);background:#fff;font-size:20px;font-weight:900;cursor:pointer}
+.g-set b{min-width:44px;text-align:center}
+.praise{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.praise li{background:var(--soft);border-radius:14px;padding:12px 14px;display:flex;flex-direction:column;gap:2px}
+.praise b{font-size:15px}.praise span{font-size:13.5px;color:var(--ink2);font-weight:600}
 @media print{
   body{background:#fff}
   .bar,.per,.kids,.noprint,.gate{display:none!important}
@@ -206,6 +308,8 @@ footer{text-align:center;color:#8a93b8;font-size:12px;margin-top:6px}
   .hero{-webkit-print-color-adjust:exact;print-color-adjust:exact}
   .subj{break-inside:auto}
   details>*{display:block}
+  .panel[hidden],[data-subjcard][hidden]{display:grid!important}
+  .mx.hid .ans{filter:none}.reveal{display:none}
 }
 </style>
 </head>
@@ -302,28 +406,71 @@ function calCard(){const {all,played,R}=CAL,g=GAMES.find(x=>x.id===CALG);let day
 function bindCal(){const c=document.getElementById('calCard');if(!c)return;c.onclick=e=>{const b=e.target.closest('[data-cal]');if(!b)return;CALG=b.dataset.cal;try{sessionStorage.setItem('moonGames.reportCal',CALG)}catch(e){}c.innerHTML=calCard();const nb=c.querySelector(`[data-cal="${CALG}"]`);if(nb)nb.focus()}}
 // ---------------------------------------------------------------- page state
 let PER=7;try{PER=+sessionStorage.getItem('moonGames.reportPer')||7}catch(e){}
+let TAB='overview';try{TAB=sessionStorage.getItem('moonGames.reportTab')||'overview'}catch(e){}
+let SUBJ=null;try{SUBJ=sessionStorage.getItem('moonGames.reportSubj')}catch(e){}
+let MXF='open',MXG='all',MXHIDE=false;
+const week=n=>{const d=new Date(TODAY);d.setDate(d.getDate()-(d.getDay()+6)%7-7*n);return dkey(d)};
+const LEARN=['math','music','science','coding'];
+const sfx=()=>DEMO?'@demo':me()?'@'+me().id:'';
+const LV={good:['🟢',['잘하고 있어요','Going well']],ok:['🟡',['꾸준히 연습 중','Practising steadily']],help:['🟠',['함께 연습하면 좋아요','Could use a hand']],rest:['⚪',['쉬는 중','Taking a break']]};
+// ---------------------------------------------------------------- analysis: turns the raw record into findings a parent can act on.
+// Every finding is a plain rule over the child's own answers (no AI guessing), so each sentence can be checked:
+// strength = newly mastered, or 90%+ right over 8+ answers; growth = recent 2 weeks vs the 6 weeks before, +15 points or more
+// (5+ answers each side); to practise = a kind of question missed 2+ times and not yet right twice in a row, or under 70% over 6+ answers.
+function analyze(R,played,P,Prev,n){const cutoff=PER>=9999?'':dkey(daysAgo(n-1)),w2=week(1),w8=week(8),skills=[],G={};
+ for(const g of played){const rec=R[g.id].r;
+  for(const k of allSkills(rec.sum)){const lr=rec.sk&&rec.sk[k.id],r=lr?lr[0]:k.r||0,w=lr?lr[1]:k.w||0;let rR=0,wR=0,rE=0,wE=0;const wk=(rec.skw||{})[k.id]||{};
+   for(const d in wk){if(d>=w2){rR+=wk[d][0];wR+=wk[d][1]}else if(d>=w8){rE+=wk[d][0];wE+=wk[d][1]}}
+   const att=r+w,nR=rR+wR,nE=rE+wE;skills.push({g,k,att,r,w,acc:att?r/att:null,nR,accR:nR?rR/nR:null,nE,accE:nE?rE/nE:null,when:rec.when&&rec.when[k.id],trend:nR>=5&&nE>=5?rR/nR-rE/nE:null})}}
+ const mist=[];for(const g of played){const mx=R[g.id].r.mx||{},by={};allSkills(R[g.id].r.sum).forEach(k=>by[k.id]=k);
+  for(const id in mx){const e=mx[id];if(e&&Array.isArray(e.q)&&Array.isArray(e.a))mist.push({g,id,e,skill:by[e.s],fixed:(e.k||0)>=2})}}
+ mist.forEach(x=>x.often=!x.fixed&&x.e.n>=2);mist.sort((a,b)=>(a.fixed-b.fixed)||(b.e.n-a.e.n)||((b.e.l||'')>(a.e.l||'')?1:-1));
+ const recentAcc=s=>s.nR>=4?s.accR:s.acc,recentN=s=>s.nR>=4?s.nR:s.att;
+ for(const g of played){const p=P[g.id],pv=Prev[g.id],pa=p.r+p.w,acc=pa?p.r/pa:null,accP=pv&&pv.r+pv.w?pv.r/(pv.r+pv.w):null,mine=skills.filter(s=>s.g===g);
+  const lv=p.s<60&&!pa?'rest':pa>=8?(acc>=.85?'good':acc>=.65?'ok':'help'):(g.id==='marble'&&p.s>=300?'good':'ok');
+  const seen=new Set(),str=mine.filter(s=>s.k.st===2&&s.when&&s.when>=cutoff).map(s=>({s,why:'new'})).concat(mine.filter(s=>s.att>=8&&s.acc>=.9).map(s=>({s,why:'acc'})))
+   .filter(o=>!seen.has(o.s.k.id)&&seen.add(o.s.k.id)).sort((a,b)=>(a.why==='new'?0:1)-(b.why==='new'?0:1)||(b.s.att-a.s.att)).slice(0,3);
+  const grow=mine.filter(s=>s.trend!=null&&s.trend>=.15).sort((a,b)=>b.trend-a.trend).slice(0,3);
+  const weak=mine.filter(s=>recentN(s)>=6&&recentAcc(s)<.7).sort((a,b)=>recentAcc(a)-recentAcc(b)).slice(0,3);
+  const mm=mist.filter(x=>x.g===g);G[g.id]={lv,acc,accP,pa,str,grow,weak,mist:mm,open:mm.filter(x=>x.often),fixed:mm.filter(x=>x.fixed)}}
+ const shaky=new Set(mist.filter(x=>!x.fixed&&x.e.n>=2).map(x=>x.g.id+'|'+x.e.s).concat(played.flatMap(g=>G[g.id].weak.map(s=>g.id+'|'+s.k.id))));
+ for(const g of played){G[g.id].str=G[g.id].str.filter(o=>!shaky.has(g.id+'|'+o.s.k.id))}
+ const best=played.flatMap(g=>G[g.id].str).sort((a,b)=>(a.why==='new'?0:1)-(b.why==='new'?0:1)||(b.s.att-a.s.att))[0];
+ const up=played.flatMap(g=>G[g.id].grow).sort((a,b)=>b.trend-a.trend)[0];
+ const focM=mist.find(x=>!x.fixed&&x.e.n>=2),focW=played.flatMap(g=>G[g.id].weak).sort((a,b)=>recentAcc(a)-recentAcc(b))[0];
+ return {skills,G,mist,best,up,focM,focW,cutoff,recentAcc}}
+// ---------------------------------------------------------------- small pieces
+const subjName=g=>T(g.subj).split(' · ')[0];
+const lvChip=lv=>`<span class="lv lv-${lv}">${LV[lv][0]} ${esc(T(LV[lv][1]))}</span>`;
+const arrow=(a,b)=>a==null||b==null?'':pct(a)-pct(b)>=3?`<em class="up">▲ ${pct(a)-pct(b)}%p</em>`:pct(b)-pct(a)>=3?`<em class="dn">▼ ${pct(b)-pct(a)}%p</em>`:'';  // changes under 3 points are noise
+function insightCards(A,tot,prev,newM){const c=[];
+ if(A.best){const s=A.best.s;c.push({ic:'🌟',cls:'good',t:L('강점','Strength'),h:T(s.k.name),p:A.best.why==='new'?L(`${esc(subjName(s.g))} · ${ago(s.when)} 새로 익혔어요.`,`${esc(subjName(s.g))} · newly mastered ${ago(s.when)}.`):L(`${esc(subjName(s.g))} · ${s.att}번 중 ${s.r}번 맞혔어요 (${pct(s.acc)}%).`,`${esc(subjName(s.g))} · right ${s.r} of ${s.att} times (${pct(s.acc)}%).`),go:'subjects:'+s.g.id})}
+ if(A.up)c.push({ic:'📈',cls:'up',t:L('성장','Growth'),h:T(A.up.k.name),p:L(`${esc(subjName(A.up.g))} · 정답률이 ${pct(A.up.accE)}%에서 ${pct(A.up.accR)}%로 올랐어요.`,`${esc(subjName(A.up.g))} · accuracy rose from ${pct(A.up.accE)}% to ${pct(A.up.accR)}%.`),go:'subjects:'+A.up.g.id});
+ else if(newM)c.push({ic:'📈',cls:'up',t:L('성장','Growth'),h:L(`새 기술 ${newM}개`,`${newM} new skill${newM>1?'s':''}`),p:L('이 기간에 새로 익힌 기술이에요. ‘한눈에’ 아래 성장 기록에서 볼 수 있어요.','Newly mastered in this period; see the milestones below.'),go:'overview'});
+ else if(prev.s&&tot.s>prev.s*1.1)c.push({ic:'📈',cls:'up',t:L('성장','Growth'),h:L(`학습 시간 +${fmtMin(tot.s-prev.s)}`,`+${fmtMin(tot.s-prev.s)} of learning`),p:L('지난 기간보다 더 많이 배웠어요.','More learning time than the period before.'),go:'overview'});
+ if(A.focM){const x=A.focM;c.push({ic:'🎯',cls:'focus',t:L('함께 연습할 것','Practise together'),h:x.skill?T(x.skill.name):subjName(x.g),p:L(`“${esc(T(x.e.q))}” 같은 문제를 ${x.e.n}번 틀렸어요.`,`Missed questions like “${esc(T(x.e.q))}” ${x.e.n} times.`),go:'mistakes:'+x.g.id})}
+ else if(A.focW){const s=A.focW;c.push({ic:'🎯',cls:'focus',t:L('함께 연습할 것','Practise together'),h:T(s.k.name),p:L(`${esc(subjName(s.g))} · 최근 정답률 ${pct(A.recentAcc(s))}%예요. 조금 더 연습하면 좋아요.`,`${esc(subjName(s.g))} · ${pct(A.recentAcc(s))}% right lately. A little more practice will help.`),go:'subjects:'+s.g.id})}
+ while(c.length<3)c.push({ic:'🔍',cls:'wait',t:L('분석 준비 중','Getting ready'),h:L('기록이 더 필요해요','A few more days'),p:L('일주일쯤 기록이 쌓이면 강점, 성장, 약점을 찾아 드려요.','After about a week of play, strengths, growth and weak spots will show up here.'),go:''});
+ return `<section class="ins" aria-label="${esc(L('핵심 발견','Key findings'))}">${c.slice(0,3).map(x=>`<button type="button" class="in in-${x.cls}"${x.go?` data-go="${x.go}"`:' disabled'}><span class="in-t">${x.ic} ${esc(x.t)}</span><b>${esc(x.h)}</b><span class="in-p">${x.p}</span>${x.go?`<span class="in-go">${L('자세히 보기 →','See more →')}</span>`:''}</button>`).join('')}</section>`}
+// ---------------------------------------------------------------- the page
 function render(){const app=$('app'),R=records(),m=DEMO?{name:L('하늘','Sky'),av:'🦄'}:me();
  const played=GAMES.filter(g=>R[g.id].r);
  if(!played.length&&!DEMO){app.innerHTML=emptyPage(R,m);bindCommon();return}
- // ---- numbers for the chosen period
  const n=PER>=9999?120:PER,P={},Prev={};let tot={s:0,r:0,w:0},prev={s:0,r:0,w:0};const dayAll={};
  for(const g of played){const d=R[g.id].r.days||{};P[g.id]=span(d,n);Prev[g.id]=PER>=9999?null:span(d,n,n);
   tot.s+=P[g.id].s;tot.r+=P[g.id].r;tot.w+=P[g.id].w;if(Prev[g.id]){prev.s+=Prev[g.id].s;prev.r+=Prev[g.id].r;prev.w+=Prev[g.id].w}
   for(const k in d)dayAll[k]=(dayAll[k]||0)+d[k].s}
- let onDays=0,streak=0;for(let i=0;i<n;i++){const k=dkey(daysAgo(i));if((dayAll[k]||0)>=30)onDays++}
- for(let i=((dayAll[dkey(TODAY)]||0)>=30?0:1);i<400;i++){const k=dkey(daysAgo(i));if((dayAll[k]||0)>=30)streak++;else break}
- const cutoff=PER>=9999?'':dkey(daysAgo(n-1));
+ let onDays=0,streak=0;for(let i=0;i<n;i++){if((dayAll[dkey(daysAgo(i))]||0)>=30)onDays++}
+ for(let i=((dayAll[dkey(TODAY)]||0)>=30?0:1);i<400;i++){if((dayAll[dkey(daysAgo(i))]||0)>=30)streak++;else break}
+ const A=analyze(R,played,P,Prev,n),cutoff=A.cutoff;
  let mastered=0,newM=0,school=0;const grow=[];
  for(const g of played){const rec=R[g.id].r;for(const k of allSkills(rec.sum)){if(k.st===2){mastered++;const w=rec.when&&rec.when[k.id];if(w&&w>=cutoff)newM++;if(w)grow.push({g,k,w})}if(k.school&&k.st>=1)school++}}
  grow.sort((a,b)=>a.w<b.w?1:-1);
  const acc=tot.r+tot.w?tot.r/(tot.r+tot.w):null,accPrev=prev.r+prev.w?prev.r/(prev.r+prev.w):null;
- const active=played.filter(g=>P[g.id].s>=60||P[g.id].r+P[g.id].w>0);
- const top=active.slice().sort((a,b)=>P[b.id].s-P[a.id].s)[0];
+ const active=played.filter(g=>P[g.id].s>=60||P[g.id].r+P[g.id].w>0),top=active.slice().sort((a,b)=>P[b.id].s-P[a.id].s)[0];
  const perLab=PER>=9999?L('지금까지','so far'):L(`최근 ${n}일`,`in the last ${n} days`);
- // ---- headline sentence
- const nm=m?m.name:L('우리 아이','your child'),nk=m?nmK(m.name):nm;
+ const nm=m?m.name:L('우리 아이','your child'),nk=m?nmK(m.name):nm,ever=Object.keys(dayAll).length>0||mastered>0;
  let say;
- const ever=Object.keys(dayAll).length>0||mastered>0;
  if(!active.length&&!ever)say=L(`${esc(nk)}의 학습 기록이 이제 막 시작됐어요. 게임을 하면 배운 시간과 익힌 기술이 여기에 차곡차곡 쌓여요.`,`${esc(nm)}’s learning record has just started. As ${esc(nm)} plays, learning time and mastered skills will build up here.`);
  else if(!active.length)say=L(`${esc(nk)}는 ${perLab} 동안 쉬어 갔어요. 짧게 10분부터 다시 시작해 보세요.${mastered?` 그동안 익힌 기술 <b>${mastered}개</b>는 그대로 남아 있어요.`:''}`,`${esc(nm)} took a break ${perLab}. Starting again with 10 minutes is plenty.${mastered?` The <b>${mastered} skill${mastered>1?'s':''}</b> already mastered are all still here.`:''}`);
  else say=L(`${esc(nk)}는 ${perLab} 동안 <b>${active.length}과목</b>에서 ${tot.s>=30?`<b>${fmtMin(tot.s)}</b> 배웠어요.`:`<b>${tot.r+tot.w}번</b> 답하며 배웠어요.`}${newM?` 새 기술 <b>${newM}개</b>를 익혔고,`:''} 가장 많이 한 과목은 <b>${esc(T(top.subj))}</b>${hasB(T(top.subj))?'이에요':'예요'}.${acc!=null?` 정답률은 <b>${pct(acc)}%</b>예요.`:''}`,
@@ -336,71 +483,151 @@ function render(){const app=$('app'),R=records(),m=DEMO?{name:L('하늘','Sky'),
   ${!DEMO&&PROF.list.length>1?`<div class="kids" role="group" aria-label="${esc(L('아이 고르기','Choose a child'))}">${PROF.list.map(p=>`<button type="button" class="kid" data-kid="${esc(p.id)}" aria-pressed="${p.id===PROF.cur}">${esc(p.av)} ${esc(p.name)}</button>`).join('')}</div>`:''}
   <p class="say">${say}</p>
   <div class="per" role="group" aria-label="${esc(L('기간','Period'))}">${[[7,L('최근 7일','7 days')],[30,L('최근 30일','30 days')],[9999,L('전체','All time')]].map(([v,t])=>`<button type="button" data-per="${v}" aria-pressed="${PER===v}">${t}</button>`).join('')}</div></section>`;
- // ---- KPI tiles
- h+=`<section class="kpis">
-  <div class="kpi"><i>⏱️</i><b class="num">${fmtMin(tot.s)}</b><span>${L('집중해서 배운 시간','Focused learning time')}</span>${diff(tot.s,PER>=9999?null:prev.s,v=>fmtMin(v))}</div>
-  <div class="kpi"><i>📅</i><b class="num">${onDays}<small>${L('일','days')}</small></b><span>${L('배운 날','Days of learning')}</span>${streak>=2?`<em class="up">🔥 ${L(`${streak}일 연속`,`${streak}-day streak`)}</em>`:`<em>${L(`${n>=9999?'':n+'일 중 '}${onDays}일`,`${onDays} of ${n} days`)}</em>`}</div>
-  <div class="kpi"><i>🎯</i><b class="num">${acc==null?'–':pct(acc)+'%'}</b><span>${L('정답률','Accuracy')} · ${(tot.r+tot.w).toLocaleString()}${L('번 답함',' answers')}</span>${acc!=null&&accPrev!=null&&PER<9999?(Math.round(acc*100)>Math.round(accPrev*100)?`<em class="up">▲ ${pct(acc)-pct(accPrev)}%p</em>`:`<em>${L(`지난 기간 ${pct(accPrev)}%`,`${pct(accPrev)}% the period before`)}</em>`):''}</div>
-  <div class="kpi"><i>🏅</i><b class="num">${mastered}<small>${L('개','')}</small></b><span>${L('익힌 기술','Skills mastered')}</span><em class="${newM?'up':''}">${newM?L(`▲ 새로 ${newM}개`,`▲ ${newM} new`):L(`학교 교과 연결 ${school}개`,`${school} linked to school`)}</em></div></section>`;
- // ---- jump to a subject
- h+=`<nav class="jump noprint" aria-label="${esc(L('과목 바로가기','Jump to a subject'))}">${GAMES.filter(g=>R[g.id].r&&R[g.id].r.sum).map(g=>`<a href="#s-${g.id}" style="--c:${g.c}">${esc(g.icon)} ${esc(T(g.subj).split(' · ')[0])}</a>`).join('')}</nav>`;
- // ---- calendar + subject balance
- const radarItems=played.map(g=>{const sk=allSkills(R[g.id].r.sum);return {label:T(g.subj).split(' · ')[0],icon:g.icon,c:g.c,v:sk.length?sk.reduce((t,k)=>t+(+k.p||0),0)/sk.length:0}});
+ h+=insightCards(A,tot,prev,newM);
+ // ---- tabs
+ const openN=A.mist.filter(x=>x.often).length;
+ const tabs=[['overview','📊',L('한눈에','Overview')],['subjects','📚',L('과목별','By subject')],['mistakes','🔁',L('틀린 문제','Missed')],['home','🏠',L('집에서 돕기','At home')]];
+ if(!tabs.some(t=>t[0]===TAB))TAB='overview';
+ h+=`<nav class="tabs noprint" role="tablist" aria-label="${esc(L('리포트 보기','Report sections'))}">${tabs.map(([id,ic,t])=>`<button type="button" role="tab" id="tab-${id}" data-tab="${id}" aria-controls="panel-${id}" aria-selected="${TAB===id}" tabindex="${TAB===id?0:-1}"><span>${ic}</span>${esc(t)}${id==='mistakes'&&openN?`<i class="cnt num">${openN}</i>`:''}</button>`).join('')}</nav>`;
+ // ---- overview panel
+ const radarItems=played.map(g=>{const sk=allSkills(R[g.id].r.sum);return {label:subjName(g),icon:g.icon,c:g.c,v:sk.length?sk.reduce((t,k)=>t+(+k.p||0),0)/sk.length:0}});
  const shareT=played.reduce((t,g)=>t+P[g.id].s,0);
  CAL={all:dayAll,played,R};if(CALG!=='all'&&!played.some(g=>g.id===CALG))CALG='all';
- h+=`<section class="two"><div class="card" id="calCard">${calCard()}</div>
-  <div class="card"><div class="h2"><h2>⏳ ${L('과목별 학습 시간','Time by subject')}</h2><span>${esc(perLab)}</span></div>${shareT?`<div class="share">${played.filter(g=>P[g.id].s).map(g=>`<i style="width:${(P[g.id].s/shareT*100).toFixed(2)}%;background:${g.c}" title="${esc(T(g.subj))}"></i>`).join('')}</div>
-   <div class="slist">${played.slice().sort((a,b)=>P[b.id].s-P[a.id].s).map(g=>`<div class="srow"><i class="dot" style="background:${g.c}"></i><b>${esc(g.icon)} ${esc(T(g.subj))}</b><span class="num">${P[g.id].s?fmtMin(P[g.id].s)+` · ${pct(P[g.id].s/shareT)}%`:L('이 기간에는 쉬었어요','not this time')}</span></div>`).join('')}</div>`:`<p class="empty">${L('이 기간에는 학습 시간이 없어요.','No learning time in this period.')}</p>`}</div></section>`;
- // ---- progress radar + accuracy trend
  const weeks=[];for(let w=7;w>=0;w--){let r=0,x=0;for(let d=0;d<7;d++){const k=dkey(daysAgo(w*7+d));for(const g of played){const y=(R[g.id].r.days||{})[k];if(y){r+=y.r;x+=y.w}}}const s=daysAgo(w*7+6);weeks.push({lab:w===0?L('이번 주','This wk'):s.toLocaleDateString(LANG==='en'?'en-US':'ko-KR',{month:'numeric',day:'numeric'}),v:r+x>=5?r/(r+x):null,n:r+x})}
  const trendOK=weeks.filter(w=>w.v!=null).length>=2;
- h+=`<section class="two"><div class="card"><div class="h2"><h2>🧭 ${L('과목별 진도','Progress by subject')}</h2><span>${L('게임 속 기술을 얼마나 익혔는지','How far through each game’s skills')}</span></div>${radarItems.length>=3?radarSVG(radarItems):`<div class="slist">${radarItems.map(it=>`<div class="srow"><i class="dot" style="background:${it.c}"></i><b>${esc(it.icon+' '+it.label)}</b><span class="num">${pct(it.v)}%</span></div>`).join('')}</div>`}</div>
-  <div class="card"><div class="h2"><h2>📈 ${L('주별 정답률','Weekly accuracy')}</h2><span>${L('최근 8주','Last 8 weeks')}</span></div>${trendOK?trendSVG(weeks):`<p class="empty">${L('2주 이상 기록이 쌓이면 정답률 흐름을 보여 드려요.','Once there are two or more weeks of answers, the trend shows up here.')}</p>`}<p class="note">${L('한 주에 5번 이상 답한 주만 표시해요. 새 단원에 들어가면 정답률이 잠깐 내려가는 게 자연스러워요.','Weeks with at least 5 answers are shown. A short dip when a new unit starts is normal.')}</p></div></section>`;
- // ---- one card per subject
- for(const g of GAMES){const x=R[g.id];if(x.r&&x.r.sum)h+=subjectCard(g,x.r,P[g.id],cutoff);else if(x.r||x.saved)h+=waitCard(g,!!x.saved)}
- // ---- growth timeline
- if(grow.length)h+=`<section class="card"><div class="h2"><h2>🌱 ${L('최근 성장 기록','Recent milestones')}</h2><span>${L('새로 익힌 기술','Newly mastered skills')}</span></div><ol class="tl">${grow.slice(0,12).map(o=>`<li><time>${esc(ago(o.w))}</time><i class="d" style="background:${o.g.c}"></i><div><b>${esc(T(o.k.name))}</b><small>${esc(o.g.icon+' '+T(o.g.subj))}${o.k.school?' · '+esc(T(o.k.school)):''}</small></div></li>`).join('')}</ol></section>`;
- // ---- Coach Moon's note to parents
- h+=coachNote({active,played,P,tot,acc,streak,nm,nk,shareT,ever});
+ h+=`<div class="panel" role="tabpanel" id="panel-overview" aria-labelledby="tab-overview" data-panel="overview"${TAB==='overview'?'':' hidden'}>
+  <section class="kpis">
+   <div class="kpi"><i>⏱️</i><b class="num">${fmtMin(tot.s)}</b><span>${L('집중해서 배운 시간','Focused learning time')}</span>${diff(tot.s,PER>=9999?null:prev.s,v=>fmtMin(v))}</div>
+   <div class="kpi"><i>📅</i><b class="num">${onDays}<small>${L('일','days')}</small></b><span>${L('배운 날','Days of learning')}</span>${streak>=2?`<em class="up">🔥 ${L(`${streak}일 연속`,`${streak}-day streak`)}</em>`:`<em>${L(`${n>=9999?'':n+'일 중 '}${onDays}일`,`${onDays} of ${n} days`)}</em>`}</div>
+   <div class="kpi"><i>🎯</i><b class="num">${acc==null?'–':pct(acc)+'%'}</b><span>${L('정답률','Accuracy')} · ${(tot.r+tot.w).toLocaleString()}${L('번 답함',' answers')}</span>${acc!=null&&accPrev!=null&&PER<9999?(Math.round(acc*100)>Math.round(accPrev*100)?`<em class="up">▲ ${pct(acc)-pct(accPrev)}%p</em>`:`<em>${L(`지난 기간 ${pct(accPrev)}%`,`${pct(accPrev)}% the period before`)}</em>`):''}</div>
+   <div class="kpi"><i>🏅</i><b class="num">${mastered}<small>${L('개','')}</small></b><span>${L('익힌 기술','Skills mastered')}</span><em class="${newM?'up':''}">${newM?L(`▲ 새로 ${newM}개`,`▲ ${newM} new`):L(`학교 교과 연결 ${school}개`,`${school} linked to school`)}</em></div></section>
+  <section class="card"><div class="h2"><h2>🚦 ${L('과목별 상태','How each subject is going')}</h2><span>${esc(perLab)}</span></div>
+   <div class="board">${played.map(g=>{const a=A.G[g.id],sk=allSkills(R[g.id].r.sum),prog=sk.length?sk.reduce((t,k)=>t+(+k.p||0),0)/sk.length:0,lv=R[g.id].r.sum&&R[g.id].r.sum.level;
+    return `<button type="button" class="brow" data-go="subjects:${g.id}" style="--c:${g.c}"><span class="b-ic">${esc(g.icon)}</span><span class="b-nm"><b>${esc(T(g.subj))}</b><small>${lv?esc(T(lv))+' · ':''}${P[g.id].s?fmtMin(P[g.id].s):L('이 기간 쉼','none this period')}</small></span>${lvChip(a.lv)}<span class="b-pg"><span class="b-bar"><i style="width:${pct(prog)}%"></i></span><span class="num">${L('진도','Progress')} ${pct(prog)}%</span></span><span class="b-acc num">${a.acc!=null?`${L('정답률','Accuracy')} ${pct(a.acc)}% ${PER<9999?arrow(a.acc,a.accP):''}`:''}</span></button>`}).join('')}</div>
+   <p class="note">${L('🟢 정답률 85% 이상 · 🟡 꾸준히 연습 중 · 🟠 정답률 65% 미만이라 함께 연습하면 좋아요 · ⚪ 이 기간에 쉬었어요. 줄을 누르면 그 과목을 자세히 볼 수 있어요.','🟢 85%+ right · 🟡 practising steadily · 🟠 under 65% right, a little help will go far · ⚪ not played this period. Tap a row for details.')}</p></section>
+  <section class="two"><div class="card" id="calCard">${calCard()}</div>
+   <div class="card"><div class="h2"><h2>⏳ ${L('과목별 학습 시간','Time by subject')}</h2><span>${esc(perLab)}</span></div>${shareT?`<div class="share">${played.filter(g=>P[g.id].s).map(g=>`<i style="width:${(P[g.id].s/shareT*100).toFixed(2)}%;background:${g.c}" title="${esc(T(g.subj))}"></i>`).join('')}</div>
+    <div class="slist">${played.slice().sort((a,b)=>P[b.id].s-P[a.id].s).map(g=>`<div class="srow"><i class="dot" style="background:${g.c}"></i><b>${esc(g.icon)} ${esc(T(g.subj))}</b><span class="num">${P[g.id].s?fmtMin(P[g.id].s)+` · ${pct(P[g.id].s/shareT)}%`:L('이 기간에는 쉬었어요','not this time')}</span></div>`).join('')}</div>`:`<p class="empty">${L('이 기간에는 학습 시간이 없어요.','No learning time in this period.')}</p>`}</div></section>
+  <section class="two"><div class="card"><div class="h2"><h2>🧭 ${L('과목별 진도','Progress by subject')}</h2><span>${L('게임 속 기술을 얼마나 익혔는지','How far through each game’s skills')}</span></div>${radarItems.length>=3?radarSVG(radarItems):`<div class="slist">${radarItems.map(it=>`<div class="srow"><i class="dot" style="background:${it.c}"></i><b>${esc(it.icon+' '+it.label)}</b><span class="num">${pct(it.v)}%</span></div>`).join('')}</div>`}</div>
+   <div class="card"><div class="h2"><h2>📈 ${L('주별 정답률','Weekly accuracy')}</h2><span>${L('최근 8주','Last 8 weeks')}</span></div>${trendOK?trendSVG(weeks):`<p class="empty">${L('2주 이상 기록이 쌓이면 정답률 흐름을 보여 드려요.','Once there are two or more weeks of answers, the trend shows up here.')}</p>`}<p class="note">${L('한 주에 5번 이상 답한 주만 표시해요. 새 단원에 들어가면 정답률이 잠깐 내려가는 게 자연스러워요.','Weeks with at least 5 answers are shown. A short dip when a new unit starts is normal.')}</p></div></section>
+  ${grow.length?`<section class="card"><div class="h2"><h2>🌱 ${L('최근 성장 기록','Recent milestones')}</h2><span>${L('새로 익힌 기술','Newly mastered skills')}</span></div><ol class="tl">${grow.slice(0,10).map(o=>`<li><time>${esc(ago(o.w))}</time><i class="d" style="background:${o.g.c}"></i><div><b>${esc(T(o.k.name))}</b><small>${esc(o.g.icon+' '+T(o.g.subj))}${o.k.school?' · '+esc(T(o.k.school)):''}</small></div></li>`).join('')}</ol></section>`:''}
+ </div>`;
+ // ---- subjects panel: one subject at a time
+ const withSum=GAMES.filter(g=>R[g.id].r&&R[g.id].r.sum),waiting=GAMES.filter(g=>!(R[g.id].r&&R[g.id].r.sum)&&(R[g.id].r||R[g.id].saved));
+ if(!withSum.some(g=>g.id===SUBJ))SUBJ=(active.slice().sort((a,b)=>P[b.id].s-P[a.id].s)[0]||withSum[0]||{}).id;
+ h+=`<div class="panel" role="tabpanel" id="panel-subjects" aria-labelledby="tab-subjects" data-panel="subjects"${TAB==='subjects'?'':' hidden'}>
+  <div class="subnav noprint" role="group" aria-label="${esc(L('과목 고르기','Choose a subject'))}">${withSum.map(g=>`<button type="button" data-subj="${g.id}" aria-pressed="${SUBJ===g.id}" style="--c:${g.c}">${esc(g.icon)} ${esc(subjName(g))} <i class="dotlv lv-${A.G[g.id]?A.G[g.id].lv:'ok'}" aria-hidden="true"></i></button>`).join('')}</div>
+  ${withSum.map(g=>subjectCard(g,R[g.id].r,P[g.id],A.G[g.id],A)).join('')}${waiting.map(g=>waitCard(g,!!R[g.id].saved)).join('')}</div>`;
+ // ---- missed questions panel
+ h+=`<div class="panel" role="tabpanel" id="panel-mistakes" aria-labelledby="tab-mistakes" data-panel="mistakes"${TAB==='mistakes'?'':' hidden'}><div id="mxBox">${mistakesHTML(A)}</div></div>`;
+ // ---- at-home panel
+ h+=`<div class="panel" role="tabpanel" id="panel-home" aria-labelledby="tab-home" data-panel="home"${TAB==='home'?'':' hidden'}>${homeHTML(A,R,played,dayAll)}${coachNote({active,played,P,tot,acc,streak,nm,nk,shareT,ever})}</div>`;
  // ---- how this report is made
  h+=`<section class="card"><div class="h2"><h2>🔎 ${L('이 리포트는 이렇게 만들어져요','How this report works')}</h2></div><div class="how">
+  <div><b>🧠 ${L('분석은 기록에 근거해요','Findings come from the record')}</b><p>${L('강점, 성장, 연습할 것은 아이가 실제로 답한 기록을 정해진 규칙으로 계산해요. AI가 추측해서 지어내지 않아요.','Strengths, growth and things to practise are worked out from your child’s actual answers with fixed rules. Nothing is guessed or made up by AI.')}</p></div>
   <div><b>🔒 ${L('기록은 이 기기에만','Saved on this device only')}</b><p>${L('아이의 기록은 서버로 보내지 않고 이 브라우저에만 저장돼요. 다른 기기에서는 따로 쌓여요.','Your child’s record is not sent anywhere. It stays in this browser, and each device keeps its own.')}</p></div>
   <div><b>⏱️ ${L('집중한 시간만','Only focused time')}</b><p>${L('화면이 켜져 있고 2분 안에 직접 누르거나 입력한 시간만 세요. 틀어 두기만 한 시간은 빠져요.','Time counts only while the page is open and your child tapped or typed in the last 2 minutes.')}</p></div>
   <div><b>🏅 ${L('익힘은 게임의 기준으로','Mastery by each game’s rule')}</b><p>${L('단원 완료, 별 3개처럼 게임마다 정한 기준을 넘으면 ‘익힘’으로 표시해요.','A skill shows as mastered when it passes that game’s own rule, like finishing a unit or earning 3 stars.')}</p></div>
   <div><b>📚 ${L('학교 교과 연결','Links to school')}</b><p>${L('한국 2022 개정 교육과정과 캐나다 온타리오 교육과정을 기준으로 연결했어요. 학교마다 배우는 순서와 방법이 조금씩 다를 수 있어요.','Links follow Korea’s 2022 national curriculum and the Ontario curriculum. Schools may teach things in a different order or in a different way.')}</p></div></div></section>`;
  h+=`<footer>Moon Mini Games · © 2026 Dongsun Moon. ${L('모든 권리 보유.','All rights reserved.')}</footer>`;
- app.innerHTML=h;bindCommon()}
-function subjectCard(g,rec,p,cutoff){const S=rec.sum,sk=allSkills(S),prog=sk.length?sk.reduce((t,k)=>t+(+k.p||0),0)/sk.length:0;
+ app.innerHTML=h;LASTA=A;bindCommon()}
+let LASTA=null;
+function subjectCard(g,rec,p,a,A){const S=rec.sum,sk=allSkills(S),prog=sk.length?sk.reduce((t,k)=>t+(+k.p||0),0)/sk.length:0;
  const nM=sk.filter(k=>k.st===2).length,nP=sk.filter(k=>k.st===1).length;
  const lastDay=Object.keys(rec.days||{}).filter(k=>rec.days[k].s>=30||rec.days[k].r+rec.days[k].w>0).sort().pop();
- const acc=p.r+p.w?p.r/(p.r+p.w):null;
- const stat=k=>{const r=k.r!=null?k.r:(rec.sk&&rec.sk[k.id]?rec.sk[k.id][0]:null),w=k.w!=null?k.w:(rec.sk&&rec.sk[k.id]?rec.sk[k.id][1]:null);return r!=null&&r+w>=3?{r,w,a:r/(r+w)}:null};
- const strong=sk.filter(k=>k.st===2).map(k=>({k,w:rec.when&&rec.when[k.id]||'',s:stat(k)})).sort((a,b)=>a.w!==b.w?(a.w<b.w?1:-1):(b.k.g||0)!==(a.k.g||0)?(b.k.g||0)-(a.k.g||0):((b.s?b.s.a:0)-(a.s?a.s.a:0))).slice(0,3);
- let next=sk.filter(k=>k.st===1).map(k=>({k,s:stat(k)})).sort((a,b)=>((a.s?a.s.a:1)*.5+(+a.k.p||0)*.5)-((b.s?b.s.a:1)*.5+(+b.k.p||0)*.5)).slice(0,3);
- const areas=(S.areas||[]).map(a=>{const ks=a.skills||[],m=ks.filter(k=>k.st===2).length,pr=ks.filter(k=>k.st===1).length,z=ks.length-m-pr,av=ks.length?ks.reduce((t,k)=>t+(+k.p||0),0)/ks.length:0;
-  return `<details class="area"><summary><span class="a-ic">${esc(a.icon||'•')}</span><span class="a-nm">${esc(T(a.name))}</span><span class="a-pc num">${pct(av)}%</span>
+ const acc=p.r+p.w?p.r/(p.r+p.w):null,info={};A.skills.filter(s=>s.g===g).forEach(s=>info[s.k.id]=s);
+ const stat=k=>{const s=info[k.id];return s&&s.att>=3?{r:s.r,w:s.w,a:s.acc}:null};
+ const strong=a.str.length?a.str:sk.filter(k=>k.st===2).map(k=>({s:info[k.id],why:'old'})).filter(o=>o.s).sort((x,y)=>(y.s.k.g||0)-(x.s.k.g||0)||((y.s.acc||0)-(x.s.acc||0))).slice(0,3);
+ let next=a.weak.map(s=>s.k);for(const k of sk.filter(k=>k.st===1).sort((x,y)=>(+x.p||0)-(+y.p||0)))if(next.length<3&&!next.includes(k))next.push(k);
+ const areas=(S.areas||[]).map(ar=>{const ks=ar.skills||[],m=ks.filter(k=>k.st===2).length,pr=ks.filter(k=>k.st===1).length,z=ks.length-m-pr,av=ks.length?ks.reduce((t,k)=>t+(+k.p||0),0)/ks.length:0;
+  return `<details class="area"><summary><span class="a-ic">${esc(ar.icon||'•')}</span><span class="a-nm">${esc(T(ar.name))}</span><span class="a-pc num">${pct(av)}%</span>
    <span class="a-bar" aria-hidden="true"><i style="width:${m/ks.length*100}%;background:var(--c)"></i><i style="width:${pr/ks.length*100}%;background:color-mix(in srgb,var(--c) 38%,#fff)"></i></span>
-   <span class="a-sub"><u>${L(`익힘 ${m} · 연습 중 ${pr} · 아직 ${z}`,`Mastered ${m} · Practising ${pr} · Not yet ${z}`)}</u>${a.school&&T(a.school)!==T(a.name)?`<span>📚 ${esc(T(a.school))}</span>`:''}</span></summary>
-   <ul class="skills">${ks.map(k=>{const s=stat(k),w=rec.when&&rec.when[k.id];return `<li><span class="st" aria-label="${esc(k.st===2?L('익힘','Mastered'):k.st===1?L('연습 중','Practising'):L('아직','Not yet'))}">${k.st===2?'✅':k.st===1?'🟡':'⚪'}</span><b>${esc(T(k.name))}</b><span class="acc num">${s?`${pct(s.a)}% (${s.r}/${s.r+s.w})`:k.st===1?pct(+k.p||0)+'%':''}</span>${k.school||k.g||w?`<small>${[k.g?L(`${k.g}학년`,`Grade ${k.g}`):'',k.school?T(k.school):'',k.st===2&&w?L(`${ago(w)} 익힘`,`mastered ${ago(w)}`):''].filter(Boolean).map(esc).join(' · ')}</small>`:''}</li>`}).join('')}</ul></details>`}).join('');
+   <span class="a-sub"><u>${L(`익힘 ${m} · 연습 중 ${pr} · 아직 ${z}`,`Mastered ${m} · Practising ${pr} · Not yet ${z}`)}</u>${ar.school&&T(ar.school)!==T(ar.name)?`<span>📚 ${esc(T(ar.school))}</span>`:''}</span></summary>
+   <ul class="skills">${ks.map(k=>{const s=stat(k),w=rec.when&&rec.when[k.id],tr=info[k.id]&&info[k.id].trend;return `<li><span class="st" aria-label="${esc(k.st===2?L('익힘','Mastered'):k.st===1?L('연습 중','Practising'):L('아직','Not yet'))}">${k.st===2?'✅':k.st===1?'🟡':'⚪'}</span><b>${esc(T(k.name))}</b><span class="acc num">${s?`${pct(s.a)}% (${s.r}/${s.r+s.w})`:k.st===1?pct(+k.p||0)+'%':''}${tr!=null&&Math.abs(tr)>=.1?(tr>0?` <em class="up">▲${pct(tr)}</em>`:` <em class="dn">▼${pct(-tr)}</em>`):''}</span>${k.school||k.g||w?`<small>${[k.g?L(`${k.g}학년`,`Grade ${k.g}`):'',k.school?T(k.school):'',k.st===2&&w?L(`${ago(w)} 익힘`,`mastered ${ago(w)}`):''].filter(Boolean).map(esc).join(' · ')}</small>`:''}</li>`}).join('')}</ul></details>`}).join('');
+ // the analysis box: what is going well, what grew, what to practise
+ const an=[];
+ a.str.slice(0,2).forEach(o=>an.push(['good','🌟',L('강점','Strength'),T(o.s.k.name),o.why==='new'?L(`${ago(o.s.when)} 새로 익혔어요`,`newly mastered ${ago(o.s.when)}`):L(`${o.s.att}번 중 ${o.s.r}번 (${pct(o.s.acc)}%)`,`${o.s.r} of ${o.s.att} right (${pct(o.s.acc)}%)`)]));
+ a.grow.slice(0,2).forEach(s=>an.push(['up','📈',L('성장','Growth'),T(s.k.name),L(`정답률 ${pct(s.accE)}% → ${pct(s.accR)}%`,`${pct(s.accE)}% → ${pct(s.accR)}% right`)]));
+ a.weak.slice(0,2).forEach(s=>an.push(['focus','🎯',L('연습할 것','To practise'),T(s.k.name),L(`최근 정답률 ${pct(A.recentAcc(s))}%`,`${pct(A.recentAcc(s))}% right lately`)]));
+ if(!a.weak.length&&a.open[0]){const x=a.open[0];an.push(['focus','🎯',L('연습할 것','To practise'),x.skill?T(x.skill.name):T(x.e.q),L(`비슷한 문제를 ${x.e.n}번 틀렸어요`,`missed similar questions ${x.e.n} times`)])}
+ const mxp=a.open.slice(0,2);
  const fx=(S.facts||[]).slice(0,6).map(f=>`<span class="fact">${esc(f[0])} ${esc(L(f[1],f[2]))}</span>`).join('');
  const talk=(S.talk||[]).slice(0,4).map(t=>`<details><summary data-a="${esc(L('답 보기','Answer'))}" data-h="${esc(L('접기','Hide'))}">💬 <span>${esc(L(t[0],t[1]))}</span></summary><p>👉 ${esc(L(t[2],t[3]))}</p></details>`).join('');
  const home=(S.home||[]).slice(0,3).map(t=>`<li>🏠 <span>${esc(T(t))}</span></li>`).join('');
- const nx=next.length?next.map(o=>`<li>🎯 <span>${esc(T(o.k.name))}${o.s?`<small>${L(`정답률 ${pct(o.s.a)}%`,`${pct(o.s.a)}% right`)}</small>`:o.k.school?`<small>📚 ${esc(T(o.k.school))}</small>`:''}</span></li>`).join(''):(S.next||[]).map(t=>`<li>🎯 <span>${esc(T(t))}</span></li>`).join('');
- return `<section class="card subj" style="--c:${g.c}" id="s-${g.id}">
+ return `<section class="card subj" style="--c:${g.c}" id="s-${g.id}" data-subjcard="${g.id}"${SUBJ===g.id?'':' hidden'}>
   <div class="s-top"><div class="s-ic">${esc(g.icon)}</div><div class="s-tt"><h3>${esc(T(g.subj))}</h3><p>${esc(T(g.game))} · ${lastDay?L(`최근 학습 ${ago(lastDay)}`,`Last played ${ago(lastDay)}`):L('아직 기록 없음','No play yet')}</p>
-   <div class="chips">${S.level?`<span class="chip c">📍 ${esc(T(S.level))}</span>`:''}<span class="chip">✅ ${L(`익힘 ${nM}`,`${nM} mastered`)}</span>${nP?`<span class="chip">🟡 ${L(`연습 중 ${nP}`,`${nP} practising`)}</span>`:''}</div></div>
+   <div class="chips">${lvChip(a.lv)}${S.level?`<span class="chip c">📍 ${esc(T(S.level))}</span>`:''}<span class="chip">✅ ${L(`익힘 ${nM}`,`${nM} mastered`)}</span>${nP?`<span class="chip">🟡 ${L(`연습 중 ${nP}`,`${nP} practising`)}</span>`:''}</div></div>
    <div class="ring">${ringSVG(prog,g.c)}<span>${L('진도','Progress')}</span></div></div>
   <div class="s-body">
    ${S.focus?`<p class="focus">${esc(T(S.focus))}</p>`:''}
-   <div class="mini"><div><b class="num">${fmtMin(p.s)}</b><span>${L('이 기간 학습','This period')}</span></div><div><b class="num">${(p.r+p.w).toLocaleString()}</b><span>${esc(S.unit?L(`${S.unit[0]} 수`,S.unit[1][0].toUpperCase()+S.unit[1].slice(1)):L('답한 수','Answers'))}</span></div><div><b class="num">${acc==null?'–':pct(acc)+'%'}</b><span>${L('정답률','Accuracy')}</span></div></div>
-   ${p.daily.some(v=>v)&&p.daily.length>=7?`<div><p class="note" style="margin:0">${L('하루하루 학습 시간','Learning time day by day')}</p>${sparkSVG(p.daily.slice(-30),g.c)}</div>`:''}
-   <div><h4 class="sec-t">${L('배우는 영역','What it covers')}</h4><div class="areas">${areas}</div></div>
-   ${strong.length||nx?`<div class="sw"><div class="box good"><h4>👏 ${L('잘하고 있어요','Doing well')}</h4><ul>${strong.length?strong.map(o=>`<li>✅ <span>${esc(T(o.k.name))}<small>${o.s?L(`정답률 ${pct(o.s.a)}%`,`${pct(o.s.a)}% right`):''}${o.s&&o.w?' · ':''}${o.w?esc(L(`${ago(o.w)} 익힘`,`mastered ${ago(o.w)}`)):''}</small></span></li>`).join(''):`<li>🌱 <span>${L('첫 기술을 익히는 중이에요. 곧 여기에 보여요!','Working on a first skill. It’ll show up here soon!')}</span></li>`}</ul></div>
-    <div class="box next"><h4>🎯 ${L('다음 목표','Next goals')}</h4><ul>${nx||`<li>🌟 <span>${L('지금 단계를 모두 익혔어요. 다음 단계에 도전할 때예요!','Everything at this stage is mastered. Time for the next stage!')}</span></li>`}</ul></div></div>`:''}
+   <div class="mini"><div><b class="num">${fmtMin(p.s)}</b><span>${L('이 기간 학습','This period')}</span></div><div><b class="num">${(p.r+p.w).toLocaleString()}</b><span>${esc(S.unit?L(`${S.unit[0]} 수`,S.unit[1][0].toUpperCase()+S.unit[1].slice(1)):L('답한 수','Answers'))}</span></div><div><b class="num">${acc==null?'–':pct(acc)+'%'}</b><span>${L('정답률','Accuracy')} ${PER<9999?arrow(acc,a.accP):''}</span></div></div>
+   <div class="anal"><h4 class="sec-t">🔬 ${L('분석','What the record shows')}</h4>${an.length?an.map(x=>`<div class="an an-${x[0]}"><span class="an-k">${x[1]} ${esc(x[2])}</span><b>${esc(x[3])}</b><span class="an-v num">${esc(x[4])}</span></div>`).join(''):`<p class="empty">${L('아직 분석할 답이 부족해요. 몇 번 더 풀면 강점과 연습할 것을 찾아 드려요.','Not enough answers yet. After a few more, strengths and things to practise will show up here.')}</p>`}</div>
+   ${mxp.length?`<div><h4 class="sec-t">🔁 ${L('자주 틀리는 문제','Often missed')}</h4><div class="mxl">${mxp.map(x=>mxCard(x,false)).join('')}</div>${a.open.length>2?`<button type="button" class="more" data-go="mistakes:${g.id}">${L(`틀린 문제 ${a.open.length}개 모두 보기 →`,`See all ${a.open.length} →`)}</button>`:''}</div>`:''}
+   <div><h4 class="sec-t">${L('배우는 영역','What it covers')}</h4><div class="areas">${areas}</div><p class="note">${L('영역을 누르면 기술마다 정답률과 최근 변화(▲▼)를 볼 수 있어요.','Tap an area to see each skill’s accuracy and recent change (▲▼).')}</p></div>
+   ${strong.length||next.length?`<div class="sw"><div class="box good"><h4>👏 ${L('잘하고 있어요','Doing well')}</h4><ul>${strong.length?strong.map(o=>`<li>✅ <span>${esc(T(o.s.k.name))}<small>${o.s.att>=3?L(`정답률 ${pct(o.s.acc)}%`,`${pct(o.s.acc)}% right`):''}${o.s.when?(o.s.att>=3?' · ':'')+esc(L(`${ago(o.s.when)} 익힘`,`mastered ${ago(o.s.when)}`)):''}</small></span></li>`).join(''):`<li>🌱 <span>${L('첫 기술을 익히는 중이에요. 곧 여기에 보여요!','Working on a first skill. It’ll show up here soon!')}</span></li>`}</ul></div>
+    <div class="box next"><h4>🎯 ${L('다음 목표','Next goals')}</h4><ul>${next.length?next.map(k=>{const s=stat(k);return `<li>🎯 <span>${esc(T(k.name))}${s?`<small>${L(`정답률 ${pct(s.a)}%`,`${pct(s.a)}% right`)}</small>`:k.school?`<small>📚 ${esc(T(k.school))}</small>`:''}</span></li>`}).join(''):(S.next||[]).map(t=>`<li>🎯 <span>${esc(T(t))}</span></li>`).join('')||`<li>🌟 <span>${L('지금 단계를 모두 익혔어요. 다음 단계에 도전할 때예요!','Everything at this stage is mastered. Time for the next stage!')}</span></li>`}</ul></div></div>`:''}
    ${fx?`<div><h4 class="sec-t">${L('게임 속 성과','In-game achievements')}</h4><div class="facts">${fx}</div></div>`:''}
    ${talk?`<div><h4 class="sec-t">${L('아이에게 물어보세요','Ask your child')}</h4><div class="talk">${talk}</div><p class="note">${L('정답을 맞히는 것보다, 아이가 자기 말로 설명해 보는 게 가장 좋은 복습이에요.','The best review is your child explaining it in their own words, more than getting it exactly right.')}</p></div>`:''}
    ${home?`<div><h4 class="sec-t">${L('집에서 함께 해 보기','Try it together at home')}</h4><ul class="home">${home}</ul></div>`:''}
+   <p style="margin:0"><a class="go" href="${esc(g.file)}?lang=${LANG}">▶ ${esc(T(g.game))} ${L('하러 가기','— play')}</a></p>
   </div></section>`}
+// one missed kind of question; with answers hidden, a tap shows them (for redoing it together)
+function mxCard(x,hide){const e=x.e;return `<article class="mx${hide?' hid':''}" style="--c:${x.g.c}"><header><span>${esc(x.g.icon)} ${esc(subjName(x.g))}${x.skill?' · '+esc(T(x.skill.name)):''}</span>${x.fixed?`<span class="mx-st ok">✓ ${L('이제 맞혀요','Got it now')}</span>`:x.often?`<span class="mx-st">${L('자주 틀려요','Often missed')}</span>`:`<span class="mx-st once">${L('한 번 틀림','Missed once')}</span>`}</header>
+ <p class="mx-q">${esc(T(e.q))}</p>
+ <div class="mx-ans">${e.g?`<div class="mx-g"><span>❌ ${L('아이의 답','Child’s answer')}</span><b class="ans">${esc(T(e.g))}</b></div>`:''}<div class="mx-a"><span>✅ ${L('정답','Answer')}</span><b class="ans">${esc(T(e.a))}</b></div></div>
+ ${hide?`<button type="button" class="reveal" data-reveal>${L('정답 보기','Show answer')}</button>`:''}
+ <p class="mx-meta num">${L(`${e.n}번 틀림 · 마지막 ${ago(e.l)}`,`Missed ${e.n}× · last ${ago(e.l)}`)}${e.ok?L(` · 그 뒤 ${e.ok}번 맞힘`,` · right ${e.ok}× since`):''}</p>
+ ${e.tip?`<p class="mx-tip">💡 ${esc(T(e.tip))}</p>`:''}</article>`}
+let MXALL=false;
+function mistakesHTML(A){const all=A.mist,often=all.filter(x=>x.often),once=all.filter(x=>!x.fixed&&!x.often),fixed=all.filter(x=>x.fixed);
+ if(!all.length)return `<section class="card"><div class="h2"><h2>🔁 ${L('틀린 문제','Missed questions')}</h2></div><p class="empty">${L('아직 틀린 문제 기록이 없어요. 아이가 문제를 풀면, 자주 헷갈리는 문제를 여기에 모아 드려요.','No missed questions recorded yet. As your child answers questions, the tricky ones will be collected here.')}</p></section>`;
+ const by={};often.concat(once).forEach(x=>{const k=x.g.id+'|'+(x.skill?x.skill.id:'');(by[k]=by[k]||{g:x.g,skill:x.skill,n:0}).n+=x.e.n});
+ const pat=Object.values(by).sort((a,b)=>b.n-a.n).slice(0,3),tot=Object.values(by).reduce((t,p)=>t+p.n,0)||1;
+ const gs=GAMES.filter(g=>all.some(x=>x.g===g));if(MXG!=='all'&&!gs.some(g=>g.id===MXG))MXG='all';
+ if(MXF==='open'&&!often.length&&once.length)MXF='once';
+ const pick=(MXF==='open'?often:MXF==='once'?once:MXF==='fixed'?fixed:all).filter(x=>MXG==='all'||x.g.id===MXG),list=MXALL?pick:pick.slice(0,12);
+ return `<section class="card"><div class="h2"><h2>🔁 ${L('자주 틀리는 문제','Often missed questions')}</h2><span>${L(`자주 틀림 ${often.length} · 한 번 틀림 ${once.length} · 다시 맞혀요 ${fixed.length}`,`Often ${often.length} · Once ${once.length} · Got it now ${fixed.length}`)}</span></div>
+  ${pat.length?`<div class="pat"><h4 class="sec-t">${L('어디서 많이 틀릴까요?','Where do the misses cluster?')}</h4>${pat.map(p=>`<div class="pat-row" style="--c:${p.g.c}"><span>${esc(p.g.icon)} ${esc(subjName(p.g))}${p.skill?' · <b>'+esc(T(p.skill.name))+'</b>':''}</span><span class="pat-bar"><i style="width:${Math.round(p.n/tot*100)}%"></i></span><span class="num">${L(`${p.n}번`,`${p.n}×`)}</span></div>`).join('')}<p class="note">${L('같은 종류의 문제를 2번 넘게 틀리면 그 개념이 아직 헷갈린다는 신호예요. 한 번 틀린 건 실수일 때가 많아요. 2번 연속 맞히면 ‘다시 맞혀요’로 옮겨 가요.','Missing the same kind of question twice or more means that idea is still tricky; a single miss is often just a slip. After 2 right in a row it moves to “Got it now”.')}</p></div>`:''}
+  <div class="mxctl noprint">
+   <div class="seg2" role="group" aria-label="${esc(L('보기','Show'))}">${[['open',L(`자주 틀림 ${often.length}`,`Often missed ${often.length}`)],['once',L(`한 번 틀림 ${once.length}`,`Missed once ${once.length}`)],['fixed',L(`다시 맞혀요 ${fixed.length}`,`Got it now ${fixed.length}`)],['all',L('전체','All')]].map(([v,t])=>`<button type="button" data-mxf="${v}" aria-pressed="${MXF===v}">${t}</button>`).join('')}</div>
+   ${gs.length>1?`<div class="seg2 scr" role="group" aria-label="${esc(L('과목','Subject'))}"><button type="button" data-mxg="all" aria-pressed="${MXG==='all'}">${L('모든 과목','All subjects')}</button>${gs.map(g=>`<button type="button" data-mxg="${g.id}" aria-pressed="${MXG===g.id}">${esc(g.icon)} ${esc(subjName(g))}</button>`).join('')}</div>`:''}
+   <label class="hidesw"><input type="checkbox" id="mxHide" ${MXHIDE?'checked':''}> 🙈 ${L('정답 가리기 · 아이와 함께 다시 풀어 보기','Hide answers · redo them together')}</label></div>
+  <div class="mxl">${list.length?list.map(x=>mxCard(x,MXHIDE)).join(''):`<p class="empty">${MXF==='open'?L('지금은 자주 틀리는 문제가 없어요! 👏','Nothing is being missed often right now! 👏'):L('해당하는 문제가 없어요.','Nothing here.')}</p>`}</div>
+  ${pick.length>list.length?`<button type="button" class="more" data-mxall>${L(`${pick.length-list.length}개 더 보기`,`Show ${pick.length-list.length} more`)}</button>`:''}</section>`}
+// a missed kind's status: often missed, a single slip, or right twice in a row since
+// ---- at home: this week's plan (tick it off), a weekly goal, and questions to ask
+const getS=k=>getJ(k+sfx()),setS=(k,v)=>{try{localStorage.setItem(k+sfx(),JSON.stringify(v))}catch(e){}};
+function planItems(A,R,played){const items=[],used=new Set();
+ for(const x of A.mist.filter(x=>x.often)){if(items.length>=2)break;if(used.has(x.g.id))continue;used.add(x.g.id);
+  items.push({id:'mx:'+x.id,ic:x.g.icon,t:L(`${subjName(x.g)} · ${x.skill?T(x.skill.name):'틀린 문제 다시 풀기'}`,`${subjName(x.g)} · ${x.skill?T(x.skill.name):'redo missed questions'}`),p:x.e.tip?T(x.e.tip):L(`“${T(x.e.q)}” 같은 문제를 같이 풀어 보세요.`,`Work through questions like “${T(x.e.q)}” together.`),d:L('10분씩 3번','10 min × 3'),go:x.g.file})}
+ for(const s of played.flatMap(g=>A.G[g.id].weak)){if(items.length>=2)break;if(used.has(s.g.id))continue;used.add(s.g.id);
+  items.push({id:'wk:'+s.g.id+':'+s.k.id,ic:s.g.icon,t:`${subjName(s.g)} · ${T(s.k.name)}`,p:L(`최근 정답률 ${pct(A.recentAcc(s))}%예요. 짧게 자주 연습하면 금방 좋아져요.`,`${pct(A.recentAcc(s))}% right lately. Short, frequent practice helps most.`),d:L('10분씩 3번','10 min × 3'),go:s.g.file})}
+ const idle=LEARN.map(id=>GAMES.find(g=>g.id===id)).find(g=>{const d=R[g.id].r?R[g.id].r.days||{}:{};for(let i=0;i<14;i++){const x=d[dkey(daysAgo(i))];if(x&&(x.s>=60||x.r+x.w))return false}return true});
+ if(idle)items.push({id:'idle:'+idle.id,ic:idle.icon,t:L(`${subjName(idle)} 다시 시작하기`,`Pick ${subjName(idle)} back up`),p:R[idle.id].r||R[idle.id].saved?L('2주 넘게 쉬었어요. 짧게 한 판만 해도 좋아요.','It’s been over two weeks. One short round is plenty.'):L('아직 안 해 본 과목이에요. 한 번 같이 열어 보세요.','Not tried yet. Open it together once.'),d:L('10분씩 2번','10 min × 2'),go:idle.file});
+ if(A.mist.some(x=>x.often))items.push({id:'redo',ic:'🔁',t:L('틀린 문제 3개 같이 풀기','Redo 3 missed questions together'),p:L('‘틀린 문제’ 탭에서 정답 가리기를 켜고 아이에게 물어보세요. 맞히면 크게 칭찬해 주세요.','In the Missed tab, turn on “hide answers” and ask your child. Celebrate the right ones!'),d:L('5분','5 min'),tab:'mistakes'});
+ items.push({id:'ask',ic:'💬',t:L('“어떻게 풀었어?” 물어보기','Ask “How did you solve it?”'),p:L('결과보다 생각한 과정을 물어보면 아이가 더 깊이 배워요.','Asking about the thinking, not the score, deepens learning.'),d:L('하루 1번','once a day')});
+ return items.slice(0,5)}
+function homeHTML(A,R,played,dayAll){const wk=week(0),pl=getS('moonGames.reportPlan')||{};const done=pl.w===wk?pl.d||{}:{};
+ const items=planItems(A,R,played),nd=items.filter(i=>done[i.id]).length;
+ const goal=getS('moonGames.reportGoal')||{days:4,mins:15};const dl=[];for(let i=0;i<7;i++){const d=new Date(wk+'T12:00:00');d.setDate(d.getDate()+i);dl.push(d)}
+ const met=dl.filter(d=>d<=TODAY&&(dayAll[dkey(d)]||0)>=goal.mins*60).length;
+ const wdn=LANG==='en'?['M','T','W','T','F','S','S']:['월','화','수','목','금','토','일'];
+ const talks=played.flatMap(g=>((R[g.id].r.sum||{}).talk||[]).slice(0,2).map(t=>({g,t}))).slice(0,8);
+ const homes=played.flatMap(g=>((R[g.id].r.sum||{}).home||[]).slice(0,1).map(t=>({g,t}))).slice(0,6);
+ return `<section class="card"><div class="h2"><h2>🗓️ ${L('이번 주 함께 하기','This week together')}</h2><span class="num">${L(`${nd}/${items.length} 완료`,`${nd}/${items.length} done`)}</span></div>
+  <p class="note" style="margin:0 0 10px">${L('기록을 보고 이번 주에 하면 좋은 것을 골랐어요. 한 것은 눌러서 체크해 두세요 (이 기기에만 저장돼요).','Picked from the record for this week. Tap to tick off what you’ve done (saved on this device only).')}</p>
+  <ul class="plan">${items.map(i=>`<li><button type="button" class="pl${done[i.id]?' on':''}" data-plan="${esc(i.id)}" aria-pressed="${!!done[i.id]}"><span class="pl-ck" aria-hidden="true">${done[i.id]?'✓':''}</span><span class="pl-ic">${esc(i.ic)}</span><span class="pl-tx"><b>${esc(i.t)}</b><small>${esc(i.p)}</small></span><span class="pl-d">${esc(i.d)}</span></button>${i.go?`<a class="pl-go" href="${esc(i.go)}?lang=${LANG}" aria-label="${esc(L('게임 열기','Open the game'))}">▶</a>`:i.tab?`<button type="button" class="pl-go" data-go="${i.tab}" aria-label="${esc(L('열기','Open'))}">→</button>`:''}</li>`).join('')}</ul></section>
+ <section class="card"><div class="h2"><h2>🎯 ${L('이번 주 목표','This week’s goal')}</h2><span class="num">${met>=goal.days?L(`🎉 ${met}일 달성 (목표 ${goal.days}일)`,`🎉 ${met} days (goal ${goal.days})`):L(`${met}일 / 목표 ${goal.days}일`,`${met} of ${goal.days} days`)}</span></div>
+  <div class="goal"><div class="g-days">${dl.map((d,i)=>{const s=dayAll[dkey(d)]||0,ok=s>=goal.mins*60,fut=d>TODAY;return `<span class="gd${ok?' ok':''}${fut?' fut':''}${dkey(d)===dkey(TODAY)?' now':''}" title="${esc(fmtMin(s))}"><i>${wdn[i]}</i><b>${ok?'⭐':fut?'':s?'·':''}</b></span>`}).join('')}</div>
+   <div class="g-set"><span>${L('주에','Days a week')}</span><button type="button" class="st" data-goal="days:-1" aria-label="${esc(L('하루 줄이기','One day less'))}">−</button><b class="num">${goal.days}${L('일','')}</b><button type="button" class="st" data-goal="days:1" aria-label="${esc(L('하루 늘리기','One day more'))}">+</button>
+    <span>${L('하루','Minutes a day')}</span><button type="button" class="st" data-goal="mins:-5" aria-label="${esc(L('5분 줄이기','5 minutes less'))}">−</button><b class="num">${goal.mins}${L('분',' min')}</b><button type="button" class="st" data-goal="mins:5" aria-label="${esc(L('5분 늘리기','5 minutes more'))}">+</button></div>
+   <p class="note">${met>=goal.days?L('이번 주 목표를 이뤘어요! 아이에게 꼭 말해 주세요. 🎉','This week’s goal is met. Be sure to tell your child! 🎉'):L(`하루 ${goal.mins}분 넘게 배운 날에 ⭐가 붙어요. 주 3~5일, 하루 15~20분이면 충분해요.`,`A ⭐ appears on days with more than ${goal.mins} minutes. 3–5 days a week, 15–20 minutes a day is plenty.`)}</p></div></section>
+ ${talks.length?`<section class="card"><div class="h2"><h2>💬 ${L('아이에게 물어보세요','Ask your child')}</h2><span>${L('저녁 식탁에서 한 가지씩','One at dinner')}</span></div><div class="talk">${talks.map(({g,t})=>`<details><summary data-a="${esc(L('답 보기','Answer'))}" data-h="${esc(L('접기','Hide'))}">${esc(g.icon)} <span>${esc(L(t[0],t[1]))}</span></summary><p>👉 ${esc(L(t[2],t[3]))}</p></details>`).join('')}</div><p class="note">${L('정답을 맞히는 것보다, 아이가 자기 말로 설명해 보는 게 가장 좋은 복습이에요.','The best review is your child explaining it in their own words, more than getting it exactly right.')}</p></section>`:''}
+ ${homes.length?`<section class="card"><div class="h2"><h2>🏠 ${L('집에서 함께 해 보기','Try it together at home')}</h2></div><ul class="home">${homes.map(({g,t})=>`<li>${esc(g.icon)} <span>${esc(T(t))}</span></li>`).join('')}</ul></section>`:''}
+ <section class="card"><div class="h2"><h2>👏 ${L('이렇게 칭찬해 주세요','Praise that helps')}</h2></div><ul class="praise">
+  <li><b>${L('“끝까지 해냈구나!”','“You stuck with it to the end!”')}</b><span>${L('결과보다 노력을 칭찬하면 어려운 문제에도 다시 도전해요.','Praising effort over results makes children willing to try hard problems again.')}</span></li>
+  <li><b>${L('“어떻게 알아냈어?”','“How did you figure that out?”')}</b><span>${L('생각한 과정을 말하게 하면 배운 것이 오래 남아요.','Talking through their thinking makes learning stick.')}</span></li>
+  <li><b>${L('“틀려도 괜찮아, 어디서 헷갈렸을까?”','“That’s okay. Where did it get tricky?”')}</b><span>${L('실수를 탓하지 않으면 아이가 모르는 문제에도 스트레스를 덜 받아요.','When mistakes aren’t blamed, unknown questions feel less stressful.')}</span></li></ul></section>`}
 function waitCard(g,saved){return `<section class="card subj" style="--c:${g.c}"><div class="s-top"><div class="s-ic">${esc(g.icon)}</div><div class="s-tt"><h3>${esc(T(g.subj))}</h3><p>${esc(T(g.game))}</p></div></div>
   <div class="s-wait"><p class="empty">${saved?L('이 게임의 기록이 있어요. 게임을 한 번 열면 배운 내용이 여기에 정리돼요.','There is progress in this game. Open it once and what your child learned will be summarised here.'):L('아직 기록이 없어요.','No record yet.')}</p><p style="margin:12px 0 0"><a class="go" href="${esc(g.file)}?lang=${LANG}">▶ ${esc(T(g.game))} ${L('열기','open')}</a></p></div></section>`}
 function coachNote(o){const tips=[];const {active,played,P,tot,acc,streak,nk,nm}=o;
@@ -421,14 +648,54 @@ function emptyPage(R,m){const any=GAMES.some(g=>R[g.id].saved);
   <div class="per noprint"><a class="go" style="background:var(--gold);color:#2a2300" href="report.html?demo=1&lang=${LANG}">👀 ${L('예시 리포트 보기','See a sample report')}</a><a class="go" style="background:#ffffff1f" href="index.html?lang=${LANG}">🎮 ${L('게임 하러 가기','Go to the games')}</a></div></section>
   ${GAMES.filter(g=>R[g.id].saved).map(g=>waitCard(g,true)).join('')}
   <footer>Moon Mini Games · © 2026 Dongsun Moon. ${L('모든 권리 보유.','All rights reserved.')}</footer>`}
-function bindCommon(){bindCal();document.querySelectorAll('[data-per]').forEach(b=>b.onclick=()=>{PER=+b.dataset.per;try{sessionStorage.setItem('moonGames.reportPer',PER)}catch(e){}render()});
- document.querySelectorAll('[data-kid]').forEach(b=>b.onclick=()=>{PROF.cur=b.dataset.kid;const u=new URL(location.href);u.searchParams.set('p',PROF.cur);history.replaceState(null,'',u.href);render()})}
+function showTab(t,focus){TAB=t;try{sessionStorage.setItem('moonGames.reportTab',t)}catch(e){}
+ document.querySelectorAll('[data-tab]').forEach(b=>{const on=b.dataset.tab===t;b.setAttribute('aria-selected',on);b.tabIndex=on?0:-1;if(on&&focus)b.focus()});
+ document.querySelectorAll('[data-panel]').forEach(p=>p.hidden=p.dataset.panel!==t)}
+function showSubj(id){SUBJ=id;try{sessionStorage.setItem('moonGames.reportSubj',id)}catch(e){}
+ document.querySelectorAll('[data-subj]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.subj===id));
+ document.querySelectorAll('[data-subjcard]').forEach(c=>c.hidden=c.dataset.subjcard!==id)}
+function goTo(target){const [t,id]=target.split(':');if(t==='subjects'&&id)showSubj(id);if(t==='mistakes'){MXG=id||'all';MXF='open';$('mxBox').innerHTML=mistakesHTML(LASTA)}
+ showTab(t);const tb=document.querySelector('.tabs');if(tb)tb.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'})}
+function rerender(sel){const y=scrollY;render();scrollTo(0,y);const el=sel&&document.querySelector(sel);if(el)el.focus()}
+function bindCommon(){bindCal();const app=$('app');
+ app.onclick=e=>{const q=s=>e.target.closest(s);let b;
+  if(b=q('[data-per]')){PER=+b.dataset.per;try{sessionStorage.setItem('moonGames.reportPer',PER)}catch(e){}render();return}
+  if(b=q('[data-kid]')){PROF.cur=b.dataset.kid;const u=new URL(location.href);u.searchParams.set('p',PROF.cur);history.replaceState(null,'',u.href);render();return}
+  if(b=q('[data-tab]')){showTab(b.dataset.tab);return}
+  if(b=q('[data-go]')){goTo(b.dataset.go);return}
+  if(b=q('[data-subj]')){showSubj(b.dataset.subj);return}
+  if(b=q('[data-mxf]')){MXF=b.dataset.mxf;MXALL=false;$('mxBox').innerHTML=mistakesHTML(LASTA);const f=document.querySelector(`[data-mxf="${MXF}"]`);if(f)f.focus();return}
+  if(b=q('[data-mxg]')){MXG=b.dataset.mxg;$('mxBox').innerHTML=mistakesHTML(LASTA);const f=document.querySelector(`[data-mxg="${MXG}"]`);if(f)f.focus();return}
+  if(b=q('[data-mxall]')){MXALL=true;$('mxBox').innerHTML=mistakesHTML(LASTA);return}
+  if(b=q('[data-reveal]')){b.closest('.mx').classList.remove('hid');b.remove();return}
+  if(b=q('[data-plan]')){const wk=week(0),cur=getS('moonGames.reportPlan')||{},d=cur.w===wk?cur.d||{}:{},id=b.dataset.plan;d[id]=!d[id];setS('moonGames.reportPlan',{w:wk,d});rerender(`[data-plan="${CSS.escape(id)}"]`);return}
+  if(b=q('[data-goal]')){const [k,v]=b.dataset.goal.split(':'),g=getS('moonGames.reportGoal')||{days:4,mins:15};g[k]=Math.max(k==='days'?1:5,Math.min(k==='days'?7:60,g[k]+(+v)));setS('moonGames.reportGoal',g);rerender(`[data-goal="${b.dataset.goal}"]`);return}};
+ app.onchange=e=>{if(e.target.id==='mxHide'){MXHIDE=e.target.checked;$('mxBox').innerHTML=mistakesHTML(LASTA);const c=$('mxHide');if(c)c.focus()}};
+ const tl=document.querySelector('.tabs');if(tl)tl.onkeydown=e=>{if(!['ArrowLeft','ArrowRight','Home','End'].includes(e.key))return;const ts=[...tl.querySelectorAll('[data-tab]')],i=ts.findIndex(x=>x.dataset.tab===TAB);
+  const j=e.key==='Home'?0:e.key==='End'?ts.length-1:(i+(e.key==='ArrowRight'?1:-1)+ts.length)%ts.length;e.preventDefault();showTab(ts[j].dataset.tab,true)}}
 // ---------------------------------------------------------------- the sample report (?demo=1): a made-up child, clearly labelled
 function demoRecords(){const out={};let seed=7;const rnd=()=>(seed=(seed*16807)%2147483647)/2147483647;
  const mk=(sum,mins,acc,skip)=>{const days={};for(let i=0;i<84;i++){if(i%9===4||(i>1&&rnd()<skip))continue;const d=dkey(daysAgo(i)),s=Math.round(mins*(.6+.8*rnd())*6)*10,n=Math.max(1,Math.round(s/50));const r=Math.max(0,Math.min(n,Math.round(n*(acc-.08+rnd()*.1+(84-i)/84*.08))));days[d]={s,r,w:n-r}}
-  const when={};allSkills(sum).forEach((k,i)=>{if(k.st===2)when[k.id]=i%3===0?'':dkey(daysAgo(Math.floor(rnd()*40)))});return {v:1,days,sum,when,at:Date.now()}};
- for(const g of GAMES){const s=DEMO_SUM[g.id];if(s)out[g.id]={r:mk(s,g.id==='math'?14:g.id==='music'?8:g.id==='science'?7:g.id==='coding'?6:3,g.id==='chess'?.74:.86,g.id==='math'?.25:g.id==='marble'?.8:.55),saved:true};else out[g.id]={r:null,saved:false}}
+  const when={};allSkills(sum).forEach((k,i)=>{if(k.st===2)when[k.id]=i%3===0?'':dkey(daysAgo(Math.floor(rnd()*40)))});
+  const sk={},skw={};allSkills(sum).forEach((k,i)=>{if(k.st===0)return;const base=k.st===2?.92:.6,lift=k.st===1&&i%2===0?.26:0;
+   for(let w=0;w<8;w++){const n=3+Math.floor(rnd()*6),a=Math.min(.98,base+(w<2?lift:0)+(rnd()-.5)*.08),r=Math.round(n*a);(skw[k.id]=skw[k.id]||{})[week(w)]=[r,n-r];const x=sk[k.id]||(sk[k.id]=[0,0]);x[0]+=r;x[1]+=n-r}});
+  const mx={};(DEMO_MX[sum.id]||[]).forEach(e=>{mx[e.id]={...e,f:dkey(daysAgo(20)),l:dkey(daysAgo(e.ago||2))}});
+  return {v:1,days,sum,when,at:Date.now(),sk,skw,mx}};
+ for(const g of GAMES){const s=DEMO_SUM[g.id];if(s){s.id=g.id;out[g.id]={r:mk(s,g.id==='math'?14:g.id==='music'?8:g.id==='science'?7:g.id==='coding'?6:3,g.id==='chess'?.74:.86,g.id==='math'?.25:g.id==='marble'?.8:.55),saved:true}}else out[g.id]={r:null,saved:false}}
  return out}
+const mxe=(id,s,qk,qe,ak,ae,gk,ge,n,k,ok,tk,te,ago)=>({id,s,q:[qk,qe],a:[ak,ae],g:gk?[gk,ge]:undefined,n,k,ok,tip:tk?[tk,te]:undefined,ago});
+const DEMO_MX={
+ math:[mxe('m:times7','m3','7 × 8 = ?','7 × 8 = ?','56','56','54','54',4,0,1,'7단을 소리 내어 외우고, 7 × 8 = 7 × 7 + 7로 생각해 봐요.','Say the 7 times table out loud; 7 × 8 is 7 × 7 + 7.',1),
+  mxe('m:share','m4','사탕 12개를 3명이 똑같이 나누면 한 명에 몇 개?','12 candies shared equally by 3 children: how many each?','4개','4','3개','3',3,1,1,'실제 물건을 한 개씩 나눠 주며 세어 보세요.','Deal real objects out one at a time and count.',2),
+  mxe('m:missing','m10','□ + 15 = 42','□ + 15 = 42','27','27','57','57',2,0,0,'42에서 15를 빼면 □가 나와요.','Subtract 15 from 42 to find □.',3),
+  mxe('m:mmcm','m7','3 cm는 몇 mm야?','How many mm are in 3 cm?','30 mm','30 mm','300 mm','300 mm',2,3,3,'1 cm는 10 mm예요.','1 cm is 10 mm.',9)],
+ music:[mxe('note:F4','note-F4','오선 첫째 칸의 음표는?','Which note is in the first space?','파 (F)','F (fa)','미 (E)','E (mi)',3,0,1,'첫째 줄의 미에서 한 칸 위예요.','One step up from E on the first line.',1),
+  mxe('rhythm:half','b2','2분음표는 몇 박?','How many beats is a half note?','2박','2 beats','1박','1 beat',2,2,2,'','',6)],
+ science:[mxe('card:circuit','s3','전구에 불이 켜지려면 전선을 어떻게 이어야 할까?','How must the wires connect for the bulb to light?','전지에서 전구를 지나 다시 전지로, 끊김 없이 한 바퀴','In an unbroken loop from the battery, through the bulb and back','전구에 전선 한 가닥만 연결','Only one wire to the bulb',2,0,0,'전기가 지나가는 길이 고리처럼 끊김 없이 이어져야 해요.','The path for electricity must make a complete loop.',2)],
+ coding:[mxe('predict:range','c3','for i in range(3): 은 몇 번 반복할까?','How many times does for i in range(3): repeat?','3번 (0, 1, 2)','3 times (0, 1, 2)','4번','4 times',2,0,0,'range(3)은 0부터 세어서 0, 1, 2 세 개예요.','range(3) counts 0, 1, 2: three numbers.',1)],
+ chess:[mxe('pin','h4','흰 차례 · 핀 찾기','White to move · find the pin','비숍 b5 (Bb5)','Bishop to b5 (Bb5)','나이트 f3 (Nf3)','Knight to f3 (Nf3)',3,0,0,'상대 킹 앞을 막고 있는 기물을 찾아봐요.','Look for an enemy piece standing in front of its king.',2)],
+ detective:[mxe('case:3','d1','단서: 빨간 모자, 안경, 강아지와 함께','Clues: red hat, glasses, walking a dog','빨간 모자에 안경을 쓰고 강아지와 있는 사람','The one with a red hat and glasses, walking a dog','빨간 모자만 쓴 사람','The one with only a red hat',2,1,1,'단서 하나씩, 맞지 않는 사람을 지워 봐요.','Rule out anyone who doesn’t match, one clue at a time.',4)],
+ marble:[mxe('exp:weight','x1','무거운 쇠구슬과 가벼운 유리구슬, 누가 먼저 도착할까?','Heavy steel ball or light glass marble: which arrives first?','거의 동시에','About the same time','쇠구슬이 먼저','Steel first',1,0,0,'무게가 달라도 굴러 내려오는 빠르기는 거의 같아요.','Heavy or light, they roll down at almost the same speed.',5)]};
 const sk=(id,ko,en,st,p,x={})=>({id,name:[ko,en],st,p,...x});
 const DEMO_SUM={
  math:{v:1,level:['3학년','Grade 3'],focus:['학년 교과 순서대로 수와 연산, 도형과 측정, 자료를 아쿠아리움을 키우며 연습해요.','Practises number, shapes and measurement, and data in school order while running an aquarium.'],unit:['문제','questions'],
@@ -440,7 +707,7 @@ const DEMO_SUM={
   talk:[['234 + 158을 어떻게 계산했는지 설명해 줄래?','How did you work out 234 + 158?','일의 자리부터 더하고, 10이 넘으면 받아올림해요 (392).','Add the ones first and regroup when it’s 10 or more (392).'],['한 시간은 몇 분이야?','How many minutes are in an hour?','60분이에요.','60 minutes.']],
   home:[['장 볼 때 두 물건의 가격을 더해 보게 해 주세요.','At the store, have your child add the prices of two items.'],['시계를 보고 “10분 뒤는 몇 시야?” 물어봐 주세요.','Look at a clock and ask, “What time will it be in 10 minutes?”']]},
  music:{v:1,level:['Lv.9','Lv. 9'],focus:['박자 감각을 시작으로 건반, 악보 읽기, 노래, 리듬을 매일 조금씩 연습해요.','Builds beat sense first, then keyboard, reading music, singing and rhythm, a little each day.'],unit:['연주','plays'],
-  areas:[{id:'beat',name:['박자·리듬','Beat and rhythm'],icon:'🥁',skills:[sk('b1','일정한 박 맞추기','Keeping a steady beat',2,1),sk('b2','4분음표와 2분음표','Quarter and half notes',2,1),sk('b3','쉼표 지키기','Rests',1,.6)]},{id:'key',name:['건반·가락','Keyboard and melody'],icon:'🎹',skills:[sk('k1','도레미 위치 찾기','Finding C, D, E',2,1),sk('k2','다섯 손가락 노래','Five-finger tunes',1,.5),sk('k3','높은음 낮은음','High and low notes',2,1)]},{id:'read',name:['악보 읽기·음악 기호','Reading music and symbols'],icon:'🎼',skills:[sk('r1','오선 위의 도레미','C, D, E on the staff',1,.4),sk('r2','높은음자리표','The treble clef',0,0)]}],
+  areas:[{id:'beat',name:['박자·리듬','Beat and rhythm'],icon:'🥁',skills:[sk('b1','일정한 박 맞추기','Keeping a steady beat',2,1),sk('b2','4분음표와 2분음표','Quarter and half notes',2,1),sk('b3','쉼표 지키기','Rests',1,.6)]},{id:'key',name:['건반·가락','Keyboard and melody'],icon:'🎹',skills:[sk('k1','도레미 위치 찾기','Finding C, D, E',2,1),sk('k2','다섯 손가락 노래','Five-finger tunes',1,.5),sk('k3','높은음 낮은음','High and low notes',2,1)]},{id:'read',name:['악보 읽기·음악 기호','Reading music and symbols'],icon:'🎼',skills:[sk('r1','오선 위의 도레미','C, D, E on the staff',1,.4),sk('r2','높은음자리표','The treble clef',0,0)]},{id:'notes',name:['오선의 음표 읽기 (음표 마을)','Reading notes on the staff (Note Town)'],icon:'🎶',skills:[sk('note-C4','도 (C4): 가온 도, 덧줄','C (C4): middle C, ledger line',2,1),sk('note-G4','솔 (G4): 둘째 줄','G (G4): second line',2,1),sk('note-D4','레 (D4): 첫째 줄 아래','D (D4): below the first line',1,.7),sk('note-F4','파 (F4): 첫째 칸','F (F4): first space',1,.4),sk('note-E4','미 (E4): 첫째 줄','E (E4): first line',0,0)]}],
   facts:[['🔥','7일 연속 연습','7-day practice streak'],['🥈','음악 대회 은메달','Silver medal in a contest']],talk:[['4분음표는 몇 박이야?','How many beats is a quarter note?','1박이에요.','One beat.']],home:[['좋아하는 노래에 맞춰 함께 손뼉으로 박자를 쳐 보세요.','Clap the beat together to a favourite song.']]},
  science:{v:1,level:['3학년','Grade 3'],focus:['생활 속 과학 개념을 퀴즈와 실험으로 익히고, 안전 수칙도 함께 배워요.','Learns everyday science through quizzes and hands-on labs, with safety rules along the way.'],unit:['문제','questions'],
   areas:[{id:'force',name:['힘과 에너지','Forces and energy'],icon:'🧲',skills:[sk('s1','자석의 성질','Magnets',2,1),sk('s2','그림자와 빛','Shadows and light',2,1),sk('s3','전기 회로','Electric circuits',1,.4)]},{id:'earth',name:['지구와 우주','Earth and space'],icon:'🌍',skills:[sk('s4','지진','Earthquakes',1,.6),sk('s5','공룡 화석','Dinosaur fossils',2,1)]},{id:'safe',name:['안전과 건강','Safety and health'],icon:'🚒',skills:[sk('s6','불이 나면','If there is a fire',2,1),sk('s7','멈추고 엎드려 구르기','Stop, drop and roll',2,1)]}],

@@ -28,23 +28,34 @@ const L=(ko,en)=>LANG==='en'?en:ko;
 //   page is visible and the player touched or typed in the last 2 minutes.
 // · sum: the game's own summary of skills, built by the function passed to LR.set() (see _src/report/SPEC.md).
 // · when: the day each skill first reached "mastered" ('' = before the record started).
-// · sk: right/wrong counts per skill, from coachAnswer(ok,skillId).
+// · sk: right/wrong counts per skill, from coachAnswer(ok,skillId); skw: the same per week (Monday's date, 12 weeks).
+// · mx: kinds of questions the child got wrong (up to 40), from coachAnswer(ok,skillId,item) with
+//   item={id,q:[ko,en],a:[ko,en],g?:[ko,en],tip?:[ko,en]}: the latest example, the right answer, the child's answer,
+//   how many misses, and how many right answers in a row since the last miss (so the report can say "fixed now").
 // A game's reset must call LR.forget() so the report forgets only that game; LR.resume() starts a fresh record.
 const LR=(()=>{const f=(location.pathname.split('/').pop()||'').replace(/\.html$/,'');
  const KEY={math_aquarium:'mathAquarium.learn',science_guardians:'scienceGuardians.learn',music_academy:'musicAcademy.learn',chess_knights:'chessKnights.learn',detective_game:'little-detective-learn',marble_rush_3d:'marbleRush.learn',coding_island:'pythonIsland.learn',python_island:'pythonIsland.learn'}[f];
- const day=()=>new Date().toLocaleDateString('en-CA');let R=null,fn=null,off=!KEY,dirty=false,last=0;
+ const day=()=>new Date().toLocaleDateString('en-CA'),week=(n=0)=>{const d=new Date();d.setDate(d.getDate()-(d.getDay()+6)%7-7*n);return d.toLocaleDateString('en-CA')};
+ const two=x=>Array.isArray(x)?x.slice(0,2).map(v=>String(v==null?'':v).slice(0,140)):undefined;let R=null,fn=null,off=!KEY,dirty=false,last=0;
  const load=()=>{if(R)return R;try{R=JSON.parse(localStorage.getItem(KEY)||'null')}catch(e){}if(!R||R.v!==1)R={v:1,days:{},when:{}};return R};
  const today=()=>{const r=load(),d=day();return r.days[d]||(r.days[d]={s:0,r:0,w:0})};
  const save=()=>{if(off)return;const r=load();
   if(fn){try{const s=fn();if(s){const first=!r.sum,d=day();r.sum=s;(s.areas||[]).forEach(a=>(a.skills||[]).forEach(k=>{if(k.st===2&&r.when[k.id]==null)r.when[k.id]=first?'':d}))}}catch(e){}}
   const ks=Object.keys(r.days).sort();ks.slice(0,Math.max(0,ks.length-120)).forEach(k=>delete r.days[k]);
+  const old=week(12);for(const k in r.skw||{}){for(const w in r.skw[k])if(w<old)delete r.skw[k][w];if(!Object.keys(r.skw[k]).length)delete r.skw[k]}
   r.at=Date.now();try{localStorage.setItem(KEY,JSON.stringify(r))}catch(e){}dirty=false};
  ['pointerdown','keydown','touchstart','wheel'].forEach(e=>addEventListener(e,()=>{last=Date.now()},{passive:true,capture:true}));
  setInterval(()=>{if(off||document.hidden||Date.now()-last>120000)return;today().s+=10;dirty=true},10000);
  setInterval(()=>{if(dirty)save()},30000);
  addEventListener('pagehide',save);document.addEventListener('visibilitychange',()=>{if(document.hidden&&dirty)save()});
  return {
-  ans(ok,skill){if(off)return;const t=today();ok?t.r++:t.w++;if(skill!=null){const r=load(),sk=r.sk||(r.sk={}),x=sk[skill]||(sk[skill]=[0,0]);x[ok?0:1]++}dirty=true},
+  ans(ok,skill,item){if(off)return;const t=today(),r=load(),i=ok?0:1;ok?t.r++:t.w++;
+   if(skill!=null){const sk=r.sk||(r.sk={});(sk[skill]||(sk[skill]=[0,0]))[i]++;const sw=r.skw||(r.skw={}),o=sw[skill]||(sw[skill]={}),w=week();(o[w]||(o[w]=[0,0]))[i]++}
+   if(item&&item.id!=null){const mx=r.mx||(r.mx={}),id=String(item.id).slice(0,80);let e=mx[id];
+    if(!ok){if(!e)e=mx[id]={s:skill,n:0,ok:0,f:day()};e.n++;e.k=0;e.l=day();e.q=two(item.q);e.a=two(item.a);e.g=two(item.g);e.tip=two(item.tip)||e.tip;
+     const ids=Object.keys(mx);if(ids.length>40)ids.sort((a,b)=>mx[a].l!==mx[b].l?(mx[a].l<mx[b].l?-1:1):mx[a].n-mx[b].n).slice(0,ids.length-40).forEach(x=>delete mx[x])}
+    else if(e){e.ok++;e.k=(e.k||0)+1}}
+   dirty=true},
   set(f){fn=f;setTimeout(save,1500)},save,
   stat(id){const x=(load().sk||{})[id];return x?{r:x[0],w:x[1]}:null},
   forget(){off=true;R=null;try{localStorage.removeItem(KEY)}catch(e){}},
@@ -69,8 +80,9 @@ function coachPop(pose,ko,en,o={}){const now=Date.now();if(!o.force&&now-coachAt
  el.innerHTML=`<img src="images/coach-moon-${pose}.webp" alt="" onerror="this.remove()"><p><b>${L('문 코치','Coach Moon')}</b>${L(ko,en)}</p>`;
  el.classList.remove('show');void el.offsetWidth;el.classList.add('show');clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove('show'),o.ms||4500);return true}
 // call with every final answer: praise runs of right answers, and help after two misses in a row.
-// The optional skill id (one of the skill ids in the game's LR summary) counts the answer for that skill in the report.
-function coachAnswer(ok,skill){try{LR.ans(ok,skill)}catch(e){}
+// The optional skill id (one of the skill ids in the game's LR summary) counts the answer for that skill in the report,
+// and the optional item (see LR above) lets the report list the kinds of questions the child often gets wrong.
+function coachAnswer(ok,skill,item){try{LR.ans(ok,skill,item)}catch(e){}
  if(ok){coachRun++;coachMiss=0;if(![3,5,10,15,20,30].includes(coachRun))return;const n=coachRun,t=coachPick([[`${n}번 연속 성공! 집중력이 대단해요 🌙`,`${n} in a row! Amazing focus 🌙`],[`와, ${n}번 연속이에요! 문 코치가 박수 쳐요 👏`,`Wow, ${n} in a row! Coach Moon is clapping 👏`],[`${n}번 연속! 오늘 머리가 반짝반짝해요 ✨`,`${n} straight! Your brain is sparkling today ✨`]]);coachPop('clap',t[0],t[1],{gap:20000});return}
  coachRun=0;coachMiss++;if(coachMiss!==2)return;const nm=coachEsc(coachNm()),t=coachPick([['괜찮아요! 틀리면서 배우는 거예요. 천천히 다시 봐요 🌙','That’s okay! Mistakes help us learn. Take another look 🌙'],[nm?`${nm}, 할 수 있어요! 문 코치가 응원해요 🌙`:'할 수 있어요! 문 코치가 응원해요 🌙',nm?`You can do it, ${nm}! Coach Moon is cheering 🌙`:'You can do it! Coach Moon is cheering 🌙'],['실수는 배움의 친구예요. 한 번 더 해 봐요!','Mistakes are friends of learning. One more try!']]);coachPop('go',t[0],t[1],{gap:30000})}
 // Once a day per game he says hello, a few minutes in he shares a tip, and after 20 minutes he suggests a little rest.
@@ -157,6 +169,7 @@ button,input,select{font:inherit}button{cursor:pointer;touch-action:manipulation
 .range::-moz-range-thumb{width:24px;height:24px;border-radius:50%;background:#fff;border:4px solid #65dbf8;box-shadow:0 2px 8px #0009}
 .mine-picker{display:flex;flex-wrap:wrap;gap:8px}
 .mine-chip{width:44px;height:44px;border-radius:50%;border:2px solid #ffffff55;color:#fff;font-weight:900;font-size:16px;display:grid;place-items:center;padding:0;text-shadow:0 1px 2px #000a;transition:transform .15s,box-shadow .15s}
+.mine-chip{position:relative}.mk-steel{position:absolute;right:-7px;top:-7px;font-style:normal;font-size:14px;line-height:1;filter:drop-shadow(0 1px 1px #000a)}
 .mine-chip.on{border-color:#fff;transform:scale(1.1);box-shadow:0 0 0 3px #ffe16b,0 0 16px #ffe16b}
 .mine-chip:disabled{opacity:.55}.mine-chip.on:disabled{opacity:1}
 .small-btn{min-height:44px;border:1px solid #3b5073;background:#1a2a47;color:#d7e6ff;border-radius:12px;padding:9px 14px;font-size:15px;font-weight:800;box-shadow:0 3px 0 #050a16}
@@ -195,6 +208,7 @@ button,input,select{font:inherit}button{cursor:pointer;touch-action:manipulation
 .start-banner{position:absolute;top:67%;left:50%;transform:translate(-50%,-50%);text-align:center;pointer-events:none;width:90%}
 .start-banner h2{margin:0;font-size:clamp(40px,6.4vw,80px);text-shadow:0 6px 0 #121729,0 0 30px #81f8ff;letter-spacing:-1px}
 .start-banner p{font-size:16px;font-weight:800;text-shadow:0 2px 6px #000;margin:6px 0 0}
+.start-banner .steel-note{display:inline-block;font-size:14px;background:#07142cd9;border:1px solid #c6d0de88;border-radius:999px;padding:4px 12px;margin-top:8px;text-shadow:none}
 .cheer-btn{position:absolute;right:74px;bottom:92px;z-index:4;border:0;border-radius:999px;padding:13px 18px;min-height:50px;font-size:17px;font-weight:1000;color:#3b1d00;background:linear-gradient(135deg,#ffe16b,#ff9f43);box-shadow:0 4px 0 #b8641a,0 8px 22px #ff9f4366;touch-action:manipulation}
 .cheer-btn:active:not(:disabled){transform:translateY(2px) scale(.95);box-shadow:0 1px 0 #b8641a}.cheer-btn.pop{animation:cheerPop .35s}
 @keyframes cheerPop{50%{transform:scale(1.16) rotate(-4deg)}}
@@ -368,6 +382,12 @@ button,input,select{font:inherit}button{cursor:pointer;touch-action:manipulation
 .ch-guess{font-size:14px;color:#ffe9a0;font-weight:800;margin:4px 0}
 .ch-podium{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;margin:6px 0 8px;font-size:14px;font-weight:800}.ch-podium span{background:#0f1d36;border-radius:999px;padding:4px 10px}
 .ch-res .mcoach{max-width:100%}.ch-res .result-actions+.ch-star-list{margin-top:10px}
+/* the spring launcher's squash level in the builder, and team / sort results */
+.b-track li.has-lv{flex-wrap:wrap}.bt-lv{flex-basis:100%;display:flex;align-items:center;gap:8px;padding:0 0 4px 32px;font-size:14px;font-weight:800;color:#cfe0ff}
+.bt-lv .mini-btn{width:44px;padding:0;font-size:18px}.lv-dots{display:flex;gap:4px}.lv-dots i{width:14px;height:14px;border-radius:50%;border:2px solid #ff8a8a;background:transparent}.lv-dots i.on{background:#ff5a5a}
+.ch-order{display:flex;flex-wrap:wrap;justify-content:center;gap:5px;margin:8px 0}.ch-order span{display:inline-flex;align-items:center;gap:2px;min-height:30px;border-radius:999px;padding:2px 8px 2px 4px;font-size:14px;font-weight:800;background:#0f1d36;border:2px solid var(--c)}
+.ch-order span b{width:20px;height:20px;border-radius:50%;display:grid;place-items:center;background:var(--c);color:#06121f;font-size:12px}.ch-order .os{background:#2a3247}
+.ch-key{text-align:center;font-size:13px;color:#a9bbd8;margin:0 0 6px}
 /* lab notebook */
 .nb-sum{font-size:14px;color:#cfe0ff;margin:0 0 10px;line-height:1.5}.nb-list{display:grid;gap:10px}
 .nb{background:#101c33;border:1px solid #2b3d61;border-radius:14px;padding:10px 12px}
@@ -506,16 +526,16 @@ const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 
 function build(mods,rng,labKind,labCfg){
  rng=rng||Math.random;
- const shapes=[],segs=[],pegs=[],spinners=[],decor=[],guide=[],sections=[],slots=[],winds=[],gates=[],poles=[LW,RW];
+ const shapes=[],segs=[],pegs=[],spinners=[],decor=[],guide=[],sections=[],slots=[],winds=[],gates=[],poles=[LW,RW],magnets=[],wells=[],springs=[];
  let y=0,x=0,gate=null,finishY=0,finishX=0,chute=null,lab=null;
  const poly=(pts,o={})=>{
-  const s={pts,style:o.style||'track',e:o.e??.3,k:o.k??.6,boost:o.boost||null,kick:o.kick||0,on:true,tint:o.tint,flash:-9};
+  const s={pts,style:o.style||'track',e:o.e??.3,k:o.k??.6,boost:o.boost||null,kick:o.kick||0,on:true,tint:o.tint,flash:-9,tag:o.tag||null};
   let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;for(const [px,py] of pts){x0=Math.min(x0,px);y0=Math.min(y0,py);x1=Math.max(x1,px);y1=Math.max(y1,py)}
   s.box=[x0-16,y0-16,x1+16,y1+16];shapes.push(s);
   for(let i=0;i<pts.length-1;i++){const [ax,ay]=pts[i],[bx,by]=pts[i+1],dx=bx-ax,dy=by-ay;segs.push({ax,ay,dx,dy,len2:dx*dx+dy*dy||1,shape:s})}
   return s};
  const gp=(px,py)=>guide.push([px,py]);
- const sec=type=>sections.push({type,y0:y});
+ const sec=type=>sections.push({type,y0:y}),meet=ym=>{sections[sections.length-1].ym=ym};
  const panel=(x0,y0,x1,y1)=>decor.push({t:'panel',x0,y0,x1,y1});
  const unit=(dx,dy)=>{const l=Math.hypot(dx,dy)||1;return [dx/l,dy/l]};
  // funnel walls from the frame to an opening at xo; the last 46px are steep so marbles never arch over the neck
@@ -647,6 +667,73 @@ function build(mods,rng,labKind,labCfg){
   panel(xl-22,top-10,xr+22,top+H+10);gp(360,top);gp(360,top+H);
   y=top+H+8;x=360;
  }
+ // a soft safety net shaped like a hopper (steep near the neck, so marbles never wedge across it)
+ function net(xl,yl,xr,yr,xo,yb,tag){const o={style:'net',e:.12,k:1.2,tag};poly([[xl,yl],[xo-46,yb-52],[xo-18,yb]],o);poly([[xr,yr],[xo+46,yb-52],[xo+18,yb]],o)}
+ // a slow way down for marbles that miss a jump: two long shelves, then the hopper
+ function slowShelves(x0,y0){poly([[x0+40,y0],[110,y0+46]],{style:'shelf'});poly([[LW,y0+90],[300,y0+128]],{style:'shelf'});gp(x0,y0);gp(110,y0+40);gp(300,y0+120);return y0+150}
+ // ➰ spring launcher: marbles wait at a little gate and go in one at a time. The latch lets go, the squashed spring stretches back
+ // (the more it is still squashed, the harder it pushes) and flings the marble over a gap. lv 1–3 = how far it is squashed.
+ // The same spring sends a heavier marble off slower, so a steel marble may drop into the net where a glass one flies across.
+ // After each shot a little motor squashes the spring again. The landing ramp and the net are tagged so a test can tell who made it.
+ function springJump(lv){
+  const X=[0,20,28,40][lv]||28;sec('spring');collect(120);const top=y;meet(top+40);const si=springs.length,ux=Math.SQRT1_2,uy=-Math.SQRT1_2,nx=-uy,ny=ux,P0=[215,top+165],hw=R+T+1.5,LT=X+24;
+  const at=(s,t)=>[P0[0]+ux*t+nx*s,P0[1]+uy*t+ny*s];  // s: across the tube (+ = lower wall), t: along it
+  // the side door is just one marble wide: while one marble sits on the pad, the next one waits outside, so the door can close between them
+  poly([at(hw,-14),at(hw,LT)]);poly([at(-hw,-14),at(-hw,-2)]);poly([at(-hw,28),at(-hw,LT+56)]);poly([at(-hw,-14),at(hw,-14)]);  // the upper wall runs on past the mouth, so waiting marbles cannot spill in from above
+  poly([[70,top+40],at(-hw,-2)]);const gate=poly([at(-hw,-2),at(-hw,28)],{style:'sgate'});gate.on=false;
+  springs.push({x:P0[0],y:P0[1],ux,uy,hw:R,X,k:813,Mp:.1,s:0,v:0,ph:'open',t:0,gate,on:[],lv,si,L:LT,hold:0});
+  poly([[412,top+124],[655,top+172]],{tag:{si,v:'L'}});poly([[640,top-70],[640,top+126]]);
+  net(226,top+196,418,top+130,356,top+280,{si,v:'N'});
+  decor.push({t:'spring',sp:springs[springs.length-1],x0:292,x1:412,y:top+124});
+  const yb=slowShelves(355,top+326),xo=360,h=Math.max(30,.42*(xo-46-LW)),ye=hopper(xo,yb,h);
+  panel(LW,top,RW,ye+10);gp(120,top-10);gp(150,top+90);gp(205,top+150);gp(300,top+70);gp(450,top+120);gp(655,top+160);gp(670,yb);gp(xo,ye);
+  x=xo;y=ye+16;
+ }
+ // 💨 fan: a fan beside a pit blows the marbles across it. The wind is strongest right next to the fan and gets weaker farther away,
+ // and the same wind pushes a light glass marble much more than a heavy steel one, so a steel marble may drop into the net.
+ function fanGap(){
+  sec('blow');collect(100);const top=y;meet(top+40);
+  poly([[LW,top+22],[240,top+64]]);
+  winds.push({x0:232,x1:RW,y0:top+58,y1:top+200,wx:1200,wy:0,kx:6,ky:0,sway:0,fx:232,d0:220});
+  decor.push({t:'blowfan',x:232,y0:top+70,y1:top+196,d0:220,x1:425});
+  poly([[425,top+182],[660,top+214]]);
+  net(236,top+150,429,top+190,341,top+288);
+  const yb=slowShelves(341,top+334),xo=360,h=Math.max(30,.42*(xo-46-LW)),ye=hopper(xo,yb,h);
+  panel(LW,top,RW,ye+10);gp(100,top-10);gp(240,top+50);gp(440,top+160);gp(660,top+200);gp(670,yb);gp(xo,ye);
+  x=xo;y=ye+16;
+ }
+ // 🧲 magnet drum: a turning drum with a magnet fixed inside one side of it. Glass marbles ride over the top and fly off to the right.
+ // Steel marbles are held to the drum (a magnet pulls only iron and steel, and pulls much harder close up), carried round and let go
+ // on the other side, into their own chute. Recycling plants sort steel cans out of rubbish with drums like this.
+ function magnetDrum(){
+  sec('magnet');collect(370);const top=y,cx=360,r=40,cy=top+72;meet(top+20);
+  pegs.push({x:cx,y:cy,r,e:.1,kind:'drum',w:4.2,k:9});
+  magnets.push({x:cx,y:cy,arc:1,r0:r+R,band:30,a0:-1.75,a1:1.85,soft:.3,K:15000,range:r+R+34,flash:-9});
+  decor.push({t:'drum',x:cx,y:cy,r,a0:-1.75,a1:1.85,mg:magnets[magnets.length-1],peg:pegs[pegs.length-1]});
+  poly([[350,top-8],[cx-Math.cos(.52)*57,cy-Math.sin(.52)*57]]);  // a guard: nothing slips down the drum's left side from the top
+  poly([[cx,cy+100],[cx,cy+150]]);poly([[cx-2,cy+150],[150,cy+196]]);poly([[cx+2,cy+150],[570,cy+196]]);
+  const yb=cy+208,xo=360,h=Math.max(30,.42*(xo-46-LW)),ye=hopper(xo,yb,h);
+  panel(LW,top,RW,ye+10);gp(366,top-10);gp(cx,cy-r-12);gp(cx+52,cy);gp(cx+40,cy+150);gp(xo,ye);
+  x=xo;y=ye+16;
+ }
+ // a rim with an opening at its top left, where a chute drops marbles in; the chute's left wall closes the circle at its leftmost point.
+// The chute is a little wider than a hopper neck (±18), so no marble can rest on the chute's top ends.
+ function wellRim(cx,cy,r,fx,yTop){
+  const hw=20,xr=fx+hw,aEnd=-Math.acos((xr-cx)/r),pts=[];
+  for(let a=Math.PI;a>aEnd+1e-6;a-=.1)pts.push([cx+Math.cos(a)*r,cy+Math.sin(a)*r]);pts.push([cx+Math.cos(aEnd)*r,cy+Math.sin(aEnd)*r]);
+  poly([[fx-hw,yTop],[fx-hw,cy],...pts,[xr,yTop]],{style:'rim',e:.45,k:.25})}
+ // 🕳️ gravity well, a model of a black hole: a pull toward the middle that gets much stronger close to it, and is the same for heavy
+ // and light marbles, like real gravity. Marbles whirl round inside the rim; rolling slowly takes their speed away, so in the end each
+ // one drops through the hole in the middle and comes out of a pipe under the well. A marble that comes in faster circles longer.
+ function gravityWell(){
+  sec('well');const fx=230;collect(fx);const top=y,cx=360,r=150,cy=top+160;meet(cy-90);
+  wellRim(cx,cy,r,fx,top-14);
+  wells.push({x:cx,y:cy,r:r-4,GM:9e7,s:55,rh:26,drag:.5,ex:cx,ey:cy+r+40,ev:240,hold:.45});
+  decor.push({t:'well',x:cx,y:cy,r,W:wells[wells.length-1]});
+  const yb=cy+r+70,xo=360,h=Math.max(30,.42*(xo-46-LW)),ye=hopper(xo,yb,h);
+  panel(LW,top,RW,ye+10);gp(fx,top-10);gp(fx,cy-40);gp(cx,cy+r-20);gp(cx,cy);gp(cx,cy+r+40);gp(xo,ye);
+  x=xo;y=ye+16;
+ }
  // ---- marble lab: two lanes side by side that differ in exactly one thing (a fair test)
  // Lane A is x 30–360, lane B the same shapes moved 330 to the right. Each lane gets a gate and a finish rule.
  function labCourse(kind,cfg){
@@ -687,15 +774,37 @@ function build(mods,rng,labKind,labCfg){
     poly([[x0,y0-30],[x0,y0],[x1,y1]],{style:'track',k:.6});poly([[x1,y1],[o+346,y1]],{style:'carpet',e:.1,k:3.5});poly([[o+346,y1-50],[o+346,y1]]);
     const gx=o+72;gateAt(gx,rampY(gx)-30,rampY(gx)-2);const sx=gx-T-R-1.5;slots.push([sx,rampY(sx)-T-R-.5]);
     L0.targetX=o+196;L0.floorY=y1;
+   }else if(kind==='magnet'){ // a ball falls past a strong magnet standing on the floor; a steel ball is pulled over and sticks to it
+    const cx=o+92,fx=o+168,y0=200,yf=470,my=262;trap(cx,110);slots.push([cx,110-T-R-.5]);
+    poly([[fx,yf],[fx,y0],[o+300,y0],[o+300,yf]]);magnets.push({x:fx+30,y:my,K:7e9,rmin:30,range:300,flash:-9});
+    decor.push({t:'labmag',x0:fx,x1:o+300,y0,y1:yf,mx:fx+30,my});
+    poly([[o+40,yf],[o+350,yf]],{style:'sand',e:.02,k:12});L0.floorY=yf;L0.startX=cx;
+   }else if(kind==='spring'){ // the same spring, squashed a lot or a little; the latch lets go when the experiment starts
+    const cx=o+180,by=500,hw=R+T+1.5,X=(c.comp||1)*30;
+    poly([[cx-hw,by-170],[cx-hw,by+14],[cx+hw,by+14],[cx+hw,by-170]]);
+    springs.push({x:cx,y:by,ux:0,uy:-1,hw:R,X,k:360,Mp:.2,s:0,v:0,ph:'ready',t:0,gate:null,on:[],lab:1,L:170,hold:0,lv:c.comp||1});
+    decor.push({t:'spring',sp:springs[springs.length-1],lab:1});
+    slots.push([cx,by-T-R-.5]);L0.floorY=by+14;L0.baseY=by-T-R;L0.cx=cx;
+   }else if(kind==='well'){ // the same gravity well in both lanes; the ball drops in from higher up (faster) or lower down (slower)
+    const cx=o+200,cy=340,r=110,fx=cx-r+20,dy=c.dropY||80;trap(fx,dy);slots.push([fx,dy-T-R-.5]);
+    wellRim(cx,cy,r,fx,dy-20);wells.push({x:cx,y:cy,r:r-4,GM:2.2e7,s:34,rh:14,drag:.42,ex:cx,ey:cy+r+34,ev:180,hold:.45});
+    decor.push({t:'well',x:cx,y:cy,r,W:wells[wells.length-1],lab:1});
+    poly([[o+40,560],[o+350,560]],{style:'tray',e:.05,k:6});L0.floorY=560;L0.cx=cx;L0.dropY=dy;
+   }else if(kind==='fan'){ // the same fan in both lanes; the ball falls close to it or farther away
+    const fx=o+40,cx=o+(c.fd||80);trap(cx,110);slots.push([cx,110-T-R-.5]);
+    winds.push({x0:fx,x1:o+360,y0:150,y1:530,wx:640,wy:0,kx:3,ky:0,sway:0,fx,d0:110});
+    decor.push({t:'blowfan',x:fx,y0:160,y1:520,d0:110,x1:o+356,lab:1});
+    poly([[o+40,560],[o+350,560]],{style:'sand',e:.02,k:12});L0.floorY=560;L0.startX=cx;
    }
   }
   if(kind==='crash')for(const L0 of lanes)slots.push([L0.targetX,L0.floorY-T-R-.5]);
   gate=gates[0];lab={kind,lanes};sections.push({type:'lab',y0:0});
-  y=kind==='bounce'?560:kind==='wind'?600:kind==='crash'?380:kind==='roll'?420:480;gp(360,0);gp(360,y);
+  y={bounce:560,wind:600,crash:380,roll:420,magnet:510,spring:540,well:600,fan:600}[kind]||480;gp(360,0);gp(360,y);
  }
  const MOD={ramps2:()=>ramps(2,-1),ramps3:()=>ramps(3,-1),ramps2b:()=>ramps(2,1),ramps3b:()=>ramps(3,1),wash2:()=>ramps(2,-1,true),
   pegs:pegField,zigzag,funnels2:()=>funnels(2),funnels3:()=>funnels(3),funnels4:()=>funnels(4),spinner:spinnerShaft,bumpers:bumperField,split,
-  ice:()=>ramps(3,-1,false,{sec:'ice',style:'ice',k:.03,slope:.1}),honey:()=>ramps(2,-1,false,{sec:'honey',style:'honey',k:2.2,slope:.22}),jump,tramp,fan:fanShaft};
+  ice:()=>ramps(3,-1,false,{sec:'ice',style:'ice',k:.03,slope:.1}),honey:()=>ramps(2,-1,false,{sec:'honey',style:'honey',k:2.2,slope:.22}),jump,tramp,fan:fanShaft,
+  spring1:()=>springJump(1),spring2:()=>springJump(2),spring3:()=>springJump(3),magnet:magnetDrum,well:gravityWell,blow:fanGap};
  if(labKind){labCourse(labKind,labCfg||[])}else{start();for(const m of mods)if(MOD[m])MOD[m]();finish()}
  const H=y;
  poly([[LW,-400],[LW,H]],{style:'frame'});poly([[RW,-400],[RW,H]],{style:'frame'});poly([[LW,H],[RW,H]],{style:'frame'});
@@ -706,31 +815,34 @@ function build(mods,rng,labKind,labCfg){
  for(const s of segs){const x0=Math.min(s.ax,s.ax+s.dx)-reach,x1=Math.max(s.ax,s.ax+s.dx)+reach,y0=Math.min(s.ay,s.ay+s.dy)-reach,y1=Math.max(s.ay,s.ay+s.dy)+reach;
   for(let cx=Math.floor(x0/CELL);cx<=Math.floor(x1/CELL);cx++)for(let cy=Math.floor(y0/CELL);cy<=Math.floor(y1/CELL);cy++)add(cx+','+cy,s)}
  for(const p of pegs){const rr=p.r+R+2;for(let cx=Math.floor((p.x-rr)/CELL);cx<=Math.floor((p.x+rr)/CELL);cx++)for(let cy=Math.floor((p.y-rr)/CELL);cy<=Math.floor((p.y+rr)/CELL);cy++)add(cx+','+cy,p)}
- return {W,H,shapes,segs,pegs,spinners,decor,guide,cum,total:cum[cum.length-1],sections,slots,gate,gates,winds,poles,lab,finishY:lab?1e9:finishY,finishX,chute,grid};
+ return {W,H,shapes,segs,pegs,spinners,decor,guide,cum,total:cum[cum.length-1],sections,slots,gate,gates,winds,poles,lab,finishY:lab?1e9:finishY,finishX,chute,grid,magnets,wells,springs};
 }
 
 function createState(course,n,order){
  const marbles=[];
- for(let i=0;i<n;i++){const [sx,sy]=course.slots[order[i]];marbles.push({id:i,x:sx,y:sy,vx:0,vy:0,ang:Math.random()*TAU,done:false,finishTime:0,progress:0,gi:0,bestP:0,lastGain:0,stuck:0,nudges:0,rescues:0,boosted:-9,mass:1,bounce:0})}
+ for(let i=0;i<n;i++){const [sx,sy]=course.slots[order[i]];marbles.push({id:i,x:sx,y:sy,vx:0,vy:0,ang:Math.random()*TAU,done:false,finishTime:0,progress:0,gi:0,bestP:0,lastGain:0,stuck:0,nudges:0,rescues:0,boosted:-9,mass:1,bounce:0,mag:0,pull:0})}
  return {course,marbles,t:0,finishers:[],events:[],gateOpen:false};
 }
-function openGate(st){st.course.gate.on=false;for(const g of st.course.gates||[])g.on=false;st.gateOpen=true;st.gateT=st.t;for(const m of st.marbles){m.lastGain=st.t}}
+function openGate(st){if(st.course.gate)st.course.gate.on=false;for(const g of st.course.gates||[])g.on=false;st.gateOpen=true;st.gateT=st.t;for(const m of st.marbles){m.lastGain=st.t}}
 
 function hitSeg(m,s,h,st){
  const sh=s.shape;if(!sh.on)return;
  const t=clamp(((m.x-s.ax)*s.dx+(m.y-s.ay)*s.dy)/s.len2,0,1),px=s.ax+t*s.dx,py=s.ay+t*s.dy;
  let nx=m.x-px,ny=m.y-py;const d2=nx*nx+ny*ny,rr=R+T;if(d2>=rr*rr)return;
  const d=Math.sqrt(d2)||1e-6;nx/=d;ny/=d;m.x+=nx*(rr-d);m.y+=ny*(rr-d);
+ if(sh.tag){const o=m.sj||(m.sj={});if(o[sh.tag.si]==null)o[sh.tag.si]=sh.tag.v}
  const vn=m.vx*nx+m.vy*ny,e=clamp(sh.e+(m.bounce||0),0,1.1);
  if(vn<0){m.vx-=(1+e)*vn*nx;m.vy-=(1+e)*vn*ny;if(sh.kick){const out=m.vx*nx+m.vy*ny;if(out<sh.kick){m.vx+=nx*(sh.kick-out);m.vy+=ny*(sh.kick-out)}if(st.t-sh.flash>.15)st.events.push({t:'tramp',x:px,y:py,id:m.id});sh.flash=st.t}
   else if(vn<-260)st.events.push({t:'hit',x:px,y:py,v:-vn,id:m.id})}
  const tx=-ny,ty=nx,vt=m.vx*tx+m.vy*ty,dec=vt*(1-Math.exp(-sh.k*h));m.vx-=tx*dec;m.vy-=ty*dec;
  if(sh.boost){const b=sh.boost;if(m.vx*b.ux+m.vy*b.uy<b.max){m.vx+=b.ux*b.acc*h;m.vy+=b.uy*b.acc*h}if(st.t-m.boosted>1.5)st.events.push({t:'boost',id:m.id,x:m.x,y:m.y});m.boosted=st.t}
 }
-function hitPeg(m,p,st){
+function hitPeg(m,p,st,h){
  let nx=m.x-p.x,ny=m.y-p.y;const d2=nx*nx+ny*ny,rr=R+p.r;if(d2>=rr*rr)return;
  const d=Math.sqrt(d2)||1e-6;nx/=d;ny/=d;m.x=p.x+nx*rr;m.y=p.y+ny*rr;
  const vn=m.vx*nx+m.vy*ny,e=clamp(p.e+(m.bounce||0),0,1.1);
+ // a turning drum drags a touching marble along with its surface
+ if(p.kind==='drum'){if(vn<0){m.vx-=(1+e)*vn*nx;m.vy-=(1+e)*vn*ny}const sx=-p.w*p.r*ny,sy=p.w*p.r*nx,vt=(m.vx-sx)*-ny+(m.vy-sy)*nx,dec=vt*(1-Math.exp(-p.k*(h||SUB)));m.vx+=ny*dec;m.vy-=nx*dec;return}
  if(vn<0){m.vx-=(1+e)*vn*nx;m.vy-=(1+e)*vn*ny;
   if(p.kind==='bumper'){const out=m.vx*nx+m.vy*ny;if(out<300){m.vx+=nx*(300-out);m.vy+=ny*(300-out)}p.flash=st.t;st.events.push({t:'bumper',x:p.x,y:p.y,id:m.id})}
   else if(vn<-260)st.events.push({t:'hit',x:m.x-nx*R,y:m.y-ny*R,v:-vn,id:m.id})}
@@ -748,20 +860,63 @@ function hitSpinner(m,sp,st){
   if(vn<0){m.vx-=(1+sp.e)*vn*nx;m.vy-=(1+sp.e)*vn*ny;if(vn<-200)st.events.push({t:'hit',x:px,y:py,v:-vn,id:m.id})}
  }
 }
+// ---- forces added in 2026-11: springs, magnets, gravity wells (and fans, as winds that fade with distance)
+// a spring launcher's pad: the side door lets one marble in → the marble settles on the squashed, latched pad → the latch lets go
+// (Hooke's law: push = k × how far it is still squashed) → a motor squashes the spring again → the door opens for the next marble
+function springStep(sp,st,h){
+ if(sp.ph==='fire'){let M=sp.Mp;for(const m of sp.on)M+=m.mass||1;  // the pad has to speed up whatever sits on it, so a heavier load leaves slower
+  sp.v+=(sp.k*(sp.X-sp.s)/M+G*sp.uy)*h;sp.s+=sp.v*h;
+  if(sp.s>=sp.X){sp.s=sp.X;sp.out=sp.v;sp.v=0;sp.ph=sp.lab?'done':'load';sp.t=st.t;sp.shots=(sp.shots||0)+1;st.events.push({t:'spring',x:sp.x,y:sp.y,id:sp.on[0]?sp.on[0].id:-1})}}
+ else if(sp.ph==='load'){if(st.t-sp.t>.15){sp.s=Math.max(0,sp.s-220*h);if(sp.s===0){sp.ph='open';sp.t=st.t;if(sp.gate)sp.gate.on=false}}}
+ else if(sp.ph==='open'){for(const m of st.marbles){const rx=m.x-sp.x,ry=m.y-sp.y,t=rx*sp.ux+ry*sp.uy,sd=rx*-sp.uy+ry*sp.ux;
+   if(!m.hid&&t>-10&&t<30&&sd>-4&&sd<6){if(sp.gate)sp.gate.on=true;sp.ph='in';sp.t=st.t;sp.hold=0;break}}}  // one marble is through the door: shut it behind
+ else if(sp.ph==='in'){const m=sp.on[0];if(m&&Math.hypot(m.vx,m.vy)<40){sp.hold+=h;if(sp.hold>.08){sp.ph='ready';sp.t=st.t}}else{sp.hold=0;if(st.t-sp.t>1.5){sp.ph='open';if(sp.gate)sp.gate.on=false}}}
+ else if(sp.ph==='ready'){if(sp.lab?st.gateOpen:st.t-sp.t>.08)sp.ph='fire'}
+ sp.on.length=0}
+function hitPad(m,sp){
+ const px=sp.x+sp.ux*sp.s,py=sp.y+sp.uy*sp.s,rx=m.x-px,ry=m.y-py,side=rx*-sp.uy+ry*sp.ux;if(Math.abs(side)>sp.hw)return;
+ const dist=rx*sp.ux+ry*sp.uy,rr=R+T;if(dist>=rr||dist<-rr)return;
+ m.x+=sp.ux*(rr-dist);m.y+=sp.uy*(rr-dist);const vn=(m.vx-sp.v*sp.ux)*sp.ux+(m.vy-sp.v*sp.uy)*sp.uy;if(vn<0){m.vx-=vn*sp.ux;m.vy-=vn*sp.uy}
+ if(!sp.on.includes(m))sp.on.push(m)}
+// a magnet pulls only magnetic (steel) marbles. Point magnets pull harder the closer the marble is (1/d³, like a small magnet);
+// a drum magnet pulls toward the drum, only beside the part of the drum where the magnet sits, and only close to its surface
+function magPull(m,g,st,h){
+ const dx=g.x-m.x,dy=g.y-m.y,d2=dx*dx+dy*dy;if(d2>g.range*g.range)return;const d=Math.sqrt(d2)||1;let a;
+ if(g.arc){const gap=d-g.r0;if(gap>g.band)return;let t=Math.atan2(-dy,-dx)-g.a0;t=((t%TAU)+TAU)%TAU;const span=g.a1-g.a0;if(t>span)return;
+  const w=Math.min(1,t/g.soft,(span-t)/g.soft);a=g.K*w*(1-Math.max(0,gap)/g.band)**2}
+ else{const dd=Math.max(d,g.rmin),q=1-d2/(g.range*g.range);a=g.K/(dd*dd*dd)*q*q}
+ a/=m.mass||1;m.vx+=a*dx/d*h;m.vy+=a*dy/d*h;if(a>m.pull){m.pull=a;m.pa=Math.atan2(dy,dx)}g.flash=st.t}
+// a gravity well: a softened 1/d² pull toward its middle (the same for every mass), a little rolling drag, and a hole in the middle
+function wellPull(m,W,st,h){
+ const dx=W.x-m.x,dy=W.y-m.y,d2=dx*dx+dy*dy;if(d2>W.r*W.r){if(m.wIn===W)m.wIn=null;return false}
+ if(d2<W.rh*W.rh){m.hid={t:st.t,W,laps:m.wl||0};m.vx=m.vy=0;st.events.push({t:'swallow',id:m.id,x:W.x,y:W.y,laps:m.wl||0});return true}
+ const a=W.GM/Math.pow(d2+W.s*W.s,1.5),k=1-W.drag*h;m.vx=(m.vx+a*dx*h)*k;m.vy=(m.vy+a*dy*h)*k;
+ const ang=Math.atan2(-dy,-dx);if(m.wIn===W){let da=ang-m.wang;if(da>Math.PI)da-=TAU;else if(da<-Math.PI)da+=TAU;m.wsum+=da}else{m.wIn=W;m.wsum=0}
+ m.wang=ang;m.wl=Math.abs(m.wsum)/TAU;m.lastGain=st.t;return true}
+// a swallowed marble travels down the pipe behind the board and pops out under the well, one at a time (the pipe is single file)
+function inPipe(m,st){const W=m.hid.W;m.x=W.x;m.y=W.y;m.lastGain=st.t;
+ if(st.t-m.hid.t>W.hold&&st.t-(W.lastOut??-9)>.3&&!st.marbles.some(o=>o!==m&&!o.hid&&(o.x-W.ex)**2+(o.y-W.ey)**2<4*R*R)){W.lastOut=st.t;m.x=W.ex;m.y=W.ey;m.vx=0;m.vy=W.ev;m.wl=m.hid.laps;m.hid=null;m.wIn=null;m.out=st.t}}
 function substep(st,h){
  const ms=st.marbles,c=st.course;st.t+=h;
- for(const m of ms){m.vy+=G*h;const f=1-.05*h;m.vx*=f;m.vy*=f;
-  // wind: the air drags a marble toward the wind's speed; a heavier marble is pushed less (same push, more mass)
-  for(const w of c.winds||[])if(m.x>w.x0&&m.x<w.x1&&m.y>w.y0&&m.y<w.y1){const im=1/(m.mass||1),wx=w.wx+(w.sway?Math.sin(m.y*.035+st.t*2.2)*w.sway:0);m.vx+=(wx-m.vx)*Math.min(1,w.kx*im*h);m.vy+=(w.wy-m.vy)*Math.min(1,w.ky*im*h)}
- const sp=Math.hypot(m.vx,m.vy);if(sp>MAXV){m.vx*=MAXV/sp;m.vy*=MAXV/sp}m.x+=m.vx*h;m.y+=m.vy*h;m.ang+=m.vx*h/R}
- for(let i=0;i<ms.length;i++)for(let j=i+1;j<ms.length;j++){const a=ms[i],b=ms[j],dx=b.x-a.x,dy=b.y-a.y,d2=dx*dx+dy*dy;
+ for(const sp of c.springs)springStep(sp,st,h);
+ for(const m of ms){if(m.hid){inPipe(m,st);continue}
+  m.vy+=G*h;const f=1-.05*h;m.vx*=f;m.vy*=f;
+  // wind: the air drags a marble toward the wind's speed; a heavier marble is pushed less (same push, more mass).
+  // A fan's wind (fx, d0) is fastest at the fan and slows down farther away from it.
+  for(const w of c.winds)if(m.x>w.x0&&m.x<w.x1&&m.y>w.y0&&m.y<w.y1){const im=1/(m.mass||1),fo=w.d0?1/(1+((m.x-w.fx)/w.d0)**2):1,wx=(w.wx+(w.sway?Math.sin(m.y*.035+st.t*2.2)*w.sway:0))*fo;m.vx+=(wx-m.vx)*Math.min(1,w.kx*im*h);m.vy+=(w.wy-m.vy)*Math.min(1,w.ky*im*h)}
+  let cap=MAXV;if(m.mag){m.pull=0;for(const g of c.magnets)magPull(m,g,st,h)}
+  for(const W of c.wells)if(wellPull(m,W,st,h))cap=1500;
+  if(m.hid)continue;
+ const sp=Math.hypot(m.vx,m.vy);if(sp>cap){m.vx*=cap/sp;m.vy*=cap/sp}m.x+=m.vx*h;m.y+=m.vy*h;m.ang+=m.vx*h/R}
+ for(let i=0;i<ms.length;i++)for(let j=i+1;j<ms.length;j++){const a=ms[i],b=ms[j],dx=b.x-a.x,dy=b.y-a.y,d2=dx*dx+dy*dy;if(a.hid||b.hid)continue;
   if(d2<4*R*R&&d2>1e-9){const d=Math.sqrt(d2),nx=dx/d,ny=dy/d,wa=1/(a.mass||1),wb=1/(b.mass||1),ws=wa+wb,p=2*R-d;a.x-=nx*p*wa/ws;a.y-=ny*p*wa/ws;b.x+=nx*p*wb/ws;b.y+=ny*p*wb/ws;
    // a heavier marble pushes harder and is pushed less (momentum); equal marbles behave exactly as before
    const rv=(b.vx-a.vx)*nx+(b.vy-a.vy)*ny;if(rv<0){const jj=-1.6*rv/ws;a.vx-=jj*wa*nx;a.vy-=jj*wa*ny;b.vx+=jj*wb*nx;b.vy+=jj*wb*ny;if(rv<-220)st.events.push({t:'clack',x:(a.x+b.x)/2,y:(a.y+b.y)/2,v:-rv})}}}
- for(const m of ms){
+ for(const m of ms){if(m.hid)continue;
   const list=c.grid.get(Math.floor(m.x/CELL)+','+Math.floor(m.y/CELL));
-  if(list)for(const o of list){if(o.shape)hitSeg(m,o,h,st);else hitPeg(m,o,st)}
+  if(list)for(const o of list){if(o.shape)hitSeg(m,o,h,st);else hitPeg(m,o,st,h)}
   for(const sp of c.spinners)hitSpinner(m,sp,st);
+  for(const sp of c.springs)hitPad(m,sp);
  }
 }
 function updateProgress(st){
@@ -820,13 +975,18 @@ const WORLDS=[
  {id:'chaos',name:L('카오스 랜덤','Chaos Random'),desc:L('매번 코스가 바뀌어요!','A new course every race!'),mods:null,
   bg:['#371259','#d6559f'],deco:'chaos',panel:'rgba(255,255,255,.16)',panelEdge:'rgba(255,255,255,.45)',rail:'#ffffff',railDark:'#2a1450',railLight:'#ffffff',glow:'#ffe36e',peg:'#ffe36e',pegTop:'#fff7c8',bumper:'#36e0c0',bowl:'#ff8a3d',accent:'#ffe36e',label:'#ffffff'},
  {id:'park',em:'🎡',name:L('과학 놀이공원','Science Park'),desc:L('점프 · 트램펄린 · 바람 터널','Jumps · Trampolines · Wind tunnel'),mods:['ramps2b','jump','tramp','fan','ice','bumpers'],
-  bg:['#ff9f80','#ffe9b8'],deco:'park',panel:'rgba(255,255,255,.55)',panelEdge:'rgba(255,255,255,.9)',rail:'#ffffff',railDark:'#d23f72',railLight:'#ffffff',glow:null,peg:'#ff5c8a',pegTop:'#ffc2d4',bumper:'#2fbaf5',bowl:'#ffa21f',accent:'#ff4f86',label:'#7a2346'}
+  bg:['#ff9f80','#ffe9b8'],deco:'park',panel:'rgba(255,255,255,.55)',panelEdge:'rgba(255,255,255,.9)',rail:'#ffffff',railDark:'#d23f72',railLight:'#ffffff',glow:null,peg:'#ff5c8a',pegTop:'#ffc2d4',bumper:'#2fbaf5',bowl:'#ffa21f',accent:'#ff4f86',label:'#7a2346'},
+ // added 2026-11: the new force pieces. Its magnet brings out the steel team; the pieces were picked so steel and glass win about equally
+ // often (100 headless races with 8 marbles: steel won 53).
+ {id:'force',em:'🧲',name:L('힘의 탐험 기지','Force Base'),desc:L('자석 · 용수철 · 중력 우물 · 선풍기','Magnet · Spring · Gravity well · Fan'),mods:['magnet','spring3','well','blow','fan','bumpers'],
+  bg:['#120c33','#33246b'],deco:'force',panel:'rgba(160,140,255,.13)',panelEdge:'rgba(176,160,255,.55)',rail:'#d2ccff',railDark:'#3b2f80',railLight:'#ffffff',glow:null,peg:'#ffcf5a',pegTop:'#fff2bf',bumper:'#ff6fb5',bowl:'#8f7bff',accent:'#7df9ff',label:'#efeaff'}
 ];
 // the clean look used by the marble lab
 const LAB_THEME={id:'lab',name:L('구슬 실험실','Marble Lab'),bg:['#0f2c4c','#25507a'],deco:'lab',panel:'rgba(255,255,255,.07)',panelEdge:'rgba(255,255,255,.3)',rail:'#e8eef7',railDark:'#56688a',railLight:'#ffffff',glow:null,peg:'#ffd84a',pegTop:'#fff3b0',bumper:'#ff6b8b',bowl:'#ffb020',accent:'#ffd84a',label:'#ffffff'};
 const CHAOS_POOL=['ramps3b','pegs','funnels3','wash2','zigzag','bumpers','spinner','split','ramps2b','funnels2'];
 const SECTION={start:['🚦',L('출발대','Start gate')],ramps:['↩️',L('지그재그 경사로','Switchback ramps')],wash:['🪜',L('덜컹덜컹 계단길','Bumpy stairs')],pegs:['🎯',L('핀볼 숲','Peg forest')],zigzag:['🗼',L('지그재그 탑','Zigzag tower')],funnels:['🌀',L('깔때기 그릇','Funnel bowls')],spinner:['🎡',L('바람개비 통로','Spinner shaft')],bumpers:['💥',L('통통 범퍼','Bumper zone')],split:['🔀',L('갈림길','Split paths')],finish:['🏁',L('결승 레인','Finish lane')],
- ice:['❄️',L('얼음 미끄럼틀','Ice slide')],honey:['🍯',L('꿀 언덕','Honey hill')],jump:['🚀',L('점프 절벽','Cliff jump')],tramp:['🤸',L('트램펄린','Trampolines')],fan:['🌬️',L('바람 터널','Wind tunnel')],lab:['🔬',L('실험','Experiment')]};
+ ice:['❄️',L('얼음 미끄럼틀','Ice slide')],honey:['🍯',L('꿀 언덕','Honey hill')],jump:['🚀',L('점프 절벽','Cliff jump')],tramp:['🤸',L('트램펄린','Trampolines')],fan:['🌬️',L('바람 터널','Wind tunnel')],lab:['🔬',L('실험','Experiment')],
+ spring:['➰',L('용수철 발사대','Spring launcher')],magnet:['🧲',L('자석 드럼','Magnet drum')],well:['🕳️',L('중력 우물 (블랙홀 모형)','Gravity well (black-hole model)')],blow:['💨',L('선풍기','Fan')]};
 const POINTS=[12,9,7,5,3,1],LEAGUE_RACES=5,CHEERS=3;
 // ---------------------------------------------------------------- course pieces, lab experiments, marble looks, badges
 // Pieces the child can stack into their own course (ids are Sim.build modules). The short line names the physics at work.
@@ -844,8 +1004,16 @@ const PIECES=[
  ['honey','🍯',L('꿀 언덕','Honey hill'),L('마찰이 커서 느릿느릿','Lots of friction, slow and sticky')],
  ['jump','🚀',L('점프 절벽','Cliff jump'),L('빠른 구슬은 날아서 건너요','Fast marbles fly across')],
  ['tramp','🤸',L('트램펄린','Trampolines'),L('통통 높이 튀어 올라요','Bouncy pads')],
- ['fan','🌬️',L('바람 터널','Wind tunnel'),L('바람이 받쳐서 둥실둥실','The air holds them up')]];
+ ['fan','🌬️',L('바람 터널','Wind tunnel'),L('바람이 받쳐서 둥실둥실','The air holds them up')],
+ // added 2026-11: forces you can see at work. A course with a magnet drum brings out the ⚙️ steel team (every even number).
+ ['spring','➰',L('용수철 발사대','Spring launcher'),L('눌린 용수철이 펴지며 휙!','A squashed spring flings it')],
+ ['magnet','🧲',L('자석 드럼','Magnet drum'),L('쇠구슬만 끌어당겨요','Pulls only steel marbles')],
+ ['well','🕳️',L('중력 우물','Gravity well'),L('가운데로 갈수록 세게 끌어요','Pulls harder near the middle')],
+ ['blow','💨',L('선풍기','Fan'),L('가까울수록 바람이 세요','Stronger wind up close')]];
 const PIECE_IDS=PIECES.map(p=>p[0]),PIECE_BY=Object.fromEntries(PIECES.map(p=>[p[0],p])),MAX_PIECES=8,MAX_CUSTOMS=6;
+// the spring launcher is one piece in the builder, stored as spring1–3 (how far it is squashed); a new one starts at 2
+const pieceOf=m=>/^spring[123]$/.test(m)?'spring':m,okMod=m=>/^spring[123]$/.test(m)||(m!=='spring'&&PIECE_IDS.includes(m)),modOf=p=>p==='spring'?'spring2':p,springLv=m=>+m.slice(6)||2;
+const FORCE_IDS=['spring','magnet','well','blow'];
 // Lab materials: same size, different weight (mass) or springiness (bounce)
 const MATS={glass:{ic:'🔮',n:L('유리구슬','glass marble'),mass:1,bounce:0,c:'#4cb4ff'},steel:{ic:'⚙️',n:L('쇠구슬','steel ball'),mass:3,bounce:0,c:'#c6d0de',metal:1},
  rubber:{ic:'🔴',n:L('고무공','rubber ball'),mass:1,bounce:.35,c:'#ff4f6d'},clay:{ic:'🟤',n:L('찰흙공','clay ball'),mass:1,bounce:-.45,c:'#b07a52',matte:1}};
@@ -915,10 +1083,39 @@ const EXPS=[
   lanes:[{mat:'glass',name:L('📏 곧은 길','📏 Straight path')},{mat:'glass',curve:true,name:L('🎢 휘어진 길','🎢 Curved path')}],
   opts:[['A',L('곧은 길 (더 짧아요)','The straight path (shorter)')],['B',L('휘어진 길','The curved path')],['same',L('거의 동시에','About the same time')]],ans:'B',
   why:L('휘어진 길은 처음에 가파르게 떨어져서 금방 빨라져요. 길이 더 길어도 먼저 도착해요!','The curved path drops steeply first, so the marble speeds up early. It wins even though its path is longer!'),
-  life:L('롤러코스터 첫 내리막이 아주 가파른 것도 빨리 속도를 내기 위해서예요.','Roller coasters start with a very steep drop to build up speed fast.')}];
+  life:L('롤러코스터 첫 내리막이 아주 가파른 것도 빨리 속도를 내기 위해서예요.','Roller coasters start with a very steep drop to build up speed fast.')},
+ // added 2026-11: one experiment for each new force. Each was run headless at 30–144 frames per second and always gives its answer.
+ {id:'magnet',ic:'🧲',kind:'magnet',measure:'far',t:L('자석 실험','Magnet test'),
+  q:L('떨어지는 공 옆에 커다란 자석이 있어요. 어느 공이 자석 쪽으로 끌려갈까요?','A big magnet stands beside the falling balls. Which ball gets pulled toward the magnet?'),
+  diff:L('다른 점은 딱 하나: 공의 재료예요 (쇠와 유리, 크기는 같아요)','Only one thing is different: what the ball is made of (steel or glass, same size)'),
+  lanes:[{mat:'steel',name:L('⚙️ 쇠구슬','⚙️ Steel ball')},{mat:'glass',name:L('🔮 유리구슬','🔮 Glass marble')}],
+  opts:[['A',L('쇠구슬','The steel ball')],['B',L('유리구슬','The glass marble')],['same',L('둘 다 똑같이','Both the same')]],ans:'A',
+  why:L('자석은 쇠(철)로 된 물체를 끌어당겨요. 유리는 끌어당기지 않아서 유리구슬은 곧장 떨어졌어요. 자석에 가까울수록 끌어당기는 힘이 훨씬 세져요.','A magnet pulls things made of iron or steel. It does not pull glass, so the glass marble fell straight down. The closer something is to a magnet, the harder the pull.'),
+  life:L('냉장고 문은 대부분 쇠로 되어 있어서 자석이 붙어요. 알루미늄 캔처럼 자석에 붙지 않는 금속도 있어요.','Most fridge doors are steel, so magnets stick to them. Some metals, like aluminum cans, are not pulled by magnets.')},
+ {id:'spring',ic:'➰',kind:'spring',measure:'up',t:L('용수철 발사대','Spring launcher'),
+  q:L('같은 용수철을 많이 누른 발사대와 조금 누른 발사대가 구슬을 위로 쏘아요. 어느 구슬이 더 높이 올라갈까요?','Two launchers have the same kind of spring. One is squashed a lot, one only a little. Which marble flies higher?'),
+  diff:L('다른 점은 딱 하나: 용수철을 누른 정도예요 (2칸과 1칸)','Only one thing is different: how far the spring is squashed (2 squares or 1)'),
+  lanes:[{mat:'glass',comp:2,name:L('➰ 많이 눌렀어요','➰ Squashed a lot')},{mat:'glass',comp:1,name:L('➰ 조금 눌렀어요','➰ Squashed a little')}],
+  opts:[['A',L('많이 누른 쪽','The one squashed a lot')],['B',L('조금 누른 쪽','The one squashed a little')],['same',L('똑같이 올라가요','The same height')]],ans:'A',
+  why:L('용수철은 많이 누를수록 다시 펴지려는 힘(탄성력)이 커요. 그래서 많이 누른 용수철이 구슬을 훨씬 높이 쏘아 올렸어요.','The more a spring is squashed, the harder it pushes as it springs back (elastic force). So the spring squashed more shot the marble much higher.'),
+  life:L('핀볼 게임기도 용수철 손잡이를 당겼다가 놓아서 공을 쏘아요. 많이 당길수록 공이 세게 나가요.','A pinball machine launches its ball with a spring, too. The farther you pull it back, the faster the ball shoots out.')},
+ {id:'well',ic:'🕳️',kind:'well',measure:'laps',t:L('중력 우물 (블랙홀 모형)','Gravity well (black-hole model)'),
+  q:L('중력 우물은 가운데로 끌어당기는 블랙홀 모형이에요. 빠르게 들어간 구슬과 느리게 들어간 구슬 중 어느 쪽이 더 많이 돌까요?','A gravity well is a model of a black hole: it pulls toward the middle. One marble goes in fast and one goes in slowly. Which one circles more?'),
+  diff:L('다른 점은 딱 하나: 들어가는 빠르기예요 (높은 곳에서 떨어지면 더 빨라요)','Only one thing is different: how fast the marble goes in (it is faster when it drops from higher up)'),
+  lanes:[{mat:'glass',dropY:60,name:L('💨 빠르게 들어가요','💨 Goes in fast')},{mat:'glass',dropY:220,name:L('🐢 느리게 들어가요','🐢 Goes in slowly')}],
+  opts:[['A',L('빠르게 들어간 구슬','The fast one')],['B',L('느리게 들어간 구슬','The slow one')],['same',L('똑같이 돌아요','The same')]],ans:'A',
+  why:L('옆으로 빠르게 움직이는 구슬은 가운데로 곧장 떨어지지 않고 빙글빙글 돌아요. 구르면서 조금씩 느려지면 결국 가운데로 빨려 들어가요.','A marble moving fast sideways does not fall straight to the middle; it circles around instead. As rolling slows it down, it is finally pulled into the middle.'),
+  life:L('달도 아주 빠르게 움직여서 지구로 떨어지지 않고 지구 둘레를 돌아요. 무거운 천체일수록 끌어당기는 중력이 세요. 블랙홀은 중력이 아주 세서 빛도 빠져나오지 못해요.','The Moon moves very fast, so it circles Earth instead of falling in. The more massive an object, the stronger its gravity. A black hole’s gravity is so strong that not even light escapes.')},
+ {id:'fan',ic:'💨',kind:'fan',measure:'far',t:L('선풍기 거리','Near or far from a fan'),
+  q:L('선풍기 가까이와 멀리에서 공이 떨어져요. 어느 공이 바람에 더 멀리 밀려날까요?','Balls fall close to a fan and farther from it. Which one does the wind push farther?'),
+  diff:L('다른 점은 딱 하나: 선풍기와의 거리예요 (공과 선풍기는 똑같아요)','Only one thing is different: how far the ball is from the fan (the balls and the fans are the same)'),
+  lanes:[{mat:'glass',fd:80,name:L('💨 선풍기 가까이','💨 Close to the fan')},{mat:'glass',fd:200,name:L('💨 선풍기에서 멀리','💨 Far from the fan')}],
+  opts:[['A',L('선풍기 가까이','Close to the fan')],['B',L('선풍기에서 멀리','Far from the fan')],['same',L('똑같이 밀려요','The same distance')]],ans:'A',
+  why:L('선풍기 바람은 가까울수록 세고 멀어질수록 약해져요. 그래서 선풍기 가까이에서 떨어진 공이 더 멀리 밀려났어요.','A fan’s wind is strongest up close and gets weaker farther away. So the ball that fell close to the fan was pushed farther.'),
+  life:L('선풍기 바로 앞에서는 바람이 세지만 방 끝에서는 약하게 느껴져요.','Right in front of a fan the wind is strong, but across the room it feels gentle.')}];
 const EXP_IDS=EXPS.map(e=>e.id),UNIT=30;  // distances are counted in "칸" (squares) of 30 px, like a ruler
 // My marble's looks. Each one is earned by a badge for something the child did (never bought, never random).
-const PATTERNS=[['plain','⚪',L('기본','Classic')],['stripe','🦓',L('줄무늬','Stripes')],['face','😊',L('웃는 얼굴','Smiley')],['rainbow','🌈',L('무지개','Rainbow')],['galaxy','🌌',L('은하수','Galaxy')],['fire','🔥',L('불꽃','Flame')],['star','⭐',L('별','Star')],['blueprint','📐',L('설계도','Blueprint')]];
+const PATTERNS=[['plain','⚪',L('기본','Classic')],['stripe','🦓',L('줄무늬','Stripes')],['face','😊',L('웃는 얼굴','Smiley')],['rainbow','🌈',L('무지개','Rainbow')],['galaxy','🌌',L('은하수','Galaxy')],['fire','🔥',L('불꽃','Flame')],['star','⭐',L('별','Star')],['blueprint','📐',L('설계도','Blueprint')],['planet','🪐',L('행성','Planet')]];
 const TRAILS=[['none','✖️',L('없음','None')],['sparkle','✨',L('반짝이','Sparkles')],['bubbles','💧',L('비눗방울','Bubbles')],['rainbow','🌈',L('무지개 꼬리','Rainbow tail')],['stars','🌟',L('별똥별','Shooting stars')],['fire','🔥',L('불꽃 꼬리','Flame tail')],['gears','⚙️',L('톱니 꼬리','Gear trail')]];
 
 // Design challenges (plan → build → test → improve). Every goal is measured by the real race on the child's own course:
@@ -936,12 +1133,19 @@ const CHALS=[
  {id:'double',ic:'⏳',t:L('두 배로 느리게','Twice as long'),g:L('코스를 고쳐서 우승 시간을 지난 시험의 2배 이상으로 만들어요','Change your course so the winning time is at least double the last test'),r:L('먼저 한 번 시험해요','Test once first'),start:['bumpers','pegs'],
   b:[L('3배 이상','Three times as long or more'),L('조각 하나만 바꿔서 성공','Do it by changing just one piece')]},
  {id:'same',ic:'📏',t:L('똑같이 두 번','Same twice'),g:L('같은 코스를 두 번 시험해서 우승 시간 차이를 1초 안으로 만들어요','Test the same course twice and keep the two winning times within 1 second'),r:L('조각 4개 이상 · 두 번째 시험 전에 바꾸지 않아요','At least 4 pieces · no changes before the second test'),start:['pegs','bumpers','tramp','split'],
-  b:[L('0.3초 안으로','Within 0.3 seconds'),L('조각 6개 이상으로 성공','Do it with 6 or more pieces')]}];
+  b:[L('0.3초 안으로','Within 0.3 seconds'),L('조각 6개 이상으로 성공','Do it with 6 or more pieces')]},
+ // added 2026-11: two challenges about mass and the new forces. They are judged on who finished first or who crossed the spring's gap,
+ // not on time. Measured headless with 8 marbles: one wind tunnel puts the steel team first about 1 run in 5, two about 4 in 5, three
+ // nearly always; two fans put the glass team first about 4 in 5. Spring level 2 sorts glass from steel in nearly every run, level 3 sends everyone across.
+ {id:'team',ic:'⚖️',t:L('쇠구슬 팀 먼저','Steel team first'),g:L('⚙️ 쇠구슬이 모두 🔮 유리구슬보다 먼저 들어오게 해요','Get every ⚙️ steel marble to the finish before any 🔮 glass marble'),r:L('🧲 자석 드럼을 꼭 넣어요. 자석이 있어야 쇠구슬 팀이 나와요','Include a 🧲 magnet drum. The steel team only races when there is a magnet'),start:['magnet','blow','pegs'],
+  b:[L('조각 3개 이하로 성공','Do it with 3 pieces or fewer'),L('반대로 🔮 유리구슬 팀이 먼저 들어오게도 해 봐요','Also make the 🔮 glass team arrive first')],team:1},
+ {id:'sort',ic:'➰',t:L('용수철 분류기','Spring sorter'),g:L('용수철을 알맞게 눌러서 🔮 유리구슬만 건너고 ⚙️ 쇠구슬은 그물에 떨어지게 해요','Squash the spring just right, so only 🔮 glass marbles fly across and ⚙️ steel ones drop into the net'),r:L('🧲 자석 드럼과 ➰ 용수철 발사대를 넣어요','Include a 🧲 magnet drum and a ➰ spring launcher'),start:['magnet','spring1','pegs'],
+  b:[L('모든 구슬이 건너게도 해 봐요 (쇠구슬도!)','Also get every marble across, steel ones too'),L('용수철 발사대 2개 모두에서 성공','Do it with 2 spring launchers')],sort:1}];
 const CHAL_BY=Object.fromEntries(CHALS.map(c=>[c.id,c]));
 // About how many seconds each piece adds to a race in this simulation (measured headless; used only to pick a hint, never shown)
-const COST={zigzag:10.7,ramps3:9.6,honey:9,ice:6.7,wash2:4.9,tramp:4.6,ramps2b:4.1,jump:4,split:3.9,funnels3:3.9,fan:3.2,pegs:2.5,spinner:1.9,bumpers:1.6};
+const COST={zigzag:10.7,ramps3:9.6,honey:9,ice:6.7,wash2:4.9,tramp:4.6,ramps2b:4.1,jump:4,split:3.9,funnels3:3.9,fan:3.2,pegs:2.5,spinner:1.9,bumpers:1.6,spring:5.2,blow:4.8,well:3.6,magnet:3.4};
 // pieces where marbles bounce off things, so the same course gives a slightly different time each run
-const BUMPY=['pegs','bumpers','tramp','split','wash2','spinner'];
+const BUMPY=['pegs','bumpers','tramp','split','wash2','spinner','well','magnet','blow'];
 // how many spots differ between two courses: 0 = same, 1 = one piece swapped, added or removed, 2 = more
 function diffN(a,b){if(a.join()===b.join())return 0;if(a.length===b.length)return Math.min(2,a.reduce((t,x,i)=>t+(x!==b[i]),0));
  if(Math.abs(a.length-b.length)!==1)return 2;const [lo,hi]=a.length<b.length?[a,b]:[b,a];for(let i=0;i<hi.length;i++){if(hi.slice(0,i).concat(hi.slice(i+1)).join()===lo.join())return 1}return 2}
@@ -951,24 +1155,27 @@ let worldIdx=0,numBalls=8,voiceOn=true,sfxOn=true,mine=0,mineStats={races:0,wins
 // added later: my own courses, my marble's look, badge progress (cheers, worlds raced, experiments done…)
 // fixes: a saved course whose pieces were changed and raced again (build → test → improve), counted since 2026-11
 // notes: times the lab notebook was opened (added 2026-11); labs[id] also keeps the last guess (p), result (w) and measured values (v) for the notebook
-const freshStats=()=>({cheers:0,worlds:[],builds:0,customRaces:0,labs:{},leagues:0,replays:0,fixes:0,notes:0});
+// forces (added 2026-11-15): which new force pieces (FORCE_IDS) the child has met in a finished race
+const freshStats=()=>({cheers:0,worlds:[],builds:0,customRaces:0,labs:{},leagues:0,replays:0,fixes:0,notes:0,forces:[]});
 // chal[id]: design challenge progress. s = stars won (bits: 1 goal, 2 and 4 bonuses), n = test runs, met = runs that met the goal,
 // mods/theme = the challenge course, prev = the last test {m: pieces, t: winner's seconds}, hist = recent test times,
 // dirs = one-change wins that went slower (1) / faster (2), imp = goal met after an earlier test missed it, key = last run counted in the report
 let customs=[],skin={pat:'plain',trail:'none'},stats=freshStats(),badges=[],chal={};
-function save(){try{localStorage.setItem('marbleRush.v2',JSON.stringify({worldIdx,numBalls,voiceOn,sfxOn,mine,mineStats,voicePick,names,mode,league,customs,skin,stats,badges,chal}))}catch(e){}}
+// wv: how many built-in worlds there were when this was saved (my own courses are listed after them, so their index moves when a world is added)
+function save(){try{localStorage.setItem('marbleRush.v2',JSON.stringify({worldIdx,numBalls,voiceOn,sfxOn,mine,mineStats,voicePick,names,mode,league,customs,skin,stats,badges,chal,wv:WORLDS.length}))}catch(e){}}
 (function load(){try{const d=JSON.parse(localStorage.getItem('marbleRush.v2')||'null')||JSON.parse(localStorage.getItem('marble3dsettings')||'{}');
  const nn=(v,max=1e6)=>Math.max(0,Math.min(max,Math.floor(Number(v)||0)));
- if(Array.isArray(d.customs))customs=d.customs.filter(c=>c&&Array.isArray(c.mods)).slice(0,6).map(c=>({name:String(c.name||'').replace(/[<>]/g,'').slice(0,12)||L('나의 코스','My course'),theme:clamp(nn(c.theme),0,WORLDS.length-1),mods:c.mods.filter(m=>PIECE_IDS.includes(m)).slice(0,8)})).filter(c=>c.mods.length);
+ if(Array.isArray(d.customs))customs=d.customs.filter(c=>c&&Array.isArray(c.mods)).slice(0,6).map(c=>({name:String(c.name||'').replace(/[<>]/g,'').slice(0,12)||L('나의 코스','My course'),theme:clamp(nn(c.theme),0,WORLDS.length-1),mods:c.mods.filter(okMod).slice(0,8)})).filter(c=>c.mods.length);
  if(d.skin&&typeof d.skin==='object')skin={pat:String(d.skin.pat||'plain'),trail:String(d.skin.trail||'none')};
- if(d.stats&&typeof d.stats==='object'){const x=d.stats;stats={cheers:nn(x.cheers),worlds:Array.isArray(x.worlds)?x.worlds.filter(w=>WORLDS.some(W=>W.id===w)):[],builds:nn(x.builds),customRaces:nn(x.customRaces),labs:{},leagues:nn(x.leagues),replays:nn(x.replays),fixes:nn(x.fixes),notes:nn(x.notes)};
+ if(d.stats&&typeof d.stats==='object'){const x=d.stats;stats={cheers:nn(x.cheers),worlds:Array.isArray(x.worlds)?x.worlds.filter(w=>WORLDS.some(W=>W.id===w)):[],builds:nn(x.builds),customRaces:nn(x.customRaces),labs:{},leagues:nn(x.leagues),replays:nn(x.replays),fixes:nn(x.fixes),notes:nn(x.notes),forces:Array.isArray(x.forces)?FORCE_IDS.filter(f=>x.forces.includes(f)):[]};
   const K=['A','B','same'];if(x.labs&&typeof x.labs==='object')for(const k in x.labs)if(EXP_IDS.includes(k)){const y=x.labs[k]||{},e={n:nn(y.n),right:nn(y.right)};if(K.includes(y.p))e.p=y.p;if(K.includes(y.w))e.w=y.w;if(Array.isArray(y.v)&&y.v.length===2&&y.v.every(q=>Number.isFinite(+q)))e.v=y.v.map(q=>clamp(+q,0,999));stats.labs[k]=e}}
- const mods=a=>Array.isArray(a)?a.filter(m=>PIECE_IDS.includes(m)).slice(0,MAX_PIECES):[];
+ const mods=a=>Array.isArray(a)?a.filter(okMod).slice(0,MAX_PIECES):[];
  if(d.chal&&typeof d.chal==='object')for(const c of CHALS){const x=d.chal[c.id];if(!x||typeof x!=='object')continue;
   const pv=x.prev&&typeof x.prev==='object'&&Number.isFinite(+x.prev.t)&&mods(x.prev.m).length?{m:mods(x.prev.m),t:clamp(+x.prev.t,0,999)}:null;
   chal[c.id]={s:nn(x.s,7),n:nn(x.n),met:nn(x.met),dirs:nn(x.dirs,3),imp:x.imp?1:0,mods:mods(x.mods),theme:clamp(nn(x.theme),0,WORLDS.length-1),prev:pv,hist:Array.isArray(x.hist)?x.hist.map(Number).filter(Number.isFinite).map(t=>clamp(t,0,999)).slice(-5):[],key:String(x.key||'').slice(0,240)}}
  if(Array.isArray(d.badges))badges=d.badges.filter(b=>typeof b==='string');
- worldIdx=clamp(Number(d.worldIdx??d.mapIndex)||0,0,WORLDS.length+customs.length-1);numBalls=clamp(Number(d.numBalls)||8,2,16);voiceOn=d.voiceOn!==false;sfxOn=d.sfxOn!==false;mine=clamp(Number(d.mine)||0,0,numBalls-1);
+ const wv=nn(d.wv)||7;worldIdx=Number(d.worldIdx??d.mapIndex)||0;if(wv<WORLDS.length&&worldIdx>=wv)worldIdx+=WORLDS.length-wv;
+ worldIdx=clamp(worldIdx,0,WORLDS.length+customs.length-1);numBalls=clamp(Number(d.numBalls)||8,2,16);voiceOn=d.voiceOn!==false;sfxOn=d.sfxOn!==false;mine=clamp(Number(d.mine)||0,0,numBalls-1);
  mineStats={races:Math.max(0,Number(d.mineStats?.races)||0),wins:Math.max(0,Number(d.mineStats?.wins)||0)};voicePick=d.voicePick&&typeof d.voicePick==='object'?d.voicePick:{};
  if(Array.isArray(d.names))names=Array.from({length:16},(_,i)=>String(d.names[i]||'').replace(/[<>]/g,'').slice(0,10));mode=d.mode==='league'?'league':'single';
  if(d.league&&Array.isArray(d.league.worlds)&&d.league.n===numBalls)league=d.league}catch(e){}})();
@@ -1013,6 +1220,11 @@ if(ME){T.winMine=L(` ${ME.name}의 구슬이에요!`,` That is ${ME.name}'s marb
 // commentary for the new pieces, plus a few true science facts mixed into the chatter
 Object.assign(T.sec,L({ice:'얼음 미끄럼틀! 마찰이 작아서 쌩쌩 미끄러져요!',honey:'꿀 언덕이에요! 끈적끈적, 마찰이 커서 느려져요!',jump:'점프 절벽! 빠른 구슬은 하늘을 날아요!',tramp:'트램펄린 구간! 통통 높이 튀어 올라요!',fan:'바람 터널! 바람이 받쳐 줘서 둥실둥실 내려와요!'},
  {ice:'The ice slide! Hardly any friction, so they zoom!',honey:'Honey hill! Sticky and slow: lots of friction!',jump:'The cliff jump! Fast marbles fly through the air!',tramp:'Trampolines! Boing, way up high!',fan:'The wind tunnel! The air holds them up, so they float down!'}));
+// the first time a marble meets a new force piece in a race, the commentary names the force at work (said once per race)
+const FORCE_LINE=L({spring:'➰ 용수철 발사대! 눌린 용수철이 펴지며 구슬을 튕겨요. 탄성의 힘이에요!',magnet:'🧲 자석 드럼! 자석은 쇠구슬만 끌어당겨요. 자석의 힘이에요!',well:'🕳️ 중력 우물이에요! 가운데에 가까울수록 더 세게 끌어당겨요. 중력의 모형이에요!',blow:'💨 선풍기! 바람의 힘이 구슬을 밀어요. 가벼운 구슬일수록 많이 밀려요!'},
+ {spring:'Spring launcher! The squashed spring springs back and flings the marble. That is elastic force!',magnet:'Magnet drum! A magnet pulls only the steel marbles. That is magnetic force!',well:'The gravity well! The closer to the middle, the harder it pulls. It is a model of gravity!',blow:'The fan! The wind pushes the marbles along. Lighter marbles get pushed more!'});
+Object.assign(T.sec,FORCE_LINE);
+const FORCE_TAG=L({spring:'➰ 탄성의 힘!',magnet:'🧲 자석의 힘!',well:'🕳️ 중력!',blow:'💨 바람의 힘!'},{spring:'➰ Elastic force!',magnet:'🧲 Magnetic force!',well:'🕳️ Gravity!',blow:'💨 Wind force!'});
 T.general.push(...L(['구슬은 내려갈수록 빨라져요. 중력이 계속 끌어당기거든요!','범퍼에 부딪히면 방향이 확 바뀌어요. 힘을 받으면 움직임이 바뀌어요!','경사가 가파를수록 구슬이 더 빨라져요!'],['Marbles speed up on the way down. Gravity keeps pulling!','Hit a bumper and the direction changes. A push changes how things move!','The steeper the slope, the faster the marble!']));
 const LOSE_LINES=[['끝까지 응원한 마음이 멋져요! 구슬도 힘이 났을 거예요 🌙','Cheering to the very end was great! Your marble felt it 🌙'],['레이스는 매번 결과가 달라요. 그래서 더 재밌어요! 🌙','Every race turns out different. That is what makes it fun! 🌙'],['다음 레이스도 같이 응원해요! 🌙','Let’s cheer together in the next race too! 🌙']];
 const fill=(s,i,extra={})=>s.replace('{n}',sayName(i)).replace('{N}',sayName(i,true)).replace('{r}',String(extra.r??'')).replace('{k}',String(extra.k??''));
@@ -1027,19 +1239,27 @@ function prepare(){
  if('speechSynthesis' in window)speechSynthesis.cancel();
  rec=[];recEnd=Infinity;replay=null;trail.length=0;mine=clamp(mine,0,numBalls-1);
  if(labMode&&labExp)setupLab();
- else if(chalRun){raceWorld=-1;theme=chalTheme(chalRun);course=Sim.build(chalRun.mods);st=Sim.createState(course,numBalls,shuffle([...Array(numBalls).keys()]));for(let i=0;i<40;i++)Sim.step(st,1/60)}
+ else if(chalRun){raceWorld=-1;theme=chalTheme(chalRun);course=Sim.build(chalRun.mods);st=Sim.createState(course,numBalls,shuffle([...Array(numBalls).keys()]));steelTeam();for(let i=0;i<40;i++)Sim.step(st,1/60)}
  else{raceWorld=raceWorldIdx();theme=worldAt(raceWorld);
   const mods=theme.mods||shuffle(CHAOS_POOL.slice()).slice(0,6);
   course=Sim.build(mods);
   if(theme.id==='chaos'){const hues=['#ff6b6b','#ffd93d','#6bcb77','#4d96ff','#c77dff','#ff9f1c'];course.shapes.forEach((s,i)=>{if(!['frame','glass','gate','tramp','net'].includes(s.style))s.tint=hues[i%hues.length]})}
-  st=Sim.createState(course,numBalls,shuffle([...Array(numBalls).keys()]));
+  st=Sim.createState(course,numBalls,shuffle([...Array(numBalls).keys()]));steelTeam();
   for(let i=0;i<40;i++)Sim.step(st,1/60)}
+ forceSaid={};chalAt=null;
  phase='ready';paused=false;timeScale=1;slowTarget=1;cheersLeft=CHEERS;leaderId=-1;leadChanges=0;secIdx=-1;winnerT=null;photo=false;sparks=[];rings=[];mineBestRank=99;slowShown=false;
  $('resultOverlay').classList.add('hidden');$('confettiLayer').innerHTML='';$('slowmo').classList.add('hidden');$('slowmo').textContent=L('🎬 슬로모션','🎬 SLOW MOTION');$('replaySkip').classList.add('hidden');$('peekBack').classList.add('hidden');
- $('startBanner').innerHTML=labMode?`<h2>🔬</h2><p>${esc(L('예상을 고르면 실험이 시작돼요!','Pick your guess to start the experiment!'))}</p>`:chalRun?`<h2>🎯</h2><p>${esc(L('시험 주행! 출발 버튼을 누르면 우승 시간을 재요.','Test run! Press Start to time the winner.'))}</p>`:`<h2>${esc(L('준비됐나요?','READY?'))}</h2><p>${esc(L('출발 버튼을 누르면 문이 열려요!','Press Start to open the gate!'))}</p>`;$('startBanner').classList.remove('hidden');
+ $('startBanner').innerHTML=labMode?`<h2>🔬</h2><p>${esc(L('예상을 고르면 실험이 시작돼요!','Pick your guess to start the experiment!'))}</p>`:chalRun?`<h2>🎯</h2><p>${esc(CHAL_BY[chalRun.id].team?L('시험 주행! 어느 팀이 먼저 들어올지 지켜봐요.','Test run! Watch which team arrives first.'):CHAL_BY[chalRun.id].sort?L('시험 주행! 누가 점프를 건너는지 지켜봐요.','Test run! Watch who makes it across the jump.'):L('시험 주행! 출발 버튼을 누르면 우승 시간을 재요.','Test run! Press Start to time the winner.'))}</p>`:`<h2>${esc(L('준비됐나요?','READY?'))}</h2><p>${esc(L('출발 버튼을 누르면 문이 열려요!','Press Start to open the gate!'))}</p>`;
+ if(hasSteel())$('startBanner').insertAdjacentHTML('beforeend',`<p class="steel-note">${esc(L('🧲 자석이 있는 코스예요! 짝수 번호 ⚙️ 쇠구슬 팀도 달려요.','🧲 This course has a magnet! The even-numbered ⚙️ steel team races too.'))}</p>`);
+ $('startBanner').classList.remove('hidden');
  $('scenePanel').classList.toggle('lab-scene',labMode);document.querySelector('.layout').classList.toggle('lab-on',labMode);if(labMode)$('labList').innerHTML=labListHTML();
  buildMinimap();updateCamera(0,true);renderMaps();renderMinePicker();renderNames();updateLeagueUI();setControls();updateHud(true);
 }
+// a magnet only pulls iron and steel, so a course with a magnet drum brings out the ⚙️ steel team: every even-numbered marble
+// (ids 1, 3, 5…) is steel, 3 times as heavy as glass like the lab's steel ball. Every other course is all glass, as before.
+let forceSaid={},chalAt=null;
+const hasSteel=()=>!!(course&&!course.lab&&course.magnets.length),isSteel=i=>hasSteel()&&i%2===1;
+function steelTeam(){if(!hasSteel())return;for(const m of st.marbles)if(m.id%2){m.mass=3;m.mag=1}}
 function startRace(){
  if(labMode){if(phase!=='ready')prepare();if(!labPred){labPredictCard();return}$('resultOverlay').classList.add('hidden');phase='countdown';countdownT=0;shownCount=-1;setControls();speak(L('실험 준비! 두 구슬을 잘 지켜봐요.','Get ready! Watch both lanes closely.'),true);tone(400,140);scrollToScene();return}
  if(phase==='countdown'||phase==='running'){prepare()}
@@ -1068,6 +1288,9 @@ function handleEvents(){
   if(e.t==='hit'||e.t==='clack'){if(e.v>420&&sparks.length<160)for(let i=0;i<3;i++)sparks.push({x:e.x,y:e.y,vx:rand(-120,120),vy:rand(-160,20),life:rand(.2,.45),c:'#fff6c8'});if(phase==='running'&&inView(e.x,e.y))tick(e.v)}
   else if(e.t==='bumper'){rings.push({x:e.x,y:e.y,t:clock,c:theme.bumper});if(inView(e.x,e.y)){tone(420,70,'sine',.05);tone(640,90,'sine',.04)}}
   else if(e.t==='tramp'){rings.push({x:e.x,y:e.y,t:clock,c:theme.bumper});if(inView(e.x,e.y)){tone(300,60,'sine',.05);tone(600,120,'sine',.04)}}
+  else if(e.t==='spring'){rings.push({x:e.x,y:e.y,t:clock,c:theme.accent});if(inView(e.x,e.y)){tone(180,60,'triangle',.06);tone(520,140,'triangle',.05)}}
+  else if(e.t==='swallow'){rings.push({x:e.x,y:e.y,t:clock,c:'#b98cff'});if(inView(e.x,e.y))tone(300,220,'sine',.05);
+   if(!forceSaid.swallow&&!labMode&&phase==='running'){forceSaid.swallow=1;const n=Math.max(1,Math.round(e.laps*2)/2);flash(L(`🕳️ ${n}바퀴 돌고 쏙!`,`🕳️ ${n} lap${n===1?'':'s'}, then in!`),'#d8c2ff')}}
   else if(e.t==='boost'){if(e.id===mine||e.id===leaderId){flash(L('⚡ 터보 부스터!','⚡ Turbo boost!'),theme.accent);tone(760,80,'sawtooth',.03)}}
   else if(e.t==='finish'){onFinish(e.id)}
  }
@@ -1085,7 +1308,10 @@ function raceLogic(){
  const rank=Sim.ranking(st),lead=rank[0];
  if(lead&&lead.id!==leaderId&&!winnerT){if(leaderId!==-1){leadChanges++;if(clock-lastLeadTalk>4){if(clock-lastTalk>2.4)speak(fill(pick(T.lead),lead.id));flash(L(`🔥 ${nameOf(lead.id)} 선두!`,`🔥 ${nameOf(lead.id)} leads!`),PALETTE[lead.id][1]);lastLeadTalk=clock;tone(780,90)}}leaderId=lead.id}
  const si=course.sections.reduce((k,s,i)=>s.y0<=lead.y?i:k,0);
- if(si!==secIdx){secIdx=si;const s=course.sections[si];if(phase==='running'&&!winnerT&&si>0&&T.sec[s.type]&&clock-lastTalk>3)speak(T.sec[s.type])}
+ if(si!==secIdx){secIdx=si;const s=course.sections[si];
+  if(phase==='running'&&!winnerT&&si>0&&T.sec[s.type]&&!FORCE_LINE[s.type]&&clock-lastTalk>3)speak(T.sec[s.type])}
+ // the first time a marble reaches a new force piece, the commentary names the force at work (once per race)
+ if(phase==='running'&&!winnerT)for(const s of course.sections)if(s.ym!=null&&!forceSaid[s.type]&&st.marbles.some(m=>m.y>s.ym&&m.y<s.ym+200)){forceSaid[s.type]=1;speak(FORCE_LINE[s.type],true);flash(FORCE_TAG[s.type],theme.accent);break}
  const myRank=rank.findIndex(m=>m.id===mine)+1;
  if(phase==='running'&&!winnerT&&myRank<mineBestRank&&myRank<=3&&clock-mineTalk>6&&clock-st.raceT0>4){mineTalk=clock;if(clock-lastTalk>2)speak(fill(T.mineUp,mine,{r:L(String(myRank),ord(myRank))}))}
  mineBestRank=Math.min(mineBestRank,myRank);
@@ -1097,7 +1323,9 @@ function raceLogic(){
  $('slowmo').classList.toggle('hidden',slowTarget>=1);
  const allDone=st.finishers.length===st.marbles.length;
  const top3=st.finishers.length>=Math.min(3,st.marbles.length);
- if(winnerT!==null&&(allDone||st.t-winnerT>(chalRun?(top3?1.2:6):15))&&phase==='running')showResults();
+ const fc=chalRun&&(CHAL_BY[chalRun.id].team||CHAL_BY[chalRun.id].sort);
+ if(fc&&winnerT!==null&&phase==='running'){if(chalDecided()){chalAt??=st.t;if(st.t-chalAt>1.2||allDone)showResults()}else if(allDone||st.t-winnerT>25)showResults()}
+ else if(winnerT!==null&&(allDone||st.t-winnerT>(chalRun?(top3?1.2:6):15))&&phase==='running')showResults();
 }
 
 // ---------------------------------------------------------------- camera
@@ -1152,6 +1380,9 @@ function drawBackground(){
   const cx=vw*.8,cy=vh*.62-wrap(par*.03,vh*.4),rad=Math.min(vw,vh)*.3;ctx.strokeStyle='rgba(255,255,255,.45)';ctx.lineWidth=3;ctx.beginPath();ctx.arc(cx,cy,rad,0,TAU);ctx.stroke();
   for(let k=0;k<10;k++){const a=clock*.15+k*TAU/10,ex=cx+Math.cos(a)*rad,ey=cy+Math.sin(a)*rad;ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(ex,ey);ctx.stroke();ctx.fillStyle=['#ff5c8a','#2fbaf5','#ffd23f','#7ed957'][k%4]+'99';ctx.beginPath();ctx.arc(ex,ey,8,0,TAU);ctx.fill()}
   for(const b of BLOBS){const x=wrap(b.x*vw+Math.sin(clock*.6+b.k)*14,vw),y=wrap(b.y*vh*2-clock*22*b.s-par*.15,vh+120)-60;ctx.strokeStyle='rgba(120,60,60,.35)';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(x,y+14*b.s);ctx.lineTo(x+3,y+40*b.s);ctx.stroke();ctx.fillStyle=['#ff5c8a','#2fbaf5','#ffd23f','#7ed957','#b06bff'][b.k%5]+'aa';ctx.beginPath();ctx.ellipse(x,y,11*b.s,14*b.s,0,0,TAU);ctx.fill()}
+ }else if(theme.deco==='force'){
+  for(const s of STARS){const x=s.x*vw,y=wrap(s.y*vh*3-par*.1*s.d,vh);ctx.fillStyle=`rgba(220,210,255,${.25+s.d*.5})`;ctx.beginPath();ctx.arc(x,y,s.r,0,TAU);ctx.fill()}
+  ctx.strokeStyle='rgba(170,150,255,.16)';ctx.lineWidth=2;const cy=wrap(vh*.5-par*.04,vh*1.4)-vh*.2;for(let k=1;k<=4;k++){ctx.beginPath();ctx.ellipse(vw*.85,cy,vw*.05*k,vh*.09*k,0,0,TAU);ctx.stroke()}
  }else if(theme.deco==='lava'){
   const lg=ctx.createLinearGradient(0,vh*.7,0,vh);lg.addColorStop(0,'rgba(255,90,30,0)');lg.addColorStop(1,'rgba(255,120,40,.45)');ctx.fillStyle=lg;ctx.fillRect(0,vh*.7,vw,vh*.3);
   for(const s of STARS.slice(0,50)){const x=s.x*vw+Math.sin(clock*s.d*3+s.y*9)*10,y=wrap(s.y*vh-clock*30*s.d-par*.1,vh);ctx.fillStyle=`rgba(255,${150+s.d*80|0},60,${.35+s.d*.5})`;ctx.beginPath();ctx.arc(x,y,s.r+.6,0,TAU);ctx.fill()}
@@ -1179,6 +1410,7 @@ function drawWorld(){
   else if(d.t==='fan'&&d.y1>v[1]-40&&d.y0<v[3]+40){
    ctx.strokeStyle='rgba(255,255,255,.6)';ctx.lineWidth=2;const H=d.y1-d.y0-50;for(let k=0;k<7;k++){const xx=d.x0+24+k*(d.x1-d.x0-48)/6,yy=d.y1-34-((clock*170+k*67)%H);ctx.globalAlpha=.3+.3*Math.sin(k+clock*2);ctx.beginPath();ctx.moveTo(xx,yy);ctx.lineTo(xx+Math.sin(yy*.05)*4,yy-26);ctx.stroke()}ctx.globalAlpha=1;
    for(const fx of [d.x0+30,d.x1-30]){ctx.save();ctx.translate(fx,d.y1-22);ctx.fillStyle='rgba(0,0,0,.28)';ctx.beginPath();ctx.arc(0,0,21,0,TAU);ctx.fill();ctx.rotate(clock*14);ctx.fillStyle=theme.accent;for(let k=0;k<4;k++){ctx.rotate(TAU/4);ctx.beginPath();ctx.ellipse(10,0,10,4.5,0,0,TAU);ctx.fill()}ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(0,0,4,0,TAU);ctx.fill();ctx.restore()}}
+  else if(d.t==='spring'||d.t==='drum'||d.t==='well'||d.t==='blowfan'||d.t==='labmag'){const y0=d.t==='spring'?d.sp.y-260:d.t==='blowfan'||d.t==='labmag'?d.y0:d.y-d.r-60,y1=d.t==='spring'?d.sp.y+200:d.t==='blowfan'||d.t==='labmag'?d.y1+40:d.y+d.r+90;if(y1>v[1]&&y0<v[3])FORCE_DRAW[d.t](d)}
   else if(d.t==='sidefan'){const my=(d.y0+d.y1)/2;ctx.font='36px system-ui';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('🌬️',d.x+4,my);ctx.textBaseline='alphabetic';ctx.textAlign='left';
    ctx.strokeStyle='rgba(255,255,255,.5)';ctx.lineWidth=2;for(let k=0;k<6;k++){const yy=d.y0+20+k*(d.y1-d.y0-40)/5,xx=d.x+30+((clock*260+k*53)%270);ctx.globalAlpha=.25+.3*Math.sin(k*2+clock*3);ctx.beginPath();ctx.moveTo(xx,yy);ctx.lineTo(xx+24,yy+Math.sin(xx*.05)*2);ctx.stroke()}ctx.globalAlpha=1}
   else if(d.t==='finish'&&d.y>v[1]-200&&d.y<v[3]+120){const ch=course.chute;
@@ -1189,10 +1421,10 @@ function drawWorld(){
  }
  // rails
  const t=clock;
- for(const s of course.shapes){if(s.style==='frame'||s.style==='gate'||!visible(s.box,v))continue;drawShape(s,t)}
+ for(const s of course.shapes){if(s.style==='frame'||s.style==='gate'||!s.on||!visible(s.box,v))continue;drawShape(s,t)}
  drawGate();if(course.lab)drawLab();
  // pegs, bumpers, spinners
- for(const p of course.pegs){if(p.x<v[0]-30||p.x>v[2]+30||p.y<v[1]-30||p.y>v[3]+30)continue;
+ for(const p of course.pegs){if(p.kind==='drum'||p.x<v[0]-30||p.x>v[2]+30||p.y<v[1]-30||p.y>v[3]+30)continue;
   if(p.kind==='bumper'){const f=Math.max(0,1-(st.t-p.flash)/.3);ctx.fillStyle='rgba(0,0,0,.25)';ctx.beginPath();ctx.arc(p.x+3,p.y+5,p.r,0,TAU);ctx.fill();ctx.fillStyle=f>0?mix(theme.bumper,'#ffffff',f*.6):theme.bumper;ctx.beginPath();ctx.arc(p.x,p.y,p.r+f*3,0,TAU);ctx.fill();ctx.fillStyle='#ffffffcc';ctx.beginPath();ctx.arc(p.x,p.y,p.r*.55,0,TAU);ctx.fill();ctx.fillStyle=theme.bumper;ctx.font='900 14px system-ui';ctx.textAlign='center';ctx.fillText('★',p.x,p.y+1);ctx.textAlign='left'}
   else{ctx.fillStyle='rgba(0,0,0,.25)';ctx.beginPath();ctx.arc(p.x+2,p.y+4,p.r,0,TAU);ctx.fill();ctx.fillStyle=theme.peg;ctx.beginPath();ctx.arc(p.x,p.y,p.r+1,0,TAU);ctx.fill();ctx.fillStyle=theme.pegTop;ctx.beginPath();ctx.arc(p.x-1,p.y-1.5,p.r*.55,0,TAU);ctx.fill()}}
  for(const sp of course.spinners){if(Math.abs(sp.y-cam.y)*cam.z>vh/2+120)continue;const arms=Sim.spinnerArms(sp,st.t);ctx.lineCap='round';
@@ -1216,6 +1448,8 @@ function drawShape(s,t){
  if(s.style==='net'){pathOf(s.pts);ctx.strokeStyle='rgba(255,255,255,.22)';ctx.lineWidth=12;ctx.stroke();ctx.setLineDash([3,6]);ctx.strokeStyle=theme.accent;ctx.lineWidth=3;ctx.stroke();ctx.setLineDash([]);return}
  if(s.style==='tray'||s.style==='sand'||s.style==='carpet'){const col={tray:['#8a96ab','#d6deea'],sand:['#b8873d','#f3d9a0'],carpet:['#7d2440','#e0607e']}[s.style];pathOf(s.pts);ctx.strokeStyle=col[0];ctx.lineWidth=12;ctx.stroke();ctx.strokeStyle=col[1];ctx.lineWidth=7;ctx.stroke();
   if(s.style!=='tray'){ctx.setLineDash(s.style==='sand'?[2,5]:[6,4]);ctx.strokeStyle=col[0];ctx.lineWidth=3;ctx.stroke();ctx.setLineDash([])}return}
+ if(s.style==='sgate'){pathOf(s.pts);ctx.lineCap='butt';ctx.strokeStyle='#1b1b1b';ctx.lineWidth=9;ctx.stroke();ctx.setLineDash([5,5]);ctx.strokeStyle='#ffd21f';ctx.stroke();ctx.setLineDash([]);return}
+ if(s.style==='rim'){pathOf(s.pts);ctx.strokeStyle='rgba(185,140,255,.35)';ctx.lineWidth=18;ctx.stroke();ctx.strokeStyle='#4b2a8f';ctx.lineWidth=10;ctx.stroke();ctx.strokeStyle='#cdb5ff';ctx.lineWidth=3;ctx.stroke();return}
  if(s.style==='tramp'){const [ax,ay]=s.pts[0],[bx,by]=s.pts[1],sq=Math.max(0,1-(st.t-s.flash)/.25)*4;
   ctx.strokeStyle='#9aa6ba';ctx.lineWidth=2;for(const f of [.2,.5,.8]){const px=ax+(bx-ax)*f,py=ay+(by-ay)*f;ctx.beginPath();for(let k=0;k<=6;k++)ctx.lineTo(px+(k%2?5:-5),py+5+k*3+sq*.5);ctx.stroke()}
   ctx.save();ctx.translate(0,sq);ctx.beginPath();ctx.moveTo(ax,ay);ctx.lineTo(bx,by);ctx.strokeStyle=mix(theme.bumper,'#000000',.35);ctx.lineWidth=11;ctx.stroke();ctx.strokeStyle=theme.bumper;ctx.lineWidth=7;ctx.stroke();ctx.translate(0,-2);ctx.strokeStyle='#ffffffaa';ctx.lineWidth=2;ctx.stroke();ctx.restore();return}
@@ -1233,11 +1467,59 @@ function drawShape(s,t){
   for(let u=(t*140)%26;u<len;u+=26){const px=ax+ux*u,py=ay+uy*u-10;ctx.beginPath();ctx.moveTo(px-ux*6-uy*5,py-uy*6+ux*5);ctx.lineTo(px,py);ctx.lineTo(px-ux*6+uy*5,py-uy*6-ux*5);ctx.stroke()}}
  if(s.style==='shelf'){const [ex,ey]=s.pts[s.pts.length-1],[px,py]=s.pts[s.pts.length-2],l=Math.hypot(ex-px,ey-py),ux=(ex-px)/l,uy=(ey-py)/l;ctx.lineWidth=w-3;ctx.lineCap='butt';ctx.strokeStyle='#1b1b1b';ctx.beginPath();ctx.moveTo(ex-ux*26,ey-uy*26);ctx.lineTo(ex,ey);ctx.stroke();ctx.setLineDash([5,5]);ctx.strokeStyle='#ffd21f';ctx.stroke();ctx.setLineDash([]);ctx.lineCap='round'}
 }
-function drawGate(){for(const g of course.gates&&course.gates.length?course.gates:[course.gate]){const [ax,ay]=g.pts[0],[bx,by]=g.pts[1],p=g.on?0:Math.min(1,(st.t-(st.gateT||st.t))/(ay===by?.3:.5));if(p>=1)continue;
+function drawGate(){for(const g of course.gates&&course.gates.length?course.gates:course.gate?[course.gate]:[]){const [ax,ay]=g.pts[0],[bx,by]=g.pts[1],p=g.on?0:Math.min(1,(st.t-(st.gateT||st.t))/(ay===by?.3:.5));if(p>=1)continue;
  ctx.lineCap='butt';ctx.strokeStyle='#1b1b1b';ctx.lineWidth=11;ctx.beginPath();
  if(ay===by){const h=(bx-ax)/2,a=p*Math.PI/2;ctx.moveTo(ax,ay);ctx.lineTo(ax+Math.cos(a)*h,ay+Math.sin(a)*h);ctx.moveTo(bx,by);ctx.lineTo(bx-Math.cos(a)*h,by+Math.sin(a)*h)}  // a trapdoor: two flaps swing down
  else{ctx.moveTo(ax,ay-p*70);ctx.lineTo(ax,by-p*70)}
  ctx.stroke();ctx.setLineDash([7,7]);ctx.strokeStyle='#ffd21f';ctx.stroke();ctx.setLineDash([])}}
+// ---- the new force pieces (added 2026-11): each one shows its force at work
+const labK=()=>Math.max(1,.9/cam.z);  // lab labels keep a readable size when the two lanes are zoomed out on a phone
+const FORCE_DRAW={
+ // ➰ the coil squashes and stretches with the pad; red while it is squashed (storing the push), grey once it has sprung open
+ spring(d){const sp=d.sp,ux=sp.ux,uy=sp.uy,nx=-uy,ny=ux,bx=sp.x-ux*12,by=sp.y-uy*12,px=sp.x+ux*sp.s,py=sp.y+uy*sp.s,len=Math.hypot(px-bx,py-by),sq=1-sp.s/sp.X;
+  ctx.lineCap='round';ctx.lineJoin='round';ctx.lineWidth=2.8;ctx.strokeStyle=mix('#c9d2e0','#ff5a5a',clamp(sq,0,1)*.85);ctx.beginPath();ctx.moveTo(bx,by);
+  for(let k=1;k<12;k++){const f=k/12,w=(k%2?1:-1)*9;ctx.lineTo(bx+ux*len*f+nx*w,by+uy*len*f+ny*w)}ctx.lineTo(px,py);ctx.stroke();
+  ctx.lineCap='butt';ctx.strokeStyle='#1b1b1b';ctx.lineWidth=8;ctx.beginPath();ctx.moveTo(px-nx*12,py-ny*12);ctx.lineTo(px+nx*12,py+ny*12);ctx.stroke();ctx.strokeStyle=theme.accent;ctx.lineWidth=3;ctx.stroke();ctx.lineCap='round';
+  ctx.textAlign='center';ctx.textBaseline='middle';
+  if(sp.ph==='load'){ctx.save();ctx.translate(bx-ux*8+nx*26,by-uy*8+ny*26);ctx.rotate(clock*6);ctx.font='18px system-ui';ctx.fillText('⚙️',0,0);ctx.restore()}
+  if(d.lab){ctx.font=`800 ${Math.round(13*labK())}px system-ui`;ctx.fillStyle='rgba(255,255,255,.85)';ctx.fillText(L(`${sp.lv}칸 눌렀어요`,`squashed ${sp.lv} sq`),sp.x,sp.y+30+12*labK())}
+  else{const lx=sp.x-92,ly=sp.y+34;ctx.fillStyle='rgba(0,0,0,.35)';rr(lx-46,ly-12,92,24,12);ctx.fill();ctx.font='800 12px system-ui';ctx.fillStyle='#fff';ctx.fillText(L('누름 ','squash ')+'●'.repeat(sp.lv)+'○'.repeat(3-sp.lv),lx,ly+1);
+   const mx=sp.x+ux*sp.L,my=sp.y+uy*sp.L;ctx.setLineDash([4,7]);ctx.strokeStyle=theme.accent;ctx.lineWidth=2.5;ctx.beginPath();ctx.moveTo(mx+8,my-8);ctx.quadraticCurveTo((mx+d.x1)/2,my-90,d.x1+30,d.y-8);ctx.stroke();ctx.setLineDash([]);
+   ctx.font='800 12px system-ui';ctx.fillStyle=theme.label;ctx.fillText(L('안전 그물','safety net'),(d.x0+d.x1)/2+30,d.y+120)}
+  ctx.textAlign='left';ctx.textBaseline='alphabetic'},
+ // 🧲 a turning drum with the magnet inside one side (red and blue band); field lines glow while it holds a steel marble
+ drum(d){const t=st.t,on=t-(d.mg.flash??-9)<.12,w=d.peg.w;ctx.save();ctx.translate(d.x,d.y);
+  ctx.fillStyle='rgba(0,0,0,.25)';ctx.beginPath();ctx.arc(3,5,d.r,0,TAU);ctx.fill();
+  ctx.strokeStyle=on?'rgba(255,90,209,.75)':'rgba(255,90,209,.35)';ctx.lineWidth=2;ctx.setLineDash([4,5]);ctx.lineDashOffset=-clock*20;
+  for(let k=0;k<6;k++){const a=d.a0+(d.a1-d.a0)*(k+.15)/6,b=a+(d.a1-d.a0)/6*.7,m=(a+b)/2,ro=d.r+20+(k%2)*6;ctx.beginPath();ctx.moveTo(Math.cos(a)*(d.r+3),Math.sin(a)*(d.r+3));ctx.quadraticCurveTo(Math.cos(m)*ro*1.12,Math.sin(m)*ro*1.12,Math.cos(b)*(d.r+3),Math.sin(b)*(d.r+3));ctx.stroke()}
+  ctx.setLineDash([]);
+  const g=ctx.createRadialGradient(-d.r*.35,-d.r*.35,3,0,0,d.r);g.addColorStop(0,'#f4f7fc');g.addColorStop(1,'#7f8ba1');ctx.fillStyle=g;ctx.beginPath();ctx.arc(0,0,d.r,0,TAU);ctx.fill();
+  const n=8;for(let k=0;k<n;k++){const a=d.a0+(d.a1-d.a0)*k/n,b=d.a0+(d.a1-d.a0)*(k+1)/n;ctx.strokeStyle=k%2?'#3d6dff':'#ff4a5a';ctx.lineWidth=7;ctx.beginPath();ctx.arc(0,0,d.r-7,a,b);ctx.stroke()}
+  ctx.rotate(t*w);ctx.strokeStyle='rgba(40,50,70,.55)';ctx.lineWidth=3;for(let k=0;k<6;k++){const a=k*TAU/6;ctx.beginPath();ctx.moveTo(Math.cos(a)*8,Math.sin(a)*8);ctx.lineTo(Math.cos(a)*(d.r-13),Math.sin(a)*(d.r-13));ctx.stroke()}
+  ctx.rotate(-t*w);ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(0,0,9,0,TAU);ctx.fill();ctx.font='13px system-ui';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('🧲',0,1);ctx.restore();ctx.textAlign='left';ctx.textBaseline='alphabetic'},
+ // 🕳️ a dark well with rings that crowd together toward the middle (the pull grows fast) and a slowly turning swirl
+ well(d){const W=d.W,t=clock;ctx.save();ctx.translate(d.x,d.y);
+  const g=ctx.createRadialGradient(0,0,W.rh,0,0,d.r);g.addColorStop(0,'#05020c');g.addColorStop(.3,'#1d0d45');g.addColorStop(1,'rgba(52,28,110,.6)');ctx.fillStyle=g;ctx.beginPath();ctx.arc(0,0,d.r,0,TAU);ctx.fill();
+  ctx.strokeStyle='rgba(190,160,255,.3)';ctx.lineWidth=1.2;for(let k=1;k<=6;k++){ctx.beginPath();ctx.arc(0,0,W.rh+(d.r-6-W.rh)*(k/6)**1.7,0,TAU);ctx.stroke()}
+  if(!RM){ctx.lineWidth=2.4;for(let a=0;a<3;a++){ctx.strokeStyle=`rgba(255,${190+a*20},255,.32)`;ctx.beginPath();for(let k=0;k<=26;k++){const f=k/26,rad=W.rh+4+(d.r-14-W.rh)*f,ang=a*TAU/3-t*1.3+f*3.4;k?ctx.lineTo(Math.cos(ang)*rad,Math.sin(ang)*rad):ctx.moveTo(Math.cos(ang)*rad,Math.sin(ang)*rad)}ctx.stroke()}}
+  ctx.fillStyle='#000';ctx.beginPath();ctx.arc(0,0,W.rh,0,TAU);ctx.fill();ctx.strokeStyle='#ffb35a';ctx.lineWidth=3;ctx.globalAlpha=.55+.35*Math.sin(t*4);ctx.beginPath();ctx.arc(0,0,W.rh+2,0,TAU);ctx.stroke();ctx.globalAlpha=1;
+  ctx.restore();
+  ctx.setLineDash([6,6]);ctx.strokeStyle='rgba(255,255,255,.3)';ctx.lineWidth=7;ctx.beginPath();ctx.moveTo(d.x,d.y+W.rh);ctx.lineTo(W.ex,W.ey-12);ctx.stroke();ctx.setLineDash([]);
+  ctx.fillStyle='#4b2a8f';rr(W.ex-14,W.ey-24,28,14,5);ctx.fill();
+  ctx.textAlign='center';ctx.textBaseline='middle';ctx.font=`800 ${Math.round(12*(d.lab?labK():1))}px system-ui`;ctx.fillStyle='rgba(255,255,255,.85)';ctx.fillText(L('블랙홀 모형','black-hole model'),d.x,d.y-d.r+22);ctx.textAlign='left';ctx.textBaseline='alphabetic'},
+ // 💨 a fan with spinning blades; its wind lines are long and bright close to it and short and faint farther away
+ blowfan(d){const t=RM?0:clock,H=d.y1-d.y0,my=(d.y0+d.y1)/2;ctx.lineCap='round';
+  for(let k=0;k<10;k++){const yy=d.y0+10+k*(H-20)/9,ph=(t*.9+k*.37)%1,x=d.x+18+ph*(d.x1-d.x-18),f=1/(1+((x-d.x)/d.d0)**2);ctx.strokeStyle=`rgba(255,255,255,${(.12+.6*f).toFixed(2)})`;ctx.lineWidth=1.5+2*f;ctx.beginPath();ctx.moveTo(x,yy);ctx.lineTo(x+8+34*f,yy);ctx.stroke()}
+  ctx.fillStyle='rgba(0,0,0,.35)';rr(d.x-22,d.y0-4,18,H+8,8);ctx.fill();ctx.fillStyle='#d6dce8';rr(d.x-18,d.y0,10,H,5);ctx.fill();
+  const nf=Math.max(1,Math.round(H/130));for(let f=0;f<nf;f++){const fy=d.y0+H*(f+.5)/nf;ctx.save();ctx.translate(d.x-10,fy);ctx.scale(.42,1);ctx.rotate(t*12+f);ctx.fillStyle=theme.accent;for(let k=0;k<3;k++){ctx.rotate(TAU/3);ctx.beginPath();ctx.ellipse(0,-17,6,17,0,0,TAU);ctx.fill()}ctx.restore();ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(d.x-10,fy,4,0,TAU);ctx.fill()}
+  ctx.textAlign='center';ctx.font=`800 ${Math.round(12*(d.lab?labK():1))}px system-ui`;ctx.fillStyle=d.lab?'rgba(255,255,255,.8)':theme.label;ctx.fillText(L('가까울수록 바람이 세요','stronger up close'),d.x+(d.lab?110:70),d.y0-10);ctx.textAlign='left'},
+ // the lab's magnet: a red-and-blue magnet near the top of its stand, with field lines curling out to the side
+ labmag(d){ctx.fillStyle='rgba(255,255,255,.08)';ctx.fillRect(d.x0,d.y0,d.x1-d.x0,d.y1-d.y0);
+  const on=st.t-(course.magnets[0]?.flash??-9)<.15;ctx.strokeStyle=on?'rgba(255,120,220,.8)':'rgba(255,120,220,.45)';ctx.lineWidth=2;ctx.setLineDash([5,5]);
+  for(let k=1;k<=3;k++){ctx.beginPath();ctx.ellipse(d.x0,d.my,12+16*k,22+14*k,0,Math.PI/2,Math.PI*1.5);ctx.stroke()}ctx.setLineDash([]);
+  ctx.fillStyle='#ff4a5a';rr(d.x0+6,d.my-36,46,36,6);ctx.fill();ctx.fillStyle='#3d6dff';rr(d.x0+6,d.my,46,36,6);ctx.fill();
+  ctx.fillStyle='#fff';ctx.font='900 18px system-ui';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('N',d.x0+29,d.my-17);ctx.fillText('S',d.x0+29,d.my+18);
+  ctx.font=`800 ${Math.round(13*labK())}px system-ui`;ctx.fillStyle='rgba(255,255,255,.85)';ctx.fillText(L('🧲 자석','🧲 Magnet'),(d.x0+d.x1)/2+14,d.y0+12+8*labK());ctx.textAlign='left';ctx.textBaseline='alphabetic'}};
 function drawMarkers(){
  const s=1/cam.z,me=st.marbles[mine];ctx.textAlign='center';
  const lead=Sim.ranking(st)[0];
@@ -1269,7 +1551,7 @@ function updateHud(force){
  if(!force&&clock-lastHud<.25)return;lastHud=clock;
  if(course.lab){$('sectionChip').classList.add('hidden');return}
  const rank=Sim.ranking(st),n=rank.length,show=window.innerWidth<=520||window.innerHeight<=520?(window.innerHeight<=420?3:5):8;let rows='';
- const row=(m,i)=>`<div class="rk${m.id===mine?' mine':''}"><span class="no">${i<3&&(phase!=='ready'&&phase!=='countdown')?['🥇','🥈','🥉'][i]:i+1}</span><span class="dot" style="background:${PALETTE[m.id][1]}"></span><span class="nm">${esc(nameOf(m.id))}${m.id===mine?' '+esc(MY):''}</span><span class="st">${m.done?'🏁':''}</span></div>`;
+ const row=(m,i)=>`<div class="rk${m.id===mine?' mine':''}"><span class="no">${i<3&&(phase!=='ready'&&phase!=='countdown')?['🥇','🥈','🥉'][i]:i+1}</span><span class="dot" style="background:${PALETTE[m.id][1]}"></span><span class="nm">${esc(nameOf(m.id))}${isSteel(m.id)?' ⚙️':''}${m.id===mine?' '+esc(MY):''}</span><span class="st">${m.done?'🏁':''}</span></div>`;
  rank.slice(0,show).forEach((m,i)=>rows+=row(m,i));
  const mi=rank.findIndex(m=>m.id===mine);if(mi>=show){rows+=`<div class="rk gap">⋯</div>`+row(rank[mi],mi)}
  const title=phase==='ready'||phase==='countdown'?L('🚦 출발 순서','🚦 Lineup'):L('🏆 실시간 순위','🏆 Live ranking');
@@ -1312,7 +1594,7 @@ function renderMaps(){
  $('maps').innerHTML=all.map(([w,i])=>`<button type="button" class="map${i===raceWorld&&!labMode?' active':''}${w.custom?' custom':''}" data-world="${i}">${w.custom?'<span class="map-em" aria-hidden="true">🛠️</span>':`<img src="images/world-${w.id}.webp" alt="" onerror="${w.em?`this.outerHTML='<span class=&quot;map-em&quot; aria-hidden=&quot;true&quot;>${w.em}</span>'`:"this.style.visibility='hidden'"}">`}<span><b>${esc(w.name)}</b><small>${esc(w.desc)}</small></span></button>`).join('')
   +`<button type="button" class="map add" data-build="1"><span class="map-em" aria-hidden="true">➕</span><span><b>${L('코스 만들기','Build a course')}</b><small>${L('조각을 쌓아 나만의 코스를!','Stack pieces into your own course!')}</small></span></button>`;
 }
-function renderMinePicker(){if(mine>=numBalls)mine=numBalls-1;$('minePicker').innerHTML=PALETTE.slice(0,numBalls).map((c,i)=>`<button type="button" class="mine-chip${i===mine?' on':''}" data-mine="${i}" title="${esc(nameOf(i))}" style="background:radial-gradient(circle at 32% 28%,#fff 0 9%,${c[1]} 42%,${SHADE[i].dark})" aria-label="${esc(L(`${nameOf(i)} 응원하기`,`Cheer for ${nameOf(i)}`))}" aria-pressed="${i===mine}">${i+1}</button>`).join('')}
+function renderMinePicker(){if(mine>=numBalls)mine=numBalls-1;$('minePicker').innerHTML=PALETTE.slice(0,numBalls).map((c,i)=>`<button type="button" class="mine-chip${i===mine?' on':''}" data-mine="${i}" title="${esc(nameOf(i))}" style="background:radial-gradient(circle at 32% 28%,#fff 0 9%,${c[1]} 42%,${SHADE[i].dark})" aria-label="${esc(L(`${nameOf(i)}${isSteel(i)?' (쇠구슬)':''} 응원하기`,`Cheer for ${nameOf(i)}${isSteel(i)?' (steel)':''}`))}" aria-pressed="${i===mine}">${i+1}${isSteel(i)?'<i class="mk-steel" aria-hidden="true">⚙️</i>':''}</button>`).join('')}
 function renderNames(){
  const p=$('namesPanel');if(p.classList.contains('hidden'))return;
  p.innerHTML=PALETTE.slice(0,numBalls).map((c,i)=>`<label><span class="dot" style="background:${c[1]}"></span>${i+1}<input type="text" maxlength="10" data-name="${i}" value="${esc(names[i])}" placeholder="${esc(c[0])}" aria-label="${esc(L(`${i+1}번 구슬 이름`,`Name for marble ${i+1}`))}"></label>`).join('');
@@ -1326,6 +1608,7 @@ function showResults(){
  const myKo=ME?esc(ME.name)+'의 구슬':'내 구슬',myEn=ME?esc(ME.name)+"'s marble":'Your marble';
  mineStats.races++;if(won)mineStats.wins++;
  const wId=theme.custom?null:WORLDS[raceWorld]?.id;if(wId&&!stats.worlds.includes(wId))stats.worlds.push(wId);if(theme.custom)stats.customRaces++;
+ for(const f of FORCE_IDS)if(!stats.forces.includes(f)&&course.sections.some(s=>s.type===f))stats.forces.push(f);
  if(chalRun){chalShow(rank);return}
  const fmt=t=>{const s=Math.max(0,t);return `${Math.floor(s/60)}:${(s%60).toFixed(1).padStart(4,'0')}`};
  let table='',actions='',coachHtml=won?coachLine('race'):theme.custom?coachHere('clap','내가 만든 코스가 멋지게 굴러갔어요! 고쳐 보고 또 달려 봐요. 그게 엔지니어의 방법이에요 🌙','Your own course rolled beautifully! Tweak it and race again: that is how engineers work 🌙'):Math.random()<.6?coachHere('go',...pick(LOSE_LINES)):'',title,leagueDone=false,hero=champ.id,heroText=L(`${nameOf(champ.id)} 우승!`,`${nameOf(champ.id)} wins!`),heroSub='',mineLine=won?L(`🎉 ${myKo} ${esc(nameOf(mine))}${jo(nameOf(mine),'이','가')} 우승했어요! 응원 대성공!`,`🎉 ${myEn} ${esc(nameOf(mine))} won! Great cheering!`):L(`${esc(MY)} ${myKo} ${esc(nameOf(mine))}${jo(nameOf(mine),'은','는')} ${myRank}위! 다음엔 1등 할 수 있어요!`,`${esc(MY)} ${myEn} ${esc(nameOf(mine))} came ${ord(myRank)}. It could win next time!`);
@@ -1333,7 +1616,7 @@ function showResults(){
   const pts=Array(numBalls).fill(0);rank.forEach((m,i)=>{pts[m.id]=POINTS[i]||0;league.total[m.id]+=POINTS[i]||0});league.last=pts;
   const k=league.race,order=[...Array(numBalls).keys()].sort((a,b)=>league.total[b]-league.total[a]||pts[b]-pts[a]);
   leagueDone=k>=LEAGUE_RACES;title=leagueDone?L('🏆 리그 최종 결과','🏆 Final league standings'):L(`리그 ${k}/${LEAGUE_RACES}경기 결과`,`League race ${k}/${LEAGUE_RACES}`);
-  table=`<table class="standings"><tr><th></th><th style="text-align:left">${L('구슬','Marble')}</th><th>${L('이번','Race')}</th><th>${L('합계','Total')}</th></tr>${order.map((id,i)=>`<tr class="${id===mine?'mine':''}"><td>${i<3?['🥇','🥈','🥉'][i]:i+1}</td><td class="nm"><span class="dot" style="background:${PALETTE[id][1]}"></span>${esc(nameOf(id))}${id===mine?' '+esc(MY):''}</td><td class="pts">${pts[id]?'+'+pts[id]:'-'}</td><td class="tot">${league.total[id]}</td></tr>`).join('')}</table>`;
+  table=`<table class="standings"><tr><th></th><th style="text-align:left">${L('구슬','Marble')}</th><th>${L('이번','Race')}</th><th>${L('합계','Total')}</th></tr>${order.map((id,i)=>`<tr class="${id===mine?'mine':''}"><td>${i<3?['🥇','🥈','🥉'][i]:i+1}</td><td class="nm"><span class="dot" style="background:${PALETTE[id][1]}"></span>${esc(nameOf(id))}${isSteel(id)?' ⚙️':''}${id===mine?' '+esc(MY):''}</td><td class="pts">${pts[id]?'+'+pts[id]:'-'}</td><td class="tot">${league.total[id]}</td></tr>`).join('')}</table>`;
   if(leagueDone){league.done=true;stats.leagues++;const lc=order[0],lr=order.indexOf(mine)+1;hero=lc;heroText=L(`${nameOf(lc)} 리그 챔피언!`,`${nameOf(lc)} is the league champion!`);heroSub=L(`리그 합계 ${league.total[lc]}점`,`${league.total[lc]} league points`);
    mineLine=lc===mine?L(`👑 ${myKo} ${esc(nameOf(mine))}${jo(nameOf(mine),'이','가')} 리그 챔피언이에요!`,`👑 ${myEn} ${esc(nameOf(mine))} is the league champion!`):L(`${esc(MY)} ${myKo} ${esc(nameOf(mine))}${jo(nameOf(mine),'은','는')} 리그 ${lr}위 (${league.total[mine]}점)!`,`${esc(MY)} ${myEn} ${esc(nameOf(mine))} finished the league ${ord(lr)} (${league.total[mine]} points)!`);if(lc===mine)coachHtml=coachLine('big');setTimeout(()=>speak(fill(T.champ,lc),true),2600);
    actions=`<div class="result-actions one"><button class="primary" type="button" data-act="newLeague">${L('🔁 새 리그 시작','🔁 New league')}</button></div>`}
@@ -1341,7 +1624,7 @@ function showResults(){
    actions=`<div class="result-actions one"><button class="primary" type="button" data-act="next">${L(`▶ 다음 경기 (${league.race}/${LEAGUE_RACES})`,`▶ Next race (${league.race}/${LEAGUE_RACES})`)}</button></div>`}
  }else{
   title=L('오늘의 우승자!',"Today's winner!");
-  table=`<table class="standings">${rank.slice(0,3).map((m,i)=>`<tr class="${m.id===mine?'mine':''}"><td>${['🥇','🥈','🥉'][i]}</td><td class="nm"><span class="dot" style="background:${PALETTE[m.id][1]}"></span>${esc(nameOf(m.id))}${m.id===mine?' '+esc(MY):''}</td><td>${m.done?fmt(m.finishTime-st.raceT0):L('추격 중','racing')}</td></tr>`).join('')}</table>`;
+  table=`<table class="standings">${rank.slice(0,3).map((m,i)=>`<tr class="${m.id===mine?'mine':''}"><td>${['🥇','🥈','🥉'][i]}</td><td class="nm"><span class="dot" style="background:${PALETTE[m.id][1]}"></span>${esc(nameOf(m.id))}${isSteel(m.id)?' ⚙️':''}${m.id===mine?' '+esc(MY):''}</td><td>${m.done?fmt(m.finishTime-st.raceT0):L('추격 중','racing')}</td></tr>`).join('')}</table>`;
   actions=theme.custom?`<div class="result-actions"><button class="control" type="button" data-act="again">${L('🔁 다시 대결','🔁 Race again')}</button><button class="primary" type="button" data-act="edit">${L('🛠️ 코스 고치기','🛠️ Improve my course')}</button></div>`:`<div class="result-actions"><button class="control" type="button" data-act="again">${L('🔁 다시 대결','🔁 Race again')}</button><button class="primary" type="button" data-act="nextWorld">${L('🌍 다음 월드','🌍 Next world')}</button></div>`;
  }
  $('resultCard').innerHTML=`<div class="trophy">🏆</div><h2>${title}</h2>${photo?`<span class="photo">📸 ${L('사진 판정','Photo finish')}</span>`:''}<div class="champ" style="background:${PALETTE[hero][1]};--c:${PALETTE[hero][1]}">${hero+1}</div>
@@ -1389,7 +1672,8 @@ const BADGES=[
  {id:'marathon',ic:'🌟',n:L('레이스 30번','30 races'),d:L('레이스 30번 보기','Watch 30 races'),goal:30,val:()=>mineStats.races,prize:['pat','star']},
  {id:'lucky',ic:'🏆',n:L('첫 우승','First win'),d:L('응원한 구슬이 1등 하기','Your marble wins a race'),goal:1,val:()=>mineStats.wins,prize:['trail','fire']},
  {id:'designer',ic:'🎯',n:L('도전 설계사','Challenge designer'),d:L('설계 도전 3가지 성공하기','Meet 3 design challenges'),goal:3,val:()=>chalMet(),prize:['pat','blueprint']},
- {id:'chief',ic:'👷',n:L('수석 엔지니어','Chief engineer'),d:L(`설계 도전 ${CHALS.length}가지 모두 성공하기`,`Meet all ${CHALS.length} design challenges`),goal:CHALS.length,val:()=>chalMet(),prize:['trail','gears']}];
+ {id:'chief',ic:'👷',n:L('수석 엔지니어','Chief engineer'),d:L(`설계 도전 ${CHALS.length}가지 모두 성공하기`,`Meet all ${CHALS.length} design challenges`),goal:CHALS.length,val:()=>chalMet(),prize:['trail','gears']},
+ {id:'forces',ic:'🧲',n:L('힘 탐험가','Force explorer'),d:L('레이스에서 새 과학 조각 4가지(용수철·자석·중력 우물·선풍기) 모두 만나기','Meet all 4 new science pieces (spring, magnet, gravity well, fan) in races'),goal:FORCE_IDS.length,val:()=>stats.forces.length,prize:['pat','planet']}];
 const lookName=([k,id])=>((k==='pat'?PATTERNS:TRAILS).find(x=>x[0]===id)||['','',''])[2];
 const lookIcon=([k,id])=>((k==='pat'?PATTERNS:TRAILS).find(x=>x[0]===id)||['','',''])[1];
 const badgeFor=(k,id)=>BADGES.find(b=>b.prize[0]===k&&b.prize[1]===id);
@@ -1403,7 +1687,7 @@ const skinOk=()=>unlocked('pat',skin.pat)&&unlocked('trail',skin.trail);
 
 // ---------------------------------------------------------------- marble painting (patterns) and my marble's trail
 function paintBall(g,x,y,r,c,sh,ang,pat,time){
- const base=pat==='blueprint'?['#cfe6ff','#2a6fd6','#0f3474']:pat==='galaxy'?['#d9ccff','#5a3fc0','#120c3a']:pat==='fire'?['#fff6c0','#ffb347','#d8341a']:pat==='metal'?['#ffffff','#eef2f7','#7d8798']:[sh.lite,c,sh.dark];
+ const base=pat==='steel'?[mix(c,'#ffffff',.6),mix(c,'#b8c3d4',.35),mix(c,'#262c38',.45)]:pat==='blueprint'?['#cfe6ff','#2a6fd6','#0f3474']:pat==='galaxy'?['#d9ccff','#5a3fc0','#120c3a']:pat==='fire'?['#fff6c0','#ffb347','#d8341a']:pat==='metal'?['#ffffff','#eef2f7','#7d8798']:[sh.lite,c,sh.dark];
  const gr=g.createRadialGradient(x-r*.38,y-r*.42,r*.1,x,y,r*1.05);gr.addColorStop(0,pat==='matte'?sh.lite:'#ffffff');gr.addColorStop(.28,base[0]);gr.addColorStop(.72,base[1]);gr.addColorStop(1,base[2]);
  g.fillStyle=gr;g.beginPath();g.arc(x,y,r,0,TAU);g.fill();
  g.save();g.beginPath();g.arc(x,y,r*.93,0,TAU);g.clip();g.translate(x,y);
@@ -1416,14 +1700,20 @@ function paintBall(g,x,y,r,c,sh,ang,pat,time){
   else if(pat==='rainbow'){['#ff5d5d','#ffa53d','#ffe45c','#5ee38a','#4fb7ff','#8a6cff'].forEach((cc,k)=>{g.fillStyle=cc+'cc';g.fillRect(-r,-r+k*r/3,2*r,r/3)})}
   else if(pat==='fire'){g.fillStyle='rgba(255,240,150,.8)';for(let k=0;k<3;k++){g.rotate(TAU/3);g.beginPath();g.moveTo(0,r*.1);g.quadraticCurveTo(r*.45,-r*.2,0,-r*.85);g.quadraticCurveTo(-r*.2,-r*.3,0,r*.1);g.fill()}}
   else if(pat==='blueprint'){g.strokeStyle='rgba(255,255,255,.6)';g.lineWidth=Math.max(1,r*.06);for(let k=-2;k<=2;k++){g.beginPath();g.moveTo(-r,k*r*.42);g.lineTo(r,k*r*.42);g.moveTo(k*r*.42,-r);g.lineTo(k*r*.42,r);g.stroke()}g.lineWidth=Math.max(1,r*.1);g.beginPath();g.arc(0,0,r*.5,0,TAU);g.stroke()}
-  else if(pat==='plain'||pat==='metal'){g.fillStyle=pat==='metal'?'rgba(255,255,255,.55)':'rgba(255,255,255,.32)';g.beginPath();g.ellipse(0,0,r,r*.3,0,0,TAU);g.fill()}}
+  else if(pat==='planet'){g.fillStyle='rgba(255,255,255,.3)';for(const k of [-.5,0,.48])g.fillRect(-r,k*r-r*.08,2*r,r*.16);g.strokeStyle='rgba(255,236,190,.9)';g.lineWidth=Math.max(1,r*.13);g.beginPath();g.ellipse(0,0,r*.98,r*.3,-.35,0,TAU);g.stroke()}
+  else if(pat==='plain'||pat==='metal'||pat==='steel'){g.fillStyle=pat==='plain'?'rgba(255,255,255,.32)':'rgba(255,255,255,.55)';g.beginPath();g.ellipse(0,0,r,r*.3,0,0,TAU);g.fill()}}
  g.restore();
  if(pat!=='matte'){g.fillStyle='rgba(255,255,255,.9)';g.beginPath();g.ellipse(x-r*.36,y-r*.42,r*.28,r*.17,-.6,0,TAU);g.fill()}
 }
+// a ⚙️ steel marble keeps its colour with a shiny metal finish and a silver rim; a magnet's pull shows as a pink arrow;
+// a marble swallowed by a gravity well spins smaller into the hole
 function drawMarble(m){
- const look=m.look,c=look?look.c:PALETTE[m.id][1],sh=look||SHADE[m.id],pat=look?(look.metal?'metal':look.matte?'matte':'plain'):m.id===mine?skin.pat:'plain';
+ const look=m.look,steel=m.mag&&!look,c=look?look.c:PALETTE[m.id][1],sh=look||SHADE[m.id],pat=look?(look.metal?'metal':look.matte?'matte':'plain'):m.id===mine?skin.pat:steel?'steel':'plain';
+ if(m.hid){const k=1-(st.t-m.hid.t)/.35;if(k<=0)return;paintBall(ctx,m.x,m.y,R*k,c,sh,m.ang+(1-k)*9,pat,clock);return}
  ctx.fillStyle='rgba(0,0,0,.25)';ctx.beginPath();ctx.ellipse(m.x+3,m.y+5,R,R*.9,0,0,TAU);ctx.fill();
  paintBall(ctx,m.x,m.y,R,c,sh,m.ang,pat,clock);
+ if(m.mag){if(steel){ctx.strokeStyle='#eef3fb';ctx.lineWidth=1.6;ctx.beginPath();ctx.arc(m.x,m.y,R-.8,0,TAU);ctx.stroke()}
+  if(m.pull>250){const a=m.pa,l=clamp(m.pull/200,5,16),x0=m.x+Math.cos(a)*(R+2),y0=m.y+Math.sin(a)*(R+2),x1=x0+Math.cos(a)*l,y1=y0+Math.sin(a)*l;ctx.strokeStyle='#ff5ad1';ctx.lineWidth=2.4;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(x0,y0);ctx.lineTo(x1,y1);ctx.lineTo(x1-Math.cos(a-.6)*5,y1-Math.sin(a-.6)*5);ctx.moveTo(x1,y1);ctx.lineTo(x1-Math.cos(a+.6)*5,y1-Math.sin(a+.6)*5);ctx.stroke()}}
  if(!look&&pat!=='face'&&R*cam.z>=9){ctx.fillStyle='#fff';ctx.font=`900 ${R*1.05}px system-ui`;ctx.textAlign='center';ctx.lineWidth=2.4;ctx.strokeStyle='rgba(0,0,0,.55)';ctx.strokeText(m.id+1,m.x,m.y+.6);ctx.fillText(m.id+1,m.x,m.y+.6);ctx.textAlign='left'}
 }
 // the trail behind my marble: points in world units, newest last
@@ -1457,7 +1747,7 @@ function endReplay(){if(!replay)return;st.marbles.forEach((m,i)=>{[m.x,m.y,m.ang
 
 // ---------------------------------------------------------------- my own courses (builder)
 const worldAt=i=>i<WORLDS.length?WORLDS[i]:customTheme(customs[i-WORLDS.length]||{name:'',theme:0,mods:['ramps3']});
-function customTheme(c){const b=WORLDS[c.theme]||WORLDS[0];return {...b,name:c.name,desc:c.mods.map(m=>PIECE_BY[m]?.[1]||'').join(''),mods:c.mods.slice(),custom:true}}
+function customTheme(c){const b=WORLDS[c.theme]||WORLDS[0];return {...b,name:c.name,desc:c.mods.map(m=>PIECE_BY[pieceOf(m)]?.[1]||'').join(''),mods:c.mods.slice(),custom:true}}
 let draft=null,buildMsg='';
 function openBuilder(idx,opener){
  if(phase==='countdown'||phase==='running')return;
@@ -1471,7 +1761,7 @@ function renderBuilder(){
   <h3>① ${L('조각을 눌러 코스에 넣어요','Tap a piece to add it')} <small>${d.mods.length}/${MAX_PIECES}</small></h3>
   <div class="b-pieces">${PIECES.map(([id,ic,n,desc])=>`<button type="button" class="piece" data-b="add" data-p="${id}" ${full?'disabled':''}><span class="pi">${ic}</span><b>${esc(n)}</b><small>${esc(desc)}</small></button>`).join('')}</div>
   <h3>② ${L('내 코스 순서','Your course, top to bottom')}</h3>
-  <ol class="b-track"><li class="fixed">🚦 ${L('출발','Start')}</li>${d.mods.map((m,i)=>{const [,ic,n]=PIECE_BY[m];return `<li><span class="bt-n">${i+1}</span><span class="bt-ic">${ic}</span><b>${esc(n)}</b><span class="bt-tools"><button type="button" class="mini-btn" data-b="up" data-i="${i}" ${i?'':'disabled'} aria-label="${L('위로','Move up')}">▲</button><button type="button" class="mini-btn" data-b="down" data-i="${i}" ${i<d.mods.length-1?'':'disabled'} aria-label="${L('아래로','Move down')}">▼</button><button type="button" class="mini-btn" data-b="del" data-i="${i}" aria-label="${L('빼기','Remove')}">✕</button></span></li>`}).join('')}<li class="fixed">🏁 ${L('결승','Finish')}</li></ol>
+  <ol class="b-track"><li class="fixed">🚦 ${L('출발','Start')}</li>${d.mods.map((m,i)=>{const [,ic,n]=PIECE_BY[pieceOf(m)],sp=pieceOf(m)==='spring',lv=sp?springLv(m):0;return `<li${sp?' class="has-lv"':''}><span class="bt-n">${i+1}</span><span class="bt-ic">${ic}</span><b>${esc(n)}</b><span class="bt-tools"><button type="button" class="mini-btn" data-b="up" data-i="${i}" ${i?'':'disabled'} aria-label="${L('위로','Move up')}">▲</button><button type="button" class="mini-btn" data-b="down" data-i="${i}" ${i<d.mods.length-1?'':'disabled'} aria-label="${L('아래로','Move down')}">▼</button><button type="button" class="mini-btn" data-b="del" data-i="${i}" aria-label="${L('빼기','Remove')}">✕</button></span>${sp?`<span class="bt-lv"><span>${L('누른 정도','Squash')}</span><button type="button" class="mini-btn" data-b="lvm" data-i="${i}" ${lv>1?'':'disabled'} aria-label="${L('용수철 덜 누르기','Squash the spring less')}">−</button><span class="lv-dots" role="img" aria-label="${esc(L(`3단계 중 ${lv}단계`,`level ${lv} of 3`))}">${[1,2,3].map(k=>`<i class="${k<=lv?'on':''}"></i>`).join('')}</span><button type="button" class="mini-btn" data-b="lvp" data-i="${i}" ${lv<3?'':'disabled'} aria-label="${L('용수철 더 꾹 누르기','Squash the spring more')}">+</button></span>`:''}</li>`}).join('')}<li class="fixed">🏁 ${L('결승','Finish')}</li></ol>
   <h3>③ ${L('경기장 꾸미기','Pick a look')}</h3>
   <div class="b-themes">${WORLDS.map((w,i)=>`<button type="button" class="chip${d.theme===i?' on':''}" data-b="theme" data-i="${i}" style="--a:${w.bg[0]};--b:${w.bg[1]}"><i></i>${esc(w.name)}</button>`).join('')}</div>
   <p class="b-tip">💡 ${d.ch?L('시험 주행에서는 응원 없이 코스만으로 달려요. 결과를 보고 고쳐서 다시 시험해요!','Test runs have no cheering, so only the course decides. Look at the result, improve, and test again!'):L('엔지니어처럼 해 봐요: 만들기 → 달려 보기 → 고치기! 어떤 조각이 재밌을지 예상해 보세요.','Work like an engineer: build → test → improve! Guess which pieces will be the most fun.')}</p>
@@ -1483,12 +1773,14 @@ function renderBuilder(){
 const jo=(w,a,b)=>{w=String(w);const c=w.charCodeAt(w.length-1)-44032;return c>=0&&c<11172&&c%28?a:b};
 function builderAct(b){
  const d=draft,a=b.dataset.b,i=+b.dataset.i;buildMsg='';
- if(a==='add'){if(d.mods.length>=MAX_PIECES){buildMsg=L(`조각은 ${MAX_PIECES}개까지 넣을 수 있어요.`,`You can use up to ${MAX_PIECES} pieces.`)}else{d.mods.push(b.dataset.p);tone(660+d.mods.length*40,70,'triangle',.06)}}
+ if(a==='add'){if(d.mods.length>=MAX_PIECES){buildMsg=L(`조각은 ${MAX_PIECES}개까지 넣을 수 있어요.`,`You can use up to ${MAX_PIECES} pieces.`)}else{d.mods.push(modOf(b.dataset.p));tone(660+d.mods.length*40,70,'triangle',.06)}}
+ else if((a==='lvm'||a==='lvp')&&pieceOf(d.mods[i]||'')==='spring'){const lv=clamp(springLv(d.mods[i])+(a==='lvp'?1:-1),1,3);d.mods[i]='spring'+lv;tone(300+lv*160,90,'triangle',.06);
+  buildMsg=L(`➰ 용수철을 ${['','살짝','보통으로','꾹'][lv]} 눌렀어요. 많이 누를수록 세게 튕겨요!`,`➰ Spring squashed ${['','a little','a medium amount','a lot'][lv]}. The more you squash it, the harder it flings!`)}
  else if(a==='up'&&i>0)[d.mods[i-1],d.mods[i]]=[d.mods[i],d.mods[i-1]];
  else if(a==='down'&&i<d.mods.length-1)[d.mods[i+1],d.mods[i]]=[d.mods[i],d.mods[i+1]];
  else if(a==='del'){d.mods.splice(i,1);tone(330,70)}
  else if(a==='theme')d.theme=i;
- else if(a==='random'){d.mods=shuffle(PIECE_IDS.slice()).slice(0,5);tone(880,80,'triangle',.06)}
+ else if(a==='random'){d.mods=shuffle(PIECE_IDS.slice()).slice(0,5).map(modOf);tone(880,80,'triangle',.06)}
  else if(a==='edit'){draft={...customs[i],mods:customs[i].mods.slice(),idx:i}}
  else if(a==='new'){if(customs.length>=MAX_CUSTOMS)buildMsg=L(`코스는 ${MAX_CUSTOMS}개까지 저장돼요. 하나를 지우고 만들어요.`,`You can keep ${MAX_CUSTOMS} courses. Delete one to make a new one.`);else draft={name:L(`나의 코스 ${customs.length+1}`,`My course ${customs.length+1}`),theme:customs.length%6,mods:[],idx:null}}
  else if(a==='remove'){askConfirm({title:L('🗑️ 코스를 지울까요?','🗑️ Delete this course?'),text:L(`“${d.name}” 코스가 사라져요.`,`“${d.name}” will be gone.`),no:L('아니요','No'),yes:L('지울래요','Delete'),opener:b,onYes:()=>{const k=d.idx;customs.splice(k,1);const ci=WORLDS.length+k;if(worldIdx===ci)worldIdx=0;else if(worldIdx>ci)worldIdx--;save();draft={name:L(`나의 코스 ${customs.length+1}`,`My course ${customs.length+1}`),theme:0,mods:['ramps3','jump','pegs'],idx:null};renderBuilder();renderMaps()}});return}
@@ -1497,7 +1789,7 @@ function builderAct(b){
  else if(a==='free'){draft={name:L(`나의 코스 ${customs.length+1}`,`My course ${customs.length+1}`),theme:d.theme,mods:d.mods.slice(),idx:null}}
  else if(a==='load'&&customs[i])d.mods=customs[i].mods.slice();
  else if(a==='gm'||a==='gp'){const c=chalGet(d.ch);d.guess=d.guess==null?Math.round(c.prev?c.prev.t:({slow:30,fast:16,window:22})[d.ch]||20):clamp(d.guess+(a==='gp'?1:-1),1,120);tone(600+d.guess*4,50,'triangle',.05)}
- renderBuilder();const f=$('buildBody').querySelector(`[data-b="${a}"][data-i="${a==='up'?i-1:a==='down'?i+1:i}"]`)||$('buildBody').querySelector(`[data-b="${a}"]`);if(f&&!f.disabled)try{f.focus({preventScroll:true})}catch(e){}}
+ renderBuilder();const f=$('buildBody').querySelector(`[data-b="${a}"][data-i="${a==='up'?i-1:a==='down'?i+1:i}"]`)||$('buildBody').querySelector(`[data-b="${a}"]`);const g=f&&f.disabled&&(a==='lvm'||a==='lvp')?$('buildBody').querySelector(`[data-b="${a==='lvm'?'lvp':'lvm'}"][data-i="${i}"]`):f;if(g&&!g.disabled)try{g.focus({preventScroll:true})}catch(e){}}
 function saveDraftAndRace(){
  const d=draft;if(d.mods.length<2)return;const c={name:(d.name||'').trim()||L('나의 코스','My course'),theme:d.theme,mods:d.mods.slice()};
  let k=d.idx;if(k!=null&&customs[k]){if(customs[k].mods.join()!==c.mods.join())stats.fixes++;customs[k]=c}else{if(customs.length>=MAX_CUSTOMS){buildMsg=L(`코스는 ${MAX_CUSTOMS}개까지 저장돼요. 하나를 지우고 만들어요.`,`You can keep ${MAX_CUSTOMS} courses. Delete one first.`);renderBuilder();return}customs.push(c);k=customs.length-1;stats.builds++}
@@ -1517,9 +1809,9 @@ const starsHTML=s=>`<span class="ch-stars" role="img" aria-label="${esc(L(`별 3
 const sec=x=>x.toFixed(1)+L('초',' s');
 const STEPS=[['📝',L('계획','Plan')],['🛠️',L('만들기','Build')],['🏁',L('시험','Test')],['🔧',L('고치기','Improve')]];
 const stepsHTML=on=>`<ol class="ch-steps" aria-label="${esc(L('엔지니어의 방법','How engineers work'))}">${STEPS.map(([e,s],i)=>`<li class="${on.includes(i)?'on':''}"${on.includes(i)?' aria-current="step"':''}><span class="se" aria-hidden="true">${e} </span>${s}</li>`).join('')}</ol>`;
-const pieceName=id=>{const p=PIECE_BY[id];return p?p[1]+' '+p[2]:''};
+const pieceName=id=>{const p=PIECE_BY[pieceOf(id)];return p?p[1]+' '+p[2]:''};
 // the goal zone(s) on the time ruler for the next test, given the last test of this challenge
-function chalZones(id,prev){const p=prev?.t;
+function chalZones(id,prev){const p=prev?.t;if(CHAL_BY[id].team||CHAL_BY[id].sort)return [];
  return id==='slow'?[[30,null]]:id==='fast'?[[0,16]]:id==='window'?[[20,24]]:!prev?[]:id==='one'?[[0,Math.max(0,p-4)],[p+4,null]]:id==='double'?[[2*p,null]]:[[Math.max(0,p-1),p+1]]}
 // judge one test run. run and prev are {m: pieces, t: winner's seconds}; prev is the last test of this challenge.
 // ready = this run can meet the goal (one/double/same need a baseline test first)
@@ -1531,13 +1823,32 @@ function chalJudge(ch,run,prev,c){
  else if(ch.id==='one'){ready=dc===1;ok=ready&&A>=4;b1=A>=7;b2=((c.dirs||0)|(d>0?1:2))===3}
  else if(ch.id==='double'){ready=dc>=1;ok=ready&&t>=2*prev.t;b1=ok&&t>=3*prev.t;b2=dc===1}
  else if(ch.id==='same'){ready=dc===0;ok=ready&&n>=4&&A<1;b1=A<.3;b2=n>=6}
+ // team and sort: judged on who finished first / who crossed the spring's gap. Their two bonuses can come from a run that misses the goal.
+ else if(ch.team||ch.sort){const o=run.o||{},can=o.mag&&(ch.team||o.springs>0);
+  if(ch.team){ok=!!(can&&o.steelFirst);b1=ok&&n<=3;b2=!!(can&&o.glassFirst)}else{ok=!!(can&&o.sorted);b1=!!(can&&o.all);b2=ok&&o.springs>=2}
+  return {ready,ok,stars:(ok?1:0)|(b1?2:0)|(b2?4:0),dc,d,A,n,t,o}}
  return {ready,ok,stars:ok?1|(b1?2:0)|(b2?4:0):0,dc,d,A,n,t}}
+// what a team or sort test run showed: who finished first, and who crossed each spring launcher's gap (landed) or dropped into its net
+function chalFacts(){const ms=st.marbles,f=st.finishers,steelN=ms.filter(m=>m.mag).length,glassN=ms.length-steelN,sps=course.springs.map(s=>s.si);
+ const first=k=>f.length>=k&&f.slice(0,k);const sf=steelN>0&&first(steelN),gf=glassN>0&&first(glassN);
+ const tags=m=>sps.map(si=>(m.sj||{})[si]),glass=ms.filter(m=>!m.mag),steel=ms.filter(m=>m.mag);
+ return {mag:hasSteel(),springs:sps.length,steelFirst:!!sf&&sf.every(m=>m.mag),glassFirst:!!gf&&gf.every(m=>!m.mag),order:f.map(m=>m.id),
+  gL:glass.filter(m=>sps.length&&tags(m).every(x=>x==='L')).length,gN:glass.length,sN:steel.filter(m=>sps.length&&tags(m).every(x=>x==='N')).length,sT:steel.length,
+  sorted:sps.length>0&&steelN>0&&ms.every(m=>tags(m).every(x=>x===(m.mag?'N':'L'))),all:sps.length>0&&ms.every(m=>tags(m).every(x=>x==='L'))}}
+// a team or sort run may end once its result is known (team: one team is all in, or the other team has arrived; sort: everyone has met every spring)
+function chalDecided(){const ch=CHAL_BY[chalRun.id],ms=st.marbles,f=st.finishers;
+ if(ch.team){const steelN=ms.filter(m=>m.mag).length;if(!steelN||!f.length)return !!f.length;const fs=!!f[0].mag,k=fs?steelN:ms.length-steelN;let i=0;while(i<f.length&&!!f[i].mag===fs)i++;return i>=k||i<f.length}
+ const sps=course.springs.map(s=>s.si);return !sps.length||!hasSteel()||ms.every(m=>m.done||sps.every(si=>(m.sj||{})[si]))}
 // the builder's live check of the rule, before the test: [state (true ok, false not yet, null info), text]
 function chalRule(ch,mods,c){
  const n=mods.length,p=c.prev,dc=p?diffN(p.m,mods):-1;
  if(ch.id==='slow')return n<=4?[true,L(`✅ 조각 ${n}개 · 4개까지예요`,`✅ ${n} pieces · up to 4`)]:[false,L(`⚠️ 조각 ${n}개 · 4개까지만 써요`,`⚠️ ${n} pieces · use 4 or fewer`)];
  if(ch.id==='fast')return n>=5?[true,L(`✅ 조각 ${n}개 · 5개 이상이에요`,`✅ ${n} pieces · at least 5`)]:[false,L(`⚠️ 조각 ${n}개 · 5개 이상 넣어요`,`⚠️ ${n} pieces · use at least 5`)];
  if(ch.id==='window')return [null,L(`조각 ${n}개 · 조각 수는 자유예요`,`${n} pieces · any number is fine`)];
+ if(ch.team||ch.sort){const mg=mods.includes('magnet'),sp=mods.some(m=>pieceOf(m)==='spring');
+  if(!mg)return [false,L('⚠️ 🧲 자석 드럼을 넣어야 ⚙️ 쇠구슬 팀이 나와요','⚠️ Add a 🧲 magnet drum so the ⚙️ steel team races')];
+  if(ch.sort&&!sp)return [false,L('⚠️ ➰ 용수철 발사대를 넣어요','⚠️ Add a ➰ spring launcher')];
+  return [true,ch.team?L(`✅ 🧲 자석이 있어서 ⚙️ 쇠구슬 팀이 나와요 · 조각 ${n}개`,`✅ The 🧲 magnet brings out the ⚙️ steel team · ${n} pieces`):L(`✅ 🧲 자석과 ➰ 용수철이 있어요 · 용수철 누름 ${mods.filter(m=>pieceOf(m)==='spring').map(springLv).join('·')}`,`✅ Magnet and spring are in · spring squashed ${mods.filter(m=>pieceOf(m)==='spring').map(springLv).join(', ')}`)]}
  if(!p)return [null,ch.id==='same'?L('📏 먼저 한 번 시험해요. 그다음 그대로 한 번 더!','📏 Test once first, then test it again unchanged!'):L('📏 먼저 이 코스로 시험해서 기준 시간을 재요','📏 First test this course to measure a baseline time')];
  if(ch.id==='one')return dc===0?[false,L('지난 시험과 같은 코스예요. 조각 하나만 바꿔요','Same course as the last test. Change one piece')]:dc===1?[true,L('✅ 한 군데만 바꿨어요','✅ Exactly one spot changed')]:[false,L('⚠️ 여러 군데가 바뀌었어요. 한 군데만 바꿔요','⚠️ Several spots changed. Change only one')];
  if(ch.id==='double')return [dc?null:false,L(`기준 ${sec(p.t)} → 목표 ${sec(2*p.t)} 이상`,`Baseline ${sec(p.t)} → goal ${sec(2*p.t)} or more`)+(dc?'':L(' · 아직 바꾼 곳이 없어요',' · nothing changed yet'))];
@@ -1557,15 +1868,16 @@ function gaugeHTML({zones=[],now=null,base=null,old=[],guess=null,label,near=fal
  if(now!=null){h+=`<span class="g-now" style="left:${P(now)}"><em>${sec(now)}</em></span>`;key.push(`<li><i class="kn"></i>${L('이번 시험','This test')}</li>`)}
  let ticks='';for(let v=min;v<=max+1e-6;v+=step)ticks+=`<span style="left:${P(v)}">${v}${v+step>max+1e-6?L('초',' s'):''}</span>`;
  return `<div class="gauge" role="img" aria-label="${esc(label)}"><div class="g-track" aria-hidden="true">${h}</div><div class="g-ticks" aria-hidden="true">${ticks}</div><ul class="g-key" aria-hidden="true">${key.join('')}</ul></div>`}
-const zoneText=(id,prev)=>({slow:L('30초 이상','30 s or more'),fast:L('16초 이하','16 s or less'),window:L('20~24초','20 to 24 s')})[id]||
+const zoneText=(id,prev)=>CHAL_BY[id].team||CHAL_BY[id].sort?'':({slow:L('30초 이상','30 s or more'),fast:L('16초 이하','16 s or less'),window:L('20~24초','20 to 24 s')})[id]||
  (!prev?'':id==='one'?L(`${sec(prev.t)}에서 4초 이상 달라지게`,`at least 4 s away from ${sec(prev.t)}`):id==='double'?L(`${sec(2*prev.t)} 이상`,`${sec(2*prev.t)} or more`):L(`${sec(prev.t)}에서 1초 안`,`within 1 s of ${sec(prev.t)}`));
 // one short physics hint from Coach Moon, tied to what happened in this test
 const SLOW_WHY={honey:L('마찰이 커서 구슬을 붙잡아요','It has lots of friction, which holds the marbles back'),zigzag:L('왔다 갔다 하는 길이 길어요','Its back-and-forth path is long'),ramps3:L('왔다 갔다 하는 길이 길고 완만해요','Its back-and-forth path is long and gentle'),
  ice:L('왔다 갔다 하는 길이 길어요','Its back-and-forth path is long'),wash2:L('왔다 갔다 하는 길이 길고 덜컹거려요','Its back-and-forth path is long and bumpy'),ramps2b:L('왔다 갔다 하는 길이 있어요','It has a back-and-forth path'),tramp:L('구슬이 통통 튀며 옆으로 오가요','Marbles bounce from side to side'),
- fan:L('바람이 구슬을 받쳐 줘요','The air holds the marbles up'),funnels3:L('구슬이 빙글빙글 돌아요','Marbles go round and round'),split:L('한쪽 길이 더 길어요','One of its paths is longer'),jump:L('길이 꽤 길어요','Its path is fairly long'),pegs:L('핀에 부딪히며 내려와요','Marbles bump down through pegs'),spinner:L('팔에 부딪혀요','The arms knock the marbles'),bumpers:L('범퍼에 튕겨요','The bumpers bounce them')};
+ fan:L('바람이 구슬을 받쳐 줘요','The air holds the marbles up'),spring:L('구슬이 한 개씩 차례를 기다려요','Marbles wait their turn, one at a time'),blow:L('그물에 떨어지면 먼 길로 돌아가요','Marbles that drop into the net take the long way'),well:L('구슬이 빙글빙글 돌다가 빠져나가요','Marbles whirl round before they drop through'),magnet:L('쇠구슬이 드럼에 붙어 돌아가요','Steel marbles ride round on the drum'),funnels3:L('구슬이 빙글빙글 돌아요','Marbles go round and round'),split:L('한쪽 길이 더 길어요','One of its paths is longer'),jump:L('길이 꽤 길어요','Its path is fairly long'),pegs:L('핀에 부딪히며 내려와요','Marbles bump down through pegs'),spinner:L('팔에 부딪혀요','The arms knock the marbles'),bumpers:L('범퍼에 튕겨요','The bumpers bounce them')};
 function chalHint(ch,run,j,prev){
- const m=run.m,has=p=>m.includes(p),byCost=m.slice().sort((a,b)=>(COST[b]||0)-(COST[a]||0)),slow=byCost[0],fast=byCost[byCost.length-1],bumpy=m.some(p=>BUMPY.includes(p));
- const slowLine=()=>L(`가장 느린 조각은 ${pieceName(slow)}${jo(PIECE_BY[slow][2],'이에요','예요')}. ${SLOW_WHY[slow]}.`,`The slowest piece here is the ${pieceName(slow)}. ${SLOW_WHY[slow]}.`);
+ if(ch.team||ch.sort)return chalForceHint(ch,run.m,j);
+ const m=run.m,has=p=>m.includes(p),byCost=m.slice().sort((a,b)=>(COST[pieceOf(b)]||0)-(COST[pieceOf(a)]||0)),slow=byCost[0],fast=byCost[byCost.length-1],bumpy=m.some(p=>BUMPY.includes(pieceOf(p)));
+ const slowLine=()=>L(`가장 느린 조각은 ${pieceName(slow)}${jo(PIECE_BY[pieceOf(slow)][2],'이에요','예요')}. ${SLOW_WHY[pieceOf(slow)]}.`,`The slowest piece here is the ${pieceName(slow)}. ${SLOW_WHY[pieceOf(slow)]}.`);
  if(ch.id==='slow'){if(j.ok)return has('honey')?L('🍯 꿀 언덕은 마찰이 커서 구슬을 붙잡아요. 그래서 느려졌어요!','🍯 Honey hill has lots of friction, which holds the marbles back. That is what slowed them down!'):L('왔다 갔다 하는 길은 더 멀어서 시간이 오래 걸려요. 길이를 이용한 멋진 설계예요!','A back-and-forth path is longer, so it takes more time. Clever use of a long path!');
   if(j.n>4)return L('조각이 4개보다 많아요. 가장 느릴 것 같은 조각 4개만 골라 봐요.','That is more than 4 pieces. Keep the 4 you think are slowest.');
   if(!has('honey'))return L('🍯 꿀 언덕은 마찰이 커서 구슬이 느릿느릿 내려와요. 넣어 볼까요?','🍯 Honey hill has lots of friction, so marbles crawl down it. Want to try it?');
@@ -1587,8 +1899,31 @@ function chalHint(ch,run,j,prev){
  if(j.n<4)return L('조각 4개 이상이 규칙이에요. 조각을 더 넣고 다시 두 번 시험해요.','The rule is 4 or more pieces. Add pieces, then test twice again.');
  if(j.ok)return L('같은 결과가 또 나오면 믿을 수 있어요. 그래서 엔지니어도 여러 번 시험해요!','When a second test gives the same result, you can trust it. That is why engineers test more than once!');
  return bumpy?L('핀·범퍼·트램펄린·갈림길·계단길·바람개비에서는 매번 다르게 튕겨서 시간이 들쭉날쭉해요. ❄️ 얼음이나 🍯 꿀 같은 매끈한 길로 바꿔 봐요.','On pegs, bumpers, trampolines, split paths, stairs and spinners, marbles bounce differently every time, so the times jump around. Try smooth tracks like ❄️ ice or 🍯 honey.'):L('같은 코스도 구슬의 출발 순서가 매번 달라서 조금씩 달라져요. 한 번 더 재 봐요.','Even the same course changes a little, because the marbles line up in a new order each time. Measure once more.')}
+// hints for the team and sort challenges: which pieces help heavy or light marbles, and how far to squash the spring
+function chalForceHint(ch,m,j){const o=j.o||{};
+ if(!o.mag)return L('🧲 자석 드럼이 있어야 ⚙️ 쇠구슬 팀이 나와요. 자석은 쇠만 끌어당기거든요!','The ⚙️ steel team only comes out with a 🧲 magnet drum, because magnets pull only steel!');
+ if(ch.team){const tunnels=m.filter(p=>p==='fan').length,light=m.some(p=>p==='blow'||pieceOf(p)==='spring');
+  if(j.ok)return L('🌬️ 바람 터널은 가벼운 구슬을 오래 붙잡아 둬요. 무거운 쇠구슬은 바람에 덜 밀려서 먼저 내려왔어요!','The 🌬️ wind tunnel holds light marbles up for longer. Heavy steel marbles are pushed less by the wind, so they came down first!');
+  if(o.glassFirst)return L('🔮 유리구슬 팀이 먼저 왔어요! 💨 선풍기와 ➰ 용수철은 가벼운 구슬을 더 멀리 보내요. 쇠구슬 팀이 먼저 오게 하려면 어떻게 바꿀까요?','The 🔮 glass team came first! 💨 Fans and ➰ springs send light marbles farther. How could you change it so the steel team comes first?');
+  if(light)return L('💨 선풍기와 ➰ 용수철은 가벼운 유리구슬에게 유리해요. 무거운 쇠구슬에게 유리한 조각은 뭘까요?','💨 Fans and ➰ springs help the light glass marbles. Which piece helps the heavy steel ones?');
+  return tunnels?L('🌬️ 바람 터널을 하나 더 넣어 볼까요? 바람은 가벼운 구슬을 더 오래 붙잡아 둬요.','Add one more 🌬️ wind tunnel? The wind holds light marbles up for longer.'):L('🌬️ 바람 터널을 넣어 봐요. 같은 바람이 불어도 무거운 구슬은 덜 붙잡혀요.','Try a 🌬️ wind tunnel. The same wind holds heavy marbles back less.')}
+ if(!o.springs)return L('➰ 용수철 발사대를 넣어 봐요.','Add a ➰ spring launcher.');
+ if(j.ok)return L('같은 용수철이 밀어도 무거운 쇠구슬은 덜 빨라져요. 그래서 무게로 구슬을 나눌 수 있었어요!','The same spring speeds up a heavy steel marble less, so the marbles were sorted by weight!');
+ if(o.all)return L('모두 건넜어요! 무거운 쇠구슬까지 건너려면 용수철을 아주 꾹 눌러야 해요. 쇠구슬만 떨어지게 하려면 조금 덜 눌러 봐요.','Everyone made it across! The heavy steel marbles need a very squashed spring. To drop only the steel ones, squash it a little less.');
+ if(o.gL<o.gN)return L('유리구슬도 그물에 떨어졌어요. 용수철을 더 꾹 눌러서 세게 쏘아 봐요!','Some glass marbles fell into the net too. Squash the spring more for a stronger launch!');
+ return L('쇠구슬이 건너 버렸어요. 용수철을 조금 덜 눌러 봐요.','Some steel marbles made it across. Squash the spring a little less.')}
+// the result of a team or sort run: the finishing order by team, or who crossed the spring's gap
+function chalForceView(ch,o){
+ const chip=(id,i,extra)=>`<span class="${isSteel(id)?'os':'og'}" style="--c:${PALETTE[id][1]}"><b>${i}</b>${isSteel(id)?'⚙️':'🔮'}${extra||''}</span>`;
+ if(ch.team)return `<div class="ch-order" role="img" aria-label="${esc(L('들어온 순서: ','Finishing order: ')+o.order.map(id=>isSteel(id)?L('쇠구슬','steel'):L('유리구슬','glass')).join(', '))}">${o.order.map((id,i)=>chip(id,i+1)).join('')}</div>`;
+ if(!o.springs||!o.mag)return '';const sps=course.springs.map(s=>s.si);
+ return `<div class="ch-order" role="img" aria-label="${esc(L(`유리구슬 건넘 ${o.gL}/${o.gN}, 쇠구슬 그물 ${o.sN}/${o.sT}`,`Glass across ${o.gL} of ${o.gN}, steel in the net ${o.sN} of ${o.sT}`))}">${st.marbles.map(m=>chip(m.id,m.id+1,sps.map(si=>({L:'🛬',N:'🕸️'})[(m.sj||{})[si]]||'⏳').join(''))).join('')}</div><p class="ch-key">🛬 ${L('건넜어요','across')} · 🕸️ ${L('그물','net')}</p>`}
 // the result line under the gauge: what was measured against the goal
 function chalMsg(ch,j,prev,plus=0){
+ if(ch.team||ch.sort){const o=j.o||{},head=j.ok?['ok',L('🎉 목표 달성!','🎉 Goal met!')+(plus?L(` ⭐ 새 별 ${plus}개!`,` ⭐ ${plus} new star${plus>1?'s':''}!`):'')]:plus?['ok',L(`⭐ 보너스 별 ${plus}개!`,`⭐ ${plus} bonus star${plus>1?'s':''}!`)]:['new',L('🔧 아직이에요. 고쳐서 다시 시험해요!','🔧 Not yet. Improve it and test again!')];
+  const x=!o.mag?L('🧲 자석이 없어서 쇠구슬 팀이 나오지 않았어요','No magnet, so the steel team did not race'):ch.team?(o.steelFirst?L('⚙️ 쇠구슬 팀이 모두 먼저 들어왔어요','The whole ⚙️ steel team came in first'):o.glassFirst?L('🔮 유리구슬 팀이 모두 먼저 들어왔어요','The whole 🔮 glass team came in first'):L('두 팀이 섞여서 들어왔어요','The two teams came in mixed up')):
+   !o.springs?L('➰ 용수철 발사대가 없어요','There is no spring launcher'):L(`🔮 유리구슬 건넘 ${o.gL}/${o.gN} · ⚙️ 쇠구슬 그물 ${o.sN}/${o.sT}`,`🔮 Glass across: ${o.gL} of ${o.gN} · ⚙️ Steel in the net: ${o.sN} of ${o.sT}`);
+  return `<p class="ch-msg ${head[0]}" role="status">${head[1]}<small>${esc(x)}</small></p>`}
  const b='base',head=j.ok?['ok',L('🎉 목표 달성!','🎉 Goal met!')+(plus?L(` ⭐ 새 별 ${plus}개!`,` ⭐ ${plus} new star${plus>1?'s':''}!`):'')]:!j.ready?[b,L('📏 기준을 쟀어요','📏 Baseline measured')]:['new',L('🔧 아직이에요. 고쳐서 다시 시험해요!','🔧 Not yet. Improve it and test again!')];
  let x='';const n=j.n,t=j.t;
  if(ch.id==='slow')x=n>4?L(`규칙: 조각 4개까지 (이번 ${n}개)`,`Rule: up to 4 pieces (this time ${n})`):t>=30?L(`목표 30초 이상 · 이번 ${sec(t)}`,`Goal 30 s or more · this time ${sec(t)}`):L(`${sec(30-t)} 더 느려야 해요`,`It needs to be ${sec(30-t)} slower`);
@@ -1601,7 +1936,7 @@ function chalMsg(ch,j,prev,plus=0){
  return `<p class="ch-msg ${head[0]}" role="status">${head[1]}<small>${esc(x)}</small></p>`}
 // a test run ended: measure, judge, keep the record, then show the result card
 function chalShow(rank){
- const ch=CHAL_BY[chalRun.id],c=chalOf(ch.id),w=rank[0],t=Math.round(((w.finishTime||st.t)-st.raceT0)*100)/100,run={m:chalRun.mods.slice(),t},prev=c.prev,old=(c.hist||[]).slice(),guess=chalRun.guess;
+ const ch=CHAL_BY[chalRun.id],c=chalOf(ch.id),w=rank[0],t=Math.round(((w.finishTime||st.t)-st.raceT0)*100)/100,force=ch.team||ch.sort,run={m:chalRun.mods.slice(),t,o:force?chalFacts():null},prev=c.prev,old=(c.hist||[]).slice(),guess=chalRun.guess;
  const j=chalJudge(ch,run,prev,c),was=c.s,metBefore=c.met>0,fixed=!!prev&&j.dc>0;
  c.n++;if(j.ok){if(fixed&&c.n>c.met+1)c.imp=1;c.met++;if(ch.id==='one')c.dirs|=j.d>0?1:2}
  c.s|=j.stars;const gained=c.s&~was;
@@ -1616,19 +1951,19 @@ function chalShow(rank){
  const top=rank.slice(0,3).filter(m=>m.done).map((m,i)=>`<span>${['🥇','🥈','🥉'][i]} ${esc(nameOf(m.id))} ${sec(m.finishTime-st.raceT0)}</span>`).join('');
  const hint=chalHint(ch,run,j,prev);
  $('resultCard').innerHTML=`<div class="ch-res"><div class="lab-head">🎯 ${L('설계 도전','Design challenge')} · ${ch.ic} ${esc(ch.t)}</div>${stepsHTML([2])}
-  <div class="ch-time">⏱️ ${L('우승 시간','Winning time')} ${sec(t)}</div>${gaugeHTML({zones,now:t,base,old:(base!=null?old.slice(0,-1):old).slice(-4),guess,label,near:ch.id==='same'&&base!=null})}${chalMsg(ch,j,prev,starN(gained))}
+  <div class="ch-time">⏱️ ${L('우승 시간','Winning time')} ${sec(t)}</div>${force?chalForceView(ch,j.o):gaugeHTML({zones,now:t,base,old:(base!=null?old.slice(0,-1):old).slice(-4),guess,label,near:ch.id==='same'&&base!=null})}${chalMsg(ch,j,prev,starN(gained))}
   ${guess!=null?`<p class="ch-guess">🤔 ${L(`내 예상 ${guess}초 → 실제 ${sec(t)} (${sec(Math.abs(t-guess))} 차이)`,`My guess ${guess} s → actual ${sec(t)} (${sec(Math.abs(t-guess))} off)`)}</p>`:''}
   ${coachHere(j.ok?'clap':'idea',hint,hint)}
   <div class="result-actions"><button class="control" type="button" data-act="chAgain">🔁 ${L('그대로 다시 시험','Test it again')}</button><button class="primary" type="button" data-act="chFix">🔧 ${L('코스 고치기','Improve the course')}</button></div>
   ${stars}<div class="ch-podium">${top}</div>
   <div class="result-actions"><button class="control" type="button" data-act="chBoard">🎯 ${L('도전 목록','Challenges')}</button><button class="control" type="button" data-act="chExit">🏁 ${L('레이스로','Back to races')}</button></div></div>`;
  $('resultOverlay').classList.remove('hidden');if(j.ok){confetti();setTimeout(jingle,400)}
- setControls();setCaption(L(`⏱️ 우승 시간 ${sec(t)}`,`⏱️ Winning time ${sec(t)}`));speak(L(`우승 시간은 ${t.toFixed(1)}초예요. `,`The winning time is ${t.toFixed(1)} seconds. `)+hint,true);
+ setControls();setCaption(L(`⏱️ 우승 시간 ${sec(t)}`,`⏱️ Winning time ${sec(t)}`));speak((force?'':L(`우승 시간은 ${t.toFixed(1)}초예요. `,`The winning time is ${t.toFixed(1)} seconds. `))+hint,true);
  if(j.ok&&!metBefore)setTimeout(()=>coachTell('medal',`${ch.ic} ${ch.t} 성공! 계획하고, 만들고, 시험하고, 고친 덕분이에요 🌙`,`${ch.ic} ${ch.t}: done! You planned, built, tested and improved 🌙`,{gap:4000,ms:6000}),1800);
  checkBadges()}
 function openChalBoard(opener){
  if(phase==='countdown'||phase==='running')return;
- $('chalBody').innerHTML=`${stepsHTML([])}<p class="ch-intro">${L('엔지니어처럼 목표에 맞는 코스를 설계해요. 시험 주행에서 우승 시간을 진짜로 재서 확인해요. 시험 주행은 응원 없이 코스의 힘만으로 달려요.','Design a course that meets the goal, like an engineer. A test run measures the real winning time. Test runs have no cheering, so only the course decides.')} · ⭐ ${chalStars()}/${CHALS.length*3}</p>
+ $('chalBody').innerHTML=`${stepsHTML([])}<p class="ch-intro">${L('엔지니어처럼 목표에 맞는 코스를 설계해요. 시험 주행에서 우승 시간이나 들어온 순서를 진짜로 재서 확인해요. 시험 주행은 응원 없이 코스의 힘만으로 달려요.','Design a course that meets the goal, like an engineer. A test run measures the real winning time or finishing order. Test runs have no cheering, so only the course decides.')} · ⭐ ${chalStars()}/${CHALS.length*3}</p>
   <div class="ch-grid">${CHALS.map(ch=>{const c=chalGet(ch.id);return `<button type="button" class="ch-card${c.s&1?' met':''}" data-ch="${ch.id}"><span class="ci" aria-hidden="true">${ch.ic}</span><span class="ct"><b>${esc(ch.t)}</b><span class="cg">${esc(ch.g)}</span><small>📐 ${esc(ch.r)}</small>${starsHTML(c.s)}<small>${c.n?L(`시험 ${c.n}번`,`${c.n} test run${c.n===1?'':'s'}`)+(c.prev?' · '+L('지난 시험 ','last ')+sec(c.prev.t):''):L('새 도전','New challenge')}</small></span></button>`}).join('')}</div>`;
  openModal('chalModal',opener||$('chalBtn'))}
 function startChallenge(id,opener){
@@ -1641,9 +1976,9 @@ function chalStripHTML(d){
  const ch=CHAL_BY[d.ch],c=chalGet(d.ch),[rs,rt]=chalRule(ch,d.mods,c),zones=chalZones(ch.id,c.prev);
  return `<div class="ch-strip"><div class="ch-head"><b>${ch.ic} ${esc(ch.t)}</b>${starsHTML(c.s)}</div>
   <p class="ch-goal">🎯 ${esc(ch.g)}<small>📐 ${esc(ch.r)}</small></p>${stepsHTML(c.n?[3]:[0,1])}
-  ${c.prev?gaugeHTML({zones,base:c.prev.t,guess:d.guess,near:ch.id==='same',label:L(`지난 시험 ${sec(c.prev.t)}`,`Last test ${sec(c.prev.t)}`)+(zones.length?L(`, 목표 ${zoneText(ch.id,c.prev)}`,`, goal ${zoneText(ch.id,c.prev)}`):'')}):''}
+  ${c.prev&&!(ch.team||ch.sort)?gaugeHTML({zones,base:c.prev.t,guess:d.guess,near:ch.id==='same',label:L(`지난 시험 ${sec(c.prev.t)}`,`Last test ${sec(c.prev.t)}`)+(zones.length?L(`, 목표 ${zoneText(ch.id,c.prev)}`,`, goal ${zoneText(ch.id,c.prev)}`):'')}):''}
   <p class="ch-rule ${rs===true?'ok':rs===false?'no':''}" role="status">${esc(rt)}</p>
-  <div class="guess"><span>🤔 ${L('예상 우승 시간','Guess the winning time')}</span><button type="button" class="mini-btn" data-b="gm" aria-label="${L('예상 1초 줄이기','Guess 1 second less')}">−</button><output aria-live="polite">${d.guess==null?'?':d.guess+L('초',' s')}</output><button type="button" class="mini-btn" data-b="gp" aria-label="${L('예상 1초 늘리기','Guess 1 second more')}">+</button><small>${L('먼저 예상하고 시험하면 더 많이 배워요. 안 해도 괜찮아요.','Guessing before a test helps you learn. Skipping is fine too.')}</small></div>
+  ${ch.team||ch.sort?`<p class="ch-rule">🤔 ${esc(ch.team?L('어떤 조각이 무거운 쇠구슬에게 유리할지 먼저 예상해 봐요.','First guess which pieces help the heavy steel marbles.'):L('용수철을 얼마나 눌러야 할지 먼저 예상해 봐요.','First guess how far to squash the spring.'))}</p>`:`<div class="guess"><span>🤔 ${L('예상 우승 시간','Guess the winning time')}</span><button type="button" class="mini-btn" data-b="gm" aria-label="${L('예상 1초 줄이기','Guess 1 second less')}">−</button><output aria-live="polite">${d.guess==null?'?':d.guess+L('초',' s')}</output><button type="button" class="mini-btn" data-b="gp" aria-label="${L('예상 1초 늘리기','Guess 1 second more')}">+</button><small>${L('먼저 예상하고 시험하면 더 많이 배워요. 안 해도 괜찮아요.','Guessing before a test helps you learn. Skipping is fine too.')}</small></div>`}
   <div class="ch-tools"><button type="button" class="chip" data-b="board">🎯 ${L('다른 도전','Other challenges')}</button><button type="button" class="chip" data-b="free">🛠️ ${L('자유롭게 만들기','Free build')}</button></div></div>
   ${customs.length?`<div class="b-saved"><span>📂 ${L('내 코스 가져오기','Start from my course')}:</span>${customs.map((x,i)=>`<button type="button" class="chip" data-b="load" data-i="${i}">🛠️ ${esc(x.name)}</button>`).join('')}</div>`:''}`}
 function chalTest(){
@@ -1657,12 +1992,14 @@ function chalExit(){chalRun=null;prepare();setCaption(L('🏁 레이스로 돌�
 const firstSentence=s=>(String(s).match(/^.*?[.!?](?=\s|$)/)||[s])[0];
 // the result headline for an experiment outcome (shared by the lab result card and the notebook)
 function labHead(ex,win){const nmOf=k=>ex.lanes['AB'.indexOf(k)]?.name||'';
+ if(ex.kind==='magnet')return win==='same'?L('🤝 둘 다 똑같이 움직였어요!','🤝 Both moved the same!'):`🧲 ${L('자석 쪽으로 끌려갔어요','Pulled to the magnet')}: ${nmOf(win)}`;
+ if(ex.measure==='laps')return win==='same'?L('🤝 비슷하게 돌았어요!','🤝 About the same number of laps!'):`🌀 ${L('더 많이 돌았어요','Circled more')}: ${nmOf(win)}`;
  return ex.measure==='time'?(win==='same'?L('🤝 거의 동시에 도착!','🤝 They arrived together!'):`🏁 ${L('먼저 도착','First to arrive')}: ${nmOf(win)}`):ex.measure==='up'?(win==='same'?L('🤝 비슷하게 튀었어요!','🤝 About the same bounce!'):`↕️ ${L('더 높이','Higher')}: ${nmOf(win)}`):(win==='same'?L('🤝 비슷하게 갔어요!','🤝 About the same distance!'):`↔️ ${L('더 멀리','Farther')}: ${nmOf(win)}`)}
 function noteEntryHTML(e,busy){
- const r=stats.labs[e.id],time=e.measure==='time',vals=r.v.map(x=>time?(x>=99?null:x):sq(x)),txt=v=>v==null?'—':time?v.toFixed(2)+L('초',' s'):v+L('칸',' squares');
+ const r=stats.labs[e.id],time=e.measure==='time',laps=e.measure==='laps',vals=r.v.map(x=>time?(x>=99?null:x):laps?x:sq(x)),txt=v=>v==null?'—':time?v.toFixed(2)+L('초',' s'):laps?lapTxt(v):v+L('칸',' squares');
  const mx=Math.max(time?.1:1,...vals.filter(v=>v!=null)),W=v=>v==null?0:v/mx*72;
  const pred=e.opts.find(o=>o[0]===r.p)?.[1],same=r.p&&r.w&&r.p===r.w;
- const axis=time?L('⏱️ 걸린 시간 · 막대가 짧을수록 먼저 도착했어요','⏱️ Time taken · a shorter bar arrived first'):e.measure==='up'?L('↕️ 튀어 오른 높이 · 막대가 길수록 높이 튀었어요','↕️ Bounce height · a longer bar bounced higher'):L('↔️ 간 거리 · 막대가 길수록 멀리 갔어요','↔️ Distance · a longer bar went farther');
+ const axis=time?L('⏱️ 걸린 시간 · 막대가 짧을수록 먼저 도착했어요','⏱️ Time taken · a shorter bar arrived first'):laps?L('🌀 돈 바퀴 수 · 막대가 길수록 많이 돌았어요','🌀 Laps · a longer bar circled more'):e.measure==='up'?L('↕️ 튀어 오른 높이 · 막대가 길수록 높이 튀었어요','↕️ Bounce height · a longer bar bounced higher'):L('↔️ 간 거리 · 막대가 길수록 멀리 갔어요','↔️ Distance · a longer bar went farther');
  const aria=e.lanes.map((ln,i)=>`${'AB'[i]} ${ln.name} ${txt(vals[i])}`).join(', ');
  return `<article class="nb"><h3 class="nb-h"><span aria-hidden="true">${e.ic}</span>${esc(e.t)}<small>${L(`실험 ${r.n}번`,`${r.n} run${r.n===1?'':'s'}`)}</small></h3>
   ${pred?`<p>🤔 <b>${L('내 예상','My guess')}</b> · ${esc(pred)}</p>`:''}<p>👀 <b>${L('결과','Result')}</b> · ${esc(labHead(e,r.w||'same'))}${pred?`<span class="nb-tag ${same?'ok':'new'}">${same?L('예상과 같아요','Matched my guess'):L('예상과 달라요','Different from my guess')}</span>`:''}</p>
@@ -1684,7 +2021,7 @@ let labMode=false,labExp=null,labPred=null,labFresh=false,labRes=[{},{}],labStar
 function setupLab(){
  const ex=labExp;course=Sim.build(null,null,ex.kind,ex.lanes);theme=LAB_THEME;
  const n=ex.kind==='crash'?4:2,mats=ex.kind==='crash'?[ex.lanes[0].mat,ex.lanes[1].mat,ex.lanes[0].target,ex.lanes[1].target]:ex.lanes.map(l=>l.mat);
- st=Sim.createState(course,n,[...Array(n).keys()]);st.marbles.forEach((m,i)=>{const M=MATS[mats[i]];m.mass=M.mass;m.bounce=M.bounce;m.look=M;m.ang=0});
+ st=Sim.createState(course,n,[...Array(n).keys()]);st.marbles.forEach((m,i)=>{const M=MATS[mats[i]];m.mass=M.mass;m.bounce=M.bounce;m.look=M;m.ang=0;m.mag=M.metal?1:0});
  for(let i=0;i<40;i++)Sim.step(st,1/60);labStart=st.marbles.map(m=>m.x);labRes=[{},{}];labEndAt=0}
 function labListHTML(){return EXPS.map(e=>{const r=stats.labs[e.id];return `<button type="button" class="lab-card${labExp&&labExp.id===e.id&&labMode?' on':''}" data-exp="${e.id}"><span class="lc-ic">${e.ic}</span><span class="lc-tx"><b>${esc(e.t)}</b><small>${esc(e.q)}</small></span><span class="lc-done">${r?'✅'+(r.n>1?' ×'+r.n:''):''}</span></button>`}).join('')}
 function openLabPicker(opener){
@@ -1712,6 +2049,9 @@ function labLogic(){
   else if(ex.kind==='bounce'){if(m.vy>60)r.fell=1;if(r.fell&&!r.hit&&m.vy<0&&m.y>L0.floorY-floor-80){r.hit=1;tone(l?220:520,90,'sine',.07)}if(r.hit===1){r.peak=Math.min(r.peak??1e9,m.y);if(m.vy>0){r.hit=2;r.v=Math.max(0,L0.floorY-floor-r.peak)}}}
   else if(ex.kind==='roll'){r.x=m.x;if(r.v==null&&m.x>L0.startX&&Math.hypot(m.vx,m.vy)<4&&t>.8){r.v=Math.max(0,m.x-L0.startX);tone(300+l*80,80,'sine',.06)}}
   else if(ex.kind==='wind'){if(r.v==null&&m.y>=L0.floorY-floor-1){r.v=Math.max(0,m.x-L0.startX);r.x=m.x;tone(300+l*80,80,'sine',.06)}}
+  else if(ex.kind==='magnet'||ex.kind==='fan'){r.x=m.x;if(r.v==null&&t>.5&&(m.y>=L0.floorY-floor-1||(ex.kind==='magnet'&&Math.hypot(m.vx,m.vy)<4))){r.v=Math.max(0,m.x-L0.startX);tone(300+l*80,80,'sine',.06)}}
+  else if(ex.kind==='spring'){if(m.vy<-30)r.up=1;if(r.up&&r.v==null){r.peak=Math.min(r.peak??1e9,m.y);if(m.vy>0){r.v=Math.max(0,L0.baseY-r.peak);tone(l?300:600,90,'sine',.07)}}}
+  else if(ex.kind==='well'){if(r.v==null&&m.hid){r.v=m.hid.laps;tone(l?260:420,140,'sine',.06)}}
   else if(ex.kind==='crash'){const tg=st.marbles[2+l],moved=Math.abs(tg.x-labStart[2+l]);if(!r.hit&&moved>1.5){r.hit=1;tone(l?400:180,110,'square',.05)}if(!r.hit&&tg.x-m.x<70)slow=true;r.x=tg.x;if(r.hit&&r.v==null&&Math.hypot(tg.vx,tg.vy)<4&&t>.8)r.v=moved}}
  slowTarget=slow?.35:1;$('slowmo').classList.toggle('hidden',!slow);
  if(!labEndAt&&(labRes.every(r=>r.v!=null)||t>7))labEndAt=clock+(ex.measure==='time'?1.1:.9);
@@ -1719,15 +2059,16 @@ function labLogic(){
 function labOutcome(){const ex=labExp,v=labRes.map(r=>r.v??(ex.measure==='time'?99:0));let win;
  if(ex.measure==='time')win=Math.abs(v[0]-v[1])<.03?'same':v[0]<v[1]?'A':'B';
  else{const mx=Math.max(v[0],v[1],1);win=Math.abs(v[0]-v[1])<mx*.12?'same':v[0]>v[1]?'A':'B'}return {win,v}}
-const sq=v=>Math.round(v/UNIT);
+const sq=v=>Math.round(v/UNIT),lapTxt=v=>(Math.round(v*10)/10).toFixed(1)+L('바퀴',' laps');
 function labExplain(){
  const ex=labExp,{win,v}=labOutcome(),right=labPred===win;phase='finished';slowTarget=1;$('slowmo').classList.add('hidden');
  const f=x=>x>=99?'—':x.toFixed(2);
  const head=labHead(ex,win);
- const detail=ex.measure==='time'?`A ${f(v[0])}${L('초','s')} · B ${f(v[1])}${L('초','s')}`:`A ${sq(v[0])}${L('칸',' squares')} · B ${sq(v[1])}${L('칸',' squares')}`;
+ const detail=ex.measure==='time'?`A ${f(v[0])}${L('초','s')} · B ${f(v[1])}${L('초','s')}`:ex.measure==='laps'?`A ${lapTxt(v[0])} · B ${lapTxt(v[1])}`:`A ${sq(v[0])}${L('칸',' squares')} · B ${sq(v[1])}${L('칸',' squares')}`;
  // the notebook keeps the latest guess, outcome and measured values (seconds, or pixels shown as 칸)
  const r=stats.labs[ex.id]||{n:0,right:0};r.n++;if(right)r.right++;if(labPred)r.p=labPred;r.w=win;r.v=v.map(x=>Math.round(x*1000)/1000);stats.labs[ex.id]=r;save();
- if(labFresh){labFresh=false;try{LR.ans(right,'exp_'+ex.id)}catch(e){}}
+ // the report counts only the first test of each guess, and keeps the question, the right answer and (when it differed) the guess
+ if(labFresh){labFresh=false;const it=IX[ex.id];try{LR.ans(right,'exp_'+ex.id,it?{id:'exp:'+ex.id,q:it.q,a:it.o[ex.ans],...(right?{}:{g:it.o[labPred]}),tip:it.tip}:undefined)}catch(e){}}
  const predTxt=ex.opts.find(o=>o[0]===labPred)?.[1]||'';
  $('resultCard').innerHTML=`<div class="lab-head">${ex.ic} ${esc(ex.t)}</div><div class="lab-result">${esc(head)}</div><p class="lab-detail">${esc(detail)}</p>
   <p class="lab-fb ${right?'ok':'new'}">${right?L('🎯 예상이 맞았어요! 과학자처럼 생각했어요.','🎯 Your guess was right! You thought like a scientist.'):L('🔍 예상과 달랐어요! 그래서 실험이 재밌어요. 과학자들도 이렇게 새로 알게 돼요.','🔍 Not what you guessed! That is what makes experiments fun. Scientists learn new things exactly like this.')}<small>${L('내 예상','My guess')}: ${esc(predTxt)}</small></p>
@@ -1746,6 +2087,10 @@ function drawLab(){
    for(let q=0,yy=top;yy>L0.dropY;q++,yy-=UNIT){ctx.beginPath();ctx.moveTo(x,yy);ctx.lineTo(x+(q%5?8:14),yy);ctx.stroke();if(q&&q%5===0)ctx.fillText(q,x+20+8*k,yy)}
    if(ex.id==='drop'){const sy=L0.dropY-Sim.T-R-.5;ctx.font=F(900,14);ctx.fillStyle='rgba(255,255,255,.85)';ctx.fillText(L(`${sq(top-sy)}칸 높이에서`,`from ${sq(top-sy)} sq`),L0.off+262,sy)}
    if(r.peak!=null){const py=r.peak;ctx.setLineDash([6,5]);ctx.strokeStyle=l?'#ffd84a':'#7df9ff';ctx.lineWidth=2.5;ctx.beginPath();ctx.moveTo(L0.off+70,py);ctx.lineTo(x,py);ctx.stroke();ctx.setLineDash([]);if(r.v!=null){ctx.font=F(900,15);ctx.fillStyle=l?'#ffd84a':'#7df9ff';ctx.fillText(`↕ ${sq(r.v)}${L('칸',' sq')}`,L0.off+120,py-14*k)}}}
+  else if(ex.kind==='spring'){const base=L0.baseY,x=L0.cx+56;ctx.strokeStyle='rgba(255,255,255,.55)';ctx.fillStyle='rgba(255,255,255,.75)';ctx.font=F(700,11);ctx.lineWidth=1.5;
+   for(let q=0,yy=base;yy>64;q++,yy-=UNIT){ctx.beginPath();ctx.moveTo(x,yy);ctx.lineTo(x+(q%5?8:14),yy);ctx.stroke();if(q&&q%5===0)ctx.fillText(q,x+20+8*k,yy)}
+   if(r.peak!=null){ctx.setLineDash([6,5]);ctx.strokeStyle=l?'#ffd84a':'#7df9ff';ctx.lineWidth=2.5;ctx.beginPath();ctx.moveTo(L0.cx-40,r.peak);ctx.lineTo(x,r.peak);ctx.stroke();ctx.setLineDash([]);if(r.v!=null){ctx.font=F(900,15);ctx.fillStyle=l?'#ffd84a':'#7df9ff';ctx.fillText(`↕ ${sq(r.v)}${L('칸',' sq')}`,L0.cx-70,r.peak-14*k)}}}
+  else if(ex.kind==='well'){const m=st.marbles[l],n=r.v??(m.wIn?m.wl:0);ctx.font=F(900,15);ctx.fillStyle=l?'#ffd84a':'#7df9ff';ctx.fillText(`🌀 ${lapTxt(n||0)}`,L0.cx+72,214)}
   else{const fy=L0.floorY+16,x0=ex.kind==='crash'?labStart[2+l]:L0.startX;ctx.strokeStyle='rgba(255,255,255,.6)';ctx.lineWidth=1.5;ctx.fillStyle='rgba(255,255,255,.75)';ctx.font=F(700,11);
    for(let q=0,xx=x0;xx<L0.off+346;q++,xx+=UNIT){ctx.beginPath();ctx.moveTo(xx,fy);ctx.lineTo(xx,fy+(q%5?6:11));ctx.stroke();if(q&&q%5===0)ctx.fillText(q,xx,fy+14+6*k)}
    if(ex.kind==='roll'){const sy=L0.floorY-L0.h;ctx.font=F(900,14);ctx.fillStyle='rgba(255,255,255,.85)';ctx.fillText(L(`출발 높이 ${sq(L0.h)}칸`,`start: ${sq(L0.h)} sq high`),L0.sx+78,sy-6)}
@@ -1753,7 +2098,7 @@ function drawLab(){
    if(ex.kind==='crash'){ctx.setLineDash([3,4]);ctx.strokeStyle='rgba(255,255,255,.5)';ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(x0,L0.floorY-Sim.T-R,R+3,0,TAU);ctx.stroke();ctx.setLineDash([])}}
  });
  // a ring and the material's emoji follow each ball, so it stays easy to spot on a small phone screen
- st.marbles.forEach((m,i)=>{if(!m.look)return;const lane=i%2;ctx.strokeStyle=lane?'#ffd84a':'#7df9ff';ctx.globalAlpha=.85;ctx.lineWidth=2*k;ctx.beginPath();ctx.arc(m.x,m.y,R+5*k,0,TAU);ctx.stroke();ctx.globalAlpha=1;ctx.font=`${Math.round(13*k)}px system-ui`;ctx.fillText(m.look.ic,m.x,m.y-R-11*k)});
+ st.marbles.forEach((m,i)=>{if(!m.look||m.hid)return;const lane=i%2;ctx.strokeStyle=lane?'#ffd84a':'#7df9ff';ctx.globalAlpha=.85;ctx.lineWidth=2*k;ctx.beginPath();ctx.arc(m.x,m.y,R+5*k,0,TAU);ctx.stroke();ctx.globalAlpha=1;ctx.font=`${Math.round(13*k)}px system-ui`;ctx.fillText(m.look.ic,m.x,m.y-R-11*k)});
  ctx.textAlign='left';ctx.textBaseline='alphabetic'}
 
 // ---------------------------------------------------------------- workshop (my marble's look) and badge book
@@ -1858,6 +2203,20 @@ if('speechSynthesis' in window){speechSynthesis.getVoices();speechSynthesis.addE
 fillVoiceSelect();setTimeout(fillVoiceSelect,600);
 checkBadges(true);resize();prepare();setCaption(L('환영합니다! 응원할 구슬을 고르고 출발 버튼을 눌러요!','Welcome! Pick your marble and press Start!'));
 // ---------------------------------------------------------------- parents' report (report.html, see _src/report/SPEC.md)
+// each experiment as a short question in both languages, for the report's list of predictions that missed: q, the guesses, one tip
+const IX={weight:{q:['무거운 쇠구슬과 가벼운 유리구슬이 같은 비탈을 내려가면 누가 먼저 도착할까?','A heavy steel ball and a light glass marble roll down one slide. Which arrives first?'],o:{A:['쇠구슬이 먼저','Steel first'],B:['유리구슬이 먼저','Glass first'],same:['거의 동시에','About the same time']},tip:['무게가 달라도 굴러 내려오는 빠르기는 거의 같아요.','Heavy or light, they roll down at almost the same speed.']},
+ slope:{q:['가파른 비탈과 완만한 비탈 중 어느 쪽 구슬이 먼저 도착할까?','Which marble reaches the end first: on a steep slide or a gentle one?'],o:{A:['가파른 길','The steep slide'],B:['완만한 길','The gentle slide'],same:['거의 동시에','About the same time']},tip:['경사가 가파를수록 구슬을 끌어내리는 힘이 커서 더 빨라요.','The steeper the slope, the harder gravity pulls the marble down it.']},
+ height:{q:['같은 비탈의 높은 곳과 낮은 곳에서 출발한 구슬 중 어느 쪽이 더 멀리 굴러갈까?','On the same ramp, which rolls farther: a marble starting high or one starting low?'],o:{A:['높은 곳에서 출발한 구슬','The one that starts high'],B:['낮은 곳에서 출발한 구슬','The one that starts low'],same:['똑같이 굴러가요','The same distance']},tip:['높은 곳에서 출발할수록 내려오며 더 빨라져서 더 멀리 가요.','Starting higher, it speeds up more on the way down, so it goes farther.']},
+ friction:{q:['매끈한 얼음길과 보송보송한 카펫길 중 어디에서 구슬이 먼저 도착할까?','Which marble arrives first: on a smooth ice slide or a fuzzy carpet slide?'],o:{A:['얼음길','The ice slide'],B:['카펫길','The carpet slide'],same:['거의 동시에','About the same time']},tip:['카펫은 마찰력이 커서 구슬을 붙잡아요.','Carpet has more friction, which holds the marble back.']},
+ bounce:{q:['고무공과 찰흙공을 같은 높이에서 떨어뜨리면 어느 공이 더 높이 튈까?','A rubber ball and a clay ball drop from the same height. Which bounces higher?'],o:{A:['고무공','The rubber ball'],B:['찰흙공','The clay ball'],same:['똑같이 튀어요','The same height']},tip:['고무는 눌렸다가 다시 펴지는 성질(탄성)이 커요.','Rubber springs back after it is squashed (it is elastic).']},
+ drop:{q:['같은 고무공을 높은 곳과 낮은 곳에서 떨어뜨리면 어느 쪽이 더 높이 튈까?','The same rubber ball drops from high up and lower down. Which bounces higher?'],o:{A:['높은 곳에서 떨어뜨린 공','The one dropped from high up'],B:['낮은 곳에서 떨어뜨린 공','The one dropped from lower down'],same:['똑같이 튀어요','The same height']},tip:['높은 곳에서 떨어지면 바닥에 닿을 때 더 빨라서 더 높이 튀어요.','Dropped from higher, it hits the floor faster, so it bounces higher.']},
+ wind:{q:['옆바람이 불 때 무거운 쇠구슬과 가벼운 유리구슬 중 어느 쪽이 더 멀리 밀릴까?','In a side wind, which is pushed farther: a heavy steel ball or a light glass marble?'],o:{A:['무거운 쇠구슬','The heavy steel ball'],B:['가벼운 유리구슬','The light glass marble'],same:['똑같이 밀려요','The same distance']},tip:['같은 바람이 밀어도 가벼운 구슬이 훨씬 많이 밀려요.','The same wind pushes a light marble much farther.']},
+ crash:{q:['굴러온 구슬이 서 있는 구슬을 칠 때, 어느 쪽에서 맞은 구슬이 더 멀리 갈까?','A rolling ball hits a ball standing still. Where does the hit ball roll farther?'],o:{A:['쇠구슬이 친 쪽','Where steel hits'],B:['유리구슬이 친 쪽','Where glass hits'],same:['똑같이 굴러가요','The same distance']},tip:['무거운 구슬이 치면 가벼운 구슬이 멀리 굴러가요.','When the heavy ball hits, the light one rolls far.']},
+ curve:{q:['곧은 길과 휘어진 길이 같은 두 곳을 이을 때 어느 쪽 구슬이 먼저 도착할까?','A straight path and a curved path link the same two points. Which marble arrives first?'],o:{A:['곧은 길','The straight path'],B:['휘어진 길','The curved path'],same:['거의 동시에','About the same time']},tip:['휘어진 길은 처음에 가파르게 떨어져서 금방 빨라져요.','The curved path drops steeply first, so the marble speeds up early.']},
+ magnet:{q:['떨어지는 쇠구슬과 유리구슬 옆에 자석이 있으면 어느 공이 자석 쪽으로 끌려갈까?','A magnet stands beside a falling steel ball and glass marble. Which is pulled to it?'],o:{A:['쇠구슬','The steel ball'],B:['유리구슬','The glass marble'],same:['둘 다 똑같이','Both the same']},tip:['자석은 쇠(철)로 된 물체를 끌어당기고, 유리는 끌어당기지 않아요.','A magnet pulls iron and steel, but not glass.']},
+ spring:{q:['같은 용수철을 많이 누를 때와 조금 누를 때 중 언제 구슬이 더 높이 올라갈까?','The same spring is squashed a lot or a little. Which sends the marble higher?'],o:{A:['많이 누를 때','Squashed a lot'],B:['조금 누를 때','Squashed a little'],same:['똑같이 올라가요','The same height']},tip:['용수철은 많이 누를수록 다시 펴지려는 힘(탄성력)이 커요.','The more a spring is squashed, the harder it pushes back.']},
+ well:{q:['중력 우물에 빠르게 들어간 구슬과 느리게 들어간 구슬 중 어느 쪽이 더 많이 돌까?','One marble enters a gravity well fast, one slowly. Which circles more times?'],o:{A:['빠르게 들어간 구슬','The fast one'],B:['느리게 들어간 구슬','The slow one'],same:['똑같이 돌아요','The same']},tip:['옆으로 빠르게 움직이면 곧장 떨어지지 않고 빙글빙글 돌아요.','Moving fast sideways, it circles instead of falling straight in.']},
+ fan:{q:['선풍기 가까이와 멀리에서 떨어지는 공 중 어느 쪽이 바람에 더 멀리 밀릴까?','Balls fall near a fan and far from it. Which does the wind push farther?'],o:{A:['선풍기 가까이','Close to the fan'],B:['선풍기에서 멀리','Far from the fan'],same:['똑같이 밀려요','The same distance']},tip:['선풍기 바람은 가까울수록 세고 멀어질수록 약해요.','A fan’s wind is strongest up close and weaker farther away.']}};
 // Read from this save only. Lab notebook (stats.labs: runs and runs where the guess matched), builds, badges and races are
 // lifetime numbers; per-experiment right/wrong counts (LR.ans) and course fixes start when this was added.
 // An experiment is mastered once it was run and the child's guess matched the result at least once (the game's 🎯 message).
@@ -1877,6 +2236,14 @@ const RX={weight:{t:['무게 경주','Heavy vs light'],n:['무게가 다른 두 
   q:['똑같은 비탈에서 높은 곳과 낮은 곳에서 출발한 구슬 중 어느 쪽이 카펫에서 더 멀리 굴러갔어?','On the same ramp, which marble rolled farther on the carpet: the one that started high or the one that started low?','높은 곳에서 출발한 구슬이요. 내려오면서 더 빨라져서 더 멀리 가요.','The one that started high. It sped up more on the way down, so it went farther.']},
  drop:{t:['떨어뜨리는 높이','Drop height'],n:['떨어뜨리는 높이와 튀어 오르는 높이','How the drop height changes the bounce height'],
   q:['같은 고무공을 높은 곳과 낮은 곳에서 떨어뜨리면 어느 쪽이 더 높이 튀었어?','When the same kind of rubber ball dropped from high up and from lower down, which bounced higher?','높은 곳에서 떨어뜨린 공이요. 그래도 처음 높이까지는 올라오지 못해요.','The one dropped from higher up. It still did not come all the way back up to where it started.']},
+ magnet:{t:['자석 실험','Magnet test'],n:['자석이 끌어당기는 물체와 끌어당기지 않는 물체 (쇠구슬과 유리구슬)','What a magnet pulls and what it does not (steel or glass)'],
+  q:['자석 옆으로 쇠구슬과 유리구슬이 떨어지면 어떻게 됐어? 왜 그럴까?','What happened when a steel ball and a glass marble fell past the magnet? Why?','쇠구슬만 자석 쪽으로 끌려갔어요. 자석은 쇠(철)를 끌어당기고 유리는 끌어당기지 않아요.','Only the steel ball was pulled over. A magnet pulls iron and steel, not glass.']},
+ spring:{t:['용수철 발사대','Spring launcher'],n:['용수철을 누른 정도와 튀어 나가는 힘 (탄성력)','How far a spring is squashed and how hard it launches (elastic force)'],
+  q:['용수철을 많이 누른 발사대와 조금 누른 발사대 중 어느 쪽이 구슬을 더 높이 쏘았어?','Which launcher shot the marble higher: the spring squashed a lot or a little?','많이 누른 쪽이요. 많이 누를수록 다시 펴지려는 힘이 커요.','The one squashed a lot. The more it is squashed, the harder it pushes back.']},
+ well:{t:['중력 우물 (블랙홀 모형)','Gravity well (black-hole model)'],n:['중력 모형에서 들어가는 빠르기와 도는 바퀴 수','In a gravity model, how entry speed changes the number of laps'],
+  q:['중력 우물에 빠르게 들어간 구슬과 느리게 들어간 구슬은 어떻게 달랐어?','How were the fast and the slow marble different in the gravity well?','빠르게 들어간 구슬이 더 많이 돌았어요. 옆으로 빨리 움직이면 곧장 떨어지지 않고 돌아요.','The fast one circled more. Moving fast sideways, it circles instead of falling straight in.']},
+ fan:{t:['선풍기 거리','Near or far from a fan'],n:['선풍기와의 거리와 바람에 밀리는 거리','How the distance from a fan changes how far the wind pushes'],
+  q:['선풍기 가까이와 멀리에서 떨어진 공 중 어느 쪽이 더 멀리 밀렸어?','Which ball was pushed farther: the one close to the fan or the one far from it?','가까이에서 떨어진 공이요. 선풍기 바람은 가까울수록 세요.','The one close to the fan. A fan’s wind is strongest up close.']},
  curve:{t:['지름길의 비밀','The shortcut secret'],n:['곧은 길과 휘어진 길, 어느 쪽이 빠를까','Straight path or curved path: which is faster'],
   q:['곧은 길과 휘어진 길 중 어느 구슬이 먼저 도착했어? 휘어진 길이 더 긴데 왜 그럴까?','Which marble arrived first, on the straight path or the curved one? The curved one is longer, so why?','휘어진 길이요. 처음에 가파르게 떨어져서 금방 빨라져요.','The curved path. It drops steeply at the start, so the marble speeds up early.']}};
 const HOME={ramp:['책 두세 권에 쟁반이나 두꺼운 종이를 기대어 낮은 비탈을 만들고 장난감 자동차를 굴려 봐요. 책을 한 권씩 더 쌓으며 얼마나 멀리 가는지 비교해요.','Lean a tray or stiff cardboard on two or three books to make a low ramp and roll a toy car down. Add one book at a time and compare how far it goes.'],
@@ -1884,17 +2251,24 @@ const HOME={ramp:['책 두세 권에 쟁반이나 두꺼운 종이를 기대어 
  bounce:['고무공, 탁구공, 돌돌 만 양말을 허리 높이에서 함께 떨어뜨려 어느 것이 가장 높이 튀는지 봐요.','Drop a rubber ball, a table-tennis ball and a rolled-up sock together from waist height and see which bounces highest.'],
  track:['휴지심과 종이컵을 테이프로 이어 탁구공이 굴러가는 길을 만들고, 굴려 본 뒤 한 군데를 고쳐 다시 굴려 봐요.','Tape paper tubes and paper cups into a track for a table-tennis ball, test it, change one part, then test again.'],
  drop:['같은 공을 무릎 높이와 허리 높이에서 떨어뜨려 보고, 어느 쪽이 더 높이 튀는지 봐요.','Drop the same ball from knee height and from waist height, and see which one bounces higher.'],
+ magnet:['어른과 함께 냉장고 자석을 클립, 연필, 지우개, 알루미늄 포일에 대 보고 붙는 것과 안 붙는 것을 나눠 봐요. 작은 자석은 삼키면 아주 위험하니 어린 동생 손이 닿지 않게 해요.','With a grown-up, touch a fridge magnet to a paper clip, a pencil, an eraser and aluminum foil, and sort what it pulls and what it does not. Swallowed small magnets are very dangerous, so keep them away from little children.'],
+ spring:['책상 끝에 자를 대고 그 위에 작은 종이 뭉치를 올린 뒤, 자 끝을 조금 눌렀다 놓을 때와 많이 눌렀다 놓을 때 얼마나 멀리 날아가는지 비교해요. 사람 쪽으로는 쏘지 않아요.','Lay a ruler on a table edge with a small paper ball on it. Press the end down a little, then a lot, let go each time and compare how far the ball flies. Never aim at people.'],
+ well:['큰 그릇 안쪽 벽을 따라 탁구공을 빠르게, 또 느리게 굴려 보며 가운데로 내려오기 전에 몇 바퀴 도는지 세어 봐요.','Roll a table-tennis ball around the inside of a big bowl, fast and then slowly, and count how many times it circles before it settles in the middle.'],
+ fan:['어른과 함께 선풍기를 약하게 켜고, 휴지 조각을 선풍기 가까이와 멀리에서 들고 얼마나 펄럭이는지 비교해요. 선풍기 망 안으로 손가락이나 물건을 넣지 않아요.','With a grown-up, turn a fan on low and hold a tissue close to it and far from it to compare how much it flutters. Never put fingers or things through the fan guard.'],
  time:['책 비탈에 장난감 자동차를 굴리며 “하나, 둘, 셋…” 세어 시간을 재 봐요. 비탈에 수건을 깔고 다시 재서 비교해요.','Roll a toy car down a book ramp and count “one, two, three…” to time it. Lay a towel on the ramp, time it again and compare.']};
 // design challenges for parents: titles in both languages and one skill per challenge
-const CHT={slow:['느림보 코스','Slowpoke course'],fast:['번개 코스','Lightning course'],window:['딱 맞춰 코스','Bullseye course'],one:['하나만 바꾸기','Change just one'],double:['두 배로 느리게','Twice as long'],same:['똑같이 두 번','Same twice']};
+const CHT={slow:['느림보 코스','Slowpoke course'],fast:['번개 코스','Lightning course'],window:['딱 맞춰 코스','Bullseye course'],one:['하나만 바꾸기','Change just one'],double:['두 배로 느리게','Twice as long'],same:['똑같이 두 번','Same twice'],team:['쇠구슬 팀 먼저','Steel team first'],sort:['용수철 분류기','Spring sorter']};
 const CHN={slow:['마찰과 긴 길을 이용해 느린 코스 설계하기','Designing a slow course with friction and longer paths'],fast:['곧장 떨어지는 조각을 골라 빠른 코스 설계하기','Designing a fast course with pieces that drop straight down'],
  window:['우승 시간이 목표 범위(20~24초)에 들도록 코스 조정하기','Tuning a course so the winning time lands in a target range (20–24 s)'],one:['한 가지만 바꿔 다시 시험하고 차이 재기 (공정한 시험)','Changing one thing, testing again and measuring the difference (a fair test)'],
- double:['시험 결과를 비교해 시간을 2배로 늘리기','Comparing test results to make the time twice as long'],same:['같은 코스를 두 번 시험해 결과가 비슷하게 나오는지 확인하기','Testing the same course twice to check the results agree']};
+ double:['시험 결과를 비교해 시간을 2배로 늘리기','Comparing test results to make the time twice as long'],same:['같은 코스를 두 번 시험해 결과가 비슷하게 나오는지 확인하기','Testing the same course twice to check the results agree'],
+ team:['무게에 따라 다르게 작용하는 힘(바람)을 이용해 무거운 구슬이 먼저 오게 설계하기','Using a force that acts differently on heavy and light marbles (wind) to make the heavy ones arrive first'],sort:['용수철을 누르는 정도를 조절해 무게가 다른 구슬 나누기','Adjusting how far a spring is squashed to sort marbles by weight']};
 function learnSummary(){
  const pl=(n,w)=>n+' '+w+(n===1?'':'s'),done=id=>(stats.labs[id]?.n||0)>0;
  const bd=id=>{const b=BADGES.find(x=>x.id===id);return b?Math.min(1,b.val()/b.goal):0};
  const sk=(id,name,p)=>({id,name,st:p>=1?2:p>0?1:0,p:Math.round(p*100)/100});
- const lab=EXPS.map(e=>{const r=stats.labs[e.id],ok=done(e.id)&&r.right>0,c=LR.stat('exp_'+e.id),k={id:'exp_'+e.id,name:RX[e.id].n,st:ok?2:done(e.id)?1:0,p:ok?1:done(e.id)?.5:0};if(c){k.r=c.r;k.w=c.w}return k});
+ // only links we are sure of: magnets are taught in Korean grade 3–4 science, and Ontario Grade 3 covers contact and non-contact forces
+ const SKS={magnet:['초등 3~4학년 과학: 자석','Ontario Grade 3: contact and non-contact forces (magnetism)']};
+ const lab=EXPS.map(e=>{const r=stats.labs[e.id],ok=done(e.id)&&r.right>0,c=LR.stat('exp_'+e.id),k={id:'exp_'+e.id,name:RX[e.id].n,st:ok?2:done(e.id)?1:0,p:ok?1:done(e.id)?.5:0};if(c){k.r=c.r;k.w=c.w}if(SKS[e.id])k.school=SKS[e.id];return k});
  const kinds=EXPS.filter(e=>done(e.id)).length,runs=EXPS.reduce((t,e)=>t+(stats.labs[e.id]?.n||0),0),B=stats.builds,W=stats.worlds.length,nb=badges.length;
  // lab notebook: experiments with a written result; mastered once 3 are written and the child has opened the notebook
  const rec=EXPS.filter(e=>stats.labs[e.id]?.v).length,recSt=rec>=3&&stats.notes>0?2:rec?1:0;
@@ -1917,13 +2291,15 @@ function learnSummary(){
  if(runs)facts.push(['🔬',`실험 ${runs}번 · ${kinds}/${EXPS.length}가지`,`${pl(runs,'experiment run')} · ${kinds} of ${EXPS.length} kinds`]);
  if(tests)facts.push(['🎯',`설계 도전 성공 ${met}/${CHALS.length} · 별 ${stars}개 · 시험 주행 ${tests}번`,`${met} of ${CHALS.length} design challenges met · ${pl(stars,'star')} · ${pl(tests,'test run')}`]);
  if(B)facts.push(['🛠️',`직접 설계한 코스 ${B}개`+(stats.customRaces?` · 내 코스 레이스 ${stats.customRaces}번`:''),`${pl(B,'course')} designed`+(stats.customRaces?` · ${pl(stats.customRaces,'race')} on them`:'')]);
+ if(stats.forces.length)facts.push(['🧲',`새 과학 조각 ${stats.forces.length}/${FORCE_IDS.length}가지를 레이스에서 만남`,`Met ${stats.forces.length} of ${FORCE_IDS.length} new science pieces in races`]);
  if(mineStats.races)facts.push(['🏁',`레이스 ${mineStats.races}번`,pl(mineStats.races,'race')]);
  if(W)facts.push(['🗺️',`월드 ${W}/${WORLDS.length}곳에서 레이스`,`Raced in ${W} of ${WORLDS.length} worlds`]);
  if(stats.leagues)facts.push(['🏟️',`5경기 리그 완주 ${stats.leagues}번`,stats.leagues===1?'Finished a 5-race league':`Finished ${stats.leagues} five-race leagues`]);
  if(mineStats.wins)facts.push(['🏆',`응원한 구슬 1등 ${mineStats.wins}번`,`Their marble came first ${mineStats.wins===1?'once':mineStats.wins+' times'}`]);
  // talk about experiments played since the report began first (they have counts), then mastered ones, then the rest that were run
  const ex=lab.filter(k=>k.st).map((k,i)=>[(k.r!=null?0:4)+(k.st===2?0:2),i,k]).sort((a,b)=>a[0]-b[0]||a[1]-b[1]).map(x=>RX[x[2].id.slice(4)].q);
- const tried=id=>chalGet(id).n>0,chq=[...(tried('one')?[['설계 도전에서 조각을 딱 하나만 바꾸고 다시 시험한 이유가 뭘까?','In the design challenge, why did you change only one piece before testing again?','그래야 시간이 달라진 게 그 조각 때문인지 알 수 있어요.','So you know the time changed because of that one piece.']]:[]),
+ const tried=id=>chalGet(id).n>0,chq=[...(tried('team')?[['쇠구슬 팀이 먼저 들어오게 하려고 어떤 조각을 넣었어? 그 조각은 왜 무거운 구슬에게 유리할까?','For the steel-team challenge, which pieces did you use? Why do they help the heavy marbles?','예: 바람 터널이요. 같은 바람이 불어도 가벼운 구슬이 더 오래 붙잡혀요.','For example the wind tunnel: the same wind holds light marbles back for longer.']]:[]),
+  ...(tried('sort')?[['용수철 분류기에서 용수철을 얼마나 눌렀어? 쇠구슬만 그물에 떨어진 이유는 뭘까?','In the spring sorter, how far did you squash the spring? Why did only the steel marbles drop into the net?','무거운 쇠구슬은 같은 용수철로 밀어도 덜 빨라져서 멀리 못 날아가요.','The same spring speeds up a heavy steel marble less, so it does not fly as far.']]:[]),...(tried('one')?[['설계 도전에서 조각을 딱 하나만 바꾸고 다시 시험한 이유가 뭘까?','In the design challenge, why did you change only one piece before testing again?','그래야 시간이 달라진 게 그 조각 때문인지 알 수 있어요.','So you know the time changed because of that one piece.']]:[]),
   ...(tried('slow')?[['느림보 코스를 만들 때 어떤 조각을 넣었어? 그 조각은 왜 느릴까?','For the slowpoke course, which pieces did you use? Why are they slow?','예: 꿀 언덕은 마찰이 커서, 지그재그 탑은 길이 길어서 느려요.','For example: honey hill has lots of friction, and the zigzag tower is a long path.']]:[]),
   ...(tried('same')?[['같은 코스를 두 번 달리면 시간이 똑같았어? 왜 조금 달라질까?','When you tested the same course twice, was the time exactly the same? Why might it change a little?','부딪히는 조각에서 매번 다르게 튕기고 출발 순서도 바뀌어서 조금씩 달라져요.','Marbles bounce a little differently each time, and the start order changes too.']]:[]),
   ...(tried('fast')?[['번개 코스는 어떻게 빠르게 만들었어?','How did you make the lightning course fast?','구슬이 거의 곧장 아래로 떨어지는 조각(범퍼, 핀볼 숲)을 많이 넣었어요.','With pieces where marbles drop almost straight down, like bumpers and pegs.']]:[])];
@@ -1931,6 +2307,7 @@ function learnSummary(){
   ...(B?[['네가 만든 코스에는 어떤 조각을 어떤 순서로 넣었어? 달려 보고 바꾸고 싶은 곳이 있었어?','Which pieces did you put in your course, and in what order? After racing it, what would you change?','조각 이름과 순서, 그리고 고치고 싶은 점 한 가지','The pieces and their order, plus one thing to change']]:[]),
   ...(mineStats.races?[['레이스에서 구슬 순서가 많이 바뀌는 곳은 어디였어?','Where in a race did the marbles change places the most?','핀이나 범퍼, 바람개비처럼 부딪히는 곳이요.','Places where they bump into things, like pegs, bumpers or spinners.']]:[])].slice(0,4);
  const home=[],add=x=>{if(!home.includes(x)&&home.length<3)home.push(x)};
+ if(done('magnet'))add(HOME.magnet);if(done('spring'))add(HOME.spring);if(done('fan'))add(HOME.fan);if(done('well'))add(HOME.well);
  if(done('friction'))add(HOME.surface);if(done('slope')||done('weight')||done('curve')||done('height'))add(HOME.ramp);if(done('bounce'))add(HOME.bounce);if(done('drop'))add(HOME.drop);if(tests)add(HOME.time);if(B)add(HOME.track);
  add(HOME.ramp);add(HOME.surface);add(HOME.bounce);
  const next=[],left=EXPS.filter(e=>!done(e.id)).slice(0,2).map(e=>RX[e.id].t),miss=lab.find(k=>k.st===1);
@@ -1944,7 +2321,7 @@ function learnSummary(){
  if(!stats.leagues)next.push(['5경기 리그를 끝까지 해 보기','Finish a 5-race league']);
  if(!next.length)next.push(['집에서 책 비탈로 직접 실험해 보기','Try a book-ramp experiment at home']);
  return {v:1,level:[`배지 ${nb}/${BADGES.length}`,`${nb}/${BADGES.length} badges`],
-  focus:['구슬 레이스를 즐기면서, 실험실에서는 결과를 먼저 예상하고 한 가지만 다른 두 길을 비교해 비탈·높이·마찰·무게·튀기를 알아보고 실험 노트의 막대그래프로 결과를 비교해요. 설계 도전에서는 목표 시간에 맞는 코스를 계획하고, 만들고, 시험하고, 고쳐요.','Mostly a marble race to watch and cheer. In the lab, children predict first, compare two lanes that differ in one thing (slope, height, surface, weight, bounce) and compare the results on bar graphs in a lab notebook. In design challenges they plan, build, test and improve a course to meet a time goal.'],
+  focus:['구슬 레이스를 즐기면서, 실험실에서는 결과를 먼저 예상하고 한 가지만 다른 두 길을 비교해 비탈·높이·마찰·무게·튀기와 자석·용수철·바람·중력 모형을 알아보고 실험 노트의 막대그래프로 결과를 비교해요. 설계 도전에서는 목표에 맞는 코스를 계획하고, 만들고, 시험하고, 고쳐요.','Mostly a marble race to watch and cheer. In the lab, children predict first, compare two lanes that differ in one thing (slope, height, surface, weight, bounce, and magnets, springs, wind and a gravity model) and compare the results on bar graphs in a lab notebook. In design challenges they plan, build, test and improve a course to meet a goal.'],
   unit:['실험 예상·설계 시험','predictions and design tests'],areas,facts:facts.slice(0,6),talk,home,next:next.slice(0,3)}}
 try{LR.set(learnSummary)}catch(e){}
 window.__marble={get:()=>({phase,st,course,cam,league,mode,timeScale,labMode,lab:labExp&&labExp.id,labPred,labRes,stats,badges,skin,customs,worldIdx,rec:rec.length,chal,chalRun,draft}),start:startRace,prepare,cheer,showResults,setMine:i=>{mine=i},setDraft:m=>{if(draft){draft.mods=m.slice();renderBuilder()}}};

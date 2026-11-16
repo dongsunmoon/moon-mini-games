@@ -28,23 +28,34 @@ const L=(ko,en)=>LANG==='en'?en:ko;
 //   page is visible and the player touched or typed in the last 2 minutes.
 // · sum: the game's own summary of skills, built by the function passed to LR.set() (see _src/report/SPEC.md).
 // · when: the day each skill first reached "mastered" ('' = before the record started).
-// · sk: right/wrong counts per skill, from coachAnswer(ok,skillId).
+// · sk: right/wrong counts per skill, from coachAnswer(ok,skillId); skw: the same per week (Monday's date, 12 weeks).
+// · mx: kinds of questions the child got wrong (up to 40), from coachAnswer(ok,skillId,item) with
+//   item={id,q:[ko,en],a:[ko,en],g?:[ko,en],tip?:[ko,en]}: the latest example, the right answer, the child's answer,
+//   how many misses, and how many right answers in a row since the last miss (so the report can say "fixed now").
 // A game's reset must call LR.forget() so the report forgets only that game; LR.resume() starts a fresh record.
 const LR=(()=>{const f=(location.pathname.split('/').pop()||'').replace(/\.html$/,'');
  const KEY={math_aquarium:'mathAquarium.learn',science_guardians:'scienceGuardians.learn',music_academy:'musicAcademy.learn',chess_knights:'chessKnights.learn',detective_game:'little-detective-learn',marble_rush_3d:'marbleRush.learn',coding_island:'pythonIsland.learn',python_island:'pythonIsland.learn'}[f];
- const day=()=>new Date().toLocaleDateString('en-CA');let R=null,fn=null,off=!KEY,dirty=false,last=0;
+ const day=()=>new Date().toLocaleDateString('en-CA'),week=(n=0)=>{const d=new Date();d.setDate(d.getDate()-(d.getDay()+6)%7-7*n);return d.toLocaleDateString('en-CA')};
+ const two=x=>Array.isArray(x)?x.slice(0,2).map(v=>String(v==null?'':v).slice(0,140)):undefined;let R=null,fn=null,off=!KEY,dirty=false,last=0;
  const load=()=>{if(R)return R;try{R=JSON.parse(localStorage.getItem(KEY)||'null')}catch(e){}if(!R||R.v!==1)R={v:1,days:{},when:{}};return R};
  const today=()=>{const r=load(),d=day();return r.days[d]||(r.days[d]={s:0,r:0,w:0})};
  const save=()=>{if(off)return;const r=load();
   if(fn){try{const s=fn();if(s){const first=!r.sum,d=day();r.sum=s;(s.areas||[]).forEach(a=>(a.skills||[]).forEach(k=>{if(k.st===2&&r.when[k.id]==null)r.when[k.id]=first?'':d}))}}catch(e){}}
   const ks=Object.keys(r.days).sort();ks.slice(0,Math.max(0,ks.length-120)).forEach(k=>delete r.days[k]);
+  const old=week(12);for(const k in r.skw||{}){for(const w in r.skw[k])if(w<old)delete r.skw[k][w];if(!Object.keys(r.skw[k]).length)delete r.skw[k]}
   r.at=Date.now();try{localStorage.setItem(KEY,JSON.stringify(r))}catch(e){}dirty=false};
  ['pointerdown','keydown','touchstart','wheel'].forEach(e=>addEventListener(e,()=>{last=Date.now()},{passive:true,capture:true}));
  setInterval(()=>{if(off||document.hidden||Date.now()-last>120000)return;today().s+=10;dirty=true},10000);
  setInterval(()=>{if(dirty)save()},30000);
  addEventListener('pagehide',save);document.addEventListener('visibilitychange',()=>{if(document.hidden&&dirty)save()});
  return {
-  ans(ok,skill){if(off)return;const t=today();ok?t.r++:t.w++;if(skill!=null){const r=load(),sk=r.sk||(r.sk={}),x=sk[skill]||(sk[skill]=[0,0]);x[ok?0:1]++}dirty=true},
+  ans(ok,skill,item){if(off)return;const t=today(),r=load(),i=ok?0:1;ok?t.r++:t.w++;
+   if(skill!=null){const sk=r.sk||(r.sk={});(sk[skill]||(sk[skill]=[0,0]))[i]++;const sw=r.skw||(r.skw={}),o=sw[skill]||(sw[skill]={}),w=week();(o[w]||(o[w]=[0,0]))[i]++}
+   if(item&&item.id!=null){const mx=r.mx||(r.mx={}),id=String(item.id).slice(0,80);let e=mx[id];
+    if(!ok){if(!e)e=mx[id]={s:skill,n:0,ok:0,f:day()};e.n++;e.k=0;e.l=day();e.q=two(item.q);e.a=two(item.a);e.g=two(item.g);e.tip=two(item.tip)||e.tip;
+     const ids=Object.keys(mx);if(ids.length>40)ids.sort((a,b)=>mx[a].l!==mx[b].l?(mx[a].l<mx[b].l?-1:1):mx[a].n-mx[b].n).slice(0,ids.length-40).forEach(x=>delete mx[x])}
+    else if(e){e.ok++;e.k=(e.k||0)+1}}
+   dirty=true},
   set(f){fn=f;setTimeout(save,1500)},save,
   stat(id){const x=(load().sk||{})[id];return x?{r:x[0],w:x[1]}:null},
   forget(){off=true;R=null;try{localStorage.removeItem(KEY)}catch(e){}},
@@ -69,8 +80,9 @@ function coachPop(pose,ko,en,o={}){const now=Date.now();if(!o.force&&now-coachAt
  el.innerHTML=`<img src="images/coach-moon-${pose}.webp" alt="" onerror="this.remove()"><p><b>${L('문 코치','Coach Moon')}</b>${L(ko,en)}</p>`;
  el.classList.remove('show');void el.offsetWidth;el.classList.add('show');clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove('show'),o.ms||4500);return true}
 // call with every final answer: praise runs of right answers, and help after two misses in a row.
-// The optional skill id (one of the skill ids in the game's LR summary) counts the answer for that skill in the report.
-function coachAnswer(ok,skill){try{LR.ans(ok,skill)}catch(e){}
+// The optional skill id (one of the skill ids in the game's LR summary) counts the answer for that skill in the report,
+// and the optional item (see LR above) lets the report list the kinds of questions the child often gets wrong.
+function coachAnswer(ok,skill,item){try{LR.ans(ok,skill,item)}catch(e){}
  if(ok){coachRun++;coachMiss=0;if(![3,5,10,15,20,30].includes(coachRun))return;const n=coachRun,t=coachPick([[`${n}번 연속 성공! 집중력이 대단해요 🌙`,`${n} in a row! Amazing focus 🌙`],[`와, ${n}번 연속이에요! 문 코치가 박수 쳐요 👏`,`Wow, ${n} in a row! Coach Moon is clapping 👏`],[`${n}번 연속! 오늘 머리가 반짝반짝해요 ✨`,`${n} straight! Your brain is sparkling today ✨`]]);coachPop('clap',t[0],t[1],{gap:20000});return}
  coachRun=0;coachMiss++;if(coachMiss!==2)return;const nm=coachEsc(coachNm()),t=coachPick([['괜찮아요! 틀리면서 배우는 거예요. 천천히 다시 봐요 🌙','That’s okay! Mistakes help us learn. Take another look 🌙'],[nm?`${nm}, 할 수 있어요! 문 코치가 응원해요 🌙`:'할 수 있어요! 문 코치가 응원해요 🌙',nm?`You can do it, ${nm}! Coach Moon is cheering 🌙`:'You can do it! Coach Moon is cheering 🌙'],['실수는 배움의 친구예요. 한 번 더 해 봐요!','Mistakes are friends of learning. One more try!']]);coachPop('go',t[0],t[1],{gap:30000})}
 // Once a day per game he says hello, a few minutes in he shares a tip, and after 20 minutes he suggests a little rest.
@@ -2905,20 +2917,20 @@ function useHint(){
 }
 function puzzleMove(m){
  const z=PZ;if(!z||z.busy||z.done)return;
- const u=BD.pos.uci(m),exp=z.p.moves[z.step];
+ const u=BD.pos.uci(m),exp=z.p.moves[z.step],lr=pzItem(z,m);
  boardPlay(m);
  const mate=BD.pos.status()==='mate';
  if(u===exp||mate){
-  z.step++;flashSq(m.t,'good',500);
+  delete lr.g;z.lr=lr;z.step++;flashSq(m.t,'good',500);
   if(mate||z.step>=z.p.moves.length){puzzleSolved(mate);return}
   z.busy=true;SFX.good();if(z.mode!=='rush')say(pick([L('좋아요! 상대가 어떻게 할까요?','Good! What will they do?'),L('맞아요! 계속 가요!','Right! Keep going!'),L('훌륭해요! 다음 수도 찾아요!','Great! Find the next one too!')]));
   setTimeout(()=>{if(PZ!==z)return;boardPlay(BD.pos.fromUci(z.p.moves[z.step]));z.step++;z.busy=false;renderPuzzleBars();if(z.mode!=='rush')say(L('이제 마무리할 차례!','Now finish it!'))},700);
   renderPuzzleBars();return;
  }
  z.busy=true;flashSq(m.t,'bad',700);shakeBoard();SFX.bad();
- if(z.mode==='rush'){try{LR.ans(false,pzSkill(z))}catch(e){}rushMiss();return}
- if(S.shieldOn&&S.inv.shield>0&&!z.shieldUsed){S.inv.shield--;z.shieldUsed=true;try{LR.ans(false,pzSkill(z))}catch(e){}say(L('🛡️ 방패가 실수를 막아 줬어요! 다시 생각해 봐요.','🛡️ Your shield blocked that mistake! Think again.'));boardMsg('🛡️')}
- else{z.mistakes++;if(z.mode!=='rush')coachAnswer(false,pzSkill(z));say(z.missSaid?pick([L('괜찮아요, 다시 해 봐요!','That’s okay, try again!'),L('아깝다! 다른 수를 찾아봐요.','So close! Look for another move.')]):THEMES[z.p.theme].miss);z.missSaid=true}
+ if(z.mode==='rush'){try{LR.ans(false,pzSkill(z),lr)}catch(e){}rushMiss();return}
+ if(S.shieldOn&&S.inv.shield>0&&!z.shieldUsed){S.inv.shield--;z.shieldUsed=true;try{LR.ans(false,pzSkill(z),lr)}catch(e){}say(L('🛡️ 방패가 실수를 막아 줬어요! 다시 생각해 봐요.','🛡️ Your shield blocked that mistake! Think again.'));boardMsg('🛡️')}
+ else{z.mistakes++;if(z.mode!=='rush')coachAnswer(false,pzSkill(z),lr);say(z.missSaid?pick([L('괜찮아요, 다시 해 봐요!','That’s okay, try again!'),L('아깝다! 다른 수를 찾아봐요.','So close! Look for another move.')]):THEMES[z.p.theme].miss);z.missSaid=true}
  save();renderPuzzleTools();
  setTimeout(()=>{if(PZ!==z)return;boardUndo();z.busy=false},850);
 }
@@ -2932,8 +2944,8 @@ function rateChange(z,score){
 }
 function puzzleSolved(mate){
  const z=PZ;z.done=true;z.busy=true;BD.interactive=false;
- if(z.mode==='rush'){try{LR.ans(true,pzSkill(z))}catch(e){}rushHit();return}
- coachAnswer(true,pzSkill(z));
+ if(z.mode==='rush'){try{LR.ans(true,pzSkill(z),z.lr)}catch(e){}rushHit();return}
+ coachAnswer(true,pzSkill(z),z.lr);
  renderPuzzleBars();
  const clean=z.mistakes===0&&z.hints===0,pen=z.mistakes+z.hints,stars=clean?3:pen<=2?2:1;
  S.solved++;if(clean){S.clean++;S.cleanRun++;S.bestRun=Math.max(S.bestRun,S.cleanRun)}else S.cleanRun=0;
@@ -3237,6 +3249,24 @@ function dailyLogin(){
 const TH_SK={h:'free',a:'gain',pr:'promote',m1:'mate1',m2:'mate2',f:'fork',p:'pin',s:'pin',d:'discover'};
 const CH_SK=['free','mate1','fork','pin','mate2','mixed'];
 const pzSkill=z=>z.mode==='stage'&&z.c===5?'mixed':TH_SK[z.p.theme]||'gain';
+// one puzzle move as a report item (LR in the coach block): the kind is the puzzle theme (also in the mixed Dragon Tower),
+// q says whose move it is and what to find, a is the expected move and g the child's move, as a piece, a square and the notation
+const TH_LR={m1:['mate1','한 수 만에 체크메이트하는 수 찾기','find checkmate in one','체크하는 수를 모두 찾고, 킹이 도망칠 칸이 남는지 봐요.','List every check, then see if the king can still escape.'],
+ m2:['mate2','두 수 만에 체크메이트하기','find checkmate in two','첫 수는 체크나 강한 공격일 때가 많아요.','The first move is often a check or a big threat.'],
+ h:['hanging','공짜로 잡을 수 있는 기물 찾기','find a piece to take for free','아무도 지키지 않는 상대 기물을 찾아봐요.','Look for an enemy piece that nobody guards.'],
+ f:['fork','한 기물로 두 기물을 함께 노리는 포크 찾기','find a fork (one piece attacks two)','한 칸에서 상대 기물 두 개를 함께 공격할 수 있는지 봐요.','Look for one square that attacks two enemy pieces at once.'],
+ p:['pin','상대 기물을 움직이지 못하게 묶는 핀 찾기','find a pin','상대 기물 뒤에 킹이나 더 큰 기물이 같은 줄에 있는지 봐요.','Look for an enemy piece with its king or a bigger piece lined up behind it.'],
+ s:['skewer','큰 기물을 비키게 하고 뒤를 잡는 꼬치 공격 찾기','find a skewer','큰 기물을 공격해 비키게 하면, 뒤에 있던 기물을 잡을 수 있어요.','Attack the big piece; when it moves away, take the one behind it.'],
+ d:['discovered','기물을 비켜 숨은 공격 열기','find a discovered attack','내 기물 하나를 비키면 뒤에서 열리는 공격이 있는지 봐요.','See if moving one piece opens an attack by the piece behind it.'],
+ pr:['promotion','폰을 끝줄까지 보내 승진시키기','push a pawn to the last row and promote it','끝줄에 가까운 폰과 그 앞을 막는 기물을 살펴봐요.','Find the pawn nearest the last row and what blocks its way.'],
+ a:['material','기물 이득을 보는 가장 좋은 수 찾기','find the best move to win material','체크, 잡기, 공격부터 찾아봐요.','Look for checks, captures and attacks first.']};
+const PC_LR=[null,['폰','Pawn'],['나이트','Knight'],['비숍','Bishop'],['룩','Rook'],['퀸','Queen'],['킹','King']];
+function pzMoveLr(pos,m){if(!m)return;const s=pos.san(m);if(m.fl&4){const q=m.t<m.f;return [`${q?'퀸':'킹'} 쪽 캐슬링 (${s})`,`Castle ${q?'queenside':'kingside'} (${s})`]}
+ const n=PC_LR[typeOf(m.p)]||['',''],t=Chess.sqName(m.t);return [`${n[0]} ${t} (${s})`,`${n[1]} to ${t} (${s})`]}
+// call before the move is played on the board
+function pzItem(z,m){const t=TH_LR[z.p.theme]||TH_LR.a,pos=BD.pos,side=pos.turn===WHITE?['백','White']:['흑','Black'],n=(z.step+1)>>1;let a,g;
+ try{a=pzMoveLr(pos,pos.fromUci(z.p.moves[z.step]));if(m)g=pzMoveLr(pos,m)}catch(e){}
+ return {id:t[0],q:[`${side[0]} 차례 · ${t[1]}${n>1?` (${n}번째 수)`:''}`,`${side[1]} to move · ${t[2]}${n>1?` (move ${n})`:''}`],a:a||[t[1],t[2]],g,tip:[t[3],t[4]]}}
 const SK_POOL={};PUZ.forEach(p=>{const k=TH_SK[p.theme];if(k)SK_POOL[k]=(SK_POOL[k]||0)+1});
 const SK_NAME={free:['공짜 기물 잡기 (지켜지지 않는 기물)','Taking unguarded pieces'],gain:['기물 이득을 보는 수 찾기','Finding moves that win material'],promote:['폰 승진','Pawn promotion'],
  mate1:['1수 체크메이트','Checkmate in one move'],mate2:['2수 체크메이트','Checkmate in two moves'],fork:['포크 (한 기물로 두 기물 공격)','Forks (one piece attacks two)'],

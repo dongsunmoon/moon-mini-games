@@ -28,23 +28,34 @@ const L=(ko,en)=>LANG==='en'?en:ko;
 //   page is visible and the player touched or typed in the last 2 minutes.
 // · sum: the game's own summary of skills, built by the function passed to LR.set() (see _src/report/SPEC.md).
 // · when: the day each skill first reached "mastered" ('' = before the record started).
-// · sk: right/wrong counts per skill, from coachAnswer(ok,skillId).
+// · sk: right/wrong counts per skill, from coachAnswer(ok,skillId); skw: the same per week (Monday's date, 12 weeks).
+// · mx: kinds of questions the child got wrong (up to 40), from coachAnswer(ok,skillId,item) with
+//   item={id,q:[ko,en],a:[ko,en],g?:[ko,en],tip?:[ko,en]}: the latest example, the right answer, the child's answer,
+//   how many misses, and how many right answers in a row since the last miss (so the report can say "fixed now").
 // A game's reset must call LR.forget() so the report forgets only that game; LR.resume() starts a fresh record.
 const LR=(()=>{const f=(location.pathname.split('/').pop()||'').replace(/\.html$/,'');
  const KEY={math_aquarium:'mathAquarium.learn',science_guardians:'scienceGuardians.learn',music_academy:'musicAcademy.learn',chess_knights:'chessKnights.learn',detective_game:'little-detective-learn',marble_rush_3d:'marbleRush.learn',coding_island:'pythonIsland.learn',python_island:'pythonIsland.learn'}[f];
- const day=()=>new Date().toLocaleDateString('en-CA');let R=null,fn=null,off=!KEY,dirty=false,last=0;
+ const day=()=>new Date().toLocaleDateString('en-CA'),week=(n=0)=>{const d=new Date();d.setDate(d.getDate()-(d.getDay()+6)%7-7*n);return d.toLocaleDateString('en-CA')};
+ const two=x=>Array.isArray(x)?x.slice(0,2).map(v=>String(v==null?'':v).slice(0,140)):undefined;let R=null,fn=null,off=!KEY,dirty=false,last=0;
  const load=()=>{if(R)return R;try{R=JSON.parse(localStorage.getItem(KEY)||'null')}catch(e){}if(!R||R.v!==1)R={v:1,days:{},when:{}};return R};
  const today=()=>{const r=load(),d=day();return r.days[d]||(r.days[d]={s:0,r:0,w:0})};
  const save=()=>{if(off)return;const r=load();
   if(fn){try{const s=fn();if(s){const first=!r.sum,d=day();r.sum=s;(s.areas||[]).forEach(a=>(a.skills||[]).forEach(k=>{if(k.st===2&&r.when[k.id]==null)r.when[k.id]=first?'':d}))}}catch(e){}}
   const ks=Object.keys(r.days).sort();ks.slice(0,Math.max(0,ks.length-120)).forEach(k=>delete r.days[k]);
+  const old=week(12);for(const k in r.skw||{}){for(const w in r.skw[k])if(w<old)delete r.skw[k][w];if(!Object.keys(r.skw[k]).length)delete r.skw[k]}
   r.at=Date.now();try{localStorage.setItem(KEY,JSON.stringify(r))}catch(e){}dirty=false};
  ['pointerdown','keydown','touchstart','wheel'].forEach(e=>addEventListener(e,()=>{last=Date.now()},{passive:true,capture:true}));
  setInterval(()=>{if(off||document.hidden||Date.now()-last>120000)return;today().s+=10;dirty=true},10000);
  setInterval(()=>{if(dirty)save()},30000);
  addEventListener('pagehide',save);document.addEventListener('visibilitychange',()=>{if(document.hidden&&dirty)save()});
  return {
-  ans(ok,skill){if(off)return;const t=today();ok?t.r++:t.w++;if(skill!=null){const r=load(),sk=r.sk||(r.sk={}),x=sk[skill]||(sk[skill]=[0,0]);x[ok?0:1]++}dirty=true},
+  ans(ok,skill,item){if(off)return;const t=today(),r=load(),i=ok?0:1;ok?t.r++:t.w++;
+   if(skill!=null){const sk=r.sk||(r.sk={});(sk[skill]||(sk[skill]=[0,0]))[i]++;const sw=r.skw||(r.skw={}),o=sw[skill]||(sw[skill]={}),w=week();(o[w]||(o[w]=[0,0]))[i]++}
+   if(item&&item.id!=null){const mx=r.mx||(r.mx={}),id=String(item.id).slice(0,80);let e=mx[id];
+    if(!ok){if(!e)e=mx[id]={s:skill,n:0,ok:0,f:day()};e.n++;e.k=0;e.l=day();e.q=two(item.q);e.a=two(item.a);e.g=two(item.g);e.tip=two(item.tip)||e.tip;
+     const ids=Object.keys(mx);if(ids.length>40)ids.sort((a,b)=>mx[a].l!==mx[b].l?(mx[a].l<mx[b].l?-1:1):mx[a].n-mx[b].n).slice(0,ids.length-40).forEach(x=>delete mx[x])}
+    else if(e){e.ok++;e.k=(e.k||0)+1}}
+   dirty=true},
   set(f){fn=f;setTimeout(save,1500)},save,
   stat(id){const x=(load().sk||{})[id];return x?{r:x[0],w:x[1]}:null},
   forget(){off=true;R=null;try{localStorage.removeItem(KEY)}catch(e){}},
@@ -69,8 +80,9 @@ function coachPop(pose,ko,en,o={}){const now=Date.now();if(!o.force&&now-coachAt
  el.innerHTML=`<img src="images/coach-moon-${pose}.webp" alt="" onerror="this.remove()"><p><b>${L('문 코치','Coach Moon')}</b>${L(ko,en)}</p>`;
  el.classList.remove('show');void el.offsetWidth;el.classList.add('show');clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove('show'),o.ms||4500);return true}
 // call with every final answer: praise runs of right answers, and help after two misses in a row.
-// The optional skill id (one of the skill ids in the game's LR summary) counts the answer for that skill in the report.
-function coachAnswer(ok,skill){try{LR.ans(ok,skill)}catch(e){}
+// The optional skill id (one of the skill ids in the game's LR summary) counts the answer for that skill in the report,
+// and the optional item (see LR above) lets the report list the kinds of questions the child often gets wrong.
+function coachAnswer(ok,skill,item){try{LR.ans(ok,skill,item)}catch(e){}
  if(ok){coachRun++;coachMiss=0;if(![3,5,10,15,20,30].includes(coachRun))return;const n=coachRun,t=coachPick([[`${n}번 연속 성공! 집중력이 대단해요 🌙`,`${n} in a row! Amazing focus 🌙`],[`와, ${n}번 연속이에요! 문 코치가 박수 쳐요 👏`,`Wow, ${n} in a row! Coach Moon is clapping 👏`],[`${n}번 연속! 오늘 머리가 반짝반짝해요 ✨`,`${n} straight! Your brain is sparkling today ✨`]]);coachPop('clap',t[0],t[1],{gap:20000});return}
  coachRun=0;coachMiss++;if(coachMiss!==2)return;const nm=coachEsc(coachNm()),t=coachPick([['괜찮아요! 틀리면서 배우는 거예요. 천천히 다시 봐요 🌙','That’s okay! Mistakes help us learn. Take another look 🌙'],[nm?`${nm}, 할 수 있어요! 문 코치가 응원해요 🌙`:'할 수 있어요! 문 코치가 응원해요 🌙',nm?`You can do it, ${nm}! Coach Moon is cheering 🌙`:'You can do it! Coach Moon is cheering 🌙'],['실수는 배움의 친구예요. 한 번 더 해 봐요!','Mistakes are friends of learning. One more try!']]);coachPop('go',t[0],t[1],{gap:30000})}
 // Once a day per game he says hello, a few minutes in he shares a tip, and after 20 minutes he suggests a little rest.
@@ -2078,6 +2090,7 @@ const QS=[
 <script>
 // ================================================================ challenge formats and interactive science labs
 // Each maker returns {tag:[icon,label], say, answer, mount(box, done), hint()}; done(ok, {answer, why}) is called once.
+// Quiz formats also pass the child's raw 'Korean|English' choices (pick, bad, seq, want) for the parents' report.
 const T=s=>{s=String(s);const i=s.indexOf('|');return i<0?s:LANG==='en'?s.slice(i+1):s.slice(0,i)};
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
@@ -2132,7 +2145,7 @@ function choiceUI(box,opts,correct,done,cls=''){
 CH.mc=(q,ctx)=>{
  const wrong=shuffle(q.o.slice()).slice(0,ctx.diff===1?2:3),opts=shuffle([q.a,...wrong]);let hint=null;
  return {tag:['🔍',T('퀴즈|Quiz')],say:T(q.q)+' … '+opts.map(T).join(', '),answer:T(q.a),
-  mount(box,done){box.innerHTML=qText(T(q.q))+(q.art?`<div class="qart">${icon(q.art)}</div>`:'');hint=choiceUI(box,opts.map(o=>({html:esc(T(o))})),opts.indexOf(q.a),ok=>done(ok))},
+  mount(box,done){box.innerHTML=qText(T(q.q))+(q.art?`<div class="qart">${icon(q.art)}</div>`:'');hint=choiceUI(box,opts.map(o=>({html:esc(T(o))})),opts.indexOf(q.a),(ok,i)=>done(ok,{pick:opts[i]}))},
   hint:()=>hint&&hint()};
 };
 // ---------------------------------------------------------------- true or false: the villain makes a claim
@@ -2149,7 +2162,7 @@ CH.sort=(q,ctx)=>{
  const byBin=q.bins.map((_,b)=>shuffle(q.items.filter(it=>it[2]===b)));
  let list=byBin.map(a=>a[0]).filter(Boolean);const rest=shuffle(byBin.flatMap(a=>a.slice(1)));
  while(list.length<n&&rest.length)list.push(rest.pop());list=shuffle(list);
- let k=0,miss=0,wrongs=[],B=null,hintOn=false;
+ let k=0,miss=0,wrongs=[],bad=[],B=null,hintOn=false;
  const binName=b=>T(q.bins[b][1]);
  return {tag:['🗂️',T('분류하기|Sorting')],say:T(q.q)+' … '+T(list[0][1]),answer:'',
   mount(box,done){B=box;
@@ -2160,11 +2173,11 @@ CH.sort=(q,ctx)=>{
    const observe=it=>{const d=box.querySelector('.drop');if(!d)return;d.innerHTML=icon(it[0]);d.className='drop';void d.offsetWidth;d.classList.add(q.fx==='tank'?(it[2]===0?'float':'sink'):(it[2]===0?'stick':'fall'));if(q.fx==='tank')SFX.splash();else if(it[2]===0)SFX.snap()};
    box.querySelector('.bins').addEventListener('click',e=>{const b=e.target.closest('.bin');if(!b||box.dataset.done||card.dataset.busy)return;const it=list[k],bi=+b.dataset.b,ok=bi===it[2];card.dataset.busy=1;
     const target=box.querySelector(`.bin[data-b="${it[2]}"]`);
-    if(ok){SFX.good();b.classList.add('flash-ok')}else{miss++;wrongs.push(`${it[0][0]==='@'?'':it[0]} ${T(it[1])} → ${binName(it[2])}`);SFX.bad();b.classList.add('flash-bad');target.classList.add('flash-ok');card.classList.add('shake')}
+    if(ok){SFX.good();b.classList.add('flash-ok')}else{miss++;bad.push([it,bi]);wrongs.push(`${it[0][0]==='@'?'':it[0]} ${T(it[1])} → ${binName(it[2])}`);SFX.bad();b.classList.add('flash-bad');target.classList.add('flash-ok');card.classList.add('shake')}
     observe(it);
     later(ok?420:1000,()=>{b.classList.remove('flash-ok','flash-bad');target.classList.remove('flash-ok');card.classList.remove('shake');
      target.querySelector('.tray').insertAdjacentHTML('beforeend',`<i class="${ok?'':'was'}">${icon(it[0])}</i>`);delete card.dataset.busy;k++;
-     if(k>=list.length){box.dataset.done=1;card.classList.add('hidden');done(miss<=(ctx.diff===1?1:0),{answer:wrongs.join(' · ')})}else show()})});
+     if(k>=list.length){box.dataset.done=1;card.classList.add('hidden');done(miss<=(ctx.diff===1?1:0),{answer:wrongs.join(' · '),bad})}else show()})});
    show();
   },
   hint(){if(!B||B.dataset.done||hintOn)return false;hintOn=true;B.querySelector(`.bin[data-b="${list[k][2]}"]`).classList.add('hinted');return true}};
@@ -2180,7 +2193,7 @@ CH.order=(q,ctx)=>{
    box.innerHTML=qText(T(q.q))+`<div class="slots">${seq.map((_,i)=>`<span class="slot" data-s="${i}">${i+1}</span>`).join('<i class="arr">›</i>')}</div><div class="tiles2">${order.map(i=>`<button class="tl" type="button" data-i="${i}"><span class="ic">${icon(seq[i][0])}</span><b>${esc(T(seq[i][1]))}</b></button>`).join('')}</div>`;
    box.querySelector('.tiles2').addEventListener('click',e=>{const b=e.target.closest('.tl');if(!b||b.disabled||box.dataset.done)return;const i=+b.dataset.i;
     if(i===next){SFX.good();b.disabled=true;b.classList.add('placed');const s=box.querySelector(`.slot[data-s="${i}"]`);s.innerHTML=icon(seq[i][0]);s.classList.add('on');next++;box.querySelectorAll('.tl').forEach(x=>x.classList.remove('hinted'));
-     if(next>=seq.length){box.dataset.done=1;done(miss<=(ctx.diff===1?1:0))}}
+     if(next>=seq.length){box.dataset.done=1;done(miss<=(ctx.diff===1?1:0),{seq:seq.map(x=>x[1])})}}
     else{miss++;SFX.bad();b.classList.remove('shake');void b.offsetWidth;b.classList.add('shake');if(ctx.diff===1||miss>1)box.querySelector(`.tl[data-i="${next}"]`).classList.add('hinted')}});
   },
   hint(){if(!B||B.dataset.done)return false;const t=B.querySelector(`.tl[data-i="${next}"]`);if(!t||t.classList.contains('hinted'))return false;t.classList.add('hinted');return true}};
@@ -2195,7 +2208,7 @@ CH.multi=(q,ctx)=>{
    box.querySelector('.picks').addEventListener('click',e=>{const b=e.target.closest('.pk');if(!b||box.dataset.done)return;SFX.click();b.setAttribute('aria-pressed',b.getAttribute('aria-pressed')==='true'?'false':'true')});
    box.querySelector('.check').addEventListener('click',()=>{if(box.dataset.done)return;const sel=[...box.querySelectorAll('.pk')].map(b=>b.getAttribute('aria-pressed')==='true');
     if(!sel.some(Boolean)){const m=box.querySelector('.simmsg');m.textContent='👆 '+T('먼저 골라 주세요!|Pick some first!');m.classList.add('show');return}
-    box.dataset.done=1;let ok=true;box.querySelectorAll('.pk').forEach((b,i)=>{b.disabled=true;const want=items[i].y===1;if(want!==sel[i])ok=false;b.classList.add(want?'right':sel[i]?'wrong':'dim')});box.querySelector('.check').disabled=true;done(ok)});
+    box.dataset.done=1;let ok=true;box.querySelectorAll('.pk').forEach((b,i)=>{b.disabled=true;const want=items[i].y===1;if(want!==sel[i])ok=false;b.classList.add(want?'right':sel[i]?'wrong':'dim')});box.querySelector('.check').disabled=true;done(ok,{pick:items.filter((_,i)=>sel[i]).map(it=>it.x[1]),want:items.filter(it=>it.y).map(it=>it.x[1])})});
   },
   hint(){if(!B||B.dataset.done)return false;const bs=[...B.querySelectorAll('.pk')];const fix=bs.findIndex((b,i)=>(b.getAttribute('aria-pressed')==='true')!==(items[i].y===1)&&!b.classList.contains('hinted'));if(fix<0)return false;const b=bs[fix];b.classList.add('hinted');b.setAttribute('aria-pressed',items[fix].y?'true':'false');return true}};
 };
@@ -2207,7 +2220,7 @@ CH.riddle=(q,ctx)=>{
    box.innerHTML=qText(T('단서를 보고 맞혀 봐요!|Guess from the clues!'))+(q.art?`<div class="qart sm">${icon(q.art)}</div>`:'')+`<ol class="clues">${q.clues.map((c,i)=>`<li class="${i?'hid':''}">${esc(T(c))}</li>`).join('')}</ol><div class="simrow"><button class="btn small ghost more" type="button">🔎 ${T('단서 더 보기|Another clue')}</button></div>`;
    const more=box.querySelector('.more');
    more.addEventListener('click',()=>{if(shown>=q.clues.length)return;const li=box.querySelectorAll('.clues li')[shown++];li.classList.remove('hid');speak(li.textContent);if(shown>=q.clues.length)more.disabled=true});
-   hint=choiceUI(box,opts.map(o=>({html:esc(T(o))})),opts.indexOf(q.a),ok=>{box.querySelectorAll('.clues li').forEach(l=>l.classList.remove('hid'));more.disabled=true;done(ok)});
+   hint=choiceUI(box,opts.map(o=>({html:esc(T(o))})),opts.indexOf(q.a),(ok,i)=>{box.querySelectorAll('.clues li').forEach(l=>l.classList.remove('hid'));more.disabled=true;done(ok,{pick:opts[i]})});
   },
   hint(){if(!B)return false;B.querySelectorAll('.clues li').forEach(l=>l.classList.remove('hid'));shown=q.clues.length;B.querySelector('.more').disabled=true;return hint()||true}};
 };
@@ -6601,10 +6614,51 @@ function beamFly(cb){
  e.animate([{transform:`translate(${x0}px,${y0}px) scale(.5)`,opacity:.3},{transform:`translate(${(x0+x1)/2}px,${Math.min(y0,y1)-50}px) scale(1.5) rotate(180deg)`,opacity:1,offset:.5},{transform:`translate(${x1}px,${y1}px) scale(1.2) rotate(360deg)`,opacity:1}],{duration:560,easing:'cubic-bezier(.4,0,.6,1)'}).onfinish=()=>{e.remove();cb&&cb()};
 }
 function popOver(el,html,cls){if(!el)return;const r=el.getBoundingClientRect(),d=document.createElement('div');d.className='dmg '+(cls||'');d.innerHTML=html;d.style.left=(r.left+r.width/2)+'px';d.style.top=(r.top+r.height*.2)+'px';document.body.appendChild(d);setTimeout(()=>d.remove(),1100)}
+// ---------------------------------------------------------------- what the parents' report keeps about one answer
+// (_src/report/SPEC.md, "Answers"): which question, the right answer, the child's answer and a short why, in both
+// languages. Cards and questions hold 'Korean|English' text, so both come from there. Labs build their task in the
+// current language only, so a lab's other language names the lab and the card instead.
+const SG_RAW={};CARD_RAW.forEach(c=>{SG_RAW[c[0]]=c});
+// the kind of question: card + format + its number among that card's questions of that format, e.g. 'dir4:ox2';
+// a lab is card + lab (+ variant), e.g. 'shlow:lab-shadow-side', so its random tasks group together
+const SG_QID=(()=>{const n={};return QALL.map(q=>{if(q.t==='sim')return `${q.c}:lab-${q.sim}${q.v?'-'+q.v:''}`;const k=q.c+':'+q.t;n[k]=(n[k]||0)+1;return k+n[k]})})();
+const sgTwo=s=>{s=String(s==null?'':s);const i=s.indexOf('|');return i<0?[s,s]:[s.slice(0,i),s.slice(i+1)]};
+const sgPlain=s=>{const t=String(s).replace(/<[^>]*>/g,'').replace(/@[a-z]+/g,''),u=t.replace(/[\p{Extended_Pictographic}\u{1F1E6}-\u{1F1FF}\u{1F3FB}-\u{1F3FF}\uFE0F\u200D\u20E3]/gu,'').replace(/\s+/g,' ').trim();return u||t.trim()};
+const sgClip=(s,n=90)=>s.length<=n?s:s.slice(0,n-1).replace(/\s+\S*$/,'')+'…';
+const sgP=(s,n)=>sgTwo(s).map(x=>sgClip(sgPlain(x),n));
+const sgJoin=(raws,sep,n)=>{const ps=raws.map(r=>Array.isArray(r)?r:sgTwo(r).map(sgPlain));return [0,1].map(i=>sgClip(ps.map(p=>p[i]).join(sep),n))};
+// the first sentence of a why; a later line with an emergency number or "with a grown-up" is kept (or, when both
+// don't fit, used instead) so a safety tip never loses its official wording
+const SG_SAFE=/\b(119|112|911)\b|어른(과|이|에게|만|께)|grown-up/i;
+function sgTip(raw){
+ const sen=sgTwo(raw).map(x=>{x=sgPlain(x);const ss=x.replace(/([.!?]["”’)]?)\s+/g,(m,p,o)=>/[ap]\.m$/.test(x.slice(Math.max(0,o-3),o))?m:p+'\u0001').split('\u0001').filter(Boolean);return ss.length?ss:[x]});
+ // a very short first sentence (in either language) takes the next one too, in both languages
+ const two=sen.some((ss,i)=>ss[1]&&ss[0].length<(i?28:16));
+ const ps=sen.map(ss=>{let f=ss[0];if(two&&ss[1]){let g=ss[0]+' '+ss[1];if(g.length>140)g=g.replace(/\s*\([^)]*\)/g,'');if(g.length<=140)f=g}
+  if(f.length>140){const i=f.search(/[:;]/);if(i>20&&i<139)f=f.slice(0,i)+'.'}
+  const s=ss.filter(t=>SG_SAFE.test(t)&&!f.includes(t)).join(' ');
+  // to make room for the safety line, drop a bracketed aside, then a trailing ", and …" clause
+  if(s&&(f+' '+s).length>140){const g=f.replace(/\s*\([^)]*\)/g,'');if((g+' '+s).length<=140)f=g;
+   else{const cut=[];f.replace(/,\s+(?:and|but)\s|;\s/g,(m,o)=>{cut.push(o);return m});const i=cut.reverse().find(o=>o>20&&o+2+s.length<=140);if(i!=null)f=f.slice(0,i)+'.'}}
+  return {f,s}});
+ const fit=ps.every(p=>!p.s||(p.f+' '+p.s).length<=140);
+ return ps.map(p=>sgClip(!p.s?p.f:fit?p.f+' '+p.s:p.s.replace(/^(하지만|그러나)\s+/,'').replace(/^(?:But|However),?\s+(\w)/,(m,c)=>c.toUpperCase()),140));
+}
+function sgItem(q,ch,ok,info={}){try{
+ const c=SG_RAW[q.c],tip=sgTip(q.why||c[5]),it={id:SG_QID[q.k]||q.c,tip};let G=null;
+ if(q.t==='ox'){const s=sgTwo(q.s).map(sgPlain),T2=[['틀려요','False'],['맞아요','True']];it.q=[sgClip(`${s[0]} (O/X)`),sgClip(`True or false: ${s[1]}`)];it.a=T2[q.v?1:0];G=T2[q.v?0:1]}
+ else if(q.t==='mc'||q.t==='riddle'){it.q=q.t==='mc'?sgP(q.q):sgJoin(['나는 누구일까요?|Who am I?',...q.clues],' ');it.a=sgP(q.a);if(info.pick!=null)G=sgP(info.pick)}
+ else if(q.t==='sort'){const bin=b=>sgTwo(q.bins[b][1]).map(sgPlain),lab=x=>sgTwo(x[1]).map(sgPlain),bad=info.bad||[],to=(x,b)=>{const l=lab(x),n=bin(b);return [0,1].map(i=>`${l[i]} → ${n[i]}`)};
+  it.q=sgP(q.q);it.a=bad.length?sgJoin(bad.map(([x])=>to(x,x[2])),', '):sgJoin(q.bins.map(b=>b[1]),', ');if(bad.length)G=sgJoin(bad.map(([x,b])=>to(x,b)),', ')}
+ else if(q.t==='order'){it.q=sgP(q.q);it.a=sgJoin(info.seq||q.items.map(x=>x[1]),' → ')}
+ else if(q.t==='multi'){it.q=sgP(q.q);it.a=sgJoin(info.want||q.yes.map(x=>x[1]),', ');if(info.pick&&info.pick.length)G=sgJoin(info.pick,', ')}
+ else{const cur=LANG==='en'?1:0,lab=sgTwo((SIM_NAMES[q.sim]||['',c[4]])[1]).map(sgPlain),title=sgTwo(c[4]).map(sgPlain),ans=ch?sgPlain((info&&info.answer)||ch.answer||''):'',say=ch?sgPlain(ch.say||''):'';
+  it.q=[0,1].map(i=>sgClip(i===cur&&say?`${lab[i]}: ${say}`:`${lab[i]===title[i]?['실험','Lab'][i]:lab[i]}: ${title[i]}`));it.a=[0,1].map(i=>i===cur&&ans?sgClip(ans):tip[i])}
+ if(!ok&&G)it.g=G;return it}catch(e){}}
 function answer(ok,info){
  const ch=PS.cur,q=ch.q,c=CARD[q.c],sim=q.t==='sim';
  if(!ok&&PS.foe&&!sim&&!ch.second){secondChance(ch);return}
- coachAnswer(ok,SG_SKILL[q.c]);
+ coachAnswer(ok,SG_SKILL[q.c],sgItem(q,ch,ok,info));
  // keep a running accuracy so pickItem can steer toward about 4 right answers in 5
  S.acc=(S.acc==null?.8:S.acc)*.9+(ok?(ch.second?.6:1):0)*.1;
  S.answered++;if(!(ok&&ch.second))learn(q.c,ok);PS.cardsHit.add(q.c);PS.byCard[q.c]=(PS.byCard[q.c]||'')+(ok?(ch.second?'r':'o'):'x');
@@ -6732,7 +6786,7 @@ function speedBegin(sec){
 function speedNext(){if(!SP)return;if(SP.i>=SP.pool.length){SP.pool=shuffle(SP.pool);SP.i=0}SP.cur=SP.pool[SP.i++];$('spQ').textContent='“'+T(SP.cur.s)+'”';SP.lock=false;speak(T(SP.cur.s))}
 function speedTick(){if(!SP||SP.over)return;const left=(SP.end-Date.now())/1000;$('spT').style.width=Math.max(0,left/SP.total*100)+'%';$('spT').parentElement.classList.toggle('low',left<10);if(left<=10&&left>0&&Math.floor(left)!==SP.lt){SP.lt=Math.floor(left);SFX.tick()}if(left<=0)speedEnd()}
 function speedAnswer(ok){
- const q=SP.cur;SP.lock=true;learn(q.c,ok);S.answered++;try{LR.ans(ok,SG_SKILL[q.c])}catch(e){}
+ const q=SP.cur;SP.lock=true;learn(q.c,ok);S.answered++;try{LR.ans(ok,SG_SKILL[q.c],sgItem(q,null,ok))}catch(e){}
  const f=$('spF');
  if(ok){SP.score++;SP.combo++;SP.best=Math.max(SP.best,SP.combo);S.correct++;track('correct');SFX.good();f.className='spfb ok';f.textContent='✅ '+(SP.combo>=3?`🔥${SP.combo}`:'')}
  else{SP.combo=0;SP.end-=3000;SP.miss.push(q);SFX.bad();f.className='spfb bad';f.textContent=`❌ ${L('정답','Answer')}: ${q.v?'⭕':'❌'} · −3${L('초','s')}`;const c=$('chal');c.classList.remove('shake');void c.offsetWidth;c.classList.add('shake')}

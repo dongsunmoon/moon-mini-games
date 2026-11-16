@@ -28,23 +28,34 @@ const L=(ko,en)=>LANG==='en'?en:ko;
 //   page is visible and the player touched or typed in the last 2 minutes.
 // · sum: the game's own summary of skills, built by the function passed to LR.set() (see _src/report/SPEC.md).
 // · when: the day each skill first reached "mastered" ('' = before the record started).
-// · sk: right/wrong counts per skill, from coachAnswer(ok,skillId).
+// · sk: right/wrong counts per skill, from coachAnswer(ok,skillId); skw: the same per week (Monday's date, 12 weeks).
+// · mx: kinds of questions the child got wrong (up to 40), from coachAnswer(ok,skillId,item) with
+//   item={id,q:[ko,en],a:[ko,en],g?:[ko,en],tip?:[ko,en]}: the latest example, the right answer, the child's answer,
+//   how many misses, and how many right answers in a row since the last miss (so the report can say "fixed now").
 // A game's reset must call LR.forget() so the report forgets only that game; LR.resume() starts a fresh record.
 const LR=(()=>{const f=(location.pathname.split('/').pop()||'').replace(/\.html$/,'');
  const KEY={math_aquarium:'mathAquarium.learn',science_guardians:'scienceGuardians.learn',music_academy:'musicAcademy.learn',chess_knights:'chessKnights.learn',detective_game:'little-detective-learn',marble_rush_3d:'marbleRush.learn',coding_island:'pythonIsland.learn',python_island:'pythonIsland.learn'}[f];
- const day=()=>new Date().toLocaleDateString('en-CA');let R=null,fn=null,off=!KEY,dirty=false,last=0;
+ const day=()=>new Date().toLocaleDateString('en-CA'),week=(n=0)=>{const d=new Date();d.setDate(d.getDate()-(d.getDay()+6)%7-7*n);return d.toLocaleDateString('en-CA')};
+ const two=x=>Array.isArray(x)?x.slice(0,2).map(v=>String(v==null?'':v).slice(0,140)):undefined;let R=null,fn=null,off=!KEY,dirty=false,last=0;
  const load=()=>{if(R)return R;try{R=JSON.parse(localStorage.getItem(KEY)||'null')}catch(e){}if(!R||R.v!==1)R={v:1,days:{},when:{}};return R};
  const today=()=>{const r=load(),d=day();return r.days[d]||(r.days[d]={s:0,r:0,w:0})};
  const save=()=>{if(off)return;const r=load();
   if(fn){try{const s=fn();if(s){const first=!r.sum,d=day();r.sum=s;(s.areas||[]).forEach(a=>(a.skills||[]).forEach(k=>{if(k.st===2&&r.when[k.id]==null)r.when[k.id]=first?'':d}))}}catch(e){}}
   const ks=Object.keys(r.days).sort();ks.slice(0,Math.max(0,ks.length-120)).forEach(k=>delete r.days[k]);
+  const old=week(12);for(const k in r.skw||{}){for(const w in r.skw[k])if(w<old)delete r.skw[k][w];if(!Object.keys(r.skw[k]).length)delete r.skw[k]}
   r.at=Date.now();try{localStorage.setItem(KEY,JSON.stringify(r))}catch(e){}dirty=false};
  ['pointerdown','keydown','touchstart','wheel'].forEach(e=>addEventListener(e,()=>{last=Date.now()},{passive:true,capture:true}));
  setInterval(()=>{if(off||document.hidden||Date.now()-last>120000)return;today().s+=10;dirty=true},10000);
  setInterval(()=>{if(dirty)save()},30000);
  addEventListener('pagehide',save);document.addEventListener('visibilitychange',()=>{if(document.hidden&&dirty)save()});
  return {
-  ans(ok,skill){if(off)return;const t=today();ok?t.r++:t.w++;if(skill!=null){const r=load(),sk=r.sk||(r.sk={}),x=sk[skill]||(sk[skill]=[0,0]);x[ok?0:1]++}dirty=true},
+  ans(ok,skill,item){if(off)return;const t=today(),r=load(),i=ok?0:1;ok?t.r++:t.w++;
+   if(skill!=null){const sk=r.sk||(r.sk={});(sk[skill]||(sk[skill]=[0,0]))[i]++;const sw=r.skw||(r.skw={}),o=sw[skill]||(sw[skill]={}),w=week();(o[w]||(o[w]=[0,0]))[i]++}
+   if(item&&item.id!=null){const mx=r.mx||(r.mx={}),id=String(item.id).slice(0,80);let e=mx[id];
+    if(!ok){if(!e)e=mx[id]={s:skill,n:0,ok:0,f:day()};e.n++;e.k=0;e.l=day();e.q=two(item.q);e.a=two(item.a);e.g=two(item.g);e.tip=two(item.tip)||e.tip;
+     const ids=Object.keys(mx);if(ids.length>40)ids.sort((a,b)=>mx[a].l!==mx[b].l?(mx[a].l<mx[b].l?-1:1):mx[a].n-mx[b].n).slice(0,ids.length-40).forEach(x=>delete mx[x])}
+    else if(e){e.ok++;e.k=(e.k||0)+1}}
+   dirty=true},
   set(f){fn=f;setTimeout(save,1500)},save,
   stat(id){const x=(load().sk||{})[id];return x?{r:x[0],w:x[1]}:null},
   forget(){off=true;R=null;try{localStorage.removeItem(KEY)}catch(e){}},
@@ -69,8 +80,9 @@ function coachPop(pose,ko,en,o={}){const now=Date.now();if(!o.force&&now-coachAt
  el.innerHTML=`<img src="images/coach-moon-${pose}.webp" alt="" onerror="this.remove()"><p><b>${L('문 코치','Coach Moon')}</b>${L(ko,en)}</p>`;
  el.classList.remove('show');void el.offsetWidth;el.classList.add('show');clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove('show'),o.ms||4500);return true}
 // call with every final answer: praise runs of right answers, and help after two misses in a row.
-// The optional skill id (one of the skill ids in the game's LR summary) counts the answer for that skill in the report.
-function coachAnswer(ok,skill){try{LR.ans(ok,skill)}catch(e){}
+// The optional skill id (one of the skill ids in the game's LR summary) counts the answer for that skill in the report,
+// and the optional item (see LR above) lets the report list the kinds of questions the child often gets wrong.
+function coachAnswer(ok,skill,item){try{LR.ans(ok,skill,item)}catch(e){}
  if(ok){coachRun++;coachMiss=0;if(![3,5,10,15,20,30].includes(coachRun))return;const n=coachRun,t=coachPick([[`${n}번 연속 성공! 집중력이 대단해요 🌙`,`${n} in a row! Amazing focus 🌙`],[`와, ${n}번 연속이에요! 문 코치가 박수 쳐요 👏`,`Wow, ${n} in a row! Coach Moon is clapping 👏`],[`${n}번 연속! 오늘 머리가 반짝반짝해요 ✨`,`${n} straight! Your brain is sparkling today ✨`]]);coachPop('clap',t[0],t[1],{gap:20000});return}
  coachRun=0;coachMiss++;if(coachMiss!==2)return;const nm=coachEsc(coachNm()),t=coachPick([['괜찮아요! 틀리면서 배우는 거예요. 천천히 다시 봐요 🌙','That’s okay! Mistakes help us learn. Take another look 🌙'],[nm?`${nm}, 할 수 있어요! 문 코치가 응원해요 🌙`:'할 수 있어요! 문 코치가 응원해요 🌙',nm?`You can do it, ${nm}! Coach Moon is cheering 🌙`:'You can do it! Coach Moon is cheering 🌙'],['실수는 배움의 친구예요. 한 번 더 해 봐요!','Mistakes are friends of learning. One more try!']]);coachPop('go',t[0],t[1],{gap:30000})}
 // Once a day per game he says hello, a few minutes in he shares a tip, and after 20 minutes he suggests a little rest.
@@ -1913,7 +1925,7 @@ const W10=[
  (R,d)=>{const base=R.some(ANIMAL,[2,3,4][d-1]),dup=R.some(base,R.int(1,2)),all=R.shuf([...base,...dup]);return {code:`stickers = ${slit(all)}\nprint(len(stickers))`,lits:[String(all.length),String(base.length-1)],why:'세트는 같은 스티커를 한 번만 넣어요.|A set keeps each sticker only once.'}},
  (R,d)=>{const base=R.some(ANIMAL,[2,3,3][d-1]),x=R.pick(base);return {code:`stickers = ${slit(base)}\nstickers.add("${x}")\nprint(len(stickers))`,lits:[String(base.length+1),String(base.length-1)],why:'이미 있는 스티커를 add해도 그대로예요.|Adding a sticker that’s already there changes nothing.'}},
  (R,d)=>{const base=R.some(ANIMAL,[2,3,3][d-1]),y=R.pick(ANIMAL.filter(a=>!base.includes(a))),ask=R.chance(.5)?R.pick(base):y;return {code:`stickers = ${slit(base)}\nprint("${ask}" in stickers)`,lits:[base.includes(ask)?'False':'True'],why:'in 은 주머니에 그 스티커가 있는지 확인해요.|in checks whether the pouch has it.'}},
- (R,d)=>{const a=R.some(FRUIT,3),b=[R.pick(a),...R.some(FRUIT.filter(f=>!a.includes(f)),R.int(1,2))];return {code:`mine = ${slit(a)}\nfriend = ${slit(b)}\nprint(len(mine | friend))`,lits:[String(a.length+b.length),String(a.length+b.length-2)],why:'| 로 합치면 겹치는 스티커는 한 번만 세요.|Joining with | counts shared stickers once.'}},
+ (R,d)=>{const a=R.some(FRUIT,3),b=[R.pick(a),...R.some(FRUIT.filter(f=>!a.includes(f)),R.int(1,2))];return {code:`mine = ${slit(a)}\nfriend = ${slit(b)}\nprint(len(mine | friend))`,lits:[String(a.length+b.length),String(a.length+b.length-2)],why:'세로 막대 기호로 합치면 겹치는 스티커는 한 번만 세요.|Joining sets with the vertical bar counts shared stickers once.'}},
  (R,d)=>{const a=R.some(ANIMAL,4),b=[...R.some(a,R.int(1,2)),R.pick(ANIMAL.filter(x=>!a.includes(x)))];return {code:`mine = ${slit(a)}\nfriend = ${slit(b)}\nprint(sorted(mine & friend))`,alts:[`print(sorted(${slit([...a,...b])}))`,`print(sorted(${slit(a)} - ${slit(b)}))`],why:'& 는 둘 다 가진 스티커만 남겨요.|& keeps only the stickers both have.'}},
  (R,d)=>{const v=[...Array([4,5,6][d-1])].map(()=>R.pick(ANIMAL.slice(0,3)));return {code:`visitors = ${lit(v)}\nprint(len(set(visitors)))`,lits:[String(v.length),String(new Set(v).size+1)],why:'set()으로 바꾸면 겹친 손님이 사라져서 다른 손님 수만 남아요.|set() removes repeats, leaving the number of different visitors.'}},
  (R,d)=>{if(d<2)return null;const a=R.some(FRUIT,4),b=R.some(a,2);return {code:`mine = ${slit(a)}\nfriend = ${slit(b)}\nprint(sorted(mine - friend))`,alts:[`print(sorted(${slit(b)} - ${slit(a)}))`,`print(sorted(${slit(b)}))`],why:'mine - friend 는 나만 가진 스티커예요.|mine - friend is the stickers only I have.'}}];
@@ -4198,7 +4210,7 @@ function startBoss(n,host,opts={}){
    <div class="bb-opts ${q.optKind}">${q.options.map((_,i)=>`<button type="button" class="bb-opt" data-o="${i}"><b>${'ABCD'[i]}</b>${optHTML(q,i)}</button>`).join('')}</div></div>`;
   panel.scrollTop=0;drawItems();say(T(q.ask))}
  function answer(i){if(st.phase!=='q'||st.busy||st.ended)return;const q=st.q;st.busy=true;drawItems();hush();
-  try{LR.ans(i===q.answer,LR_W[(q.world||n)-1])}catch(e){}   // each answer counts for the parents' report, under the question's world
+  try{LR.ans(i===q.answer,LR_W[(q.world||n)-1],lrQuiz(q,i))}catch(e){}   // each answer counts for the parents' report, under the question's world
   const btns=[...panel.querySelectorAll('.bb-opt')];btns.forEach(x=>x.disabled=true);
   if(i===q.answer){btns[i].classList.add('right');st.right++;st.combo++;$b('.bb-turn b').textContent=st.right;
    let dmg=1;if(st.bolt){dmg*=2;st.bolt=false}const comboHit=st.combo>=3&&st.combo%3===0;if(comboHit)dmg++;
@@ -5129,8 +5141,8 @@ function respond(r,code){const m=P.m;let j=P.job||m.cases?JOBS.judge(m,r,code):M
  // a worked example counts once it runs: the child may have changed its numbers on purpose
  if(m.kind==='watch'&&!r.err&&!r.need&&(m.stage!=='grid'||code!==MISSION.fill(m.code)||j.ok))j={ok:true};
  if(m.kind==='predict'){predictAfter(r);return}
- if(j.ok){if(typeof coachAnswer==='function')coachAnswer(true,lrSkill(m));if(P.errSeen)S.stats.fixed++;success(code);return}
- P.tries++;if(typeof coachAnswer==='function')coachAnswer(false,lrSkill(m));sfx('oops');
+ if(j.ok){if(typeof coachAnswer==='function')coachAnswer(true,lrSkill(m),lrItem(m));if(P.errSeen)S.stats.fixed++;success(code);return}
+ P.tries++;if(typeof coachAnswer==='function')coachAnswer(false,lrSkill(m),lrItem(m,m.kind==='choose'&&P.picked!=null?lrBoth(lrCode(m.options[P.picked]),lrCode(m.options[P.picked])):lrWhy(j)));sfx('oops');
  let html='',mood='think';
  if(j.why==='error'){const e=j.err;mood='oops';P.ed.mark&&P.ed.mark(0,e.line);
   if(j.world)html=`<p>🐍 <b>${esc(L(e.ko,e.en))}</b></p><p class="small">${L(`${e.line}번째 줄에서 그랬어요. 그 앞의 명령들을 확인해 봐요.`,`It happened on line ${e.line}. Check the commands before it.`)}</p>`;
@@ -5163,8 +5175,8 @@ function firstBug(){if(S.tut.bug)return;S.tut.bug=1;save(true);setTimeout(()=>{i
 function predictPick(i){if(P.running||P.answered!=null&&P.answered!==false)return;P.pickedOpt=i;if(P.firstPick==null)P.firstPick=i;sfx('tap');document.querySelectorAll('.popt').forEach(b=>b.classList.toggle('on',+b.dataset.i===i));P.answered=false;runCode()}
 function predictAfter(r){const m=P.m,ok=MISSION.norm(m.options[P.pickedOpt])===MISSION.norm(r.out),right=m.options.findIndex(o=>MISSION.norm(o)===MISSION.norm(r.out));P.answered=true;
  document.querySelectorAll('.popt').forEach(b=>{const i=+b.dataset.i;b.classList.toggle('right',i===right);b.classList.toggle('wrong',i===P.pickedOpt&&!ok);b.disabled=true});runbar();
- if(ok){if(typeof coachAnswer==='function')coachAnswer(true,lrSkill(m));success(m.code,{predicted:P.firstPick===right})}
- else{P.tries++;if(typeof LR!=='undefined')LR.ans(false,lrSkill(m));sfx('oops');pySays(`<p>💡 ${L('아하! 실제로는 초록색 답이 나왔어요.','Aha! The green answer is what really happens.')}</p><p class="why">${tx(m.why)}</p><button class="btn small" type="button" data-a="gotit">👍 ${L('알겠어요!','Got it!')}</button>`,'think');say(L('아하! 실제로는 초록색 답이 나왔어요. ','Aha! The green answer is what really happens. ')+T(m.why))}}
+ if(ok){if(typeof coachAnswer==='function')coachAnswer(true,lrSkill(m),lrItem(m,undefined,m.options[right]));success(m.code,{predicted:P.firstPick===right})}
+ else{P.tries++;if(typeof LR!=='undefined')LR.ans(false,lrSkill(m),lrItem(m,lrBoth(lrOut(m.options[P.pickedOpt]),lrOut(m.options[P.pickedOpt])),m.options[right]));sfx('oops');pySays(`<p>💡 ${L('아하! 실제로는 초록색 답이 나왔어요.','Aha! The green answer is what really happens.')}</p><p class="why">${tx(m.why)}</p><button class="btn small" type="button" data-a="gotit">👍 ${L('알겠어요!','Got it!')}</button>`,'think');say(L('아하! 실제로는 초록색 답이 나왔어요. ','Aha! The green answer is what really happens. ')+T(m.why))}}
 function choosePick(i){if(P.running)return;P.picked=i;if(P.firstPick==null)P.firstPick=i;sfx('tap');document.querySelectorAll('.copt').forEach(b=>b.classList.toggle('on',+b.dataset.i===i));P.ed.setCode(P.m.options[i]);runCode()}
 function fixTap(ln){const m=P.m;if(P.running)return;
  if(ln===m.bug){sfx('tap');chooser(L(`${ln}번째 줄을 어떻게 고칠까요?`,`How should line ${ln} be?`),shuffle(m.fixes),P.fixLines[ln-1],v=>{P.fixLines[ln-1]=v;P.fixedOnce=true;P.ed.setCode(P.fixLines.join('\n'));P.ed.setMarks({[ln]:'fixed'});pySays(`<p>🔧 ${L('줄을 바꿨어요! ▶ 실행해서 확인해요.','Line changed! Press ▶ to check.')}</p>`,'happy')});return}
@@ -5335,6 +5347,52 @@ function lrSkill(m){if(!m)return undefined;if(m.kind==='fix'||m.fix)return 'fix'
  if(m.rb)return m.smart||(/^\s*for\b/m.test(m.solution||'')?'for':'seq');
  if(m.job){const t=JOBS.T.find(x=>x.id===m.job);return LR_W[Math.max(1,t?t.need:1)-1]}
  return LR_W[(m.world||1)-1]}
+// the kind of question behind one answer, for the report's "often missed" list (an LR item: see the coach block).
+// Plain text, at most 90 characters. English text keeps no Hangul, so Korean words inside code become "…".
+const lrCut=(s,n=90)=>{s=String(s==null?'':s).replace(/`/g,'').replace(/\s+/g,' ').trim();return s.length>n?s.slice(0,n-1).trim()+'…':s};
+const lrEn=s=>String(s).replace(/"[^"\n]*[가-힣][^"\n]*"/g,'"…"').replace(/'[^'\n]*[가-힣][^'\n]*'/g,"'…'").replace(/[가-힣]+/g,'…');
+const lrBoth=(ko,en,n)=>[lrCut(ko,n),lrCut(lrEn(en),n)];
+// split 'ko|en' even when the text itself holds a | (the set union sign): English is the part after the first | that leaves no Hangul
+const lrSplit=s=>{const p=String(s==null?'':s).split('|');for(let k=1;k<p.length;k++){const a=p.slice(0,k).join('|'),b=p.slice(k).join('|');if(/[가-힣]/.test(a)&&!/[가-힣]/.test(b))return [a,b]}return [p[0],p[1]??p[0]]};
+const lrTx=(s,n)=>{const p=lrSplit(s);return lrBoth(p[0],p[1],n)};
+// a 'ko|en' text as a tip: only its first sentence when it is long (or always, with first)
+const lrTip=(s,first)=>{if(!s)return;const one=x=>{x=String(x).replace(/`/g,'').trim();const f=x.match(/^.+?[.!?](?=\s|$)/);return (first||x.length>130)&&f?f[0]:x},p=lrSplit(s);return lrBoth(one(p[0]),one(p[1]),130)};
+// code on one line: a block's first line follows its header ("for i in range(3): print(i)"), other lines join with "; "
+const lrCode=c=>String(c||'').split('\n').map(l=>l.trim()).filter(l=>l&&!/^from turtle import/.test(l)).reduce((a,l)=>a?a+(a.endsWith(':')?' ':'; ')+l:l,'');
+const lrOut=s=>String(s).replace(/\n+$/,'').split('\n').join(' / ');
+const LR_KIND={watch:['예시 코드 실행해 보기','run the example code'],blank:['빈칸 채우기','fill in the blanks'],predict:['출력 예측하기','predict the output'],choose:['맞는 코드 고르기','pick the right code'],
+ fix:['버그 고치기','fix the bug'],order:['코드 줄 순서 맞추기','put the code lines in order'],tiles:['코드 타일로 만들기','build it from code tiles'],type:['코드 직접 쓰기','type the code'],make:['자기만의 코드 만들기','make your own code']};
+// what the judge found wrong with a mission run, said the way the game says it
+const LR_WHY={apples:['사과를 다 먹지 못했어요','Some apples were not eaten'],home:['집까지 가지 못했어요','Py didn’t get home'],drawing:['그림이 목표와 달라요 (길이나 각도)','The drawing didn’t match (lengths or angles)'],
+ output:['화면에 나온 글이 목표와 달라요','The printed lines didn’t match the goal'],short:['아직 덜 만들었어요','Not finished yet'],unserved:['마지막에 serve()를 빠뜨렸어요','Left out serve() at the end'],
+ dish:['만든 버거가 주문과 달라요','The burger didn’t match the order'],charge:['받은 돈 계산이 틀렸어요','Charged the wrong amount'],ride:['놀이기구 동작이 부탁과 달라요','The ride moves didn’t match the request']};
+function lrWhy(j){if(!j)return;if(j.case)return lrBoth('다른 손님에게 같은 코드를 쓰니 맞지 않았어요','The same code didn’t work for another customer');
+ if(j.why==='error'){const e=j.err||{};return lrBoth('오류: '+(e.ko||''),'Error: '+(e.en||''))}
+ if(j.why==='uses'){const u=USES[j.use]||[j.use,j.use];return lrBoth(`${u[0]}${josaCode(u[0])} 쓰지 않았어요`,`Didn’t use ${u[1]}`)}
+ const w=LR_WHY[j.why]||['목표와 달라요','Didn’t match the goal'];return lrBoth(w[0],w[1])}
+// one mission as a report item; g = the child's answer (a predicted output, a picked code) or what went wrong,
+// right = the output a prediction should have picked
+function lrItem(m,g,right){if(!m)return;const k=LR_KIND[m.kind]||LR_KIND.tiles,eg=['tiles','type','make'].includes(m.kind)||m.job||m.rb;
+ const con=w=>{const W=WORLDS[Math.max(1,w||1)-1];return String(W?W.concept:'|').split('|')},tt=String(m.title||'').split('|'),ref=lrCode(m.solution);let id=m.id,q,a,tip=m.learn;
+ if(m.rb==='robot'){const it=RB.MENU[m.item],nm=String(it?it.name:'|').split('|'),loop=/^\s*for\b/m.test(m.solution||'');id='robot:'+(m.fix?'fix':m.smart||(loop?'for':'recipe'));
+  q=m.fix?lrBoth('버거 로봇 버그 잡기: 버그가 몰래 바꾼 코드 한 줄 고치기','Burger robot debugging: fix the one line a bug changed')
+   :m.smart==='if'?lrBoth('버거 로봇 코딩: if로 주문을 보고 맞는 버거 만들기','Burger robot code: read the order with if and make the right burger')
+   :m.smart==='list'?lrBoth('버거 로봇 코딩: for로 주문표 리스트의 재료를 하나씩 올리기','Burger robot code: loop through the order list, adding each layer')
+   :lrBoth(`버거 로봇 코딩: ${nm[0]} 레시피 넣기${loop?' (for 반복)':''}`,`Burger robot code: the ${nm[1]||nm[0]} recipe${loop?' (with a for loop)':''}`);
+  if(m.fix)tip='실행해 보고, 만든 버거와 주문이 다른 줄을 찾아 고쳐요.|Run it, find the line where the burger and the order differ, and fix it.'}
+ else if(m.rb==='lesson')q=lrBoth(`코치 수업 ‘${tt[0]}’: ${k[0]}`,`Coach lesson “${tt[1]||tt[0]}”: ${k[1]}`);
+ else if(m.job){const t=JOBS.T.find(x=>x.id===m.job),c=con(t&&t.need);id='job:'+m.job;q=lrBoth(`${c[0]} · 마을 부탁 ‘${tt[0]}’: ${k[0]}`,`${c[1]} · village request “${tt[1]||tt[0]}”: ${k[1]}`)}
+ else{const c=con(m.world),ask=m.ask&&String(m.ask).split('|');
+  q=m.kind==='predict'?lrBoth(`${ask?ask[0]:'화면에 무엇이 나올까요?'} ${lrCode(m.code)}`,`${ask?ask[1]||ask[0]:'What will it print?'} ${lrCode(m.code)}`)
+   :m.kind==='choose'&&ask?lrBoth(`${c[0]}: ${ask[0]}`,`${c[1]}: ${ask[1]||ask[0]}`):lrBoth(`${c[0]} 미션 ‘${tt[0]}’: ${k[0]}`,`${c[1]} mission “${tt[1]||tt[0]}”: ${k[1]}`)}
+ if(m.kind==='predict'&&right!=null)a=lrBoth(lrOut(right),lrOut(right));
+ else if(m.kind==='fix'&&m.bug&&m.solution){const l=String(m.solution).split('\n')[m.bug-1].trim();a=lrBoth(`${m.bug}번째 줄: ${l}`,`Line ${m.bug}: ${l}`)}
+ else a=eg?lrBoth('예: '+ref,'e.g. '+ref):lrBoth(ref,ref);
+ return {id,q,a,g,tip:lrTip(tip,!!m.rb)}}
+// one boss-battle question as a report item, grouped by its idea (e.g. 'boss:for', 'boss:class-fix')
+function lrQuiz(q,i){const w=q.world||1,ask=String(q.ask||'').split('|'),code=lrCode(q.code);
+ const opt=x=>q.optKind==='code'?lrBoth(lrCode(x),lrCode(x)):q.optKind==='text'||x===QUIZ.EMPTY?lrTx(x):lrBoth(lrOut(x),lrOut(x));
+ return {id:'boss:'+LR_W[w-1]+(q.kind==='fix'?'-fix':''),q:lrBoth(`${ask[0]} ${code}`,`${ask[1]||ask[0]} ${code}`),a:opt(q.options[q.answer]),g:i===q.answer?undefined:opt(q.options[i]),tip:lrTip(q.why)}}
 const LR_SK={seq:['명령을 순서대로 내리기 (순차 실행)','Giving commands in order (sequencing)'],print:['글자와 계산 결과 보여 주기 (print 출력)','Showing words and math answers (print)'],
  var:['이름 붙은 상자에 값 담기 (변수)','Keeping values in named boxes (variables)'],for:['정한 횟수만큼 반복하기 (for 반복문)','Repeating steps a set number of times (for loops)'],
  if:['조건에 따라 다르게 하기 (if·elif·else 조건문)','Doing different things by condition (if, elif, else)'],while:['조건이 맞는 동안 반복하기 (while 반복문)','Repeating while something is true (while loops)'],

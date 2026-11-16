@@ -28,23 +28,34 @@ const L=(ko,en)=>LANG==='en'?en:ko;
 //   page is visible and the player touched or typed in the last 2 minutes.
 // · sum: the game's own summary of skills, built by the function passed to LR.set() (see _src/report/SPEC.md).
 // · when: the day each skill first reached "mastered" ('' = before the record started).
-// · sk: right/wrong counts per skill, from coachAnswer(ok,skillId).
+// · sk: right/wrong counts per skill, from coachAnswer(ok,skillId); skw: the same per week (Monday's date, 12 weeks).
+// · mx: kinds of questions the child got wrong (up to 40), from coachAnswer(ok,skillId,item) with
+//   item={id,q:[ko,en],a:[ko,en],g?:[ko,en],tip?:[ko,en]}: the latest example, the right answer, the child's answer,
+//   how many misses, and how many right answers in a row since the last miss (so the report can say "fixed now").
 // A game's reset must call LR.forget() so the report forgets only that game; LR.resume() starts a fresh record.
 const LR=(()=>{const f=(location.pathname.split('/').pop()||'').replace(/\.html$/,'');
  const KEY={math_aquarium:'mathAquarium.learn',science_guardians:'scienceGuardians.learn',music_academy:'musicAcademy.learn',chess_knights:'chessKnights.learn',detective_game:'little-detective-learn',marble_rush_3d:'marbleRush.learn',coding_island:'pythonIsland.learn',python_island:'pythonIsland.learn'}[f];
- const day=()=>new Date().toLocaleDateString('en-CA');let R=null,fn=null,off=!KEY,dirty=false,last=0;
+ const day=()=>new Date().toLocaleDateString('en-CA'),week=(n=0)=>{const d=new Date();d.setDate(d.getDate()-(d.getDay()+6)%7-7*n);return d.toLocaleDateString('en-CA')};
+ const two=x=>Array.isArray(x)?x.slice(0,2).map(v=>String(v==null?'':v).slice(0,140)):undefined;let R=null,fn=null,off=!KEY,dirty=false,last=0;
  const load=()=>{if(R)return R;try{R=JSON.parse(localStorage.getItem(KEY)||'null')}catch(e){}if(!R||R.v!==1)R={v:1,days:{},when:{}};return R};
  const today=()=>{const r=load(),d=day();return r.days[d]||(r.days[d]={s:0,r:0,w:0})};
  const save=()=>{if(off)return;const r=load();
   if(fn){try{const s=fn();if(s){const first=!r.sum,d=day();r.sum=s;(s.areas||[]).forEach(a=>(a.skills||[]).forEach(k=>{if(k.st===2&&r.when[k.id]==null)r.when[k.id]=first?'':d}))}}catch(e){}}
   const ks=Object.keys(r.days).sort();ks.slice(0,Math.max(0,ks.length-120)).forEach(k=>delete r.days[k]);
+  const old=week(12);for(const k in r.skw||{}){for(const w in r.skw[k])if(w<old)delete r.skw[k][w];if(!Object.keys(r.skw[k]).length)delete r.skw[k]}
   r.at=Date.now();try{localStorage.setItem(KEY,JSON.stringify(r))}catch(e){}dirty=false};
  ['pointerdown','keydown','touchstart','wheel'].forEach(e=>addEventListener(e,()=>{last=Date.now()},{passive:true,capture:true}));
  setInterval(()=>{if(off||document.hidden||Date.now()-last>120000)return;today().s+=10;dirty=true},10000);
  setInterval(()=>{if(dirty)save()},30000);
  addEventListener('pagehide',save);document.addEventListener('visibilitychange',()=>{if(document.hidden&&dirty)save()});
  return {
-  ans(ok,skill){if(off)return;const t=today();ok?t.r++:t.w++;if(skill!=null){const r=load(),sk=r.sk||(r.sk={}),x=sk[skill]||(sk[skill]=[0,0]);x[ok?0:1]++}dirty=true},
+  ans(ok,skill,item){if(off)return;const t=today(),r=load(),i=ok?0:1;ok?t.r++:t.w++;
+   if(skill!=null){const sk=r.sk||(r.sk={});(sk[skill]||(sk[skill]=[0,0]))[i]++;const sw=r.skw||(r.skw={}),o=sw[skill]||(sw[skill]={}),w=week();(o[w]||(o[w]=[0,0]))[i]++}
+   if(item&&item.id!=null){const mx=r.mx||(r.mx={}),id=String(item.id).slice(0,80);let e=mx[id];
+    if(!ok){if(!e)e=mx[id]={s:skill,n:0,ok:0,f:day()};e.n++;e.k=0;e.l=day();e.q=two(item.q);e.a=two(item.a);e.g=two(item.g);e.tip=two(item.tip)||e.tip;
+     const ids=Object.keys(mx);if(ids.length>40)ids.sort((a,b)=>mx[a].l!==mx[b].l?(mx[a].l<mx[b].l?-1:1):mx[a].n-mx[b].n).slice(0,ids.length-40).forEach(x=>delete mx[x])}
+    else if(e){e.ok++;e.k=(e.k||0)+1}}
+   dirty=true},
   set(f){fn=f;setTimeout(save,1500)},save,
   stat(id){const x=(load().sk||{})[id];return x?{r:x[0],w:x[1]}:null},
   forget(){off=true;R=null;try{localStorage.removeItem(KEY)}catch(e){}},
@@ -69,8 +80,9 @@ function coachPop(pose,ko,en,o={}){const now=Date.now();if(!o.force&&now-coachAt
  el.innerHTML=`<img src="images/coach-moon-${pose}.webp" alt="" onerror="this.remove()"><p><b>${L('문 코치','Coach Moon')}</b>${L(ko,en)}</p>`;
  el.classList.remove('show');void el.offsetWidth;el.classList.add('show');clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove('show'),o.ms||4500);return true}
 // call with every final answer: praise runs of right answers, and help after two misses in a row.
-// The optional skill id (one of the skill ids in the game's LR summary) counts the answer for that skill in the report.
-function coachAnswer(ok,skill){try{LR.ans(ok,skill)}catch(e){}
+// The optional skill id (one of the skill ids in the game's LR summary) counts the answer for that skill in the report,
+// and the optional item (see LR above) lets the report list the kinds of questions the child often gets wrong.
+function coachAnswer(ok,skill,item){try{LR.ans(ok,skill,item)}catch(e){}
  if(ok){coachRun++;coachMiss=0;if(![3,5,10,15,20,30].includes(coachRun))return;const n=coachRun,t=coachPick([[`${n}번 연속 성공! 집중력이 대단해요 🌙`,`${n} in a row! Amazing focus 🌙`],[`와, ${n}번 연속이에요! 문 코치가 박수 쳐요 👏`,`Wow, ${n} in a row! Coach Moon is clapping 👏`],[`${n}번 연속! 오늘 머리가 반짝반짝해요 ✨`,`${n} straight! Your brain is sparkling today ✨`]]);coachPop('clap',t[0],t[1],{gap:20000});return}
  coachRun=0;coachMiss++;if(coachMiss!==2)return;const nm=coachEsc(coachNm()),t=coachPick([['괜찮아요! 틀리면서 배우는 거예요. 천천히 다시 봐요 🌙','That’s okay! Mistakes help us learn. Take another look 🌙'],[nm?`${nm}, 할 수 있어요! 문 코치가 응원해요 🌙`:'할 수 있어요! 문 코치가 응원해요 🌙',nm?`You can do it, ${nm}! Coach Moon is cheering 🌙`:'You can do it! Coach Moon is cheering 🌙'],['실수는 배움의 친구예요. 한 번 더 해 봐요!','Mistakes are friends of learning. One more try!']]);coachPop('go',t[0],t[1],{gap:30000})}
 // Once a day per game he says hello, a few minutes in he shares a tip, and after 20 minutes he suggests a little rest.
@@ -736,6 +748,67 @@ button.setrow{flex-wrap:nowrap}
 .vc .iimg,.vc .isvg{width:34px;height:34px}
 .cic .ei{width:56px;height:56px;border-radius:14px;object-fit:cover}
 .poster .cic .ei{width:120px;height:120px;border-radius:20px}
+
+/* gentler answers in quizzes and key tasks: a tried answer fades (no red shake), the right one glows, help is one tap away */
+.opt.tried{opacity:.5;background:#f4f1fb;box-shadow:0 2px 0 #e4ddf8;transform:none}
+.opt.right.glow{animation:optglow 1s 3}
+@keyframes optglow{50%{box-shadow:0 4px 0 #5fc98a,0 0 0 5px #9fe8b9}}
+.qhelp,.kt-help{display:flex;justify-content:center;margin-top:10px}
+.kt-help{margin:4px 0 0}
+.kt-fb{min-height:24px;line-height:1.4}
+.pk.tried{background:linear-gradient(180deg,#fff,#ffe3ee)!important}
+.pk.b.tried{background:#a05c8a!important}
+.qdots i.nw{background:#ff8fd1}
+
+/* note town: note friends live on the staff; pressing the right key gives each one its voice */
+.nr{background:rgba(255,255,255,.96);border-radius:24px;padding:10px 12px 12px;box-shadow:var(--shadow);position:relative;max-width:680px;margin:0 auto}
+.nr .qdots{margin:2px 0 6px}.nr .qdots i{background:#e4dcff}.nr .qdots i.cur{background:#7b5cff}
+.nr .qdots i.ok{background:#3ee07a}.nr .qdots i.half{background:#ffd23f}.nr .qdots i.nw{background:#ff8fd1}
+.nr-card{position:relative;background:#fffdf7;border-radius:18px;box-shadow:inset 0 0 0 2px #f0e6cc;padding:4px 6px 0;display:flex;justify-content:center}
+.nr-card .nr-svg{width:100%;display:flex;justify-content:center}
+.nr-card svg{display:block;width:100%;height:auto;max-height:min(200px,25vh)}
+.nr-tag{position:absolute;left:10px;top:8px;z-index:1;font-size:12.5px;font-weight:900;padding:2px 10px;border-radius:99px;background:#f1edff;color:var(--brand-d)}
+.nr-tag:empty{display:none}
+.nr-tag.t3{background:#ffeef6;color:#b8296a}.nr-tag.t4{background:#fff3c4;color:#7a5200}.nr-tag.tn{background:#ffe5f0;color:#c92a6f}
+.nr-msg{min-height:46px;margin:6px 2px 2px;text-align:center;font-weight:800;font-size:16px;line-height:1.4;color:var(--ink)}
+.nr-msg.help{color:#5636d6}
+.nr-ctl{display:flex;justify-content:center;align-items:center;gap:8px;flex-wrap:wrap;min-height:50px;margin:4px 0 8px}
+.nr-kbd{height:min(170px,24vh);min-height:120px;margin:0 -6px}
+.nr-kbd .pk.home{background:var(--nc)!important;transition:background .1s}
+.nr-kbd .pk.w.glow{background:linear-gradient(180deg,#fff,#ffe680)}
+.nr-fly{position:absolute;bottom:100%;z-index:4;font-weight:900;font-size:18px;white-space:nowrap;pointer-events:none;transform:translateX(-50%);animation:nrFly 1s forwards;text-shadow:0 1px 0 #fff}
+@keyframes nrFly{0%{opacity:0;transform:translate(-50%,8px)}25%{opacity:1}100%{opacity:0;transform:translate(-50%,-28px)}}
+.nrs .nrn{transform-box:fill-box;transform-origin:50% 60%}
+.nrs .nrn .mo{opacity:0}.nrs .nrn.sing .mo{opacity:1}
+.nrs .nrn.sing{animation:nrSing .6s}
+.nrs .nrn.pop{animation:nrIn .5s cubic-bezier(.2,1.5,.4,1)}
+@keyframes nrSing{35%{transform:translateY(-5px) scale(1.12)}}
+@keyframes nrIn{from{opacity:0;transform:translateY(-12px)}}
+.nr .sn.lit ellipse,.nr .sn.lit line{fill:#ff5fa2;stroke:#ff5fa2}
+@media (max-height:700px){.nr-card svg{max-height:22vh}.nr-kbd{height:22vh;min-height:110px}.nr-msg{font-size:15px;min-height:40px}.nr .tline{min-height:40px}}
+/* note town page: the staff with every friend met so far, and one chip per note */
+.nrhub .card{margin-bottom:10px}
+.nrhub .nr-card{margin:4px 0 8px}
+.nr-legend{display:flex;flex-wrap:wrap;gap:6px 10px;justify-content:center;font-size:13px;font-weight:800;color:var(--muted)}
+.nr-chips{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px;margin-top:10px}
+@media (max-width:480px){.nr-chips{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.nr-chip{border:0;border-radius:14px;min-height:62px;padding:4px 2px;background:#f4f1fb;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;box-shadow:0 3px 0 #e1d8fb;color:var(--ink)}
+.nr-chip span{font-size:16px;line-height:1.2}.nr-chip b{font-size:16px;line-height:1.2}.nr-chip small{font-size:12px;font-weight:800;color:var(--muted);line-height:1.2;text-align:center}
+.nr-chip b:empty{display:none}
+.nr-chip.s0{background:#fbfaff;color:#a49cc4;box-shadow:inset 0 0 0 2px #e6e0f7}
+.nr-chip.s1{background:#effbf3;box-shadow:0 3px 0 #bfe9cf}
+.nr-chip.s3{background:#fff0f6;box-shadow:0 3px 0 #ffc6df}
+.nr-chip.s4{background:linear-gradient(180deg,#fff8d8,#ffe58f);box-shadow:0 3px 0 #f0c24a}
+.nr-next{margin:10px 0 0;padding:10px 12px;border-radius:14px;background:#f6f2ff;font-weight:800;font-size:14.5px;line-height:1.45;text-align:center}
+.nrban{display:flex;align-items:center;gap:12px;width:100%;border:0;border-radius:22px;padding:10px 14px;background:linear-gradient(135deg,#fffaf0,#ffe6f2);box-shadow:var(--shadow);text-align:left;color:var(--ink)}
+.nrban .ic{font-size:34px;line-height:1}.nrban .ct{flex:1;min-width:0;display:flex;flex-direction:column}
+.nrban b{font-size:17px;font-weight:900}.nrban small{font-size:13px;font-weight:800;color:var(--muted)}
+.nrban .go{font-size:20px;width:44px;height:44px;border-radius:50%;background:#fff;display:grid;place-items:center;box-shadow:0 2px 6px rgba(80,40,200,.2)}
+.nrgo{margin:10px auto 0;display:flex}
+.nr-rhead{font-size:21px;font-weight:900;color:var(--brand-d);margin:4px 0 6px;line-height:1.3}
+.nr-grow{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin:6px 0}
+.nr-grow span{background:#f6f2ff;border-radius:99px;padding:4px 11px;font-weight:900;font-size:14px}
+.result .nr-card{margin:8px 0}
 /*COACH:BEGIN*/
 /* Coach Moon: one line inside result windows (.mcoach) and a corner bubble at good moments (#coachPop, never takes taps) */
 .mcoach{display:flex;align-items:flex-end;gap:8px;margin:10px auto 6px;max-width:330px;text-align:left}
@@ -775,6 +848,7 @@ button.setrow{flex-wrap:nowrap}
  <section class="view hidden" id="v-stickers"></section>
  <section class="view hidden" id="v-shop"></section>
  <section class="view hidden" id="v-trophies"></section>
+ <section class="view hidden" id="v-notes"></section>
 </main>
 <div id="modalRoot"></div>
 <div class="toasts" id="toasts" aria-live="polite"></div>
@@ -1093,7 +1167,7 @@ const LESSONS=[
   {t:'맨 앞의 높은음자리표는 둘째 줄이 “솔”이라고 알려 줘요. 음표가 위로 갈수록 높은 소리예요.|The treble clef at the front marks the second line as Sol (G). The higher a note sits, the higher it sounds.',v:{staff:{notes:[{m:60},{m:64},{m:67},{m:72}],labels:true}},p:{seq:{notes:'C4/1 E4/1 G4/1 C5/1',bpm:80}}}],
   a:{type:'quiz',bank:'staffbasics',count:6}},
  {id:'e2',u:'E',t:'도·레·미 찾기|Find Do, Re, Mi',intro:[
-  {t:'“도”는 오선 아래 짧은 덧줄 위에 있어요. 레는 그 바로 위, 미는 첫째 줄!|Do (C) sits on a little ledger line below the staff. Re is just above it, and Mi is on the first line!',v:{staff:{notes:[{m:60},{m:62},{m:64}],labels:true}},p:{seq:{notes:'C4/1 D4/1 E4/1',bpm:80}}}],
+  {t:'“가온 도”는 오선 아래 짧은 덧줄 위에 있어요. 레는 그 바로 위, 미는 첫째 줄!|Middle C (Do) sits on a little ledger line below the staff. Re (D) is just above it, and Mi (E) is on the first line!',v:{staff:{notes:[{m:60},{m:62},{m:64}],labels:true}},p:{seq:{notes:'C4/1 D4/1 E4/1',bpm:80}}}],
   a:{type:'notes',range:[60,64],count:8}},
  {id:'e3',u:'E',t:'도부터 솔까지|Do up to Sol',intro:[
   {t:'줄–칸–줄–칸, 한 칸씩 올라갈 때마다 한 음씩 높아져요.|Line, space, line, space: each step up is the next note up.',v:{staff:{notes:[{m:60},{m:62},{m:64},{m:65},{m:67}],labels:true}},p:{seq:{notes:'C4/.5 D4/.5 E4/.5 F4/.5 G4/1',bpm:80}}}],
@@ -1242,7 +1316,7 @@ const QUIZ={
   mc('오선은 줄이 몇 개일까요?|How many lines does a staff have?','5개|5','4개|4|3개|3|6개|6'.split('|').reduce((a,x,i,arr)=>i%2?a:[...a,x+'|'+arr[i+1]],[]),{art:{staff:{notes:[]}}}),
   mc('오선의 줄은 어디부터 세나요?|Where do you start counting staff lines?','맨 아래 줄부터|From the bottom line',['맨 위 줄부터|From the top line','가운데 줄부터|From the middle line','아무 데서나|From anywhere']),
   mc('높은음자리표가 감싸고 있는 둘째 줄은 무슨 음일까요?|The treble clef curls around the second line. Which note is it?','솔(G)|Sol (G)',['도(C)|Do (C)','미(E)|Mi (E)','라(A)|La (A)'],{art:{sym:'clef'}}),
-  mc('가운데 도(C4)는 어디에 그릴까요?|Where is middle C (C4) written?','오선 아래 짧은 덧줄 위|On a short ledger line below the staff',['맨 위 줄 위|On the top line','셋째 칸|In the third space','오선 밖 아무 데나|Anywhere off the staff'],{art:{staff:{notes:[{m:60}]}}}),
+  mc('가온 도(C4)는 어디에 그릴까요?|Where is middle C (C4) written?','오선 아래 짧은 덧줄 위|On a short ledger line below the staff',['맨 위 줄 위|On the top line','셋째 칸|In the third space','오선 밖 아무 데나|Anywhere off the staff'],{art:{staff:{notes:[{m:60}]}}}),
   mc('오선의 첫째 줄(맨 아래 줄)에 있는 음은?|Which note sits on the first (bottom) line?','미(E)|Mi (E)',['도(C)|Do (C)','솔(G)|Sol (G)','시(B)|Ti (B)'],{art:{staff:{notes:[{m:64}]}}}),
   mc('음표가 오선의 위쪽에 있을수록 소리는?|The higher a note sits on the staff, the sound is…','더 높아요|Higher',['더 낮아요|Lower','더 커요|Louder','더 길어요|Longer']),
   mc('이 음의 이름은?|What is this note?','솔(G)|Sol (G)',['파(F)|Fa (F)','라(A)|La (A)','미(E)|Mi (E)'],{art:{staff:{notes:[{m:67}]}}}),
@@ -2124,18 +2198,50 @@ function playClip(c,b){const t=AC?AC.currentTime+.08:0;
  return 0}
 // question generators for listening activities
 const LISTEN_GEN={
- hl(){let a=52+rnd(30),b2;do{b2=52+rnd(30)}while(Math.abs(b2-a)<3);return {q:'두 소리를 들어 봐요. 어느 소리가 더 높을까요?|Listen to the two sounds. Which one is higher?',a:a>b2?'첫 번째 소리|The first one':'두 번째 소리|The second one',o:[a>b2?'두 번째 소리|The second one':'첫 번째 소리|The first one'],clip:{pair:[a,b2]},art:'🎵❓🎵',keep:true}},
+ hl(){let a=52+rnd(30),b2;do{b2=52+rnd(30)}while(Math.abs(b2-a)<3);return {q:'두 소리를 들어 봐요. 어느 소리가 더 높을까요?|Listen to the two sounds. Which one is higher?',a:a>b2?'첫 번째 소리|The first one':'두 번째 소리|The second one',o:[a>b2?'두 번째 소리|The second one':'첫 번째 소리|The first one'],clip:{pair:[a,b2]},art:'🎵❓🎵',keep:true,id:'pitch:higher',hint:'높은 소리는 새소리처럼 가늘고, 낮은 소리는 곰 소리처럼 굵어요.|High sounds are thin like a bird’s tweet; low sounds are deep like a bear’s growl.'}},
  contour(){const kind=pick(['up','down','same']),s=55+rnd(14),st=2+rnd(3),ms=kind==='up'?[s,s+st,s+2*st]:kind==='down'?[s+2*st,s+st,s]:[s,s,s];
   const A={up:'⬆️ 올라가요|⬆️ Going up',down:'⬇️ 내려가요|⬇️ Going down',same:'➡️ 그대로예요|➡️ Staying the same'};
-  return {q:'소리 세 개가 어떻게 움직일까요?|How do the three sounds move?',a:A[kind],o:Object.values(A).filter(x=>x!==A[kind]),clip:{seq:ms.map(m=>`${PC[m%12]}${Math.floor(m/12)-1}/1`).join(' '),bpm:110},art:'🎶',keep:true}},
+  return {q:'소리 세 개가 어떻게 움직일까요?|How do the three sounds move?',a:A[kind],o:Object.values(A).filter(x=>x!==A[kind]),clip:{seq:ms.map(m=>`${PC[m%12]}${Math.floor(m/12)-1}/1`).join(' '),bpm:110},art:'🎶',keep:true,id:'pitch:contour-'+kind,hint:'세 소리를 하나씩 따라 흥얼거려 보면 올라가는지 내려가는지 느낄 수 있어요.|Hum the three sounds one by one to feel whether they climb or fall.'}},
  family(){const opts={string:'🎻 현악기(줄)|🎻 Strings',wind:'🎺 관악기(불기)|🎺 Wind',perc:'🥁 타악기(두드리기)|🥁 Percussion',key:'🎹 건반악기|🎹 Keyboard'};
   const v=pick([['pluck','string'],['bow','string'],['flute','wind'],['reed','wind'],['brass','wind'],['mallet','perc'],['drumkit','perc']]);
-  return {q:'들어 보세요! 어떤 가족의 악기일까요?|Listen! Which family does this instrument belong to?',a:opts[v[1]],o:Object.values(opts).filter(x=>x!==opts[v[1]]),clip:v[0]==='drumkit'?{drums:['kick','snare','hat','snare']}:{voice:v[0]},art:'👂',keep:true}},
+  return {q:'들어 보세요! 어떤 가족의 악기일까요?|Listen! Which family does this instrument belong to?',a:opts[v[1]],o:Object.values(opts).filter(x=>x!==opts[v[1]]),clip:v[0]==='drumkit'?{drums:['kick','snare','hat','snare']}:{voice:v[0]},art:'👂',keep:true,id:'listen:family-'+v[1],hint:'줄을 뜯거나 켜는 소리인지, 부는 소리인지, 두드리는 소리인지 떠올려 봐요.|Is it a plucked or bowed string, something blown, or something hit?'}},
  steps(){const half=Math.random()<.5,cands=[[64,65],[71,72],[60,61],[65,66],[67,68]].concat([[60,62],[62,64],[65,67],[67,69],[69,71]]);const pair=pick(cands.filter(p=>(p[1]-p[0]===1)===half));
-  return {q:'빛나는 두 건반 사이는 반음일까요, 온음일까요?|Are the two glowing keys a half step or a whole step apart?',a:half?'반음|Half step':'온음|Whole step',o:[half?'온음|Whole step':'반음|Half step'],clip:{pair},art:{kbd:{from:60,to:72,hi:{[pair[0]]:'#ffd23f',[pair[1]]:'#ffd23f'}}},keep:true,why:'바로 옆 건반은 반음, 하나 건너뛰면 온음이에요. 검은 건반도 세어요!|The very next key is a half step; skipping one is a whole step. Count the black keys too!'}},
- majmin(){const i=rnd(MAJMIN_TUNES.length),maj=Math.random()<.5;return {q:'들어 보세요! 밝은 장조일까요, 슬픈 단조일까요?|Listen! Bright major or sad minor?',a:maj?'😊 장조(밝은 느낌)|😊 Major (bright)':'😢 단조(슬픈 느낌)|😢 Minor (sad)',o:[maj?'😢 단조(슬픈 느낌)|😢 Minor (sad)':'😊 장조(밝은 느낌)|😊 Major (bright)'],clip:{seq:MAJMIN_TUNES[i][maj?0:1],bpm:110},art:'🎶',keep:true}},
- chordmm(){const root=pick([60,62,65,67,57]),maj=Math.random()<.5;return {q:'이 화음은 밝은 장화음일까요, 슬픈 단화음일까요?|Is this chord a bright major chord or a sad minor chord?',a:maj?'😊 밝은 장화음|😊 Bright major chord':'😢 슬픈 단화음|😢 Sad minor chord',o:[maj?'😢 슬픈 단화음|😢 Sad minor chord':'😊 밝은 장화음|😊 Bright major chord'],clip:{chord:[root,root+(maj?4:3),root+7]},art:'🎹',keep:true}},
+  return {q:'빛나는 두 건반 사이는 반음일까요, 온음일까요?|Are the two glowing keys a half step or a whole step apart?',a:half?'반음|Half step':'온음|Whole step',o:[half?'온음|Whole step':'반음|Half step'],clip:{pair},art:{kbd:{from:60,to:72,hi:{[pair[0]]:'#ffd23f',[pair[1]]:'#ffd23f'}}},keep:true,id:'steps:'+(half?'half':'whole'),why:'바로 옆 건반은 반음, 하나 건너뛰면 온음이에요. 검은 건반도 세어요!|The very next key is a half step; skipping one is a whole step. Count the black keys too!'}},
+ majmin(){const i=rnd(MAJMIN_TUNES.length),maj=Math.random()<.5;return {q:'들어 보세요! 밝은 장조일까요, 슬픈 단조일까요?|Listen! Bright major or sad minor?',a:maj?'😊 장조(밝은 느낌)|😊 Major (bright)':'😢 단조(슬픈 느낌)|😢 Minor (sad)',o:[maj?'😢 단조(슬픈 느낌)|😢 Minor (sad)':'😊 장조(밝은 느낌)|😊 Major (bright)'],clip:{seq:MAJMIN_TUNES[i][maj?0:1],bpm:110},art:'🎶',keep:true,id:'scale:'+(maj?'major':'minor'),hint:'밝고 신나는 느낌이면 장조, 슬프거나 어두운 느낌이면 단조예요.|Bright and cheerful is major; sad or dark is minor.'}},
+ chordmm(){const root=pick([60,62,65,67,57]),maj=Math.random()<.5;return {q:'이 화음은 밝은 장화음일까요, 슬픈 단화음일까요?|Is this chord a bright major chord or a sad minor chord?',a:maj?'😊 밝은 장화음|😊 Bright major chord':'😢 슬픈 단화음|😢 Sad minor chord',o:[maj?'😢 슬픈 단화음|😢 Sad minor chord':'😊 밝은 장화음|😊 Bright major chord'],clip:{chord:[root,root+(maj?4:3),root+7]},art:'🎹',keep:true,id:'chord:'+(maj?'major':'minor'),hint:'밝게 울리면 장화음, 슬프게 울리면 단화음이에요.|A bright sound is a major chord; a sad sound is a minor chord.'}},
 };
+// a first miss gives a hint (and, with four choices, takes away one more wrong one); a second miss, or "Show me", shows the
+// answer and explains it. Nothing is ever taken away and a tried answer only fades. The report gets the question as an item.
+const BANK_HINT={
+ values:'음표 머리가 속이 찼는지 비었는지, 기둥과 꼬리가 있는지 살펴봐요.|Look closely: is the head filled in or hollow? Is there a stem, or a flag?',
+ rests:'쉼표의 모양을 잘 보고, 길이가 같은 음표를 떠올려 봐요.|Look at the rest’s shape and think of the note with the same length.',
+ staffbasics:'오선의 줄은 맨 아래부터 세요. 가온 도는 오선 아래 덧줄에 있어요.|Count the lines from the bottom. Middle C sits on a ledger line below the staff.',
+ sig:'박자표의 위 숫자는 한 마디에 박이 몇 개인지 알려 줘요.|The top number of a time signature tells how many beats are in each bar.',
+ drumkit:'드럼 세트를 떠올려 봐요: 발로 밟는 큰 북, 스틱으로 치는 북, 심벌즈.|Picture a drum kit: the big drum you play with your foot, the drums you hit with sticks, and the cymbals.',
+ family:'소리 내는 방법을 생각해 봐요: 줄을 쓰나요, 숨을 부나요, 두드리나요?|Think about how it makes its sound: strings, blowing, or hitting?',
+ korean:'악기 모양과 연주하는 방법을 떠올려 봐요.|Think about the instrument’s shape and how it is played.',
+ orch:'오케스트라 무대를 떠올려 봐요. 맨 앞에는 누가 있고, 어떤 악기가 가장 많을까요?|Picture an orchestra on stage. Who stands at the front, and which instruments are there the most of?',
+ dyn:'p는 피아노(여리게), f는 포르테(세게)의 첫 글자예요.|p is short for piano (soft) and f for forte (loud).',
+ tempo:'빠르기말은 이탈리아 말이에요. 알레그로는 달리듯, 아다지오는 아주 천천히!|Tempo words are Italian: Allegro runs along, Adagio goes slowly!',
+ symbols:'기호 모양을 잘 봐요. 점 두 개와 세로줄은 “돌아가요”, ♯은 “올려요”, ♭은 “내려요”.|Look at the shape: two dots with bar lines mean “go back”, ♯ means “raise”, ♭ means “lower”.',
+ steps:'두 건반 사이를 세어 봐요. 검은 건반도 세요. 바로 옆 건반이면 반음이에요.|Count the keys in between, black ones too. The very next key is a half step.',
+ keys:'장조는 대개 밝고, 단조는 대개 슬프거나 신비로운 느낌이에요.|Major usually sounds bright; minor often sounds sad or mysterious.',
+ voice:'목을 편하고 건강하게 지키는 방법을 떠올려 봐요.|Think about what keeps your voice comfortable and healthy.',
+ chords:'화음은 여러 음을 함께 누르는 거예요. 하나 건너 하나씩 쌓아요.|A chord is several notes played together, stacked by skipping one key each time.'};
+// what a picture or sound in a question shows, in words, so a parent can read the question without the game
+const SYM_NAME={w:'온음표|whole note',h:'2분음표|half note',q:'4분음표|quarter note',e:'8분음표|eighth note',dh:'점2분음표|dotted half note',dq:'점4분음표|dotted quarter note',s:'16분음표|sixteenth note',
+ wr:'온쉼표|whole rest',hr:'2분쉼표|half rest',qr:'4분쉼표|quarter rest',er:'8분쉼표|eighth rest',clef:'높은음자리표|treble clef',repeat:'도돌이표|repeat sign',final:'끝세로줄|final bar line',bar:'세로줄|bar line',
+ sharp:'올림표 ♯|sharp ♯',flat:'내림표 ♭|flat ♭',natural:'제자리표 ♮|natural sign ♮',fermata:'늘임표|fermata',cresc:'점점 세게 <|crescendo <',decresc:'점점 여리게 >|decrescendo >'};
+function artDesc(a){if(!a||typeof a==='string'||a.emoji)return null;
+ if(a.sym)return pair2(SYM_NAME[a.sym]||`${a.sym} 기호|the sign ${a.sym}`);
+ if(a.staff){const ns=a.staff.notes||[];if(!ns.length)return ['빈 오선','an empty staff'];const i=NR_INFO[nrId(ns[0].m)];return i?[`${i.w[0]} 있는 음표`,`a note ${i.w[1]}`]:['오선 위의 음표','a note on the staff']}
+ if(a.instr){const it=INSTR_BY[a.instr];return it?pair2(it[2]):null}
+ if(a.kbd){const ms=Object.keys(a.kbd.hi||{}).map(Number).sort((x,y)=>x-y);return ms.length?[`건반 그림: ${ms.map(m=>lrNote(m)[0].split(' (')[0]).join('·')}`,`keyboard picture: ${ms.map(m=>lrNote(m)[1].split(' (')[0]).join(' and ')}`]:['건반 그림','a keyboard picture']}
+ return null}
+function quizItem(spec,q,g){const qq=pair2(q.q),d=artDesc(q.art),lis=!!(q.clip||q.listen),cut=s=>s.length>90?s.slice(0,89)+'…':s;
+ const it={id:q.id||`${spec.bank||spec.task||spec.type}:${hashStr(pair2(q.q)[0]+'#'+pair2(q.a)[0]+'#'+JSON.stringify(q.art||''))}`,
+  q:[cut(qq[0]+(d?` (${d[0]})`:lis?' (소리 듣기)':'')),cut(qq[1]+(d?` (${d[1]})`:lis?' (listening)':''))],a:pair2(q.a)};
+ if(g!=null)it.g=g==='show'?['모르겠어요 (알려 줘요)','Not sure (Show me)']:pair2(g);if(q.why)it.tip=pair2(q.why);return it}
 function runQuiz(spec,host,opt){
  const gen=spec.type==='quiz'?()=>QUIZ[spec.bank](spec.set):spec.type==='pitch'?LISTEN_GEN[spec.task]:spec.type==='listen'?LISTEN_GEN.family:spec.type==='steps'?LISTEN_GEN.steps:spec.type==='scale'?LISTEN_GEN.majmin:LISTEN_GEN.chordmm;
  const N=spec.count||6,seen=new Set();let k=0,right=0,stopped=false,bs=bus(1),ended=false;
@@ -2147,82 +2253,146 @@ function runQuiz(spec,host,opt){
  function next(){if(stopped)return;if(k>=N){finish();return}
   let q,tries=0;do{q=gen();tries++}while(seen.has(q.q+q.a)&&tries<12);seen.add(q.q+q.a);
   const opts=shuffle([q.a,...shuffle(q.o.slice()).slice(0,3)]);dots[k].classList.add('cur');
-  const clip=q.clip||q.listen;
+  const clip=q.clip||q.listen,my=k;let miss=0,shown=false,first=null,over=false;
   card.innerHTML=`<div class="qq">${esc(T(q.q))}</div>${artHTML(q.art)}${clip?`<button class="btn ghost small hear" type="button">🔊 ${T('다시 듣기|Play again')}</button>`:''}
-   <div class="opts n${opts.length}">${opts.map((o,i)=>`<button class="opt" type="button" data-i="${i}">${esc(T(o))}</button>`).join('')}</div><div class="qfb"></div>`;
+   <div class="opts n${opts.length}">${opts.map((o,i)=>`<button class="opt" type="button" data-i="${i}">${esc(T(o))}</button>`).join('')}</div><div class="qfb" aria-live="polite"></div>
+   <div class="qhelp"><button class="btn ghost small" type="button" data-show>🤔 ${T('모르겠어요 · 알려 줘요|Not sure? Show me')}</button></div>`;
   card.classList.remove('in');void card.offsetWidth;card.classList.add('in');
-  const hear=()=>{const b=bus(1);playClip(clip,b)};if(clip){card.querySelector('.hear').addEventListener('click',hear);setTimeout(()=>{if(!stopped)hear()},350)}else speak(T(q.q));
-  card.querySelector('.opts').addEventListener('click',e=>{const b=e.target.closest('.opt');if(!b||card.dataset.done===String(k))return;card.dataset.done=String(k);const ok=opts[+b.dataset.i]===q.a;try{LR.ans(ok,lrSkill(spec))}catch(e){}
-   card.querySelectorAll('.opt').forEach(x=>{x.disabled=true;if(opts[+x.dataset.i]===q.a)x.classList.add('right')});
-   dots[k].className=ok?'ok':'no';
-   if(ok){right++;b.classList.add('right');SFX.good();const pr=pick(PRAISE_SHORT);bubble(host,pr);sparkle(b);k++;setTimeout(next,q.why?1500:950);if(q.why)card.querySelector('.qfb').innerHTML=`💡 ${esc(T(q.why))}`;return}
-   b.classList.add('wrong');SFX.pop();bubble(host,pick(ENCOURAGE));
-   card.querySelector('.qfb').innerHTML=`<div>✅ ${esc(T(q.a))}</div>${q.why?`<div>💡 ${esc(T(q.why))}</div>`:''}<button class="btn gold small nx" type="button">${T('다음 ▶|Next ▶')}</button>`;
-   if(q.why)speak(T(q.why));k++;card.querySelector('.nx').addEventListener('click',next);if(opt.contest)setTimeout(()=>{if(card.querySelector('.nx'))next()},1800)})}
+  const fb=card.querySelector('.qfb'),help=card.querySelector('.qhelp'),btns=[...card.querySelectorAll('.opt')],rightBtn=btns.find(b=>opts[+b.dataset.i]===q.a);
+  const hear=()=>{const b=bus(1);playClip(clip,b)};if(clip){card.querySelector('.hear').addEventListener('click',hear);setTimeout(()=>{if(!stopped&&k===my)hear()},350)}else speak(T(q.q));
+  const record=ok=>{try{LR.ans(ok,lrSkill(spec),quizItem(spec,q,ok?null:first))}catch(e){}};
+  const advance=()=>{if(over)return;over=true;k++;next()};
+  // shown: the answer glows with its reason; tapping it (or Next) goes on
+  function show(){if(shown)return;shown=true;if(first==null)first='show';record(false);dots[my].className='no';help.innerHTML='';
+   btns.forEach(x=>{if(x!==rightBtn)x.disabled=true});rightBtn.classList.add('right','glow');
+   fb.innerHTML=`<div>✅ ${esc(T(q.a))}</div>${q.why?`<div>💡 ${esc(T(q.why))}</div>`:''}<button class="btn gold small nx" type="button">${T('다음 ▶|Next ▶')}</button>`;
+   speak(T(q.why||q.a));fb.querySelector('.nx').addEventListener('click',advance);if(opt.contest)setTimeout(()=>{if(k===my)advance()},1800)}
+  help.querySelector('[data-show]').addEventListener('click',()=>{if(!over&&!shown)show()});
+  card.querySelector('.opts').addEventListener('click',e=>{const b=e.target.closest('.opt');if(!b||b.disabled||over||k!==my)return;const pickO=opts[+b.dataset.i];
+   if(pickO===q.a){if(shown){advance();return}
+    over=true;const ok=!miss;record(ok);right+=ok?1:.5;btns.forEach(x=>x.disabled=true);b.classList.add('right');dots[my].className=ok?'ok':'half';help.innerHTML='';
+    SFX.good();bubble(host,ok?pick(PRAISE_SHORT):'잘 찾았어요!|You found it!');sparkle(b);k++;
+    if(q.why){fb.innerHTML=`💡 ${esc(T(q.why))}`;setTimeout(next,1700)}else setTimeout(next,950);return}
+   miss++;if(first==null)first=pickO;b.disabled=true;b.classList.add('tried');
+   const left=btns.filter(x=>!x.disabled&&x!==rightBtn);
+   if(miss>=2||!left.length){show();return}
+   // first miss: a hint, one fewer wrong choice when there were four, and the sound once more
+   if(left.length>=2){const x=pick(left);x.disabled=true;x.classList.add('tried')}
+   const h=q.hint||BANK_HINT[spec.bank]||(clip?'한 번 더 잘 들어 봐요.|Listen once more.':'천천히 다시 읽어 봐요.|Read it again slowly.');
+   fb.innerHTML=`<div>💡 ${esc(T(h))}</div><div class="sub">${T('다른 답을 골라 볼까요?|Want to pick another one?')}</div>`;bubble(host,'괜찮아요, 다시 해 봐요!|That’s okay, try again!');
+   speak(T(h),{onend:()=>{if(clip&&!stopped&&k===my&&!over)setTimeout(hear,250)}})})}
  ACT={stop,sim(acc=.9){for(;k<N;k++)if(Math.random()<acc)right++;finish()}};
  next();
 }
 
 // ================================================================ 5. keyboard tasks: find keys, read the staff, half/whole steps, scales and chords
 function runKeys(spec,host,opt){
- const t=spec.type,N=spec.count||8;let k=0,score=0,stopped=false,miss=0,ended=false,bs=bus(1),cur=null,sel=new Set(),t0=performance.now(),fastN=0;
+ const t=spec.type,N=spec.count||8;let k=0,score=0,stopped=false,miss=0,ended=false,bs=bus(1),cur=null,sel=new Set(),shown=false,first=null,busyQ=false;
  let range=t==='keys'&&spec.task==='findCF'?[48,71]:t==='notes'?[60,Math.max(72,spec.range[1])]:t==='chord'?[60,76]:t==='scale'?((spec.keys||[spec.key||'C'])[0]==='C'?[60,72]:[57,69]):[60,72];
  const labels=!(t==='keys'&&(spec.task==='findCF'||spec.task==='name'));
  host.innerHTML=`<div class="keytask"><div class="tline">${tface(opt.teacher||'mia')}<div class="tbub"></div></div><div class="qdots"></div>
-  <div class="kt-q"></div><div class="kt-art"></div><div class="kt-steps"></div><div class="kt-fb"></div><div class="kt-kbd"></div><div class="kt-ctl"></div></div>`;
- const $q=s=>host.querySelector(s),qEl=$q('.kt-q'),art=$q('.kt-art'),fb=$q('.kt-fb'),stepsEl=$q('.kt-steps'),ctl=$q('.kt-ctl');
+  <div class="kt-q"></div><div class="kt-art"></div><div class="kt-steps"></div><div class="kt-fb" aria-live="polite"></div><div class="kt-help"></div><div class="kt-kbd"></div><div class="kt-ctl"></div></div>`;
+ const $q=s=>host.querySelector(s),qEl=$q('.kt-q'),art=$q('.kt-art'),fb=$q('.kt-fb'),stepsEl=$q('.kt-steps'),ctl=$q('.kt-ctl'),helpEl=$q('.kt-help');
  let kb=buildKeys($q('.kt-kbd'),{from:range[0],to:range[1],labels,blackLabels:false,onDown:(m)=>onKey(m)});
  const stop=()=>{stopped=true;killBus(bs)};
  const total=t==='scale'?(spec.keys||[spec.key||'C']).length*7:N;
  $q('.qdots').innerHTML=Array.from({length:Math.min(total,14)},()=>'<i></i>').join('');const dots=[...host.querySelectorAll('.qdots i')];
  const finish=()=>{if(ended)return;ended=true;stop();const acc=score/total;opt.done({acc,stars:starsOf(acc),right:Math.round(score),n:total,kind:t})};
- const clearMarks=()=>kb.all().forEach(x=>x.classList.remove('glow','hint','sel','good','bad','start'));
+ const clearMarks=()=>kb.all().forEach(x=>x.classList.remove('glow','hint','sel','good','bad','start','tried'));
  const markDot=(i,ok)=>{if(dots[i])dots[i].className=ok===1?'ok':ok>0?'half':'no'};
  const hint=m=>{const el=kb.keyEl(m);if(el)el.classList.add('hint')};
+ const mark=(ms,c='start')=>ms.forEach(m=>{const el=kb.keyEl(m);if(el)el.classList.add(c)});
  const NAME=m=>noteName(m).split(' ')[0];
+ const tried=m=>{const el=kb.keyEl(m);if(el){el.classList.add('tried');setTimeout(()=>el.classList.remove('tried'),900)}};
+ const say=(txt)=>{fb.textContent=txt;speak(txt)};
  // ---- build one question
  const whitesIn=(a,b)=>{const r=[];for(let m=a;m<=b;m++)if(!isBlack(m))r.push(m);return r};
  let last=null,scaleSeq=null,scaleIdx=0,scaleKey=0,scaleKeys=spec.keys||[spec.key||'C'];
- function next(){if(stopped)return;clearMarks();fb.textContent='';stepsEl.innerHTML='';miss=0;sel.clear();ctl.innerHTML='';t0=performance.now();
+ const showBtn=()=>{helpEl.innerHTML=`<button class="btn ghost small" type="button">🤔 ${T('모르겠어요 · 알려 줘요|Not sure? Show me')}</button>`;helpEl.querySelector('button').addEventListener('click',()=>{if(!stopped&&!busyQ)reveal(false)})};
+ function next(){if(stopped)return;clearMarks();fb.textContent='';stepsEl.innerHTML='';miss=0;shown=false;first=null;busyQ=false;sel.clear();ctl.innerHTML='';showBtn();
   if(k>=N&&t!=='scale'){finish();return}
-  if(t==='keys'){if(spec.task==='findCF'){const c=k%2===0?0:5;cur={pc:c};qEl.textContent=c===0?T('“도(C)”를 아무거나 하나 눌러요! (검은 건반 2개의 왼쪽)|Press any Do (C)! (left of the 2 black keys)'):T('“파(F)”를 아무거나 하나 눌러요! (검은 건반 3개의 왼쪽)|Press any Fa (F)! (left of the 3 black keys)')}
-   else if(spec.task==='name'){let m;do{m=pick(whitesIn(60,71))}while(m===last);last=m;cur={pc:m%12};qEl.textContent=T(`“${noteName(m,'solfege')}”${josaKo(noteName(m,'solfege'),'을','를')} 찾아 눌러요!|Find and press ${noteName(m,'letter')} (${SOLF_EN[m%12]})!`)}
-   else{let m;do{m=pick([61,63,66,68,70])}while(m===last);last=m;cur={pc:m%12,exact:m};const up=noteName(m-1).split(' ')[0]+'♯',dn=noteName(m+1).split(' ')[0]+'♭';qEl.textContent=T(`“${up}”(=${dn}) 건반을 눌러요!|Press ${up} (= ${dn})!`)}
+  if(t==='keys'){if(spec.task==='findCF'){const c=k%2===0?0:5;cur={pc:c,want:whitesIn(range[0],range[1]).filter(m=>m%12===c)};qEl.textContent=c===0?T('“도(C)”를 아무거나 하나 눌러요! (검은 건반 2개의 왼쪽)|Press any Do (C)! (left of the 2 black keys)'):T('“파(F)”를 아무거나 하나 눌러요! (검은 건반 3개의 왼쪽)|Press any Fa (F)! (left of the 3 black keys)')}
+   else if(spec.task==='name'){let m;do{m=pick(whitesIn(60,71))}while(m===last);last=m;cur={pc:m%12,want:whitesIn(range[0],range[1]).filter(x=>x%12===m%12)};qEl.textContent=T(`“${noteName(m,'solfege')}”${josaKo(noteName(m,'solfege'),'을','를')} 찾아 눌러요!|Find and press ${noteName(m,'letter')} (${SOLF_EN[m%12]})!`)}
+   else{let m;do{m=pick([61,63,66,68,70])}while(m===last);last=m;cur={pc:m%12,exact:m};const up=noteName(m-1).split(' ')[0]+'♯',dn=noteName(m+1).split(' ')[0]+'♭';cur.up=up;qEl.textContent=T(`“${up}”(=${dn}) 건반을 눌러요!|Press ${up} (= ${dn})!`)}
    art.innerHTML=''}
   else if(t==='notes'){let m;const pool=whitesIn(spec.range[0],spec.range[1]);do{m=pick(pool)}while(m===last&&pool.length>1);last=m;cur={exact:m};
-   qEl.textContent=T('이 음은 어느 건반일까요? 눌러 봐요!|Which key is this note? Press it!');art.innerHTML=staffSVG([{m,d:1}],{w:220})}
-  else if(t==='steps'){const half=Math.random()<.5,up=Math.random()<.65||true;let s;do{s=pick([60,62,64,65,67,69,71].filter(x=>x+(half?1:2)<=72))}while(s===last);last=s;const target=s+(half?1:2);cur={exact:target};
-   const el=kb.keyEl(s);if(el)el.classList.add('start');
+   qEl.textContent=T('이 음은 어느 건반일까요? 눌러 봐요!|Which key is this note? Press it!');art.innerHTML=nrAskSVG(m,{lv:3})}
+  else if(t==='steps'){const half=Math.random()<.5;let s;do{s=pick([60,62,64,65,67,69,71].filter(x=>x+(half?1:2)<=72))}while(s===last);last=s;const target=s+(half?1:2);cur={exact:target,from:s,half};
+   mark([s]);
    qEl.textContent=T(`“${noteName(s,'solfege')}”에서 ${half?'반음':'온음'} 위 건반을 눌러요!|Press the key a ${half?'half':'whole'} step above ${noteName(s,'letter')}!`);art.innerHTML='';play('piano',s,0,.5,.7,bs)}
   else if(t==='chord'){const c=spec.chords[k%spec.chords.length];cur={chord:c,set:new Set(TRIADS[c].ms.map(m=>m%12))};
    qEl.textContent=T(`${T(TRIADS[c].n).replace(/–/g,'·')} 화음을 만들어요! 건반 3개를 눌러요.|Build the ${c} chord (${T(TRIADS[c].n)})! Press 3 keys.`);art.innerHTML=''}
   else if(t==='scale'){const key=scaleKeys[scaleKey],maj=key==='C';const want=maj?[60,72]:[57,69];if(want[0]!==range[0]){range=want;kb=buildKeys($q('.kt-kbd'),{from:range[0],to:range[1],labels,onDown:(m)=>onKey(m)})}scaleSeq=maj?[60,62,64,65,67,69,71,72]:[57,59,60,62,64,65,67,69];scaleIdx=0;
-   const steps=maj?['온|W','온|W','반|H','온|W','온|W','온|W','반|H']:['온|W','반|H','온|W','온|W','반|H','온|W','온|W'];cur={steps};
+   const steps=maj?['온|W','온|W','반|H','온|W','온|W','온|W','반|H']:['온|W','반|H','온|W','온|W','반|H','온|W','온|W'];cur={steps,maj};
    qEl.textContent=maj?T('도부터 시작해서 장음계를 차례로 눌러요! (온-온-반-온-온-온-반)|Starting on Do, press the major scale in order! (W-W-H-W-W-W-H)'):T('라부터 시작해서 단음계를 차례로 눌러요! (온-반-온-온-반-온-온)|Starting on La, press the minor scale in order! (W-H-W-W-H-W-W)');
-   stepsEl.innerHTML=steps.map((s,i)=>`<span class="ss" data-i="${i}">${esc(T(s))}</span>`).join('');const el=kb.keyEl(scaleSeq[0]);if(el)el.classList.add('start','good');play('piano',scaleSeq[0],0,.5,.7,bs);scaleIdx=1;glowNext()}
+   stepsEl.innerHTML=steps.map((s,i)=>`<span class="ss" data-i="${i}">${esc(T(s))}</span>`).join('');const el=kb.keyEl(scaleSeq[0]);if(el)el.classList.add('start','good');play('piano',scaleSeq[0],0,.5,.7,bs);scaleIdx=1}
   const tb=host.querySelector('.tbub');if(tb)tb.classList.remove('show');speak(qEl.textContent)}
- function glowNext(){if(miss>=2)hint(scaleSeq[scaleIdx])}
+ // ---- what the answer is, in keys, and a hint that teaches how to find it
+ const answerKeys=()=>t==='chord'?TRIADS[cur.chord].ms:t==='scale'?[scaleSeq[scaleIdx]]:cur.exact!=null?[cur.exact]:cur.want;
+ // finding a white key from the landmarks: C left of the two black keys, F left of the three
+ const nameHint=pc=>{const i='CDEFGAB'.indexOf(PC[pc]),nm=SOLF[pc],le=PC[pc],j=josaKo(nm,'은','는');
+  if(i===0)return [`${nm}${j} 검은 건반 2개 묶음 바로 왼쪽 흰 건반이에요`,`${le} is the white key just left of a pair of black keys`];
+  if(i===3)return [`${nm}${j} 검은 건반 3개 묶음 바로 왼쪽 흰 건반이에요`,`${le} is the white key just left of a group of three black keys`];
+  if(i<3)return [`${nm}${j} 도에서 오른쪽으로 ${KNUM[i]} 칸이에요. 도는 검은 건반 2개 바로 왼쪽이에요`,`From C, ${le} is ${ENUM[i]} white key${i>1?'s':''} to the right. C is just left of the two black keys`];
+  if(i<6)return [`${nm}${j} 파에서 오른쪽으로 ${KNUM[i-3]} 칸이에요. 파는 검은 건반 3개 바로 왼쪽이에요`,`From F, ${le} is ${ENUM[i-3]} white key${i-3>1?'s':''} to the right. F is just left of the three black keys`];
+  return [`${nm}${j} 높은 도 바로 왼쪽 흰 건반이에요`,`${le} is the white key just left of high C`]};
+ function hintText(){
+  if(t==='keys'&&spec.task==='findCF')return cur.pc===0?T('도는 검은 건반 2개 묶음 바로 왼쪽에 있는 흰 건반이에요. 검은 건반 2개를 먼저 찾아봐요!|C is the white key just left of a pair of black keys. Find two black keys first!'):T('파는 검은 건반 3개 묶음 바로 왼쪽에 있는 흰 건반이에요. 검은 건반 3개를 먼저 찾아봐요!|F is the white key just left of a group of three black keys. Find three black keys first!');
+  if(t==='keys'&&spec.task==='name')return L(...nameHint(cur.pc))+'!';
+  if(t==='keys')return T(`${cur.up}${nrJ(cur.up,'은','는')} ${NAME(cur.exact-1)} 바로 오른쪽 검은 건반이에요!|${cur.up} is the black key just right of ${NAME(cur.exact-1)}!`);
+  if(t==='notes')return '';
+  if(t==='steps')return cur.half?T('반음은 바로 옆 건반이에요. 검은 건반도 한 칸으로 세요!|A half step is the very next key. Black keys count too!'):T('온음은 반음 두 개예요. 바로 옆 건반을 하나 건너뛰어요. 검은 건반도 세요!|A whole step is two half steps: skip the very next key. Black keys count too!');
+  if(t==='chord')return T(`${NAME(TRIADS[cur.chord].ms[0])}부터 하나 건너 하나씩, 흰 건반 세 개를 눌러요!|Start on ${NAME(TRIADS[cur.chord].ms[0])}, then skip one white key each time: three keys!`);
+  if(t==='scale')return T(`다음은 ${T(cur.steps[scaleIdx-1])==='반'?'반음':'온음'} 위예요!|Next is a ${T(cur.steps[scaleIdx-1])==='H'?'half':'whole'} step up!`);
+  return ''}
+ function hintMarks(){
+  if(t==='keys'&&spec.task==='findCF')mark(cur.pc===0?[49,51,61,63]:[54,56,58,66,68,70]);
+  else if(t==='keys'&&spec.task==='name'){const i='CDEFGAB'.indexOf(PC[cur.pc]);mark(i===0?[61,63]:i===3?[66,68,70]:i<3?[60,72]:i<6?[65]:[72])}
+  else if(t==='keys')mark([cur.exact-1]);
+  else if(t==='chord')mark([TRIADS[cur.chord].ms[0]])}
+ // ---- the report: one item per kind of task
+ function item(g){const gi=g==null?undefined:g==='show'?['모르겠어요 (알려 줘요)','Not sure (Show me)']:Array.isArray(g)?[g.map(m=>lrNote(m)[0]).join(' · '),g.map(m=>lrNote(m)[1]).join(', ')]:lrNote(g);let it=null;
+  if(t==='notes')it=nrItem(cur.exact,null);
+  else if(t==='keys'&&spec.task==='findCF')it={id:'keys:find-'+(cur.pc===0?'C':'F'),q:cur.pc===0?['건반에서 도(C) 찾기','Find C (do) on the keyboard']:['건반에서 파(F) 찾기','Find F (fa) on the keyboard'],a:cur.pc===0?['검은 건반 2개 바로 왼쪽 흰 건반','The white key just left of two black keys']:['검은 건반 3개 바로 왼쪽 흰 건반','The white key just left of three black keys']};
+  else if(t==='keys'&&spec.task==='name'){const n=lrNote(cur.pc+60);it={id:'keys:name-'+PC[cur.pc],q:[`이름 없는 건반에서 ${n[0].split(' (')[0]} 찾기`,`Find ${n[1].split(' (')[0]} on a keyboard with no labels`],a:n,tip:nameHint(cur.pc)}}
+  else if(t==='keys')it={id:'keys:black-'+PC[cur.pc].replace('#','s'),q:[`건반에서 ${lrNote(cur.exact)[0].split(' (')[0]} 찾기`,`Find ${lrNote(cur.exact)[1].split(' (')[0]} on the keyboard`],a:lrNote(cur.exact),tip:[`${SOLF[(cur.exact-1)%12]} 바로 오른쪽 검은 건반이에요`,`The black key just right of ${PC[(cur.exact-1)%12]}`]};
+  else if(t==='steps')it={id:'steps:find-'+(cur.half?'half':'whole'),q:[`${lrNote(cur.from)[0].split(' (')[0]}에서 ${cur.half?'반음':'온음'} 위 건반 찾기`,`Find the key a ${cur.half?'half':'whole'} step above ${lrNote(cur.from)[1].split(' (')[0]}`],a:lrNote(cur.exact),tip:cur.half?['반음은 바로 옆 건반이에요 (검은 건반 포함)','A half step is the very next key, black keys included']:['온음은 반음 두 개예요','A whole step is two half steps']};
+  else if(t==='chord')it={id:'chord:'+cur.chord,q:[`${pair2(TRIADS[cur.chord].n)[0]} 화음 누르기`,`Build the ${cur.chord} chord`],a:pair2(TRIADS[cur.chord].n),tip:['맨 아래 음부터 하나 건너 하나씩 세 건반이에요','Three keys: start on the lowest note and skip one key each time']};
+  else if(t==='scale')it={id:'scale:'+(cur.maj?'C-major':'A-minor'),q:cur.maj?['도부터 다장조 음계를 차례로 누르기','Play the C major scale in order, starting on C']:['라부터 가단조 음계를 차례로 누르기','Play the A minor scale in order, starting on A'],a:[`다음 음: ${lrNote(scaleSeq[scaleIdx])[0]}`,`Next note: ${lrNote(scaleSeq[scaleIdx])[1]}`],tip:cur.maj?['온-온-반-온-온-온-반 순서로 올라가요','It climbs whole, whole, half, whole, whole, whole, half']:['온-반-온-온-반-온-온 순서로 올라가요','It climbs whole, half, whole, whole, half, whole, whole']};
+  if(it&&gi)it.g=gi;
+  return it}
  // the report counts a key task as right only when it was found on the first try
- const lrAns=ok=>{try{LR.ans(ok,lrSkill(spec))}catch(e){}};
- function right(val=1){lrAns(val>=1);score+=val;markDot(k,val);SFX.good();const dt=performance.now()-t0;if(dt<1500)fastN++;bubble(host,dt<1500&&t==='notes'?'⚡ '+T('번개 손!|Lightning fast!'):pick(PRAISE_SHORT));k++;setTimeout(next,750)}
- function wrong(m,correct){miss++;SFX.pop();const el=kb.keyEl(m);if(el){el.classList.remove('bad');void el.offsetWidth;el.classList.add('bad');setTimeout(()=>el.classList.remove('bad'),600)}
-  if(miss>=2){lrAns(false);markDot(k,0);fb.textContent='👀 '+T('정답은 반짝이는 건반이에요!|The answer is the sparkly key!');(Array.isArray(correct)?correct:[correct]).forEach(hint);k++;setTimeout(next,1500)}
-  else{fb.textContent=T(pick(ENCOURAGE));bubble(host,pick(ENCOURAGE))}}
- function onKey(m){if(stopped)return;
+ const lrAns=(ok,g)=>{try{LR.ans(ok,lrSkill(spec),item(ok?null:g))}catch(e){}};
+ // a right answer: full marks the first time, half after a hint, none after the answer was shown (but always praised)
+ function right(){const ok=!miss&&!shown,val=ok?1:shown?0:.5;lrAns(ok,first);score+=val;markDot(k,val);SFX.good();busyQ=true;helpEl.innerHTML='';
+  bubble(host,ok?pick(PRAISE_SHORT):'잘했어요! 이렇게 찾는 거예요.|Well done! That’s how you find it.');if(!ok)fb.textContent='👍 '+T('잘했어요! 이렇게 찾는 거예요.|Well done! That’s how you find it.');k++;setTimeout(next,ok?750:1300)}
+ // a miss: the first one teaches a way to find it; the second one, or "Show me", lights the answer for the child to press
+ function wrong(m){miss++;if(first==null)first=m;tried(m);
+  if(miss>=2&&!shown){reveal(true);return}
+  if(shown){fb.textContent=T('반짝이는 건반을 눌러 봐요!|Press the sparkly key!');return}
+  if(t==='notes'){art.innerHTML=nrAskSVG(cur.exact,{lv:3,ghost:m});say(nrWhy(cur.exact,m));return}
+  hintMarks();say(hintText())}
+ function reveal(again){if(shown||busyQ)return;shown=true;if(first==null)first='show';helpEl.innerHTML='';
+  if(t==='chord'){sel.clear();kb.all().forEach(x=>x.classList.remove('sel','bad'))}
+  answerKeys().forEach(hint);
+  if(t==='notes'){art.innerHTML=nrAskSVG(cur.exact,{lab:true,ref:true});say(nrShow(cur.exact,again));return}
+  const h=hintText();say((again?T('괜찮아요! |That’s okay! '):'')+(h?h+' ':'')+(t==='chord'?T('반짝이는 건반 세 개를 눌러 봐요!|Press the three sparkly keys!'):T('반짝이는 건반을 눌러 봐요!|Press the sparkly key!')))}
+ function onKey(m){if(stopped||busyQ)return;
   if(t==='chord'){play('piano',m,0,.6,.7,bs);const el=kb.keyEl(m);if(sel.has(m)){sel.delete(m);el&&el.classList.remove('sel');return}if(sel.size>=3)return;sel.add(m);el&&el.classList.add('sel');
-   if(sel.size===3){const pcs=new Set([...sel].map(x=>x%12)),ok=pcs.size===3&&[...cur.set].every(p=>pcs.has(p));setTimeout(()=>{playChord('piano',[...sel],0,1.2,.55,bs);
-    if(ok){kb.all().forEach(x=>{if(sel.has(+x.dataset.m))x.classList.add('good')});right(miss?0.5:1)}
-    else{miss++;kb.all().forEach(x=>{if(sel.has(+x.dataset.m))x.classList.add('bad')});if(miss>=2){lrAns(false);markDot(k,0);TRIADS[cur.chord].ms.forEach(hint);fb.textContent=T(`정답: ${T(TRIADS[cur.chord].n)}|Answer: ${T(TRIADS[cur.chord].n)}`);k++;setTimeout(next,1800)}
-     else{fb.textContent=T('다시 해 봐요! 하나 건너 하나씩 눌러요.|Try again! Skip one key between each.');setTimeout(()=>{sel.clear();clearMarks()},700)}}},250)}
+   if(sel.size===3){const pcs=new Set([...sel].map(x=>x%12)),ok=pcs.size===3&&[...cur.set].every(p=>pcs.has(p)),picked=[...sel].sort((a,b)=>a-b);busyQ=true;setTimeout(()=>{busyQ=false;if(stopped)return;playChord('piano',picked,0,1.2,.55,bs);
+    if(ok){kb.all().forEach(x=>{if(sel.has(+x.dataset.m))x.classList.add('good')});right()}
+    else{kb.all().forEach(x=>{if(sel.has(+x.dataset.m))x.classList.add('tried')});setTimeout(()=>{sel.clear();kb.all().forEach(x=>x.classList.remove('sel','tried'))},700);wrong(picked)}},250)}
    return}
   if(t==='scale'){play('piano',m,0,.5,.8,bs);const want=scaleSeq[scaleIdx];
-   if(m===want){fb.textContent='';const el=kb.keyEl(m);el&&el.classList.add('good');const s=stepsEl.querySelector(`.ss[data-i="${scaleIdx-1}"]`);if(s)s.classList.add(miss?'half':'ok');lrAns(!miss);score+=miss?.5:1;markDot(k,miss?.5:1);k++;miss=0;scaleIdx++;
-    if(scaleIdx>=scaleSeq.length){SFX.good();bubble(host,pick(PRAISE_SHORT));const b=bus(1);scaleSeq.forEach((x,i)=>play('piano',x,AC?AC.currentTime+.3+i*.22:0,.25,.7,b));scaleKey++;
+   if(m===want){const ok=!miss&&!shown,val=ok?1:shown?0:.5;fb.textContent='';kb.all().forEach(x=>x.classList.remove('hint','tried'));const el=kb.keyEl(m);el&&el.classList.add('good');const s=stepsEl.querySelector(`.ss[data-i="${scaleIdx-1}"]`);if(s)s.classList.add(ok?'ok':'half');lrAns(ok,first);score+=val;markDot(k,val);k++;miss=0;shown=false;first=null;showBtn();scaleIdx++;
+    if(scaleIdx>=scaleSeq.length){busyQ=true;helpEl.innerHTML='';SFX.good();bubble(host,pick(PRAISE_SHORT));const b=bus(1);scaleSeq.forEach((x,i)=>play('piano',x,AC?AC.currentTime+.3+i*.22:0,.25,.7,b));scaleKey++;
      if(scaleKey>=scaleKeys.length)setTimeout(finish,2400);else setTimeout(next,2400)}}
-   else{miss++;SFX.pop();const el=kb.keyEl(m);if(el){el.classList.remove('bad');void el.offsetWidth;el.classList.add('bad');setTimeout(()=>el.classList.remove('bad'),600)}if(miss>=2)hint(want);fb.textContent=T(`다음은 ${T(cur.steps[scaleIdx-1])==='반'||T(cur.steps[scaleIdx-1])==='H'?'반음':'온음'} 위예요!|Next is a ${T(cur.steps[scaleIdx-1])==='H'?'half':'whole'} step up!`)}
+   else{miss++;if(first==null)first=m;tried(m);if(miss>=2||shown){shown=true;hint(want)}fb.textContent=hintText()}
    return}
   play('piano',m,0,.6,.8,bs);
-  const ok=cur.exact!=null?m===cur.exact:m%12===cur.pc;if(ok){const el=kb.keyEl(m);el&&el.classList.add('good');right(miss?.5:1)}else wrong(m,cur.exact!=null?cur.exact:range[0]+((cur.pc-range[0]%12+12)%12))}
+  // reading the staff: a black key is not a wrong answer, just not one of these notes
+  if(t==='notes'&&isBlack(m)){fb.textContent=T('검은 건반이에요. 이 음표들은 모두 흰 건반이에요!|That’s a black key. These notes are all on white keys!');return}
+  const ok=cur.exact!=null?m===cur.exact:m%12===cur.pc;if(ok){const el=kb.keyEl(m);el&&el.classList.add('good');right()}else wrong(m)}
  ACT={stop,sim(acc=.9){score=total*acc;finish()}};
  next();
 }
@@ -2235,6 +2405,7 @@ function runActivity(spec,host,opt){stopActivity();host.scrollTop=0;
  if(t==='sing')return runSing(spec,host,opt);
  if(t==='echo'||t==='read')return runRhythm(spec,host,opt);
  if(t==='song'||t==='drum'||t==='chordplay')return runHighway(spec,host,opt);
+ if(t==='nr')return runNR(spec,host,opt);
  if(t==='quiz'||t==='pitch'||t==='listen'||(t==='steps'&&spec.task==='name')||(t==='scale'&&spec.task==='majmin')||(t==='chord'&&spec.task==='majmin'))return runQuiz(spec,host,opt);
  return runKeys(spec,host,opt)}
 // the parents' report skill (a lesson id) an answer belongs to: the lesson being played,
@@ -2243,7 +2414,282 @@ function lrSkill(spec){if(RUN&&RUN.kind==='lesson')return RUN.id;if(!spec)return
  const same=a=>a.type===spec.type&&['bank','task','level','song','pattern'].every(k=>spec[k]==null||a[k]===spec[k])&&(spec.type!=='notes'||!spec.range||!a.range||a.range[1]===spec.range[1]);
  const l=LESSONS.find(l=>same(l.a));return l?l.id:undefined}
 // how long an activity takes, roughly, for the lesson list
-const ACT_ICON={breath:'🌬️',sing:'🎤',beat:'💓',echo:'👂',read:'📖',song:'🎹',drum:'🥁',chordplay:'🌈',quiz:'❓',pitch:'🎵',keys:'🎹',notes:'🎼',steps:'🪜',scale:'🌈',chord:'🎶',listen:'👂'};
+const ACT_ICON={breath:'🌬️',sing:'🎤',beat:'💓',echo:'👂',read:'📖',song:'🎹',drum:'🥁',chordplay:'🌈',quiz:'❓',pitch:'🎵',keys:'🎹',notes:'🎼',steps:'🪜',scale:'🌈',chord:'🎶',listen:'👂',nr:'🎼'};
+
+// ================================================================ 6. note town: reading notes on the staff, one note friend at a time
+// Each note is a little friend who lives at its place on the staff; pressing its key gives it its voice (see → hear → play).
+// · Teach before asking: a new friend is shown with its name and place, heard, then played with its key glowing.
+// · Landmarks first (middle C, then G on the treble clef's line), then one neighbour at a time, so a note can be worked out
+//   by counting steps (line → space → line) from a note the child already knows.
+// · Errorless: help fades per note (glowing key → name label → colour only → plain) and comes back after a miss.
+//   A wrong key plays that note and shows where it lives next to the target; two misses or "Show me" teach the answer.
+// · Leitner-style memory per note: "known" = read with no help on two different days; known notes come back for review
+//   after 1, 2, 4, 7 and 14 days. A new friend joins only when every friend met so far is at least "almost there".
+const NR_ORDER=['C4','G4','D4','F4','E4','A4','B4','C5','D5','E5','F5','G5'];
+const NR_ASC=['C4','D4','E4','F4','G4','A4','B4','C5','D5','E5','F5','G5'];
+// the note each one is worked out from (the hints and the "Show me" arrow start there)
+const NR_REF={D4:'C4',E4:'C4',F4:'G4',A4:'G4',B4:'G4',C5:'G4',D5:'C5',E5:'C5',F5:'C5',G5:'G4'};
+// the keyboard shows one octave of white keys, so the keys stay big on phones: C4–C5, or G4–G5 once high notes are met
+const NR_ZONES=[[60,72],[67,79]];
+const NR_INT=[1,2,4,7,14];
+// darker text colours for the note colours (yellow text on cream would be hard to read)
+const NR_TXT=['#d63c42','#d63c42','#c46600','#c46600','#8f6c00','#1f9a4f','#1f9a4f','#0b8496','#0b8496','#3560e0','#3560e0','#8a45e0'];
+const nrTxtCol=m=>NR_TXT[((midiOf(m)%12)+12)%12];
+// w: where it lives, in a sentence (ko ends with 에 / en with its preposition); s: short label under the note;
+// pl: the place as a name; tip: how to find it from a landmark; i: what the teacher says when the friend is new
+const NR_INFO={
+ C4:{w:['오선 아래 덧줄 위에','on the ledger line below the staff'],s:['덧줄','ledger line'],pl:['오선 아래 덧줄','ledger line below the staff'],
+  tip:['오선 아래 짧은 덧줄 위에 있어요','It sits on a short ledger line below the staff'],
+  i:['첫 친구는 ‘가온 도(C)’예요! 오선 아래에 짧은 줄을 하나 더 긋고 그 위에 앉아요. 이 짧은 줄을 ‘덧줄’이라고 해요. 줄이 몸 한가운데를 지나가니까 줄 음표예요. 피아노 가운데쯤에 있는 도라서 가온 도라고 불러요.',
+   'Your first friend is middle C (do)! It sits on a short extra line below the staff, called a ledger line. The line runs through its middle, so it’s a line note. It’s the C near the middle of a piano, so we call it middle C.']},
+ D4:{w:['오선 첫째 줄 바로 아래에','just below the bottom line'],s:['첫째 줄 아래','below line 1'],pl:['첫째 줄 바로 아래','just below the bottom line'],
+  tip:['가온 도에서 한 칸 위예요','One step up from middle C'],
+  i:['‘레(D)’예요! 가온 도에서 한 칸 위로 올라왔어요. 첫째 줄 바로 아래에 매달려 있고, 줄이 몸을 지나가지 않으니까 칸 음표예요. 한 칸 올라가면 바로 다음 음이 돼요!',
+   'This is D (re)! It’s one step up from middle C. It hangs just below the bottom line. No line runs through it, so it’s a space note. One step up is always the very next note!']},
+ E4:{w:['오선 첫째 줄에','on the first line'],s:['첫째 줄','line 1'],pl:['첫째 줄','first line'],
+  tip:['가온 도에서 두 칸 위, 첫째 줄이에요','Two steps up from middle C, on the first line'],
+  i:['‘미(E)’예요! 오선의 맨 아래 줄, 첫째 줄에 사는 줄 음표예요. 레보다 한 칸 위, 파보다 한 칸 아래예요. 가온 도에서 세면 두 칸 위예요.',
+   'This is E (mi)! It lives on the bottom line of the staff, the first line, so it’s a line note. It’s one step above D and one step below F. From middle C, it’s two steps up.']},
+ F4:{w:['오선 첫째 칸에','in the first space'],s:['첫째 칸','space 1'],pl:['첫째 칸','first space'],
+  tip:['솔에서 한 칸 아래, 첫째 칸이에요','One step down from G, in the first space'],
+  i:['‘파(F)’예요! 솔에서 한 칸 아래로 내려왔어요. 첫째 줄과 둘째 줄 사이, 첫째 칸에 쏙 들어간 칸 음표예요. 한 칸 내려가면 바로 앞의 음이 돼요.',
+   'This is F (fa)! It’s one step down from G, tucked into the first space between the first and second lines. It’s a space note. One step down is always the note just before.']},
+ G4:{w:['오선 둘째 줄에','on the second line'],s:['둘째 줄','line 2'],pl:['둘째 줄','second line'],
+  tip:['높은음자리표가 감고 있는 둘째 줄이에요','On the second line, where the treble clef curls'],
+  i:['이번 친구는 ‘솔(G)’이에요! 맨 앞의 높은음자리표를 봐요. 동그랗게 말린 부분이 둘째 줄을 감싸고 있죠? 그 둘째 줄에 사는 음이 솔이에요. 솔도 줄 음표예요.',
+   'This friend is G (sol)! Look at the treble clef at the front. Its curl wraps around the second line. The note on that line is G, which is why the treble clef is also called the G clef. G is a line note too.']},
+ A4:{w:['오선 둘째 칸에','in the second space'],s:['둘째 칸','space 2'],pl:['둘째 칸','second space'],
+  tip:['솔에서 한 칸 위, 둘째 칸이에요','One step up from G, in the second space'],
+  i:['‘라(A)’예요! 솔에서 한 칸 위로 올라왔어요. 둘째 줄과 셋째 줄 사이, 둘째 칸에 사는 칸 음표예요.',
+   'This is A (la)! It’s one step up from G. It lives in the second space, between the second and third lines. It’s a space note.']},
+ B4:{w:['오선 셋째 줄(가운데 줄)에','on the middle (third) line'],s:['셋째 줄','line 3'],pl:['셋째 줄 (가운데 줄)','third (middle) line'],
+  tip:['솔에서 두 칸 위, 가운데 줄이에요','Two steps up from G, on the middle line'],
+  i:['‘시(B)’예요! 라에서 한 칸 위, 오선 한가운데인 셋째 줄에 사는 줄 음표예요. 솔에서 세면 두 칸 위예요.',
+   'This is B (ti)! It’s one step up from A, on the third line, right in the middle of the staff. It’s a line note. From G, it’s two steps up.']},
+ C5:{w:['오선 셋째 칸에','in the third space'],s:['셋째 칸','space 3'],pl:['셋째 칸','third space'],
+  tip:['솔에서 세 칸 위, 셋째 칸이에요. 가온 도보다 한 옥타브 높아요','Three steps up from G, in the third space: an octave above middle C'],
+  i:['‘높은 도(C)’예요! 시에서 한 칸 위, 셋째 칸에 사는 칸 음표예요. 가온 도부터 도·레·미·파·솔·라·시·도! 다시 도가 됐어요. 이름은 같고 소리만 더 높아요!',
+   'This is high C (do)! It’s one step up from B, in the third space, so it’s a space note. Count up from middle C: C, D, E, F, G, A, B, C. You’re back to C, just higher!']},
+ D5:{w:['오선 넷째 줄에','on the fourth line'],s:['넷째 줄','line 4'],pl:['넷째 줄','fourth line'],
+  tip:['높은 도에서 한 칸 위, 넷째 줄이에요','One step up from high C, on the fourth line'],
+  i:['‘높은 레(D)’예요! 높은 도에서 한 칸 위, 넷째 줄에 사는 줄 음표예요.',
+   'This is D (re) again, up high! It’s one step up from high C, on the fourth line. It’s a line note.']},
+ E5:{w:['오선 넷째 칸에','in the fourth space'],s:['넷째 칸','space 4'],pl:['넷째 칸','fourth space'],
+  tip:['높은 도에서 두 칸 위, 넷째 칸이에요','Two steps up from high C, in the fourth space'],
+  i:['‘높은 미(E)’예요! 높은 레에서 한 칸 위, 맨 위 칸인 넷째 칸에 사는 칸 음표예요.',
+   'This is E (mi), up high! It’s one step up from the high D, in the fourth space, the top space. It’s a space note.']},
+ F5:{w:['오선 다섯째 줄(맨 위 줄)에','on the top (fifth) line'],s:['다섯째 줄','line 5'],pl:['다섯째 줄 (맨 위 줄)','fifth (top) line'],
+  tip:['높은 도에서 세 칸 위, 맨 위 줄이에요','Three steps up from high C, on the top line'],
+  i:['‘높은 파(F)’예요! 오선의 맨 위 줄, 다섯째 줄에 사는 줄 음표예요. 높은 미에서 한 칸 위예요.',
+   'This is F (fa), up high! It lives on the top line, the fifth line, so it’s a line note. It’s one step above the high E.']},
+ G5:{w:['오선 맨 위 줄 바로 위에','just above the top line'],s:['맨 위 줄 위','above line 5'],pl:['맨 위 줄 바로 위','just above the top line'],
+  tip:['맨 위 줄 바로 위예요. 둘째 줄의 솔보다 한 옥타브 높아요','Just above the top line: an octave above the G on the second line'],
+  i:['‘높은 솔(G)’이에요! 맨 위 줄 바로 위에 올라앉은 칸 음표예요. 둘째 줄의 솔부터 솔·라·시·도·레·미·파·솔! 다시 솔이 됐어요.',
+   'This is high G (sol)! It sits just above the top line, so it’s a space note. Count up from the G on the second line: G, A, B, C, D, E, F, G. You’re back to G!']},
+};
+const NR_HELLO=['음표 친구들은 오선 위에 살아요. 오선의 다섯 줄은 맨 아래부터 첫째 줄, 둘째 줄… 하고 세요. 줄이 몸 한가운데를 지나가면 ‘줄 음표’, 줄과 줄 사이에 쏙 들어가 있으면 ‘칸 음표’예요. 위에 있을수록 높은 소리가 나요! 친구들은 아직 노래를 못 해요. 건반을 눌러 목소리를 찾아 줘요!',
+ 'The note friends live on the staff. Its five lines are counted from the bottom: line 1, line 2, and so on. If a line runs through a note’s middle, it’s a line note. If it sits between two lines, it’s a space note. The higher a note sits, the higher it sounds! The friends can’t sing yet. Press their keys to give them their voices!'];
+const NR_TAG=[['🌱','배우는 중','Learning'],['🌱','배우는 중','Learning'],['🌱','배우는 중','Learning'],['🌷','거의 다 읽어요','Almost there'],['⭐','읽을 수 있어요','I can read it']];
+const KNUM=['','한','두','세','네','다섯','여섯','일곱','여덟','아홉','열','열한','열두'],ENUM=['','one','two','three','four','five','six','seven','eight','nine','ten','eleven','twelve'];
+const nrId=m=>{m=midiOf(m);return PC[((m%12)+12)%12]+(Math.floor(m/12)-1)};
+const nrY=m=>74-(stepOf(m)-2)*5;
+// Korean particles after a note name: a final ♯/♭ is read 샵/플랫, which ends in a consonant
+const nrJ=(w,x,y)=>/[♯♭]$/.test(w)?x:josaKo(w,x,y);
+// the name on keys and labels (follows the 도레미 / C D E setting)
+const nrLab=m=>noteName(m).split(' ')[0];
+// the name in sentences: 가온 도 / middle C, and 높은 … / high … for the octave above
+function nrNm(m,cap){m=midiOf(m);const b=noteName(m);let s;
+ if(LANG==='en')s=m===60?'middle '+b:m>=72?'high '+b:b;else s=/[가-힣]/.test(b)?(m===60?'가온 '+b:m>=72?'높은 '+b:b):b+(Math.floor(m/12)-1);
+ return cap?s.charAt(0).toUpperCase()+s.slice(1):s}
+// a note for the parents' report, the same in every name setting: ['미 (E)','E (mi)']
+const lrNote=m=>{m=midiOf(m);const pc=((m%12)+12)%12,l=PC[pc].replace('#','♯'),lo=m===60,hi=m>=72;return [`${lo?'가온 ':hi?'높은 ':''}${SOLF[pc]} (${l})`,`${lo?'Middle ':hi?'High ':''}${l} (${SOLF_EN[pc].toLowerCase()})`]};
+const pair2=s=>{s=String(s==null?'':s);const i=s.indexOf('|');return i<0?[s,s]:[s.slice(0,i),s.slice(i+1)]};
+const hashStr=s=>{let h=5381;for(let i=0;i<s.length;i++)h=((h<<5)+h+s.charCodeAt(i))|0;return (h>>>0).toString(36)};
+// the report item for one note-reading answer (see _src/report/SPEC.md): g is the key pressed first, or 'show'
+function nrItem(t,g){const id=nrId(t),i=NR_INFO[id],it={id:'note:'+id,q:i?[`${i.w[0]} 있는 음표`,`The note ${i.w[1]}`]:['오선 위의 음표','A note on the staff'],a:lrNote(t)};
+ if(g!=null)it.g=g==='show'?['모르겠어요 (알려 줘요)','Not sure (Show me)']:lrNote(g);if(i)it.tip=i.tip;return it}
+// what a wrong key teaches: where the pressed note lives, and how many steps away the friend is
+function nrWhy(t,p){t=midiOf(t);p=midiOf(p);const d=stepOf(t)-stepOf(p),n=Math.abs(d),P=nrNm(p),Tn=nrNm(t);
+ if(t%12===p%12)return L(`${P}${nrJ(P,'을','를')} 눌렀어요. ${P}${nrJ(P,'은','는')} 여기 살아요. 이 친구는 ${Tn}${nrJ(Tn,'이에요','예요')}. 이름은 같지만 더 ${d<0?'낮은':'높은'} 음이에요. 건반에서 ${d<0?'왼쪽':'오른쪽'}에 있는 ${nrLab(t)}${nrJ(nrLab(t),'을','를')} 찾아봐요!`,
+  `You pressed ${P}. ${nrNm(p,1)} lives here. This friend is ${Tn}: the same name, but ${d<0?'lower':'higher'}. Find the ${nrLab(t)} further to the ${d<0?'left':'right'}!`);
+ return L(`${P}${nrJ(P,'을','를')} 눌렀어요. ${P}${nrJ(P,'은','는')} 여기 살아요. ${Tn}${nrJ(Tn,'은','는')} ${P}보다 ${KNUM[n]} 칸 ${d>0?'위':'아래'}예요. ${n===1?`건반에서도 바로 ${d>0?'오른쪽':'왼쪽'} 건반이에요!`:`건반에서도 ${d>0?'오른쪽':'왼쪽'}으로 ${KNUM[n]} 칸이에요!`}`,
+  `You pressed ${P}. ${nrNm(p,1)} lives here. ${nrNm(t,1)} is ${ENUM[n]} step${n>1?'s':''} ${d>0?'up':'down'} from ${P}. ${n===1?`On the keys, it’s the very next key to the ${d>0?'right':'left'}!`:`On the keys, that’s ${ENUM[n]} white keys to the ${d>0?'right':'left'}!`}`)}
+// "Show me" (or a second miss): the name, and how to find it from a landmark
+function nrShow(t,again){const i=NR_INFO[nrId(t)],Tn=nrNm(t);if(!i)return '';
+ return L(`${again?'괜찮아요! ':''}이 친구는 ${Tn}${nrJ(Tn,'이에요','예요')}. ${i.tip[0]}. 반짝이는 건반을 눌러 봐요!`,`${again?'That’s okay! ':''}This friend is ${Tn}. ${i.tip[1]}. Press the glowing key!`)}
+
+// ---------------------------------------------------------------- drawing: the staff with note friends
+// Same geometry as staffSVG: top line y=34, lines 10 apart, middle C (step 0) on a ledger line at y=84.
+let NRSVG_N=0;
+function nrNote({m,x,col='#1d2a4a',tcol=null,label='',sub='',ghost=false,cls='',lsz=15}){const st=stepOf(m),y=nrY(m),up=st<6,sx=up?x+6.4:x-6.4,sy=up?y-30:y+30;
+ let s=`<g class="nrn ${cls}" data-m="${m}">`;
+ for(let k=0;k>=st;k-=2)s+=`<line x1="${x-12}" y1="${74-(k-2)*5}" x2="${x+12}" y2="${74-(k-2)*5}" stroke="#7d88a6" stroke-width="1.5"/>`;
+ for(let k=12;k<=st;k+=2)s+=`<line x1="${x-12}" y1="${74-(k-2)*5}" x2="${x+12}" y2="${74-(k-2)*5}" stroke="#7d88a6" stroke-width="1.5"/>`;
+ s+=`<line x1="${sx}" y1="${y+(up?-1.5:1.5)}" x2="${sx}" y2="${sy}" stroke="${col}" stroke-width="2"${ghost?' stroke-dasharray="3 2"':''}/>`;
+ s+=ghost?`<ellipse cx="${x}" cy="${y}" rx="7" ry="5.1" fill="#fff" stroke="${col}" stroke-width="2" stroke-dasharray="3 2" transform="rotate(-20 ${x} ${y})"/>`
+  :`<ellipse cx="${x}" cy="${y}" rx="7" ry="5.1" fill="${col}" transform="rotate(-20 ${x} ${y})"/>`;
+ // two eyes, and a mouth that opens when the friend sings
+ const ew=ghost?col:'#fff';s+=`<circle cx="${x-2.5}" cy="${y-.9}" r="1.7" fill="${ew}"/><circle cx="${x+2.3}" cy="${y-1.7}" r="1.7" fill="${ew}"/>`;
+ if(!ghost)s+=`<circle cx="${x-2.2}" cy="${y-.7}" r=".85" fill="#1d2a4a"/><circle cx="${x+2.6}" cy="${y-1.5}" r=".85" fill="#1d2a4a"/>`;
+ s+=`<ellipse class="mo" cx="${x+.4}" cy="${y+2.2}" rx="1.5" ry="1.2" fill="${ghost?col:'#fff'}"/>`;
+ if(label)s+=`<text x="${x}" y="114" font-size="${lsz}" font-weight="900" text-anchor="middle" fill="${tcol||col}">${esc(label)}</text>`;
+ if(sub)s+=`<text x="${x}" y="127" font-size="10" font-weight="800" text-anchor="middle" fill="#6f61a8">${esc(sub)}</text>`;
+ return s+'</g>'}
+function nrSVG(notes,{w=210,h=132,arrow=null,nums=false,aria=''}={}){const id='nrA'+(++NRSVG_N);
+ let s=`<svg class="nrs" viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg" ${aria?`role="img" aria-label="${esc(aria)}"`:'aria-hidden="true"'}><defs><marker id="${id}" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 0L10 5L0 10z" fill="#8f7ee0"/></marker></defs>`;
+ for(let i=0;i<5;i++)s+=`<line x1="6" y1="${34+i*10}" x2="${w-6}" y2="${34+i*10}" stroke="#7d88a6" stroke-width="1.3"/>`;
+ s+=clefSVG(12,34,1);
+ if(nums)for(let i=0;i<5;i++)s+=`<circle cx="${w-15}" cy="${74-i*10}" r="5.4" fill="#ede7ff"/><text x="${w-15}" y="${74-i*10+3.6}" font-size="9.5" font-weight="900" text-anchor="middle" fill="#5636d6">${i+1}</text>`;
+ // a dashed arrow from one note to another, with a dot on every step in between (line, space, line…)
+ if(arrow){const a=arrow.from,b=arrow.to,ya=nrY(a.m),yb=nrY(b.m),n=Math.abs(stepOf(b.m)-stepOf(a.m)),dir=b.x>a.x?1:-1,x1=a.x+dir*10,x2=b.x-dir*12;
+  s+=`<path d="M${x1} ${ya}L${x2} ${yb}" stroke="#8f7ee0" stroke-width="2" stroke-dasharray="3 3" fill="none" marker-end="url(#${id})"/>`;
+  for(let i=1;i<n;i++){const f=i/n;s+=`<circle cx="${(x1+(x2-x1)*f).toFixed(1)}" cy="${(ya+(yb-ya)*f).toFixed(1)}" r="2" fill="#8f7ee0"/>`}}
+ notes.forEach(n=>s+=nrNote(n));
+ return s+'</svg>'}
+// one question: the friend in the middle, drawn with the help its level allows; ghost = a wrong key's note, ref = the landmark
+function nrAskSVG(t,{lv=3,ghost=null,ref=false,lab=false,cls=''}={}){t=midiOf(t);const id=nrId(t),i=NR_INFO[id],showL=lab||lv<=1,col=showL||lv===2?colorOf(t):'#1d2a4a';
+ const ns=[{m:t,x:116,col,tcol:nrTxtCol(t),label:showL?nrLab(t):'',sub:showL&&i?L(i.s[0],i.s[1]):'',cls:'tg '+cls}];let arrow=null;
+ if(ghost!=null&&!isBlack(ghost)){ns.push({m:ghost,x:170,col:colorOf(ghost),tcol:nrTxtCol(ghost),ghost:true,label:nrLab(ghost)});arrow={from:{x:170,m:ghost},to:{x:116,m:t}}}
+ else if(ref&&NR_REF[id]){const r=midiOf(NR_REF[id]);ns.push({m:r,x:64,col:colorOf(r),tcol:nrTxtCol(r),ghost:true,label:nrLab(r)});arrow={from:{x:64,m:r},to:{x:116,m:t}}}
+ return nrSVG(ns,{arrow,aria:i?L(`${i.w[0]} 있는 음표`,`A note ${i.w[1]}`):''})}
+// the whole town: every friend at home on one staff; not met yet = a dotted "?"
+function nrTownSVG(){const R=nrS(),w=320;let s=`<svg class="nrs town" viewBox="0 0 ${w} 112" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="${esc(L('음표 마을: 오선 위의 음표 친구들','Note Town: the note friends on the staff'))}">`;
+ for(let i=0;i<5;i++)s+=`<line x1="6" y1="${34+i*10}" x2="${w-6}" y2="${34+i*10}" stroke="#7d88a6" stroke-width="1.3"/>`;
+ s+=clefSVG(12,34,1);
+ NR_ASC.forEach((id,i)=>{const m=midiOf(id),x=60+i*21.6,y=nrY(m),lv=nrLv(id);
+  if(m===60)s+=`<line x1="${x-11}" y1="84" x2="${x+11}" y2="84" stroke="#7d88a6" stroke-width="1.5"${lv<0?' stroke-dasharray="2 2"':''}/>`;
+  if(lv<0){s+=`<ellipse cx="${x}" cy="${y}" rx="6.6" ry="4.9" fill="#fff" stroke="#c3bbe0" stroke-width="1.6" stroke-dasharray="2.5 2" transform="rotate(-20 ${x} ${y})"/><text x="${x}" y="${y+3.2}" font-size="8" font-weight="900" text-anchor="middle" fill="#a49cc4">?</text>`;return}
+  s+=`<g class="nrn" data-m="${m}" opacity="${lv<=2?.6:1}"><ellipse cx="${x}" cy="${y}" rx="6.8" ry="5" fill="${colorOf(m)}" transform="rotate(-20 ${x} ${y})"/><circle cx="${x-2.4}" cy="${y-.9}" r="1.6" fill="#fff"/><circle cx="${x+2.2}" cy="${y-1.6}" r="1.6" fill="#fff"/><circle cx="${x-2.1}" cy="${y-.7}" r=".8" fill="#1d2a4a"/><circle cx="${x+2.5}" cy="${y-1.4}" r=".8" fill="#1d2a4a"/><ellipse class="mo" cx="${x+.4}" cy="${y+2.1}" rx="1.4" ry="1.1" fill="#fff"/></g>`;
+  if(lv>=3)s+=`<text x="${x}" y="${y-8}" font-size="9" text-anchor="middle">${lv>=4?'⭐':'🌷'}</text>`});
+ return s+'</svg>'}
+
+// ---------------------------------------------------------------- the memory: one record per note friend in the player's save
+const nrS=()=>{if(typeof S==='undefined')return {n:{},r:0,hi:0,last:''};if(!S.nr||typeof S.nr!=='object')S.nr={};const R=S.nr;
+ if(!R.n||typeof R.n!=='object')R.n={};R.r=+R.r||0;R.hi=R.hi?1:0;R.last=R.last||'';
+ for(const id of Object.keys(R.n)){const x=R.n[id];if(!NR_INFO[id]||!x||typeof x!=='object'){delete R.n[id];continue}
+  x.lv=clamp(+x.lv||0,0,4);for(const k of ['ok','w','pc','kb','seen'])x[k]=+x[k]||0;if(!Array.isArray(x.pd))x.pd=[];x.due=x.due||'';x.intro=x.intro?1:0;if(x.at==null)x.at=-1}
+ return R};
+const nrFresh=()=>({lv:0,ok:0,w:0,pc:0,pd:[],kb:0,due:'',seen:0,intro:0,at:-1,ld:''});
+// -1 = not met yet (or met but its first lesson was never finished)
+const nrLv=id=>{const x=nrS().n[id];return x&&x.intro?x.lv:-1};
+const nrBucket=lv=>lv<0?0:lv<=2?1:lv===3?3:4;
+const NR_ICON=['🥚','🌱','🌱','🌷','⭐'];
+const dayAdd=n=>{const d=new Date();d.setDate(d.getDate()+n);return dayKey(d)};
+const nrDue=x=>x.lv>=4&&(!x.due||daysSince(x.due)>=0);
+// solid enough for a new friend to join: known, or almost there and read once more with no help since the last miss
+const nrReady=x=>!!x&&(x.lv>=4||(x.lv===3&&x.pc>=1));
+const nrOpen=()=>lessonDone('b3')||Object.keys(nrS().n).length>0;
+// how=clean (no help at all), helped (only the planned glow of a brand-new friend), miss (a wrong key or "Show me")
+function nrUpdate(id,how){const R=nrS(),x=R.n[id];if(!x)return {was:0,now:0};const was=x.lv,today=dayKey();let ev=null;x.seen++;x.at=R.r;x.ld=today;
+ if(how==='miss'){x.w++;x.pc=0;if(x.lv>=4){x.lv=3;x.pd=[];x.kb=0;x.due=''}else if(x.lv>=2)x.lv--}
+ else{if(how==='clean')x.ok++;
+  if(x.lv===0)x.lv=1;
+  else if(how==='clean'){
+   if(x.lv<3)x.lv++;
+   else if(x.lv===3){x.pc++;if(!x.pd.includes(today))x.pd=x.pd.concat(today).slice(-4);if(x.pc>=3&&x.pd.length>=2){x.lv=4;x.kb=0;x.due=dayAdd(NR_INT[0]);ev='known'}}
+   else if(nrDue(x)){x.kb=Math.min(NR_INT.length-1,x.kb+1);x.due=dayAdd(NR_INT[x.kb])}}}
+ save();return {was,now:x.lv,ev}}
+// one round: which friends come, in what order, and which octave of keys to show
+function nrPlan(){const R=nrS(),n=R.n;let ids=NR_ORDER.filter(id=>n[id]);const fresh=ids.filter(id=>!n[id].intro);
+ if(!ids.length){['C4','G4'].forEach(id=>{n[id]=nrFresh();fresh.push(id)});ids=['C4','G4']}
+ else if(!fresh.length&&ids.every(id=>nrReady(n[id]))){const nx=NR_ORDER.find(id=>!n[id]);if(nx){n[nx]=nrFresh();fresh.push(nx);ids.push(nx)}}
+ save();
+ const inZ=(z,id)=>{const m=midiOf(id);return m>=z[0]&&m<=z[1]};let zone=NR_ZONES[0];
+ if(ids.some(id=>midiOf(id)>72)){const wt=id=>fresh.includes(id)?6:n[id].lv<=2?3:n[id].lv===3?2:nrDue(n[id])?1:0,sc=NR_ZONES.map(z=>ids.filter(id=>inZ(z,id)).reduce((a,id)=>a+wt(id),0));
+  zone=fresh.some(id=>midiOf(id)>72)?NR_ZONES[1]:fresh.some(id=>midiOf(id)<67)?NR_ZONES[0]:sc[1]>sc[0]?NR_ZONES[1]:sc[0]>sc[1]?NR_ZONES[0]:NR_ZONES[R.r%2]}
+ const pool=ids.filter(id=>inZ(zone,id)),fr=fresh.filter(id=>pool.includes(id)),N=pool.length<=3?8:10,want=[];
+ // new friends three times (the first is their lesson), friends still learning twice, almost-there once or twice, known ones when due
+ pool.forEach(id=>{const x=n[id];if(fr.includes(id))[100,90,80].forEach(p=>want.push([id,p]));else if(x.lv<=2)(pool.length<=3?[70,60,50]:[70,60]).forEach(p=>want.push([id,p]));
+  else if(x.lv===3)(pool.length<=4?[55,45]:[55]).forEach(p=>want.push([id,p]));else if(nrDue(x))want.push([id,40])});
+ // fill up with known friends seen least recently, then the others
+ const fill=pool.slice().sort((a,b)=>(n[b].lv>=4)-(n[a].lv>=4)||n[a].at-n[b].at||Math.random()-.5);for(let i=0,p=20;want.length<N&&fill.length;i++,p-=.01)want.push([fill[i%fill.length],p]);
+ const chosen=want.sort((a,b)=>b[1]-a[1]).slice(0,N),cnt={};chosen.forEach(([id])=>cnt[id]=(cnt[id]||0)+1);
+ const slots=Array(N).fill(null);
+ fr.forEach((id,i)=>{[i*3,i*3+2,i*3+5].forEach(p=>{if(!cnt[id])return;while(p<N&&slots[p])p++;if(p<N){slots[p]=id;cnt[id]--}})});
+ const firstAt={};fr.forEach(id=>firstAt[id]=slots.indexOf(id));const ok=(id,p)=>firstAt[id]==null||firstAt[id]<p;
+ const rest=shuffle(Object.entries(cnt).flatMap(([id,c])=>Array(c).fill(id)));
+ for(let p=0;p<N;p++){if(slots[p])continue;const a=slots[p-1],b=slots[p+1];let j=rest.findIndex(id=>ok(id,p)&&id!==a&&id!==b);if(j<0)j=rest.findIndex(id=>ok(id,p)&&id!==a);if(j<0)j=rest.findIndex(id=>ok(id,p));
+  if(j>=0){slots[p]=rest.splice(j,1)[0];continue}const alt=pool.filter(id=>ok(id,p)&&id!==a);slots[p]=alt.length?pick(alt):pool.find(id=>ok(id,p))||pool[0]}
+ return {zone,queue:slots,fresh:fr}}
+
+// ---------------------------------------------------------------- the round
+function runNR(spec,host,opt){const R=nrS(),P=nrPlan(),N=P.queue.length,[lo,hi]=P.zone;
+ let k=0,stopped=false,ended=false,phase='',cur=null,asked=false,tok=0;const bs=bus(1),timers=[],res={right:0,played:[],before:{},known:[],met:[]};
+ NR_ORDER.forEach(id=>{res.before[id]=nrLv(id)});
+ host.innerHTML=`<div class="nr"><div class="tline">${tface(opt.teacher||'mia')}<div class="tbub"></div></div><div class="qdots">${'<i></i>'.repeat(N)}</div>
+  <div class="nr-card"><span class="nr-tag"></span><div class="nr-svg"></div></div><div class="nr-msg" aria-live="polite"></div><div class="nr-ctl"></div><div class="nr-kbd"></div></div>`;
+ const $q=s=>host.querySelector(s),svgEl=$q('.nr-svg'),msg=$q('.nr-msg'),ctl=$q('.nr-ctl'),tag=$q('.nr-tag'),dots=[...host.querySelectorAll('.qdots i')];
+ const kb=buildKeys($q('.nr-kbd'),{from:lo,to:hi,labels:true,onDown:m=>onKey(m)});
+ // a key on the computer keyboard (Enter or Space on a focused piano key) works like a tap
+ $q('.nr-kbd').addEventListener('keydown',e=>{const b=e.target.closest('.pk');if(b&&(e.key==='Enter'||e.key===' ')&&!e.repeat){e.preventDefault();b.classList.add('down');setTimeout(()=>b.classList.remove('down'),150);onKey(+b.dataset.m)}});
+ const later=(f,ms)=>{const my=tok;timers.push(setTimeout(()=>{if(!stopped&&my===tok)f()},ms))};
+ const stop=()=>{stopped=true;timers.forEach(clearTimeout);killBus(bs)};
+ const setMsg=(txt,cls='')=>{msg.textContent=txt;msg.className='nr-msg '+cls};
+ const say=(txt,cls,o)=>{setMsg(txt,cls);speak(txt,o)};
+ const keyClear=()=>kb.all().forEach(x=>x.classList.remove('glow','tried','home'));
+ const glow=m=>{const el=kb.keyEl(m);if(el)el.classList.add('glow')};
+ const setTag=(lv,isNew)=>{if(lv==null){tag.textContent='';tag.className='nr-tag';return}const g=isNew?['✨','새 친구','New friend']:NR_TAG[lv];tag.textContent=`${g[0]} ${L(g[1],g[2])}`;tag.className='nr-tag '+(isNew?'tn':lv>=4?'t4':lv===3?'t3':'')};
+ const sing=()=>{const g=svgEl.querySelector('.nrn.tg');if(g){g.classList.remove('sing','pop');void g.getBoundingClientRect();g.classList.add('sing')}};
+ const fly=(m,txt)=>{const el=kb.keyEl(m),box=$q('.pkeys');if(!el||!box)return;const f=document.createElement('span');f.className='nr-fly';f.style.left=(el.offsetLeft+el.offsetWidth/2)+'px';f.style.color=nrTxtCol(m);f.textContent=txt;box.appendChild(f);setTimeout(()=>f.remove(),1000)};
+ const home=m=>{const el=kb.keyEl(m);if(!el)return;el.classList.add('home');setTimeout(()=>el.classList.remove('home'),650);fly(m,'♪ '+nrLab(m))};
+ const tone=(m,d=.9)=>play('piano',m,0,d,.85,bs);
+ const showBtn=()=>{ctl.innerHTML=`<button class="btn ghost small" id="nrShow" type="button">🤔 ${L('모르겠어요 · 알려 줘요','Not sure? Show me')}</button>`;$q('#nrShow').addEventListener('click',()=>{if(cur&&!cur.done)reveal(false)})};
+ function hello(){phase='hello';setTag(null);
+  svgEl.innerHTML=nrSVG([{m:64,x:80,col:colorOf(64),tcol:nrTxtCol(64),label:L('줄 음표','line note'),lsz:12},{m:65,x:153,col:colorOf(65),tcol:nrTxtCol(65),label:L('칸 음표','space note'),lsz:12}],{nums:true,aria:L('오선: 줄 다섯 개, 줄 음표와 칸 음표','The staff: five lines, a line note and a space note')});
+  say(L(...NR_HELLO));ctl.innerHTML=`<button class="btn green" id="nrGo" type="button">🎵 ${L('친구 만나러 가기','Meet the friends')} ▶</button>`;
+  $q('#nrGo').addEventListener('click',()=>{SFX.click();R.hi=1;save();stopVoice();step()})}
+ function step(){tok++;keyClear();if(stopped)return;if(k>=N){finale();return}dots.forEach((d,i)=>d.classList.toggle('cur',i===k));
+  const id=P.queue[k];if(P.fresh.includes(id)&&!R.n[id].intro)intro(id);else ask(id)}
+ // see → hear → play: the new friend, its place and its landmark, its sound, then its key glows
+ function intro(id){phase='intro';const t=midiOf(id),i=NR_INFO[id];cur={id,t,done:false};setTag(0,true);
+  svgEl.innerHTML=nrAskSVG(t,{lab:true,ref:true,cls:'pop'});setMsg(L(i.i[0],i.i[1]));glow(t);
+  ctl.innerHTML=`<button class="btn ghost small" id="nrHear" type="button">🔊 ${L('다시 듣기','Hear again')}</button>`;
+  const hear=()=>{tone(t);sing();later(()=>speak(L(i.i[0],i.i[1]),{force:true,onend:()=>{if(cur&&cur.id===id&&!cur.done){tone(t);sing()}}}),700)};
+  $q('#nrHear').addEventListener('click',()=>{stopVoice();hear()});
+  later(()=>{tone(t);sing()},350);later(()=>speak(L(i.i[0],i.i[1]),{onend:()=>{if(phase==='intro'&&cur&&cur.id===id&&!cur.done){tone(t);sing();setMsg(L(i.i[0]+' 반짝이는 건반을 눌러 봐요!',i.i[1]+' Press the glowing key!'))}}}),1100)}
+ function ask(id){phase='ask';const t=midiOf(id),x=R.n[id];cur={id,t,lv:x.lv,tries:0,show:false,glowed:false,first:null,done:false};setTag(x.lv);
+  svgEl.innerHTML=nrAskSVG(t,{lv:x.lv,cls:'pop'});
+  const p=L('이 친구의 건반은 어디일까요? 눌러서 목소리를 찾아 줘요!','Where is this friend’s key? Press it to give it a voice!');
+  if(!asked){asked=true;say(p)}else setMsg(L('이 친구의 건반은?','Which key is this friend?'));showBtn();
+  // a brand-new friend's key glows by itself after a short wait, so the first tries are always right
+  if(x.lv===0)later(()=>{if(cur&&cur.id===id&&!cur.done&&!cur.tries&&!cur.show){glow(t);cur.glowed=true;setMsg(L('반짝이는 건반이에요!','It’s the glowing key!'),'help')}},2500)}
+ function onKey(m){if(stopped)return;tone(m,.8);
+  if(phase==='intro'&&cur&&!cur.done){
+   if(m===cur.t){cur.done=true;const x=R.n[cur.id];x.intro=1;save();res.met.push(cur.id);dots[k].className='nw';home(m);sing();const Tn=nrNm(m);
+    speak(L(`${Tn}!`,`${nrNm(m,1)}!`));setMsg(L(`와, ${Tn}${nrJ(Tn,'이','가')} 노래해요! 🎵`,`Yay, ${Tn} is singing! 🎵`));tok++;k++;later(step,1500)}
+   else{const P2=nrNm(m);setMsg(isBlack(m)?L('검은 건반이에요. 반짝이는 흰 건반을 눌러 봐요!','That’s a black key. Press the glowing white key!'):L(`그건 ${P2}${nrJ(P2,'이에요','예요')}. 반짝이는 건반을 눌러 봐요!`,`That’s ${P2}. Press the glowing key!`),'help')}
+   return}
+  if(phase!=='ask'||!cur||cur.done)return;
+  if(isBlack(m)){setMsg(L('검은 건반이에요. 음표 친구들의 목소리는 모두 흰 건반에 있어요!','That’s a black key. These friends’ voices are all on the white keys!'),'help');return}
+  if(m===cur.t)good();else bad(m)}
+ function good(){cur.done=true;tok++;const c=cur,rep=c.tries===0&&!c.show,how=rep?(c.glowed?'helped':'clean'):'miss',u=nrUpdate(c.id,how);
+  try{coachAnswer(rep,'note-'+c.id,nrItem(c.t,rep?null:c.first))}catch(e){}
+  if(rep)res.right++;res.played.push(c.t);if(u.ev==='known')res.known.push(c.id);
+  dots[k].className=rep?'ok':'half';home(c.t);sing();ctl.innerHTML='';const Tn=nrNm(c.t);speak(L(`${Tn}!`,`${nrNm(c.t,1)}!`));
+  if(u.ev==='known'){setMsg(L(`⭐ 이제 ${Tn}${nrJ(Tn,'을','를')} 혼자 읽을 수 있어요!`,`⭐ Now you can read ${Tn} all by yourself!`));setTag(4);celebrate('stars');
+   try{coachPop('clap',`${Tn}${nrJ(Tn,'을','를')} 이제 혼자 읽어요! 다른 날에도 기억해 낸 거예요 ⭐`,`You can read ${Tn} on your own now! You remembered it on another day ⭐`,{gap:15000})}catch(e){}}
+  else if(rep)setMsg(pick([L(`딩동! ${Tn}${nrJ(Tn,'이','가')} 노래해요! 🎵`,`Ding! ${nrNm(c.t,1)} is singing! 🎵`),L(`맞아요, ${Tn}${nrJ(Tn,'이에요','예요')}! ✨`,`Yes, that’s ${Tn}! ✨`),L(`${Tn}${nrJ(Tn,'이','가')} 목소리를 찾았어요! 🎶`,`${nrNm(c.t,1)} found its voice! 🎶`)]));
+  else setMsg(L(`잘했어요! 이제 ${Tn}${nrJ(Tn,'을','를')} 알아요 🎵`,`Well done! Now you know ${Tn} 🎵`));
+  k++;later(step,u.ev==='known'?2000:1200)}
+ function bad(m){const c=cur;c.tries++;if(c.first==null)c.first=m;const el=kb.keyEl(m);if(el){el.classList.add('tried');setTimeout(()=>el.classList.remove('tried'),900)}
+  if(c.tries>=2&&!c.show){reveal(true);return}
+  if(c.show){setMsg(nrShow(c.t),'help');return}
+  // the wrong key's note, drawn where it lives, with the steps to the friend
+  svgEl.innerHTML=nrAskSVG(c.t,{lv:c.lv,ghost:m});say(nrWhy(c.t,m),'help')}
+ function reveal(again){const c=cur;if(!c||c.done||c.show)return;c.show=true;if(c.first==null)c.first='show';
+  svgEl.innerHTML=nrAskSVG(c.t,{lv:c.lv,lab:true,ref:true});glow(c.t);ctl.innerHTML='';say(nrShow(c.t,again),'help')}
+ // the friends sing together: every voice found this round, in order
+ function finale(){phase='end';setTag(null);ctl.innerHTML='';cur=null;const ms=res.played.slice(-10);
+  if(!ms.length){finish();return}
+  svgEl.innerHTML=staffSVG(ms.map(m=>({m,d:1,col:colorOf(m)})),{w:300});setMsg('🎶 '+L('오늘 찾은 목소리로 다 같이 노래해요!','Everyone sings with the voices you found!'));
+  const gap=.36,t0=AC?AC.currentTime+.25:0;ms.forEach((m,i)=>{play('piano',m,t0+i*gap,gap*.95,.8,bs);later(()=>{const g=svgEl.querySelector(`.sn[data-i="${i}"]`);if(g){g.classList.add('lit');setTimeout(()=>g.classList.remove('lit'),300)}const el=kb.keyEl(m);if(el){el.classList.add('home');setTimeout(()=>el.classList.remove('home'),300)}},250+i*gap*1000)});
+  later(finish,250+ms.length*gap*1000+700)}
+ function finish(){if(ended)return;ended=true;R.r++;R.last=dayKey();save();stop();
+  const grew=NR_ORDER.filter(id=>nrBucket(nrLv(id))>nrBucket(res.before[id]??-1)).map(id=>[id,res.before[id]??-1,nrLv(id)]);
+  const acc=N?res.right/N:0;opt.done({acc,stars:acc>=.8?3:acc>=.5?2:1,right:res.right,n:N,kind:'nr',self:true,nr:{grew,known:res.known,met:res.met}})}
+ ACT={stop,sim(acc=.9){for(;k<N;k++){const id=P.queue[k],x=R.n[id];if(!x.intro){x.intro=1;res.met.push(id);continue}const ok=Math.random()<acc,u=nrUpdate(id,ok?'clean':'miss');
+   try{LR.ans(ok,'note-'+id,nrItem(midiOf(id),ok?null:'show'))}catch(e){}if(ok)res.right++;if(u.ev==='known')res.known.push(id);res.played.push(midiOf(id))}finish()}};
+ if(!R.hi)hello();else step()}
 </script>
 <script>
 // ================================================================ singing: breathing, warm-ups and pitch matching with the microphone
@@ -2467,7 +2913,7 @@ const SAVE_KEY='musicAcademy.v1';
 const freshP=()=>({name:L('음악 친구','Music friend'),av:'🧒',xp:0,lvl:1,coins:120,earned:0,lessons:{},songs:{},drums:{},contests:{},stickers:[],ach:[],how:{},
  daily:{day:'',tasks:[],done:[],chest:false},streak:{n:0,best:0,last:'',shields:1},days:{},stats:{taps:0,perfect:0,plays:0,maxCombo:0,sings:0,secs:0},
  owned:['skin-block','stage-night','keys-classic'],equip:{skin:'skin-block',stage:'stage-night',keys:'keys-classic'},intro:false,fails:{},created:dayKey(),
- cnt:{},mic:0});
+ cnt:{},mic:0,nr:{n:{},r:0,hi:0,last:''}});
 const mergeP=d=>{const f=freshP();if(!d||typeof d!=='object')return f;return {...f,...d,streak:{...f.streak,...d.streak},stats:{...f.stats,...d.stats},equip:{...f.equip,...d.equip},daily:{...f.daily,...d.daily}}};
 function loadRoot(){let r=null;try{r=JSON.parse(localStorage.getItem(SAVE_KEY)||'null')}catch(e){}
  if(!r||!Array.isArray(r.P)||!r.P.length)r={v:1,cur:0,P:[freshP()],opt:{}};
@@ -2588,7 +3034,7 @@ const leaveGuard=f=>{if(busy())askQuit(f);else f()};
 const goMain=()=>leaveGuard(()=>{stopActivity();stopVoice();location.href=homeHref()});
 const switchPlayer=()=>leaveGuard(()=>go('who'));
 function back(){if(busy()){askQuit();return}go(popNav(),false)}
-function askQuit(then){modal(`<div class="center"><div class="big">🤔</div><h2>${L('그만할까요?','Stop now?')}</h2><p>${L('지금 그만두면 이번 연습은 기록되지 않아요.','If you stop now, this try won’t be saved.')}</p></div><div class="row"><button class="btn ghost" data-act="close" type="button">${L('계속할래요','Keep going')}</button><button class="btn red" data-act="quit" type="button">${L('그만할래요','Stop')}</button></div>`,{acts:{quit:()=>()=>{stopActivity();if(then)then();else go(popNav(),false)}}})}
+function askQuit(then){const nr=!!document.querySelector('#host .nr');modal(`<div class="center"><div class="big">🤔</div><h2>${L('그만할까요?','Stop now?')}</h2><p>${nr?L('그만해도 괜찮아요! 지금까지 만난 음표 친구들은 그대로 기억해요.','It’s fine to stop! Your note friends remember everything you did so far.'):L('지금 그만두면 이번 연습은 기록되지 않아요.','If you stop now, this try won’t be saved.')}</p></div><div class="row"><button class="btn ghost" data-act="close" type="button">${L('계속할래요','Keep going')}</button><button class="btn red" data-act="quit" type="button">${L('그만할래요','Stop')}</button></div>`,{acts:{quit:()=>()=>{stopActivity();if(then)then();else go(popNav(),false)}}})}
 const RENDER={};
 
 // ---------------------------------------------------------------- home
@@ -2604,6 +3050,7 @@ RENDER.home=()=>{ensureDaily();const nl=nextLesson(),t=nl?TEACHERS[teacherOf(nl)
    ${doneN===3&&d.chest?`<p class="center sub">🎉 ${L('오늘 연습 끝! 내일 또 만나요!','All done today! See you tomorrow!')}</p>`:''}</div>
   ${nl?`<button class="cta next" id="nextBtn" type="button" style="background:${t.bg}"><span class="tface big">${pic(t.img,t.icon)}</span><span class="ct"><small>${L('이어서 배우기','Continue learning')} · ${esc(T(unitOf(nl).t))}</small><b>${esc(T(nl.t))}</b></span><span class="go">▶</span></button>`
    :`<div class="card center"><div class="big">🎓</div><b>${L('모든 레슨을 마쳤어요! 대회와 연습실에서 실력을 뽐내요!','You finished every lesson! Show off in contests and practice rooms!')}</b></div>`}
+  ${nrOpen()?nrBanner():''}
   <div class="tiles">
    ${tile('path','t-path','🗺️',L('배움 지도','Lesson map'),`${doneCount()}/${LESSONS.length}`)}
    ${tile('contests','t-contest','🏆',L('음악 대회','Contests'),`${Object.values(S.contests).filter(x=>x.medal>=1).length} ${L('메달','medals')}`,CONTESTS.some(c=>contestOpen(c)&&!S.contests[c.id])?1:0)}
@@ -2623,21 +3070,22 @@ RENDER.home=()=>{ensureDaily();const nl=nextLesson(),t=nl?TEACHERS[teacherOf(nl)
  v.querySelectorAll('[data-daily]').forEach(b=>b.addEventListener('click',()=>{SFX.click();startDaily(+b.dataset.daily)}));
  v.querySelectorAll('[data-teacher]').forEach(b=>b.addEventListener('click',()=>teacherCard(b.dataset.teacher)));
  if($('nextBtn'))$('nextBtn').addEventListener('click',()=>{SFX.click();openLesson(nl.id)});
- if($('chestBtn'))$('chestBtn').addEventListener('click',openDailyChest);
+ if($('chestBtn'))$('chestBtn').addEventListener('click',openDailyChest);if($('nrBan'))$('nrBan').addEventListener('click',openNR);
  $('heroFace').addEventListener('click',openMe);$('trophyBtn').addEventListener('click',()=>go('trophies'))};
 const tile=(go,cls,ic,name,small,dot=0)=>`<button class="tile ${cls}" type="button" data-go="${go}"><span class="ic">${ic}</span><b>${esc(name)}</b><small>${esc(small)}</small>${dot?'<span class="dot">!</span>':''}</button>`;
 function teacherCard(k){const t=TEACHERS[k],units=UNITS.filter(u=>u.teacher===k);modal(`<div class="tcard"><span class="tface huge" style="background:${t.bg}">${pic(t.img,t.icon)}</span><h2>${esc(T(t.name))}</h2><p class="sub">${esc(T(t.role))}</p><p class="say">“${esc(T(pick(t.hi)))}”</p>
- ${units.map(u=>`<button class="btn ghost small" data-act="u" data-u="${u.id}" type="button">${u.ic} ${esc(T(u.t))}</button>`).join('')}</div>`,{acts:{u:b=>()=>{PATH_FOCUS=b.dataset.u;go('path')}},onOpen:()=>speak(T(pick(t.hi)))})}
+ ${units.map(u=>`<button class="btn ghost small" data-act="u" data-u="${u.id}" type="button">${u.ic} ${esc(T(u.t))}</button>`).join('')}${k==='mia'?`<button class="btn green small" data-act="nr" type="button">🎼 ${L('음표 마을 · 음표 읽기 연습','Note Town · note reading practice')}</button>`:''}</div>`,{acts:{u:b=>()=>{PATH_FOCUS=b.dataset.u;go('path')},nr:()=>()=>openNR()},onOpen:()=>speak(T(pick(t.hi)))})}
 
 // ---------------------------------------------------------------- lesson map
 let PATH_FOCUS=null;
 RENDER.path=()=>{const nl=nextLesson();let html='<div class="path">';
  UNITS.forEach(u=>{const ls=LESSONS.filter(l=>l.u===u.id),t=TEACHERS[u.teacher],dn=ls.filter(l=>lessonDone(l.id)).length;
-  html+=`<section class="unit" id="unit-${u.id}"><div class="uhead" style="background:${t.bg}"><span class="tface">${pic(t.img,t.icon)}</span><div><b>${u.ic} ${esc(T(u.t))}</b><small>${esc(T(t.name))} · ${dn}/${ls.length}</small></div></div><div class="nodes">`;
+  html+=`<section class="unit" id="unit-${u.id}"><div class="uhead" style="background:${t.bg}"><span class="tface">${pic(t.img,t.icon)}</span><div><b>${u.ic} ${esc(T(u.t))}</b><small>${esc(T(t.name))} · ${dn}/${ls.length}</small></div></div>${u.id==='E'?`<button class="btn gold small nrgo" type="button" data-nr="1">🎼 ${L('음표 마을에서 음표 읽기 연습','Practice reading notes in Note Town')}</button>`:''}<div class="nodes">`;
   ls.forEach((l,j)=>{const i=lessonIdx(l.id),open=lessonOpen(i),st=(S.lessons[l.id]||{}).s||0,cur=nl&&nl.id===l.id;
    html+=`<button class="node ${open?'':'locked'} ${cur?'cur':''} ${lessonDone(l.id)?'done':''}" type="button" data-lesson="${l.id}" style="--off:${[0,34,52,34,0,-34,-52,-34][j%8]}px"><span class="nb">${open?ACT_ICON[l.a.type]||'🎵':'🔒'}</span><span class="nt">${esc(T(l.t))}</span><span class="ns">${'★'.repeat(st)}${'☆'.repeat(3-st)}</span>${cur?`<span class="here">${L('여기!','Here!')}</span>`:''}</button>`});
   html+='</div></section>'});
  $('v-path').innerHTML=html+'</div>';
+ $('v-path').querySelectorAll('[data-nr]').forEach(b=>b.addEventListener('click',openNR));
  $('v-path').querySelectorAll('[data-lesson]').forEach(b=>b.addEventListener('click',()=>{const i=lessonIdx(b.dataset.lesson);if(!lessonOpen(i)){SFX.pop();toast('🔒 '+L('앞의 레슨을 먼저 해요!','Finish the lesson before it first!'));return}SFX.click();openLesson(b.dataset.lesson)}));
  const target=PATH_FOCUS?$('unit-'+PATH_FOCUS):$('v-path').querySelector('.node.cur');PATH_FOCUS=null;if(target)setTimeout(()=>target.scrollIntoView({block:'center'}),60)};
 
@@ -2736,7 +3184,7 @@ function lessonDone2(id,r){const l=LESSON_BY[id],prev=S.lessons[id]||{s:0,best:0
  const rec={s:Math.max(prev.s,r.stars),best:Math.max(prev.best||0,r.acc),n:(prev.n||0)+1,pass:prev.pass||r.stars>=1||fails>=3};S.lessons[id]=rec;
  trackStats(r);if(l.a.type==='song')recordSong(l.a.song,r);if(l.a.type==='drum')recordDrum(l.a.pattern,r);
  const xp=10+r.stars*10,coins=r.stars*10+(first&&rec.pass?20:0);const st=first&&rec.pass?giveSticker():null;
- save();try{LR.save()}catch(e){}showResult(r,{teacher:teacherOf(l),title:T(l.t),prevBest:prev.best,first:first&&rec.pass,unlockedByEffort:!r.stars&&fails>=3,xp,coins,sticker:st,
+ save();try{LR.save()}catch(e){}showResult(r,{teacher:teacherOf(l),title:T(l.t),prevBest:prev.best,first:first&&rec.pass,unlockedByEffort:!r.stars&&fails>=3,xp,coins,sticker:st,practice:l.u==='E'&&nrOpen()?openNR:null,
   again:()=>startLessonActivity(id),easy:(l.a.type==='song'||l.a.type==='drum'||l.a.type==='read'||l.a.type==='echo'||l.a.type==='beat')&&r.stars<2?()=>startLessonActivity(id,{easy:true}):null,
   step:l.a.type==='song'&&!l.a.step&&r.stars<2?()=>{const host=playView(T(l.t));RUN={kind:'room'};runActivity({type:'song',song:l.a.song,step:true},host,{teacher:'mia',done:r2=>showResult(r2,{teacher:'mia',title:T(l.t),again:()=>startLessonActivity(id),xp:5,coins:5})})}:null,
   next:rec.pass?()=>{const n=LESSONS[lessonIdx(id)+1];if(n)openLesson(n.id);else go('path')}:null})}
@@ -2749,26 +3197,26 @@ function adviceOf(r){const a=[];
   if(r.m>r.n*.3)a.push('🐢 '+L('놓친 음표가 많아요. “느리게 연습”으로 먼저 익혀요.','Lots of missed notes. Try “Practice slowly” first.'));
   if(r.extra>2)a.push('🤫 '+L('쉼표나 빈 곳에서 친 소리가 있어요. 쉼표에서는 쉬어요!','Some taps landed on rests. Stay quiet on the rests!'))}
  return a}
-function showResult(r,o){stopActivity();const host=$('host')||playView(o.title||'');const t=TEACHERS[o.teacher||'mia'],pct=Math.round(r.acc*100),line=T(pick(t.res[r.stars]));
+function showResult(r,o){stopActivity();const host=$('host')||playView(o.title||'');const t=TEACHERS[o.teacher||'mia'],pct=Math.round(r.acc*100),calm=!!r.nr,line=T(pick(t.res[calm?(r.right>=r.n*.7?3:2):r.stars]));
  const improved=o.prevBest!=null&&o.prevBest>0&&r.acc>o.prevBest+.005,firstTime=o.prevBest==null||o.prevBest===0;
  if(o.xp||o.coins)grant({xp:o.xp||0,coins:o.coins||0});
- const adv=adviceOf(r);
+ const adv=adviceOf(r);if(o.practice)adv.push('🎼 '+L('음표 마을에서 음표 친구를 한 명씩 만나면 오선의 음표를 읽는 힘이 쑥쑥 자라요!','Meet the note friends one at a time in Note Town, and reading notes on the staff gets easier and easier!'));
  host.innerHTML=`<div class="result card">
-  <div class="rstars">${[0,1,2].map(i=>`<span class="${i<r.stars?'on':''}">★</span>`).join('')}</div>
-  <div class="rpct">${r.self?L('잘 해냈어요!','Well done!'):`${pct}%`}</div>
+  ${calm?nrResultHTML(r):`<div class="rstars">${[0,1,2].map(i=>`<span class="${i<r.stars?'on':''}">★</span>`).join('')}</div>`}
+  ${calm?'':`<div class="rpct">${r.self?L('잘 해냈어요!','Well done!'):`${pct}%`}</div>`}
   ${r.timed?`<div class="rchips"><span style="--c:${JCOL.p}">${T(JTXT.p)} ${r.p}</span><span style="--c:${JCOL.g}">${T(JTXT.g)} ${r.g}</span><span style="--c:${JCOL.o}">${T(JTXT.o)} ${r.o}</span><span style="--c:${JCOL.m}">${T(JTXT.m)} ${r.m}</span>${r.maxCombo>=3?`<span style="--c:#ff9f1c">🔥 ${r.maxCombo} ${L('콤보','combo')}</span>`:''}</div>`:r.n&&!r.self?`<div class="rchips"><span style="--c:#3ee07a">✅ ${L(`${r.n}개 중 ${r.right}개`,`${r.right} of ${r.n}`)}</span></div>`:''}
   ${improved?`<div class="growth">📈 ${L(`개인 최고 기록! ${Math.round(o.prevBest*100)}% → ${pct}%`,`New personal best! ${Math.round(o.prevBest*100)}% → ${pct}%`)}</div>`:''}
   ${o.unlockedByEffort?`<div class="growth">💪 ${L('여러 번 노력했으니 다음 레슨도 열어 줄게요!','You worked so hard, the next lesson is open!')}</div>`:''}
   <div class="teach"><span class="tface huge" style="background:${t.bg}">${pic(t.img,t.icon)}</span><div class="say">${esc(line)}</div></div>
-  ${adv.length?`<ul class="advice">${adv.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`:''}${coachLine(r.stars>=3||improved?'up':r.stars>=1?'good':'try')}
+  ${adv.length?`<ul class="advice">${adv.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`:''}${coachLine(calm?(r.nr.grew.length?'up':'good'):r.stars>=3||improved?'up':r.stars>=1?'good':'try')}
   <div class="rewards">${o.xp?`<span>⭐ +${o.xp} XP</span>`:''}${o.coins?`<span>${COIN} +${o.coins}</span>`:''}${o.sticker?`<span class="stk">${o.sticker} ${L('새 스티커!','New sticker!')}</span>`:''}</div>
-  <div class="row rbtns">${o.again?`<button class="btn ghost" id="rAgain" type="button">↻ ${L('다시','Again')}</button>`:''}${o.easy?`<button class="btn ghost" id="rEasy" type="button">🐢 ${L('느리게 연습','Practice slowly')}</button>`:''}${o.step?`<button class="btn ghost" id="rStep" type="button">👣 ${L('기다려 주기 연습','Wait-for-me practice')}</button>`:''}
+  <div class="row rbtns">${o.again?`<button class="btn ghost" id="rAgain" type="button">↻ ${L('다시','Again')}</button>`:''}${o.easy?`<button class="btn ghost" id="rEasy" type="button">🐢 ${L('느리게 연습','Practice slowly')}</button>`:''}${o.step?`<button class="btn ghost" id="rStep" type="button">👣 ${L('기다려 주기 연습','Wait-for-me practice')}</button>`:''}${o.practice?`<button class="btn gold" id="rNR" type="button">🎼 ${L('음표 마을 연습','Note Town practice')}</button>`:''}
    ${o.next?`<button class="btn green" id="rNext" type="button">${o.nextLabel||L('다음 ▶','Next ▶')}</button>`:`<button class="btn gold" id="rDone" type="button">${o.doneLabel||L('확인','Done')}</button>`}</div></div>`;
  host.querySelectorAll('.rstars span.on').forEach((s,i)=>setTimeout(()=>{s.classList.add('pop');SFX.star(i)},300+i*280));
- if(r.stars>=3)setTimeout(()=>celebrate(),400);else if(r.stars>=1)setTimeout(()=>celebrate('stars'),400);
+ if(calm){if(r.nr.grew.length)setTimeout(()=>celebrate('stars'),400)}else if(r.stars>=3)setTimeout(()=>celebrate(),400);else if(r.stars>=1)setTimeout(()=>celebrate('stars'),400);
  speak(line+(adv.length?' '+adv[0]:''));
  const bind=(id,f)=>{const b=$(id);if(b)b.addEventListener('click',()=>{SFX.click();stopVoice();f()})};
- bind('rAgain',o.again);bind('rEasy',o.easy);bind('rStep',o.step);bind('rNext',o.next);bind('rDone',o.done||(()=>back()));
+ bind('rAgain',o.again);bind('rEasy',o.easy);bind('rStep',o.step);bind('rNR',o.practice);bind('rNext',o.next);bind('rDone',o.done||(()=>back()));
  checkTrophies()}
 
 // ---------------------------------------------------------------- daily practice (three short tasks, a chest and the streak)
@@ -2778,7 +3226,8 @@ function makeDaily(){const D=lessonDone,n=doneCount();const tasks=[];
  const sk=[];if(D('b1'))sk.push({spec:{type:'pitch',task:pick(['hl','contour']),count:4},icon:'🎵',t:'소리 높낮이|High or low',teacher:'mia'});
  if(D('b3'))sk.push({spec:{type:'keys',task:'name',count:5},icon:'🎹',t:'건반 찾기|Find the keys',teacher:'mia'});
  if(D('c4'))sk.push({spec:{type:'echo',level:D('c6')?3:1,count:3,bpm:80},icon:'👂',t:'리듬 따라 하기|Copy the rhythm',teacher:'hop'});
- if(D('e2'))sk.push({spec:{type:'notes',range:[60,D('e5')?72:D('e3')?67:64],count:8},icon:'🎼',t:'계이름 읽기|Note reading',teacher:'mia'});
+ // reading notes: a round in note town (twice as likely once the child has started there)
+ if(nrOpen()){const nt={spec:{type:'nr'},icon:'🎼',t:'음표 마을|Note Town',teacher:'mia'};sk.push(nt);if(Object.keys(nrS().n).length)sk.push(nt)}
  if(D('s3'))sk.push({spec:{type:'sing',task:'match',count:3},icon:'🎤',t:'음 따라 부르기|Match the note',teacher:'lala'});
  if(D('g1'))sk.push({spec:{type:'steps',task:'name',count:4},icon:'🪜',t:'반음과 온음|Half and whole steps',teacher:'harmo'});
  const banks=[...new Set(LESSONS.filter(l=>l.a.type==='quiz'&&D(l.id)).map(l=>l.a.bank))];if(banks.length)sk.push({spec:{type:'quiz',bank:pick(banks),count:4},icon:'❓',t:'음악 퀴즈|Music quiz',teacher:'hoot'});
@@ -2795,6 +3244,52 @@ function startDaily(i){const tk=S.daily.tasks[i];if(!tk)return;RUN={kind:'daily'
   showResult(r,{teacher:tk.teacher,title:T(tk.t),xp:was?5:15,coins:was?5:20,again:()=>startDaily(i),next:left?()=>startDaily(S.daily.done.findIndex(x=>!x)):null,nextLabel:L('다음 연습 ▶','Next task ▶'),done:()=>go('home'),doneLabel:left?L('홈으로','Home'):'🎁 '+L('상자 열러 가기','Go open the chest')})}}))}
 function openDailyChest(){if(S.daily.chest)return;S.daily.chest=true;const st=giveSticker();save();grant({coins:60,xp:30});
  modal(`<div class="chest"><div class="big">🎁</div><h2>${L('오늘의 연습 완료!','Practice complete!')}</h2><p>${L('매일 조금씩, 이게 바로 음악가가 되는 길이에요!','A little every day: that’s how musicians are made!')}</p><div class="rewards"><span>${COIN} +60</span><span>⭐ +30 XP</span>${st?`<span class="stk">${st}</span>`:''}</div></div><div class="row"><button class="btn gold" data-act="close" type="button">${L('야호!','Yay!')}</button></div>`,{cls:'pop',onOpen:()=>{SFX.win();celebrate();speak(L('오늘의 연습 완료! 정말 잘했어요!','Practice complete! Great job!'))},onClose:()=>RENDER.home()})}
+
+// ---------------------------------------------------------------- note town: the page with every note friend, and how a round ends
+const nrIcon=lv=>NR_ICON[nrBucket(lv)];
+function nrNextText(){const R=nrS(),ids=NR_ORDER.filter(id=>R.n[id]),met=ids.filter(id=>R.n[id].intro),nx=NR_ORDER.find(id=>!R.n[id]),all=NR_ORDER.length;
+ if(!met.length)return L('✨ 첫 친구 가온 도와 솔이 기다리고 있어요!','✨ Your first friends, middle C and G, are waiting!');
+ if(ids.some(id=>!R.n[id].intro))return L('✨ 새 친구가 기다리고 있어요! 다음 판에서 만나요.','✨ A new friend is waiting for you! Meet it next round.');
+ if(!nx){const k=met.filter(id=>R.n[id].lv>=4).length;return k>=all?L(`⭐ 음표 친구 ${all}명을 모두 읽을 수 있어요! 가끔 들러서 복습해요.`,`⭐ You can read all ${all} note friends! Drop by now and then to review.`)
+  :L(`음표 친구 ${all}명을 모두 만났어요! 다른 날에도 혼자 읽으면 🌷 친구가 ⭐가 돼요. (⭐ ${k}/${all})`,`You’ve met all ${all} note friends! Read them on your own on another day and 🌷 friends become ⭐. (⭐ ${k}/${all})`)}
+ const ready=met.filter(id=>nrReady(R.n[id])).length;
+ if(ready>=met.length)return L('✨ 다음 판에서 새 친구를 만나요!','✨ You’ll meet a new friend next round!');
+ return L(`친구들을 모두 🌷로 키우고 한 번씩 더 혼자 읽으면 새 친구가 와요. (${ready}/${met.length})`,`Grow every friend to 🌷 and read each one on its own once more, and a new friend joins. (${ready}/${met.length})`)}
+function nrSay(){const met=NR_ORDER.filter(id=>nrLv(id)>=0),kn=met.filter(id=>nrLv(id)>=4);
+ if(!met.length)return L('안녕! 오선 위에 사는 음표 친구들을 소개할게요. 첫 친구는 가온 도와 솔이에요. 같이 만나러 가요!','Hi! Let me introduce the note friends who live on the staff. The first ones are middle C and G. Let’s go meet them!');
+ if(kn.length===NR_ORDER.length)return L('와! 음표 친구들을 모두 읽을 수 있어요. 가끔 와서 인사해 주면 친구들을 잊지 않아요!','Wow! You can read every note friend. Drop by now and then so you don’t forget them!');
+ if(!kn.length)return L(`지금까지 음표 친구 ${met.length}명을 만났어요. 오늘도 목소리를 찾아 줄까요?`,`You’ve met ${met.length} note friends so far. Shall we find their voices today?`);
+ return L(`지금까지 음표 친구 ${met.length}명을 만났고, 그중 ${kn.length}명은 혼자 읽을 수 있어요. 오늘도 목소리를 찾아 줄까요?`,`You’ve met ${met.length} note friends so far, and you can read ${kn.length} of them on your own. Shall we find their voices today?`)}
+const nrCounts=()=>{const c=[0,0,0,0,0];NR_ASC.forEach(id=>c[nrBucket(nrLv(id))]++);return c};
+const nrBanner=()=>{const c=nrCounts(),met=NR_ASC.length-c[0];
+ return `<button class="nrban" id="nrBan" type="button"><span class="ic">🎼</span><span class="ct"><b>${L('음표 마을','Note Town')}</b><small>${met?`⭐ ${c[4]} · 🌷 ${c[3]} · 🌱 ${c[1]} · ${L('음표 읽기 연습','note reading practice')}`:L('음표 친구들을 만나 오선 읽기를 배워요!','Meet the note friends and learn to read the staff!')}</small></span><span class="go">▶</span></button>`};
+function nrResultHTML(r){const g=r.nr;
+ const chip=([id,a,b])=>{const m=midiOf(id);return `<span style="color:${nrTxtCol(m)}">${esc(nrNm(m))} ${a<0?'✨':nrIcon(a)}→${nrIcon(b)}</span>`};
+ return `<div class="nr-rhead">🎵 ${L(`목소리를 ${r.n}번 찾아 줬어요!`,`You found ${r.n} voices!`)}</div>
+  <p class="sub">${L(`그중 ${r.right}번은 처음부터 혼자 찾았어요.`,`${r.right} of them all by yourself on the first try.`)}</p>
+  ${g.grew.length?`<div class="nr-grow">${g.grew.map(chip).join('')}</div>`:''}
+  <div class="nr-card">${nrTownSVG()}</div><p class="nr-next">${esc(nrNextText())}</p>`}
+function openNR(){if(!nrOpen()){SFX.pop();toast('🔒 '+L('‘도레미파솔라시도’ 레슨을 마치면 열려요!','Opens after the “Do Re Mi Fa Sol La Ti Do” lesson!'));return}SFX.click();go('notes')}
+function startNR(){RUN={kind:'nr'};const host=playView('🎼 '+L('음표 마을','Note Town'));
+ runActivity({type:'nr'},host,{teacher:'mia',done:r=>{trackStats(r);save();try{LR.save()}catch(e){}
+  showResult(r,{teacher:'mia',title:L('음표 마을','Note Town'),xp:10+r.right*2,coins:10+r.right,again:startNR,done:()=>go('notes',false),doneLabel:L('음표 마을로','Back to Note Town')})}})}
+RENDER.notes=()=>{const c=nrCounts(),t=TEACHERS.mia;
+ $('v-notes').innerHTML=`<div class="room nrhub"><h2 class="h2w">🎼 ${L('음표 마을','Note Town')}</h2>
+  <p class="wsub">${L('음표 친구들은 오선 위 자기 자리에 살아요. 건반을 눌러 목소리를 찾아 주면 친구가 쑥쑥 자라요!','The note friends live at their own places on the staff. Press their keys to give them their voices, and watch them grow!')}</p>
+  <div class="card"><div class="teach"><span class="tface big" style="background:${t.bg}">${pic(t.img,t.icon)}</span><div class="say">${esc(nrSay())}</div></div>
+   <div class="nr-card">${nrTownSVG()}</div>
+   <div class="nr-legend"><span>⭐ ${L('읽을 수 있어요','I can read it')} ${c[4]}</span><span>🌷 ${L('거의 다','Almost there')} ${c[3]}</span><span>🌱 ${L('배우는 중','Learning')} ${c[1]}</span><span>🥚 ${L('아직','Not yet')} ${c[0]}</span></div><p class="sub center" style="margin:6px 0 0">${L('🌷 친구는 다른 날에 또 혼자 읽으면 ⭐가 돼요. 하루에 한 번씩 오면 제일 잘 기억해요!','A 🌷 friend becomes ⭐ when you read it on your own again on another day. Coming back once a day helps you remember best!')}</p>
+   <div class="nr-chips">${NR_ASC.map(id=>{const m=midiOf(id),lv=nrLv(id),i=NR_INFO[id];return `<button type="button" class="nr-chip s${nrBucket(lv)}" data-n="${id}" aria-label="${esc(lv<0?L('아직 만나지 않은 친구','A friend you haven’t met yet'):nrNm(m)+' · '+L(i.pl[0],i.pl[1]))}"><span>${nrIcon(lv)}</span><b>${lv<0?'':esc(nrLab(m))}</b><small>${esc(lv<0?L('아직','not yet'):L(i.s[0],i.s[1]))}</small></button>`}).join('')}</div>
+   <p class="nr-next">${esc(nrNextText())}</p></div>
+  <button class="btn green cta" id="nrPlay" type="button">▶ ${L('음표 친구 만나러 가기 · 약 1분','Meet the note friends · about 1 min')}</button>
+  ${COPYRIGHT()}</div>`;
+ const v=$('v-notes');v.querySelector('#nrPlay').addEventListener('click',()=>{SFX.click();startNR()});
+ // tap a friend you know: it sings, and the teacher says where it lives
+ v.querySelectorAll('[data-n]').forEach(b=>b.addEventListener('click',()=>{const id=b.dataset.n,m=midiOf(id),i=NR_INFO[id];
+  if(nrLv(id)<0){SFX.pop();toast('❔ '+L('아직 만나지 않은 친구예요. 연습하면 곧 만나요!','You haven’t met this friend yet. Keep practicing to meet it soon!'));return}
+  play('piano',m,0,.9,.85);const g=v.querySelector(`.town .nrn[data-m="${m}"]`);if(g){g.classList.remove('sing');void g.getBoundingClientRect();g.classList.add('sing')}const Tn=nrNm(m);
+  const tp=id==='C4'?['피아노 가운데쯤에 있는 도예요','It’s the C near the middle of a piano']:i.tip;
+  speak(L(`${Tn}${nrJ(Tn,'은','는')} ${i.w[0]} 살아요. ${tp[0]}.`,`${nrNm(m,1)} lives ${i.w[1]}. ${tp[1]}.`),{force:true})}))};
 
 // ---------------------------------------------------------------- song room and drum room
 let ROOMOPT={mode:'both',speed:1};
@@ -3044,7 +3539,7 @@ const LR_TALK={
  d1:'드럼 세트에서 가장 낮게 “쿵” 하는 드럼은? 어떻게 쳐?|Which drum in a drum kit makes the deepest boom, and how is it played?|베이스 드럼, 발로 페달을 밟아요|The bass drum; you press a pedal with your foot',
  d4:'드럼의 “필인”은 무슨 신호야?|What does a drum fill tell the band?|곧 다음 부분으로 넘어간다는 신호|That a new part of the song is coming',
  e1:'오선은 줄이 몇 개야? 어느 줄부터 세?|How many lines does a staff have, and which one is line 1?|5개, 맨 아래 줄부터 세요|5 lines, counted from the bottom',
- e2:'가운데 도는 오선의 어디에 그려?|Where is middle C written on the staff?|오선 아래 짧은 덧줄 위|On a short ledger line below the staff',
+ e2:'가온 도(가운데 도)는 오선의 어디에 그려?|Where is middle C written on the staff?|오선 아래 짧은 덧줄 위|On a short ledger line below the staff',
  f1:'4분의 4박자에서 한 마디에 4분음표가 몇 개 들어가?|In 4/4 time, how many quarter notes fit in one bar?|4개|Four',
  f2:'왈츠는 박을 어떻게 세?|How do you count the beat in a waltz?|쿵-짝-짝, 3박자로 세요|In 3: boom-tick-tick',
  g1:'미와 파 사이는 반음일까, 온음일까?|Are E and F (Mi and Fa) a half step or a whole step apart?|반음 (사이에 검은 건반이 없어요)|A half step (there is no black key between them)',
@@ -3075,6 +3570,7 @@ const LR_HOME={
  drum:'무릎이나 쿠션을 두드리며 “쿵-짝 쿵-짝” 리듬을 함께 쳐 보세요.|Tap a boom-clap beat together on your knees or a cushion.',
  harmony:'노래 몇 곡을 들으며 밝은 느낌(장조)인지 슬픈 느낌(단조)인지 이야기해 보세요.|Listen to a few songs and talk about whether each sounds bright (major) or sad (minor).',
  instr:'음악을 들으며 어떤 악기 소리가 들리는지 번갈아 맞혀 보세요.|While listening to music, take turns naming the instruments you hear.',
+ notes:'종이에 줄 다섯 개를 긋고 아이가 아는 음표를 줄이나 칸에 그려 이름을 말해 보게 하세요. 그다음엔 부모님이 그리고 아이가 맞혀 봐요.|Draw five lines on paper. Ask your child to draw a note they know on a line or in a space and name it, then swap: you draw, they name it.',
 };
 const lrTwo=s=>{const i=s.indexOf('|');return [s.slice(0,i),s.slice(i+1)]};
 const lrNum=n=>String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g,',');
@@ -3084,10 +3580,16 @@ function learnSummary(){const N=LESSONS.length,rec=id=>S.lessons[id]||null,mast=
  const areas=LR_AREAS.map(a=>({id:a.id,name:lrTwo(a.name),icon:a.icon,school:lrTwo(a.school),skills:LESSONS.filter(l=>a.ls[l.id]).map(l=>{const r=rec(l.id),st=mast(l.id)?2:tried(l.id)?1:0;
   // practising: how close the best try came to the one-star mark
   const k={id:l.id,name:NAME[l.id],st,p:st===2?1:st?Math.min(.95,Math.round((r.best||0)/.45*100)/100):0},x=LR.stat(l.id);if(x){k.r=x.r;k.w=x.w}return k})}));
+ // note town: one skill per note on the staff. Practising = met; mastered = known (read with no help on two different days).
+ const nrKnown=NR_ASC.filter(id=>nrLv(id)>=4),nrMet=NR_ASC.filter(id=>nrLv(id)>=0),nrShort=id=>lrNote(id).map(x=>x.split(' (')[0]);
+ areas.splice(3,0,{id:'notes',icon:'🎶',name:['오선의 음표 읽기 (음표 마을)','Reading notes on the staff (Note Town)'],school:['초등 음악 · 연주 (악보 읽기)','Music: reading standard notation'],
+  skills:NR_ASC.map(id=>{const lv=nrLv(id),n=nrShort(id),i=NR_INFO[id],k={id:'note-'+id,name:[`${n[0]} (${id}): ${i.pl[0]}`,`${n[1]} (${id}): ${i.pl[1]}`],st:lv>=4?2:lv>=0?1:0,p:lv<0?0:[.1,.25,.5,.75,1][lv]},x=LR.stat('note-'+id);if(x){k.r=x.r;k.w=x.w}return k})});
  const passed=LESSONS.filter(l=>mast(l.id)).length,stars=starTotal(),three=LESSONS.filter(l=>(rec(l.id)||{}).s>=3).length;
  const medals=CONTESTS.map(c=>(S.contests[c.id]||{}).medal||0),mN=medals.filter(m=>m>0).length,mc=k=>medals.filter(m=>m===k).length;
  const songs=Object.keys(SONGS).filter(id=>S.songs[id]&&S.songs[id].n).length,drums=Object.keys(DRUMS).filter(id=>S.drums[id]&&S.drums[id].n).length,st=S.stats||{},facts=[];
  if(passed)facts.push(['🎓',`별을 받고 통과한 레슨 ${passed}개 (전체 ${N}개)`,`${passed} of ${N} lessons passed with stars`]);
+ if(nrKnown.length)facts.push(['🎼',`도움 없이 읽을 수 있는 오선 음표 ${nrKnown.length}개: ${nrKnown.map(id=>nrShort(id)[0]).join('·')}`,`${nrKnown.length} notes read on the staff without help: ${nrKnown.join(', ')}`]);
+ else if(nrMet.length)facts.push(['🎼',`오선 음표 ${nrMet.length}개를 배우는 중 (아직 ‘읽을 수 있음’은 없음)`,`Learning ${nrMet.length} notes on the staff (none fully known yet)`]);
  if(stars)facts.push(['⭐',`모은 별 ${stars}개 · 별 3개를 받은 레슨 ${three}개`,`${stars} stars earned · ${three} lessons with all 3 stars`]);
  if(mN)facts.push(['🏅',`메달을 딴 음악 대회 ${mN}개 (금 ${mc(3)} · 은 ${mc(2)} · 동 ${mc(1)})`,`Medals in ${mN} music contests (${mc(3)} gold, ${mc(2)} silver, ${mc(1)} bronze)`]);
  if(songs||drums)facts.push(['🎹',[songs?`건반으로 연주한 곡 ${songs}곡`:'',drums?`드럼 리듬 ${drums}가지`:''].filter(Boolean).join(' · '),[songs?`${songs} songs played on the keyboard`:'',drums?`${drums} drum patterns played`:''].filter(Boolean).join(' · ')]);
@@ -3097,17 +3599,22 @@ function learnSummary(){const N=LESSONS.length,rec=id=>S.lessons[id]||null,mast=
  const recent=LESSONS.map(l=>l.id).filter(tried).reverse();
  const cand=[...recent.filter(mast),...recent.filter(id=>!mast(id))].filter(id=>LR_TALK[id]),tk=[],seen=new Set();
  cand.forEach(id=>{if(tk.length<4&&!seen.has(AREA[id])){tk.push(id);seen.add(AREA[id])}});cand.forEach(id=>{if(tk.length<4&&!tk.includes(id))tk.push(id)});
- const hz=[...new Set(recent.map(id=>AREA[id]))].slice(0,3);if(!hz.length)hz.push('beat','keys');
+ const hz=[...new Set(recent.map(id=>AREA[id]))].slice(0,3);if(!hz.length)hz.push('beat','keys');if(nrMet.length&&!hz.includes('notes'))hz.unshift('notes');
+ // a note the child reads well, to ask about at home
+ const nrT=[...NR_ORDER].reverse().find(id=>nrLv(id)>=4)||[...NR_ORDER].reverse().find(id=>nrLv(id)>=3),nrTalk=nrT?[[`${NR_INFO[nrT].w[0]} 있는 음은 뭐야? (종이에 오선을 그려 보여 줘도 좋아요)`,`Which note sits ${NR_INFO[nrT].w[1]}? (You can draw a staff on paper to show it.)`,...lrNote(nrT)]]:[];
  const next=[],nl=nextLesson();
  next.push(nl?[`다음 레슨: ${NAME[nl.id][0]}`,`Next lesson: ${NAME[nl.id][1]}`]:[`${N}개 레슨을 모두 마쳤어요. 모든 레슨 별 3개와 대회 금메달에 도전해 보세요`,`All ${N} lessons are finished. Next: 3 stars in every lesson and contest gold`]);
+ const nrNx=NR_ORDER.find(id=>nrLv(id)<0);
+ if(nrMet.length&&nrNx){const n=nrShort(nrNx),i=NR_INFO[nrNx];next.push([`음표 마을에서 만날 다음 음표: ${n[0]} (${nrNx}, ${i.pl[0]})`,`Next note to meet in Note Town: ${n[1]} (${nrNx}, ${i.pl[1]})`])}
+ else if(nrMet.length&&nrKnown.length<nrMet.length)next.push(['음표 마을에서 ‘거의 다’인 음표를 다른 날에도 혼자 읽어 ‘읽을 수 있어요’로 만들기','In Note Town, read the “almost there” notes on your own on another day so they become “known”']);
  const redo=recent.find(id=>!mast(id)&&(!nl||id!==nl.id))||recent.find(id=>(rec(id)||{}).s===1);
  if(redo)next.push(mast(redo)?[`별 더 모으기: ${NAME[redo][0]} (지금 별 1개)`,`Replay for more stars: ${NAME[redo][1]} (1 star so far)`]:[`다시 도전하기: ${NAME[redo][0]} (아직 별 없음)`,`Try again for a first star: ${NAME[redo][1]}`]);
  const ct=CONTESTS.find(c=>contestOpen(c)&&((S.contests[c.id]||{}).medal||0)<3);
  if(ct){const n=lrTwo(ct.name);next.push([`음악 대회 금메달 도전: ${n[0]}`,`Go for gold in a music contest: ${n[1]}`])}
  else next.push(['매일 “오늘의 연습” 세 가지로 연속 연습 이어 가기','Do the three daily practice tasks to keep the streak going']);
  return {v:1,level:[`레슨 ${passed}/${N} 통과 · Lv.${S.lvl}`,`${passed}/${N} lessons passed · Lv. ${S.lvl}`],
-  focus:['62개의 짧은 레슨에서 여섯 선생님 캐릭터와 함께 박 지키기, 리듬과 음표 읽기, 화면 건반으로 쉬운 곡 치기, 음 높이 맞춰 노래하기, 드럼 리듬, 화음, 악기 구별을 익혀요.','In 62 short lessons with six teacher characters, children work on keeping a steady beat, reading rhythms and notes, playing simple songs on an on-screen keyboard, singing in tune, drum patterns, chords and recognizing instruments.'],
-  unit:['문제','questions'],areas,facts:facts.slice(0,6),talk:tk.map(id=>LR_TALK[id].split('|')),home:hz.map(a=>lrTwo(LR_HOME[a])),next:next.slice(0,3)}}
+  focus:['62개의 짧은 레슨에서 여섯 선생님 캐릭터와 함께 박 지키기, 리듬과 음표 읽기, 화면 건반으로 쉬운 곡 치기, 음 높이 맞춰 노래하기, 드럼 리듬, 화음, 악기 구별을 익혀요. 음표 마을에서는 오선의 음표를 하나씩 보고, 듣고, 건반으로 쳐 보며 읽는 법을 익혀요.','In 62 short lessons with six teacher characters, children work on keeping a steady beat, reading rhythms and notes, playing simple songs on an on-screen keyboard, singing in tune, drum patterns, chords and recognizing instruments. In Note Town they learn to read notes on the staff one at a time: see the note, hear it, then play it on the keys.'],
+  unit:['문제','questions'],areas,facts:facts.slice(0,6),talk:[...nrTalk,...tk.map(id=>LR_TALK[id].split('|'))].slice(0,4),home:hz.slice(0,3).map(a=>lrTwo(LR_HOME[a])),next:next.slice(0,3)}}
 
 // ---------------------------------------------------------------- start
 function returnGreeting(){const gap=daysSince(S.streak.last);if(S.intro&&S.streak.last&&gap>=3){const t=TEACHERS[pick(Object.keys(TEACHERS))];

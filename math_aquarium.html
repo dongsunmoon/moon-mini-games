@@ -315,7 +315,7 @@ main{width:min(780px,100%);margin:0 auto;padding:10px max(12px,env(safe-area-ins
 .bb-t{flex:1;min-width:0;display:flex;flex-direction:column}.bb-t b{font-size:18px}.bb-t small{font-size:13px;font-weight:700;opacity:.92;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.bb-go{font-size:22px}
 @keyframes pulse{50%{transform:scale(1.015)}}
 .replay{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:10px}.replay button{border:0;border-radius:12px;background:#fff;box-shadow:0 3px 0 #d8e3f7;padding:6px 2px;font-size:20px;display:flex;flex-direction:column;align-items:center}.replay small{font-size:12px;min-height:14px;line-height:1.2}
-.tanks{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0}
+.tanks{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:12px 0}
 .tank{position:relative;border-radius:18px;padding:6px;background:linear-gradient(180deg,#2f4f7a,#1e3558);box-shadow:0 6px 16px rgba(10,40,90,.25);cursor:pointer;transition:transform .15s}
 .tank:active{transform:scale(.98)}.tank.wide{grid-column:1/-1}
 .water{position:relative;height:122px;border-radius:13px;overflow:hidden;background:linear-gradient(180deg,var(--w1,#4cb4ff),var(--w2,#0b3d7a))}
@@ -347,7 +347,7 @@ main{width:min(780px,100%);margin:0 auto;padding:10px max(12px,env(safe-area-ins
 .lobby{position:relative;height:70px;border-radius:16px;overflow:hidden;margin:4px 0 10px;background:linear-gradient(180deg,#fff7e6,#ffe9c4);box-shadow:inset 0 -14px 0 #f1d39a}
 .lobby .floor{position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent 0 40px,#00000008 40px 41px)}
 .vis-p{position:absolute;left:-40px;font-size:30px;line-height:1;animation:walk var(--dur) linear forwards;display:flex;align-items:flex-end;will-change:transform}
-.vis-p i{font-style:normal;display:block;animation:step .5s ease-in-out infinite}.vis-p b{font-size:16px;margin-left:-6px}
+.vis-p i{font-style:normal;display:flex;align-items:flex-end;animation:step .5s ease-in-out infinite}.vis-p b{font-size:16px;margin-left:-6px}
 @keyframes walk{to{transform:translateX(calc(var(--lw,400px) + 80px))}}@keyframes step{50%{transform:translateY(-3px)}}
 .tip::before{content:"";position:absolute;inset:-5px}
 .tip{position:absolute;left:4px;top:-30px;border:0;background:#fff;border-radius:50%;width:34px;height:34px;font-size:19px;box-shadow:0 3px 10px rgba(0,0,0,.2);animation:bounce 1s ease-in-out infinite}
@@ -574,6 +574,18 @@ button:focus-visible,a:focus-visible,[tabindex]:focus-visible{outline:3px solid 
 /* staff pictures */
 .stpic{display:block;object-fit:contain;-webkit-user-drag:none;user-select:none}
 .lic .stpic{width:46px;height:46px}.cav .stpic{width:84px;height:84px;margin:0 auto}.big .stpic.hero{width:150px;height:150px;margin:0 auto;animation:pop .6s ease-out}
+/* coin and pearl pictures in text, decorations, cars and lobby visitors (each falls back to its emoji) */
+img.cur{display:inline-block;width:auto!important;height:1.25em;vertical-align:-.28em;object-fit:contain;-webkit-user-drag:none;user-select:none}
+.pill img.cur{height:24px;vertical-align:middle}
+.dpic,.carpic,.vpic{display:block;object-fit:contain;-webkit-user-drag:none;user-select:none}
+.decor .dpic{height:32px;width:auto}.tank.wide .decor .dpic{height:38px}.tankbig .decor .dpic{height:46px}
+.sitem .dpic,.sitem .carpic{width:84px;height:56px}
+.chip .dpic{display:inline-block;height:26px;width:auto;vertical-align:middle}
+.node .car .carpic{width:44px;transform:translateY(4px)}
+.carshow .carpic{height:104px;width:auto;filter:drop-shadow(0 6px 6px rgba(0,0,0,.18))}
+.big .carpic.hero{width:170px;margin:0 auto}.bb-ic .carpic{width:48px}
+.vis-p .vpic{height:42px;width:auto}.vis-p .vpic.kid{height:35px}.vis-p .vpic+.vpic{margin-left:-10px}.vis-p i.roll{animation:none}
+@media (min-width:700px){.decor .dpic{height:38px}.tank.wide .decor .dpic{height:44px}}
 .mav img{object-fit:cover;object-position:50% 18%}
 .mepic{display:block;-webkit-user-drag:none;user-select:none}
 .meav{overflow:hidden}.meav .mepic,.lvl .badge .mepic{width:100%;height:100%;object-fit:cover;object-position:50% 12%;border-radius:50%}
@@ -677,8 +689,8 @@ button:focus-visible,a:focus-visible,[tabindex]:focus-visible{outline:3px solid 
  <a class="hbtn" id="homeBtn" href="index.html" aria-label="게임 목록" data-en-aria-label="All games">🏠</a>
  <button class="lvl" id="hudLvlBtn" type="button"><span class="badge"><span id="hudAv">🧒</span><b id="hudLvl">1</b></span><span class="info"><span class="name"><span id="hudName"></span> <small id="hudTitle"></small></span><span class="xpbar"><i id="hudXp"></i></span></span></button>
  <div class="pills">
-  <button class="pill" id="hudCoinPill" type="button" aria-label="코인" data-en-aria-label="Coins">🪙<b id="hudCoins">0</b></button>
-  <button class="pill" id="hudPearlPill" type="button" aria-label="진주" data-en-aria-label="Pearls">🫧<b id="hudPearls">0</b></button>
+  <button class="pill" id="hudCoinPill" type="button" aria-label="코인" data-en-aria-label="Coins"><img class="cur" src="images/coin.webp" alt="" draggable="false" onerror="this.replaceWith('🪙')"><b id="hudCoins">0</b></button>
+  <button class="pill" id="hudPearlPill" type="button" aria-label="진주" data-en-aria-label="Pearls"><img class="cur" src="images/aq-pearl.webp" alt="" draggable="false" onerror="this.replaceWith('🫧')"><b id="hudPearls">0</b></button>
   <button class="pill" id="hudTicketPill" type="button" aria-label="바다 티켓" data-en-aria-label="Sea tickets">🎫<b id="hudTickets">0</b></button>
   <button class="pill streak" id="hudStreakPill" type="button" aria-label="연속 공부" data-en-aria-label="Streak">🔥<b id="hudStreak">0</b></button>
  </div>
@@ -9106,8 +9118,10 @@ const put=(c,sp,x,y)=>c.drawImage(sp.cv,x-sp.w/2,y-sp.h/2,sp.w,sp.h);
 function fspr(id,dark){const key=id+(dark?'#':'');if(FSPR[key])return FSPR[key];let im=null;try{im=fishImg(id)}catch(e){}
  if(!im||!im.complete||!im.naturalWidth)return null;const cv=mk(330,220),c=cv.getContext('2d');try{c.drawImage(im,0,0,330,220)}catch(e){return null}
  if(dark){c.globalCompositeOperation='source-in';c.fillStyle='rgba(12,30,62,.9)';c.fillRect(0,0,330,220)}return FSPR[key]=cv}
-// staff pictures (images/aq-staff-<animal>.webp) are busts: they stand on little legs, or behind a counter
-const SIM={};function staffImg(key){if(!key)return null;let im=SIM[key];if(!im){im=SIM[key]=new Image();im.src=`images/aq-staff-${key}.webp`}return im.complete&&im.naturalWidth?im:null}
+// painted pictures (images/<name>.webp) load once and are drawn when ready; until then, or if one fails, the emoji is drawn
+const SIM={};function picImg(name){if(!name)return null;let im=SIM[name];if(!im){im=SIM[name]=new Image();im.src=`images/${name}.webp`}return im.complete&&im.naturalWidth?im:null}
+// staff and visitor pictures (aq-staff-<animal>, aq-visitor-<key>) are busts: they stand on little legs, or behind a counter
+const staffImg=key=>key?picImg('aq-staff-'+key):null;
 // the child: their profile animal as a little aquarium director (images/aq-me-<key>.webp, helpers in core.js).
 // If the picture cannot load, a chibi director is drawn; avatars that are not a front-facing face (🦄🐙🐬🦖⭐) ride on the chest badge.
 const FACES=new Set(['🐰','🐻','🦊','🐼','🐨','🐯','🦁','🐸','🐱','🐶','🐥','🐮','🐷','🐵','🐹','🐭','🧒','👧','👦','🧑','👩','👨','👶','👱','👱‍♀️','👩‍🦰','👨‍🦱']);
@@ -9180,8 +9194,8 @@ function buildStaff(){const a=W.a;W.staff=[];const n={};
 // ---------------------------------------------------------------- people
 function mkPerson(o){const head=o.head||pk(HEADS);return {x:0,y:530,dir:1,ph:rnd(0,6),moving:false,head,shirt:o.shirt||pk(SHIRTS),pants:o.pants||pk(PANTS),s:o.s||(KIDS.has(head)?.82:1),sp:rnd(70,100),stops:[],si:0,wait:0,held:'',emo:'',emoT:0,badge:''}}
 // a visitor pays at the booth, looks at a few tanks, shops where they bought, maybe uses the restroom, then heads back out
-function spawn(v,mid){if(!W)return;if(W.people.filter(p=>!p.ask).length>=16)return;const a=W.a,p=mkPerson({});p.kind='vis';p.x=118;p.y=rnd(505,565);
- const st=[{x:W.secs[0].x0+360+rnd(-24,24),y:Y0+rnd(4,16),wait:1,on:q=>{if(v&&v.c&&Math.random()<.4)pop(q.x,q.y-130,`+${short(v.c)} ${COIN}`)}}];
+function spawn(v,mid){if(!W)return;if(W.people.filter(p=>!p.ask).length>=16)return;const a=W.a,p=mkPerson({});p.kind='vis';p.vk=VIS_KEY[p.head]||'';p.x=118;p.y=rnd(505,565);
+ const st=[{x:W.secs[0].x0+360+rnd(-24,24),y:Y0+rnd(4,16),wait:1,on:q=>{if(v&&v.c&&Math.random()<.4)pop(q.x,q.y-130,`+${short(v.c)} ${COIN_T}`)}}];
  const open=[];for(let k=0;k<Math.min(4,a.open);k++)open.push(k);open.sort(()=>Math.random()-.5);
  for(const k of open.slice(0,Math.max(1,Math.round(rnd(1,Math.min(3,open.length)))))){const s=W.secs.find(x=>x.k===k);st.push({x:s.cx+rnd(-110,110),y:rnd(Y0+2,Y0+40),wait:rnd(2.5,5),on:q=>emote(q,pk(['😍','🤩','😮','👀','💙','🥰']))})}
  for(const f of (v&&v.bought)||[]){const s=secOf(f);if(!s)continue;st.push({x:s.cx+rnd(-60,60),y:Y0+rnd(2,10),wait:rnd(2,3.5),on:q=>{q.held=pk(HELD[f]);if(Math.random()<.1)dropTrash(q)}})}
@@ -9286,8 +9300,8 @@ function panel(){const s=W.cur;if(!s)return;const {g,i}=W,a=W.a,r=REQ;let ic='',
 function marks(){const a=W.a,r=REQ;const cls=W.secs.map(s=>{let c='';if(s.kind==='claw'&&!UNLOCK.claw()||s.k!=null&&a.open<=s.k||s.f&&s.f!=='toilet'&&!S.fac[s.f]||s.f==='toilet'&&!UNLOCK.toilet())c='lock';
   if(r&&(r.f===s.f||r.f==='ticket'&&s.kind==='entry'))c+=' ask';else if(s.k!=null&&hungry(a,s.k)&&UNLOCK.feed()||s.f==='toilet'&&UNLOCK.toilet()&&a.dirt>60)c+=' warn';return c});
  const sig=cls.join('|');if(sig===W.mapSig)return;W.mapSig=sig;W.el.map.querySelectorAll('button').forEach((b,j)=>b.className=cls[j])}
-function hud(){W.el.coins.textContent=`${COIN} ${short(S.coins)}`;const w=S.walk,n=w.day===dayKey()?W.secs.filter(x=>w.been.includes(W.d.key+':'+x.i)).length:0;
- const sub=w.toured&&w.day===dayKey()?`🚶 ${L('오늘 한 바퀴 완료!','Tour done today!')}`:`🚶 ${L('한 바퀴','Tour')} ${n}/${W.secs.length} · ${L('다 돌면','finish for')} ${PEARL}+1`;if(W.el.sub.textContent!==sub)W.el.sub.textContent=sub}
+function hud(){const ch=`${COIN} ${short(S.coins)}`;if(W.el.coins._h!==ch){W.el.coins._h=ch;W.el.coins.innerHTML=ch}const w=S.walk,n=w.day===dayKey()?W.secs.filter(x=>w.been.includes(W.d.key+':'+x.i)).length:0;
+ const sub=w.toured&&w.day===dayKey()?`🚶 ${L('오늘 한 바퀴 완료!','Tour done today!')}`:`🚶 ${L('한 바퀴','Tour')} ${n}/${W.secs.length} · ${L('다 돌면','finish for')} ${PEARL}+1`;if(W.el.sub._h!==sub){W.el.sub._h=sub;W.el.sub.innerHTML=sub}}
 function meDot(){const cs=W.secs.map(s=>s.cx),n=cs.length,x=W.me.x;let f;if(x<=cs[0])f=.5;else if(x>=cs[n-1])f=n-.5;else{let j=0;while(cs[j+1]<x)j++;f=j+.5+(x-cs[j])/(cs[j+1]-cs[j])}
  const px=f/n*W.mapW;if(Math.abs(px-W.mePx)>.5){W.mePx=px;W.el.me.style.transform=`translateX(${px.toFixed(1)}px)`}}
 
@@ -9363,7 +9377,8 @@ function sign(c,cx,cy,text,bg,maxW){const sp=fit(text,26,'#ffffff',maxW,{stroke:
 function awning(c,x,y,w,h,col){const n=Math.max(4,Math.round(w/34)),sw=w/n;for(let j=0;j<n;j++){c.fillStyle=j%2?'#ffffff':col;c.fillRect(x+j*sw,y,sw+.6,h);c.beginPath();c.arc(x+j*sw+sw/2,y+h,sw/2,0,Math.PI);c.fill()}c.fillStyle='rgba(0,0,0,.1)';c.fillRect(x,y,w,5)}
 function pillar(c,x){const t=W.col.trim;c.fillStyle=shade(t,-.15);c.fillRect(x-15,56,30,FY-56);c.fillStyle='rgba(255,255,255,.22)';c.fillRect(x-11,56,7,FY-56);
  c.fillStyle=shade(t,-.32);c.fillRect(x-20,56,40,12);c.fillRect(x-20,FY-16,40,16);dot(c,x,172,26,'rgba(255,240,180,.22)');dot(c,x,172,8,'#fff3c0')}
-function plant(c,x,j){const d=W.d,key=j%4===1?d.deco:d.deco2,e=DECO_E[key]||'🌿';
+function plant(c,x,j){const d=W.d,key=j%4===1?d.deco:d.deco2,e=DECO_E[key]||'🌿',im=DECO_E[key]&&picImg('aq-plant-'+key);
+ if(im){const h=POTTED.has(key)?104:92,w=h*im.naturalWidth/im.naturalHeight;c.drawImage(im,x-w/2,FY+24-h,w,h);return}
  if(POTTED.has(key)){put(c,emo(e,64),x,FY-26);c.fillStyle='#d9774a';c.beginPath();c.moveTo(x-20,FY-4);c.lineTo(x+20,FY-4);c.lineTo(x+15,FY+22);c.lineTo(x-15,FY+22);c.closePath();c.fill();c.fillStyle='#f0905e';c.fillRect(x-22,FY-8,44,8)}
  else put(c,emo(e,54),x,FY-2)}
 function badge(c,x,y,t){dot(c,x,y,17,'#ffffff');dot(c,x,y,14,W.col.trim);put(c,txt(t,17,'#ffffff'),x,y)}
@@ -9371,14 +9386,15 @@ function badge(c,x,y,t){dot(c,x,y,17,'#ffffff');dot(c,x,y,14,W.col.trim);put(c,t
 function entry(c,s){const R_=W.R,col=W.col,dx=s.x0+40,dw=180,dy=152;
  c.fillStyle=shade(col.trim,-.25);rr(c,dx-10,dy-10,dw+20,FY-dy+12,14);c.fill();
  c.save();rr(c,dx,dy,dw,FY-dy,8);c.clip();c.fillStyle=W.gOut;c.fillRect(dx,dy,dw,FY-dy);dot(c,dx+140,dy+46,18,'#fff4a8');
- put(c,emo(DECO_E[W.d.deco]||'🌴',70),dx+46,FY-78);c.fillStyle='rgba(255,255,255,.2)';c.beginPath();c.moveTo(dx+20,dy);c.lineTo(dx+70,dy);c.lineTo(dx+10,FY);c.lineTo(dx-40,FY);c.closePath();c.fill();c.restore();
+ {const im=DECO_E[W.d.deco]&&picImg('aq-plant-'+W.d.deco);if(im){const h=104,w=h*im.naturalWidth/im.naturalHeight;c.drawImage(im,dx+46-w/2,FY-34-h,w,h)}else put(c,emo(DECO_E[W.d.deco]||'🌴',70),dx+46,FY-78)}c.fillStyle='rgba(255,255,255,.2)';c.beginPath();c.moveTo(dx+20,dy);c.lineTo(dx+70,dy);c.lineTo(dx+10,FY);c.lineTo(dx-40,FY);c.closePath();c.fill();c.restore();
  c.fillStyle=shade(col.trim,-.25);c.fillRect(dx+dw/2-3,dy,6,FY-dy);c.fillStyle='#e8eef8';rr(c,dx+dw/2-17,dy+140,8,44,4);c.fill();rr(c,dx+dw/2+9,dy+140,8,44,4);c.fill();
  sign(c,dx+dw/2,100,`${R_.flag} ${W.d.name}`,col.trim,250);
  const bx=s.x0+272,bw=176,cx=bx+bw/2;sign(c,cx,152,`🎫 ${L('매표소','Tickets')}`,shade(col.trim,-.15),160);awning(c,bx-8,184,bw+16,36,col.trim);
  c.fillStyle=mix(col.trim,'#ffffff',.72);c.fillRect(bx,220,bw,FY-220);c.fillStyle=shade(col.wall,-.5);rr(c,bx+16,236,bw-32,104,10);c.fill();
  const cs=W.staff.find(p=>p.bust&&p.role==='cashier');if(cs)person(c,cs);else put(c,emo('🛎️',26),cx+44,322);
  c.fillStyle=shade(col.trim,.35);rr(c,bx-6,334,bw+12,16,6);c.fill();c.fillStyle=col.trim;c.fillRect(bx,350,bw,FY-350);c.fillStyle='rgba(255,255,255,.16)';c.fillRect(bx,350,bw,14);
- put(c,emo('🎫',36),cx-40,398);put(c,txt(`${COIN}${short(ticketPrice(W.g,W.i))}`,20,'#ffffff',{stroke:'rgba(0,0,0,.25)'}),cx+26,398)}
+ put(c,emo('🎫',36),cx-40,398);const ci=picImg('coin'),pt=txt(`${ci?'':COIN_T}${short(ticketPrice(W.g,W.i))}`,20,'#ffffff',{stroke:'rgba(0,0,0,.25)'});
+ if(ci){const x0=cx+26-(pt.w+18)/2;c.drawImage(ci,x0,386,24,24);put(c,pt,x0+18+pt.w/2,398)}else put(c,pt,cx+26,398)}
 function winPath(c,x,y,w,h,shape){if(shape==='arch'){const ah=Math.min(h*.36,92);c.beginPath();c.moveTo(x,y+h);c.lineTo(x,y+ah);c.ellipse(x+w/2,y+ah,w/2,ah,0,Math.PI,TAU);c.lineTo(x+w,y+h);c.closePath()}else rr(c,x,y,w,h,shape==='port'?Math.min(w,h)*.3:20)}
 function tankSec(c,s){const a=W.a,k=s.k,b=s.win,open=a.open>k,shape=W.d.win;
  c.fillStyle=shade(W.col.trim,-.22);winPath(c,b.x-14,b.y-14,b.w+28,b.h+28,shape);c.fill();
@@ -9395,7 +9411,8 @@ function water(c,s){const b=s.win,k=s.k,T=W.tanks[k],w=b.w,h=b.h,t=W.t;
  for(let j=0;j<3;j++){const x=(t*14+j*130+k*40)%(w+160)-80;c.beginPath();c.moveTo(x,0);c.lineTo(x+44,0);c.lineTo(x+110,h);c.lineTo(x+40,h);c.closePath();c.fill()}
  c.fillStyle=W.gSand;c.beginPath();c.moveTo(0,h-38);c.quadraticCurveTo(w*.3,h-54,w*.55,h-40);c.quadraticCurveTo(w*.8,h-28,w,h-44);c.lineTo(w,h);c.lineTo(0,h);c.closePath();c.fill();
  c.lineCap='round';c.lineWidth=7;for(let j=0;j<4;j++){const x=w*(.07+j*.29)+(k*13%20),hh=58+(j*37+k*11)%50,sw=Math.sin(t*1.3+j*1.7)*10;c.strokeStyle=j%2?'#2fae5a':'#3cc070';c.beginPath();c.moveTo(x,h-30);c.quadraticCurveTo(x+sw,h-30-hh*.5,x+sw*1.6,h-30-hh);c.stroke()}
- const dec=W.a.decor[k];dec.forEach((id,j)=>{const D=DECOR_BY[id];if(D)put(c,emo(D.icon,40),w*(j+1)/(dec.length+1),h-36)});
+ const dec=W.a.decor[k];dec.forEach((id,j)=>{const D=DECOR_BY[id];if(!D)return;const x=w*(j+1)/(dec.length+1),im=picImg('aq-deco-'+id);
+  if(im){const dw=78,dh=dw*im.naturalHeight/im.naturalWidth;c.drawImage(im,x-dw/2,h-10-dh,dw,dh)}else put(c,emo(D.icon,40),x,h-36)});
  for(const f of T.food)dot(c,f.x,f.y,3.6,'#c8762a');
  for(const f of T.fish)fish(c,f);
  c.strokeStyle='rgba(255,255,255,.6)';c.lineWidth=1.6;for(let j=0;j<6;j++){const x=(j*67+k*41)%w+Math.sin(t*2+j)*4,y=h-(t*38+j*61)%h;c.beginPath();c.arc(x,y,3+j%3,0,TAU);c.stroke()}
@@ -9410,7 +9427,8 @@ function tunnel(c,s){const a=W.a,b=s.win,col=W.col;if(a.open<5){curtain(c,s);ret
  c.save();c.beginPath();c.rect(b.x,top,b.w,FY-top);c.clip();c.fillStyle=W.gTun;c.fillRect(b.x,top,b.w,FY-top);
  c.fillStyle='rgba(255,255,255,.06)';for(let j=0;j<6;j++){const x=b.x+(t*16+j*230)%(b.w+300)-150;c.beginPath();c.moveTo(x,top);c.lineTo(x+60,top);c.lineTo(x+170,FY);c.lineTo(x+70,FY);c.closePath();c.fill()}
  c.fillStyle=W.gTunSand;c.beginPath();c.moveTo(b.x,FY);for(let x=0;x<=b.w;x+=60)c.lineTo(b.x+x,FY-44-Math.sin(x*.021)*14-Math.sin(x*.057)*8);c.lineTo(b.x+b.w,FY);c.closePath();c.fill();
- ['🪸','🌿','🪨','🐚','🪸','🌿'].forEach((e,j)=>{for(let x=b.x+60+j*170;x<b.x+b.w;x+=1020)put(c,emo(e,j%3===2?34:44),x,FY-40-(j%2)*8)});
+ [['coral','🪸'],['weed','🌿'],['rock','🪨'],['shell','🐚'],['coral','🪸'],['weed','🌿']].forEach(([id,e],j)=>{const im=picImg('aq-deco-'+id),sz=j%3===2?34:44;
+  for(let x=b.x+60+j*170;x<b.x+b.w;x+=1020){const y=FY-40-(j%2)*8;if(im){const dw=sz*2,dh=dw*im.naturalHeight/im.naturalWidth;c.drawImage(im,x-dw/2,y+sz*.55-dh,dw,dh)}else put(c,emo(e,sz),x,y)}});
  c.translate(b.x,b.y);
  const sh=fspr(W.d.star,true);if(sh){const u=(t*.022)%1.4-.2,dir=Math.floor(t*.022/1.4)%2?-1:1,x=dir>0?u*b.w:(1-u)*b.w,fw=360;c.save();c.globalAlpha=.16;c.translate(x,120+Math.sin(t*.4)*14);if(dir<0)c.scale(-1,1);c.drawImage(sh,-fw/2,-fw/3,fw,fw*2/3);c.restore()}
  // a shimmering school of little silver fish
@@ -9483,7 +9501,7 @@ function person(c,p){const s=(p.bust?1:scaleAt(p.y))*(p.s||1),mv=p.moving?1:0,sw
  c.save();c.translate(p.x,p.y);c.scale(s,s);
  if(!p.bust){oval(c,0,0,20,5.5,'rgba(20,30,60,.2)');c.lineCap='round';c.strokeStyle=p.pants;c.lineWidth=8;c.beginPath();c.moveTo(-5,-26);c.lineTo(-5+sw*7,-5);c.moveTo(5,-26);c.lineTo(5-sw*7,-5);c.stroke();
   oval(c,-5+sw*7+dir*2,-3,5.5,3.2,'#3a3f58');oval(c,5-sw*7+dir*2,-3,5.5,3.2,'#3a3f58')}
- const pim=p.pic&&staffImg(p.pic);
+ const pim=p.pic?staffImg(p.pic):p.vk?picImg('aq-visitor-'+p.vk):null;
  if(pim){const w=p.bust?76:70,h=w*pim.naturalHeight/pim.naturalWidth,by=p.bust?10:-22-bob;c.drawImage(pim,-w/2,by-h,w,h);
   if(p.held)put(c,emo(p.held,24),dir*31,by-20);if(p.badge){dot(c,-w*.34,by-16,11,'#ffffff');put(c,emo(p.badge,15),-w*.34,by-16)}c.restore();return}
  const ty=(p.bust?0:-26-bob)-38;if(!p.g||p.gb!==!!p.bust){p.gb=!!p.bust;p.g=lg(c,-16,ty,16,ty+40,[[0,shade(p.shirt,.32)],[1,shade(p.shirt,-.18)]])}
@@ -9702,7 +9720,10 @@ const weekKey=(d=new Date())=>{const t=new Date(d.getFullYear(),d.getMonth(),d.g
 const now=()=>Date.now();
 const T=pair=>L(pair[0],pair[1]);
 const fill=(s,o)=>String(s).replace(/\{(\w+)\}/g,(_,k)=>o[k]??'');
-const COIN='🪙',PEARL='🫧',TICKET='🎫';
+const COIN_T='🪙',PEARL_T='🫧',TICKET='🎫';
+// coins and pearls show as little pictures in the page (the emoji stands in if one cannot load); canvas and plain text use COIN_T / PEARL_T
+const curPic=(src,e)=>`<img class="cur" src="${src}" alt="${e}" draggable="false" onerror="this.replaceWith('${e}')">`;
+const COIN=curPic('images/coin.webp',COIN_T),PEARL=curPic('images/aq-pearl.webp',PEARL_T);
 const COPYRIGHT=()=>`<footer class="copy">© 2026 Dongsun Moon. ${L('모든 권리 보유.','All rights reserved.')}<br>${L('문제, 그림, 캐릭터, 소리는 이 게임을 위해 새로 만들었어요. 게임 속 동물은 한국이나 캐나다에 실제로 사는 동물이에요(전설의 바다 친구 6마리는 상상 속 동물이에요).','Questions, art, characters and sounds were made for this game. The animals really live in Korea or Canada (the six legendary sea creatures are made up).')}</footer>`;
 
 // ---------------------------------------------------------------- save (one save per profile picked on the main page)
@@ -11258,7 +11279,9 @@ const ITEMS=[
 const ITEM_BY={};ITEMS.forEach(x=>ITEM_BY[x.id]=x);
 const DECOR=[['weed','🌿','해초','Seaweed',40],['rock','🪨','바위','Rock',40],['shell','🐚','조개','Shell',60],['flower','🌺','바다꽃','Sea flower',90],['coral','🪸','산호','Coral',120],['bubbler','🫧','기포기','Bubbler',150],['anchor','⚓','닻','Anchor',180],['castle','🏰','모래성','Sandcastle',220],['statue','🗿','돌 석상','Stone statue',260],['ship','🚢','난파선','Shipwreck',320],['chest','💎','보물상자','Treasure chest',400],['star','🌟','반짝 별','Shiny star',500]];
 const DECOR_BY={};DECOR.forEach(x=>DECOR_BY[x[0]]={id:x[0],icon:x[1],ko:x[2],en:x[3],cost:x[4]});
-const CARS=[['van','🚐','미니밴','Minivan',0],['suv','🚙','지프','Jeep',600],['truck','🚚','수족관 트럭','Aquarium truck',1500],['bus','🚌','관광버스','Tour bus',3000],['pickup','🛻','픽업트럭','Pickup',5000],['sport','🏎️','스포츠카','Sports car',9000],['tractor','🚜','트랙터','Tractor',2500]];
+// decoration pictures live in images/aq-deco-<id>.webp; the emoji stands in if one cannot load
+const decoPic=(id,cls='')=>{const D=DECOR_BY[id];return D?`<img class="dpic ${cls}" src="images/aq-deco-${id}.webp" alt="" draggable="false" onerror="this.replaceWith('${D.icon}')">`:''};
+const CARS=[['van','🚐','미니밴','Minivan',0],['suv','🚙','오프로드 차','Off-roader',600],['truck','🚚','수족관 트럭','Aquarium truck',1500],['bus','🚌','관광버스','Tour bus',3000],['pickup','🛻','픽업트럭','Pickup',5000],['sport','🏎️','스포츠카','Sports car',9000],['tractor','🚜','트랙터','Tractor',2500]];
 const CAR_COLORS=['#ff6a5a','#4cb4ff','#3ccf7a','#ffd23f','#a66bff','#ff8ad8','#ffffff','#2a2f45'];
 
 // ---------------------------------------------------------------- staff (cute animals you hire)
@@ -11287,6 +11310,9 @@ const mePic=(cls='')=>{const k=meKey(S.av);return ME_HAVE.has(k)?`<img class="me
 // staff pictures live in images/aq-staff-<animal>.webp; the animal emoji stands in if one cannot load
 const staffKey=x=>String(x.ae||'').toLowerCase().replace(/[^a-z]/g,'');
 const staffPic=(x,cls='')=>`<img class="stpic ${cls}" src="images/aq-staff-${staffKey(x)}.webp" alt="" draggable="false" onerror="this.replaceWith('${x.av}')">`;
+// visitor pictures (images/aq-visitor-<key>.webp) are waist-up busts too, one per visitor emoji; the emoji stands in if one cannot load
+const VIS_KEY={'🧒':'kid','👧':'girl','👦':'boy','👩':'woman','👨':'man','👵':'grandma','👴':'grandpa','🧑':'adult','👩‍🦰':'redhair','👨‍🦱':'curly','🧕':'hijab','👲':'cap','👱‍♀️':'blond','🧔':'beard','🧑‍🦽':'wheelchair'};
+const visPic=(e,cls='')=>{const k=VIS_KEY[e];return k?`<img class="vpic ${['kid','girl','boy'].includes(k)?'kid':''} ${cls}" src="images/aq-visitor-${k}.webp" alt="" draggable="false" onerror="this.replaceWith('${e}')">`:e};
 
 // ---------------------------------------------------------------- facilities (one brand: levels count in every aquarium)
 const FAC={ticket:{icon:'🎫',ko:'매표소',en:'Ticket booth',base:120},toilet:{icon:'🚻',ko:'화장실',en:'Restrooms',base:100},snack:{icon:'🍦',ko:'매점',en:'Snack bar',base:150},gift:{icon:'🎁',ko:'기프트샵',en:'Gift shop',base:260},mart:{icon:'🛒',ko:'마트',en:'Mart',base:380}};
@@ -11711,7 +11737,7 @@ function swimmersHTML(list){return list.slice(0,7).map((id,j)=>{const w=fishW(id
 function tankHTML(g,i,k){const a=aqState(g,i),d=aqDef(g,i),R_=REGIONS[g],id=d.tanks[k];
  if(a.open<=k){const nextS=k===a.open;return `<div class="tank locked ${k===4?'wide':''}" data-a="tank" data-k="${k}"><div class="water" style="--w1:${R_.water[0]};--w2:${R_.water[1]}"><span class="ghost">${fishImgTag(id,'shadow')}</span></div><div class="tlabel">🔒 ${L(`${k+1}번 수조`,`Tank ${k+1}`)} · ${nextS?`<b>${STAGES[k].icon} ${stageName(k)}</b>`:L('잠겨 있어요','locked')}</div></div>`}
  const hungryNow=hungry(a,k)&&UNLOCK.feed();
- return `<div class="tank ${k===4?'wide':''} ${hungryNow?'hungry':''}" data-a="tank" data-k="${k}"><div class="water" style="--w1:${R_.water[0]};--w2:${R_.water[1]}">${swimmersHTML(a.fish[k])}<div class="decor">${a.decor[k].map(x=>`<span>${DECOR_BY[x].icon}</span>`).join('')}</div><span class="bub1"></span><span class="bub2"></span>${hungryNow?'<span class="hungrytag">🍤</span>':''}</div>
+ return `<div class="tank ${k===4?'wide':''} ${hungryNow?'hungry':''}" data-a="tank" data-k="${k}"><div class="water" style="--w1:${R_.water[0]};--w2:${R_.water[1]}">${swimmersHTML(a.fish[k])}<div class="decor">${a.decor[k].map(x=>`<span>${decoPic(x)}</span>`).join('')}</div><span class="bub1"></span><span class="bub2"></span>${hungryNow?'<span class="hungrytag">🍤</span>':''}</div>
   <div class="tlabel">${k+1}. ${esc(fishName(id))} <small>×${a.fish[k].length}</small>${a.st[k]?` <span class="tst">${'⭐'.repeat(a.st[k])}</span>`:''}</div></div>`}
 function nextStageOf(a){if(a.done)return -1;return Math.min(a.open,4)}
 function ctaHTML(){const {g,i,d,a}=here(),sk=skillOf(g,i),s=nextStageOf(a);
@@ -11721,10 +11747,11 @@ function ctaHTML(){const {g,i,d,a}=here(),sk=skillOf(g,i),s=nextStageOf(a);
   ${s<4&&a.open<4?`<button type="button" class="linkbtn" data-a="test">🚀 ${L('이미 잘 알아요! 바로 마스터 도전','I know this! Skip-ahead challenge')}</button>`:''}</div>`}
  const nxt=i<19?aqDef(g,i+1):null,nState=i<19?aqState(g,i+1):null;
  if(gradeDone(g)&&g<6)return `<div class="cta done"><div class="mooni">${MAV}<div class="bub">${L(`${g}학년 수학 단원 20개를 모두 마스터했어요! ${g+1}학년 바다로 떠나 볼까요?`,`You mastered all 20 Grade ${g} math skills! Off to the Grade ${g+1} sea?`)}</div></div><button type="button" class="bigbtn gold" data-a="nextgrade"><span class="bb-ic">🎓</span><span class="bb-t"><b>${L(`${g+1}학년으로 출발`,`Go to Grade ${g+1}`)}</b><small>${REGIONS[g+1].flag} ${regionName(g+1)}</small></span><span class="bb-go">▶</span></button>${replayHTML(a)}</div>`;
- if(nxt&&!nState.done)return `<div class="cta done"><div class="mooni">${MAV}<div class="bub">${L(`${d.name} 완성! 다음 아쿠아리움 <b>${esc(nxt.name)}</b>${josa(nxt.name,'이','가')} 기다려요.`,`${d.name} is finished! <b>${esc(nxt.name)}</b> is waiting for you.`)}</div></div><button type="button" class="bigbtn" data-a="gonext"><span class="bb-ic">${S.car?carEmoji():'🚐'}</span><span class="bb-t"><b>${L('다음 아쿠아리움으로 운전하기','Drive to the next aquarium')}</b><small>${esc(nxt.name)} · ${esc(skillOf(g,i+1)?skillOf(g,i+1).name:'')}</small></span><span class="bb-go">▶</span></button>${replayHTML(a)}</div>`;
+ if(nxt&&!nState.done)return `<div class="cta done"><div class="mooni">${MAV}<div class="bub">${L(`${d.name} 완성! 다음 아쿠아리움 <b>${esc(nxt.name)}</b>${josa(nxt.name,'이','가')} 기다려요.`,`${d.name} is finished! <b>${esc(nxt.name)}</b> is waiting for you.`)}</div></div><button type="button" class="bigbtn" data-a="gonext"><span class="bb-ic">${S.car?carPic():'🚐'}</span><span class="bb-t"><b>${L('다음 아쿠아리움으로 운전하기','Drive to the next aquarium')}</b><small>${esc(nxt.name)} · ${esc(skillOf(g,i+1)?skillOf(g,i+1).name:'')}</small></span><span class="bb-go">▶</span></button>${replayHTML(a)}</div>`;
  return `<div class="cta done"><div class="mooni">${MAV}<div class="bub">${L('완성된 아쿠아리움이에요. 수업을 다시 하면 별을 더 받을 수 있어요.','This aquarium is finished. Replay lessons to earn more stars.')}</div></div>${replayHTML(a)}<button type="button" class="btn ghost wide" data-a="map">🗺️ ${L('지도 보기','Open the map')}</button></div>`}
 function replayHTML(a){return `<div class="replay">${STAGES.map((st,k)=>`<button type="button" data-a="lesson" data-s="${k}">${st.icon}<small>${'⭐'.repeat(a.st[k]||0)||'·'}</small></button>`).join('')}</div>`}
-const carEmoji=()=>(CARS.find(c=>c[0]===S.car.model)||CARS[0])[1];
+// car pictures (images/aq-car-<id>.webp) face right; the emoji stands in if one cannot load. The colour the child picks tints the backdrop, not the car
+const carPic=(id,cls='')=>{const c=CARS.find(x=>x[0]===(id||S.car.model))||CARS[0];return `<img class="carpic ${cls}" src="images/aq-car-${c[0]}.webp" alt="" draggable="false" onerror="this.replaceWith('${c[1]}')">`};
 function facCardHTML(k){const f=FAC[k],lv=S.fac[k],{a}=here();
  if(k==='toilet'){if(!UNLOCK.toilet())return '';const c=Math.round(100-a.dirt);return `<button type="button" class="fac ${a.dirt>60?'dirty':''}" data-a="fac" data-f="toilet"><span class="fic">${a.dirt>85?'🤢':f.icon}</span><b>${L(f.ko,f.en)}</b><span class="meter"><i style="width:${c}%;background:${c<40?'#ff5a6a':c<70?'#ffb020':'#3ccf7a'}"></i></span><small>${a.dirt>60?L('청소해 주세요!','Needs cleaning!'):L(`깨끗함 ${c}%`,`${c}% clean`)}</small></button>`}
  const open=k==='ticket'||UNLOCK[k]();if(!open)return `<div class="fac lockf"><span class="fic">🔒</span><b>${L(f.ko,f.en)}</b><small>${T(UNLOCK_HINT[k])}</small></div>`;
@@ -11749,10 +11776,12 @@ function updateChips(){const el=$('homeChips');if(!el)return;const {g,i,a}=here(
 function flashTank(k){const t=document.querySelector(`.tank[data-k="${k}"]`);if(!t)return;t.scrollIntoView({behavior:'smooth',block:'center'});t.classList.add('flash');setTimeout(()=>t.classList.remove('flash'),2200)}
 
 // visitors walking through the lobby (only drawn when the aquarium is on screen)
-const PEOPLE=['🧒','👧','👦','👩','👨','👵','👴','🧑','👩‍🦰','👨‍🦱','🧕','👲','🧑‍🦽','👨‍👧','👩‍👦'];
+const PEOPLE=['🧒','👧','👦','👩','👨','👵','👴','🧑','👩‍🦰','👨‍🦱','🧕','👲','👱‍♀️','🧔','🧑‍🦽','👨‍👧','👩‍👦'];
+// painted busts (visPic in core.js); a parent and child walk side by side, and the wheelchair rolls instead of stepping
+const PAIRS={'👨‍👧':['👨','👧'],'👩‍👦':['👩','👦']};
 function walkVisitor(v){if(typeof Walk!=='undefined'&&Walk.on()){Walk.visitor(v);return}const lob=$('lobby');if(!lob||VIEW!=='home'||document.hidden||document.body.classList.contains('staged')||modalOpen())return;if(lob.querySelectorAll('.vis-p').length>9)return;
  const p=document.createElement('span');p.className='vis-p';p.style.setProperty('--dur',(9+Math.random()*5)+'s');p.style.bottom=(6+Math.random()*16)+'px';const shop=v.bought.length?{snack:'🍦',gift:'🧸',mart:'🛍️'}[pick(v.bought)]:'';
- p.innerHTML=`<i>${pick(PEOPLE)}</i>${shop?`<b>${shop}</b>`:''}`;lob.appendChild(p);p.addEventListener('animationend',()=>p.remove());
+ const who=pick(PEOPLE);p.innerHTML=`<i class="${who==='🧑‍🦽'?'roll':''}">${(PAIRS[who]||[who]).map(e=>visPic(e)).join('')}</i>${shop?`<b>${shop}</b>`:''}`;lob.appendChild(p);p.addEventListener('animationend',()=>p.remove());
  if(Math.random()<.13){const tip=document.createElement('button');tip.type='button';tip.className='tip';tip.textContent='💰';p.appendChild(tip);const val=Math.round(ticketPrice(S.at.g,S.at.i)*3);
   const grab=()=>{if(tip.dataset.got)return;tip.dataset.got=1;earn(val,{at:tip});sfx('coin');tip.remove()};tip.addEventListener('pointerdown',e=>{e.stopPropagation();grab()});if(boostOn('magnet'))setTimeout(grab,1500)}
  if(Math.random()<.35)popAt(lob,`+${short(v.c)}`)}
@@ -11788,7 +11817,7 @@ function openTank_(k){const {g,i,d,a}=here(),id=d.tanks[k];sfx('tap');
  const cap=tankCap(a,k),f=FISH_BY[id],hung=hungry(a,k);
  const counts={};a.fish[k].forEach(x=>counts[x]=(counts[x]||0)+1);
  const html=()=>`<h2>${k+1}. ${esc(fishName(id))} ${L('수조','tank')}</h2>
-  <div class="tankbig"><div class="water" style="--w1:${REGIONS[g].water[0]};--w2:${REGIONS[g].water[1]}">${swimmersHTML(a.fish[k])}<div class="decor">${a.decor[k].map(x=>`<span>${DECOR_BY[x].icon}</span>`).join('')}</div></div></div>
+  <div class="tankbig"><div class="water" style="--w1:${REGIONS[g].water[0]};--w2:${REGIONS[g].water[1]}">${swimmersHTML(a.fish[k])}<div class="decor">${a.decor[k].map(x=>`<span>${decoPic(x)}</span>`).join('')}</div></div></div>
   <div class="tstats"><span>🐟 ${a.fish[k].length}/${cap}</span><span>⭐ ${L('인기','Popularity')} ${Math.round(tankPower(a,k))}</span><span>Lv.${a.lv[k]}</span>${hung?`<span class="warn">🍤 ${L('배고파요!','Hungry!')}</span>`:''}</div>
   <div class="row wrap">${UNLOCK.feed()?`<button class="btn ${hung?'':'ghost'}" data-act="feed">🍤 ${L('먹이 주기','Feed')}</button>`:''}<button class="btn ghost" data-act="buy">🐠 ${L('물고기 더 넣기','Add fish')}</button><button class="btn ghost" data-act="decor">🪸 ${L('꾸미기','Decorate')}</button>${a.lv[k]<5?`<button class="btn ghost" data-act="up">⬆️ ${L('수조 넓히기','Bigger tank')} ${COIN}${short(tankUpCost(k,a))}</button>`:''}</div>
   <div class="fishlist">${Object.entries(counts).map(([x,n])=>`<button type="button" class="fl" data-act="info" data-id="${x}">${fishImgTag(x)}<b>${esc(fishName(x))}</b><small>×${n} ${flagsOf(FISH_BY[x])}</small></button>`).join('')}</div>`;
@@ -11805,8 +11834,8 @@ function buyFishModal(k){const {g,i,d,a}=here();const ids=[...new Set([d.tanks[k
   put:b=>{if(a.fish[k].length>=tankCap(a,k)){toast(L('수조가 꽉 찼어요! 수조를 넓혀 보세요.','The tank is full! Make it bigger.'));return false}const x=b.dataset.id;S.store[x]--;if(!S.store[x])delete S.store[x];a.fish[k].push(x);sfx('splash');save();renderHome();return ()=>buyFishModal(k)},
   buyf:b=>{if(a.fish[k].length>=tankCap(a,k)){toast(L('수조가 꽉 찼어요! 수조를 넓혀 보세요.','The tank is full! Make it bigger.'));return false}const x=b.dataset.id;if(!spend(fishPrice(x)))return false;a.fish[k].push(x);addDex(x);sfx('splash');toast(`🐠 ${esc(fishName(x))} ${L('이사 완료!','moved in!')}`);save();renderHome();return ()=>buyFishModal(k)}}})}
 function decorModal(k){const {a}=here();modal(`<h2>🪸 ${L(`${k+1}번 수조 꾸미기`,`Decorate tank ${k+1}`)}</h2><p class="muted">${L('장식 하나마다 수조 인기 +15% (수조마다 3개까지)','Each decoration adds +15% popularity (3 per tank)')}</p>
-  <div class="shopgrid">${DECOR.map(([id,ic,ko,en,c])=>{const cost=Math.round(c*Math.pow(tier(S.at.g,S.at.i),.5));return `<button type="button" class="sitem" data-act="d" data-id="${id}" data-c="${cost}"><span class="sic">${ic}</span><b>${L(ko,en)}</b><small>${COIN} ${short(cost)}</small></button>`}).join('')}</div>
-  ${a.decor[k].length?`<p>${L('지금 장식','Now')}: ${a.decor[k].map((x,j)=>`<button class="chip" data-act="rm" data-j="${j}">${DECOR_BY[x].icon} ✕</button>`).join(' ')}</p>`:''}`,{acts:{
+  <div class="shopgrid">${DECOR.map(([id,ic,ko,en,c])=>{const cost=Math.round(c*Math.pow(tier(S.at.g,S.at.i),.5));return `<button type="button" class="sitem" data-act="d" data-id="${id}" data-c="${cost}">${decoPic(id)}<b>${L(ko,en)}</b><small>${COIN} ${short(cost)}</small></button>`}).join('')}</div>
+  ${a.decor[k].length?`<p>${L('지금 장식','Now')}: ${a.decor[k].map((x,j)=>`<button class="chip" data-act="rm" data-j="${j}">${decoPic(x)} ✕</button>`).join(' ')}</p>`:''}`,{acts:{
   d:b=>{if(a.decor[k].length>=3){toast(L('장식은 3개까지예요. ✕를 눌러 빼고 바꿔요.','Up to 3. Tap ✕ to swap one.'));return false}if(!spend(+b.dataset.c))return false;a.decor[k].push(b.dataset.id);sfx('coin');save();renderHome();return ()=>decorModal(k)},
   rm:b=>{a.decor[k].splice(+b.dataset.j,1);save();renderHome();return ()=>decorModal(k)}}})}
 function fishInfo(id,back){const f=FISH_BY[id];modal(`<div class="fishcard">${fishImgTag(id,'big')}</div><h2>${esc(fishName(id))}</h2><p class="muted">${flagsOf(f)} ${f.where==='legend'?L('전설','Legend'):f.where.split(' ').map(w=>w==='kr'?L('한국','Korea'):L('캐나다','Canada')).join(' · ')} · <span style="color:${RARITY[f.r].c}">${'★'.repeat(f.r)} ${L(RARITY[f.r].ko,RARITY[f.r].en)}</span></p><p class="fact">🦦 ${esc(fishFact(id))}</p><button class="btn ghost wide" data-act="say">🔊 ${L('읽어 주기','Read aloud')}</button>`,{acts:{say:()=>{say(fishName(id)+'. '+fishFact(id),{raw:false});return false}},onClose:back?()=>{}:null})}
@@ -11897,7 +11926,7 @@ function renderMap(){const g=TAB.map||S.at.g||S.grade||1;TAB.map=g;const gd=grad
  el.innerHTML=`<div class="gtabs">${[1,2,3,4,5,6].map(x=>`<button type="button" class="${x===g?'on':''} ${gradeDone(x)?'done':''}" data-a="grade" data-g="${x}"><b>${x}${L('학년','')}</b><small>${REGIONS[x].flag} ${doneCount(x)}/20</small></button>`).join('')}</div>
  <div class="region" style="--w1:${R_.water[0]};--w2:${R_.water[1]}"><h2>${R_.flag} ${regionName(g)}</h2><p>${T(R_.about)}</p><div class="gprog"><i style="width:${dn*5}%"></i></div><small>${L(`${g}학년 수학 ${dn}/20 마스터`,`Grade ${g} math: ${dn}/20 mastered`)}</small></div>
  <div class="mapbox" style="--g1:${R_.sky[1]};--g2:${R_.ground}"><svg class="road" viewBox="0 0 100 100" preserveAspectRatio="none"><path d="${pts.map((p,k)=>(k?'L':'M')+p.x+' '+(p.y+5)).join('')}" fill="none" stroke="#ffffffcc" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/><path d="${pts.map((p,k)=>(k?'L':'M')+p.x+' '+(p.y+5)).join('')}" fill="none" stroke="#7d89b8" stroke-width=".5" stroke-dasharray="2 2"/></svg>
- ${pts.map((p,i)=>{const a=gd.aq[i],d=aqDef(g,i),open=aqOpen(g,i),me=S.at.g===g&&S.at.i===i;return `<button type="button" class="node ${a.done?'done':''} ${open?'':'lock'} ${me?'me':''}" style="left:${p.x}%;top:${p.y}%" data-a="node" data-i="${i}"><span class="nimg">${open?`<img src="${fishURL(d.star)}" alt="">`:'🔒'}</span><b>${i+1}</b>${a.done?`<small>${'⭐'.repeat(a.best)}</small>`:a.open?`<small>${a.open}/5</small>`:''}${me?`<span class="car">${carEmoji()}</span>`:''}</button>`}).join('')}
+ ${pts.map((p,i)=>{const a=gd.aq[i],d=aqDef(g,i),open=aqOpen(g,i),me=S.at.g===g&&S.at.i===i;return `<button type="button" class="node ${a.done?'done':''} ${open?'':'lock'} ${me?'me':''}" style="left:${p.x}%;top:${p.y}%" data-a="node" data-i="${i}"><span class="nimg">${open?`<img src="${fishURL(d.star)}" alt="">`:'🔒'}</span><b>${i+1}</b>${a.done?`<small>${'⭐'.repeat(a.best)}</small>`:a.open?`<small>${a.open}/5</small>`:''}${me?`<span class="car">${carPic()}</span>`:''}</button>`}).join('')}
  <div class="grad ${gradeDone(g)?'on':''}">🎓</div></div>
  ${UNLOCK.drive()?`<div class="card"><b>🚚 ${L('배달 미션','Delivery missions')}</b><p class="muted">${L('완성한 아쿠아리움을 누르면 물고기 배달 운전을 할 수 있어요. (하루 3번 보상)','Tap a finished aquarium to deliver fish by car. (Rewards 3 times a day)')}</p></div>`:''}`}
 function nodeModal(g,i){const a=aqState(g,i),d=aqDef(g,i),sk=skillOf(g,i),open=aqOpen(g,i),me=S.at.g===g&&S.at.i===i;sfx('tap');
@@ -11934,7 +11963,7 @@ function finishDrive(o,res){if(res.quit&&o.kind!=='move'){go(VIEW);return}const 
  if(o.kind==='delivery'){const d=S.deliveries.day===dayKey()?S.deliveries:{day:dayKey(),n:0};if(d.n>=3)coins=Math.round(coins*.25);d.n++;S.deliveries=d}
  S.stats.drives++;mission('drive');lrRest(res);S.stats.correct+=res.right||0;S.stats.solved+=(res.right||0)+(res.wrong||0);
  earn(coins,{pop:false});if((res.stars||0)>=3)S.pearls++;checkAch();save();
- modal(`<div class="big">${carEmoji()}</div><h2>${o.kind==='move'?L('도착했어요!','We made it!'):L('배달 완료!','Delivery done!')}</h2><div class="stars3">${[1,2,3].map(k=>`<span class="${k<=(res.stars||1)?'on':''}">⭐</span>`).join('')}</div><div class="rew"><span>✅ ${res.right||0}</span><span>${COIN} +${short(coins)}</span>${(res.stars||0)>=3?`<span>${PEARL} +1</span>`:''}</div><p>${(res.right||0)>=(res.right||0)+(res.wrong||0)-1?L('수학 표지판을 척척 맞혔어요! 운전 실력도 수학 실력도 최고!','You aced the math signs! Great driving and great math!'):L('안전 운전 최고! 다음엔 표지판을 더 많이 맞혀 봐요.','Safe driving! Try to get more signs next time.')}</p><button class="btn wide" data-act="close">${L('좋아요!','Great!')}</button>`,{onClose:()=>{o.after&&o.after()}})}
+ modal(`<div class="big">${carPic('','hero')}</div><h2>${o.kind==='move'?L('도착했어요!','We made it!'):L('배달 완료!','Delivery done!')}</h2><div class="stars3">${[1,2,3].map(k=>`<span class="${k<=(res.stars||1)?'on':''}">⭐</span>`).join('')}</div><div class="rew"><span>✅ ${res.right||0}</span><span>${COIN} +${short(coins)}</span>${(res.stars||0)>=3?`<span>${PEARL} +1</span>`:''}</div><p>${(res.right||0)>=(res.right||0)+(res.wrong||0)-1?L('수학 표지판을 척척 맞혔어요! 운전 실력도 수학 실력도 최고!','You aced the math signs! Great driving and great math!'):L('안전 운전 최고! 다음엔 표지판을 더 많이 맞혀 봐요.','Safe driving! Try to get more signs next time.')}</p><button class="btn wide" data-act="close">${L('좋아요!','Great!')}</button>`,{onClose:()=>{o.after&&o.after()}})}
 
 // ---------------------------------------------------------------- the sea: fishing and diving
 const SEA_W=[0,10,6,3,1.3,.45];
@@ -11986,7 +12015,7 @@ function renderShop(){const el=$('v-shop'),t=TAB.shop;
  if(t==='items')body=`<div class="shopgrid big">${ITEMS.map(x=>{const own=S.items[x.id]||0,on=x.boost&&boostOn(x.boost);return `<button type="button" class="sitem" data-a="buyitem" data-id="${x.id}"><span class="sic">${x.icon}</span><b>${L(x.ko,x.en)}</b><small class="d">${L(x.dk,x.de)}</small><small class="price">${x.pearl?`${PEARL} ${x.pearl}`:`${COIN} ${short(itemCost(x))}`}</small>${own?`<span class="own">×${own}</span>`:''}${on?`<span class="own on">⏱ ${Math.ceil((S.boosts[x.boost]-now())/60000)}${L('분','m')}</span>`:''}</button>`}).join('')}</div>`;
  else if(t==='decor'){const {a}=here();body=a.open?`<p class="muted">${L('꾸밀 수조를 고르세요.','Pick a tank to decorate.')}</p><div class="row wrap">${Array.from({length:a.open},(_,k)=>`<button class="btn ghost" data-a="decor" data-k="${k}">🪸 ${L(`${k+1}번 수조`,`Tank ${k+1}`)} (${a.decor[k].length}/3)</button>`).join('')}</div>`:lockCard('toilet')}
  else if(t==='fish'){const {d,a}=here();body=a.open?`<p class="muted">${L('물고기를 넣을 수조를 고르세요.','Pick a tank for new fish.')}</p><div class="row wrap">${Array.from({length:a.open},(_,k)=>`<button class="btn ghost" data-a="fishbuy" data-k="${k}">${fishImgTag(d.tanks[k],'tiny')} ${L(`${k+1}번`,`Tank ${k+1}`)} (${a.fish[k].length}/${tankCap(a,k)})</button>`).join('')}</div>`:`<p class="muted">${L('첫 수조를 열면 물고기를 살 수 있어요.','Open your first tank to buy fish.')}</p>`}
- else if(t==='car'){body=`<div class="carshow" style="--c:${S.car.color}"><span>${carEmoji()}</span></div><h3>${L('자동차','Cars')}</h3><div class="shopgrid">${CARS.map(([id,ic,ko,en,c])=>{const own=S.car.owned.includes(id);return `<button type="button" class="sitem ${S.car.model===id?'sel':''}" data-a="car" data-id="${id}"><span class="sic">${ic}</span><b>${L(ko,en)}</b><small>${own?(S.car.model===id?L('타는 중','Driving'):L('고르기','Choose')):`${COIN} ${short(c)}`}</small></button>`}).join('')}</div>
+ else if(t==='car'){body=`<div class="carshow" style="--c:${S.car.color}">${carPic()}</div><h3>${L('자동차','Cars')}</h3><div class="shopgrid">${CARS.map(([id,ic,ko,en,c])=>{const own=S.car.owned.includes(id);return `<button type="button" class="sitem ${S.car.model===id?'sel':''}" data-a="car" data-id="${id}">${carPic(id)}<b>${L(ko,en)}</b><small>${own?(S.car.model===id?L('타는 중','Driving'):L('고르기','Choose')):`${COIN} ${short(c)}`}</small></button>`}).join('')}</div>
   <h3>${L('색깔','Colour')}</h3><div class="row wrap">${CAR_COLORS.map(c=>`<button type="button" class="swatch ${S.car.color===c?'on':''}" style="background:${c}" data-a="color" data-c="${c}"></button>`).join('')}</div>
   <h3>${L('업그레이드','Upgrades')}</h3><div class="shopgrid">${[['speed','💨','속도','Speed'],['magnet','🧲','코인 자석','Coin magnet'],['shield','🛡️','범퍼 방패','Bumper shields']].map(([k,ic,ko,en])=>`<button type="button" class="sitem" data-a="carup" data-k="${k}"><span class="sic">${ic}</span><b>${L(ko,en)}</b><small>${'●'.repeat(S.car[k])}${'○'.repeat(5-S.car[k])}</small><small class="price">${S.car[k]>=5?'MAX':`${COIN} ${short(carUpCost(k))}`}</small></button>`).join('')}</div>`}
  el.innerHTML=`<h2 class="vtitle">🏪 ${L('상점','Shop')}</h2>${tabsHTML('shop',[['items','🛍️','아이템','Items'],['decor','🪸','장식','Decor'],['fish','🐠','물고기','Fish'],['car','🚗','자동차','Car']])}${body}`}

@@ -879,7 +879,7 @@ button.setrow{flex-wrap:nowrap}
 .nr-chip.s4{background:linear-gradient(180deg,#fff8d8,#ffe58f);box-shadow:0 3px 0 #f0c24a}
 .nr-next{margin:10px 0 0;padding:10px 12px;border-radius:14px;background:#f6f2ff;font-weight:800;font-size:14.5px;line-height:1.45;text-align:center}
 .nrban{display:flex;align-items:center;gap:12px;width:100%;border:0;border-radius:22px;padding:10px 14px;background:linear-gradient(135deg,#fffaf0,#ffe6f2);box-shadow:var(--shadow);text-align:left;color:var(--ink)}
-.nrban .ic{font-size:34px;line-height:1}.nrban .ct{flex:1;min-width:0;display:flex;flex-direction:column}
+.nrban .ic{font-size:34px;line-height:1;flex:0 0 56px;width:56px;height:56px;display:grid;place-items:center}.nrban .ic img{width:56px;height:56px;object-fit:contain}.nrban .ct{flex:1;min-width:0;display:flex;flex-direction:column}
 .nrban b{font-size:17px;font-weight:900}.nrban small{font-size:13px;font-weight:800;color:var(--muted)}
 .nrban .go{font-size:20px;width:44px;height:44px;border-radius:50%;background:#fff;display:grid;place-items:center;box-shadow:0 2px 6px rgba(80,40,200,.2)}
 .nrgo{margin:10px auto 0;display:flex}
@@ -3572,7 +3572,7 @@ function nrSay(){const met=NR_ORDER.filter(id=>nrLv(id)>=0),kn=met.filter(id=>nr
  return L(`지금까지 음표 친구 ${met.length}명을 만났고, 그중 ${kn.length}명은 혼자 읽을 수 있어요. 오늘도 목소리를 찾아 줄까요?`,`You’ve met ${met.length} note friends so far, and you can read ${kn.length} of them on your own. Shall we find their voices today?`)}
 const nrCounts=()=>{const c=[0,0,0,0,0];NR_ASC.forEach(id=>c[nrBucket(nrLv(id))]++);return c};
 const nrBanner=()=>{const c=nrCounts(),met=NR_ASC.length-c[0];
- return `<button class="nrban" id="nrBan" type="button"><span class="ic">🎼</span><span class="ct"><b>${L('음표 마을','Note Town')}</b><small>${met?`⭐ ${c[4]} · 🌷 ${c[3]} · 🌱 ${c[1]} · ${L('음표 읽기 연습','note reading practice')}`:L('음표 친구들을 만나 오선 읽기를 배워요!','Meet the note friends and learn to read the staff!')}</small></span><span class="go">▶</span></button>`};
+ return `<button class="nrban" id="nrBan" type="button"><span class="ic">${pic('images/mus-nr-town.webp','🎼')}</span><span class="ct"><b>${L('음표 마을','Note Town')}</b><small>${met?`⭐ ${c[4]} · 🌷 ${c[3]} · 🌱 ${c[1]} · ${L('음표 읽기 연습','note reading practice')}`:L('음표 친구들을 만나 오선 읽기를 배워요!','Meet the note friends and learn to read the staff!')}</small></span><span class="go">▶</span></button>`};
 function nrResultHTML(r){const g=r.nr;
  const chip=([id,a,b])=>{const m=midiOf(id);return `<span style="color:${nrTxtCol(m)}">${esc(nrNm(m))} ${a<0?'✨':nrIcon(a)}→${nrIcon(b)}</span>`};
  return `<div class="nr-rhead">🎵 ${L(`목소리를 ${r.n}번 찾아 줬어요!`,`You found ${r.n} voices!`)}</div>

@@ -66,6 +66,9 @@ const LR=(()=>{const f=(location.pathname.split('/').pop()||'').replace(/\.html$
 const coachEsc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const coachNm=()=>{try{return MGP.me&&MGP.me.name||''}catch(e){return ''}};
 const coachPick=a=>a[Math.random()*a.length|0];
+// the player's face as their game character (images/aq-me-<key>.webp) from the emoji the profile stores; other emoji stay as they are
+const COACH_ME={'🐰':'bunny','🐻':'bear','🦊':'fox','🐼':'panda','🐨':'koala','🐯':'tiger','🦁':'lion','🐸':'frog','🐱':'cat','🐶':'puppy','🐥':'chick','🦄':'unicorn','🐙':'octopus','🐬':'dolphin','🦖':'dino','⭐':'star'};
+const coachMe=(av,cls='')=>{const k=COACH_ME[String(av||'').replace(/\ufe0f/g,'')];return k?`<img class="me-pic ${cls}" src="images/aq-me-${k}.webp" alt="" draggable="false" data-e="${coachEsc(av)}" onerror="this.replaceWith(document.createTextNode(this.dataset.e))">`:coachEsc(av||'')};
 const coachSay_=t=>{const nm=coachNm(),ok=t.filter(x=>nm||!/\{nm\}/.test(x[0])),x=coachPick(ok.length?ok:t);return L(x[0],x[1]).replace(/\{nm\}/g,coachEsc(nm))};
 const COACH={
  up:['clap',[['꾸준히 한 덕분이에요. 정말 멋져요!','Your steady practice paid off. Awesome!'],['어제보다 오늘 더 잘하고 있어요!','You’re doing even better than yesterday!'],['계속 도전해서 여기까지 왔어요!','You kept trying, and look how far you’ve come!'],['{nm}의 노력이 반짝반짝 빛나요 ✨','Your hard work is shining, {nm} ✨'],['문 코치가 박수 쳐요! 짝짝짝 👏','Coach Moon is clapping for you! 👏'],['이 기세 그대로 가 봐요! 🌙','Keep this going! 🌙']]],
@@ -483,6 +486,14 @@ button,input,select{font:inherit}button{cursor:pointer;touch-action:manipulation
 .nb .small-btn{margin-top:8px}.nb-left{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}.nb-empty{font-size:15px;color:#cfe0ff;line-height:1.5;margin:0 0 10px}
 /* pictures for course pieces, experiments, design challenges and badges (images/mr-*.webp, see mrPic); a picture that fails to load turns back into its emoji */
 .mr-pic{display:inline-block;width:1.6em;height:1.6em;object-fit:contain;vertical-align:middle;-webkit-user-drag:none;user-select:none;pointer-events:none}
+/* badge picture inside Coach Moon's bubble (the bubble's own rule makes every img 54×64), on locked looks, and the race trophy */
+#coachPop p .mr-pic{width:1.75em;height:1.75em;flex:none;object-fit:contain;object-position:50% 50%;filter:none;vertical-align:-.55em;margin:-.3em 0}
+.opt small .mr-pic{width:1.5em;height:1.5em;vertical-align:-.45em}.trophy .mr-pic{display:block;width:1.3em;height:1.3em;margin:0 auto}
+/* steel / glass team marks: small balls instead of ⚙️ (Settings) and 🔮 (a crystal ball) */
+.matdot{display:inline-block;width:.85em;height:.85em;border-radius:50%;vertical-align:-.08em;margin:0 .1em;flex:none;font-style:normal;box-shadow:0 0 0 1px #0008,0 1px 2px #0009}
+.matdot.steel{background:radial-gradient(circle at 35% 30%,#fff 0 15%,#c6d0de 45%,#5b6577)}
+.matdot.glass{background:radial-gradient(circle at 35% 30%,#fff 0 15%,#bfe6ff 40%,#4cb4ff 75%)}
+.mk-steel.matdot{width:14px;height:14px;margin:0;vertical-align:0}
 .piece .pi .mr-pic{display:block;width:40px;height:40px}.bt-ic .mr-pic{display:block;width:34px;height:34px}
 .lc-ic{min-width:46px;text-align:center}.lc-ic .mr-pic{display:block;width:46px;height:46px}
 .ch-card .ci .mr-pic{display:block;width:50px;height:50px}.badge .bi .mr-pic{display:block;width:48px;height:48px}
@@ -554,6 +565,7 @@ button,input,select{font:inherit}button{cursor:pointer;touch-action:manipulation
 #coachPop img{width:54px;height:64px;flex:0 0 54px;object-fit:contain;object-position:50% 0;filter:drop-shadow(0 4px 8px rgba(0,0,0,.28))}
 #coachPop p{margin:8px 0 0;background:#fff;border:2px solid #c9d4ff;border-radius:4px 16px 16px 16px;padding:6px 11px;font-size:13.5px;font-weight:700;line-height:1.38;color:#2a3470;box-shadow:0 8px 20px rgba(20,30,80,.22)}
 #coachPop b{display:block;font-size:11px;font-weight:900;color:#5b6cff}
+.me-pic{width:100%;height:100%;object-fit:cover;object-position:50% 18%;border-radius:inherit;display:block}
 @media (prefers-reduced-motion:reduce){#coachPop{transition:opacity .2s;transform:none}}
 /* Mini lessons (.mlx) and the concept notebook (.mlx.book): one window, a picture, the teacher's line, big buttons */
 .mlx{position:fixed;inset:0;z-index:2147483100;display:grid;place-items:center;padding:max(10px,env(safe-area-inset-top)) max(8px,env(safe-area-inset-right)) max(10px,env(safe-area-inset-bottom)) max(8px,env(safe-area-inset-left));background:rgba(18,24,58,.55);font-family:system-ui,-apple-system,'Apple SD Gothic Neo','Noto Sans KR',sans-serif;color:#22305e;animation:mlxIn .2s ease}
@@ -1197,7 +1209,8 @@ const PIECE_IDS=PIECES.map(p=>p[0]),PIECE_BY=Object.fromEntries(PIECES.map(p=>[p
 const pieceOf=m=>/^spring[123]$/.test(m)?'spring':m,okMod=m=>/^spring[123]$/.test(m)||(m!=='spring'&&PIECE_IDS.includes(m)),modOf=p=>p==='spring'?'spring2':p,springLv=m=>+m.slice(6)||2;
 const FORCE_IDS=['spring','magnet','well','blow'];
 // Lab materials: same size, different weight (mass) or springiness (bounce)
-const MATS={glass:{ic:'🔮',n:L('유리구슬','glass marble'),mass:1,bounce:0,c:'#4cb4ff'},steel:{ic:'⚙️',n:L('쇠구슬','steel ball'),mass:3,bounce:0,c:'#c6d0de',metal:1},
+// ic: the small mark that follows each ball in the lab (a plain ball like rubber 🔴 and clay 🟤; not 🔮 or ⚙️)
+const MATS={glass:{ic:'🔵',n:L('유리구슬','glass marble'),mass:1,bounce:0,c:'#4cb4ff'},steel:{ic:'⚪',n:L('쇠구슬','steel ball'),mass:3,bounce:0,c:'#c6d0de',metal:1},
  rubber:{ic:'🔴',n:L('고무공','rubber ball'),mass:1,bounce:.35,c:'#ff4f6d'},clay:{ic:'🟤',n:L('찰흙공','clay ball'),mass:1,bounce:-.45,c:'#b07a52',matte:1}};
 for(const k in MATS){const m=MATS[k];m.lite=mix(m.c,'#ffffff',.55);m.dark=mix(m.c,'#000000',.45)}
 // Predict → observe → explain. Two lanes differ in exactly one thing; every guess is welcome.
@@ -1333,6 +1346,12 @@ const piecePic=m=>{const p=pieceOf(m);return mrPic('mr-piece-'+p,PIECE_BY[p]?.[1
 const EXP_PIC_AFTER=['magnet','fan'];
 const expPic=e=>EXP_PIC_AFTER.includes(e.id)&&!stats.labs[e.id]?e.ic:mrPic('mr-exp-'+e.id,e.ic);
 const chalPic=ch=>mrPic('mr-chal-'+ch.id,ch.ic),badgePic=b=>mrPic('mr-badge-'+b.id,b.ic);
+// The steel and glass teams are marked with small CSS balls: ⚙️ is the Settings button and 🔮 is a crystal ball.
+// matDots swaps the two emoji inside already-escaped HTML; matText drops them for aria labels and canvas text.
+const MAT_NAME={steel:L('쇠구슬','steel'),glass:L('유리구슬','glass')};
+const matDot=(m,label)=>label?`<i class="matdot ${m}" role="img" aria-label="${MAT_NAME[m]}" title="${MAT_NAME[m]}"></i>`:`<i class="matdot ${m}" aria-hidden="true"></i>`;
+const matDots=h=>String(h).replace(/\u2699\uFE0F?/g,matDot('steel')).replace(/\u{1F52E}/gu,matDot('glass'));
+const matText=s=>String(s).replace(/(?:\u2699\uFE0F?|\u{1F52E})(?:→(?:\u2699\uFE0F?|\u{1F52E}))?\s?/gu,'');
 // About how many seconds each piece adds to a race in this simulation (measured headless; used only to pick a hint, never shown)
 const COST={zigzag:10.7,ramps3:9.6,honey:9,ice:6.7,wash2:4.9,tramp:4.6,ramps2b:4.1,jump:4,split:3.9,funnels3:3.9,fan:3.2,pegs:2.5,spinner:1.9,bumpers:1.6,spring:5.2,blow:4.8,well:3.6,magnet:3.4};
 // pieces where marbles bounce off things, so the same course gives a slightly different time each run
@@ -1441,7 +1460,7 @@ function prepare(){
  phase='ready';paused=false;timeScale=1;slowTarget=1;cheersLeft=CHEERS;leaderId=-1;leadChanges=0;secIdx=-1;winnerT=null;photo=false;sparks=[];rings=[];mineBestRank=99;slowShown=false;
  $('resultOverlay').classList.add('hidden');$('confettiLayer').innerHTML='';$('slowmo').classList.add('hidden');$('slowmo').textContent=L('🎬 슬로모션','🎬 SLOW MOTION');$('replaySkip').classList.add('hidden');$('peekBack').classList.add('hidden');
  $('startBanner').innerHTML=labMode?`<h2>🔬</h2><p>${esc(L('예상을 고르면 실험이 시작돼요!','Pick your guess to start the experiment!'))}</p>`:chalRun?`<h2>🎯</h2><p>${esc(CHAL_BY[chalRun.id].team?L('시험 주행! 어느 팀이 먼저 들어올지 지켜봐요.','Test run! Watch which team arrives first.'):CHAL_BY[chalRun.id].sort?L('시험 주행! 누가 점프를 건너는지 지켜봐요.','Test run! Watch who makes it across the jump.'):L('시험 주행! 출발 버튼을 누르면 우승 시간을 재요.','Test run! Press Start to time the winner.'))}</p>`:`<h2>${esc(L('준비됐나요?','READY?'))}</h2><p>${esc(L('출발 버튼을 누르면 문이 열려요!','Press Start to open the gate!'))}</p>`;
- if(hasSteel())$('startBanner').insertAdjacentHTML('beforeend',`<p class="steel-note">${esc(L('🧲 자석이 있는 코스예요! 짝수 번호 ⚙️ 쇠구슬 팀도 달려요.','🧲 This course has a magnet! The even-numbered ⚙️ steel team races too.'))}</p>`);
+ if(hasSteel())$('startBanner').insertAdjacentHTML('beforeend',`<p class="steel-note">${matDots(esc(L('🧲 자석이 있는 코스예요! 짝수 번호 ⚙️ 쇠구슬 팀도 달려요.','🧲 This course has a magnet! The even-numbered ⚙️ steel team races too.')))}</p>`);
  $('startBanner').classList.remove('hidden');
  $('scenePanel').classList.toggle('lab-scene',labMode);document.querySelector('.layout').classList.toggle('lab-on',labMode);if(labMode)$('labList').innerHTML=labListHTML();
  buildMinimap();updateCamera(0,true);renderMaps();renderMinePicker();renderNames();updateLeagueUI();setControls();updateHud(true);
@@ -1742,7 +1761,7 @@ function updateHud(force){
  if(!force&&clock-lastHud<.25)return;lastHud=clock;
  if(course.lab){$('sectionChip').classList.add('hidden');return}
  const rank=Sim.ranking(st),n=rank.length,show=window.innerWidth<=520||window.innerHeight<=520?(window.innerHeight<=420?3:5):8;let rows='';
- const row=(m,i)=>`<div class="rk${m.id===mine?' mine':''}"><span class="no">${i<3&&(phase!=='ready'&&phase!=='countdown')?['🥇','🥈','🥉'][i]:i+1}</span><span class="dot" style="background:${PALETTE[m.id][1]}"></span><span class="nm">${esc(nameOf(m.id))}${isSteel(m.id)?' ⚙️':''}${m.id===mine?' '+esc(MY):''}</span><span class="st">${m.done?'🏁':''}</span></div>`;
+ const row=(m,i)=>`<div class="rk${m.id===mine?' mine':''}"><span class="no">${i<3&&(phase!=='ready'&&phase!=='countdown')?['🥇','🥈','🥉'][i]:i+1}</span><span class="dot" style="background:${PALETTE[m.id][1]}"></span><span class="nm">${esc(nameOf(m.id))}${isSteel(m.id)?' '+matDot('steel',1):''}${m.id===mine?' '+esc(MY):''}</span><span class="st">${m.done?'🏁':''}</span></div>`;
  rank.slice(0,show).forEach((m,i)=>rows+=row(m,i));
  const mi=rank.findIndex(m=>m.id===mine);if(mi>=show){rows+=`<div class="rk gap">⋯</div>`+row(rank[mi],mi)}
  const title=phase==='ready'||phase==='countdown'?L('🚦 출발 순서','🚦 Lineup'):L('🏆 실시간 순위','🏆 Live ranking');
@@ -1782,10 +1801,10 @@ function setControls(){
 function renderMaps(){
  const all=[...WORLDS.map((w,i)=>[w,i]),...customs.map((c,k)=>[customTheme(c),WORLDS.length+k])];
  // a world without a picture yet shows its emoji (the image takes over once images/world-<id>.webp exists)
- $('maps').innerHTML=all.map(([w,i])=>`<button type="button" class="map${i===raceWorld&&!labMode?' active':''}${w.custom?' custom':''}" data-world="${i}">${w.custom?'<span class="map-em" aria-hidden="true">🛠️</span>':`<img src="images/world-${w.id}.webp" alt="" onerror="${w.em?`this.outerHTML='<span class=&quot;map-em&quot; aria-hidden=&quot;true&quot;>${w.em}</span>'`:"this.style.visibility='hidden'"}">`}<span><b>${esc(w.name)}</b><small>${esc(w.desc)}</small></span></button>`).join('')
+ $('maps').innerHTML=all.map(([w,i])=>`<button type="button" class="map${i===raceWorld&&!labMode?' active':''}${w.custom?' custom':''}" data-world="${i}">${w.custom?`<img src="images/world-custom.webp" alt="" onerror="this.outerHTML='<span class=&quot;map-em&quot; aria-hidden=&quot;true&quot;>🛠️</span>'">`:`<img src="images/world-${w.id}.webp" alt="" onerror="${w.em?`this.outerHTML='<span class=&quot;map-em&quot; aria-hidden=&quot;true&quot;>${w.em}</span>'`:"this.style.visibility='hidden'"}">`}<span><b>${esc(w.name)}</b><small>${esc(w.desc)}</small></span></button>`).join('')
   +`<button type="button" class="map add" data-build="1"><span class="map-em" aria-hidden="true">➕</span><span><b>${L('코스 만들기','Build a course')}</b><small>${L('조각을 쌓아 나만의 코스를!','Stack pieces into your own course!')}</small></span></button>`;
 }
-function renderMinePicker(){if(mine>=numBalls)mine=numBalls-1;$('minePicker').innerHTML=PALETTE.slice(0,numBalls).map((c,i)=>`<button type="button" class="mine-chip${i===mine?' on':''}" data-mine="${i}" title="${esc(nameOf(i))}" style="background:radial-gradient(circle at 32% 28%,#fff 0 9%,${c[1]} 42%,${SHADE[i].dark})" aria-label="${esc(L(`${nameOf(i)}${isSteel(i)?' (쇠구슬)':''} 응원하기`,`Cheer for ${nameOf(i)}${isSteel(i)?' (steel)':''}`))}" aria-pressed="${i===mine}">${i+1}${isSteel(i)?'<i class="mk-steel" aria-hidden="true">⚙️</i>':''}</button>`).join('')}
+function renderMinePicker(){if(mine>=numBalls)mine=numBalls-1;$('minePicker').innerHTML=PALETTE.slice(0,numBalls).map((c,i)=>`<button type="button" class="mine-chip${i===mine?' on':''}" data-mine="${i}" title="${esc(nameOf(i))}" style="background:radial-gradient(circle at 32% 28%,#fff 0 9%,${c[1]} 42%,${SHADE[i].dark})" aria-label="${esc(L(`${nameOf(i)}${isSteel(i)?' (쇠구슬)':''} 응원하기`,`Cheer for ${nameOf(i)}${isSteel(i)?' (steel)':''}`))}" aria-pressed="${i===mine}">${i+1}${isSteel(i)?'<i class="mk-steel matdot steel" aria-hidden="true"></i>':''}</button>`).join('')}
 function renderNames(){
  const p=$('namesPanel');if(p.classList.contains('hidden'))return;
  p.innerHTML=PALETTE.slice(0,numBalls).map((c,i)=>`<label><span class="dot" style="background:${c[1]}"></span>${i+1}<input type="text" maxlength="10" data-name="${i}" value="${esc(names[i])}" placeholder="${esc(c[0])}" aria-label="${esc(L(`${i+1}번 구슬 이름`,`Name for marble ${i+1}`))}"></label>`).join('');
@@ -1807,7 +1826,7 @@ function showResults(){
   const pts=Array(numBalls).fill(0);rank.forEach((m,i)=>{pts[m.id]=POINTS[i]||0;league.total[m.id]+=POINTS[i]||0});league.last=pts;
   const k=league.race,order=[...Array(numBalls).keys()].sort((a,b)=>league.total[b]-league.total[a]||pts[b]-pts[a]);
   leagueDone=k>=LEAGUE_RACES;title=leagueDone?L('🏆 리그 최종 결과','🏆 Final league standings'):L(`리그 ${k}/${LEAGUE_RACES}경기 결과`,`League race ${k}/${LEAGUE_RACES}`);
-  table=`<table class="standings"><tr><th></th><th style="text-align:left">${L('구슬','Marble')}</th><th>${L('이번','Race')}</th><th>${L('합계','Total')}</th></tr>${order.map((id,i)=>`<tr class="${id===mine?'mine':''}"><td>${i<3?['🥇','🥈','🥉'][i]:i+1}</td><td class="nm"><span class="dot" style="background:${PALETTE[id][1]}"></span>${esc(nameOf(id))}${isSteel(id)?' ⚙️':''}${id===mine?' '+esc(MY):''}</td><td class="pts">${pts[id]?'+'+pts[id]:'-'}</td><td class="tot">${league.total[id]}</td></tr>`).join('')}</table>`;
+  table=`<table class="standings"><tr><th></th><th style="text-align:left">${L('구슬','Marble')}</th><th>${L('이번','Race')}</th><th>${L('합계','Total')}</th></tr>${order.map((id,i)=>`<tr class="${id===mine?'mine':''}"><td>${i<3?['🥇','🥈','🥉'][i]:i+1}</td><td class="nm"><span class="dot" style="background:${PALETTE[id][1]}"></span>${esc(nameOf(id))}${isSteel(id)?' '+matDot('steel',1):''}${id===mine?' '+esc(MY):''}</td><td class="pts">${pts[id]?'+'+pts[id]:'-'}</td><td class="tot">${league.total[id]}</td></tr>`).join('')}</table>`;
   if(leagueDone){league.done=true;stats.leagues++;const lc=order[0],lr=order.indexOf(mine)+1;hero=lc;heroText=L(`${nameOf(lc)} 리그 챔피언!`,`${nameOf(lc)} is the league champion!`);heroSub=L(`리그 합계 ${league.total[lc]}점`,`${league.total[lc]} league points`);
    mineLine=lc===mine?L(`👑 ${myKo} ${esc(nameOf(mine))}${jo(nameOf(mine),'이','가')} 리그 챔피언이에요!`,`👑 ${myEn} ${esc(nameOf(mine))} is the league champion!`):L(`${esc(MY)} ${myKo} ${esc(nameOf(mine))}${jo(nameOf(mine),'은','는')} 리그 ${lr}위 (${league.total[mine]}점)!`,`${esc(MY)} ${myEn} ${esc(nameOf(mine))} finished the league ${ord(lr)} (${league.total[mine]} points)!`);if(lc===mine)coachHtml=coachLine('big');setTimeout(()=>speak(fill(T.champ,lc),true),2600);
    actions=`<div class="result-actions one"><button class="primary" type="button" data-act="newLeague">${L('🔁 새 리그 시작','🔁 New league')}</button></div>`}
@@ -1815,10 +1834,10 @@ function showResults(){
    actions=`<div class="result-actions one"><button class="primary" type="button" data-act="next">${L(`▶ 다음 경기 (${league.race}/${LEAGUE_RACES})`,`▶ Next race (${league.race}/${LEAGUE_RACES})`)}</button></div>`}
  }else{
   title=L('오늘의 우승자!',"Today's winner!");
-  table=`<table class="standings">${rank.slice(0,3).map((m,i)=>`<tr class="${m.id===mine?'mine':''}"><td>${['🥇','🥈','🥉'][i]}</td><td class="nm"><span class="dot" style="background:${PALETTE[m.id][1]}"></span>${esc(nameOf(m.id))}${isSteel(m.id)?' ⚙️':''}${m.id===mine?' '+esc(MY):''}</td><td>${m.done?fmt(m.finishTime-st.raceT0):L('추격 중','racing')}</td></tr>`).join('')}</table>`;
+  table=`<table class="standings">${rank.slice(0,3).map((m,i)=>`<tr class="${m.id===mine?'mine':''}"><td>${['🥇','🥈','🥉'][i]}</td><td class="nm"><span class="dot" style="background:${PALETTE[m.id][1]}"></span>${esc(nameOf(m.id))}${isSteel(m.id)?' '+matDot('steel',1):''}${m.id===mine?' '+esc(MY):''}</td><td>${m.done?fmt(m.finishTime-st.raceT0):L('추격 중','racing')}</td></tr>`).join('')}</table>`;
   actions=theme.custom?`<div class="result-actions"><button class="control" type="button" data-act="again">${L('🔁 다시 대결','🔁 Race again')}</button><button class="primary" type="button" data-act="edit">${L('🛠️ 코스 고치기','🛠️ Improve my course')}</button></div>`:`<div class="result-actions"><button class="control" type="button" data-act="again">${L('🔁 다시 대결','🔁 Race again')}</button><button class="primary" type="button" data-act="nextWorld">${L('🌍 다음 월드','🌍 Next world')}</button></div>`;
  }
- $('resultCard').innerHTML=`<div class="trophy">🏆</div><h2>${title}</h2>${photo?`<span class="photo">📸 ${L('사진 판정','Photo finish')}</span>`:''}<div class="champ" style="background:${PALETTE[hero][1]};--c:${PALETTE[hero][1]}">${hero+1}</div>
+ $('resultCard').innerHTML=`<div class="trophy">${mrPic('mr-trophy','🏆')}</div><h2>${title}</h2>${photo?`<span class="photo">📸 ${L('사진 판정','Photo finish')}</span>`:''}<div class="champ" style="background:${PALETTE[hero][1]};--c:${PALETTE[hero][1]}">${hero+1}</div>
   <div class="win-text" style="color:${PALETTE[hero][1]}">${esc(heroText)}</div><p class="win-sub">${heroSub?esc(heroSub)+' · ':''}${esc(theme.name)} · ${fmt((champ.finishTime||st.t)-st.raceT0)} · ${L(`역전 ${leadChanges}회`,`${leadChanges} lead change${leadChanges===1?'':'s'}`)}</p>
   <p class="mine-result">${mineLine}<span class="mine-stats">${ME?esc(MY)+' '+L(esc(ME.name)+' · ',''):''}${L(`응원한 구슬 우승 ${mineStats.wins}번 / ${mineStats.races}경기`,`${myEn} won ${mineStats.wins} of ${mineStats.races} race${mineStats.races===1?'':'s'}`)}</span></p>${coachHtml}${table}${rec.length>20?`<button class="small-btn replay-btn" type="button" data-act="replay">📺 ${L('결승 장면 다시 보기 (슬로모션)','Watch the finish again (slow motion)')}</button>`:''}${actions}`;
  $('resultOverlay').classList.remove('hidden');confetti();if(won)setTimeout(jingle,600);
@@ -1872,7 +1891,7 @@ const unlocked=(k,id)=>(k==='pat'&&id==='plain')||(k==='trail'&&id==='none')||ba
 function checkBadges(quiet){
  const got=[];for(const b of BADGES)if(!badges.includes(b.id)&&b.val()>=b.goal){badges.push(b.id);got.push(b)}
  if(got.length){save();if(!quiet){const b=got[0],pr=lookIcon(b.prize)+' '+lookName(b.prize);tone(988,120,'triangle',.08);setTimeout(()=>tone(1319,180,'triangle',.08),120);
-  setTimeout(()=>coachTell('medal',`새 배지 ${b.ic} ${b.n}! 꾸준히 해서 얻었어요. 상으로 「${pr}」 꾸미기가 열렸어요 🌙`,`New badge ${b.ic} ${b.n}! You earned it by sticking with it. The “${pr}” look is now open 🌙`,{gap:4000,ms:6500}),1400)}}
+  setTimeout(()=>coachTell('medal',`새 배지 ${badgePic(b)} ${b.n}! 꾸준히 해서 얻었어요. 상으로 「${pr}」 꾸미기가 열렸어요 🌙`,`New badge ${badgePic(b)} ${b.n}! You earned it by sticking with it. The “${pr}” look is now open 🌙`,{gap:4000,ms:6500}),1400)}}
  if(!skinOk())skin={pat:'plain',trail:'none'};setControls();return got}
 const skinOk=()=>unlocked('pat',skin.pat)&&unlocked('trail',skin.trail);
 
@@ -2105,7 +2124,7 @@ function chalForceHint(ch,m,j){const o=j.o||{};
  return L('쇠구슬이 건너 버렸어요. 용수철을 조금 덜 눌러 봐요.','Some steel marbles made it across. Squash the spring a little less.')}
 // the result of a team or sort run: the finishing order by team, or who crossed the spring's gap
 function chalForceView(ch,o){
- const chip=(id,i,extra)=>`<span class="${isSteel(id)?'os':'og'}" style="--c:${PALETTE[id][1]}"><b>${i}</b>${isSteel(id)?'⚙️':'🔮'}${extra||''}</span>`;
+ const chip=(id,i,extra)=>`<span class="${isSteel(id)?'os':'og'}" style="--c:${PALETTE[id][1]}"><b>${i}</b>${matDot(isSteel(id)?'steel':'glass')}${extra||''}</span>`;
  if(ch.team)return `<div class="ch-order" role="img" aria-label="${esc(L('들어온 순서: ','Finishing order: ')+o.order.map(id=>isSteel(id)?L('쇠구슬','steel'):L('유리구슬','glass')).join(', '))}">${o.order.map((id,i)=>chip(id,i+1)).join('')}</div>`;
  if(!o.springs||!o.mag)return '';const sps=course.springs.map(s=>s.si);
  return `<div class="ch-order" role="img" aria-label="${esc(L(`유리구슬 건넘 ${o.gL}/${o.gN}, 쇠구슬 그물 ${o.sN}/${o.sT}`,`Glass across ${o.gL} of ${o.gN}, steel in the net ${o.sN} of ${o.sT}`))}">${st.marbles.map(m=>chip(m.id,m.id+1,sps.map(si=>({L:'🛬',N:'🕸️'})[(m.sj||{})[si]]||'⏳').join(''))).join('')}</div><p class="ch-key">🛬 ${L('건넜어요','across')} · 🕸️ ${L('그물','net')}</p>`}
@@ -2114,7 +2133,7 @@ function chalMsg(ch,j,prev,plus=0){
  if(ch.team||ch.sort){const o=j.o||{},head=j.ok?['ok',L('🎉 목표 달성!','🎉 Goal met!')+(plus?L(` ⭐ 새 별 ${plus}개!`,` ⭐ ${plus} new star${plus>1?'s':''}!`):'')]:plus?['ok',L(`⭐ 보너스 별 ${plus}개!`,`⭐ ${plus} bonus star${plus>1?'s':''}!`)]:['new',L('🔧 아직이에요. 고쳐서 다시 시험해요!','🔧 Not yet. Improve it and test again!')];
   const x=!o.mag?L('🧲 자석이 없어서 쇠구슬 팀이 나오지 않았어요','No magnet, so the steel team did not race'):ch.team?(o.steelFirst?L('⚙️ 쇠구슬 팀이 모두 먼저 들어왔어요','The whole ⚙️ steel team came in first'):o.glassFirst?L('🔮 유리구슬 팀이 모두 먼저 들어왔어요','The whole 🔮 glass team came in first'):L('두 팀이 섞여서 들어왔어요','The two teams came in mixed up')):
    !o.springs?L('➰ 용수철 발사대가 없어요','There is no spring launcher'):L(`🔮 유리구슬 건넘 ${o.gL}/${o.gN} · ⚙️ 쇠구슬 그물 ${o.sN}/${o.sT}`,`🔮 Glass across: ${o.gL} of ${o.gN} · ⚙️ Steel in the net: ${o.sN} of ${o.sT}`);
-  return `<p class="ch-msg ${head[0]}" role="status">${head[1]}<small>${esc(x)}</small></p>`}
+  return `<p class="ch-msg ${head[0]}" role="status">${head[1]}<small>${matDots(esc(x))}</small></p>`}
  const b='base',head=j.ok?['ok',L('🎉 목표 달성!','🎉 Goal met!')+(plus?L(` ⭐ 새 별 ${plus}개!`,` ⭐ ${plus} new star${plus>1?'s':''}!`):'')]:!j.ready?[b,L('📏 기준을 쟀어요','📏 Baseline measured')]:['new',L('🔧 아직이에요. 고쳐서 다시 시험해요!','🔧 Not yet. Improve it and test again!')];
  let x='';const n=j.n,t=j.t;
  if(ch.id==='slow')x=n>4?L(`규칙: 조각 4개까지 (이번 ${n}개)`,`Rule: up to 4 pieces (this time ${n})`):t>=30?L(`목표 30초 이상 · 이번 ${sec(t)}`,`Goal 30 s or more · this time ${sec(t)}`):L(`${sec(30-t)} 더 느려야 해요`,`It needs to be ${sec(30-t)} slower`);
@@ -2124,7 +2143,7 @@ function chalMsg(ch,j,prev,plus=0){
  else if(ch.id==='one')x=j.dc===1?L(`${sec(prev.t)} → ${sec(t)} · ${sec(j.A)} 차이 (목표 4초 이상)`,`${sec(prev.t)} → ${sec(t)} · ${sec(j.A)} apart (goal: 4 s or more)`):L(`바뀐 곳 ${j.dc?'여러 ':'0'}군데 · 한 군데만 바꿔야 비교할 수 있어요`,`${j.dc?'Several spots':'Nothing'} changed · change exactly one spot to compare`);
  else if(ch.id==='double')x=j.dc===0?L('바뀐 곳이 없어요 · 이번 시험이 새 기준이에요','Nothing changed · this test is the new baseline'):L(`${sec(prev.t)} → ${sec(t)} · ${(t/prev.t).toFixed(1)}배 (목표 2배 이상)`,`${sec(prev.t)} → ${sec(t)} · ${(t/prev.t).toFixed(1)} times as long (goal: 2 or more)`);
  else x=j.dc!==0?L('코스가 바뀌어서 새 기준이 됐어요','The course changed, so this is the new baseline'):n<4?L(`규칙: 조각 4개 이상 (이번 ${n}개)`,`Rule: at least 4 pieces (this time ${n})`):L(`두 번의 차이 ${j.A.toFixed(2)}초 (목표 1초 안)`,`The two runs were ${j.A.toFixed(2)} s apart (goal: within 1 s)`);
- return `<p class="ch-msg ${head[0]}" role="status">${head[1]}<small>${esc(x)}</small></p>`}
+ return `<p class="ch-msg ${head[0]}" role="status">${head[1]}<small>${matDots(esc(x))}</small></p>`}
 // a test run ended: measure, judge, keep the record, then show the result card
 function chalShow(rank){
  const ch=CHAL_BY[chalRun.id],c=chalOf(ch.id),w=rank[0],t=Math.round(((w.finishTime||st.t)-st.raceT0)*100)/100,force=ch.team||ch.sort,run={m:chalRun.mods.slice(),t,o:force?chalFacts():null},prev=c.prev,old=(c.hist||[]).slice(),guess=chalRun.guess;
@@ -2138,7 +2157,7 @@ function chalShow(rank){
  c.hist=old.concat(t).slice(-5);c.prev=run;c.mods=run.m.slice();chalRun.guess=null;save();
  const zones=j.ready||['slow','fast','window'].includes(ch.id)?chalZones(ch.id,prev):[],base=['one','double','same'].includes(ch.id)&&prev?prev.t:null;
  const label=L(`우승 시간 ${sec(t)}`,`Winning time ${sec(t)}`)+(zones.length?L(`, 목표 ${zoneText(ch.id,prev)}`,`, goal ${zoneText(ch.id,prev)}`):'');
- const stars=`<ul class="ch-star-list">${[L(`목표: ${ch.g}`,`Goal: ${ch.g}`),...ch.b].map((txt,i)=>{const bit=1<<i,on=c.s&bit;return `<li class="${on?'':'off'}">${on?'⭐':'☆'} ${esc(txt)}${gained&bit?`<span class="nw">${L('새 별!','New!')}</span>`:''}</li>`}).join('')}</ul>`;
+ const stars=`<ul class="ch-star-list">${[L(`목표: ${ch.g}`,`Goal: ${ch.g}`),...ch.b].map((txt,i)=>{const bit=1<<i,on=c.s&bit;return `<li class="${on?'':'off'}">${on?'⭐':'☆'} ${matDots(esc(txt))}${gained&bit?`<span class="nw">${L('새 별!','New!')}</span>`:''}</li>`}).join('')}</ul>`;
  const top=rank.slice(0,3).filter(m=>m.done).map((m,i)=>`<span>${['🥇','🥈','🥉'][i]} ${esc(nameOf(m.id))} ${sec(m.finishTime-st.raceT0)}</span>`).join('');
  const hint=chalHint(ch,run,j,prev);
  $('resultCard').innerHTML=`<div class="ch-res"><div class="lab-head">🎯 ${L('설계 도전','Design challenge')} · ${chalPic(ch)} ${esc(ch.t)}</div>${stepsHTML([2])}
@@ -2155,7 +2174,7 @@ function chalShow(rank){
 function openChalBoard(opener){
  if(phase==='countdown'||phase==='running')return;
  $('chalBody').innerHTML=`${stepsHTML([])}<p class="ch-intro">${L('엔지니어처럼 목표에 맞는 코스를 설계해요. 시험 주행에서 우승 시간이나 들어온 순서를 진짜로 재서 확인해요. 시험 주행은 응원 없이 코스의 힘만으로 달려요.','Design a course that meets the goal, like an engineer. A test run measures the real winning time or finishing order. Test runs have no cheering, so only the course decides.')} · ⭐ ${chalStars()}/${CHALS.length*3}</p><div class="ch-books"><button type="button" class="chip" data-book="1">📖 ${L('개념 노트','Concept notebook')}</button></div>
-  <div class="ch-grid">${CHALS.map(ch=>{const c=chalGet(ch.id);return `<button type="button" class="ch-card${c.s&1?' met':''}" data-ch="${ch.id}"><span class="ci" aria-hidden="true">${chalPic(ch)}</span><span class="ct"><b>${esc(ch.t)}</b><span class="cg">${esc(ch.g)}</span><small>📐 ${esc(ch.r)}</small>${starsHTML(c.s)}<small>${c.n?L(`시험 ${c.n}번`,`${c.n} test run${c.n===1?'':'s'}`)+(c.prev?' · '+L('지난 시험 ','last ')+sec(c.prev.t):''):L('새 도전','New challenge')}</small></span></button>`}).join('')}</div>`;
+  <div class="ch-grid">${CHALS.map(ch=>{const c=chalGet(ch.id);return `<button type="button" class="ch-card${c.s&1?' met':''}" data-ch="${ch.id}"><span class="ci" aria-hidden="true">${chalPic(ch)}</span><span class="ct"><b>${esc(ch.t)}</b><span class="cg">${matDots(esc(ch.g))}</span><small>📐 ${matDots(esc(ch.r))}</small>${starsHTML(c.s)}<small>${c.n?L(`시험 ${c.n}번`,`${c.n} test run${c.n===1?'':'s'}`)+(c.prev?' · '+L('지난 시험 ','last ')+sec(c.prev.t):''):L('새 도전','New challenge')}</small></span></button>`}).join('')}</div>`;
  openModal('chalModal',opener||$('chalBtn'))}
 function startChallenge0(id,opener){
  const ch=CHAL_BY[id];if(!ch||phase==='countdown'||phase==='running')return;const c=chalGet(id);
@@ -2166,9 +2185,9 @@ function startChallenge0(id,opener){
 function chalStripHTML(d){
  const ch=CHAL_BY[d.ch],c=chalGet(d.ch),[rs,rt]=chalRule(ch,d.mods,c),zones=chalZones(ch.id,c.prev);
  return `<div class="ch-strip"><div class="ch-head"><b>${chalPic(ch)} ${esc(ch.t)}</b>${starsHTML(c.s)}</div>
-  <p class="ch-goal">🎯 ${esc(ch.g)}<small>📐 ${esc(ch.r)}</small></p>${stepsHTML(c.n?[3]:[0,1])}
+  <p class="ch-goal">🎯 ${matDots(esc(ch.g))}<small>📐 ${matDots(esc(ch.r))}</small></p>${stepsHTML(c.n?[3]:[0,1])}
   ${c.prev&&!(ch.team||ch.sort)?gaugeHTML({zones,base:c.prev.t,guess:d.guess,near:ch.id==='same',label:L(`지난 시험 ${sec(c.prev.t)}`,`Last test ${sec(c.prev.t)}`)+(zones.length?L(`, 목표 ${zoneText(ch.id,c.prev)}`,`, goal ${zoneText(ch.id,c.prev)}`):'')}):''}
-  <p class="ch-rule ${rs===true?'ok':rs===false?'no':''}" role="status">${esc(rt)}</p>
+  <p class="ch-rule ${rs===true?'ok':rs===false?'no':''}" role="status">${matDots(esc(rt))}</p>
   ${ch.team||ch.sort?`<p class="ch-rule">🤔 ${esc(ch.team?L('어떤 조각이 무거운 쇠구슬에게 유리할지 먼저 예상해 봐요.','First guess which pieces help the heavy steel marbles.'):L('용수철을 얼마나 눌러야 할지 먼저 예상해 봐요.','First guess how far to squash the spring.'))}</p>`:`<div class="guess"><span>🤔 ${L('예상 우승 시간','Guess the winning time')}</span><button type="button" class="mini-btn" data-b="gm" aria-label="${L('예상 1초 줄이기','Guess 1 second less')}">−</button><output aria-live="polite">${d.guess==null?'?':d.guess+L('초',' s')}</output><button type="button" class="mini-btn" data-b="gp" aria-label="${L('예상 1초 늘리기','Guess 1 second more')}">+</button><small>${L('먼저 예상하고 시험하면 더 많이 배워요. 안 해도 괜찮아요.','Guessing before a test helps you learn. Skipping is fine too.')}</small></div>`}
   <div class="ch-tools"><button type="button" class="chip" data-b="board">🎯 ${L('다른 도전','Other challenges')}</button><button type="button" class="chip" data-b="free">🛠️ ${L('자유롭게 만들기','Free build')}</button></div></div>
   ${customs.length?`<div class="b-saved"><span>📂 ${L('내 코스 가져오기','Start from my course')}:</span>${customs.map((x,i)=>`<button type="button" class="chip" data-b="load" data-i="${i}">🛠️ ${esc(x.name)}</button>`).join('')}</div>`:''}`}
@@ -2191,10 +2210,10 @@ function noteEntryHTML(e,busy){
  const mx=Math.max(time?.1:1,...vals.filter(v=>v!=null)),W=v=>v==null?0:v/mx*72;
  const pred=e.opts.find(o=>o[0]===r.p)?.[1],same=r.p&&r.w&&r.p===r.w;
  const axis=time?L('⏱️ 걸린 시간 · 막대가 짧을수록 먼저 도착했어요','⏱️ Time taken · a shorter bar arrived first'):laps?L('🌀 돈 바퀴 수 · 막대가 길수록 많이 돌았어요','🌀 Laps · a longer bar circled more'):e.measure==='up'?L('↕️ 튀어 오른 높이 · 막대가 길수록 높이 튀었어요','↕️ Bounce height · a longer bar bounced higher'):L('↔️ 간 거리 · 막대가 길수록 멀리 갔어요','↔️ Distance · a longer bar went farther');
- const aria=e.lanes.map((ln,i)=>`${'AB'[i]} ${ln.name} ${txt(vals[i])}`).join(', ');
+ const aria=e.lanes.map((ln,i)=>`${'AB'[i]} ${matText(ln.name)} ${txt(vals[i])}`).join(', ');
  return `<article class="nb"><h3 class="nb-h"><span aria-hidden="true">${expPic(e)}</span>${esc(e.t)}<small>${L(`실험 ${r.n}번`,`${r.n} run${r.n===1?'':'s'}`)}</small></h3>
-  ${pred?`<p>🤔 <b>${L('내 예상','My guess')}</b> · ${esc(pred)}</p>`:''}<p>👀 <b>${L('결과','Result')}</b> · ${esc(labHead(e,r.w||'same'))}${pred?`<span class="nb-tag ${same?'ok':'new'}">${same?L('예상과 같아요','Matched my guess'):L('예상과 달라요','Different from my guess')}</span>`:''}</p>
-  <div class="bars" role="img" aria-label="${esc(aria)}">${e.lanes.map((ln,i)=>`<span class="bl" aria-hidden="true"><i class="sw ${'ab'[i]}">${'AB'[i]}</i><span>${esc(ln.name)}</span></span><span class="bt" aria-hidden="true"><i class="${'ab'[i]}" style="width:${W(vals[i]).toFixed(1)}%"></i><em style="left:calc(${W(vals[i]).toFixed(1)}% + 6px)">${txt(vals[i])}</em></span>`).join('')}</div>
+  ${pred?`<p>🤔 <b>${L('내 예상','My guess')}</b> · ${esc(pred)}</p>`:''}<p>👀 <b>${L('결과','Result')}</b> · ${matDots(esc(labHead(e,r.w||'same')))}${pred?`<span class="nb-tag ${same?'ok':'new'}">${same?L('예상과 같아요','Matched my guess'):L('예상과 달라요','Different from my guess')}</span>`:''}</p>
+  <div class="bars" role="img" aria-label="${esc(aria)}">${e.lanes.map((ln,i)=>`<span class="bl" aria-hidden="true"><i class="sw ${'ab'[i]}">${'AB'[i]}</i><span>${matDots(esc(ln.name))}</span></span><span class="bt" aria-hidden="true"><i class="${'ab'[i]}" style="width:${W(vals[i]).toFixed(1)}%"></i><em style="left:calc(${W(vals[i]).toFixed(1)}% + 6px)">${txt(vals[i])}</em></span>`).join('')}</div>
   <p class="nb-axis">${axis}</p><p class="nb-why">💡 ${esc(firstSentence(e.why))}</p>
   <button type="button" class="small-btn" data-exp="${e.id}" ${busy?'disabled':''}>🔬 ${L('다시 해 보기','Try it again')}</button></article>`}
 function openNotebook(opener){
@@ -2228,7 +2247,7 @@ function exitLab(){labMode=false;labExp=null;labPred=null;prepare();setCaption(L
 function labPredictCard(){
  const ex=labExp;phase='ready';
  $('resultCard').innerHTML=`<div class="lab-head">${expPic(ex)} ${esc(ex.t)}</div><p class="lab-q">${esc(ex.q)}</p><p class="lab-diff">🔎 ${esc(ex.diff)}</p>
-  <div class="lab-lanes">${ex.lanes.map((l,i)=>`<span><i>${'AB'[i]}</i>${esc(l.name)}</span>`).join('')}</div>
+  <div class="lab-lanes">${ex.lanes.map((l,i)=>`<span><i>${'AB'[i]}</i>${matDots(esc(l.name))}</span>`).join('')}</div>
   <p class="lab-ask">🤔 ${L('어떻게 될지 예상해 보세요!','What do you think will happen?')}</p>
   <div class="lab-opts">${ex.opts.map(([k,t])=>`<button type="button" class="primary lab-opt" data-act="pred" data-k="${k}">${k==='same'?'🤝':k==='A'?'🅰️':'🅱️'} ${esc(t)}</button>`).join('')}</div>
   <p class="lab-note">${L('틀려도 괜찮아요. 예상해 보는 것이 과학자의 첫걸음이에요!','Any guess is fine. Guessing first is how scientists start!')}</p>
@@ -2262,7 +2281,7 @@ function labExplain(){
  // the report counts only the first test of each guess, and keeps the question, the right answer and (when it differed) the guess
  if(labFresh){labFresh=false;const it=IX[ex.id];try{LR.ans(right,'exp_'+ex.id,it?{id:'exp:'+ex.id,q:it.q,a:it.o[ex.ans],...(right?{}:{g:it.o[labPred]}),tip:it.tip}:undefined)}catch(e){}}
  const predTxt=ex.opts.find(o=>o[0]===labPred)?.[1]||'';
- $('resultCard').innerHTML=`<div class="lab-head">${expPic(ex)} ${esc(ex.t)}</div><div class="lab-result">${esc(head)}</div><p class="lab-detail">${esc(detail)}</p>
+ $('resultCard').innerHTML=`<div class="lab-head">${expPic(ex)} ${esc(ex.t)}</div><div class="lab-result">${matDots(esc(head))}</div><p class="lab-detail">${esc(detail)}</p>
   <p class="lab-fb ${right?'ok':'new'}">${right?L('🎯 예상이 맞았어요! 과학자처럼 생각했어요.','🎯 Your guess was right! You thought like a scientist.'):L('🔍 예상과 달랐어요! 그래서 실험이 재밌어요. 과학자들도 이렇게 새로 알게 돼요.','🔍 Not what you guessed! That is what makes experiments fun. Scientists learn new things exactly like this.')}<small>${L('내 예상','My guess')}: ${esc(predTxt)}</small></p>
   <div class="lab-why"><b>💡 ${L('왜 그럴까요?','Why?')}</b>${esc(ex.why)}</div><p class="lab-life">🏠 ${esc(ex.life)}</p><button type="button" class="mlx-chip mrl-again" data-act="lesson" data-ls="${LAB_LS[ex.id]}">📖 ${L('개념 다시 보기','See the idea again')}</button>
   ${right?coachHere('clap','예상하고, 지켜보고, 확인까지! 진짜 과학자의 방법이에요 🌙','Predict, watch, check: that is exactly how real scientists work 🌙'):coachHere('idea','예상이 달라도 괜찮아요. 왜 그런지 알게 된 게 더 멋진 일이에요 🌙','A different result is okay. Finding out why is the best part 🌙')}
@@ -2272,7 +2291,7 @@ function labExplain(){
 function drawLab(){
  const ex=labExp,lab=course.lab,k=Math.max(1,1/cam.z*.9),F=(w,px)=>`${w} ${Math.round(px*k)}px system-ui`;ctx.textAlign='center';ctx.textBaseline='middle';
  lab.lanes.forEach((L0,l)=>{const cx=L0.off+195,lane=ex.lanes[l],r=labRes[l];
-  ctx.font=F(900,15);const t=`${'AB'[l]} · ${lane.name}`,w=Math.min(326,ctx.measureText(t).width+24*k),hh=28*k;ctx.fillStyle='rgba(6,16,36,.82)';rr(cx-w/2,22,w,hh,hh/2);ctx.fill();ctx.fillStyle=l?'#ffd84a':'#7df9ff';ctx.fillText(t,cx,22+hh/2+.5);
+  ctx.font=F(900,15);const t=`${'AB'[l]} · ${matText(lane.name)}`,w=Math.min(326,ctx.measureText(t).width+24*k),hh=28*k;ctx.fillStyle='rgba(6,16,36,.82)';rr(cx-w/2,22,w,hh,hh/2);ctx.fill();ctx.fillStyle=l?'#ffd84a':'#7df9ff';ctx.fillText(t,cx,22+hh/2+.5);
   if(ex.measure==='time'){const fy=L0.finY;for(let k=0;k<8;k++){ctx.fillStyle=k%2?'#111':'#fff';ctx.fillRect(L0.finX-3,fy-60+k*9,6,9)}
    if(r.v!=null){const other=labRes[1-l].v,first=other==null||r.v<=other-.03,tie=other!=null&&Math.abs(r.v-other)<.03;ctx.font=F(900,14);const lab2=`${tie?L('동시!','Tie!'):first?L('1등!','1st!'):L('2등','2nd')} ${r.v.toFixed(2)}${L('초','s')}`,w2=ctx.measureText(lab2).width+16*k,h2=24*k;ctx.fillStyle=tie?'#7df9c8':first?'#ffd84a':'#c8d4ea';rr(Math.min(L0.finX-w2/2,L0.off+352-w2),fy-70-h2,w2,h2,h2/2);ctx.fill();ctx.fillStyle='#14203a';ctx.fillText(lab2,Math.min(L0.finX,L0.off+352-w2/2),fy-70-h2/2)}}
   else if(ex.kind==='bounce'){const top=L0.floorY-Sim.T-R,x=L0.off+300;ctx.strokeStyle='rgba(255,255,255,.55)';ctx.fillStyle='rgba(255,255,255,.75)';ctx.font=F(700,11);ctx.lineWidth=1.5;
@@ -2577,7 +2596,7 @@ const CH_LS={one:['fair'],double:['fair'],same:['fair'],team:['pushpull','magnet
 // six pages or fewer): each one's result and its one-line tip
 function mrLesson(id){const d=MRL[id];if(!d)return null;const found=EXPS.filter(e=>LAB_LS[e.id]===id&&stats.labs[e.id]),steps=d.steps(),tip=e=>L(IX[e.id].tip[0],IX[e.id].tip[1]);
  for(let i=0;i<found.length;i+=2){const part=found.slice(i,i+2);steps.push({say:(i?L('실험에서 알아낸 것이 더 있어요. ','There is more from your experiments. '):L('실험에서 알아낸 것이에요. ','Here is what your experiments showed. '))+part.map(tip).join(' '),
-  art:`<div class="mrl"><ul class="mrl-found">${part.map(e=>`<li><b>${expPic(e)} ${esc(e.t)}</b><span>${esc(labHead(e,e.ans))}</span><small>💡 ${esc(tip(e))}</small></li>`).join('')}</ul></div>`})}
+  art:`<div class="mrl"><ul class="mrl-found">${part.map(e=>`<li><b>${expPic(e)} ${esc(e.t)}</b><span>${matDots(esc(labHead(e,e.ans)))}</span><small>💡 ${esc(tip(e))}</small></li>`).join('')}</ul></div>`})}
  return {id:'mr:'+id,icon:d.icon,title:d.title,steps,key:d.key.concat(found.map(e=>IX[e.id].tip)).slice(0,3)}}
 const mrSeenN=()=>MRL_IDS.filter(id=>MiniLesson.seen('mr:'+id)).length;
 const mrOffered=new Set();
@@ -2601,7 +2620,7 @@ function openSkins(opener){renderSkins();openModal('skinModal',opener||$('skinBt
   trailDraw(g,pts,skin.trail,tt,s*1.6);const c=PALETTE[mine][1];paintBall(g,x,y,26*s,c,SHADE[mine],tt*3,skin.pat,tt);skinRaf=requestAnimationFrame(loop)};skinRaf=requestAnimationFrame(loop)}
 function renderSkins(){
  const grid=(k,list)=>list.map(([id,ic,n])=>{const ok=unlocked(k,id),b=badgeFor(k,id),on=(k==='pat'?skin.pat:skin.trail)===id;
-  return `<button type="button" class="opt${on?' on':''}" data-look="${k}" data-id="${id}" ${ok?'':'aria-disabled="true"'} aria-pressed="${on}"><span class="oi">${ok?ic:'🔒'}</span><b>${esc(n)}</b>${ok?'':`<small>${b?esc(b.ic+' '+b.n):''}</small>`}</button>`}).join('');
+  return `<button type="button" class="opt${on?' on':''}" data-look="${k}" data-id="${id}" ${ok?'':'aria-disabled="true"'} aria-pressed="${on}"><span class="oi">${ok?ic:'🔒'}</span><b>${esc(n)}</b>${ok?'':`<small>${b?badgePic(b)+' '+esc(b.n):''}</small>`}</button>`}).join('');
  $('skinBody').innerHTML=`<div class="skin-top"><canvas id="skinPreview" width="300" height="180" aria-label="${L('내 구슬 미리 보기','Preview of my marble')}"></canvas><p>${esc(MY)} ${esc(nameOf(mine))} · ${L('배지를 모으면 새 꾸미기가 열려요!','Collect badges to open new looks!')}</p></div>
   <h3>🎨 ${L('무늬','Pattern')}</h3><div class="opts">${grid('pat',PATTERNS)}</div><h3>💫 ${L('꼬리','Trail')}</h3><div class="opts">${grid('trail',TRAILS)}</div>`}
 function renderBadges(){

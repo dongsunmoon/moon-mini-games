@@ -1132,6 +1132,10 @@ button.ty-prog:active{transform:translateY(2px)}
 .ty-pvneed small{font-size:13px;font-weight:800}
 @media (prefers-reduced-motion:reduce){.ty-pvgo{animation:none}}
 /*SHOPCSS:END*/
+.mlx .svgi{width:1.25em;height:1.25em;display:inline-block;vertical-align:-.25em}.mlx .sgl .sic .svgi{width:64px;height:64px}
+.sgl{display:grid;justify-items:center;gap:6px;text-align:center;width:100%}.sgl .sic{font-size:56px;line-height:1}.sgl .sic .svgi,.sgl .sic img{width:64px;height:64px}
+.sgl b{font-size:19px}.sgl p{margin:0;font-size:15.5px;line-height:1.5;font-weight:700;color:#33405f}.sgl .life{background:#fff7e0;border-radius:12px;padding:8px 10px;font-size:14px;font-weight:700;color:#6b5210;width:100%;box-sizing:border-box}
+.cards-top{display:flex;gap:8px;flex-wrap:wrap}.cards-top .btn{flex:1 1 200px}
 /*COACH:BEGIN*/
 /* Coach Moon: one line inside result windows (.mcoach) and a corner bubble at good moments (#coachPop, never takes taps) */
 .mcoach{display:flex;align-items:flex-end;gap:8px;margin:10px auto 6px;max-width:330px;text-align:left}
@@ -6532,7 +6536,7 @@ PLAYS.explore=(box,p,api)=>{
 function renderCards(){
  const w=cardsWorld,cs=CARDS.filter(c=>c.w===w);
  $('v-cards').innerHTML=`<h2 class="section-title">📚 ${L('과학 카드','Science cards')} <small>${Object.keys(S.cards).length}/${CARDS.length} · 🥇 ${goldCards()}</small></h2>
- <button class="btn ghost small cards-album" type="button" data-album>📒 ${L('과학 스티커 앨범','Science sticker album')} · ${stkCount()}/${STK_ALL.length}</button>
+ <div class="row cards-top"><button class="btn gold small" type="button" data-book>📖 ${L('개념 노트 · 미니 수업','Concept notebook · mini lessons')}</button><button class="btn ghost small cards-album" type="button" data-album>🌟 ${L('과학 스티커 앨범','Science sticker album')} · ${stkCount()}/${STK_ALL.length}</button></div>
  <div class="tabs">${WORLDS.map((x,i)=>`<button type="button" data-cw="${i}" aria-pressed="${i===w}">${x.icon} ${esc(x.name)}</button>`).join('')}</div>
  <p class="hintp">${L('문제를 맞힐수록 카드가 🥉→🥈→🥇로 자라요. 하루에 조금씩 여러 날 복습하면 골드가 돼요!','Cards grow 🥉→🥈→🥇 as you answer correctly. A little review on different days makes them gold!')}</p>
  <div class="cardgrid">${cs.map(c=>{const st=S.cards[c.id],tr=st?tierOf(st.m):0,lock=!st,hard=!cardOk(c),cd=cardDiff(c);
@@ -6540,6 +6544,7 @@ function renderCards(){
  const on=$('v-cards').querySelector('[aria-pressed="true"]');if(on)on.scrollIntoView({block:'nearest',inline:'center'});
 }
 $('v-cards').addEventListener('click',e=>{
+ if(e.target.closest('[data-book]')){SFX.click();openSciBook();return}
  if(e.target.closest('[data-album]')){SFX.click();openAlbum(Math.max(0,...openWorldIds().filter(i=>i<=nextStage().w)));return}
  const t=e.target.closest('[data-cw]'),c=e.target.closest('[data-card]');
  if(t){SFX.click();cardsWorld=+t.dataset.cw;renderCards();return}
@@ -6549,6 +6554,24 @@ $('v-cards').addEventListener('click',e=>{
  modal(cardHTML(card)+`<div class="row"><button class="btn ghost" type="button" data-act="say">🔊 ${L('읽어 주세요','Read it to me')}</button>${LEARN[card.id]?`<button class="btn gold" type="button" data-act="shop">🏪 ${L('놀이로 배우기','Learn by playing')}</button>`:''}${pool.length?`<button class="btn green" type="button" data-act="practice">🎯 ${L('연습하기','Practice')}</button>`:''}</div>`,
   {cls:'lesson',acts:{say:()=>{speak(card.title+'. '+card.text+' '+card.life);return false},shop:()=>()=>shopOpen([card.id],()=>go('cards'),{mode:'review'}),practice:()=>()=>startCardPractice(card.id)},onOpen:()=>speak(card.title)});
 });
+
+// ---------------------------------------------------------------- concept lessons (MiniLesson, shared in the coach block)
+// The shop teaches by doing; parents also asked for a short lesson that explains the idea first. Each report topic
+// (SG_AREAS: 42 topics, every card in one) is a lesson: one page per card with its explanation and an everyday example,
+// then the customers' take-away lines to remember. Before a shop day the topics of its new cards play once (at most two),
+// and the 📒 concept notebook in the cards view keeps every topic.
+MiniLesson.cfg({voice:t=>speak(t),stop:()=>stopVoice(),who:{img:'images/buddy-puppy.webp',name:L('멍멍 박사','Dr. Woof')}});
+const SG_TOPICS=[];SG_AREAS.forEach(a=>a[4].forEach(([id,name,ids])=>SG_TOPICS.push({id,area:a[0],ic:a[1],name:T(name),cards:ids.split(' ').filter(x=>CARD[x])})));
+const topicOfCard=id=>SG_TOPICS.find(tp=>tp.cards.includes(id));
+function sciLesson(tp,first=[]){const b=BUDDIES[S.equip.buddy]||BUDDIES.puppy;
+ const ids=[...first.filter(id=>tp.cards.includes(id)),...tp.cards.filter(id=>!first.includes(id))].filter(id=>cardOk(CARD[id])).slice(0,5);
+ const steps=ids.map(id=>{const c=CARD[id];return {say:`${c.title}. ${c.text}`,art:`<div class="sgl"><span class="sic">${icon(c.icon)}</span><b>${esc(c.title)}</b><p>${esc(c.text)}</p><div class="life">🏡 ${esc(c.life)}</div></div>`}});
+ const key=ids.filter(id=>LEARN[id]).slice(0,3).map(id=>T(LEARN[id].thanks));
+ return {id:'sg:'+tp.id,icon:CARD[ids[0]]?icon(CARD[ids[0]].icon):tp.ic,title:tp.name,who:{img:b.img||'images/buddy-puppy.webp',name:b.name},steps,key:key.length?key:ids.slice(0,2).map(id=>CARD[id].text)}}
+// play the lessons of the new cards' topics (each once, at most two a day), then go on
+function sciLessonsFor(ids,then){const tps=[];ids.forEach(id=>{const tp=topicOfCard(id);if(tp&&!tps.includes(tp)&&!MiniLesson.seen('sg:'+tp.id))tps.push(tp)});
+ const list=tps.slice(0,2),step=()=>{const tp=list.shift();if(!tp){then();return}const ls=sciLesson(tp,ids);if(!ls.steps.length){step();return}MiniLesson.before(ls,step)};step()}
+function openSciBook(){MiniLesson.book({title:['과학 개념 노트','Science concept notebook'],groups:SG_AREAS.map(a=>({name:a[1]+' '+T(a[2]),items:SG_TOPICS.filter(tp=>tp.area===a[0]&&tp.cards.some(id=>cardOk(CARD[id]))).map(tp=>({id:'sg:'+tp.id,icon:icon(CARD[tp.cards[0]].icon),title:tp.name,key:LEARN[tp.cards[0]]?[T(LEARN[tp.cards[0]].thanks)]:[],lesson:()=>sciLesson(tp)}))})).filter(g=>g.items.length)})}
 
 // ---------------------------------------------------------------- play sessions (battles, review, daily, labs)
 let PS=null;
@@ -6569,7 +6592,7 @@ function startStage(w,s){
  mapWorld=w;
  const want=[...fresh,...focus].filter((id,i,a)=>a.indexOf(id)===i&&!S.cards[id]).slice(0,3),foe={icon:W.mon.icon,img:W.mon.img,name:W.mon.name,hi:W.mon.hi,hp:D().mon};
  const day=[...want,...regulars(focus.length>want.length?focus:availCards(w).map(c=>c.id),want.length>=3?0:want.length?1:2)];
- shopOpen(day,()=>startSession({mode:'stage',w,s,pool:poolOf(learnedOf(focus)),fresh:want,fixed:firstQs(want),grad:W.grad,title:`${W.icon} ${L(`스테이지 ${w+1}-${s+1}`,`Stage ${w+1}-${s+1}`)}`,foe}),{grad:W.grad,foe});
+ sciLessonsFor(want,()=>shopOpen(day,()=>startSession({mode:'stage',w,s,pool:poolOf(learnedOf(focus)),fresh:want,fixed:firstQs(want),grad:W.grad,title:`${W.icon} ${L(`스테이지 ${w+1}-${s+1}`,`Stage ${w+1}-${s+1}`)}`,foe}),{grad:W.grad,foe}));
 }
 function bossIntro(w){
  const W=WORLDS[w],b=W.boss;
@@ -6577,7 +6600,7 @@ function bossIntro(w){
   <p>${L(`${W.name}에서 배운 과학으로 물리쳐요! 실험 문제도 나와요.`,`Use everything you learned in ${W.name}! Lab challenges are coming too.`)}</p>
   <div class="row"><button class="btn red" type="button" data-act="go">⚔️ ${L('도전!','Fight!')}</button></div>`,
  {acts:{go:()=>()=>{const ids=availCards(w).map(c=>c.id);const want=ids.filter(id=>!S.cards[id]).slice(0,3),foe={icon:b.icon,img:b.img,name:b.name,hi:b.hi,lose:b.lose,hp:D().boss,boss:true};
-  shopOpen([...want,...regulars(ids,want.length>=3?0:want.length?1:2)],()=>startSession({mode:'boss',w,pool:poolOf(learnedOf(ids)),fresh:want,fixed:firstQs(want),grad:W.grad,title:`👑 BOSS`,foe}),{grad:W.grad,foe})}},onOpen:()=>speak(b.hi)});
+  sciLessonsFor(want,()=>shopOpen([...want,...regulars(ids,want.length>=3?0:want.length?1:2)],()=>startSession({mode:'boss',w,pool:poolOf(learnedOf(ids)),fresh:want,fixed:firstQs(want),grad:W.grad,title:`👑 BOSS`,foe}),{grad:W.grad,foe}))}},onOpen:()=>speak(b.hi)});
 }
 function finalIntro(){
  modal(`<div class="bossart" style="background:${FINAL.grad}">${pic(FINAL.img,FINAL.icon)}</div><h2>${esc(FINAL.name)}</h2><div class="speech">“${esc(FINAL.hi)}”</div>

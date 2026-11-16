@@ -606,6 +606,7 @@ button:focus-visible,a:focus-visible,[tabindex]:focus-visible{outline:3px solid 
 .cl-land .cl-mv[data-c="l"]{position:absolute;left:max(14px,env(safe-area-inset-left));bottom:calc(16px + env(safe-area-inset-bottom))}
 .cl-land .cl-mv[data-c="r"]{position:absolute;left:calc(max(14px,env(safe-area-inset-left)) + 70px);bottom:calc(16px + env(safe-area-inset-bottom))}
 .cl-land .cl-drop{position:absolute;right:max(14px,env(safe-area-inset-right));bottom:calc(16px + env(safe-area-inset-bottom))}
+.lnote{background:#fff3;font-size:20px}
 /*COACH:BEGIN*/
 /* Coach Moon: one line inside result windows (.mcoach) and a corner bubble at good moments (#coachPop, never takes taps) */
 .mcoach{display:flex;align-items:flex-end;gap:8px;margin:10px auto 6px;max-width:330px;text-align:left}
@@ -9719,6 +9720,10 @@ MONEY.kind=S.opt.money;
 // ---------------------------------------------------------------- grades, skills and aquarium progress
 SKILLS.sort((a,b)=>a.id<b.id?-1:1);
 const SKILL_BY={};SKILLS.forEach(s=>SKILL_BY[s.id]=s);
+// Level-2/3 lessons and the lines to remember, per skill (MiniLesson; data from _src/aquarium/more/g1–g6.js)
+const MORE={};
+/*MORE:BEGIN*/
+/*MORE:END*/
 const skillId=(g,i)=>`g${g}-${String(i+1).padStart(2,'0')}`;
 const skillOf=(g,i)=>SKILL_BY[skillId(g,i)];
 const gradeData=g=>{if(!S.G[g])S.G[g]={aq:Array.from({length:20},freshAq),grad:'',started:dayKey()};return S.G[g]};
@@ -10118,23 +10123,37 @@ function startLesson(g,i,stage,mode='stage'){audio();const sk=skillOf(g,i);if(!s
  const a=aqState(g,i),spec=mode==='test'?STAGES[4]:STAGES[stage];
  LES={g,i,sk,stage,mode,spec,right:0,asked:0,first:0,wrong:0,combo:0,max:0,miss:0,hintsLeft:stage===0?99:1+skl('hint'),shield:false,coins:0,qn:0,reviewDone:0,t0:now(),wasRetry:false};
  const st=openStage();st.className='stage lesson';
- st.innerHTML=`<div class="lbar"><button type="button" class="lx" data-l="quit" aria-label="${L('그만하기','Quit')}">✕</button><div class="ltitle"><b>${esc(aqDef(g,i).name)}</b><small>${mode==='test'?'🚀 '+L('바로 마스터 도전','Skip-ahead challenge'):STAGES[stage].icon+' '+L(`${stage+1}번 수조 · ${STAGES[stage].ko}`,`Tank ${stage+1} · ${STAGES[stage].en}`)} · ${esc(sk.name)}</small></div><div class="lcombo" id="lCombo"></div></div>
+ st.innerHTML=`<div class="lbar"><button type="button" class="lx" data-l="quit" aria-label="${L('그만하기','Quit')}">✕</button><div class="ltitle"><b>${esc(aqDef(g,i).name)}</b><small>${mode==='test'?'🚀 '+L('바로 마스터 도전','Skip-ahead challenge'):STAGES[stage].icon+' '+L(`${stage+1}번 수조 · ${STAGES[stage].ko}`,`Tank ${stage+1} · ${STAGES[stage].en}`)} · ${esc(sk.name)}</small></div><div class="lcombo" id="lCombo"></div>${mode==='test'?'':`<button type="button" class="lx lnote" data-l="note" aria-label="${L('개념 다시 보기','See the idea again')}">📒</button>`}</div>
   <div class="lprog" id="lProg"></div><div class="lbody" id="lBody"></div>`;
  st.querySelector('[data-l=quit]').addEventListener('click',()=>{sfx('tap');modal(`<h2>${L('수업을 그만할까요?','Stop this lesson?')}</h2><p>${L('지금까지 푼 문제는 기록돼요. 수조는 수업을 끝까지 하면 열려요.','Your answers so far are saved. The tank opens when you finish the lesson.')}</p><div class="row"><button class="btn ghost" data-act="close">${L('계속하기','Keep going')}</button><button class="btn" data-act="quit">${L('그만하기','Stop')}</button></div>`,{acts:{quit:()=>()=>{closeStage();go('home')}}})});
- if(stage===0&&mode==='stage')showSlides();else nextProblem();
+ {const nb=st.querySelector('[data-l=note]');if(nb)nb.addEventListener('click',()=>{sfx('tap');hush();MiniLesson.open(mathLesson(sk,0))})}
+ if(stage===0&&mode==='stage')showSlides();else if(mode==='stage')newKinds(sk,stage,nextProblem);else nextProblem();
  a.at=a.at||now();save(true)}
 function progHTML(){const s=LES.spec;if(s.fixed){return `<div class="dots">${s.fixed.map((_,k)=>`<i class="${k<LES.qn?(LES.marks&&LES.marks[k]?'g':'r'):k===LES.qn?'c':''}"></i>`).join('')}</div><span>${L(`${s.pass}개 이상 맞히면 통과!`,`${s.pass} right to pass!`)}</span>`}
  return `<div class="dots">${Array.from({length:s.goal},(_,k)=>`<i class="${k<LES.right?'g':k===LES.right?'c':''}"></i>`).join('')}</div><span>${L(`정답 ${LES.right}/${s.goal}`,`${LES.right}/${s.goal} right`)}</span>`}
 function updateLesson(){$('lProg').innerHTML=progHTML();$('lCombo').innerHTML=LES.combo>=2?`🔥<b>${LES.combo}</b>`:''}
 
-// Mooni explains with pictures, then the guided problems start
-function showSlides(){const sk=LES.sk;let slides=[];try{slides=sk.learn()||[]}catch(e){slides=[]}let k=0;
- const body=$('lBody');$('lProg').innerHTML=`<span>📖 ${L('무니 선생님과 배워요','Learn with Mooni')}</span>`;
- const show=()=>{const s=slides[k];body.scrollTop=0;body.innerHTML=`<div class="slide"><div class="mooni">${MAV}<div class="bub">${s.t}</div></div>${s.vis?`<div class="qvis">${s.vis}</div>`:''}
-  <div class="row"><button type="button" class="btn ghost" data-s="again">🔊 ${L('다시 듣기','Hear again')}</button><button type="button" class="btn" data-s="next">${k<slides.length-1?L('다음','Next')+' ▶':L('문제 풀어 보기','Try it')+' ✏️'}</button></div><div class="sdots">${slides.map((_,j)=>`<i class="${j===k?'on':''}"></i>`).join('')}</div></div>`;
-  say(speechOf(s.t),{raw:true})};
- body.onclick=e=>{const b=e.target.closest('[data-s]');if(!b)return;sfx('tap');if(b.dataset.s==='again'){say(speechOf(slides[k].t),{raw:true});return}k++;if(k>=slides.length){body.onclick=null;hush();nextProblem()}else show()};
- if(!slides.length){nextProblem();return}show()}
+// Mooni's mini lessons (the shared MiniLesson player in the coach block). Tank 1 (Learn) plays the skill's own slides,
+// which teach the level-1 kinds, and ends with the lines to remember (MORE[id].key). The kinds that first appear at level 2
+// (from Practice 1) and at level 3 (in the Challenge) get a short lesson of their own the first time those tanks start
+// (MORE[id].l2 / l3, written per grade from _src/aquarium/MORE_SPEC.md). 📒 in the lesson bar and the concept notebook
+// replay the whole idea any time, so a child is never left with a kind of question nobody explained.
+MiniLesson.cfg({voice:(t,cb)=>say(t,{raw:true,onend:cb}),stop:()=>hush(),who:{img:'images/aq-mooni.webp',name:L('무니 선생님','Mooni')}});
+const moreOf=sk=>MORE[sk.id]||{};
+function slidesOf(sk,part){const m=moreOf(sk),f=x=>{try{return x?x()||[]:[]}catch(e){return []}};
+ return part===1?f(sk.learn):part===2?f(m.l2):part===3?f(m.l3):[...f(sk.learn),...f(m.l2),...f(m.l3)]}
+function mathLesson(sk,part=0){const m=moreOf(sk),steps=slidesOf(sk,part).map(s=>({say:speechOf(s.t),art:s.vis?`<div class="qvis">${s.vis}</div>`:''}));
+ return {id:part>1?sk.id+':'+part:sk.id,icon:sk.icon,title:part===2?L(`${sk.name} · 새로 나오는 문제`,`${sk.name} · new kinds of questions`):part===3?L(`${sk.name} · 도전 문제`,`${sk.name} · challenge questions`):sk.name,
+  steps,key:m.key&&m.key.length?m.key:sk.goals.slice(0,2),cta:part>1?L('좋아요, 풀어 볼게요!','Got it, let’s solve!'):L('문제 풀어 보기','Try it')}}
+function showSlides(){const sk=LES.sk,ls=mathLesson(sk,1);$('lProg').innerHTML=`<span>📖 ${L('무니 선생님과 배워요','Learn with Mooni')}</span>`;
+ if(!ls.steps.length){nextProblem();return}let went=false;const go_=()=>{if(went)return;went=true;if(LES&&LES.sk===sk)nextProblem()};
+ MiniLesson.open(ls,{onDone:go_,onClose:go_})}
+// the new kinds' lessons before Practice 1–Challenge (level 2) and the Challenge (level 3), each once
+function newKinds(sk,stage,then){const parts=[];if(stage>=1&&stage<=3&&slidesOf(sk,2).length)parts.push(2);if(stage===3&&slidesOf(sk,3).length)parts.push(3);
+ const step=()=>{const p=parts.shift();if(p==null){then();return}MiniLesson.before(mathLesson(sk,p),step)};step()}
+// the concept notebook: every skill of every grade, the grade on screen open first
+function openMathBook(g){MiniLesson.book({title:['수학 개념 노트','Math concept notebook'],open:(g||S.grade||1)-1,groups:[1,2,3,4,5,6].map(gr=>({name:[`${gr}학년`,`Grade ${gr}`],
+ items:Array.from({length:20},(_,i)=>skillOf(gr,i)).filter(Boolean).map(sk=>({id:sk.id,icon:sk.icon,title:sk.name,key:moreOf(sk).key||[],lesson:()=>mathLesson(sk,0)}))}))})}
 
 function nextProblem(){const L_=LES,s=L_.spec,body=$('lBody');body.onclick=null;if(L_.view){L_.view.destroy();L_.view=null}
  if(s.fixed&&L_.qn>=s.fixed.length){finishStage();return}if(!s.fixed&&L_.right>=s.goal){finishStage();return}
@@ -10545,13 +10564,13 @@ function growCurriculum(){const g=TAB.curg||S.grade||1;TAB.curg=g;const gd=grade
  const rows=Array.from({length:20},(_,i)=>{const sk=skillOf(g,i),a=gd.aq[i];if(!sk)return '';const stt=a.done?'done':aqOpen(g,i)?'now':'next';if(stt==='done')learned++;else if(stt==='now')now_++;else next++;
   return `<button type="button" class="currow ${stt}" data-a="skillinfo" data-g="${g}" data-i="${i}"><span class="cst">${stt==='done'?'✅':stt==='now'?'🔵':'⚪'}</span><span class="cic">${sk.icon}</span><span class="ct"><b>${i+1}. ${esc(sk.name)}</b><small>${sk.kr?`🇰🇷 ${esc(sk.kr)}`:''}${sk.kr&&sk.ca?' · ':''}${sk.ca?`🇨🇦 ${esc(sk.ca)}`:''}</small></span><span class="cstar">${a.done?'⭐'.repeat(a.best):stt==='now'?`${a.open}/5`:''}</span></button>`}).join('');
  return `<div class="gtabs">${[1,2,3,4,5,6].map(x=>`<button type="button" class="${x===g?'on':''}" data-a="curg" data-g="${x}"><b>${x}${L('학년','')}</b><small>${doneCount(x)}/20</small></button>`).join('')}</div>
- <div class="card"><div class="curtop"><span>✅ ${L('배운 것','Learned')} <b>${learned}</b></span><span>🔵 ${L('배우는 중','Learning')} <b>${now_}</b></span><span>⚪ ${L('배울 것','Coming up')} <b>${next}</b></span></div><div class="gprog"><i style="width:${learned*5}%"></i></div>
+ <div class="card"><div class="curtop"><span>✅ ${L('배운 것','Learned')} <b>${learned}</b></span><span>🔵 ${L('배우는 중','Learning')} <b>${now_}</b></span><span>⚪ ${L('배울 것','Coming up')} <b>${next}</b></span></div><div class="gprog"><i style="width:${learned*5}%"></i></div><div class="row"><button type="button" class="btn ghost small" data-a="notebook" data-g="${g}">📒 ${L('개념 노트 · 언제든 다시 배우기','Concept notebook · learn any idea again')}</button></div>
  <p class="muted">${L('한국 2022 개정 수학과 교육과정과 캐나다 온타리오 수학 교육과정(2020)의 학년별 내용을 합쳐서 만들었어요. 아쿠아리움 20곳을 모두 완성하면 이 학년의 주요 수학 내용을 한 번씩 배운 거예요.','Built from Korea’s 2022 national math curriculum and Ontario’s 2020 math curriculum, merged grade by grade. Finish all 20 aquariums and you have covered this grade’s main math topics.')}</p></div>
  <div class="curlist">${rows}</div>`}
 function skillInfo(g,i){const sk=skillOf(g,i),a=aqState(g,i),r=S.sk[sk.id];let sample='';try{const p=sk.gen(1);sample=`<div class="sample"><small>${L('예시 문제','Sample problem')}</small><div class="qtext">${p.q}</div>${p.vis?`<div class="qvis">${p.vis}</div>`:''}</div>`}catch(e){}
  modal(`<h2>${sk.icon} ${esc(sk.name)}</h2><p>${esc(sk.about)}</p><ul class="goals">${sk.goals.map(x=>`<li>${esc(x)}</li>`).join('')}</ul><p class="muted">${sk.kr?`🇰🇷 ${esc(sk.kr)}<br>`:''}${sk.ca?`🇨🇦 ${esc(sk.ca)}`:''}</p>
   ${r?`<p>✏️ ${L(`${r.n}문제 풀이 · 정답률 ${Math.round(100*r.c/Math.max(1,r.n))}%`,`${r.n} tries · ${Math.round(100*r.c/Math.max(1,r.n))}% right`)}</p>`:''}${sample}
-  <div class="row wrap">${aqOpen(g,i)?`<button class="btn" data-act="go">🐠 ${L('이 아쿠아리움으로','Go to this aquarium')}</button>`:`<span class="muted">🔒 ${L('앞 단원을 마치면 열려요','Opens after the one before')}</span>`}</div>`,{cls:'wide',acts:{go:()=>()=>travelTo(g,i)}})}
+  <div class="row wrap"><button class="btn ghost" data-act="learn">📒 ${L('개념 배우기','Learn the idea')}</button>${aqOpen(g,i)?`<button class="btn" data-act="go">🐠 ${L('이 아쿠아리움으로','Go to this aquarium')}</button>`:`<span class="muted">🔒 ${L('앞 단원을 마치면 열려요','Opens after the one before')}</span>`}</div>`,{cls:'wide',acts:{go:()=>()=>travelTo(g,i),learn:()=>()=>MiniLesson.open(mathLesson(sk,0))}})}
 function growDex(){const by=[1,2,3,4,5,6,7].map(reg=>{const list=FISH.filter(f=>f.reg===reg),got=list.filter(f=>S.dex[f.id]).length;return `<div class="card"><h3>${reg<7?`${REGIONS[reg].flag} ${regionName(reg)}`:`✨ ${L('전설의 물고기','Legends')}`} <small>${got}/${list.length}</small></h3><div class="dexgrid">${list.map(f=>S.dex[f.id]?`<button type="button" class="dx" data-a="fishinfo" data-id="${f.id}">${fishImgTag(f.id)}<small>${esc(L(f.ko,f.en))}</small></button>`:`<span class="dx no">${fishImgTag(f.id,'shadow')}<small>?</small></span>`).join('')}</div></div>`}).join('');
  return `<p class="muted center">${L(`만난 바다 친구 ${Object.keys(S.dex).length}/${FISH.length} · 🇰🇷 한국과 🇨🇦 캐나다에 사는 동물이에요.`,`Sea friends met: ${Object.keys(S.dex).length}/${FISH.length} · animals of 🇰🇷 Korea and 🇨🇦 Canada.`)}</p>${by}`}
 function growAch(){return `<div class="achs">${ACH.map(([id,ic,ko,en])=>`<div class="ach ${S.ach.includes(id)?'got':''}"><span>${S.ach.includes(id)?ic:'🔒'}</span><b>${L(ko,en)}</b></div>`).join('')}</div><p class="muted center">${L(`업적마다 ${PEARL} 진주 2개를 받아요.`,`Each trophy gives ${PEARL} 2 pearls.`)}</p>`}
@@ -10660,6 +10679,7 @@ function wire(){
    case 'skill':{const x=SKILLTREE.find(y=>y.id===b.dataset.id);if(skl(x.id)>=5)break;if(S.sp<1){toast(L('스킬 포인트가 없어요. 레벨을 올려요!','No skill points. Level up!'));break}S.sp--;S.skills[x.id]=skl(x.id)+1;sfx('level');toast(`${x.icon} ${L(x.ko,x.en)} Lv.${S.skills[x.id]}`);save();renderHQ();break}
    case 'curg':TAB.curg=+b.dataset.g;renderGrow();break;
    case 'skillinfo':skillInfo(+b.dataset.g,+b.dataset.i);break;
+   case 'notebook':sfx('tap');openMathBook(+b.dataset.g);break;
    case 'fishinfo':fishInfo(b.dataset.id);break}});
  document.addEventListener('click',e=>{if(e.target.closest('.reqb')){e.stopPropagation();openRequest()}},true)}
 

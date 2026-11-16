@@ -628,6 +628,112 @@ body.mgOpen{overflow:hidden}
 @media (max-width:420px){.mlx-card{padding:10px 12px 12px;border-radius:20px}.mlx-stage{min-height:170px}.mlx-talk p{font-size:16px}}
 @media (prefers-reduced-motion:reduce){.mlx{animation:none}.mlx-b.go.ready{animation:none}.mlx-dots i{transition:none}}
 /*COACH:END*/
+/* Mini lessons: the pictures drawn inside the shared lesson window (.mlx-stage), and the 📖 notebook buttons */
+.peekRow{display:flex;gap:6px;align-items:stretch}.peekRow #peekToggle{flex:1;min-width:0}
+@media (max-width:480px){.peekRow #peekMini{display:none}}
+@media (max-width:400px){.cluePeek .peekRow .dtBookBtn{white-space:normal;max-width:100px;line-height:1.2;text-align:center}}
+.cluePeek .dtBookBtn,.dtBookBtn{width:auto;flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;gap:4px;min-height:44px;padding:0 12px;border:1px solid #f0d58a;border-radius:11px;background:#fff6dc;color:#7a5200;font-size:13px;font-weight:950;box-shadow:0 2px #ecd28a;white-space:nowrap;cursor:pointer}
+.dtHeadRow{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.feedback .dtl-again,.miniResult .dtl-again{margin:6px 0 0;vertical-align:middle}
+.dtl{width:100%;display:grid;gap:9px;justify-items:center;color:#2d3f66;font-weight:800;font-size:14px;line-height:1.35}
+.dtl-row{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;width:100%}
+.dtl-head{display:flex;align-items:center;gap:8px;font-size:15px;font-weight:950;color:#35468c}.dtl-head .ei{width:44px;height:44px}
+.dtl-note{margin:0;font-size:14px;font-weight:850;text-align:center;color:#3a4d7a}
+.dtl-big{font-size:40px;line-height:1.1}
+.dtl-clues{display:grid;grid-template-columns:repeat(auto-fit,minmax(132px,1fr));gap:6px;width:100%}
+.dtl .clue{min-height:0;padding:7px 9px;text-align:left}
+.dtl-sus{position:relative;flex:1 1 0;min-width:0;max-width:118px;margin:0;padding:3px 3px 6px;display:grid;justify-items:center;gap:1px;background:#fff;border:2px solid #dfe6f6;border-radius:16px;font:inherit;color:inherit;text-align:center}
+.dtl-sus.big{max-width:160px}
+button.dtl-sus{cursor:pointer;box-shadow:0 3px 0 #d5ddf2}button.dtl-sus:active{transform:translateY(2px);box-shadow:none}
+.dtl-sus svg{display:block;width:100%;height:auto}
+.dtl-sus b{font-size:12.5px;font-weight:900;line-height:1.25}
+.dtl-sus::after{position:absolute;top:3px;right:5px;font-size:22px;line-height:1}
+.dtl-sus.out{opacity:.45;filter:grayscale(.8)}.dtl-sus.out::after{content:'❌'}
+.dtl-sus.ok{border-color:#2fbf71;background:#effbf3}.dtl-sus.ok::after{content:'✅'}
+.dtl-sus.no{border-color:#f3b9b0;background:#fff6f4}.dtl-sus.no::after{content:'❌'}
+.dtl-sus.cross{animation:dtlOut .45s 1.6s both}.dtl-sus.cross::after{content:'❌';animation:dtlIn .3s 1.6s both}
+.dtl-sus.win{animation:dtlWin .45s 3s both}.dtl-sus.win::after{content:'✅';animation:dtlIn .3s 3s both}
+.dtl-late{animation:dtlIn .35s 3.4s both}
+.dtl-hint{outline:4px solid #ffb02e;outline-offset:2px}
+@keyframes dtlOut{to{opacity:.45;filter:grayscale(.8)}}
+@keyframes dtlIn{from{opacity:0;transform:scale(1.8)}}
+@keyframes dtlWin{to{border-color:#2fbf71;background:#effbf3}}
+.dtl-steps{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}.dtl-steps span{padding:6px 10px;border-radius:999px;background:#eef1ff;color:#3a4690;font-size:13.5px;font-weight:900}
+.dtl-btn{display:inline-flex;align-items:center;justify-content:center;min-height:40px;padding:0 12px;border-radius:12px;background:#fff;border:2px solid #cfd8f3;color:#3a4690;font-size:14px;font-weight:900;box-shadow:0 3px 0 #d5ddf2}
+.dtl-btn.red{background:#ff6b6b;border-color:#e14d4d;color:#fff;box-shadow:0 3px 0 #c43c3c}.dtl-btn.blue{background:#5b6cff;border-color:#4757e0;color:#fff;box-shadow:0 3px 0 #3c4bd0}
+.dtl-chip{display:inline-flex;align-items:center;gap:5px;padding:6px 11px;border-radius:999px;background:#fff;border:2px solid #dfe6f6;font-size:14.5px;font-weight:900}
+.dtl-chip.c{border-color:#f5c542;background:#fff6d6}.dtl-chip.t{border-color:#8fd3f5;background:#e9f7ff}.dtl-chip.n{border-color:#f39a9a;background:#ffeded}
+.dtl-chip.good{border-color:#9edcb7;background:#effbf3}.dtl-chip.key{border-color:#ffd27a;background:#fff6dc}
+.dtl-radio{width:100%;background:#25345e;color:#fff;border-radius:16px;padding:10px 12px;font-size:16.5px;font-weight:900;text-align:center;line-height:1.6}
+.dtl-radio small{display:block;font-size:12px;color:#b9c6ff;margin-bottom:2px;line-height:1.3}
+.dtl-radio mark{border-radius:6px;padding:0 4px;color:#25213a}.dtl-radio mark.c{background:#ffd75e}.dtl-radio mark.t{background:#9fe0ff}.dtl-radio mark.n{background:#ff9e9e}
+.dtl-words{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:4px}
+.dtl-word{min-height:46px;padding:0 13px;border:2px solid #cfd8f3;border-radius:14px;background:#fff;color:#26326a;font:inherit;font-size:17px;font-weight:900;cursor:pointer;box-shadow:0 3px 0 #aab6dd}
+.dtl-word.on{background:#ff9e9e;border-color:#e86a6a}
+.dtl-street{width:100%;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px}
+.dtl-spot{position:relative;display:grid;justify-items:center;align-content:start;gap:1px;min-height:86px;padding:6px 2px;background:#fff;border:2px solid #dfe6f6;border-radius:14px;font:inherit;font-size:12.5px;font-weight:900;color:inherit}
+button.dtl-spot{cursor:pointer;box-shadow:0 3px 0 #d5ddf2}
+.dtl-spot .n{font-size:12px;color:#5b6cff}.dtl-spot .pl{font-size:24px;line-height:1.1}.dtl-spot .nm{line-height:1.2}.dtl-spot .who{min-height:18px;font-size:13px;color:#1f7a4a}
+.dtl-spot.hi{border-color:#5b6cff;background:#eef1ff}.dtl-spot.ok{border-color:#2fbf71;background:#effbf3}.dtl-spot.bad{border-color:#f3b9b0;border-style:dashed;background:#fff6f4}
+.dtl-spot.x{opacity:.5}.dtl-spot.x::after{content:'✖';position:absolute;inset:0;display:grid;place-items:center;font-size:44px;color:#e0525a}
+.dtl-arrow{width:100%;display:flex;justify-content:space-between;font-size:12.5px;color:#5d6896}
+.dtl-cl{margin:0;padding:8px 10px 8px 30px;width:100%;background:#fff;border:1px solid #e1e7fb;border-radius:12px;text-align:left;font-size:14px;line-height:1.5}
+.dtl-checks{width:100%;display:grid;gap:5px}.dtl-checks p{margin:0;padding:7px 10px;border-radius:12px;background:#effbf3;border:1px solid #c9ecd6;text-align:left;font-size:13.5px}.dtl-checks p.bad{background:#fff3f0;border-color:#f3c4bc}
+.dtl-want,.dtl-rec,.dtl-rep{width:100%;display:grid;gap:6px;justify-items:center;padding:8px 10px;border-radius:14px;background:#fff8ed;border:2px solid #f9e4c4}
+.dtl-want small,.dtl-rep small{font-size:12px;color:#9b7c4f;font-weight:900}.dtl-rep b{font-size:16px}
+.dtl-code{font-size:24px;font-weight:950;letter-spacing:.06em;color:#35468c}
+.dtl-print{display:grid;justify-items:center;gap:3px;padding:6px 6px 8px;margin:0;border:2px solid transparent;border-radius:16px;background:none;font:inherit;font-size:12px;font-weight:900;color:inherit;text-align:center;min-width:0;flex:1 1 0;max-width:110px}
+button.dtl-print{cursor:pointer;background:#fff;border-color:#dfe6f6;box-shadow:0 3px 0 #d5ddf2}
+.dtl-print em{font-style:normal;font-size:12px}
+.dtl-print.ok{border-color:#2fbf71;background:#effbf3}.dtl-print.bad{border-color:#f3b9b0;background:#fff3f0}
+.dtl-sole{width:66px;height:104px;display:grid;grid-template-rows:1fr auto;justify-items:center;align-items:center;padding:8px 4px 6px;border-radius:33px 33px 26px 26px/44px 44px 26px 26px;background:#f1e6d6;border:3px solid #b99b7a;line-height:1.05}
+.dtl-sole .pt{font-size:17px}.dtl-sole .hl{display:grid;place-items:center;width:34px;height:30px;border-radius:12px 12px 16px 16px;background:#e2cfb4;font-size:16px}
+.dtl-wit{width:100%;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+.dtl-wit div{padding:6px 9px;border:2px solid #dee7f7;border-radius:13px;background:#fff;text-align:left}.dtl-wit small{display:block;font-size:11.5px;color:#566688}.dtl-wit b{font-size:15px}
+.dtl-wit .flag{background:#ffe9db;border-color:#edab70}
+.dtl-wp{flex:1 1 0;min-width:0;max-width:170px;margin:0;display:grid;gap:4px;align-content:start;padding:7px;border:2px solid #dfe6f6;border-radius:14px;background:#fff;font:inherit;color:inherit;text-align:left}
+button.dtl-wp{cursor:pointer;box-shadow:0 3px 0 #d5ddf2}
+.dtl-wp b{font-size:13px}.dtl-wp small{font-size:12px;color:#3a4d7a}.dtl-wp .f{display:flex;flex-wrap:wrap;gap:3px}
+.dtl-wp i{font-style:normal;font-size:12px;font-weight:800;line-height:1.3;background:#f3f7fd;border:1px solid #dbe6f5;border-radius:10px;padding:1px 6px;overflow-wrap:anywhere}
+.dtl-wp i.y{background:#e6f9ee;border-color:#9edcb7}.dtl-wp i.n{background:#fff0ee;border-color:#f3b9b0;text-decoration:line-through}
+.dtl-wp.ok{border-color:#2fbf71;background:#effbf3}.dtl-wp.bad{opacity:.75}
+.dtl-safe{display:grid;gap:6px;justify-items:center;padding:10px 18px;border-radius:18px;background:#36435f;color:#fff}
+.dtl-safe .lk{font-size:26px;line-height:1}.dtl-safe .d{display:flex;gap:6px}.dtl-safe .d span{width:42px;height:50px;border-radius:10px;background:#fff;color:#26326a;display:grid;place-items:center;font-size:25px;font-weight:950}
+.dtl-safe small{font-size:12px;color:#d6defa}
+.dtl-legend{width:100%;display:grid;gap:6px}.dtl-legend p{margin:0;display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:12px;background:#fff;border:1px solid #e1e7fb;text-align:left;font-size:14.5px}.dtl-legend b{font-size:22px}
+.dtl-guesses{width:100%;display:grid;gap:6px}
+.dtl-guess{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:4px 8px;width:100%;min-height:46px;margin:0;padding:6px 12px;border:2px solid #dfe6f6;border-radius:14px;background:#fff;font:inherit;font-size:15px;font-weight:900;color:inherit;text-align:left}
+button.dtl-guess{cursor:pointer;box-shadow:0 3px 0 #d5ddf2}.dtl-guess.on{border-color:#9edcb7;background:#f4fbf6}
+.dtl-guess .sig{font-size:13px;color:#3a4d7a}.dtl-guess em{flex-basis:100%;font-style:normal;font-size:12.5px;color:#5d6896}
+.dtl-shelf{width:100%;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}.dtl-shelf.six{grid-template-columns:repeat(3,minmax(0,1fr))}
+.dtl-item{display:grid;justify-items:center;gap:1px;margin:0;padding:6px 2px;border:2px solid #fff;border-radius:12px;font:inherit;font-weight:900;color:#2d3f66;min-width:64px}
+button.dtl-item{cursor:pointer;box-shadow:0 3px 0 #d5ddf2}
+.dtl-item .ic{font-size:26px;line-height:1.15}.dtl-item .tg{font-size:12px}
+.dtl-item.dim{opacity:.25}.dtl-item.glow{outline:4px solid #ffb347;outline-offset:1px}
+.dtl-item.d1{animation:dtlDim .4s 1.8s both}.dtl-item.d2{animation:dtlDim .4s 3.6s both}.dtl-item.d3{animation:dtlDim .4s 5.2s both}.dtl-item.g{animation:dtlGlow .4s 5.6s both}
+@keyframes dtlDim{to{opacity:.22}}@keyframes dtlGlow{to{outline:4px solid #ffb347;outline-offset:1px}}
+.dtl-steps3 span{padding:4px 10px;border-radius:999px;background:#fff;border:2px solid #dfe6f6;font-size:13px}
+.dtl-steps3 .s1{animation:dtlStep .4s 1.6s both}.dtl-steps3 .s2{animation:dtlStep .4s 3.4s both}.dtl-steps3 .s3{animation:dtlStep .4s 5s both}
+@keyframes dtlStep{to{background:#fff1c9;border-color:#ffb02e}}
+.dtl-tv{width:min(240px,100%);display:grid;justify-items:center;gap:2px;padding:10px;border:4px solid #46557a;border-radius:16px;background:#1f2a44;color:#fff}
+.dtl-tv small{font-size:12px;color:#ff8f8f;font-weight:900}.dtl-tv .big{font-size:52px;line-height:1.15}.dtl-tv b{font-size:17px}.dtl-tv.end .big{opacity:.7}
+.dtl-bubble{max-width:100%;padding:9px 14px;border-radius:16px;background:#fff;border:2px solid #dfe6f6;font-size:15.5px;font-weight:900;text-align:center}
+.dtl-slots{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}.dtl-slots span{min-width:88px;min-height:44px;padding:0 8px;display:grid;place-items:center;border:2px dashed #b9c4ec;border-radius:12px;background:#fff;font-size:14px;font-weight:900}
+.dtl-slots span.f{border-style:solid;border-color:#2fbf71;background:#effbf3}
+.dtl-place{min-height:52px;padding:0 12px;border:2px solid #dfe6f6;border-radius:14px;background:#fff;font:inherit;font-size:16px;font-weight:900;color:inherit;cursor:pointer;box-shadow:0 3px 0 #d5ddf2}.dtl-place:disabled{opacity:.35;cursor:default;box-shadow:none}
+.dtl-cards{display:grid;grid-template-columns:repeat(4,minmax(0,62px));gap:6px;justify-content:center}.dtl-cards.four{grid-template-columns:repeat(4,minmax(0,70px))}
+.dtl-card{position:relative;aspect-ratio:1;margin:0;padding:0;display:grid;place-items:center;border:3px solid #dbe6f5;border-radius:12px;background:#fff;font-size:28px;box-shadow:0 3px 0 #c9d6ec}
+button.dtl-card{cursor:pointer}
+.dtl-card .ei{width:78%;height:78%}
+.dtl-card::before{content:'🔍';position:absolute;inset:-3px;display:grid;place-items:center;border:3px solid #fff;border-radius:12px;background:linear-gradient(135deg,#6d8cf0,#a07cf0);font-size:20px;opacity:0;pointer-events:none;transition:opacity .2s}
+.dtl-card.down::before{opacity:1}.dtl-card.fd::before{animation:dtlCover .3s 2.8s both}@keyframes dtlCover{to{opacity:1}}
+.dtl-card.row{outline:3px solid #ffb02e;outline-offset:1px}.dtl-card.dim{opacity:.35}.dtl-card.m{border-color:#7bd3a0;background:#effbf3}
+.dtl-flow{display:grid;justify-items:center;gap:6px}
+.dtl-crowd{display:flex;flex-wrap:wrap;gap:4px;justify-content:center;max-width:300px;font-size:26px;line-height:1}
+.dtl-crowd span{position:relative}.dtl-crowd .x{animation:dtlOut .3s both}.dtl-crowd .x::after{content:'✖';position:absolute;inset:0;display:grid;place-items:center;color:#e0525a;font-size:22px;animation:inherit;animation-name:dtlIn}
+.dtl-crowd .w{animation:dtlGlowW .4s 3s both;border-radius:10px}@keyframes dtlGlowW{to{background:#c9f1d8;outline:3px solid #2fbf71}}
+@media (max-width:420px){.dtl-wit b{font-size:14px}.dtl-sole{width:58px;height:94px}.dtl-cards{grid-template-columns:repeat(4,minmax(0,56px))}}
+@media (prefers-reduced-motion:reduce){.dtl *,.dtl *::before,.dtl *::after{animation-duration:.01s!important;animation-delay:0s!important}}
 </style>
 </head>
 <body>
@@ -702,7 +808,7 @@ body.mgOpen{overflow:hidden}
   </div>
   <div class="patrolMessage" id="patrolMessage" role="status" aria-live="polite" data-en="📡 Detective HQ: A new report just came in. Go find the case!">📡 탐정 본부: 새로운 신고가 도착했어요. 사건 장소를 찾아가 보세요!</div>
   <div class="patrolControls"><div class="patrolPad" id="patrolPad" aria-label="탐정 이동 방향키" data-en-aria-label="Detective arrow pad"><span class="empty"></span><button data-dir="up" aria-label="위로 이동" data-en-aria-label="Move up">▲</button><span class="empty"></span><button data-dir="left" aria-label="왼쪽 이동" data-en-aria-label="Move left">◀</button><button data-dir="down" aria-label="아래로 이동" data-en-aria-label="Move down">▼</button><button data-dir="right" aria-label="오른쪽 이동" data-en-aria-label="Move right">▶</button></div><div class="patrolTip"><strong data-en="👮 Detective HQ">👮 탐정 본부</strong><span data-en="Tap a case pin and you&#x27;ll walk there by yourself.">사건 핀을 터치하면 자동으로 걸어가요.</span><span data-en="🎯 Tap “Find me” to jump to your detective.">🎯 내 위치를 누르면 탐정을 바로 찾아요.</span><span class="key" data-en="PC: arrow keys / W A S D">PC: 방향키 / W A S D</span><b data-en="🏆 Solve all 7 for a patrol bonus +60 🪙">🏆 7개 모두 해결하면 순찰 보너스 +60 🪙</b></div></div>
-  <div class="v11ChecklistHeader" data-en="🔎 Seven case spots in this neighborhood">🔎 이 동네의 일곱 수사 현장</div><div class="patrolChecklist" id="patrolChecklist"></div>
+  <div class="v11ChecklistHeader dtHeadRow"><span data-en="🔎 Seven case spots in this neighborhood">🔎 이 동네의 일곱 수사 현장</span><button type="button" class="dtBookBtn" id="dtBookPatrol" aria-haspopup="dialog" data-en="📖 Concept notebook">📖 개념 노트</button></div><div class="patrolChecklist" id="patrolChecklist"></div>
  </section>
 <div id="gameArea">
   <section class="questPanel" aria-label="오늘의 탐정 미션" data-en-aria-label="Today&#x27;s detective mission">
@@ -712,7 +818,7 @@ body.mgOpen{overflow:hidden}
  </section>
  <section class="brief" aria-label="사건의 단서" data-en-aria-label="Case clues"><div class="missionTop"><div class="sceneArt" id="sceneArt" aria-hidden="true">🌳</div><div class="missionInfo"><span class="missionLabel" data-en="📍 Today&#x27;s crime scene">📍 오늘의 수사 현장</span><strong id="sceneName" data-en="City Park">도시 공원</strong><small id="chapterMission" data-en="Mission 1 / 5">임무 1 / 5</small></div><div class="casePill"><span data-en="Case file">사건 파일</span> <span id="caseFileNumber">#001</span></div></div><div class="briefHead"><span class="casechip" id="caseLabel" data-en="🔍 Case #1">🔍 사건 1호</span><span class="chapter" id="chapterLabel" data-en="First detective mission">첫 번째 탐정 임무</span></div><h2 data-en="🚨 Emergency! Witness clues">🚨 긴급 수사! 목격자 단서</h2><p id="story" data-en="Find the thief who ran away from the park. Look closely at everyone!">공원에서 달아난 도둑을 찾아주세요. 인물들의 모습을 자세히 관찰하세요!</p><div class="radio" aria-live="polite"><div class="radio-icon">👮</div><div class="radio-main"><span class="radio-head"><span class="live-dot"></span> <span data-en="Detective HQ · Emergency radio">탐정 본부 · 긴급 무전</span></span><strong id="radioLine" data-en="Agent! Ready for action?">탐정 요원! 출동 준비됐나요?</strong></div></div><div class="stage"><i id="stageFill"></i></div><div class="clues" id="clues"></div>
  <div class="witness"><div class="witnessTitle"><span class="witnessFace">👵</span><div><strong data-en="Ask the witness">목격자에게 질문하기</strong><small data-en="Pick 1 free question to get an extra clue!">무료로 질문 1개를 골라 추가 단서를 얻어요!</small></div></div><div class="witnessOptions" id="witnessOptions"><button type="button" data-ask="clothes" data-en="👕 Clothes">👕 옷차림</button><button type="button" data-ask="accessory" data-en="🎒 Belongings">🎒 소지품</button><button type="button" data-ask="face" data-en="👀 Looks">👀 외모</button></div><div id="witnessAnswer" class="witnessAnswer" role="status" aria-live="polite" data-en="Pick a question.">질문을 골라보세요.</div></div><div class="controls"><button class="btn speak" id="speak" data-en="🎙️ Hear police radio">🎙️ 경찰 무전 듣기</button><button class="btn stopvoice" id="stopVoice" type="button" data-en="⏹️ Stop voice">⏹️ 목소리 중지</button><button class="btn help" id="hint" data-en="💡 Show hint">💡 힌트 보기</button><button class="btn" id="shuffle" data-en="🔀 New case">🔀 새로운 사건</button><button class="btn" id="v15RepeatGuide" type="button" data-en="🔁 Hear again">🔁 다시 듣기</button></div></section>
- <section class="board" id="boardSection"><div class="cluePeek" id="cluePeek"><button type="button" id="peekToggle" aria-expanded="true"><span data-en="📋 Review clues">📋 단서 다시 보기</span> <span id="peekMini" data-en="Check the witness report">목격자 진술 확인</span> <span id="peekChevron">▴</span></button><div id="peekBody" class="peekBody"></div></div><div class="boardHead"><div><h2 data-en="👀 Who is the thief?">👀 누가 도둑일까요?</h2><p data-en="Check the clues, look closely at everyone, and make the arrest!">단서를 확인하고, 인물을 자세히 살펴서 체포하세요!</p></div><span class="count" id="count" data-en="4 suspects">용의자 4명</span></div><div class="boardTip" data-en-html="💡 Use the &lt;b&gt;notebook&lt;/b&gt; to mark people who aren&#x27;t the thief. Mistakes are okay!">💡 <b>수사 노트</b>로 아닌 사람을 표시해 보세요. 실수해도 괜찮아요!</div><div class="suspects" id="suspects"></div><div class="feedback" id="feedback" role="status" aria-live="polite" data-en="🔍 Only one person matches every clue!">🔍 단서를 모두 만족하는 사람은 딱 한 명이에요!</div></section>
+ <section class="board" id="boardSection"><div class="cluePeek" id="cluePeek"><div class="peekRow"><button type="button" id="peekToggle" aria-expanded="true"><span data-en="📋 Review clues">📋 단서 다시 보기</span> <span id="peekMini" data-en="Check the witness report">목격자 진술 확인</span> <span id="peekChevron">▴</span></button><button type="button" class="dtBookBtn" id="dtBookCase" aria-haspopup="dialog" data-en="📖 Concept notebook">📖 개념 노트</button></div><div id="peekBody" class="peekBody"></div></div><div class="boardHead"><div><h2 data-en="👀 Who is the thief?">👀 누가 도둑일까요?</h2><p data-en="Check the clues, look closely at everyone, and make the arrest!">단서를 확인하고, 인물을 자세히 살펴서 체포하세요!</p></div><span class="count" id="count" data-en="4 suspects">용의자 4명</span></div><div class="boardTip" data-en-html="💡 Use the &lt;b&gt;notebook&lt;/b&gt; to mark people who aren&#x27;t the thief. Mistakes are okay!">💡 <b>수사 노트</b>로 아닌 사람을 표시해 보세요. 실수해도 괜찮아요!</div><div class="suspects" id="suspects"></div><div class="feedback" id="feedback" role="status" aria-live="polite" data-en="🔍 Only one person matches every clue!">🔍 단서를 모두 만족하는 사람은 딱 한 명이에요!</div></section>
  </div> <!-- gameArea -->
  <section class="store" id="storeSection"><div class="storeIntro"><div><div class="storeEyebrow" data-en="DETECTIVE SUPPLY SHOP">탐정 장비 상점</div><h2 data-en="🛍️ Secret Detective Shop">🛍️ 탐정 비밀 상점</h2><p data-en="Spend the coins you earn catching thieves on detective gear!">도둑을 잡고 번 코인으로 탐정 장비를 구입하세요!</p></div><div class="wallet"><img class="ei coin" src="images/coin.webp" data-emoji="🪙" alt="" draggable="false" onerror="this.replaceWith('🪙')"> <strong id="shopCoins">0</strong><small data-en="My coins">내 코인</small></div></div><div class="items" id="shopItems"></div><div class="inventory" id="inventory"></div><div class="shopNote" id="shopNote" role="status" aria-live="polite" data-en="🕵️ Buy some gear and use it on your cases!">🕵️ 장비를 구입해서 수사에 활용해 보세요!</div></section>
  <section class="awards" id="awardsSection"><div class="awardsHeader"><div><div class="storeEyebrow" data-en="DETECTIVE COLLECTION">탐정 컬렉션</div><h2 data-en="🏆 My Detective Collection">🏆 나의 탐정 도감</h2><p data-en="Solve more cases to unlock cool badges.">사건을 해결할수록 멋진 배지가 열려요.</p></div><div class="badgeMedal">🕵️</div></div><div class="awardsProgress"><div class="awardsProgressHead"><strong id="nextBadgeName" data-en="Until the first badge">첫 배지까지</strong><span id="nextBadgeCount">0 / 1</span></div><div class="awardsBar"><i id="awardsFill"></i></div></div><div class="badgeGrid" id="badgeGrid"></div>
@@ -1125,7 +1231,7 @@ if(id==='booster'){boostReady=true;shopMessage(L('🚀 부스터 장착 완료! 
 persist();scoreUI();play('hint');switchView('play')}
 $('shopItems').addEventListener('click',e=>{let b=e.target.closest('[data-buy]');if(b)return buyItem(b.dataset.buy);b=e.target.closest('[data-use]');if(b)return useItem(b.dataset.use)});
 function caseHint(){if(solved||usedHint)return;const p=suspects[culprit];const pool=Object.keys(field).filter(k=>!clueKeys.includes(k)&&k!==witnessKey&&!shopHints.includes(k)&&seeable(k)&&new Set(suspects.map(s=>s[k])).size>1);hintKey=sample(pool.length?pool:clueKeys);usedHint=true;$('clues').insertAdjacentHTML('beforeend',clueBox(hintKey,p,true));updatePeek();$('hint').disabled=true;$('hint').textContent=L('✅ 힌트 확인','✅ Hint used');message(L('💡 새로운 단서를 발견했어요! 자세히 살펴보세요.','💡 You found a new clue! Take a close look.'));$('radioLine').textContent=L('새로운 단서를 확보했어요! 범인을 좁혀보세요.','We have a new clue! Narrow down the suspects.');play('hint')}
-function arrest(i){if(solved)return;const p=suspects[i],card=$('card'+i);if(!p.guilty){wrongCount++;coachAnswer(false,'case',lrCaseItem(p));if(caseShield){caseShield=false;shopMessage(L('🛡️ 실수 방패 사용! 연속 체포 기록이 유지됐어요.','🛡️ Oops Shield used! Your streak is safe.'))}else state.streak=0;scoreUI();persist();const wrong=clueKeys.filter(k=>p[k]!==suspects[culprit][k]);card.classList.remove('wrong');void card.offsetWidth;card.classList.add('wrong');const k=wrong[0]||clueKeys[0];const detail=k?spokenClue(k,suspects[culprit]):L('목격자의 단서를 다시 살펴보자.','Let\'s look at the witness clues again.');const encouragement=pickLine('wrong',wrongLines);const coaching=pickLine('v15-main-wrong',[L(`이 사람의 ${(w=>w+(v17Final(w)?'이':'가'))(field[k]?.label||'옷차림')} 단서와 달라요. ${detail}`,`This person's ${(field[k]?.label||'outfit').toLowerCase()} doesn't match the clue. ${detail}`),L(`좋은 시도야! ${(w=>w+(v17Final(w)?'을':'를'))(field[k]?.label||'외모')} 다시 비교해 보자. ${detail}`,`Nice try! Let's compare the ${(field[k]?.label||'looks').toLowerCase()} again. ${detail}`),L(`단서 하나만 더 확인하자. ${detail}`,`Let's check one more clue. ${detail}`)]);message('💡 '+coaching,'bad');buddySay(buddies[state.buddy].emoji+' '+coaching);$('radioLine').textContent=namedText(encouragement+' '+coaching);v15Narrate(encouragement+' '+coaching,'mainWrong');play('wrong');return}
+function arrest(i){if(solved)return;const p=suspects[i],card=$('card'+i);if(!p.guilty){wrongCount++;coachAnswer(false,'case',lrCaseItem(p));if(caseShield){caseShield=false;shopMessage(L('🛡️ 실수 방패 사용! 연속 체포 기록이 유지됐어요.','🛡️ Oops Shield used! Your streak is safe.'))}else state.streak=0;scoreUI();persist();const wrong=clueKeys.filter(k=>p[k]!==suspects[culprit][k]);card.classList.remove('wrong');void card.offsetWidth;card.classList.add('wrong');const k=wrong[0]||clueKeys[0];const detail=k?spokenClue(k,suspects[culprit]):L('목격자의 단서를 다시 살펴보자.','Let\'s look at the witness clues again.');const encouragement=pickLine('wrong',wrongLines);const coaching=pickLine('v15-main-wrong',[L(`이 사람의 ${(w=>w+(v17Final(w)?'이':'가'))(field[k]?.label||'옷차림')} 단서와 달라요. ${detail}`,`This person's ${(field[k]?.label||'outfit').toLowerCase()} doesn't match the clue. ${detail}`),L(`좋은 시도야! ${(w=>w+(v17Final(w)?'을':'를'))(field[k]?.label||'외모')} 다시 비교해 보자. ${detail}`,`Nice try! Let's compare the ${(field[k]?.label||'looks').toLowerCase()} again. ${detail}`),L(`단서 하나만 더 확인하자. ${detail}`,`Let's check one more clue. ${detail}`)]);message('💡 '+coaching,'bad');dtAgain($('feedback'),'dt:case');buddySay(buddies[state.buddy].emoji+' '+coaching);$('radioLine').textContent=namedText(encouragement+' '+coaching);v15Narrate(encouragement+' '+coaching,'mainWrong');play('wrong');return}
 solved=true;coachAnswer(true,'case',lrCaseItem(p));updateQuestUI();const clearedRegion=Math.min(state.mapStep,scenes.length-1);state.mapStep=Math.min(scenes.length,clearedRegion+1);state.caught++;state.streak++;const newSticker=!state.sceneStickers.includes(clearedRegion);if(newSticker)state.sceneStickers.push(clearedRegion);const stars=wrongCount===0&&!usedHint?3:wrongCount<=1?2:1;const earnedXP=(100+stars*20+(state.streak>1?10:0))*(boostReady?2:1);const earnedCoins=8+stars*4+(askedWitness&&didZoom?10:0);state.stars+=stars;state.coins+=earnedCoins;state.xp+=earnedXP;let badgeEarned=[];for(const badge of badgeMilestones){if(state.caught>=badge.at&&!state.awards.includes(badge.id)){state.awards.push(badge.id);state.coins+=badge.bonus;badgeEarned.push(badge)}}state.history.unshift({scene:scenes[clearedRegion].label,icon:scenes[clearedRegion].icon,stars,date:new Date().toLocaleDateString(L('ko-KR','en-US'))});state.history=state.history.slice(0,12);const thief=collectThief(clearedRegion,suspects[culprit],clueKeys[0]);let levelup=false;while(state.xp>=200+(state.level-1)*85){state.xp-=200+(state.level-1)*85;state.level++;levelup=true}persist();scoreUI();card.classList.add('scanning');setTimeout(()=>{card.classList.remove('scanning');card.classList.add('correct')},540);const praise=pickLine('praise',praises);buddySay(pickLine('buddy-win',[L(`우와! ${buddies[state.buddy].name}도 깜짝 놀랐어!`,`Wow! Even ${buddies[state.buddy].name} is amazed!`),L('대단해! 정말 훌륭한 추리였어!','Amazing! That was brilliant detective work!'),L('짝짝짝! 우리가 해냈어!','Clap clap clap! We did it!'),L('새 스티커도 챙기자!','Let\'s grab the new sticker too!')]));$('radioLine').textContent='🚨 '+namedText(praise);document.querySelectorAll('.catch').forEach(b=>b.disabled=true);message('🎊 '+namedText(praise)+' · '+scenes[clearedRegion].label+L(' 수사 완료!',' case solved!'),'good');v15Narrate(praise+' '+pickLine('v15-extra-praise',[L('정말 훌륭한 관찰이었어!','You looked so carefully!'),L('단서를 놓치지 않은 덕분이야!','It\'s because you didn\'t miss a single clue!'),L('와, 네 추리가 딱 맞았어!','Wow, your guess was exactly right!')]),'mainWin');play('victory');party(75);previousResult={stars,earnedXP,earnedCoins,levelup,badgeEarned,clearedRegion,praise,newSticker,investigationBonus:askedWitness&&didZoom,thief};dailyEvent('case',...(stars===3?['perfect']:[]),...(askedWitness?['ask']:[]));LR.save();renderShop();setTimeout(()=>showWin(i),750)}
 function party(n){if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;for(let i=0;i<n;i++){const s=document.createElement('div');s.className='confetti';s.style.background=sample(['#ffbd44','#f06e79','#6acb9d','#8ab8f9','#ac8fe7']);s.style.left=R(100)+'vw';s.style.setProperty('--dx',(R(180)-90)+'px');s.style.setProperty('--delay',(Math.random()*.5)+'s');s.style.setProperty('--dur',(1.8+Math.random()*1.4)+'s');document.body.appendChild(s);setTimeout(()=>s.remove(),4000)}}
 function zoom(i){didZoom=true;updateQuestUI();mode='zoom';modalPerson=suspects[i];$('popIcon').textContent='🔎';$('popTitle').textContent=L('꼼꼼히 살펴봐요!','Take a close look!');$('popDesc').textContent=L('얼굴, 손, 목, 신발까지 잘 관찰하세요.','Check the face, hands, neck and even the shoes.');$('popStars').textContent='';$('popCoach').innerHTML='';$('rewards').innerHTML='';$('large').innerHTML=avatar(modalPerson);$('advance').textContent=L('단서로 돌아가기','Back to the clues');$('close').hidden=false;$('giftArea').hidden=true;showModal()}
@@ -1153,13 +1259,13 @@ else{$('voices').innerHTML=L('<option value="">한국어 목소리가 설치되�
 }
 function stopSpeaking(){voiceToken++;speaking=false;utteranceQueue=[];if('speechSynthesis' in window)window.speechSynthesis.cancel();$('speak').textContent=L('🎙️ 경찰 무전 듣기','🎙️ Hear police radio');$('stopVoice').disabled=true;}
 function stopVoiceClick(){stopSpeaking();$('voiceMsg').textContent=L('⏹️ 목소리 재생을 중지했어요.','⏹️ Voice stopped.');$('radioLine').textContent=L('무전이 중지됐습니다. 필요하면 다시 듣기를 누르세요.','Radio stopped. Press the button again if you want to hear it.');}
-function speakLines(lines){
+function speakLines(lines,plain){
 if(!('speechSynthesis'in window&&'SpeechSynthesisUtterance'in window)){$('voiceMsg').textContent=L('음성 읽기를 지원하지 않는 브라우저입니다.','This browser can\'t read text aloud.');return}
 refreshVoices();
 if(!langVoices.length){stopSpeaking();$('voiceMsg').textContent=L('⚠️ 영어 목소리로 한국어를 읽지 않도록 막았어요. Android 설정 → 텍스트 음성 변환 → 한국어 음성을 추가하세요.','⚠️ No English voice is available. On Android: Settings → Text-to-speech → add an English voice.');return}
 stopSpeaking();const token=voiceToken;
 // One fluent short Korean sentence per segment; avoid saying '치직' or excessive radio punctuation.
-utteranceQueue=lines.filter(Boolean).map(x=>String(x).replace(/[\p{Extended_Pictographic}\u{1F1E6}-\u{1F1FF}\uFE0F\u200D\u20E3←↑→↓]/gu,'').replace(/\s*·\s*/g,', ').replace(/\s+/g,' ').trim()).filter(Boolean);if(utteranceQueue.length)utteranceQueue[0]=namedText(utteranceQueue[0]);
+utteranceQueue=lines.filter(Boolean).map(x=>String(x).replace(/[\p{Extended_Pictographic}\u{1F1E6}-\u{1F1FF}\uFE0F\u200D\u20E3←↑→↓]/gu,'').replace(/\s*·\s*/g,', ').replace(/\s+/g,' ').trim()).filter(Boolean);if(utteranceQueue.length&&!plain)utteranceQueue[0]=namedText(utteranceQueue[0]);
 const voice=langVoices.find(v=>v.voiceURI===$('voices').value)||langVoices[0];
 $('stopVoice').disabled=false;$('speak').textContent=L('🔊 무전 재생 중','🔊 Radio playing');$('voiceMsg').textContent=L('📡 한국어 목소리 연결 중…','📡 Connecting the voice…');
 const go=()=>{
@@ -1239,6 +1345,7 @@ function switchView(target){
  document.querySelectorAll('.navTab').forEach(b=>{const on=b.dataset.view===target;b.classList.toggle('on',on);if(on)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current')});
  if(target==='shop')renderShop();if(target==='awards')renderAwards();if(target==='map')renderMap();if(target==='patrol'){patrolRender();requestAnimationFrame(()=>patrolCenter('instant'))};
  window.scrollTo({top:0,behavior:'instant'});
+ if(target==='play')dtCaseGate();
 }
 function updatePeek(){
  const labels=Array.from($('clues').querySelectorAll('.clue')).map(c=>c.querySelector('.desc b')?.textContent||'').filter(Boolean);
@@ -1272,7 +1379,7 @@ $('peekToggle').addEventListener('click',()=>{const open=$('peekBody').hidden;$(
 $('witnessOptions').addEventListener('click',e=>{const b=e.target.closest('[data-ask]');if(b)askWitness(b.dataset.ask)});
 document.querySelector('.gameNav').addEventListener('click',e=>{const b=e.target.closest('[data-view]');if(b)switchView(b.dataset.view)});
 
-$('modes').addEventListener('click',e=>{const b=e.target.closest('[data-mode]');if(!b||b.dataset.mode===difficulty)return;stopSpeaking();difficulty=state.difficulty=b.dataset.mode;persist();syncSettings();if(!solved)makeCase()});$('hint').addEventListener('click',caseHint);$('shuffle').addEventListener('click',()=>{stopSpeaking();if(solved){switchView('map');return}makeCase();message(L('🔄 같은 지역의 새 사건으로 바꿨어요. 지역을 건너뛰지 않아요!','🔄 New case in the same area. You will not skip any areas!'))});$('speak').addEventListener('click',speak);$('stopVoice').addEventListener('click',stopVoiceClick);$('testVoice').addEventListener('click',testVoice);$('voices').addEventListener('change',e=>{selectedURI=e.target.value;stopSpeaking();$('voiceMsg').textContent=L('한국어 목소리를 변경했어요. 테스트 버튼을 눌러보세요.','Voice changed. Press the test button to hear it.')});$('advance').addEventListener('click',next);$('close').addEventListener('click',hideModal);$('layer').addEventListener('click',e=>{if(e.target===$('layer'))hideModal()});document.addEventListener('keydown',e=>{if(e.key==='Escape')hideModal()});$('stopVoice').disabled=true;if('speechSynthesis'in window){window.speechSynthesis.addEventListener?.('voiceschanged',refreshVoices);refreshVoices();setTimeout(refreshVoices,400);setTimeout(refreshVoices,1600);setTimeout(refreshVoices,4500)}else refreshVoices();caseNo=state.caught+1;makeCase();switchView('map');
+$('modes').addEventListener('click',e=>{const b=e.target.closest('[data-mode]');if(!b||b.dataset.mode===difficulty)return;stopSpeaking();difficulty=state.difficulty=b.dataset.mode;persist();syncSettings();if(!solved)makeCase()});$('hint').addEventListener('click',caseHint);$('shuffle').addEventListener('click',()=>{stopSpeaking();if(solved){switchView('map');return}makeCase();message(L('🔄 같은 지역의 새 사건으로 바꿨어요. 지역을 건너뛰지 않아요!','🔄 New case in the same area. You will not skip any areas!'))});$('speak').addEventListener('click',()=>dtListenGate());$('stopVoice').addEventListener('click',stopVoiceClick);$('testVoice').addEventListener('click',testVoice);$('voices').addEventListener('change',e=>{selectedURI=e.target.value;stopSpeaking();$('voiceMsg').textContent=L('한국어 목소리를 변경했어요. 테스트 버튼을 눌러보세요.','Voice changed. Press the test button to hear it.')});$('advance').addEventListener('click',next);$('close').addEventListener('click',hideModal);$('layer').addEventListener('click',e=>{if(e.target===$('layer'))hideModal()});document.addEventListener('keydown',e=>{if(e.key==='Escape')hideModal()});$('stopVoice').disabled=true;if('speechSynthesis'in window){window.speechSynthesis.addEventListener?.('voiceschanged',refreshVoices);refreshVoices();setTimeout(refreshVoices,400);setTimeout(refreshVoices,1600);setTimeout(refreshVoices,4500)}else refreshVoices();caseNo=state.caught+1;makeCase();switchView('map');
 // ==== V11: large-world patrol and evidence-based puzzles ==== 
 const PATROL_W=22,PATROL_H=16,PATROL_TILE=70;
 const patrolKinds=[
@@ -1375,11 +1482,11 @@ let v12Game=null,v12Generation=0,v12WatchTimers=[],v12Replay=false;
 const v12Rand=(a)=>a[R(a.length)];
 function v12Esc(t){return String(t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function v12ClearTimers(){v12WatchTimers.forEach(clearTimeout);v12WatchTimers=[];v12Generation++}
-function v12Status(txt,wrong=false){const info=wrong==='info';$('miniResult').style.color=info?'#35668b':wrong?'#b85b50':'#38725b';$('miniResult').textContent=txt;if(wrong===true){play('wrong')}else{play('hint')}if(info)v15MiniSay(txt,true);else v15MiniFeedback(txt,wrong)}
+function v12Status(txt,wrong=false){const info=wrong==='info';$('miniResult').style.color=info?'#35668b':wrong?'#b85b50':'#38725b';$('miniResult').textContent=txt;if(wrong===true){play('wrong');dtAgain($('miniResult'),'dt:p:'+patrolCurrent)}else{play('hint')}if(info)v15MiniSay(txt,true);else v15MiniFeedback(txt,wrong)}
 function v12Header(story,evidence,step=0,max=1){$('miniStory').textContent=story;$('miniEvidence').innerHTML=evidence;$('miniStepLabel').textContent=step?L(`진행 ${step} / ${max}`,`Progress ${step} / ${max}`):L('직접 조사하세요','Investigate it yourself');$('miniStepFill').style.width=Math.min(100,step/max*100)+'%';$('miniTierDisplay').textContent=tierLabels[patrolTier()];}
 function v12ActionButton(action,label,alt=false){return `<button type="button" ${alt?'class="alt"':''} data-v12="${action}">${label}</button>`}
 function v12NewGame(id){if(id==='footprints')return v12MakeMaze();if(id==='witness')return v12MakeWitness();if(id==='cipher')return v12MakeCipher();if(id==='lost')return v12MakeLost();if(id==='cctv')return v12MakeCctv();if(id==='memory')return v17MakeMemory();return v12MakeAlibi()}
-function patrolStartMini(id){
+function patrolRunMini(id){
  const mission=patrolKinds.find(m=>m.id===id);if(!mission)return;
  v12Replay=patrolStore().done.includes(id);
  ++patrolWalkToken;v12ClearTimers();patrolCurrent=id;patrolMiniSolved=false;patrolMistakes=0;patrolPhase=0;
@@ -1666,7 +1773,7 @@ function v17GiveUp(){const g=v12Game,btn=$('miniGiveUp');if(!g||patrolMiniSolved
  $('miniStepLabel').textContent=L('🏳️ 정답 공개','🏳️ Answer revealed');$('miniStepFill').style.width='0%';
  $('miniStory').textContent=L('괜찮아요! 정답을 보고 배우는 것도 탐정 공부예요. 이 사건은 그대로 남아 있으니 언제든 다시 도전할 수 있어요.','That\'s okay! Learning from the answer is part of detective training. This case stays open, so you can try again any time.');
  $('miniEvidence').innerHTML=`<b>${L('📖 정답','📖 The answer')}</b>`;$('miniChoices').innerHTML=`<div class="v17-answer">${v17AnswerHtml(g)}</div>`;
- $('miniResult').style.color='#35668b';$('miniResult').textContent=L('🔁 다시 도전하면 새로운 문제가 나와요!','🔁 Try again for a brand-new puzzle!');
+ $('miniResult').style.color='#35668b';$('miniResult').textContent=L('🔁 다시 도전하면 새로운 문제가 나와요!','🔁 Try again for a brand-new puzzle!');dtAgain($('miniResult'),'dt:p:'+patrolCurrent);
  $('miniRetry').hidden=false;$('miniEnd').textContent=L('🗺️ 지도로 돌아가기','🗺️ Back to the map');$('miniEnd').classList.add('show');
  v15MiniSay(L('괜찮아! 정답을 같이 보자. 다음엔 꼭 풀 수 있을 거야!','It\'s okay! Let\'s look at the answer together. You\'ll get it next time!'),true);
 }
@@ -1906,7 +2013,7 @@ $('miniChoices').addEventListener('click',v12HandleClick);$('miniChoices').addEv
 $('nameEdit').addEventListener('click',()=>{nameEditing=true;showDetectiveName();$('detectiveNameInput').focus()});$('nameSkip').addEventListener('click',()=>{state.nameSkip=true;nameEditing=false;persist();showDetectiveName()});
 $('miniClose').addEventListener('click',patrolCloseMini);$('miniEnd').addEventListener('click',patrolCloseMini);
 $('miniGiveUp').addEventListener('click',v17GiveUp);$('miniRetry').addEventListener('click',()=>{if(patrolCurrent)patrolStartMini(patrolCurrent)});
-document.addEventListener('keydown',e=>{if(view!=='patrol'||$('patrolMiniOverlay').classList.contains('open')||['INPUT','TEXTAREA','SELECT'].includes(document.activeElement?.tagName))return;const dirs={ArrowUp:'up',ArrowDown:'down',ArrowLeft:'left',ArrowRight:'right',w:'up',s:'down',a:'left',d:'right'};if(dirs[e.key]){e.preventDefault();patrolStep(dirs[e.key])}else if(e.key==='+'||e.key==='='){e.preventDefault();setPatrolZoom(patrolZoom*1.25)}else if(e.key==='-'||e.key==='_'){e.preventDefault();setPatrolZoom(patrolZoom/1.25)}});
+document.addEventListener('keydown',e=>{if(MiniLesson.on||view!=='patrol'||$('patrolMiniOverlay').classList.contains('open')||['INPUT','TEXTAREA','SELECT'].includes(document.activeElement?.tagName))return;const dirs={ArrowUp:'up',ArrowDown:'down',ArrowLeft:'left',ArrowRight:'right',w:'up',s:'down',a:'left',d:'right'};if(dirs[e.key]){e.preventDefault();patrolStep(dirs[e.key])}else if(e.key==='+'||e.key==='='){e.preventDefault();setPatrolZoom(patrolZoom*1.25)}else if(e.key==='-'||e.key==='_'){e.preventDefault();setPatrolZoom(patrolZoom/1.25)}});
 $('patrolZoomIn').addEventListener('click',()=>setPatrolZoom(patrolZoom*1.25));$('patrolZoomOut').addEventListener('click',()=>setPatrolZoom(patrolZoom/1.25));
 {const vp=$('patrolViewport');let pinch=null;const rel=(x,y)=>{const r=vp.getBoundingClientRect();return {x:x-r.left,y:y-r.top}};
  vp.addEventListener('touchstart',e=>{if(e.touches.length===2){const [a,b]=e.touches;pinch={d:Math.hypot(a.clientX-b.clientX,a.clientY-b.clientY)||1,z:patrolZoom}}},{passive:true});
@@ -1914,7 +2021,7 @@ $('patrolZoomIn').addEventListener('click',()=>setPatrolZoom(patrolZoom*1.25));$
  vp.addEventListener('touchend',e=>{if(e.touches.length<2)pinch=null});
  vp.addEventListener('wheel',e=>{if(!e.ctrlKey)return;e.preventDefault();setPatrolZoom(patrolZoom*Math.exp(-e.deltaY*.01),rel(e.clientX,e.clientY))},{passive:false});
  setPatrolZoom(patrolZoom,null,false);if(window.ResizeObserver)new ResizeObserver(()=>{if(vp.clientWidth)setPatrolZoom(patrolZoom,null,false)}).observe(vp)}
-document.addEventListener('keydown',e=>{if(!$('patrolMiniOverlay').classList.contains('open')||patrolCurrent!=='footprints'||['INPUT','TEXTAREA','SELECT'].includes(document.activeElement?.tagName))return;const dirs={ArrowUp:'up',ArrowDown:'down',ArrowLeft:'left',ArrowRight:'right',w:'up',s:'down',a:'left',d:'right'};if(dirs[e.key]){e.preventDefault();v13MazeDir(dirs[e.key])}});
+document.addEventListener('keydown',e=>{if(MiniLesson.on||!$('patrolMiniOverlay').classList.contains('open')||patrolCurrent!=='footprints'||['INPUT','TEXTAREA','SELECT'].includes(document.activeElement?.tagName))return;const dirs={ArrowUp:'up',ArrowDown:'down',ArrowLeft:'left',ArrowRight:'right',w:'up',s:'down',a:'left',d:'right'};if(dirs[e.key]){e.preventDefault();v13MazeDir(dirs[e.key])}});
 $('dailyChest').addEventListener('click',openDailyChest);
 applyExpTheme();{const gift=dailyEnsure();scoreUI();renderDaily();if(gift)setTimeout(()=>dailyToast(L(`📅 출석 도장 쾅! 🔥 ${state.attend.streak}일 연속 · 🪙+${gift}`,`📅 Check-in stamp! 🔥 ${state.attend.streak}-day streak · 🪙+${gift}`)),900)}
 // ===== Settings window (⚙️ in the top bar) and the in-page confirm window =====
@@ -1929,7 +2036,7 @@ function syncSettings(){
  $('setPlayerNote').textContent=PROFILE_NAME?L(`${MGP.me.av||''} ${PROFILE_NAME}의 기록이에요. 플레이어는 첫 화면에서 바꿔요.`,`${MGP.me.av||''} This is ${PROFILE_NAME}'s progress. Switch players on the main page.`).trim():L('첫 화면에서 프로필을 만들면 형제자매가 따로 기록할 수 있어요.','Make profiles on the main page so siblings keep separate progress.');
 }
 function openSettings(){if(!$('setLayer').hidden)return;setReturnFocus=document.activeElement;syncSettings();refreshVoices();$('setLayer').hidden=false;document.body.classList.add('mgOpen');$('setLayer').querySelector('.mgCard').scrollTop=0;$('setClose').focus()}
-function closeSettings(restore=true){if($('setLayer').hidden)return;$('setLayer').hidden=true;if($('confirmLayer').hidden)document.body.classList.remove('mgOpen');if(restore&&setReturnFocus?.focus)setReturnFocus.focus()}
+function closeSettings(restore=true){if($('setLayer').hidden)return;$('setLayer').hidden=true;if($('confirmLayer').hidden)document.body.classList.remove('mgOpen');if(restore&&setReturnFocus?.focus)setReturnFocus.focus();if(restore&&view==='play')dtCaseGate()}
 function askConfirm(o,onYes){cfReturnFocus=document.activeElement;cfAction=onYes;$('cfIcon').textContent=o.icon||'❓';$('cfTitle').textContent=o.title;$('cfDesc').textContent=o.desc;$('cfYes').textContent=o.yes||L('확인','OK');$('confirmLayer').hidden=false;document.body.classList.add('mgOpen');$('cfNo').focus()}
 function closeConfirm(){if($('confirmLayer').hidden)return;$('confirmLayer').hidden=true;cfAction=null;if($('setLayer').hidden)document.body.classList.remove('mgOpen');if(cfReturnFocus?.focus&&document.contains(cfReturnFocus))cfReturnFocus.focus()}
 $('settingsBtn').addEventListener('click',openSettings);
@@ -1946,6 +2053,7 @@ $('patrolMiniOverlay').addEventListener('click',e=>{if(e.target===$('patrolMiniO
 // While the settings or confirm window is open it owns the keyboard: Escape closes the top one, Tab stays inside it,
 // and arrow keys no longer walk the detective around the town behind it.
 window.addEventListener('keydown',e=>{
+ if(MiniLesson.on)return;
  const top=!$('confirmLayer').hidden?$('confirmLayer'):!$('setLayer').hidden?$('setLayer'):null;
  if(!top){if(e.key==='Escape'&&$('patrolMiniOverlay').classList.contains('open')){patrolCloseMini();e.stopPropagation()}return}
  if(e.key==='Escape'){e.preventDefault();if(top===$('confirmLayer'))closeConfirm();else closeSettings()}
@@ -2081,6 +2189,293 @@ function learnSummary(){
   unit:['답','answers'],areas,facts:facts.slice(0,6),talk:talk.slice(0,4),home:home.slice(0,3),next:next.slice(0,3)};
 }
 LR.set(learnSummary);
+// ===== Mini lessons and the concept notebook (MiniLesson is in the coach block; rules in _src/coach/LESSONS_SPEC.md) =====
+// Kids learn each idea before they meet it. dtCaseGate (end of switchView, and when settings close on the case screen)
+// plays one unseen lesson per case start: how to solve a case first (with a try on three drawn suspects), then what
+// changes at a harder case level, then careful listening from the second case (it also plays before the first 🎙️ radio
+// message, dtListenGate). patrolStartMini plays a patrol mini-game's lesson before its first play, then patrolRunMini.
+// Lessons are built when they open, so the teacher is the buddy the child picked, and the pictures come from the game's
+// own drawings (avatar, clueBox, the station pictures). 📖 개념 노트 beside 📋 단서 다시 보기 and above the patrol list
+// opens the notebook (dtOpenBook); a 📖 chip after a miss opens that lesson again (dtAgain).
+// speakLines drops emoji before reading, so a spoken line never uses an emoji as a word.
+let dtTimers=[];
+const dtClear=()=>{dtTimers.forEach(clearTimeout);dtTimers=[]},dtLater=(f,ms)=>{dtTimers.push(setTimeout(f,ms))};
+// the lesson's read-aloud: the game's own voice and its 🗣️ switch, without the "Detective …," greeting on every page
+function dtSay(t){if(!v15VoiceEnabled())return;if(!langVoices.length)refreshVoices();if(langVoices.length)try{speakLines([t],true)}catch(e){}}
+const dtWho=()=>({img:BUDDY_IMG[state.buddy]||BUDDY_IMG.puppy,name:(buddies[state.buddy]||buddies.puppy).name});
+MiniLesson.cfg({voice:t=>dtSay(t),stop:()=>{dtClear();stopSpeaking()},who:dtWho()});
+const dtHead=id=>{const m=patrolKinds.find(x=>x.id===id);return m?`<div class="dtl-head">${pic(m.img,m.icon)}<b>${m.label}</b></div>`:''};
+const dtTap=(box,sel,fn)=>box.querySelectorAll(sel).forEach(b=>b.addEventListener('click',()=>fn(b)));
+const dtBtn=(t,cls='')=>`<span class="dtl-btn ${cls}">${t}</span>`;
+// a plain person for the pictures: no extra accessories, so the clue being taught is the thing that stands out
+function dtPerson(o){return Object.assign(randomPerson(),{topPattern:'plain',pantsPattern:'plain',glasses:'none',scarf:'none',bracelet:'none',ring:'none',necklace:'none',height:'normal',legs:'normal',hat:'none',bag:'none',pants:sample(['brown','black']),shoes:'sneakers',shoeColor:'white'},o||{})}
+const dtSus=(p,cap,cls='',attr='')=>attr?`<button type="button" class="dtl-sus ${cls}" ${attr}>${avatar(p)}<b>${cap}</b></button>`:`<div class="dtl-sus ${cls}">${avatar(p)}<b>${cap}</b></div>`;
+
+// ---- 사건 해결: how to solve a case (the try: tap the suspect the first clue rules out)
+function dtCaseSteps(){
+ const base=dtPerson(),mk=o=>({...base,skin:sample(skins),hair:sample(field.hair.options),hairColor:sample(field.hairColor.options),...o});
+ const thief=mk({top:'red',hat:'blue',bag:'backpack'}),trio=shuffle([{w:'t',p:thief},{w:'b',p:mk({top:'red',hat:'yellow',bag:'backpack'})},{w:'c',p:mk({top:'green',hat:'blue',bag:'backpack'})}]);
+ const clues=ks=>`<div class="dtl-clues">${ks.map(k=>clueBox(k,thief)).join('')}</div>`,no=i=>L(`${i+1}번`,`No. ${i+1}`);
+ const row=(cls,btn)=>`<div class="dtl-row">${trio.map((x,i)=>dtSus(x.p,no(i),(cls||{})[x.w]||'',btn?`data-w="${x.w}" aria-label="${L(`${i+1}번 용의자`,`Suspect ${i+1}`)}"`:'')).join('')}</div>`;
+ return [
+  {say:L('사건이 생기면 목격자가 범인의 모습을 알려 줘요. 이번 단서는 세 개예요. 하나도 빼놓지 말고 모두 들어요.','When there is a case, a witness tells us what the thief looks like. This time there are three clues. Listen to every one of them.'),
+   art:`<div class="dtl">${clues(['top','hat','bag'])}</div>`},
+  {say:L('용의자는 여러 명이에요. 모든 단서와 딱 맞는 사람은 단 한 명! 그 사람이 범인이에요.','There are several suspects. Only one person matches every clue, and that person is the thief!'),
+   art:`<div class="dtl">${row()}<p class="dtl-note">🔍 ${L('단서를 모두 만족하는 사람은 딱 한 명이에요!','Only one person matches every clue!')}</p></div>`},
+  {say:L('단서 하나씩 사람을 지워 봐요. 첫 단서는 빨간색 윗옷이에요. 빨간색 윗옷을 입지 않은 사람을 눌러서 지워 보세요.','Rule people out one clue at a time. The first clue is a red top. Tap the person who is not wearing a red top.'),try:true,
+   art:(box,api)=>{box.innerHTML=`<div class="dtl">${clues(['top'])}${row(null,true)}</div>`;
+    dtTap(box,'[data-w]',b=>{if(box.dataset.done)return;
+     if(b.dataset.w==='c'){box.dataset.done=1;b.classList.add('out');api.say(L('맞아요! 초록색 윗옷이라서 범인이 아니에요. 한 명을 지웠어요.','Yes! That top is green, so this person is not the thief. One ruled out.'));api.done()}
+     else api.say(L('이 사람은 빨간색 윗옷을 입었어요. 아직 지우면 안 돼요. 다른 사람을 찾아봐요.','This person is wearing a red top, so keep them for now. Look for someone else.'))})},
+   show:box=>{box.dataset.done=1;const b=box.querySelector('[data-w="c"]');if(b)b.classList.add('out','dtl-hint')}},
+  {say:L('다음 단서는 파란 모자예요. 노란 모자를 쓴 사람도 지워요. 남은 한 사람이 마지막 단서인 배낭까지 맞는지 확인하면, 바로 범인이에요!','The next clue is a blue hat, so the person in the yellow hat is ruled out too. Check that the one person left also matches the last clue, the backpack. That is the thief!'),
+   art:`<div class="dtl">${clues(['hat'])}${row({c:'out',b:'cross',t:'win'})}<p class="dtl-note dtl-late">${field.bag.icon} ${clueText('bag',thief)} ✅ · ${L('모든 단서와 맞아요!','Matches every clue!')}</p></div>`},
+  {say:L('게임에서는 수사 노트 버튼으로 아닌 사람을 표시해요. 돋보기 버튼으로 확대하면 작은 것까지 보이고, 목격자에게 질문하면 단서가 하나 더 생겨요. 확실할 때 체포해요!','In the game, use the Notebook button to mark people who are not the thief. The magnifier button zooms in so you can see small things, and asking the witness gives you one more clue. Arrest only when you are sure!'),
+   art:`<div class="dtl"><div class="dtl-steps"><span>①${L(' 목격자 질문',' Ask the witness')}</span><span>②${L(' 용의자 확대',' Zoom in on a suspect')}</span><span>③${L(' 범인 체포',' Catch the thief')}</span></div><div class="dtl-row">${dtBtn(L('✏️ 수사 노트 · 제외','✏️ Notebook · Rule out'))}${dtBtn('🔍')}${dtBtn(L('🚨 체포!','🚨 Arrest!'),'red')}</div><p class="dtl-note">🌈 ${L('질문 + 확대 후 체포하면 보너스 코인 +10!','Ask + zoom, then make the arrest for bonus coins +10!')}</p></div>`}]}
+
+// ---- 귀 기울여 듣기: careful listening (the try: tap the word that flips the meaning)
+function dtListenSteps(){
+ const radio=html=>`<div class="dtl-radio"><small>📻 ${L('경찰 무전','Police radio')}</small>${html}</div>`;
+ const words=L(['모자는','쓰지','않았어요.'],['The thief','is','not','wearing','a hat.']),hit=2,noHat=dtPerson({hat:'none'});
+ const pair=[dtPerson({hat:'blue',pants:'black'}),dtPerson({hat:'yellow',pants:'blue'})];
+ return [
+  {say:L('경찰 무전은 금방 지나가요. 그래서 탐정은 중요한 낱말을 붙잡아 들어요. 색깔 낱말, 물건 낱말, 그리고 ‘않았어요’처럼 뜻을 뒤집는 낱말이에요.','The police radio goes by fast, so detectives catch the important words: color words, thing words, and little words like “not” that flip the meaning.'),
+   art:`<div class="dtl">${radio(L('<mark class="c">빨간색</mark> <mark class="t">윗옷</mark>을 입었어요.<br><mark class="t">모자</mark>는 쓰지 <mark class="n">않았어요</mark>.','The thief is wearing a <mark class="c">red</mark> <mark class="t">top</mark>.<br>The thief is <mark class="n">not</mark> wearing a <mark class="t">hat</mark>.'))}<div class="dtl-row"><span class="dtl-chip c">🎨 ${L('색깔','Color')}</span><span class="dtl-chip t">🧢 ${L('물건','Thing')}</span><span class="dtl-chip n">🚫 ${L('뜻 뒤집기','Not')}</span></div></div>`},
+  {say:L('색깔과 물건은 짝으로 들어요. ‘파란 모자’는 모자가 파란색이라는 뜻이에요. 바지가 파란 사람은 아니에요!','Hear the color and the thing as a pair. “Blue hat” means the hat is blue. Someone in blue pants doesn’t count!'),
+   art:`<div class="dtl">${clueBox('hat',pair[0])}<div class="dtl-row">${dtSus(pair[0],L('✅ 모자가 파란색','✅ The hat is blue'),'ok')}${dtSus(pair[1],L('❌ 파란 건 바지','❌ Only the pants are blue'),'no')}</div></div>`},
+  {say:L('한국말은 끝까지 들어야 해요. ‘모자를 썼어요’와 ‘모자는 쓰지 않았어요’는 끝에서 뜻이 달라져요. 이 문장에서 뜻을 뒤집는 낱말을 눌러 보세요.','“Not” flips the meaning: “The thief is wearing a hat” and “The thief is not wearing a hat” are opposites. Tap the word in this sentence that flips the meaning.'),try:true,
+   art:(box,api)=>{box.innerHTML=`<div class="dtl">${radio(`<div class="dtl-words">${words.map((w,i)=>`<button type="button" class="dtl-word" data-i="${i}">${w}</button>`).join('')}</div>`)}<div class="dtl-after" hidden>${clueBox('hat',noHat)}</div></div>`;
+    const win=()=>{box.dataset.done=1;box.querySelector(`[data-i="${hit}"]`).classList.add('on');box.querySelector('.dtl-after').hidden=false};
+    dtTap(box,'[data-i]',b=>{if(box.dataset.done)return;if(+b.dataset.i===hit){win();api.say(L('맞아요! 모자를 쓴 사람이 아니라, 모자가 없는 사람이 범인이에요.','Yes! The thief is someone with no hat, not someone wearing one.'));api.done()}
+     else api.say(L('그 낱말도 잘 들어야 하지만, 뜻을 뒤집는 낱말은 따로 있어요. 문장 끝을 잘 들어 봐요.','That word matters too, but another little word flips the meaning. Listen for it again.'))});
+    box._win=win},
+   show:box=>{if(box._win)box._win()}},
+  {say:L('자리를 알려 주는 낱말도 놓치지 마세요. 왼쪽, 오른쪽, 바로 옆, 그리고 어디에 있지 않았다는 말이에요. 알리바이 수사에서 자주 나와요.','Don’t miss place words either: left, right, next to, and “was not at”. You will hear them a lot in the alibi puzzle.'),
+   art:`<div class="dtl">${dtStreet(['',L('지우','Mia'),L('하린','Leo'),''],['','hi','hi',''])}<p class="dtl-note">↔️ ${L('지우와 하린은 바로 옆이에요.','Mia and Leo are right next to each other.')}</p></div>`},
+  {say:L('놓쳤다면 다시 들으면 돼요. 경찰 무전 듣기를 다시 누르거나, 단서 다시 보기에서 글로 확인해요. 멋진 탐정도 다시 확인한답니다.','Missed something? Just listen again. Press Hear police radio again, or open Review clues to read them. Even great detectives check twice.'),
+   art:`<div class="dtl"><div class="dtl-row">${dtBtn(L('🎙️ 경찰 무전 듣기','🎙️ Hear police radio'),'blue')}${dtBtn(L('📋 단서 다시 보기','📋 Review clues'))}</div></div>`}]}
+
+// ---- harder case levels: what is new (opens before the first case at that level)
+const DT_LV={medium:{icon:'🦊',name:L('보통','Medium'),add:['pantsPattern','shoes','shoeColor','bracelet','necklace'],
+  s2:L('바지 무늬, 신발 모양과 색, 팔찌, 목걸이 같은 단서가 새로 나와요.','New kinds of clues appear: pants patterns, shoe type and color, bracelets and necklaces.'),
+  s3:L('팔찌는 손목, 목걸이는 목, 신발은 발을 봐요. 돋보기 버튼으로 확대하면 잘 보여요.','Look at the wrist for bracelets, the neck for necklaces and the feet for shoes. The magnifier button zooms in so you can see them.'),
+  k3:[['팔찌는 손목, 목걸이는 목, 신발은 발을 봐요.','Bracelets: wrist. Necklaces: neck. Shoes: feet.']]},
+ hard:{icon:'🦁',name:L('어려움','Hard'),add:['hairColor','ring','height','legs','eyes'],
+  s2:L('머리색, 반지, 키, 다리 길이, 눈동자 색 같은 단서가 새로 나와요.','New kinds of clues appear: hair color, rings, height, leg length and eye color.'),
+  s3:L('키는 사람 뒤에 있는 점선 두 줄과 비교해요. 반지와 눈동자 색은 돋보기로 확대해서 봐요.','Compare height with the two dashed lines behind each person. Zoom in with the magnifier to check rings and eye color.'),
+  k3:[['키는 뒤에 있는 점선 두 줄과 비교해요.','Compare height with the two dashed lines.']]},
+ expert:{icon:'👑',name:L('탐정왕','Master'),add:['nose','mouth'],
+  s2:L('이제 코와 입 모양까지 단서가 될 수 있어요. 어떤 특징이든 나올 수 있어요.','Now even the nose and the mouth can be clues. Any feature can show up.'),
+  s3:L('얼굴은 한 부분씩 비교해요. 먼저 코, 그다음 입이에요. 돋보기로 확대하면 잘 보여요.','Compare faces one part at a time: first the nose, then the mouth. Zooming in with the magnifier helps.'),
+  k3:[['얼굴은 코, 입 순서로 한 부분씩 비교해요.','Compare faces one part at a time: nose, then mouth.']]}};
+function dtLevelSteps(d){const v=DT_LV[d],c=configs[d],n=c.n,k=c.k;
+ const p=dtPerson({pantsPattern:'stripes',shoes:'boots',shoeColor:'red',bracelet:'purple',necklace:'heart',hairColor:'ginger',ring:'gold',height:'tall',legs:'long',eyes:'green',nose:'pointy',mouth:'open'});
+ let pics;
+ if(d==='medium')pics=`<div class="dtl-row">${dtSus(dtPerson({bracelet:'purple',necklace:'heart',shoes:'boots',shoeColor:'red',pantsPattern:'stripes'}),L('팔찌 · 목걸이 · 부츠','Bracelet · necklace · boots'),'big')}</div>`;
+ else if(d==='hard'){const b=dtPerson();pics=`<div class="dtl-row">${['short','normal','tall'].map(h=>dtSus({...b,height:h},L({short:'작은 키',normal:'보통 키',tall:'큰 키'}[h],{short:'Short',normal:'Medium',tall:'Tall'}[h]))).join('')}</div>`}
+ else {const b=dtPerson();pics=`<div class="dtl-row">${['round','tiny','pointy'].map(z=>dtSus({...b,nose:z},desc.nose[z])).join('')}</div>`}
+ return [
+  {say:L(`${v.name} 난이도 사건에는 용의자가 ${n}명, 단서가 ${k}개 나와요. 서로 비슷한 사람이 더 많아요.`,`A ${v.name} case has ${n} suspects and ${k} clues, so more people look alike.`),
+   art:`<div class="dtl"><div class="dtl-big">${v.icon}</div><div class="dtl-row"><span class="dtl-chip">👥 ${L(`용의자 ${n}명`,`${n} suspects`)}</span><span class="dtl-chip">📋 ${L(`단서 ${k}개`,`${k} clues`)}</span></div></div>`},
+  {say:v.s2,art:`<div class="dtl"><div class="dtl-clues">${v.add.map(x=>clueBox(x,p)).join('')}</div></div>`},
+  {say:v.s3,art:`<div class="dtl">${pics}</div>`},
+  {say:L('사람이 많을수록 수사 노트로 아닌 사람을 지우는 게 더 중요해요. 단서 하나에 한 번씩 지우면, 남는 사람이 점점 줄어요.','The more people there are, the more the Notebook helps. Use one clue at a time to rule people out, and fewer and fewer are left.'),
+   art:`<div class="dtl"><div class="dtl-crowd">${Array.from({length:n},(_,i)=>`<span class="${i<n-1?'x':'w'}" style="animation-delay:${(.6+i*.22).toFixed(2)}s">🧑</span>`).join('')}</div>${dtBtn(L('✏️ 수사 노트 · 제외','✏️ Notebook · Rule out'))}</div>`}]}
+
+// ---- patrol: 발자국 수사 미로 (both features must match; the code goes in the letter order)
+function dtFootSteps(){const P=v13Patterns,H=v13Heels,p=R(P.length),h=R(H.length),p2=(p+1+R(P.length-1))%P.length,h2=(h+1+R(H.length-1))%H.length;
+ const sole=(pi,hi,cap='',cls='',w='')=>{const inner=`<span class="dtl-sole"><span class="pt">${P[pi][0]}<br>${P[pi][0]}<br>${P[pi][0]}</span><span class="hl">${H[hi][0]}</span></span><small>${P[pi][1]}<br>${H[hi][1]}</small>${cap?`<em>${cap}</em>`:''}`;
+  return w?`<button type="button" class="dtl-print ${cls}" data-w="${w}">${inner}</button>`:`<div class="dtl-print ${cls}">${inner}</div>`};
+ const want=`<div class="dtl-want"><small>📻 ${L('경찰 무전 — 범인 신발의 특징','Police radio: the thief’s shoe')}</small><div class="dtl-row"><span class="dtl-chip">${P[p][0]} ${P[p][1]}</span><span class="dtl-chip">${H[h][0]} ${H[h][1]}</span></div></div>`;
+ const three=shuffle([['real',p,h],['heel',p,h2],['pat',p2,h]]);
+ return [
+  {say:L('발자국 수사에서는 경찰 무전이 범인 신발의 특징 두 가지를 알려 줘요. 신발 바닥의 무늬와 뒤꿈치 모양이에요.','In the footprint case, the police radio tells you two things about the thief’s shoe: the pattern on the sole and the shape of the heel.'),
+   art:`<div class="dtl">${dtHead('footprints')}${want}<div class="dtl-row">${sole(p,h)}</div></div>`},
+  {say:L('진짜 발자국은 무늬와 뒤꿈치가 둘 다 같아요. 하나만 같으면 비슷하게 만든 가짜예요. 가짜가 섞여 있으니 두 가지를 모두 봐요.','A real footprint matches both the pattern and the heel. If only one matches, it is a look-alike fake. Fakes are mixed in, so always check both.'),
+   art:`<div class="dtl">${want}<div class="dtl-row">${sole(p,h,L('✅ 둘 다 같아요','✅ Both match'),'ok')}${sole(p,h2,L('❌ 뒤꿈치가 달라요','❌ Heel is different'),'bad')}${sole(p2,h,L('❌ 무늬가 달라요','❌ Pattern is different'),'bad')}</div></div>`},
+  {say:L('이제 해 봐요. 찾는 신발과 두 가지가 모두 같은 발자국을 눌러 보세요.','Your turn. Tap the footprint where both things match the wanted shoe.'),try:true,
+   art:(box,api)=>{box.innerHTML=`<div class="dtl">${want}<div class="dtl-row">${three.map(x=>sole(x[1],x[2],'','',x[0])).join('')}</div></div>`;
+    dtTap(box,'[data-w]',b=>{if(box.dataset.done)return;const w=b.dataset.w;
+     if(w==='real'){box.dataset.done=1;b.classList.add('ok');api.say(L('정확해요! 무늬도 뒤꿈치도 같아요. 게임에서는 진짜 버튼을 눌러 증거로 모아요.','Exactly! The pattern and the heel both match. In the game, press Real to collect it.'));api.done()}
+     else{b.classList.add('bad');api.say(w==='heel'?L('무늬는 같지만 뒤꿈치가 달라요. 이건 가짜예요!','The pattern matches, but the heel is different. This one is a fake!'):L('뒤꿈치는 같지만 무늬가 달라요. 이건 가짜예요!','The heel matches, but the pattern is different. This one is a fake!'))}})},
+   show:box=>{box.dataset.done=1;const b=box.querySelector('[data-w="real"]');if(b)b.classList.add('ok','dtl-hint')}},
+  {say:L('진짜 발자국을 감식하면 숫자를 하나씩 얻어요. 마지막 문에는 기록에 적힌 글자 순서대로 숫자를 넣어요. B 다음 A라면, B의 숫자 7이 먼저예요.','Each real footprint gives you a number. At the last door, enter the numbers in the letter order shown in the record. If it says B then A, B’s number 7 goes first.'),
+   art:`<div class="dtl"><div class="dtl-rec"><b>📁 ${L('수사 기록','Case record')}</b><div class="dtl-row"><span class="dtl-chip">A: 🔑 4</span><span class="dtl-chip">B: 🔑 7</span></div><b>${L('마지막 문 비밀번호 순서: ','Final door code order: ')}B → A</b></div><div class="dtl-code">🔐 7 - 4</div></div>`}]}
+
+// ---- patrol: 틀린 증언 찾기 (the thief fits three statements; the one left over is the wrong one)
+function dtWitnessSteps(){
+ const W=[L('🔴 빨간 옷','🔴 Red top'),L('🧢 야구모자','🧢 Baseball cap'),L('🎒 배낭','🎒 Backpack'),L('🥾 부츠','🥾 Boots')],names=[L('상의','Top'),L('모자','Hat'),L('가방','Bag'),L('신발','Shoes')],faces=['👵','👨','👩','👴'];
+ const people=[{w:'t',v:[W[0],W[1],W[2],L('👟 운동화','👟 Sneakers')]},{w:'a',v:[L('🟢 초록 옷','🟢 Green top'),W[1],L('👜 손가방','👜 Handbag'),W[3]]},{w:'b',v:[W[0],L('🎩 신사모자','🎩 Top hat'),L('🧳 여행가방','🧳 Suitcase'),L('👞 구두','👞 Dress shoes')]}];
+ const fit=q=>q.v.filter((f,i)=>f===W[i]).length,order=shuffle(people.slice());
+ const cards=flag=>`<div class="dtl-wit">${W.map((s,i)=>`<div class="${flag&&i===3?'flag':''}"><small>${faces[i]} ${L('목격자','Witness')} ${i+1} · ${names[i]}</small><b>${s}${flag&&i===3?' 🚩':''}</b></div>`).join('')}</div>`;
+ const person=(q,n,mark,btn)=>{const inner=`<b>${L(`${n}번 용의자`,`Suspect ${n}`)}</b><span class="f">${q.v.map((f,i)=>`<i class="${mark?(f===W[i]?'y':'n'):''}">${f}</i>`).join('')}</span>${mark?`<small>${L(`증언 ${fit(q)}개와 맞아요`,`Matches ${fit(q)} statement${fit(q)===1?'':'s'}`)}</small>`:''}`;
+  return btn?`<button type="button" class="dtl-wp" data-w="${q.w}">${inner}</button>`:`<div class="dtl-wp">${inner}</div>`};
+ return [
+  {say:L('목격자 네 명이 범인의 모습을 하나씩 말해요. 윗옷, 모자, 가방, 신발이에요. 세 명은 맞게 봤지만, 한 명은 잘못 봤어요!','Four witnesses each describe one thing: the top, the hat, the bag and the shoes. Three of them are right, but one saw it wrong!'),
+   art:`<div class="dtl">${dtHead('witness')}${cards()}</div>`},
+  {say:L('누가 틀렸는지는 바로 알 수 없어요. 그래서 용의자마다 증언 몇 개와 맞는지 세어 봐요. 이 사람은 빨간 옷 하나만 맞아요.','You can’t tell right away who is wrong. So count how many statements each suspect matches. This person matches only one: the red top.'),
+   art:`<div class="dtl">${cards()}<div class="dtl-row">${person(people[2],1,true)}</div></div>`},
+  {say:L('이제 해 봐요. 증언 네 개 중 세 개와 맞는 사람을 찾아 눌러 보세요.','Your turn. Find the person who matches three of the four statements, and tap them.'),try:true,
+   art:(box,api)=>{box.innerHTML=`<div class="dtl">${cards()}<div class="dtl-row">${order.map((q,i)=>person(q,i+1,false,true)).join('')}</div></div>`;
+    const mark=b=>{const q=people.find(x=>x.w===b.dataset.w),n=order.indexOf(q)+1;b.outerHTML=person(q,n,true).replace('class="dtl-wp"',`class="dtl-wp ${q.w==='t'?'ok':'bad'}"`)};
+    dtTap(box,'[data-w]',b=>{if(box.dataset.done)return;const q=people.find(x=>x.w===b.dataset.w);
+     if(q.w==='t'){box.dataset.done=1;mark(b);api.say(L('맞아요! 이 사람은 증언 세 개와 맞아요. 신발만 달라요.','Yes! This person matches three statements. Only the shoes are different.'));api.done()}
+     else{mark(b);const n=fit(q);api.say(L(`이 사람은 증언 ${n}개와 맞아요. 세 개와 맞는 사람을 찾아봐요.`,`This person matches ${n} statement${n===1?'':'s'}. Look for the one who matches three.`))}})},
+   show:box=>{box.dataset.done=1;const b=box.querySelector('[data-w="t"]');if(b){b.classList.add('dtl-hint');const q=people[0];b.outerHTML=person(q,order.indexOf(q)+1,true).replace('class="dtl-wp"','class="dtl-wp ok dtl-hint"')}}},
+  {say:L('범인과 맞지 않는 증언 하나가 바로 틀린 증언이에요. 네 번째 목격자는 부츠라고 했지만, 범인은 운동화를 신었어요. 게임에서는 그 증언에 깃발을 꽂고, 범인을 고른 뒤 확인 버튼을 눌러요.','The one statement that doesn’t fit the thief is the wrong one. Witness 4 said boots, but the thief wore sneakers. In the game, flag that statement, pick the thief, then press the check button.'),
+   art:`<div class="dtl">${cards(true)}<p class="dtl-note">🚩 ${L('진짜는','Really:')} <b>${people[0].v[3]}</b></p>${dtBtn(L('📋 증거 대조 후 체포','📋 Check the evidence and arrest'))}</div>`}]}
+
+// ---- patrol: 금고 암호 추리 (green and yellow counts; no signal means those digits are out)
+function dtCipherSteps(){
+ const sig=(e,n)=>L(`🟢 자리까지 ${e}개 · 🟡 숫자만 ${n}개`,`🟢 Right spot: ${e} · 🟡 Right digit only: ${n}`);
+ const tries=[{n:[3,1],e:1,y:0,t:L('3은 자리까지 맞아서 초록 1개예요. 1은 비밀번호에 없어서 신호가 없어요.','3 is in the right spot, so 1 green. 1 is not in the code, so it gives no signal.')},
+  {n:[5,3],e:0,y:2,t:L('5와 3은 둘 다 비밀번호에 있지만 자리가 바뀌었어요. 그래서 노란 2개예요.','5 and 3 are both in the code, but they are swapped. So 2 yellow.')},
+  {n:[3,5],e:2,y:0,t:L('둘 다 숫자도 자리도 맞아요. 초록 2개, 금고가 열려요!','Both digits are right and in the right spots: 2 green, and the safe opens!')}];
+ const safe=(d,cap)=>`<div class="dtl-safe"><span class="lk">🔐</span><div class="d">${d.map(x=>`<span>${x}</span>`).join('')}</div><small>${cap}</small></div>`;
+ return [
+  {say:L('금고 비밀번호는 서로 다른 숫자로 되어 있어요. 숫자를 넣어 보면 금고가 초록 신호와 노란 신호로 알려 줘요. 단계가 올라가면 자리가 늘어나요.','The safe code is made of different digits. When you try a code, the safe answers with green and yellow signals. At higher levels the code gets longer.'),
+   art:`<div class="dtl">${dtHead('cipher')}${safe(['?','?'],L('🔐 2자리 서로 다른 숫자 · 🔢 1~6 사용','🔐 2 different digits · 🔢 Use 1–6'))}</div>`},
+  {say:L('초록 신호는 숫자도 자리도 맞은 개수예요. 노란 신호는 숫자는 맞지만 자리가 다른 개수예요. 어느 숫자가 맞았는지는 알려 주지 않아요. 그걸 추리하는 게 탐정의 일이에요!','Green counts the digits that are right and in the right spot. Yellow counts the digits that are right but in the wrong spot. The safe never says which digits. Working that out is the detective’s job!'),
+   art:`<div class="dtl"><div class="dtl-legend"><p><b>🟢</b> ${L('숫자도 맞고 자리도 맞은 개수','How many digits are right and in the right spot')}</p><p><b>🟡</b> ${L('숫자는 맞지만 자리가 다른 개수','How many digits are right but in the wrong spot')}</p></div></div>`},
+  {say:L('연습 금고의 비밀번호를 보여 줄게요. 3, 5예요. 아래 시도를 하나씩 눌러서 금고가 어떤 신호를 주는지 보세요.','Here is the practice safe’s code: 3, 5. Tap each try below to see what signals the safe gives.'),try:true,
+   art:(box,api)=>{box.innerHTML=`<div class="dtl">${safe([3,5],L('연습 금고 · 비밀번호를 보여 줘요','Practice safe · code shown'))}<div class="dtl-guesses">${tries.map((g,i)=>`<button type="button" class="dtl-guess" data-g="${i}"><span>🔢 ${g.n.join(' - ')}</span><span class="sig">${L('눌러 보기 ▶','Tap to try ▶')}</span></button>`).join('')}</div></div>`;
+    const got=new Set(),open=i=>{const b=box.querySelector(`[data-g="${i}"]`),g=tries[i];b.classList.add('on');b.querySelector('.sig').textContent=sig(g.e,g.y);got.add(i)};
+    dtTap(box,'[data-g]',b=>{const i=+b.dataset.g;open(i);api.say(tries[i].t);if(got.size===tries.length)api.done()});box._all=()=>tries.forEach((_,i)=>open(i))},
+   show:box=>{if(box._all)box._all()}},
+  {say:L('시도에 신호가 하나도 없으면, 넣은 숫자들은 모두 비밀번호에 없어요. 빼고 생각해요. 기록을 첫 시도부터 읽고, 한 번에 조금씩 바꿔 가며 시험해요.','If a try gets no signal at all, none of those digits is in the code, so leave them out. Read your tries from the first one, and change a little at a time.'),
+   art:`<div class="dtl"><div class="dtl-guesses">${[[[1,2],0,0,L('➜ 1, 2는 없어요','➜ No 1, no 2')],[[3,4],1,0,L('➜ 하나는 자리까지 맞아요','➜ One is in the right spot')],[[3,5],2,0,'🔓']].map(g=>`<div class="dtl-guess on"><span>🔢 ${g[0].join(' - ')}</span><span class="sig">${sig(g[1],g[2])}</span><em>${g[3]}</em></div>`).join('')}</div></div>`}]}
+
+// ---- patrol: 증거 보관함 (all three details must match; narrow down one detail at a time)
+const DT_SHELF={red:'#ffe1de',blue:'#d8ebff',yellow:'#fff2ba',green:'#def5d5',purple:'#eee0ff'};
+function dtLostSteps(){
+ const item=(o,cls='',w='')=>{const inner=`<span class="ic">${o.t}</span><span class="tg">${lostColor[o.c]} ${o.m}</span>`,st=`style="background:${DT_SHELF[o.c]}"`;
+  return w?`<button type="button" class="dtl-item ${cls}" ${st} data-w="${w}" aria-label="${L(`색깔 ${lostColor[o.c]} ${o.t} ${o.m} 표시`,`${lostColor[o.c]} ${o.t} with a ${o.m} mark`)}">${inner}</button>`:`<div class="dtl-item ${cls}" ${st}>${inner}</div>`};
+ const rep=t=>`<div class="dtl-rep"><small>📋 ${L('분실 신고','Lost item report')}</small><b>${L(`${t.t} 종류의 물건 · 색깔 ${lostColor[t.c]} · ${t.m} 표시`,`Item: ${t.t} · Color: ${lostColor[t.c]} · Mark: ${t.m}`)}</b></div>`;
+ const A={t:'🧢',c:'blue',m:'⭐'},shelf=shuffle([[A,'g'],[{t:'🧢',c:'blue',m:'🌙'},'d3'],[{t:'📘',c:'blue',m:'⭐'},'d2'],[{t:'🎒',c:'blue',m:'❤️'},'d2'],[{t:'🧢',c:'red',m:'⭐'},'d1'],[{t:'🧸',c:'yellow',m:'⭐'},'d1'],[{t:'🧢',c:'green',m:'⚡'},'d1'],[{t:'🪁',c:'purple',m:'⭐'},'d1']]);
+ const B={t:'📘',c:'yellow',m:'🌙'},six=shuffle([B,{t:'📘',c:'yellow',m:'⚡'},{t:'📘',c:'green',m:'🌙'},{t:'🧸',c:'yellow',m:'🌙'},{t:'🎒',c:'yellow',m:'🌼'},{t:'📘',c:'purple',m:'⭐'}]);
+ return [
+  {say:L('분실 신고서에는 물건의 특징 세 가지가 적혀 있어요. 물건의 종류, 색깔, 그리고 표시예요.','A lost item report gives three details: the kind of item, its color, and its mark.'),
+   art:`<div class="dtl">${dtHead('lost')}${rep(A)}<div class="dtl-row">${item(A)}</div></div>`},
+  {say:L('하나씩 좁혀요. 먼저 파란색 물건만 남기고, 그중에서 모자를 찾고, 마지막으로 별 표시를 확인해요.','Narrow it down one detail at a time. First keep only the blue things, then find the caps among them, and last check for the star mark.'),
+   art:`<div class="dtl">${rep(A)}<div class="dtl-shelf">${shelf.map(x=>item(x[0],x[1])).join('')}</div><div class="dtl-row dtl-steps3"><span class="s1">① ${L('색깔','Color')}</span><span class="s2">② ${L('종류','Item')}</span><span class="s3">③ ${L('표시','Mark')}</span></div></div>`},
+  {say:L('이제 해 봐요. 신고서와 세 가지가 모두 같은 물건을 눌러 보세요.','Your turn. Tap the item that matches all three details in the report.'),try:true,
+   art:(box,api)=>{box.innerHTML=`<div class="dtl">${rep(B)}<div class="dtl-shelf six">${six.map((o,i)=>item(o,'',String(i))).join('')}</div></div>`;
+    dtTap(box,'[data-w]',b=>{if(box.dataset.done)return;const o=six[+b.dataset.w];
+     if(o===B){box.dataset.done=1;b.classList.add('glow');api.say(L('맞아요! 종류, 색깔, 표시가 모두 같아요. 주인을 찾아 줬어요!','Yes! The item, the color and the mark all match. You found it for its owner!'));api.done();return}
+     b.classList.add('dim');const d=[o.t!==B.t&&L('종류','item'),o.c!==B.c&&L('색깔','color'),o.m!==B.m&&L('표시','mark')].filter(Boolean);
+     api.say(L(`${d.join(', ')}${v17Final(d[d.length-1])?'이':'가'} 달라요. 하나라도 다르면 다른 물건이에요!`,`${cap(d.map(w=>'the '+w).join(' and '))} ${d.length>1?'are':'is'} different. If even one detail is different, it’s a different item!`))})},
+   show:box=>{box.dataset.done=1;const b=box.querySelector(`[data-w="${six.indexOf(B)}"]`);if(b)b.classList.add('glow','dtl-hint')}},
+  {say:L('신고서는 모두 세 장이에요. 하나를 찾으면 다음 신고서가 나와요. 비슷해 보여도 하나라도 다르면 다른 물건이에요!','There are three reports in all. Find one, and the next report comes. Even if it looks close, one different detail means a different item!'),
+   art:`<div class="dtl"><div class="dtl-row">${item(B,'glow')}${item({t:'📘',c:'yellow',m:'⚡'},'dim')}</div><p class="dtl-note">✅ ${L('세 가지 모두 같아요','All three match')} · ❌ ${L('표시가 달라요','The mark is different')}</p></div>`}]}
+
+// ---- patrol: CCTV 기억 수사 (remember the order: say it, make a story, watch again if needed)
+function dtCctvSteps(){
+ const PL=[['🏫',L('학교','School')],['🌳',L('공원','Park')],['📚',L('도서관','Library')]],ord=['첫','두','세'],ordEn=['first','second','third'];
+ const tv=`<div class="dtl-tv"><small>🔴 REC · <span class="fr">1</span>/3 · ${L('순서 기억하기','Remember the order')}</small><span class="big">${PL[0][0]}</span><b>${PL[0][1]}</b></div>`;
+ return [
+  {say:L('CCTV는 범인이 지나간 장소를 하나씩 차례로 보여 줘요. 영상이 끝나면, 본 순서대로 장소 카드를 눌러요.','The CCTV shows the places the thief passed, one at a time. When the video ends, you tap the place cards in the order you saw them.'),
+   art:box=>{box.innerHTML=`<div class="dtl">${dtHead('cctv')}${tv}</div>`;let i=0;const s=box.querySelector('.dtl-tv'),tick=()=>{if(!s.isConnected)return;i=(i+1)%4;
+     s.querySelector('.big').textContent=i<3?PL[i][0]:'📼';s.querySelector('b').textContent=i<3?PL[i][1]:L('영상 끝!','Video over!');s.querySelector('.fr').textContent=Math.min(i+1,3);s.classList.toggle('end',i===3);dtLater(tick,1500)};dtLater(tick,1500)}},
+  {say:L('보면서 작게 소리 내어 따라 말해요. 학교, 공원, 도서관. 말로 하면 더 잘 기억나요.','As you watch, say the places quietly: school, park, library. Saying them out loud helps you remember.'),
+   art:`<div class="dtl"><div class="dtl-bubble">🗣️ “${PL.map(x=>x[1]).join('… ')}…”</div><div class="dtl-row">${PL.map((x,i)=>`<span class="dtl-chip">${i+1}. ${x[0]} ${x[1]}</span>`).join('')}</div></div>`},
+  {say:L('장소들을 짧은 이야기로 이어 봐요. 학교가 끝나고, 공원에서 놀다가, 도서관에 갔대! 이야기로 만들면 순서가 잘 기억나요.','Link the places into a short story: after school, the thief played in the park, then went to the library! A story keeps the order in your head.'),
+   art:`<div class="dtl"><div class="dtl-big">${PL.map(x=>x[0]).join(' ➜ ')}</div><div class="dtl-bubble">📖 ${L('“학교가 끝나고, 공원에서 놀다가, 도서관에 갔대!”','“After school, the thief played in the park, then went to the library!”')}</div></div>`},
+  {say:L('이제 해 봐요. 범인이 지나간 순서대로 장소 카드를 눌러 보세요.','Your turn. Tap the place cards in the order the thief went.'),try:true,
+   art:(box,api)=>{const opts=shuffle([0,1,2]);box.innerHTML=`<div class="dtl"><div class="dtl-slots">${PL.map((_,i)=>`<span data-s="${i}">${i+1}. ?</span>`).join('')}</div><div class="dtl-row">${opts.map(j=>`<button type="button" class="dtl-place" data-j="${j}">${PL[j][0]} ${PL[j][1]}</button>`).join('')}</div></div>`;
+    let k=0;const put=j=>{const s=box.querySelector(`[data-s="${k}"]`);s.textContent=`${k+1}. ${PL[j][0]} ${PL[j][1]}`;s.classList.add('f');box.querySelector(`[data-j="${j}"]`).disabled=true;k++};
+    dtTap(box,'[data-j]',b=>{if(k>=3)return;const j=+b.dataset.j;if(j===k){put(j);if(k===3){api.say(L('완벽해요! 학교, 공원, 도서관 순서예요.','Perfect! School, park, library.'));api.done()}}
+     else api.say(L(`이야기를 떠올려 봐요. ${ord[k]} 번째 장소는 어디였을까요?`,`Think of the story. Which place came ${ordEn[k]}?`))});box._all=()=>{while(k<3)put(k)}},
+   show:box=>{if(box._all)box._all()}},
+  {say:L('기억이 안 나도 괜찮아요. 영상 다시 보기를 눌러도 되고, 잘못 누르면 마지막 취소로 지울 수 있어요. 처음과 마지막 장소부터 떠올려 보세요.','Can’t remember? That’s okay. You can press Watch again, and Undo last takes back a wrong tap. Try to recall the first and last places first.'),
+   art:`<div class="dtl"><div class="dtl-row">${dtBtn(L('▶ 영상 다시 보기','▶ Watch again'))}${dtBtn(L('↩ 마지막 취소','↩ Undo last'))}</div></div>`}]}
+
+// ---- patrol: 알리바이 논리표 (the street numbers; left = smaller, next to = differ by 1, "not at" crosses out)
+function dtStreet(who=[],cls=[],btn=false){return `<div class="dtl-street">${v12Places.map((pl,j)=>{const e=pl.split(' ')[0],nm=pl.split(' ').slice(1).join(' '),inner=`<span class="n">${L(`${j+1}번`,`#${j+1}`)}</span><span class="pl">${e}</span><span class="nm">${nm}</span><span class="who">${who[j]||''}</span>`;
+  return btn?`<button type="button" class="dtl-spot ${cls[j]||''}" data-j="${j}" aria-label="${L(`${j+1}번 ${nm}`,`#${j+1} ${nm}`)}">${inner}</button>`:`<div class="dtl-spot ${cls[j]||''}">${inner}</div>`}).join('')}</div><div class="dtl-arrow"><span>⬅️ ${L('왼쪽','Left')}</span><span>${L('오른쪽','Right')} ➡️</span></div>`}
+function dtAlibiSteps(){
+ const ava=L('도윤','Ava'),notAt=[0,2,3];
+ return [
+  {say:L('거리는 왼쪽부터 학교 1번, 도서관 2번, 빵집 3번, 공원 4번이에요. 네 사람은 서로 다른 곳에 있었어요. 한 곳에 한 명씩이에요.','The street goes from left to right: the School is spot 1, the Library spot 2, the Bakery spot 3 and the Park spot 4. The four people were each in a different place, one person per spot.'),
+   art:`<div class="dtl">${dtHead('alibi')}${dtStreet()}</div>`},
+  {say:L('‘왼쪽’은 번호가 더 작은 곳이에요. 지우가 하린보다 왼쪽에 있었다면, 지우의 번호가 더 작아요. 바로 옆이 아니어도 괜찮아요.','“To the left” means a smaller spot number. If Mia was to the left of Leo, Mia’s number is smaller. They don’t have to be right next to each other.'),
+   art:`<div class="dtl">${dtStreet([L('지우','Mia'),'',L('하린','Leo'),''],['hi','','hi',''])}<p class="dtl-note">${L('지우 1번 · 하린 3번 → 1이 3보다 작아요. 지우가 왼쪽!','Mia #1 · Leo #3 → 1 is smaller than 3. Mia is on the left!')}</p></div>`},
+  {say:L('‘바로 옆’은 번호 차이가 1이에요. 2번과 3번은 바로 옆이에요. 2번과 4번은 사이에 3번이 있어서 바로 옆이 아니에요.','“Right next to” means the spot numbers differ by 1. Spots 2 and 3 are right next to each other. Spots 2 and 4 are not, because spot 3 is between them.'),
+   art:`<div class="dtl">${dtStreet(['','A','B','C'],['','ok','ok','bad'])}<p class="dtl-note">✅ ${L('A 2번 · B 3번: 바로 옆 (차이 1)','A #2 · B #3: right next to (differ by 1)')}<br>❌ ${L('A 2번 · C 4번: 바로 옆이 아니에요 (사이에 3번)','A #2 · C #4: not next to (#3 is between)')}</p></div>`},
+  {say:L('‘있지 않았어요’ 단서로 장소를 지울 수 있어요. 단서에 나온 장소를 하나씩 눌러서 지워 보세요. 남는 곳이 도윤이 있던 곳이에요.','A “was not at” clue lets you cross out a place. Tap each place the clues name to cross it out. The place that is left is where Ava was.'),try:true,
+   art:(box,api)=>{box.innerHTML=`<div class="dtl"><ol class="dtl-cl">${notAt.map(j=>`<li>${L(`${ava}은 ${v12Places[j]}에 있지 않았어요.`,`${ava} was not at the ${v12Places[j]}.`)}</li>`).join('')}</ol>${dtStreet([],[],true)}</div>`;
+    const x=new Set(),cross=j=>{const s=box.querySelector(`[data-j="${j}"]`);s.classList.add('x');x.add(j);if(x.size===3){const r=box.querySelector('[data-j="1"]');r.classList.add('ok');r.querySelector('.who').textContent=ava+' ✅';box.dataset.done=1}};
+    dtTap(box,'[data-j]',b=>{if(box.dataset.done)return;const j=+b.dataset.j;if(x.has(j))return;
+     if(j===1){api.say(L('도서관에 없었다는 단서는 없어요. 단서에 나온 곳만 지워요.','No clue says Ava was not at the Library. Only cross out the places the clues name.'));return}
+     cross(j);if(x.size===3){api.say(L('맞아요! 남은 곳은 도서관 하나예요. 도윤은 도서관에 있었어요.','Yes! Only the Library is left, so Ava was at the Library.'));api.done()}});box._all=()=>notAt.forEach(j=>{if(!x.has(j))cross(j)})},
+   show:box=>{if(box._all)box._all()}},
+  {say:L('게임에서는 단서를 하나씩 풀어서 네 사람을 모두 놓은 뒤, 단서별로 검증 버튼을 눌러요. 맞지 않는 단서에는 엑스 표시가 붙으니, 그 단서에 나온 사람을 옮겨 봐요.','In the game, work through the clues one at a time, place all four people, then press Check each clue. A clue that doesn’t fit gets a cross, so try moving the people in that clue.'),
+   art:`<div class="dtl">${dtBtn(L('🔎 단서별로 검증','🔎 Check each clue'))}<div class="dtl-checks"><p>✅ <b>${L('1번','#1')}</b> ${L('지우는 하린보다 왼쪽 장소에 있었어요.','Mia was somewhere to the left of Leo.')}</p><p class="bad">❌ <b>${L('2번','#2')}</b> ${L('하린과 민서는 바로 이웃한 장소에 있었어요.','Leo and Noah were right next to each other.')}</p></div></div>`}]}
+
+// ---- patrol: 같은 그림 찾기 (chunk by rows, say it aloud, a new card first)
+function dtMemorySteps(){
+ // cards 0–3 are the pictures of the looking pages, 4–5 the two pairs of the try
+ const POOL=[['images/buddy-puppy.webp','🐶',L('강아지','puppy')],['images/mission-cookie.webp','🍪',L('쿠키','cookie')],['images/buddy-fox.webp','🦊',L('여우','fox')],['images/mission-key.webp','🗝️',L('열쇠','key')],['images/buddy-cat.webp','🐱',L('고양이','cat')],['images/mission-robot.webp','🤖',L('로봇','robot')]];
+ const deck=shuffle([0,1,2,3,0,1,2,3]),top=deck.slice(0,4).map(k=>POOL[k][2]),first=POOL[deck[4]][2];
+ const card=(k,cls='',attr='')=>attr?`<button type="button" class="dtl-card ${cls}" ${attr}>${pic(POOL[k][0],POOL[k][1])}</button>`:`<span class="dtl-card ${cls}">${pic(POOL[k][0],POOL[k][1])}</span>`;
+ const grid=f=>`<div class="dtl-cards">${deck.map((k,i)=>card(k,f(i))).join('')}</div>`;
+ return [
+  {say:L('카드를 두 장씩 뒤집어서 같은 그림 짝을 찾아요. 처음에는 손전등으로 모든 카드를 잠깐 보여 줘요. 그때가 기억할 기회예요!','Flip two cards at a time to find matching pictures. At the start, a flashlight shows every card for a moment. That is your chance to remember!'),
+   art:`<div class="dtl">${dtHead('memory')}<p class="dtl-note">🔦 ${L('손전등으로 잠깐 비춰 줄게요!','A quick flashlight peek!')}</p>${grid(()=>'fd')}</div>`},
+  {say:L(`한꺼번에 다 외우기는 어려워요. 한 줄씩 나눠서 기억해요. 윗줄은 ${top.join(', ')}. 그다음에 아랫줄!`,`Remembering everything at once is hard, so split it up, one row at a time. Top row: ${top.join(', ')}. Then the bottom row!`),
+   art:`<div class="dtl">${grid(i=>i<4?'row':'dim')}<p class="dtl-note">${L('윗줄','Top row')}: ${top.join(', ')}</p></div>`},
+  {say:L(`본 카드는 소리 내어 말해요. ‘${v17Eun(first)} 아랫줄 첫 번째!’ 말로 하면 더 오래 기억나요.`,`Say what you see out loud: “The ${first} is in the bottom row, first card!” Saying it helps you remember longer.`),
+   art:`<div class="dtl">${grid(i=>i===4?'row':'down')}<div class="dtl-bubble">🗣️ ${L(`“${v17Eun(first)} 아랫줄 첫 번째!”`,`“${cap(first)}: bottom row, first card!”`)}</div></div>`},
+  {say:L('이제 해 봐요. 손전등이 꺼지기 전에 그림 자리를 소리 내어 말해 보고, 짝을 찾아 눌러 보세요.','Your turn. Before the flashlight goes off, say where the pictures are out loud, then tap to find the pairs.'),try:true,
+   art:(box,api)=>{const d=shuffle([4,4,5,5]);box.innerHTML=`<div class="dtl"><div class="dtl-cards four">${d.map((k,i)=>card(k,'',`data-i="${i}" aria-label="${L(`${i+1}번 카드`,`Card ${i+1}`)}"`)).join('')}</div><p class="dtl-note dtl-peek">🔦 ${L('잘 봐 두세요!','Watch closely!')}</p></div>`;
+    const bs=[...box.querySelectorAll('[data-i]')],m=new Set();let open=[],lock=true;
+    dtLater(()=>{bs.forEach(b=>{if(!m.has(+b.dataset.i))b.classList.add('down')});lock=false;const p=box.querySelector('.dtl-peek');if(p)p.textContent='🃏 '+L('두 장씩 뒤집어요!','Flip two at a time!')},3500);
+    const win=()=>{bs.forEach((b,i)=>{m.add(i);b.classList.remove('down');b.classList.add('m')});lock=true;box.dataset.done=1};
+    dtTap(box,'[data-i]',b=>{const i=+b.dataset.i;if(lock||m.has(i)||open.includes(i))return;b.classList.remove('down');open.push(i);if(open.length<2)return;
+     const [a,c]=open;open=[];if(d[a]===d[c]){m.add(a);m.add(c);bs[a].classList.add('m');bs[c].classList.add('m');if(m.size===4){box.dataset.done=1;api.say(L('짝을 모두 찾았어요! 정말 잘 기억했어요.','You found both pairs! Great remembering.'));api.done()}}
+     else{lock=true;api.say(L('괜찮아요! 어디에 무엇이 있었는지 말해 보며 다시 해 봐요.','That’s okay! Say where each picture was, then try again.'));dtLater(()=>{bs[a].classList.add('down');bs[c].classList.add('down');lock=false},900)}});box._win=win},
+   show:box=>{if(box._win)box._win()}},
+  {say:L('새 카드를 먼저 한 장 뒤집어요. 그 짝을 본 적이 있으면 그 자리로 가요! 본 적이 없으면 다른 새 카드를 뒤집어서 더 알아 둬요.','Flip a new card first. If you have seen its partner, go to that spot! If not, flip another new card to learn more.'),
+   art:`<div class="dtl"><div class="dtl-flow"><span class="dtl-chip">🃏 ${L('새 카드 한 장','A new card')}</span><span>⬇️</span><span class="dtl-chip key">🤔 ${L('짝을 본 적 있나요?','Seen its partner?')}</span><div class="dtl-row"><span class="dtl-chip good">✅ ${L('네: 그 자리로!','Yes: go to that spot!')}</span><span class="dtl-chip">🔍 ${L('아니요: 다른 새 카드','No: another new card')}</span></div></div></div>`}]}
+
+// ---- the list of lessons: the notebook shows them in this order (group 0 사건 해결, group 1 순찰 미니게임)
+const dtPk=id=>patrolKinds.find(m=>m.id===id);
+const DT_LES=[
+ {id:'dt:case',g:0,icon:'🔎',title:L('사건을 해결하는 법','How to solve a case'),steps:dtCaseSteps,cta:L('좋아요, 수사 시작!','Got it, let’s investigate!'),
+  key:[['단서를 모두 듣고, 맞지 않는 사람을 하나씩 지워요.','Hear every clue, then rule out anyone who doesn’t match, one clue at a time.'],['모든 단서와 맞는 사람은 딱 한 명, 그 사람이 범인이에요.','Only one person matches every clue: that’s the thief.'],['질문하고, 확대하고, 확실할 때 체포해요.','Ask, zoom in, and arrest only when you’re sure.']]},
+ {id:'dt:listen',g:0,icon:'👂',title:L('귀 기울여 듣기','Careful listening'),steps:dtListenSteps,
+  key:[['색깔과 물건은 짝으로 들어요. ‘파란 모자’는 모자가 파란색.','Hear color + thing as a pair: “blue hat” means the hat is blue.'],['‘않았어요’, ‘없어요’는 뜻을 뒤집어요. 끝까지 들어요.','“Not” and “no” flip the meaning, so listen for them.'],['‘바로 옆’, ‘왼쪽’ 같은 자리 낱말도 듣고, 놓치면 다시 들어요.','Catch place words like “next to” and “left”. Missed one? Listen again.']]},
+ ...['medium','hard','expert'].map(d=>({id:'dt:level:'+d,g:0,icon:DT_LV[d].icon,title:L(`${DT_LV[d].name} 난이도 사건`,`${DT_LV[d].name} cases`),steps:()=>dtLevelSteps(d),
+  key:[...DT_LV[d].k3,['단서 하나씩, 맞지 않는 사람을 수사 노트로 지워요.','One clue at a time, rule people out with the Notebook.'],['작은 단서는 돋보기로 확대해서 확인해요.','Zoom in with the magnifier to check small clues.']]})),
+ {id:'dt:p:footprints',g:1,title:L('발자국 비교하기','Comparing footprints'),steps:dtFootSteps,
+  key:[['무늬와 뒤꿈치, 두 가지가 모두 같아야 진짜예요.','It’s real only if both match: the pattern and the heel.'],['하나만 같으면 가짜! 가짜 버튼으로 걸러내요.','Only one matches? It’s a fake: reject it.'],['문에는 기록에 적힌 글자 순서대로 숫자를 넣어요.','At the door, enter the numbers in the letter order shown.']]},
+ {id:'dt:p:witness',g:1,title:L('증언 비교하기','Comparing statements'),steps:dtWitnessSteps,
+  key:[['용의자마다 증언 몇 개와 맞는지 세어 봐요.','Count how many statements each suspect matches.'],['증언 세 개와 맞는 사람이 범인이에요.','The one who matches three statements is the thief.'],['범인과 안 맞는 증언 하나가 틀린 증언이에요.','The statement that doesn’t fit the thief is the wrong one.']]},
+ {id:'dt:p:cipher',g:1,title:L('금고 신호 읽기','Reading the safe’s signals'),steps:dtCipherSteps,
+  key:[['초록은 숫자와 자리가 모두 맞은 개수, 노랑은 숫자만 맞은 개수예요.','Green counts right digits in the right spot; yellow counts right digits in the wrong spot.'],['신호가 하나도 없으면 그 숫자들은 비밀번호에 없어요.','No signal at all? None of those digits is in the code.'],['한 번에 조금씩 바꾸며 기록을 비교해요.','Change a little at a time and compare your tries.']]},
+ {id:'dt:p:lost',g:1,title:L('세 가지 특징 맞추기','Matching three details'),steps:dtLostSteps,
+  key:[['종류, 색깔, 표시 세 가지가 모두 맞아야 해요.','All three must match: the item, its color and its mark.'],['색깔 먼저, 그다음 종류, 마지막에 표시로 좁혀요.','Narrow it down: color first, then the item, then the mark.']]},
+ {id:'dt:p:cctv',g:1,title:L('순서 기억하기','Remembering the order'),steps:dtCctvSteps,
+  key:[['보면서 장소 이름을 차례대로 작게 말해요.','Say the places quietly, in order, as you watch.'],['장소들을 짧은 이야기로 이어요.','Link the places into a short story.'],['처음과 마지막을 먼저 떠올리고, 필요하면 다시 봐요.','Recall the first and last places first; watch again if you need to.']]},
+ {id:'dt:p:alibi',g:1,title:L('자리 단서 읽기','Reading place clues'),steps:dtAlibiSteps,
+  // the three LR_ALIBI_TIP ideas (direction, next to, not at), worded to be read aloud (no "~" or "#")
+  key:[LR_ALIBI_TIP.direction,[LR_ALIBI_TIP['next-to'][0],'“Right next to” means the spot numbers differ by 1; spots 2 and 4 are not.'],['‘있지 않았어요’ 단서로 장소를 하나씩 지우면, 남는 곳이 답이에요.',LR_ALIBI_TIP['not-at'][1]]]},
+ {id:'dt:p:memory',g:1,title:L('기억하는 요령','Tricks for remembering'),steps:dtMemorySteps,
+  key:[['한 줄씩 나눠서 기억해요.','Remember one row at a time.'],['그림과 자리를 소리 내어 말해요.','Say each picture and its spot out loud.'],['새 카드를 먼저 뒤집고, 짝을 봤다면 그 자리로!','Flip a new card first; if you saw its partner, go there!']]}];
+// a patrol lesson's title names its station, and the station picture is its icon
+DT_LES.forEach(m=>{const k=m.id.startsWith('dt:p:')&&dtPk(m.id.slice(5));if(k){m.icon=pic(k.img,k.icon);m.title=k.label+' · '+m.title}});
+function dtLesson(id){const m=DT_LES.find(x=>x.id===id);if(!m)return null;return {id:m.id,icon:m.icon,title:m.title,who:dtWho(),key:m.key,cta:m.cta,steps:m.steps()}}
+// before the first case, the first case of a harder level, and (from the second case) careful listening: one per case start
+function dtCaseGate(){if(view!=='play'||solved||traveling||MiniLesson.on)return;
+ const ids=['dt:case',...(difficulty!=='easy'?['dt:level:'+difficulty]:[]),...(state.caught>=1?['dt:listen']:[])],id=ids.find(x=>!MiniLesson.seen(x));
+ if(id){stopSpeaking();MiniLesson.before(dtLesson(id),()=>{})}}
+function dtListenGate(){if(MiniLesson.seen('dt:listen')){speak();return}stopSpeaking();MiniLesson.before(dtLesson('dt:listen'),speak)}
+function patrolStartMini(id){if(MiniLesson.seen('dt:p:'+id)||!dtPk(id)){patrolRunMini(id);return}stopSpeaking();MiniLesson.before(dtLesson('dt:p:'+id),()=>patrolRunMini(id))}
+function dtOpenBook(at){stopSpeaking();const item=m=>({id:m.id,icon:m.icon,title:m.title,key:m.key,lesson:()=>dtLesson(m.id)});
+ MiniLesson.book({title:['탐정 개념 노트','Detective concept notebook'],open:at,groups:[{name:['🔎 사건 해결','🔎 Solving cases'],items:DT_LES.filter(m=>m.g===0).map(item)},{name:['🚶 순찰 미니게임','🚶 Patrol mini-games'],items:DT_LES.filter(m=>m.g===1).map(item)}]})}
+// "see the idea again" after a miss: a small chip at the end of the feedback line
+const dtAgain=(el,id)=>{if(el&&id&&DT_LES.some(m=>m.id===id))el.insertAdjacentHTML('beforeend',` <button type="button" class="mlx-chip dtl-again" data-dtl="${id}">📖 ${L('개념 다시 보기','See the idea again')}</button>`)};
+document.addEventListener('click',e=>{const b=e.target.closest('[data-dtl]');if(!b)return;stopSpeaking();const ls=dtLesson(b.dataset.dtl);if(ls)MiniLesson.open(ls)});
+$('dtBookCase').addEventListener('click',()=>dtOpenBook(0));$('dtBookPatrol').addEventListener('click',()=>dtOpenBook(1));
 // For browser verification without exposing internal state to the player.
 window.__patrolTest={get:()=>({region:patrolRegion,x:patrolX,y:patrolY,tier:patrolTier(),mistakes:patrolMistakes,record:JSON.parse(JSON.stringify(patrolStore())),coins:state.coins,level:state.level,view,game:v12Game}),enter:patrolEnter,move:patrolWalkTo,open:patrolStartMini,close:patrolCloseMini,missions:patrolKinds,complete:v12Finish,mazeMove:v12MazeMove,mazeDir:v13MazeDir,mazeJudge:v13MazeJudge,mazeUnlock:v13MazeUnlock,makeMaze:v12MakeMaze,mazeHint:v12MazeHint,mazeAuto:v14MazeAuto,makeAlibi:v12MakeAlibi};
 window.__gameTest={get:()=>({mapStep:state.mapStep,season:state.season,traveling,difficulty,clueKeys,suspects,culprit,caseNo,state:JSON.parse(JSON.stringify(state)),matches:suspects.filter(p=>clueKeys.every(k=>p[k]===suspects[culprit][k])).length,askedWitness,excluded:[...excluded],view}),newCase:makeCase,askWitness,toggleExclude,switchView,arrest,buy:buyItem,use:useItem,avatar,shopCatalog,stop:stopVoiceClick,voices:()=>langVoices,renderMap,beginRegion,driveToNext,joinNext:next,openGift,claimSecret,renderStickerAlbum,getV8:()=>({buddy:state.buddy,sceneStickers:state.sceneStickers,secretStars:state.secretStars,giftClaims:state.giftClaims,didZoom,askedWitness}),getV9:()=>({detectiveName:detectiveName(),historyCount:state.history.length}),setName:(name)=>{$('detectiveNameInput').value=name;saveDetectiveName()},clearHistory:clearCaseHistory,resetProgress:resetAllProgress};

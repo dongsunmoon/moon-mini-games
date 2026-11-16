@@ -269,6 +269,20 @@ code{font-family:var(--mono);background:#eef6f3;border-radius:6px;padding:1px 5p
 .py.small .pyhat{font-size:21px;top:-10px}.py.big .pyhat{font-size:44px;top:-22px}.py .pyhat{font-size:24px}.py.mini .pyhat{font-size:18px}
 .py .pyacc{position:absolute;left:50%;top:22%;transform:translateX(-50%);font-style:normal;font-size:24px;line-height:1}.py .pyacc.a-scarf{top:58%}.py .pyacc.a-star{top:62%;left:72%;font-size:16px}
 .py.small .pyacc{font-size:20px}.py.big .pyacc{font-size:44px}.py.big .pyacc.a-star{font-size:28px}
+/* painted hats and extras: sized in % of Py's box, placed from where each pose's head (--hx centre, --ey eye line) is */
+.py.pic{isolation:isolate;--hx:43%;--ey:26%}.py.pic.m-think{--hx:48%}.py.pic.m-oops{--hx:48%;--ey:30%}.py.pic.m-wow{--ey:22%}
+.py .pyhat.im,.py .pyacc.im{font-size:0;line-height:0;width:var(--w,48%);left:calc(var(--hx) + var(--dx,0%));top:var(--y);transform:translateX(-50%) rotate(var(--r,0deg));pointer-events:none}
+.py .pyhat.im img,.py .pyacc.im img{display:block;width:100%;height:auto}
+.py .pyhat.im{--y:-26%;--r:-8deg}
+.py .pyhat.h-cap{--w:56%;--y:-21%}.py .pyhat.h-helmet{--w:56%;--y:-31%;--r:-4deg}.py .pyhat.h-straw{--w:60%;--y:-32%;--r:-6deg}.py .pyhat.h-cowboy{--w:60%;--y:-31%;--r:-6deg}
+.py .pyhat.h-crown{--w:42%;--y:-21%}.py .pyhat.h-grad{--w:52%;--y:-24%}.py .pyhat.h-chef{--w:46%;--y:-31%}.py .pyhat.h-tophat{--w:44%;--y:-30%}
+.py .pyhat.h-party{--w:38%;--y:-30%;--dx:2%;--r:8deg}.py .pyhat.h-wizard{--w:50%;--y:-38%;--r:-10deg}
+.py .pyhat.h-bow{--w:38%;--y:-9%;--dx:17%;--r:14deg}.py .pyhat.h-flower{--w:30%;--y:-6%;--dx:19%;--r:10deg}.py .pyhat.h-clover{--w:28%;--y:-6%;--dx:19%;--r:12deg}
+.py .pyacc.a-glasses{--w:46%;--y:calc(var(--ey) - 19%)}.py .pyacc.a-shades{--w:46%;--y:calc(var(--ey) - 21%)}
+.py .pyacc.a-scarf{--w:38%;--y:46%;--dx:3%}.py .pyacc.a-star{--w:22%;--y:62%;left:72%}
+.py .pyacc.a-headphones{--w:82%;--y:-16%;z-index:-1}.py .pyacc.a-butterfly{--w:28%;--y:-6%;--dx:22%;--r:16deg}
+.py .pyacc.a-backpack{--w:32%;--y:36%;left:16%;--r:-10deg;z-index:-1}.py .pyacc.a-medal{--w:28%;--y:46%;--dx:3%}
+.py .pyacc.a-balloon{--w:34%;--y:-4%;left:86%;--r:6deg}
 .py.m-happy svg{animation:bob 2.6s ease-in-out infinite}
 @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
 .pyline{display:flex;align-items:flex-end;gap:8px;margin:6px 0;text-align:left}
@@ -491,6 +505,9 @@ body:not(.playing):not(.staged) #coachDock{bottom:calc(var(--nav) + 10px + env(s
 .dish{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;min-width:70px;padding-bottom:10px}
 .dish .lay{font-style:normal;font-size:34px;line-height:.62;display:block;filter:drop-shadow(0 2px 0 rgba(0,0,0,.15))}
 .dish .lay.drop{animation:dropin .35s cubic-bezier(.3,1.6,.6,1)}
+/* a painted layer takes its own thickness in the stack (--t, in widths) and centres its slice there (--c), so the slices overlap like one burger; upper ones in front */
+.dish{isolation:isolate}.dish .lay.im{position:relative;z-index:var(--i);width:1.9em;height:calc(var(--t) * 1.9em);line-height:0;filter:drop-shadow(0 2px 0 rgba(0,0,0,.1))}
+.dish .lay.im img{position:absolute;left:0;width:100%;top:calc((var(--t) / 2 - var(--c)) * 1.9em);pointer-events:none}
 .dish .plate{position:absolute;bottom:0;width:78px;height:12px;border-radius:50%;background:radial-gradient(ellipse,#fff 55%,#d9dee8 56%,#fff 70%);box-shadow:0 3px 0 #c8cfdb}
 .dish.mini .lay{font-size:20px}.dish.mini{min-width:44px;padding-bottom:7px}.dish.mini .plate{width:46px;height:8px}
 .dish.want{opacity:.55}.dish.want.next{opacity:1;outline:3px dashed #ffb020;outline-offset:4px;border-radius:10px}.dish.want.done{opacity:.35;filter:grayscale(1)}
@@ -538,7 +555,7 @@ button.vm{border:0;background:none;padding:0;display:flex;flex-direction:column;
 .vplace.s-locked .vic{filter:grayscale(1);opacity:.55}
 .vplace.here .vic{box-shadow:0 0 0 4px #ff9b3d,0 6px 16px rgba(0,0,0,.25)}
 .vm .vic{position:relative}.vm .bugs,.vm .flag,.vm .lk,.vm .ok{position:absolute;top:-6px;right:-8px;font-style:normal;font-size:12px;font-weight:900;background:#fff;border-radius:10px;padding:1px 6px;box-shadow:0 2px 6px rgba(0,0,0,.2)}
-.vm .rideon{position:absolute;left:-10px;bottom:-6px;font-style:normal;font-size:22px;animation:bob 2s ease-in-out infinite}.glitchnote.fixed{background:#fff6d6}
+.vm .rideon{position:absolute;left:-10px;bottom:-6px;font-style:normal;font-size:22px;animation:bob 2s ease-in-out infinite}.vm .vic .rideon img{width:32px;height:32px;object-fit:contain;border-radius:0;display:block;filter:drop-shadow(0 2px 2px rgba(0,0,0,.25))}.glitchnote.fixed{background:#fff6d6}
 .vm .bugs{background:#5b3fb8;color:#fff}.vm .flag{background:#ff4f6d;color:#fff;animation:pulse 1.4s infinite;top:-10px;font-size:14px}.vm .lk{background:none;box-shadow:none;font-size:16px}.vm .ok{background:none;box-shadow:none;font-size:18px}
 @keyframes glitch{0%,90%,100%{transform:none}92%{transform:translate(2px,-1px) skewX(4deg)}94%{transform:translate(-2px,1px)}96%{transform:translate(1px,0) skewX(-3deg)}}
 @keyframes spark{50%{opacity:.2}}
@@ -587,7 +604,7 @@ button.vm{border:0;background:none;padding:0;display:flex;flex-direction:column;
 .cl.cur .lcap{background:#ffe7a3;color:#7a5200}.cl.err .lcap{display:none}
 .tile,.ocard{display:inline-flex;flex-direction:column;align-items:flex-start;gap:2px}.ocard{align-items:stretch}
 .tcap{font-family:system-ui,-apple-system,'Apple SD Gothic Neo',sans-serif;font-size:12.5px;font-weight:800;color:#5d6f8c;white-space:normal;line-height:1.25}
-.ridecard.pic{padding:8px 8px 12px}.ridecard .rimg{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:14px;margin-bottom:4px;box-shadow:0 3px 8px rgba(0,0,0,.12)}
+.ridecard.pic{padding:8px 8px 12px}.ridecard .rimg{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:14px;margin-bottom:4px;box-shadow:0 3px 8px rgba(0,0,0,.12)}.ridecard.wide .rimg{max-width:480px}
 /* ---------------------------------------------------------------- mini lessons: the pictures inside Coach Moon's lessons (MiniLesson) */
 .vrow{margin-top:10px}.vrow .btn{flex:1 1 40%}
 .mlp{width:100%;display:grid;grid-template-columns:minmax(0,1fr);gap:8px;text-align:left}
@@ -783,9 +800,9 @@ button.vm{border:0;background:none;padding:0;display:flex;flex-direction:column;
 .dv-box .tag{font-size:22px;margin-bottom:2px}
 .dv-box.open .gem{opacity:1;transform:translateY(-40px) scale(1.25)}
 .dv-box.right .chest,.dv-door.right span{filter:drop-shadow(0 0 10px #7ff0a0) drop-shadow(0 0 4px #3fbf62)}
-.dv-door{min-width:110px}.dv-door b{background:#fff;border-radius:12px;padding:4px 14px;font:900 18px ui-monospace,Menlo,monospace;margin-bottom:4px;box-shadow:0 3px 0 #b5c7d8}.dv-door span{font-size:56px;line-height:1}
+.dv-door{min-width:110px}.dv-door b{background:#fff;border-radius:12px;padding:4px 14px;font:900 18px ui-monospace,Menlo,monospace;margin-bottom:4px;box-shadow:0 3px 0 #b5c7d8}.dv-door span{font-size:56px;line-height:1}.dv-door .door.pgi{width:auto;height:80px;margin:0 auto}
 .dv-crab{position:absolute;z-index:5;left:10px;bottom:-120px;display:flex;align-items:flex-end;gap:6px;font-size:40px;transition:bottom .35s;max-width:calc(100% - 20px)}
-.dv-crab span{font-size:14px;font-weight:700;background:#fff;border-radius:14px 14px 14px 4px;padding:8px 10px;margin-bottom:24px;box-shadow:0 4px 10px rgba(0,0,0,.2)}
+.dv-crab .say{font-size:14px;font-weight:700;background:#fff;border-radius:14px 14px 14px 4px;padding:8px 10px;margin-bottom:24px;box-shadow:0 4px 10px rgba(0,0,0,.2)}.dv-crab .crab.pgi{width:60px;height:60px;flex:none}
 .dv-crab.show{bottom:46%}
 .dv-sea .qn{position:absolute;right:10px;top:8px;font-weight:900;color:#fff;background:#0b5f5a99;border-radius:10px;padding:2px 8px}
 @media (min-width:860px){.dv-box .chest{width:76px;height:64px}}
@@ -805,6 +822,7 @@ button.vm{border:0;background:none;padding:0;display:flex;flex-direction:column;
 .bb-ride{position:absolute;left:50%;top:44%;transform:translate(-50%,-50%);font-size:clamp(90px,15vh,150px);opacity:.38;line-height:1;pointer-events:none}
 .bb-ride.glitch{filter:grayscale(1) contrast(.9);animation:bbGlitch 1.6s steps(2) infinite}
 .bb-ride.fixed{opacity:.75;filter:none;animation:bbSpin 3.5s ease-in-out infinite}
+.bb-ride img{display:block;width:1.5em;height:1.5em;object-fit:contain}
 @keyframes bbGlitch{0%,100%{transform:translate(-50%,-50%)}20%{transform:translate(-52%,-49%) skewX(6deg)}40%{transform:translate(-49%,-51%)}60%{transform:translate(-51%,-50%) skewX(-5deg)}}
 @keyframes bbSpin{0%,100%{transform:translate(-50%,-50%) rotate(-6deg) scale(1)}50%{transform:translate(-50%,-52%) rotate(6deg) scale(1.06)}}
 .bb-boss{position:absolute;right:7%;top:6%;display:flex;flex-direction:column;align-items:center;gap:4px}
@@ -913,7 +931,8 @@ body.inshop{overflow:hidden;--coach-top:142px}body.inshop main{padding:0;width:1
 .rbm{border:2px solid #e3e8f2;background:#fff;border-radius:18px;padding:8px 6px;display:flex;flex-direction:column;align-items:center;gap:2px;font:inherit;color:var(--ink);cursor:pointer;min-height:118px}
 button.rbm:hover{border-color:#ffb020}.rbm b{font-size:14px;line-height:1.25}.rbm small{font-size:12px;font-weight:800;color:var(--muted)}
 .rbm.lock{background:#f5f6fa}.rbm.lock .dish{filter:grayscale(.6);opacity:.7}.rbm.smart{border-color:#c9b8ff;background:#f7f3ff}.rbm.cur{border-color:#33c46b;background:#effff4}
-.rbm .dish{display:flex;flex-direction:column;align-items:center;font-size:20px;line-height:.62;padding:8px 0 4px;min-height:44px;justify-content:flex-end}.rbm .dish i{font-style:normal}
+.rbm .dish{display:flex;flex-direction:column;align-items:center;font-size:20px;line-height:.62;padding:8px 0 4px;min-height:44px;justify-content:flex-end}.rbm .dish i{font-style:normal}.rbm .dish .lay{font-size:22px}
+.rb-hold .rb-bimg{width:24px;height:24px;object-fit:contain;display:inline-block;vertical-align:middle}
 .rbbs{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;margin-top:8px}
 .rbb{border:2px solid #e3e8f2;background:#fff;border-radius:16px;padding:8px;display:flex;flex-direction:column;align-items:center;gap:2px;font:inherit;color:var(--ink);cursor:pointer;min-height:96px}
 .rbb span{font-size:28px}.rbb b{font-size:14px}.rbb small{font-size:12.5px;font-weight:900;color:#1f9a4f}.rbb.lock small,.rbb.max small{color:var(--muted)}.rbb:disabled{cursor:default;opacity:.75}.rbb:not(:disabled):hover{border-color:#33c46b}
@@ -3279,10 +3298,14 @@ const WORLD_PRIZE={4:['acc','star'],8:['hat','chef'],12:['hat','grad'],11:['colo
 // The wardrobe colours then become a hue filter on the picture.
 const PY_HAVE=new Set(['hi','wow','think','oops']),PY_POSE={happy:'hi',wow:'wow',think:'think',oops:'oops'};
 const PY_TINT={leaf:'',sky:'hue-rotate(130deg) saturate(1.15)',berry:'hue-rotate(255deg) saturate(1.1)',grape:'hue-rotate(200deg) saturate(1.05)',sun:'hue-rotate(-25deg) saturate(1.2) brightness(1.05)',mint:'hue-rotate(90deg)',coral:'hue-rotate(-60deg) saturate(1.25)',night:'hue-rotate(160deg) brightness(.82) saturate(1.2)',rainbow:'',gold:'sepia(1) saturate(2.5) hue-rotate(-12deg) brightness(1.05)'};
+// hats and extras painted on their own (images/py-hat-<id>.webp, py-acc-<id>.webp): placed per kind on the 3D Py by the CSS
+// (.pyhat.im / .pyacc.im); the emoji comes back if a picture fails to load
+const WEAR_IMG={hat:new Set(['cap','bow','flower','party','tophat','crown','grad','chef','straw','helmet','clover','cowboy','wizard']),acc:new Set(['glasses','shades','scarf','star','headphones','butterfly','backpack','medal','balloon'])};
+const wearPic=(kind,id,e)=>WEAR_IMG[kind].has(id)?`<img src="images/py-${kind}-${id}.webp" alt="" draggable="false" onerror="this.parentNode.classList.remove('im');this.replaceWith('${e}')">`:e;
 let pyN=0;
 function pySVG(mood='happy',o={}){const pose=PY_POSE[mood]||'hi';
- if(PY_HAVE.has(pose)){const col=o.color||S.wear.color,hat=HATS[o.hat??S.wear.hat]||HATS[''],acc=ACCS[o.acc??S.wear.acc]||ACCS[''];
-  return `<span class="py pic ${o.cls||''} m-${mood}">${hat[0]?`<i class="pyhat">${hat[0]}</i>`:''}<img src="images/py-${pose}.webp" alt="" draggable="false" class="${col==='rainbow'?'rainbow':''}" style="filter:${PY_TINT[col]||'none'}">${acc[0]?`<i class="pyacc a-${o.acc??S.wear.acc}">${acc[0]}</i>`:''}</span>`}
+ if(PY_HAVE.has(pose)){const col=o.color||S.wear.color,hid=o.hat??S.wear.hat,aid=o.acc??S.wear.acc,hat=HATS[hid]||HATS[''],acc=ACCS[aid]||ACCS[''];
+  return `<span class="py pic ${o.cls||''} m-${mood}">${hat[0]?`<i class="pyhat ${WEAR_IMG.hat.has(hid)?'im':''} h-${hid}">${wearPic('hat',hid,hat[0])}</i>`:''}<img src="images/py-${pose}.webp" alt="" draggable="false" class="${col==='rainbow'?'rainbow':''}" style="filter:${PY_TINT[col]||'none'}">${acc[0]?`<i class="pyacc ${WEAR_IMG.acc.has(aid)?'im':''} a-${aid}">${wearPic('acc',aid,acc[0])}</i>`:''}</span>`}
 const c=COLORS[o.color||S.wear.color]||COLORS.leaf,id=++pyN,[dark,light]=[c[1],c[2]],main=c[0].replace(/url\(#(\w+)\)/,`url(#$1${id})`);
  const eyes=mood==='think'?`<circle cx="41" cy="33" r="4" fill="#1f2b55"/><circle cx="59" cy="33" r="4" fill="#1f2b55"/><circle cx="42" cy="31.5" r="1.4" fill="#fff"/><circle cx="60" cy="31.5" r="1.4" fill="#fff"/>`
   :mood==='oops'?`<path d="M36 34 l9 -2 M64 34 l-9 -2" stroke="#1f2b55" stroke-width="3" stroke-linecap="round"/><path d="M70 22 q3 6 0 9 q-3 -3 0 -9z" fill="#7cc8ff"/>`
@@ -3593,7 +3616,14 @@ function TypeEditor(host,code,o={}){
 
 // ---------------------------------------------------------------- the restaurant kitchen: the customer, their order card, and the burger stacking up on the plate
 const villagerPic=(who,cls='')=>who&&who[0]==='robot'?`<img class="vill ${cls}" src="${robotSrc(who[3]||0)}" alt="" draggable="false">`:who&&who[0]==='coach'?`<img class="vill cimg ${cls}" src="images/coach-moon-idea.webp" alt="" draggable="false">`:who?`<img class="vill ${cls}" src="images/aq-me-${who[0]}.webp" alt="" draggable="false" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'vill em',textContent:'🐾'}))">`:'';
-const dishHTML=(d,cls='')=>`<div class="dish ${cls}">${d.slice().reverse().map((k,i)=>`<i class="lay l-${k}" style="--i:${d.length-1-i}">${STAGE.FOOD[k][0]}</i>`).join('')}<b class="plate"></b></div>`;
+// painted burger layers (images/rb-layer-<name>.webp: side-view slices, all the same width). A bun at the bottom is the
+// bottom bun, any other bun the top bun. Each picture gets [thickness, centre of the slice from the picture's top] in
+// widths, so the slices overlap like one burger; a layer without a picture, or one that fails to load, stays an emoji.
+const LAYER_FIT={'bun-bottom':[.19,.346],'bun-top':[.44,.32],patty:[.3,.332],cheese:[.16,.354],lettuce:[.15,.338],tomato:[.27,.363],egg:[.27,.328],onion:[.16,.324],pickle:[.13,.338],fish:[.19,.326]};
+const layerName=(k,i)=>k==='bun'?(i?'bun-top':'bun-bottom'):k;
+const layerHTML=(k,i)=>{const n=layerName(k,i),f=LAYER_FIT[n],e=STAGE.FOOD[k]?STAGE.FOOD[k][0]:'❓';
+ return f?`<i class="lay im l-${k}" style="--i:${i};--t:${f[0]};--c:${f[1]}"><img src="images/rb-layer-${n}.webp" alt="" draggable="false" onerror="this.parentNode.classList.remove('im');this.replaceWith('${e}')"></i>`:`<i class="lay l-${k}" style="--i:${i}">${e}</i>`};
+const dishHTML=(d,cls='')=>`<div class="dish ${cls}">${d.slice().reverse().map((k,i)=>layerHTML(k,d.length-1-i)).join('')}<b class="plate"></b></div>`;
 function KitchenView(host,m){const want=MISSION.ref(m).stage.result();let plate=[],served=0;
  function render(){host.innerHTML=`<div class="kitchen"><div class="kcust">${villagerPic(m.who)}<div class="kname">${esc(L(m.who[1],m.who[2]))}</div><div class="kwant"><small>${L('주문','Order')}</small><div class="kdishes">${want.served.map((d,i)=>dishHTML(d,'mini want'+(i===0?' next':''))).join('')}${want.charged.length?`<span class="kcash">🪙 ?</span>`:''}</div></div></div>
   <div class="kcounter"><div class="kplate" id="kPlate">${dishHTML([])}</div><div class="kserved" id="kServed"></div><div class="kreg" id="kReg">🧾</div></div></div>`}
@@ -3687,8 +3717,9 @@ const out=code=>{const r=PY.run(code,{maxTrace:1,vars:false});return r.err||r.ne
 const fails=code=>{const r=PY.run(code,{maxTrace:1,vars:false});return !!(r.err||r.need)};
 const FRUIT=['🍎','🍌','🍇','🍓','🍒','🍑','🍉','🍋'],PETS=['🐶','🐱','🐰','🐻','🐼','🐸','🦊','🐯'],GEMS=['💎','🐚','👑','⭐','🪙','🔮','🧸','🎁'];
 // optional pictures (emoji/canvas until they are in images/)
-const GAME_IMG=new Set(['pg-chest','pg-diver','pg-rocket','pg-fisher','pg-bucket','pg-fish-bg','pg-fish-pier','pg-fish-bobber','pg-fish-book','pg-fish-rod']);
-const img=(k,fb,cls='')=>GAME_IMG.has(k)?`<img class="pgi ${cls}" src="images/${k}.webp" alt="" draggable="false">`:`<span class="pge ${cls}">${fb}</span>`;
+const GAME_IMG=new Set(['pg-chest','pg-locker','pg-diver','pg-crab','pg-door','pg-rocket','pg-racer','pg-fisher','pg-bucket','pg-fish-bg','pg-fish-pier','pg-fish-bobber','pg-fish-book','pg-fish-rod']);
+// a picture that turns back into its emoji if it fails to load
+const img=(k,fb,cls='')=>GAME_IMG.has(k)?`<img class="pgi ${cls}" src="images/${k}.webp" alt="" draggable="false" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'pge ${cls}',textContent:'${fb}'}))">`:`<span class="pge ${cls}">${fb}</span>`;
 
 // ---------------------------------------------------------------- questions whose answer is one short value (kart)
 // gen(lv) → {show, code, wrong:[…mix-ups]} ; the answer is whatever the code really prints
@@ -4179,7 +4210,7 @@ function raceGame(){const play=shell(LIST[1].name,'🏎️','race'),lv=level(),k
  listen(window,'resize',()=>{size();draw();showQ()});
  G.test={answer:ok=>{const g=st.gate;if(!g)return;const ls=lanesOf(g),k=g.q.opts.indexOf(g.q.ans);st.lane=ok?ls[k]:ls[(k+1)%ls.length];markLane();st.d=Math.max(st.d,g.d-5)},state:()=>({gi:st.gi,gates,d:st.d,bug:st.bug,over:st.over,q:st.gate&&st.gate.q})};
  size();showQ();st.x=laneX(1);draw();
- howTo('🏎️',LIST[1].name,['위 표지판의 코드 값을 생각해요.|Work out the value on the sign.','◀ ▶ 를 눌러서 그 값이 있는 길로 가요!|Tap ◀ ▶ to steer into the lane with that value!','맞히면 부스터! 버그 레이서보다 먼저 들어와요.|Right answers boost you past the bug racer!'],
+ howTo(img('pg-racer','🏎️','pg-hero'),LIST[1].name,['위 표지판의 코드 값을 생각해요.|Work out the value on the sign.','◀ ▶ 를 눌러서 그 값이 있는 길로 가요!|Tap ◀ ▶ to steer into the lane with that value!','맞히면 부스터! 버그 레이서보다 먼저 들어와요.|Right answers boost you past the bug racer!'],
   '표지판을 먼저 읽고 미리 길을 바꿔 두면 여유로워요. 서두르지 않아도 돼요!|Read the sign first and switch lanes early. No need to rush!',()=>frames(tick))}
 function roundRect(c,x,y,w,h,r){c.beginPath();c.moveTo(x+r,y);c.arcTo(x+w,y,x+w,y+h,r);c.arcTo(x+w,y+h,x,y+h,r);c.arcTo(x,y+h,x,y,r);c.arcTo(x,y,x+w,y,r);c.closePath()}
 
@@ -4221,7 +4252,7 @@ function shootGame(){const play=shell(LIST[2].name,'🚀','shoot'),lv=level(),sh
 // ================================================================ 🤿 Treasure Dive Pool — a list of chests: swim to the one the code points at
 function diveGame(){const play=shell(LIST[3].name,'🤿','dive'),lv=level(),suit=gear('suit'),total=8,airMax=[26,22,18,15,13,11][lv-1]+suit*4;
  let q=null,qn=0,air=airMax,busy=false,W=0,H=0;
- play.innerHTML=`<div class="dv-card"><div class="dv-code"></div><b class="dv-ask"></b><div class="dv-air"><i></i><span>🫧</span></div></div><div class="dv-sea"><div class="dv-boat">⛵</div><div class="dv-diver">${img('pg-diver','🐍','diver')}<i class="mask">🤿</i></div><div class="dv-floor"></div><div class="dv-crab">🦀<span></span></div><span class="qn"></span></div>`;
+ play.innerHTML=`<div class="dv-card"><div class="dv-code"></div><b class="dv-ask"></b><div class="dv-air"><i></i><span>🫧</span></div></div><div class="dv-sea"><div class="dv-boat">⛵</div><div class="dv-diver">${img('pg-diver','🐍','diver')}<i class="mask">🤿</i></div><div class="dv-floor"></div><div class="dv-crab">${img('pg-crab','🦀','crab')}<span class="say"></span></div><span class="qn"></span></div>`;
  const sea=play.querySelector('.dv-sea'),floor=play.querySelector('.dv-floor'),diver=play.querySelector('.dv-diver'),crab=play.querySelector('.dv-crab');
  const size=()=>{const r=sea.getBoundingClientRect();W=r.width;H=r.height};
  const home=()=>{diver.style.transform=`translate(${W/2-30}px,${18}px)`};
@@ -4230,18 +4261,18 @@ function diveGame(){const play=shell(LIST[3].name,'🤿','dive'),lv=level(),suit
   play.querySelector('.dv-ask').innerHTML=q.kind==='set'?`${L('이 값은 True일까요, False일까요?','True or False?')} <code>${esc(q.ask)}</code>`:`<code>${esc(q.ask)}</code> ${L(q.kind==='dict'?'사물함으로 헤엄쳐요!':'상자로 헤엄쳐요!',q.kind==='dict'?'— swim to that locker!':'— swim to that chest!')}`;
   play.querySelector('.qn').textContent=`${qn}/${total}`;
   const showIdx=q.kind==='list'&&(lv<=3||G.opts.diff===1);
-  floor.className='dv-floor '+q.kind;
-  floor.innerHTML=q.items.map((it,i)=>q.kind==='set'?`<button type="button" class="dv-door" data-i="${i}"><b>${it}</b><span>🚪</span></button>`
-   :`<button type="button" class="dv-box ${q.kind==='dict'?'locker':''}" data-i="${i}" aria-label="${q.kind==='dict'?q.tags[i]:i}">${q.kind==='dict'?`<span class="tag">${q.tags[i]}</span>`:''}<span class="chest">${GAME_IMG.has('pg-chest')?img('pg-chest',''):`<i class="lid"></i><i class="body"></i><i class="lock"></i>`}</span><span class="gem">${it}</span>${showIdx?`<small>${i}</small>`:''}</button>`).join('');
+  floor.className='dv-floor '+q.kind;const box=q.kind==='dict'?'pg-locker':'pg-chest';
+  floor.innerHTML=q.items.map((it,i)=>q.kind==='set'?`<button type="button" class="dv-door" data-i="${i}"><b>${it}</b><span>${img('pg-door','🚪','door')}</span></button>`
+   :`<button type="button" class="dv-box ${q.kind==='dict'?'locker':''}" data-i="${i}" aria-label="${q.kind==='dict'?q.tags[i]:i}">${q.kind==='dict'?`<span class="tag">${q.tags[i]}</span>`:''}<span class="chest">${GAME_IMG.has(box)?img(box,''):`<i class="lid"></i><i class="body"></i><i class="lock"></i>`}</span><span class="gem">${it}</span>${showIdx?`<small>${i}</small>`:''}</button>`).join('');
   floor.querySelectorAll('[data-i]').forEach(b=>listen(b,'click',()=>swim(+b.dataset.i,b)));home();
-  say(q.kind==='set'?L('참일까요, 거짓일까요?','True or false?'):L('어느 상자일까요?','Which chest?'))}
+  say(q.kind==='set'?L('참일까요, 거짓일까요?','True or false?'):q.kind==='dict'?L('어느 사물함일까요?','Which locker?'):L('어느 상자일까요?','Which chest?'))}
  function swim(i,b){if(busy||G.paused)return;busy=true;const r=rel(b,sea);diver.style.transform=`translate(${r.x-30}px,${r.y-r.h/2-56}px)`;SND.splash();after(()=>open(i,b),720)}
  function open(i,b){b.classList.add('open');const ok=i===q.pos,r=rel(b,G.host);
   if(ok){good(r.x,r.y-30,100+Math.round(air/airMax*50));okRun();burst(r.x,r.y-20,['💎','✨','🪙']);SND.coin()}
-  else{miss();const right=floor.querySelector(`[data-i="${q.pos}"]`);if(right)right.classList.add('right');crab.className='dv-crab show';crab.querySelector('span').innerHTML=`${q.kind==='list'?L('0부터 세요! ','Count from 0! '):''}${tx(q.why)}`;say(T(q.why).replace(/`/g,''))}
+  else{miss();const right=floor.querySelector(`[data-i="${q.pos}"]`);if(right)right.classList.add('right');crab.className='dv-crab show';crab.querySelector('.say').innerHTML=`${q.kind==='list'?L('0부터 세요! ','Count from 0! '):''}${tx(q.why)}`;say(T(q.why).replace(/`/g,''))}
   after(()=>{home();after(next,650)},ok?1100:2600)}
  function tick(dt){if(!busy&&q){air-=dt;const p=Math.max(0,air/airMax),bar=play.querySelector('.dv-air i');bar.style.width=(p*100)+'%';bar.classList.toggle('low',p<.3);
-   if(air<=0){busy=true;miss();const right=floor.querySelector(`[data-i="${q.pos}"]`);if(right){right.classList.add('right','open')}crab.className='dv-crab show';crab.querySelector('span').innerHTML=`${L('공기가 다 됐어요! 정답은 여기예요. ','Out of air! Here’s the answer. ')}${tx(q.why)}`;after(()=>{home();after(next,650)},2400)}}
+   if(air<=0){busy=true;miss();const right=floor.querySelector(`[data-i="${q.pos}"]`);if(right){right.classList.add('right','open')}crab.className='dv-crab show';crab.querySelector('.say').innerHTML=`${L('공기가 다 됐어요! 정답은 여기예요. ','Out of air! Here’s the answer. ')}${tx(q.why)}`;after(()=>{home();after(next,650)},2400)}}
   return !G.done}
  listen(window,'resize',()=>{size();home()});
  G.test={answer:ok=>{if(busy||!q)return;const i=ok?q.pos:(q.pos+1)%q.items.length,b=floor.querySelector(`[data-i="${i}"]`);if(b)swim(i,b)},state:()=>({qn,total,q:q&&{kind:q.kind,code:q.code,ask:q.ask,ans:q.ans,pos:q.pos},busy})};
@@ -4337,6 +4368,9 @@ const BOSSES=[
 const BOSS_BY={};BOSSES.forEach(b=>BOSS_BY[b.n]=b);
 const BOSS_HP_LEFT={};   // a bug you didn't finish stays tired until the page is reloaded
 const ITEMS_B=[['shield','🛡️','방패|Shield'],['bolt','⚡','번개|Bolt'],['heart','❤️','하트|Heart'],['card','🌙','코치 카드|Coach card']];
+// the ride each bug broke, painted (a funpark picture for the rides without their own); its emoji if the picture fails
+const RIDE_ART={tangle:'boss-ride-tangle',hushy:'py-deco-tent',swappy:'py-deco-icecream',loopy:'py-spot-wheel',dither:'boss-ride-dither',nonstop:'boss-ride-nonstop',forgetty:'boss-ride-forgetty',mixy:'boss-ride-mixy',snatchy:'boss-ride-snatchy',doubly:'py-deco-balloon',squishy:'py-deco-carousel',jumbly:'boss-ride-jumbly',king:'py-deco-castle'};
+const ridePic=b=>RIDE_ART[b.id]?`<img src="images/${RIDE_ART[b.id]}.webp" alt="" draggable="false" onerror="this.replaceWith('${b.ride.emoji}')">`:b.ride.emoji;
 function bossPic(b,cls=''){
  if(BOSS_IMG.has(b.id))return `<img class="bb-img ${cls}" src="images/boss-${b.id}.webp" alt="" draggable="false">`;
  return `<span class="bb-emo ${cls} ${b.rainbow?'rainbow':''} ${b.crown?'crowned':''}">${b.crown?'<i class="bb-crown">👑</i>':''}${b.emoji}<i class="bb-eyes"></i></span>`}
@@ -4352,7 +4386,7 @@ function startBoss(n,host,opts={}){
   <div class="bb-top"><button class="bb-x" type="button" aria-label="${L('나가기','Leave')}">✕</button><div class="bb-name"><small>${b.ride.emoji} ${tx(b.ride.name)} · ${tx(b.title)}</small><b>${tx(b.name)}</b></div><div class="bb-turn" aria-label="${L('맞힌 수','Right answers')}">⭐ <b>0</b></div></div>
   <div class="bb-main">
    <div class="bb-arena">
-    <div class="bb-ride glitch">${b.ride.emoji}</div>
+    <div class="bb-ride glitch">${ridePic(b)}</div>
     <div class="bb-boss"><div class="bb-hp" role="img" aria-label="${L('버그 체력','Bug energy')}"><i></i><span></span></div><div class="bb-sprite">${bossPic(b)}</div><div class="bb-say"></div></div>
     <div class="bb-py"><div class="bb-shield hidden">🛡️</div><div class="bb-pyp">${pySVG('happy',{cls:'big'})}</div><div class="bb-hearts"></div></div>
     <div class="bb-fx"></div>
@@ -4486,7 +4520,7 @@ const KING_POS=[78,2.5];
 const PLOTS=[[9,96],[88,93],[42,88],[7,66],[69,58],[38,53],[93,47],[7,38],[61,29],[38,24],[9,8],[34,4]];
 const MAP_IMG=new Set(['map']);   // add 'map' once images/py-map.webp exists
 const PLACE_IMG=new Set([1,2,3,4,5,6,7,8,9,10,11,12]); // add world numbers once images/py-place-<n>.webp exist
-const SPOT_IMG=new Set(['kitchen','wheel']);  // add 'kitchen' / 'wheel' once images/py-spot-<id>.webp exist
+const SPOT_IMG=new Set(['kitchen','wheel','fish','race','shoot','dive']);  // spots and the funpark rides with a picture, images/py-spot-<id>.webp
 const bossOn=()=>typeof startBoss==='function'&&typeof BOSSES!=='undefined';
 const allDone=w=>worldDone(w)===w.missions.length;
 const restored=n=>{const w=WORLDS[n-1];return w&&(bossOn()?!!S.boss.won[n]:allDone(w))};
@@ -4524,10 +4558,10 @@ function mapHTML(){const cur=nextMission(),w0=cur?cur.world:12,[px,py]=MAP_POS[w
  for(const w of LIVE()){const [x,y]=MAP_POS[w.n],open=worldOpen(w.n),fix=restored(w.n),left=w.missions.length-worldDone(w),boss=bossReady(w.n);
   const st=!open?'locked':fix?'fixed':'glitch';
   h+=`<button type="button" class="vm vplace s-${st} ${cur&&cur.world===w.n?'here':''}" style="left:${x}%;top:${y}%" data-a="place" data-n="${w.n}" aria-label="${esc(T(w.name))}">
-   <span class="vic">${PLACE_IMG.has(w.n)?`<img src="images/py-place-${w.n}.webp" alt="">`:w.icon}${st==='glitch'&&left?`<i class="bugs">🐛${left}</i>`:''}${boss?`<i class="flag">⚔️</i>`:''}${st==='locked'?'<i class="lk">🔒</i>':''}${st==='fixed'?'<i class="ok">✨</i>':''}${st==='fixed'&&bossOn()&&BOSS_BY[w.n]?`<i class="rideon">${BOSS_BY[w.n].ride.emoji}</i>`:''}</span><b>${w.n}. ${tx(w.name)}</b></button>`}
+   <span class="vic">${PLACE_IMG.has(w.n)?`<img src="images/py-place-${w.n}.webp" alt="">`:w.icon}${st==='glitch'&&left?`<i class="bugs">🐛${left}</i>`:''}${boss?`<i class="flag">⚔️</i>`:''}${st==='locked'?'<i class="lk">🔒</i>':''}${st==='fixed'?'<i class="ok">✨</i>':''}${st==='fixed'&&bossOn()&&BOSS_BY[w.n]?`<i class="rideon">${ridePic(BOSS_BY[w.n])}</i>`:''}</span><b>${w.n}. ${tx(w.name)}</b></button>`}
  for(const [k,s] of Object.entries(SPOT)){const [x,y]=s.xy,rs=reqAt(k);h+=`<button type="button" class="vm spot" style="left:${x}%;top:${y}%" data-a="spot" data-s="${k}"><span class="vic">${SPOT_IMG.has(k)?`<img src="images/py-spot-${k}.webp" alt="">`:s.icon}</span><b>${tx(s.name)}</b></button>`;
   rs.forEach((r,j)=>{const [ox,oy]=(k==='kitchen'?[[-15,-6],[-15,6],[-3,-11]]:[[0,-10],[-13,5],[-12,-9]])[j]||[-15,0];h+=`<button type="button" class="vm vreq" style="left:${x+ox}%;top:${y+oy}%" data-a="req" data-i="${r.i}" aria-label="${L('주민 부탁','Request')}">${villagerPic(r.m.who)}<i class="ex">!</i></button>`})}
- if(typeof PYGAMES!=='undefined')for(const g of PYGAMES.list){const p=RIDE_POS[g.id];if(!p)continue;const on=rideOpen(g);h+=`<button type="button" class="vm ride ${on?'':'locked'}" style="left:${p[0]}%;top:${p[1]}%" data-a="ride" data-g="${g.id}"><span class="vic">${g.icon}${on?'':'<i class="lk">🔒</i>'}</span><b>${tx(g.name)}</b></button>`}
+ if(typeof PYGAMES!=='undefined')for(const g of PYGAMES.list){const p=RIDE_POS[g.id];if(!p)continue;const on=rideOpen(g);h+=`<button type="button" class="vm ride ${on?'':'locked'}" style="left:${p[0]}%;top:${p[1]}%" data-a="ride" data-g="${g.id}"><span class="vic">${SPOT_IMG.has(g.id)?`<img src="images/py-spot-${g.id}.webp" alt="" onerror="this.replaceWith('${g.icon}')">`:g.icon}${on?'':'<i class="lk">🔒</i>'}</span><b>${tx(g.name)}</b></button>`}
  if(bossOn()&&BOSSES.some(b=>b.n===13)&&LIVE().every(w=>restored(w.n)||bossReady(w.n)))h+=`<button type="button" class="vm vplace king ${kingReady()?'':S.boss.won[13]?'s-fixed':'s-locked'}" style="left:${KING_POS[0]}%;top:${KING_POS[1]}%" data-a="king"><span class="vic">👑${kingReady()?`<i class="flag">⚔️</i>`:''}</span><b>${L('버그 대왕','King Buggle')}</b></button>`;
  const vis=Math.min(10,LIVE().filter(w=>restored(w.n)).length+Math.floor((S.deco||[]).filter(Boolean).length/2));
  for(let i=0;i<vis;i++){const p=Object.values(MAP_POS)[i%12];h+=`<span class="vm visitor" style="left:${p[0]+((i*37)%13)-6}%;top:${p[1]+3}%;animation-delay:-${i*1.3}s">${['🐰','🐻','🦊','🐼','🐨','🐯','🐸','🐱','🐶','🐥'][i]}</span>`}
@@ -4647,7 +4681,7 @@ let DRESS='color';
 function wardrobeHTML(shop){const set=DRESS==='color'?COLORS:DRESS==='hat'?HATS:ACCS,own=S.owned[DRESS],wear=S.wear[DRESS];const prizeOf=id=>Object.entries(WORLD_PRIZE).find(([n,p])=>p[0]===DRESS&&p[1]===id);
  const ids=Object.keys(set).filter(id=>shop||own.includes(id));
  return `<div class="card dressme">${pySVG('happy',{cls:'big'})}</div><div class="tabs">${[['color','🎨 '+L('색깔','Colours')],['hat','🎩 '+L('모자','Hats')],['acc','👓 '+L('소품','Extras')]].map(([k,t])=>`<button type="button" class="${DRESS===k?'on':''}" data-a="dtab" data-v="${k}">${t}</button>`).join('')}</div>
-  <div class="items">${ids.map(id=>{const it=set[id],owned=own.includes(id),on=wear===id,price=DRESS==='color'?it[4]:it[2],prize=prizeOf(id);const look=DRESS==='color'?pySVG('happy',{color:id,hat:'',acc:'',cls:'mini'}):`<span class="em">${it[0]||'🚫'}</span>`;
+  <div class="items">${ids.map(id=>{const it=set[id],owned=own.includes(id),on=wear===id,price=DRESS==='color'?it[4]:it[2],prize=prizeOf(id);const look=DRESS==='color'?pySVG('happy',{color:id,hat:'',acc:'',cls:'mini'}):`<span class="em">${id&&WEAR_IMG[DRESS].has(id)?wearPic(DRESS,id,it[0]):it[0]||'🚫'}</span>`;
    return `<button type="button" class="item ${on?'on':''} ${owned?'own':''}" data-a="ditem" data-id="${id}">${look}<b>${T(DRESS==='color'?it[3]:it[1])}</b><small>${on?L('입고 있어요','Wearing'):owned?L('입기','Wear'):prize?`🏝️ ${L(`${prize[0]}번 장소 선물`,`Place ${prize[0]} gift`)}`:`🍎 ${price}`}</small></button>`}).join('')}</div>`}
 function dressItem(id){const own=S.owned[DRESS],set=DRESS==='color'?COLORS:DRESS==='hat'?HATS:ACCS,it=set[id],price=DRESS==='color'?it[4]:it[2];
  if(!own.includes(id)){const prize=Object.entries(WORLD_PRIZE).find(([n,p])=>p[0]===DRESS&&p[1]===id);if(prize){sfx('oops');toast(`🏝️ ${L(`${prize[0]}번 장소를 완성하면 받는 선물이에요!`,`A gift for finishing place ${prize[0]}!`)}`);return}
@@ -4656,12 +4690,12 @@ function dressItem(id){const own=S.owned[DRESS],set=DRESS==='color'?COLORS:DRESS
  S.wear[DRESS]=id;save();updateHud();RENDER[VIEW]()}
 
 // ---------------------------------------------------------------- funpark: the rides (mini-games), park requests and the free coding playground
-const RIDE_IMG=new Set(['fish','race','shoot','dive']);   // card pictures images/pg-ride-<id>.webp
+const RIDE_IMG=new Set(['fish','race','shoot','dive','lab']);   // card pictures images/pg-ride-<id>.webp ('lab': the coding playground)
 RENDER.arcade=()=>{const games=typeof PYGAMES!=='undefined'?PYGAMES.list:[];
  $('v-arcade').innerHTML=`<h2 class="vtitle">🎡 ${L('파이 놀이공원','Py’s Funpark')} <span class="have">🎟️ ${S.tickets}</span></h2>
   <p class="muted">${L('놀이기구는 🎟️ 티켓 1장으로 타요. 티켓은 미션, 주민 부탁, 보스전, 오늘의 상자에서 받아요.','Each ride costs one 🎟️ ticket. Missions, requests, bosses and the daily chest give tickets.')}</p>
   <div class="rides">${games.map(g=>{const on=rideOpen(g),best=(S.games.best||{})[g.id];return `<button type="button" class="ridecard ${on?'':'locked'} ${RIDE_IMG.has(g.id)?'pic':''}" data-a="ride" data-g="${g.id}">${RIDE_IMG.has(g.id)?`<img class="rimg" src="images/pg-ride-${g.id}.webp" alt="" draggable="false">`:`<span class="ric">${g.icon}</span>`}<b>${tx(g.name)}</b><small>${tx(g.desc||'')}</small><span class="rmeta">${on?`🎟️ 1${best?` · 🏆 ${best}`:''}`:`🔒 ${L(`${g.world}번 장소를 반쯤 배우면 열려요`,`Opens after place ${g.world}`)}`}</span></button>`}).join('')||`<p class="muted">${L('놀이기구를 짓는 중이에요!','Rides are being built!')}</p>`}</div>
-  <h3>🎨 ${L('코딩 놀이터','Coding playground')}</h3><button type="button" class="ridecard wide" data-a="lab"><span class="ric">🎨</span><b>${L('마음대로 코딩하기','Code anything')}</b><small>${L('그림판, 게시판, 정원에서 자유롭게 만들고 작품으로 저장해요.','Draw, print and move Py freely, and save your works.')}</small></button>
+  <h3>🎨 ${L('코딩 놀이터','Coding playground')}</h3><button type="button" class="ridecard wide ${RIDE_IMG.has('lab')?'pic':''}" data-a="lab">${RIDE_IMG.has('lab')?`<img class="rimg" src="images/pg-ride-lab.webp" alt="" draggable="false" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'ric',textContent:'🎨'}))">`:'<span class="ric">🎨</span>'}<b>${L('마음대로 코딩하기','Code anything')}</b><small>${L('그림판, 게시판, 정원에서 자유롭게 만들고 작품으로 저장해요.','Draw, print and move Py freely, and save your works.')}</small></button>
   ${COPYRIGHT()}`};
 function startRide(id){if(typeof PYGAMES==='undefined')return;const g=PYGAMES.list.find(x=>x.id===id);if(!g)return;
  if(!rideOpen(g)){sfx('oops');coachTalk('idea',`${g.world}번 장소 미션을 반쯤 하면 이 놀이기구가 열려요!|This ride opens after half of place ${g.world}’s missions!`);return}
@@ -4758,11 +4792,17 @@ function hasSkill(k){const s=SKILL[k];if(st().skills[k])return true;const w=WORL
 // painted pictures for the upgrades and the special burgers (emoji until they load)
 const PAD_ART={tables:'rb-table',motor:'rb-motor',chip:'rb-chip',shoes:'rb-shoes',tray:'rb-tray',buddy:'py-hi',decor:'py-deco-flowers',sign:'rb-sign'};
 const padSrc=id=>id==='robot'?robotSrc(lvOf('robot')):`images/${PAD_ART[id]}.webp`;
-const BURGER_ART={tower:'rb-burger-tower',fish:'rb-burger-fish',rainbow:'rb-burger-rainbow'};
+const BURGER_ART={classic:'rb-burger-classic',cheese:'rb-burger-cheese',veggie:'rb-burger-veggie',egg:'rb-burger-egg',fish:'rb-burger-fish',tower:'rb-burger-tower',double:'rb-burger-double',rainbow:'rb-burger-rainbow',mess:'rb-burger-mess'};
+// the floor decorations bought with the 🪴 upgrade, in order: a potted plant, flowers, a balloon
+const DECOR_ART=[['rb-plant','🪴',44],['py-deco-flowers','🌷',44],['py-deco-balloon','🎈',56]];
 const PICS={};function img(src){if(!PICS[src]){const m=new Image();m.src=src;PICS[src]=m}return PICS[src]}
 const ok_=m=>m&&m.complete&&m.naturalWidth;
 // a burger on the canvas: its painted picture when there is one, else the menu emoji; 🤢 for a buggy mess
-function dish(c,k,x,y,size){const a=BURGER_ART[k],m=a&&img(`images/${a}.webp`);if(ok_(m)){const h=size*1.25,w=h*m.naturalWidth/m.naturalHeight;c.drawImage(m,x-w/2,y-h/2,w,h);return}emo(c,MENU[k]?MENU[k].e:'🤢',x,y,size)}
+const dishEmo=k=>MENU[k]?MENU[k].e:'🤢';
+const dishPic=k=>{const a=BURGER_ART[k],m=a&&img(`images/${a}.webp`);return ok_(m)?m:null};
+function dish(c,k,x,y,size){const m=dishPic(k);if(m){const h=size*1.25,w=h*m.naturalWidth/m.naturalHeight;c.drawImage(m,x-w/2,y-h/2,w,h);return}emo(c,dishEmo(k),x,y,size)}
+// the same burger picture inside HTML (the carrying bar)
+const burgerImg=k=>BURGER_ART[k]?`<img class="rb-bimg" src="images/${BURGER_ART[k]}.webp" alt="${dishEmo(k)}" draggable="false" onerror="this.replaceWith('${dishEmo(k)}')">`:dishEmo(k);
 // an upgrade's picture inside HTML (cards and the board)
 const padImg=(id,cls)=>`<img class="${cls}" src="${padSrc(id)}" alt="" draggable="false" onerror="this.replaceWith('${UPN[id][1]}')">`;
 function meKey(){const map={'🐰':'bunny','🐻':'bear','🦊':'fox','🐼':'panda','🐨':'koala','🐯':'tiger','🦁':'lion','🐸':'frog','🐱':'cat','🐶':'puppy','🐥':'chick','🦄':'unicorn','🐙':'octopus','🐬':'dolphin','🦖':'dino','⭐':'star'};return map[String(S.av||'').replace(/️/g,'')]||'kid'}
@@ -4801,7 +4841,7 @@ function hud(){if(!Y)return;const l=shopLv(),nx=LV[l+1],s=st().served;
  const can=UP.some(u=>canBuy(u[0]));Y.el.up.classList.toggle('can',can)}
 function caption(ic,txt,good,speak){if(!Y)return;Y.capT=Y.t;const c=Y.el.cap;c.className='rb-cap show'+(good===true?' good':'');c.innerHTML=`<span class="ci">${ic}</span><span>${rich(txt)}</span>`;if(speak)say(txt)}
 function acts(){if(!Y)return;const h=Y.hold;let html='';
- if(h.length)html+=`<span class="rb-hold">${L('들고 있음','Carrying')} ${h.map(d=>MENU[d]?MENU[d].e:'🤢').join(' ')}</span>`;
+ if(h.length)html+=`<span class="rb-hold">${L('들고 있음','Carrying')} ${h.map(d=>burgerImg(d)).join(' ')}</span>`;
  const need=Y.diners.filter(d=>d.state==='sit'&&!d.got).length;if(need)html+=`<span class="rb-need">🙋 ${need}</span>`;
  Y.el.acts.innerHTML=html}
 
@@ -4874,16 +4914,16 @@ function inZone(dt){const z=zoneAt(),key=z?z.k+(z.r?z.r.i:z.t?z.t.i:z.p?z.p.id:'
  if(key!==Y.zone){Y.zone=key;if(z&&z.k==='pad')openCard(z.p.id);else if(Y.card&&Y.card.from==='pad')closeCard();if(z&&z.k==='school'){sfx('tap');caption('🏫',L('코딩 학교예요! 문 코치와 새 코드를 배우면 로봇이 더 똑똑해져요.','The coding school! Learn new code with Coach Moon and the robots get smarter.'),null,false)}}
  if(!z)return;
  if(z.k==='robot'){const r=z.r;if(r.dish.length&&Y.hold.length<trayN()){const need=demand();// take what diners need, and mess so it can be thrown away
-   while(r.dish.length&&Y.hold.length<trayN()){const d=r.dish.shift();Y.hold.push(d);sfx('tile');fly(MENU[d]?MENU[d].e:'🤢',[r.x+.5,r.y+.5],'me')}acts()}}
+   while(r.dish.length&&Y.hold.length<trayN()){const d=r.dish.shift();Y.hold.push(d);sfx('tile');fly(d,[r.x+.5,r.y+.5],'me')}acts()}}
  if(z.k==='table')serveTable(z.t,true)}
 function serveTable(t,mine){let did=false;
- for(const d of Y.diners.filter(d=>d.state==='sit'&&d.t===t.i&&!d.got)){const i=Y.hold.indexOf(d.item);if(i<0)continue;Y.hold.splice(i,1);d.got=true;d.state='eat';d.eat=4;d.mood='😍';d.moodT=1.4;did=true;sfx('coin');fly(MENU[d.item].e,'me',[d.x,d.y])}
+ for(const d of Y.diners.filter(d=>d.state==='sit'&&d.t===t.i&&!d.got)){const i=Y.hold.indexOf(d.item);if(i<0)continue;Y.hold.splice(i,1);d.got=true;d.state='eat';d.eat=4;d.mood='😍';d.moodT=1.4;did=true;sfx('coin');fly(d.item,'me',[d.x,d.y])}
  // a wrong burger: the diner shakes their head; the mess goes in the bin
  const mi=Y.hold.indexOf('mess');if(mi>=0&&Y.diners.some(d=>d.state==='sit'&&d.t===t.i&&!d.got)){Y.hold.splice(mi,1);const d=Y.diners.find(d=>d.state==='sit'&&d.t===t.i&&!d.got);d.mood='😕';d.moodT=2;sfx('oops');caption('🐛',L('“이건 제가 주문한 버거가 아니에요!” 버그 걸린 로봇을 고쳐야 해요.','“That’s not the burger I ordered!” Fix the buggy robot.'),null,false)}
  if(t.coins>0){const n=t.coins;t.coins=0;addApples(n);coinFly(t);did=true}
  if(did)acts();return did}
 function coinFly(t){for(let k=0;k<Math.min(6,1+Math.floor(t.coinShow/3));k++)Y.pops.push({x:t.x+.5+rnd(-.3,.3),y:t.y+.5,txt:'🍎',col:'#d23',t:-k*.05})}
-function fly(e,from,to){Y.fly.push({e,from:from==='me'?[Y.me.x,Y.me.y]:from,to,t:0})}
+function fly(k,from,to){Y.fly.push({k,from:from==='me'?[Y.me.x,Y.me.y]:from,to,t:0})}
 
 // ---------------------------------------------------------------- upgrades: pads on the floor and a board
 const price=id=>{const u=UPN[id],v=lvOf(id);return u[3][v]};
@@ -4924,7 +4964,7 @@ function robotTap(i){const R=st().robots[i];if(!R)return;sfx('tap');
  const smart=hasSkill('if')&&open.filter(k=>!lockWhy(k)).length>1,list=hasSkill('list');
  modal(`<div class="big">${villagerPic(who(i),'big')}</div><h2>${L(`${i+1}번 로봇`,`Robot ${i+1}`)}</h2>
   <p>${R.code?L(`지금 <b>${lab}</b> 만들어요. 다른 걸 가르칠까요?`,`Now making <b>${lab}</b>. Teach it something else?`):L('어떤 버거 만드는 법을 가르칠까요?','Which burger shall we teach it?')}</p>
-  <div class="rbmenu">${open.map(k=>{const m=MENU[k],w=lockWhy(k),cur=R.code&&!R.smart&&R.item===k;return `<button type="button" class="rbm ${w?'lock':''} ${cur?'cur':''}" data-act="m" data-k="${k}"><span class="dish">${m.dish.slice().reverse().map(x=>`<i>${LAYER[x]}</i>`).join('')}</span><b>${m.e} ${T(m.name)}</b><small>${w?w.skill?`🔒 ${SKILL[w.skill].ic} ${T(SKILL[w.skill].name)}`:L(`💾 ${w.lines}줄 · 칩 칸 ${slots()}줄`,`💾 ${w.lines} lines · chip ${slots()}`):cur?L('✅ 지금 만드는 중','✅ making it now'):`🍎 ${m.price}${m.pantry?` · 🎣 ${(S.pantry||{})[m.pantry]||0}${L('마리','')}`:''}`}</small></button>`}).join('')}
+  <div class="rbmenu">${open.map(k=>{const m=MENU[k],w=lockWhy(k),cur=R.code&&!R.smart&&R.item===k;return `<button type="button" class="rbm ${w?'lock':''} ${cur?'cur':''}" data-act="m" data-k="${k}"><span class="dish">${m.dish.map((x,j)=>layerHTML(x,j)).reverse().join('')}</span><b>${m.e} ${T(m.name)}</b><small>${w?w.skill?`🔒 ${SKILL[w.skill].ic} ${T(SKILL[w.skill].name)}`:L(`💾 ${w.lines}줄 · 칩 칸 ${slots()}줄`,`💾 ${w.lines} lines · chip ${slots()}`):cur?L('✅ 지금 만드는 중','✅ making it now'):`🍎 ${m.price}${m.pantry?` · 🎣 ${(S.pantry||{})[m.pantry]||0}${L('마리','')}`:''}`}</small></button>`}).join('')}
    ${smart?`<button type="button" class="rbm smart ${R.smart==='if'?'cur':''}" data-act="smart"><span class="dish">❓</span><b>${L('주문 보고 골라 만들기','Read the order, choose')}</b><small>❓ ${T(SKILL.if.name)}</small></button>`:''}
    ${list?`<button type="button" class="rbm smart ${R.smart==='list'?'cur':''}" data-act="list"><span class="dish">🚂</span><b>${L('주문표대로 뭐든 만들기','Make anything on the list')}</b><small>🚂 ${T(SKILL.list.name)}</small></button>`:''}</div>`,{cls:'wide',acts:{
   m:b=>{const k=b.dataset.k,w=lockWhy(k);if(w&&w.skill)return ()=>offerSkill(w.skill,k);
@@ -5088,10 +5128,15 @@ function poly(c,pts,fill,stroke){c.beginPath();pts.forEach(([x,y],i)=>i?c.lineTo
 function box(c,x,y,w,d,h,top,left,right){const A=iso(x,y),B=iso(x+w,y),C=iso(x+w,y+d),D=iso(x,y+d),u=p=>[p[0],p[1]-h];poly(c,[D,C,u(C),u(D)],left);poly(c,[B,C,u(C),u(B)],right);poly(c,[u(A),u(B),u(C),u(D)],top)}
 const quad=(x0,y0,x1,y1)=>[iso(x0,y0),iso(x1,y0),iso(x1,y1),iso(x0,y1)];
 function emo(c,e,x,y,size){const fs=c.fillStyle;c.fillStyle='#000';c.font=`${size}px ${EF}`;c.textAlign='center';c.textBaseline='middle';c.fillText(e,x,y);c.fillStyle=fs}
-function label(c,t,x,y,bg,fg='#24304a'){c.font=`800 13px ${TF}`;const w=Math.min(120,c.measureText(t).width+12);c.fillStyle=bg;c.beginPath();c.roundRect(x-w/2,y-10,w,20,9);c.fill();c.strokeStyle='rgba(0,0,0,.08)';c.stroke();c.fillStyle=fg;c.textAlign='center';c.textBaseline='middle';c.fillText(t,x,y+.5,w-8)}
+function label(c,t,x,y,bg,fg='#24304a',pic){c.font=`800 13px ${TF}`;const p=pic?20:0,w=Math.min(120,c.measureText(t).width+12+p);c.fillStyle=bg;c.beginPath();c.roundRect(x-w/2,y-10,w,20,9);c.fill();c.strokeStyle='rgba(0,0,0,.08)';c.stroke();
+ if(pic){const h=22,iw=h*pic.naturalWidth/pic.naturalHeight;c.drawImage(pic,x-w/2+2+(20-iw)/2,y-h/2-1,iw,h)}
+ c.fillStyle=fg;c.textAlign='center';c.textBaseline='middle';c.fillText(t,x+p/2,y+.5,w-8-p)}
 function wallQuad(c,x0,y0,x1,y1,h0,h1,fill){const a=iso(x0,y0),b=iso(x1,y1);poly(c,[[a[0],a[1]-h0],[b[0],b[1]-h0],[b[0],b[1]-h1],[a[0],a[1]-h1]],fill)}
 function bubble(c,x,ty,m,w){c.font=`900 14px ${TF}`;w=w||Math.max(34,c.measureText(m).width+16);c.fillStyle='#ffffff';c.beginPath();c.roundRect(x-w/2,ty-24,w,24,12);c.fill();c.beginPath();c.moveTo(x-5,ty);c.lineTo(x+5,ty);c.lineTo(x,ty+6);c.fill();emo(c,m,x,ty-12,16)}
-function miniDish(c,d,x,y,s=11){d.forEach((k,i)=>emo(c,LAYER[k],x,y-i*s*.55,s*1.4))}
+// a burger built from its layer pictures (bottom at y), slices overlapping by their thickness; emoji for a missing one
+function miniDish(c,d,x,y,s=11){const w=s*2.6;let cy=y,pt=0;
+ d.forEach((k,i)=>{const n=layerName(k,i),f=LAYER_FIT[n]||[.2,.33],m=LAYER_FIT[n]&&img(`images/rb-layer-${n}.webp`);cy-=(pt+f[0])/2*w;pt=f[0];
+  if(ok_(m))c.drawImage(m,x-w/2,cy-f[1]*w,w,w*m.naturalHeight/m.naturalWidth);else emo(c,LAYER[k],x,cy,s*1.4)})}
 function shadow(c,x,y,r){c.fillStyle='rgba(0,0,0,.16)';c.beginPath();c.ellipse(x,y,r,r/2,0,0,TAU);c.fill()}
 function legs(c,x,y,ph,moving,pants,shoe){const sw=moving?Math.sin(ph):0;[[-5,sw],[5,-sw]].forEach(([dx,s])=>{c.fillStyle=pants;c.beginPath();c.roundRect(x+dx-3.5,y-17+(s<0?-s*2:0),7,14,3.5);c.fill();c.fillStyle=shoe;c.beginPath();c.ellipse(x+dx+s*2,y-2+(s<0?s*2:0),5.5,3.4,0,0,TAU);c.fill()})}
 function person(c,x,y,e,ph,moving){const bob=moving?Math.abs(Math.sin(ph))*2.5:Math.sin(ph*.3);shadow(c,x,y,14);legs(c,x,y,ph,moving,'#3a4a7a','#ffffff');
@@ -5108,7 +5153,7 @@ function draw(){const c=Y.ctx,me=Y.me,dec=lvOf('decor'),sg=lvOf('sign');c.lineJo
  const wh=104;wallQuad(c,0,0,MW,0,0,wh,'#c9f0e4');wallQuad(c,0,0,0,MH,0,wh,'#ffe6c4');wallQuad(c,0,0,MW,0,wh,wh+10,'#fff');wallQuad(c,0,0,0,MH,wh,wh+10,'#fffaf2');wallQuad(c,0,0,MW,0,0,16,'#5fc4a8');wallQuad(c,0,0,0,MH,0,16,'#f3b46a');
  // the menu board on the dining wall: every burger as a picture, so diners’ orders can be matched by sight
  const mo=menuOpen();const mb=iso(8.6,0);c.save();c.translate(mb[0],mb[1]-wh+22);c.transform(1,.5,0,1,0,0);c.fillStyle='#3a2b26';c.beginPath();c.roundRect(-6,-16,Math.max(80,mo.length*36+8),66,8);c.fill();
- mo.forEach((k,j)=>{const m=MENU[k];miniDish(c,m.dish,14+j*36,38,9);c.font=`900 11px ${TF}`;c.fillStyle='#ffd23f';c.textAlign='center';c.fillText(m.e,14+j*36,-4)});c.restore();
+ mo.forEach((k,j)=>{const m=MENU[k],bx=14+j*36,p=dishPic(k);if(p){const h=34,w=h*p.naturalWidth/p.naturalHeight;c.drawImage(p,bx-w/2,17-h/2,w,h);return}miniDish(c,m.dish,bx,38,9);c.font=`900 11px ${TF}`;c.fillStyle='#ffd23f';c.textAlign='center';c.fillText(m.e,bx,-4)});c.restore();
  // the school door on the left wall
  const sd=iso(0,8.5);c.save();c.translate(sd[0],sd[1]);c.transform(1,-.5,0,1,0,0);c.fillStyle='#7a5bd8';c.beginPath();c.roundRect(-20,-82,40,80,[14,14,0,0]);c.fill();c.fillStyle='#fff';c.font=`800 12px ${TF}`;c.textAlign='center';c.fillText(L('학교','School'),0,-90);emo(c,'🏫',0,-48,26);c.restore();
  for(let x=0;x<MW;x++)for(let y=0;y<MH;y++){const kit=x<7;poly(c,quad(x,y,x+1,y+1),kit?((x+y)%2?'#e8f4ff':'#f4faff'):((x+y)%2?'#f6c58c':'#f9cf9b'),kit?'rgba(120,150,200,.25)':'rgba(180,110,50,.25)')}
@@ -5123,14 +5168,14 @@ function draw(){const c=Y.ctx,me=Y.me,dec=lvOf('decor'),sg=lvOf('sign');c.lineJo
  const D=[];
  Y.robots.forEach((r,i)=>{if(i<lvOf('robot'))D.push([r.x+r.y+.9,()=>drawRobot(c,r,i)])});
  Y.tables.forEach(t=>{if(t.n<=lvOf('tables'))D.push([t.x+t.y+.95,()=>drawTable(c,t)])});
- if(dec)[[.5,10.5],[12.5,.5],[6.5,.5]].slice(0,dec).forEach(([x,y])=>D.push([x+y,()=>{const [a,b]=iso(x,y);emo(c,['🪴','🌷','🎈'][Math.floor(x+y)%3],a,b-16,30)}]));
+ if(dec)[[.5,10.5],[12.5,.5],[6.5,.5]].slice(0,dec).forEach(([x,y],j)=>D.push([x+y,()=>{const [a,b]=iso(x,y),[src,e,h]=DECOR_ART[j],m=img(`images/${src}.webp`);if(ok_(m)){const w=h*m.naturalWidth/m.naturalHeight;c.drawImage(m,a-w/2,b+4-h,w,h)}else emo(c,e,a,b-16,30)}]));
  Y.diners.forEach(d=>D.push([d.x+d.y+(d.state==='sit'||d.state==='eat'?.02:0),()=>drawDiner(c,d)]));
  Y.walkers.forEach(w=>D.push([w.x+MH+.9,()=>{const [x,y]=iso(w.x,MH+1.3+(w.dir>0?0:.9));person(c,x,y,w.e,w.ph,true)}]));
  D.push([me.x+me.y,()=>drawMe(c)]);D.push([Y.bd.x+Y.bd.y,()=>drawPy(c)]);
  D.push([MW+1.05-.45,()=>drawSign(c)]);
  D.sort((a,b)=>a[0]-b[0]).forEach(o=>o[1]());
  {const g=guide();if(g){const [x,y]=iso(g[0],g[1]);emo(c,'⬇️',x,y-g[2]+Math.sin(Y.t*6)*5,26)}}
- for(const f of Y.fly){const [ax,ay]=iso(f.from[0],f.from[1]),to=f.to==='me'?iso(me.x,me.y):iso(f.to[0],f.to[1]),k=f.t,x=ax+(to[0]-ax)*k,y=ay-30+(to[1]-50-ay+30)*k-Math.sin(k*Math.PI)*40;emo(c,f.e,x,y,20)}
+ for(const f of Y.fly){const [ax,ay]=iso(f.from[0],f.from[1]),to=f.to==='me'?iso(me.x,me.y):iso(f.to[0],f.to[1]),k=f.t,x=ax+(to[0]-ax)*k,y=ay-30+(to[1]-50-ay+30)*k-Math.sin(k*Math.PI)*40;dish(c,f.k,x,y,20)}
  for(const p of Y.pops){if(p.t<0)continue;const [x,y]=iso(p.x,p.y),a=1-p.t/1.1;c.globalAlpha=a;emo(c,p.txt,x,y-40-p.t*40,20);c.globalAlpha=1}}
 function drawRobot(c,r,i){const R=st().robots[i],[x,y]=iso(r.x+.5,r.y+.5),[,by]=iso(r.x+1,r.y+1);
  box(c,r.x+.1,r.y+.1,.8,.8,30,R&&R.bug?'#ffd6e0':'#dfe7f3','#b4c2da','#9fb0cc');
@@ -5142,11 +5187,12 @@ function drawRobot(c,r,i){const R=st().robots[i],[x,y]=iso(r.x+.5,r.y+.5),[,by]=
  r.dish.forEach((d,k)=>dish(c,d,x-16+k*16,y-22,18));
  if(R&&R.bug){if(!ok_(bugPic))emo(c,'🐛',x+18,y-86+Math.sin(Y.t*9)*3,24);bubble(c,x,y-102,'❗')}
  else if(!R||!R.code){bubble(c,x,y-102,'❓');c.strokeStyle=`rgba(255,160,40,${.5+.5*Math.sin(Y.t*5)})`;c.lineWidth=3;c.beginPath();c.ellipse(x,y+2,34,17,0,0,TAU);c.stroke();c.lineWidth=1}
- label(c,R&&R.code?(R.smart?`❓ ${L('주문 보고','by order')}`:`${MENU[R.item].e} ${T(MENU[R.item].name).split(' ')[0]}`):L(`${i+1}번 로봇`,`Robot ${i+1}`),x,by-6,R&&R.code?'#ffffff':'#fff3d6')}
+ const tag=R&&R.code&&!R.smart?dishPic(R.item):null,nm=R&&R.code&&!R.smart?T(MENU[R.item].name).split(' ')[0]:'';
+ label(c,R&&R.code?(R.smart?`❓ ${L('주문 보고','by order')}`:tag?nm:`${MENU[R.item].e} ${nm}`):L(`${i+1}번 로봇`,`Robot ${i+1}`),x,by-6,R&&R.code?'#ffffff':'#fff3d6',undefined,tag)}
 function drawTable(c,t){const [x,y]=iso(t.x+.5,t.y+.5),tp=img('images/rb-table.webp');c.fillStyle='rgba(0,0,0,.12)';c.beginPath();c.ellipse(x,y,26,12,0,0,TAU);c.fill();
  if(ok_(tp)){const w=78,h=w*tp.naturalHeight/tp.naturalWidth;c.drawImage(tp,x-w/2,y+8-h,w,h)}
  else{c.fillStyle='#5ab0e6';c.fillRect(x-3,y-18,6,18);c.fillStyle='#ffffff';c.beginPath();c.ellipse(x,y-20,30,15,0,0,TAU);c.fill();c.strokeStyle='#dfe7f3';c.lineWidth=2;c.stroke();c.lineWidth=1}
- Y.diners.filter(d=>d.t===t.i&&d.state==='eat').forEach((d,k)=>miniDish(c,MENU[d.item].dish,x-8+k*16,y-24,8));
+ Y.diners.filter(d=>d.t===t.i&&d.state==='eat').forEach((d,k)=>{const px=x-9+k*18;c.fillStyle='#ffffff';c.beginPath();c.ellipse(px,y-24,11,4,0,0,TAU);c.fill();if(dishPic(d.item))dish(c,d.item,px,y-32,15);else miniDish(c,MENU[d.item].dish,px,y-24,8)});
  const n=Math.round(t.coinShow);if(n>0){emo(c,'🍎',x+16,y-34,18);label(c,`${n}`,x+16,y-50,'#fff6d0')}}
 function drawDiner(c,d){const [x,y]=iso(d.x,d.y);
  if(d.state==='sit'||d.state==='eat'){const bob=Math.sin(d.ph*.4),key=CUST_PIC[d.e],pc=key?img(`images/aq-staff-${key}.webp`):null;let ty=y-58;
@@ -5181,7 +5227,7 @@ function listen(){const cv=Y.el.cv,on=(t,ev,fn,o)=>{t.addEventListener(ev,fn,o);
  const up=e=>{const j=Y&&Y.joy;if(!j||j.id!==e.pointerId)return;if(!j.on&&performance.now()-j.t0<700){const o=thingAt(j.px,j.py);if(o)goThing(o);else{const [tx,ty]=toTile(j.px,j.py);route(tx,ty)}}Y.joy=null;Y.el.joy.classList.add('hidden')};
  on(cv,'pointerup',up);on(cv,'pointercancel',up);
  on(Y.el.up,'click',()=>{sfx('tap');board()});
- on(Y.el.lv,'click',()=>{sfx('tap');const l=shopLv(),nx=LV[l+1];modal(`<div class="big">${LV[l][1]}</div><h2>${T(LV[l][2])}</h2><p>${L(`대접한 손님 ${st().served}명`,`${st().served} diners served`)}${nx?L(` · 다음 단계까지 ${nx[0]-st().served}명`,` · ${nx[0]-st().served} to the next level`):''}</p><div class="rbmenu">${menuOpen().map(k=>`<div class="rbm"><span class="dish">${MENU[k].dish.slice().reverse().map(x=>`<i>${LAYER[x]}</i>`).join('')}</span><b>${MENU[k].e} ${T(MENU[k].name)}</b><small>🍎 ${MENU[k].price}</small></div>`).join('')}</div>`,{cls:'wide'})});
+ on(Y.el.lv,'click',()=>{sfx('tap');const l=shopLv(),nx=LV[l+1];modal(`<div class="big">${LV[l][1]}</div><h2>${T(LV[l][2])}</h2><p>${L(`대접한 손님 ${st().served}명`,`${st().served} diners served`)}${nx?L(` · 다음 단계까지 ${nx[0]-st().served}명`,` · ${nx[0]-st().served} to the next level`):''}</p><div class="rbmenu">${menuOpen().map(k=>`<div class="rbm"><span class="dish">${MENU[k].dish.map((x,j)=>layerHTML(x,j)).reverse().join('')}</span><b>${MENU[k].e} ${T(MENU[k].name)}</b><small>🍎 ${MENU[k].price}</small></div>`).join('')}</div>`,{cls:'wide'})});
  on(Y.el.card,'click',e=>{const b=e.target.closest('[data-c]');if(!b||!Y)return;if(b.dataset.c==='buy')buy(Y.card.id);else{sfx('tap');closeCard()}});
  const key=e=>{if(!Y||modalOpen()||VIEW!=='home')return;const m={ArrowLeft:'l',ArrowRight:'r',ArrowUp:'u',ArrowDown:'d',a:'l',d:'r',w:'u',s:'d'}[e.key];if(!m||(e.target&&/INPUT|TEXTAREA/.test(e.target.tagName)))return;Y.keys[m]=e.type==='keydown';e.preventDefault()};
  on(window,'keydown',key);on(window,'keyup',key);on(window,'blur',()=>{if(Y)Y.keys={}});

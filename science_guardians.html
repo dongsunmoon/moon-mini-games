@@ -938,6 +938,12 @@ main{width:min(980px,100%);margin:0 auto;padding:14px max(12px,env(safe-area-ins
 @media (max-width:520px){.tile.t-album .arow{display:none}}
 .btn.next.auto{position:relative;overflow:hidden}.btn.next.auto::after{content:'';position:absolute;left:0;bottom:0;height:5px;width:100%;background:rgba(255,255,255,.75);transform-origin:left;animation:autonext 1.9s linear forwards}
 @keyframes autonext{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+/* painted pictures: customer faces around the café and in battle hints, the treasure chests, the review monsters */
+.ty-order .w .ei,.ty-give .w .ei{width:40px;height:40px}
+.ty-cap .ic .ei{width:32px;height:32px}
+.ls-rc .w .ei{width:46px;height:46px}
+.ls-cue .ei.cf,.ls-cuebox .ei.cf,.fbl .ei.cf{width:1.8em;height:1.8em;vertical-align:-.55em}
+.chestbox .ei{width:132px;height:132px;vertical-align:bottom}
 /*SHOPCSS:BEGIN*/
 /* science shop (learn before battle) */
 .ls-arena{padding:10px 12px 14px}
@@ -5038,8 +5044,8 @@ const BUDDIES={
  cat:{icon:'🐱',img:'images/buddy-cat.webp',name:L('야옹 박사','Dr. Meow'),price:600,pitch:1.35,perk:L('전투마다 무료 힌트 1번','1 free hint every battle')},
  bunny:{icon:'🐰',img:'images/buddy-bunny.webp',name:L('깡총 박사','Dr. Hop'),price:800,pitch:1.45,perk:L('받는 코인 +10%','+10% coins')},
  fox:{icon:'🦊',img:'images/buddy-fox.webp',name:L('여우 박사','Dr. Fox'),price:1000,pitch:1,perk:L('전투마다 첫 실수 1번을 막아 줘요','Blocks your first mistake each battle')},
- robot:{icon:'🤖',img:'',name:L('삐빅 로봇','Beep Bot'),price:1400,pitch:.9,perk:L('번개 OX 시간 +10초','+10 seconds in Lightning')},
- owl:{icon:'🦉',img:'',name:L('부엉 교수','Professor Hoot'),price:1800,pitch:.95,perk:L('2콤보부터 크리티컬 공격!','Critical hits from a 2-combo!')},
+ robot:{icon:'🤖',img:'images/buddy-robot.webp',name:L('삐빅 로봇','Beep Bot'),price:1400,pitch:.9,perk:L('번개 OX 시간 +10초','+10 seconds in Lightning')},
+ owl:{icon:'🦉',img:'images/buddy-owl.webp',name:L('부엉 교수','Professor Hoot'),price:1800,pitch:.95,perk:L('2콤보부터 크리티컬 공격!','Critical hits from a 2-combo!')},
 };
 const EFFECTS=[
  {id:'confetti',icon:'🎉',name:L('색종이','Confetti'),price:0},{id:'stars',icon:'⭐',name:L('별가루','Stardust'),price:400},{id:'hearts',icon:'💖',name:L('하트 뿅뿅','Hearts'),price:500},
@@ -5774,13 +5780,13 @@ const UPG=[
  {id:'fries',cat:0,ic:'🍟',pic:'shop-fries',name:'감자튀김 기계|Fries machine',act:'감자튀김 기계 빠르게|Faster fries machine',act1:'감자튀김 기계 놓기|Add a fries machine',price:[0,40,130,230,400,700],pad:[null,[11,1]],what:'감자튀김을 더 빨리 튀기고, 더 많이 쌓아 둬요.|Fries faster and keeps more ready.',first:'감자튀김(🪙3)도 팔아요. 손님이 감자튀김도 주문해요!|Sell fries (🪙3) too. Diners will order them!'},
  {id:'drink',cat:0,ic:'🥤',pic:'shop-drink',name:'음료 기계|Drink machine',act:'음료 기계 빠르게|Faster drink machine',act1:'음료 기계 놓기|Add a drink machine',price:[0,190,220,380,650,1100],pad:[null,[12,1]],what:'음료를 더 빨리 따르고, 더 많이 쌓아 둬요.|Pours drinks faster and keeps more ready.',first:'음료(🪙2)도 팔아요. 손님이 음료도 주문해요!|Sell drinks (🪙2) too. Diners will order them!'},
  {id:'tables',cat:1,ic:'🪑',pic:'shop-table',name:'테이블|Tables',act:'테이블 추가|Add a table',start:1,price:[0,0,90,250,520,950,1600],pad:[null,null,[10,6],[10,9],[12,3],[12,6],[12,9]],what:'테이블이 하나 더 생겨서 손님이 더 자주 와요.|One more table, so diners come more often.'},
- {id:'sign',cat:1,ic:'🌟',name:'가게 간판|Shop sign',act:'간판 바꾸기|Better sign',price:[0,520,950,1650],what:'간판이 눈에 잘 띄어서 손님이 더 자주 와요.|A bright sign brings diners more often.',names:SIGN_LV},
- {id:'decor',cat:1,ic:'🪴',name:'예쁜 꾸미기|Decorations',act:'가게 꾸미기|Decorate the café',price:[0,60,320,680,1250],what:'가게가 예뻐지면 손님이 팁을 더 줘요.|Diners tip more in a pretty café.',names:DECOR_LV},
+ {id:'sign',cat:1,ic:'🌟',pic:'shop-sign',name:'가게 간판|Shop sign',act:'간판 바꾸기|Better sign',price:[0,520,950,1650],what:'간판이 눈에 잘 띄어서 손님이 더 자주 와요.|A bright sign brings diners more often.',names:SIGN_LV},
+ {id:'decor',cat:1,ic:'🪴',pic:[null,'shop-plant','shop-plant','shop-balloons','shop-radio'],name:'예쁜 꾸미기|Decorations',act:'가게 꾸미기|Decorate the café',price:[0,60,320,680,1250],what:'가게가 예뻐지면 손님이 팁을 더 줘요.|Diners tip more in a pretty café.',names:DECOR_LV},
  {id:'staff',cat:2,ic:'🧑‍🍳',name:'알바생|Helpers',act:'알바생 고용|Hire a helper',price:[0,180,700,1650],what:'알바생이 기계에서 음식을 받아 손님께 날라 줘요.|A helper carries food from the machines to the diners.'},
- {id:'train',cat:2,ic:'🎓',name:'알바생 교육|Helper training',act:'알바생 교육|Train the helpers',price:[0,400,780,1400],need:'staff',what:'알바생이 더 빨리 걸어서 음식을 빨리 날라요.|Helpers walk faster and bring food sooner.'},
+ {id:'train',cat:2,ic:'🎓',pic:'shop-train',name:'알바생 교육|Helper training',act:'알바생 교육|Train the helpers',price:[0,400,780,1400],need:'staff',what:'알바생이 더 빨리 걸어서 음식을 빨리 날라요.|Helpers walk faster and bring food sooner.'},
  {id:'buddy',cat:2,ic:'🐾',name:'동전 줍는 짝꿍|Coin-picking buddy',act:'동전 짝꿍|Coin buddy',price:[0,600],what:'짝꿍이 테이블에 놓인 동전을 주워 와요.|Your buddy picks up the coins left on tables.'},
- {id:'tray',cat:3,ic:'🛍️',name:'큰 쟁반|Big tray',act:'쟁반 키우기|Bigger tray',price:[0,110,380,850],what:'쟁반이 커져서 음식을 한 번에 더 많이 들어요.|A bigger tray carries more food at once.'},
- {id:'shoes',cat:3,ic:'👟',name:'빠른 신발|Fast shoes',act:'신발 바꾸기|Faster shoes',price:[0,320,680,1200],what:'내가 더 빨리 걸어요.|You walk faster.'}];
+ {id:'tray',cat:3,ic:'🛍️',pic:'shop-tray',name:'큰 쟁반|Big tray',act:'쟁반 키우기|Bigger tray',price:[0,110,380,850],what:'쟁반이 커져서 음식을 한 번에 더 많이 들어요.|A bigger tray carries more food at once.'},
+ {id:'shoes',cat:3,ic:'👟',pic:'shop-shoes',name:'빠른 신발|Fast shoes',act:'신발 바꾸기|Faster shoes',price:[0,320,680,1200],what:'내가 더 빨리 걸어요.|You walk faster.'}];
 const upAct=(u,v)=>T(v===1&&u.act1?u.act1:u.act);
 // the level step in words a child reads at a glance: "새로!", "2개 → 3개", "1명 → 2명", else "Lv.2→3"
 const upStep=(u,v)=>u.id==='tables'?L(`${v-1}개 → ${v}개`,`${v-1} → ${v}`):u.id==='staff'?L(`${v-1}명 → ${v}명`,`${v-1} → ${v}`):v===1?L('✨ 새로!','✨ New!'):`Lv.${v-1}→${v}`;
@@ -5844,7 +5850,7 @@ function shopRecap(ses){
   <div class="ls-top"><span>📒 ${L('오늘 배운 것','What I learned today')}</span><span class="ls-till">${COIN} +${ses.earned}</span></div>
   <div class="ls-head">${f?`<span class="ls-foe">${pic(f.img,f.icon)}</span><div class="ls-bub">${L(`${esc(josa(f.name,'이','가'))} 가게에 쳐들어왔어요! 오늘 배운 과학으로 물리쳐요.`,`${esc(f.name)} burst into the shop! Beat it with what you learned today.`)}</div>`:`<div class="ls-bub">${L('배운 걸 떠올리며 다시 도전해요!','Remember what you learned and try again!')}</div>`}</div></div>
  <div class="card ls-play"><p class="ls-rch">${L('과학 손님들이 해 준 말을 한 번 더 읽어요. 누르면 들려줘요.','Read what the science customers said once more. Tap to hear it.')}</p>
-  ${ses.list.map(id=>`<button class="ls-rc" type="button" data-l="rc" data-id="${id}"><span class="w">${LEARN[id].who}</span><span class="ci">${icon(CARD[id].icon)}</span><span class="t"><b>${esc(CARD[id].title)}</b><small>“${esc(T(LEARN[id].thanks))}”</small></span></button>`).join('')}
+  ${ses.list.map(id=>`<button class="ls-rc" type="button" data-l="rc" data-id="${id}"><span class="w">${custFace(LEARN[id].who)}</span><span class="ci">${icon(CARD[id].icon)}</span><span class="t"><b>${esc(CARD[id].title)}</b><small>“${esc(T(LEARN[id].thanks))}”</small></span></button>`).join('')}
   <button class="btn green ls-go" type="button" data-l="go">⚔️ ${ses.mode==='relearn'?L('다시 도전!','Try again!'):L('출동!','Let’s go!')}</button></div>`;
  window.scrollTo({top:0});SFX.hint();speak(L('오늘 배운 것을 정리해요.','Let’s sum up what you learned today.'));
 }
@@ -5876,8 +5882,11 @@ const DECOR=['🧸','📒','🖍️','🧴','🔦','🎈','🧃','🪀'];
 const FOOD={burger:'🍔',fries:'🍟',drink:'🥤'};
 // pictures from images/ (step 14 of the prompt file): customers are waist-up like the player, legs are drawn here.
 // Add a key to SHOP_HAVE once its file is in images/; until then customers and furniture are drawn from emoji and boxes.
-const SHOP_HAVE=new Set(['shop-stand','shop-counter','shop-lab','shop-grill','shop-fries','shop-drink','shop-table',...['bear','squirrel','fox','turtle','owl','bunny','panda','scientist','puppy','farmer','hedgehog','penguin','koala','raccoon','hamster','frog','otter','pig','tiger','monkey'].map(k=>'cust-'+k)]);
-const CUST_KEY={'🐻':'bear','🐿️':'squirrel','🦊':'fox','🐢':'turtle','🦉':'owl','🐰':'bunny','🐇':'bunny','🐼':'panda','👩‍🔬':'scientist','🧑‍🔬':'scientist','🐶':'puppy','🧑‍🌾':'farmer','🦔':'hedgehog','🐧':'penguin','🐨':'koala','🦝':'raccoon','🐹':'hamster','🐸':'frog','🦦':'otter','🐷':'pig','🐯':'tiger','🐵':'monkey'};
+const SHOP_HAVE=new Set(['shop-stand','shop-counter','shop-lab','shop-grill','shop-fries','shop-drink','shop-table',...['bear','squirrel','fox','turtle','owl','bunny','panda','scientist','puppy','farmer','hedgehog','penguin','koala','raccoon','hamster','frog','otter','pig','tiger','monkey',
+ 'chef','firefighter','crab','octopus','astronaut','cow','giraffe','cat','beaver','chick','whale','artist','rooster','goat','mouse','builder','cheetah','pilot','mechanic','operator','sheep','elephant','swimmer','bee','dragon','caterpillar','ant','snail','teacher','deer','polarbear','parrot','dolphin','horse','badger'].map(k=>'cust-'+k),
+ 'shop-sign','shop-plant','shop-balloons','shop-picture','shop-radio','shop-tray','shop-shoes','shop-train','food-burger','food-fries','food-drink']);
+const CUST_KEY={'🐻':'bear','🐿️':'squirrel','🦊':'fox','🐢':'turtle','🦉':'owl','🐰':'bunny','🐇':'bunny','🐼':'panda','👩‍🔬':'scientist','🧑‍🔬':'scientist','🐶':'puppy','🧑‍🌾':'farmer','🦔':'hedgehog','🐧':'penguin','🐨':'koala','🦝':'raccoon','🐹':'hamster','🐸':'frog','🦦':'otter','🐷':'pig','🐯':'tiger','🐵':'monkey',
+ '👩‍🍳':'chef','🧑‍🍳':'chef','👨‍🍳':'chef','🧑‍🚒':'firefighter','🦀':'crab','🐙':'octopus','🧑‍🚀':'astronaut','👩‍🚀':'astronaut','🐮':'cow','🦒':'giraffe','🐱':'cat','🦫':'beaver','🐥':'chick','🐳':'whale','👩‍🎨':'artist','🧑‍🎨':'artist','🐓':'rooster','🐔':'rooster','🐐':'goat','🐭':'mouse','👷':'builder','🐆':'cheetah','🧑‍✈️':'pilot','🧑‍🔧':'mechanic','🧑‍🏭':'operator','🐑':'sheep','🐘':'elephant','🏊':'swimmer','🐝':'bee','🐲':'dragon','🐛':'caterpillar','🐜':'ant','🐌':'snail','🧑‍🏫':'teacher','🦌':'deer','🐻‍❄️':'polarbear','🦜':'parrot','🐬':'dolphin','🐴':'horse','🦡':'badger'};
 const PICS={};
 const cl=(v,a,b)=>v<a?a:v>b?b:v,rnd=(a,b)=>a+Math.random()*(b-a);
 const pk=a=>a[Math.floor(Math.random()*a.length)];
@@ -5886,6 +5895,9 @@ let Y=null;
 function img(src){const m=new Image();m.src=src;return m}
 const ok_=m=>m&&m.complete&&m.naturalWidth;
 function shopPic(k){if(!SHOP_HAVE.has(k))return null;if(!PICS[k])PICS[k]=img(`images/sci-${k}.webp`);return ok_(PICS[k])?PICS[k]:null}
+// a customer's painted face for the page around the café (order card, buttons, captions, the recap and battle hints);
+// anything without a picture stays as it was. A picture that fails to load turns back into its emoji (data-emoji).
+function face(e){const k=CUST_KEY[e];return k&&SHOP_HAVE.has('cust-'+k)?`<img class="ei cf" src="images/sci-cust-${k}.webp" data-emoji="${esc(e)}" alt="" draggable="false">`:richE(e)}
 function meKey(){const map={'🐰':'bunny','🐻':'bear','🦊':'fox','🐼':'panda','🐨':'koala','🐯':'tiger','🦁':'lion','🐸':'frog','🐱':'cat','🐶':'puppy','🐥':'chick','🦄':'unicorn','🐙':'octopus','🐬':'dolphin','🦖':'dino','⭐':'star'};
  return map[String(S.av||'').replace(/️/g,'')]||'kid'}
 const meSrc=()=>`images/aq-me-${meKey()}.webp`;
@@ -5989,7 +6001,7 @@ function taskText(){const O=Y.O;if(!O)return '';const ask=esc(T(O.p.ask));
  if(O.t==='order')return `🍔 ${ask} <span class="ty-steps">${Array.from({length:O.need},(_,k)=>`<i class="${k<O.next?'on':''}">${k<O.next?richE(O.stack[k]):k+1}</i>`).join('')}</span>`;
  if(O.t==='pair')return `🔗 ${ask} <b>${O.got}/${O.need}</b>`;
  return `🔬 ${ask}${O.lab?' <b>📋</b>':''}`}
-function orderUI(){if(!Y)return;const O=Y.O;Y.el.order.innerHTML=O?`<span class="w">${O.X.who}</span><span class="tx"><small>🔬 ${L('과학 손님','Science customer')}</small>${taskText()}</span><span class="sp">🔊</span>`:'';hud()}
+function orderUI(){if(!Y)return;const O=Y.O;Y.el.order.innerHTML=O?`<span class="w">${face(O.X.who)}</span><span class="tx"><small>🔬 ${L('과학 손님','Science customer')}</small>${taskText()}</span><span class="sp">🔊</span>`:'';hud()}
 function hud(){if(!Y)return;const n=upHave(),all=upAll(),tot=Y.ses.list.length;
  Y.el.day.textContent=`🍔 ${L(`${S.shopX.days||1}일째`,`Day ${S.shopX.days||1}`)} · 🔬 ${Math.max(0,Math.min(Y.oi,tot))+(Y.O&&Y.O.done?1:0)}/${tot}`;
  Y.el.bar.style.width=n/all*100+'%';Y.el.up.textContent=`🛠️ ${L('업그레이드','Upgrades')} ${n}/${all}`;canUI()}
@@ -6007,13 +6019,13 @@ function giveTo(c){const O=Y.O;if(!O||O.done||!c||c.state!=='wait')return;
  SFX.click();Y.blockCust=-1;Y.zoneKey='go';route(CCOL+.5,cl(Math.floor(c.spot[1]),5,7)+.5)}
 function actsUI(){if(!Y)return;const O=Y.O,box=Y.el.acts;let html='';
  if(O&&!O.done&&Y.phase==='open'&&topSci()>=0){const wait=Y.cust.filter(c=>c.state==='wait');
-  if(O.t==='sort')html=wait.sort((a,b)=>a.bin-b.bin).map(c=>`<button type="button" class="ty-give" data-give="${Y.cust.indexOf(c)}"><span class="w">${c.e}</span><span class="t"><b>${richE(c.sign[0])} ${esc(c.sign[1])}</b><small>${L('이 손님께 주기','Give it to this customer')}</small></span></button>`).join('');
-  else{const c=custFor(6);if(c)html=`<button type="button" class="ty-give one" data-give="${Y.cust.indexOf(c)}"><span class="w">${c.e}</span><span class="t"><b>${O.t==='predict'||O.t==='explore'?L('📋 손님께 결과 알려 주기','📋 Tell the customer the result'):L('🛎️ 손님께 건네기','🛎️ Hand it to the customer')}</b>${c.sign?`<small>${richE(c.sign[0])} ${esc(c.sign[1])}</small>`:''}</span></button>`}}
+  if(O.t==='sort')html=wait.sort((a,b)=>a.bin-b.bin).map(c=>`<button type="button" class="ty-give" data-give="${Y.cust.indexOf(c)}"><span class="w">${face(c.e)}</span><span class="t"><b>${richE(c.sign[0])} ${esc(c.sign[1])}</b><small>${L('이 손님께 주기','Give it to this customer')}</small></span></button>`).join('');
+  else{const c=custFor(6);if(c)html=`<button type="button" class="ty-give one" data-give="${Y.cust.indexOf(c)}"><span class="w">${face(c.e)}</span><span class="t"><b>${O.t==='predict'||O.t==='explore'?L('📋 손님께 결과 알려 주기','📋 Tell the customer the result'):L('🛎️ 손님께 건네기','🛎️ Hand it to the customer')}</b>${c.sign?`<small>${richE(c.sign[0])} ${esc(c.sign[1])}</small>`:''}</span></button>`}}
  if(!html&&Y.phase==='open'){const t=foodTable();if(t&&!atTable(t)){const fd=Y.hold.filter(h=>h.food).map(h=>h.food),d=Y.diners.find(d=>d.state==='sit'&&d.t===t.i&&fd.some(f=>(d.want[f]||0)>(d.got[f]||0)));
-  html=`<button type="button" class="ty-give one food" data-food="${t.i}"><span class="w">${d.e}</span><span class="t"><b>${L('🍽️ 손님께 음식 갖다 주기','🍽️ Take the food to the diner')}</b><small>${[...new Set(fd.filter(f=>(d.want[f]||0)>(d.got[f]||0)))].map(f=>FOOD[f]).join(' ')} ${L('기다리는 손님이 있어요','A diner is waiting')}</small></span></button>`}}
+  html=`<button type="button" class="ty-give one food" data-food="${t.i}"><span class="w">${face(d.e)}</span><span class="t"><b>${L('🍽️ 손님께 음식 갖다 주기','🍽️ Take the food to the diner')}</b><small>${[...new Set(fd.filter(f=>(d.want[f]||0)>(d.got[f]||0)))].map(f=>FOOD[f]).join(' ')} ${L('기다리는 손님이 있어요','A diner is waiting')}</small></span></button>`}}
  if(!html&&Y.phase==='open'&&Y.mess&&!atTable(Y.mess.t))html=`<button type="button" class="ty-give one wipe" data-wipe="1"><span class="w">🧽</span><span class="t"><b>${L('테이블 닦으러 가기','Go wipe the table')}</b><small>${L('헷갈 박사가 어질러 놓았어요. 닦으면 보너스!','Dr. Mix-Up made a mess. Wipe it for a bonus!')}</small></span></button>`;
  if(html!==Y.actsHtml){Y.actsHtml=html;box.innerHTML=html;box.classList.toggle('hidden',!html)}}
-function caption(ic,txt,good,say){if(!Y)return;Y.capAt=Y.t;const c=Y.el.cap;c.className='ty-cap'+(good===true?' good':good===false?' bad':'');c.innerHTML=`<span class="ic">${richE(ic)}</span><span>${esc(txt)}</span>`;void c.offsetWidth;c.classList.add('in');if(say!==false)speak(txt)}
+function caption(ic,txt,good,say){if(!Y)return;Y.capAt=Y.t;const c=Y.el.cap;c.className='ty-cap'+(good===true?' good':good===false?' bad':'');c.innerHTML=`<span class="ic">${face(ic)}</span><span>${esc(txt)}</span>`;void c.offsetWidth;c.classList.add('in');if(say!==false)speak(txt)}
 function banner(html,ms){if(!Y)return;const b=Y.el.ban;b.innerHTML=html;b.classList.remove('hidden','in');void b.offsetWidth;b.classList.add('in');clearTimeout(Y.banT);Y.banT=setTimeout(()=>{if(Y)b.classList.add('hidden')},ms)}
 function mood(c,m,t=1.6){c.mood=m;c.moodT=t}
 function pop(x,y,txt,col){Y.pops.push({x,y,txt,col,t:0})}
@@ -6183,7 +6195,9 @@ function openCard(u,v,from){if(!Y||Y.card||v>upMax(u))return;if(Y.board)closeBoa
  Y.card={u,v,from};Y.joy=null;Y.keys={};Y.el.joy.classList.add('hidden');Y.focus=upSpots(u,v)[0];SFX.hint();cardUI();Y.el.pv.classList.remove('hidden');
  speak(`${upAct(u,v)}. ${T(v===1&&u.first?u.first:u.what)}`)}
 function cardUI(){const C=Y&&Y.card;if(!C)return;const {u,v}=C,p=u.price[v],can=S.coins>=p,rows=upChange(u,v-1,v,true);
- const pic=u.pic?`<img src="images/sci-${u.pic}.webp" alt="" onerror="this.replaceWith('${u.ic}')">`:u.id==='staff'&&Y.crew[v-1]?`<img src="${Y.crew[v-1].src}" alt="">`:u.ic;
+ // the picture: the upgrade's own (some change with the level), your buddy for the coin buddy, the new helper for staff
+ const pn=Array.isArray(u.pic)?u.pic[v]:u.pic,bd=BUDDIES[S.equip.buddy]||BUDDIES.puppy;
+ const pic=pn?`<img src="images/sci-${pn}.webp" alt="" onerror="this.replaceWith('${u.ic}')">`:u.id==='buddy'&&bd.img?`<img src="${bd.img}" alt="" onerror="this.replaceWith('${bd.icon}')">`:u.id==='staff'&&Y.crew[v-1]?`<img src="${Y.crew[v-1].src}" alt="">`:u.ic;
  Y.el.pv.innerHTML=`<div class="ty-pvin" role="dialog" aria-label="${esc(upAct(u,v))}"><div class="ty-pvh"><span class="pic">${pic}</span><div class="t"><b>${esc(upAct(u,v))}</b><small>${esc(T(u.name))} · <em>${esc(upStep(u,v))}</em></small></div></div>
   <p class="ty-pvw">${esc(T(v===1&&u.first?u.first:u.what))}</p>
   ${rows.length?`<ul class="ty-pvc">${rows.map(r=>`<li><span class="k">${r[0]} ${esc(r[1])}</span><span class="v"><s>${esc(r[2])}</s> → <b>${esc(r[3])}</b></span></li>`).join('')}</ul>`:''}
@@ -6280,7 +6294,12 @@ function tint(h,a){const n=parseInt(h.slice(1),16),r=n>>16,g=n>>8&255,b=n&255,f=
 const ICO={};
 function icoImg(n){if(!ICO[n]){const svg=(ICON_SVG[n]||'').replace('<svg ','<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" ');ICO[n]=img(ICO_HAVE.has(n)?`images/sci-ico-${n}.webp`:'data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg))}return ok_(ICO[n])?ICO[n]:null}
 // color emoji take the alpha of the current fill color, so draw them with an opaque one and put it back after
-function emo(c,e,x,y,size){const fs=c.fillStyle;c.fillStyle='#000';emo_(c,e,x,y,size);c.fillStyle=fs}
+// café food and the radio have painted pictures: emo() draws the picture instead once it has loaded (the emoji until
+// then), and leaves the same font and text alignment behind as an emoji would
+const EMO_PIC={'🍔':'food-burger','🍟':'food-fries','🥤':'food-drink','📻':'shop-radio'};
+function emo(c,e,x,y,size){const im=EMO_PIC[e]&&shopPic(EMO_PIC[e]);
+ if(im){const s=size*1.12,r=im.naturalWidth/im.naturalHeight,w=r>1?s:s*r,h=r>1?s/r:s;c.drawImage(im,x-w/2,y-h/2,w,h);c.font=`${size}px ${EF}`;c.textAlign='center';c.textBaseline='middle';return}
+ const fs=c.fillStyle;c.fillStyle='#000';emo_(c,e,x,y,size);c.fillStyle=fs}
 function emo_(c,e,x,y,size){if(e&&e.includes('@')){const parts=e.split(/(@[a-z]+)/).filter(Boolean);let w=0;const ws=parts.map(p=>{let v;if(p[0]==='@')v=size;else{c.font=`${size}px ${EF}`;v=c.measureText(p).width}w+=v;return v});let px=x-w/2;
   parts.forEach((p,k)=>{if(p[0]==='@'){const im=icoImg(p.slice(1));if(im)c.drawImage(im,px,y-size/2,size,size)}else{c.font=`${size}px ${EF}`;c.textAlign='left';c.textBaseline='middle';c.fillText(p,px,y)}px+=ws[k]});return}
  c.font=`${size}px ${EF}`;c.textAlign='center';c.textBaseline='middle';c.fillText(e,x,y)}
@@ -6301,12 +6320,15 @@ function draw(){const c=Y.ctx,me=Y.me,O=Y.O,dec=lvOf('decor'),sg=lvOf('sign');c.
  wallQuad(c,0,0,MW,0,wh,wh+10,'#ffffff');wallQuad(c,0,0,0,MH,wh,wh+10,'#f2f6fb');
  wallQuad(c,0,0,MW,0,0,16,'#f0a76a');wallQuad(c,0,0,0,MH,0,16,'#8fbfe8');
  const mb=iso(9.2,0);c.save();c.translate(mb[0],mb[1]-wh+28);c.transform(1,.5,0,1,0,0);c.fillStyle='#3a2b26';c.beginPath();c.roundRect(-4,-14,132,52,8);c.fill();
- c.font=`22px ${EF}`;c.textBaseline='middle';c.textAlign='center';[['🍔',5],['🍟',3],['🥤',2]].forEach(([e,p],k)=>{c.fillText(e,18+k*44,4);c.font=`900 12px ${TF}`;c.fillStyle='#ffd23f';c.fillText(`🪙${p}`,18+k*44,27);c.font=`22px ${EF}`;c.fillStyle='#3a2b26'});c.restore();
+ [['🍔',5],['🍟',3],['🥤',2]].forEach(([e,p],k)=>{emo(c,e,18+k*44,4,22);c.font=`900 12px ${TF}`;c.textAlign='center';c.textBaseline='middle';c.fillStyle='#ffd23f';c.fillText(`🪙${p}`,18+k*44,27)});c.restore();
  const sp=iso(3.8,0);c.save();c.translate(sp[0],sp[1]-wh+30);c.transform(1,.5,0,1,0,0);c.fillStyle=sg?'#ffd23f':'#ffffff';c.beginPath();c.roundRect(-84,-18,168,34,12);c.fill();if(sg){c.strokeStyle='#ff9f1a';c.lineWidth=3;c.stroke();c.lineWidth=1}
- c.fillStyle='#e0533d';c.font=`900 16px ${TF}`;c.textAlign='center';c.textBaseline='middle';c.fillText(`🍔 ${T(SHOP_LV[shopLv()][2])}`,0,0,160);c.restore();
+ const nm=T(SHOP_LV[shopLv()][2]);c.fillStyle='#e0533d';c.font=`900 16px ${TF}`;c.textAlign='center';c.textBaseline='middle';
+ if(shopPic('food-burger')){const w=Math.min(134,c.measureText(nm).width),x0=-(w+26)/2;emo(c,'🍔',x0+10,0,20);c.fillStyle='#e0533d';c.font=`900 16px ${TF}`;c.fillText(nm,x0+26+w/2,0,134)}
+ else c.fillText(`🍔 ${nm}`,0,0,160);c.restore();
  [['🧲',0,3.2],['🌍',0,5.6],['🔬',0,8]].forEach(([e,x,y])=>{const p=iso(x,y);c.save();c.translate(p[0],p[1]-wh+46);c.transform(1,-.5,0,1,0,0);c.fillStyle='#ffffff';c.strokeStyle='#9fb6d6';c.lineWidth=3;c.beginPath();c.roundRect(-22,-26,44,50,6);c.fill();c.stroke();c.lineWidth=1;c.font=`26px ${EF}`;c.textAlign='center';c.textBaseline='middle';c.fillText(e,0,0);c.restore()});
  // decorations: a picture on the café wall, then a radio playing music
- if(dec>=3){const p=iso(8.45,0);c.save();c.translate(p[0],p[1]-wh+52);c.transform(1,.5,0,1,0,0);c.fillStyle='#ffffff';c.strokeStyle='#e0a33a';c.lineWidth=4;c.beginPath();c.roundRect(-18,-20,36,36,4);c.fill();c.stroke();c.lineWidth=1;c.font=`22px ${EF}`;c.textAlign='center';c.textBaseline='middle';c.fillStyle='#000';c.fillText('🌈',0,-2);c.restore()}
+ if(dec>=3&&shopPic('shop-picture')){const p=iso(8.45,0);c.save();c.translate(p[0],p[1]-wh+52);c.transform(1,.5,0,1,0,0);c.drawImage(shopPic('shop-picture'),-23,-27,46,46);c.restore()}
+ else if(dec>=3){const p=iso(8.45,0);c.save();c.translate(p[0],p[1]-wh+52);c.transform(1,.5,0,1,0,0);c.fillStyle='#ffffff';c.strokeStyle='#e0a33a';c.lineWidth=4;c.beginPath();c.roundRect(-18,-20,36,36,4);c.fill();c.stroke();c.lineWidth=1;c.font=`22px ${EF}`;c.textAlign='center';c.textBaseline='middle';c.fillStyle='#000';c.fillText('🌈',0,-2);c.restore()}
  if(dec>=4){const p=iso(12.75,0);emo(c,'📻',p[0],p[1]-wh+64,26);for(let k=0;k<3;k++){const a=(Y.t*.5+k/3)%1;c.globalAlpha=1-a;emo(c,k%2?'🎵':'🎶',p[0]-10-a*26+Math.sin(a*9+k)*6,p[1]-wh+52-a*44,14);c.globalAlpha=1}}
  if(sg||dec)for(let k=0;k<17;k++){const [x,y]=iso(k*.78+.2,0);c.globalAlpha=(Math.floor(Y.t*3)+k)%3?1:.45;emo(c,'💡',x,y-wh-2,12);c.globalAlpha=1}
  // floors: tiles in the science corner, warm wood in the café
@@ -6343,8 +6365,11 @@ function draw(){const c=Y.ctx,me=Y.me,O=Y.O,dec=lvOf('decor'),sg=lvOf('sign');c.
  D.push([COINS.x+COINS.y+1,()=>drawPile(c)]);
  Y.mach.forEach(m=>{if(machOn(m))D.push([m.x+m.y+.9,()=>drawMach(c,m)])});
  Y.tables.forEach(t=>{if(tableOn(t))D.push([t.x+t.y+.95,()=>drawTable(c,t)])});
- if(dec)[[.5,10.5],[10.5,.5],[.5,.6]].forEach(([x,y])=>D.push([x+y,()=>{const [a,b]=iso(x,y);emo(c,'🪴',a,b-16,32)}]));
- if(dec>=3)[[8.35,.45],[12.75,10.75]].forEach(([x,y],k)=>D.push([x+y,()=>{const [a,b]=iso(x,y),w=Math.sin(Y.t*2+k)*3;c.strokeStyle='#9aa4b8';c.beginPath();c.moveTo(a,b);c.lineTo(a+w,b-42);c.stroke();emo(c,'🎈',a+w-7,b-54,24);emo(c,'🎈',a+w+8,b-60,22)}]));
+ if(dec)[[.5,10.5],[10.5,.5],[.5,.6]].forEach(([x,y])=>D.push([x+y,()=>{const [a,b]=iso(x,y);if(!furn(c,'plant',a,b+3,32))emo(c,'🪴',a,b-16,32)}]));
+ // balloons: the painted bunch stands on its weight and sways a little; without it, two emoji on a string
+ if(dec>=3)[[8.35,.45],[12.75,10.75]].forEach(([x,y],k)=>D.push([x+y,()=>{const [a,b]=iso(x,y),im=shopPic('shop-balloons');
+  if(im){const h=70,w=h*im.naturalWidth/im.naturalHeight;c.save();c.translate(a,b+2);c.rotate(Math.sin(Y.t*2+k)*.05);c.drawImage(im,-w/2,-h,w,h);c.restore();return}
+  const w=Math.sin(Y.t*2+k)*3;c.strokeStyle='#9aa4b8';c.beginPath();c.moveTo(a,b);c.lineTo(a+w,b-42);c.stroke();emo(c,'🎈',a+w-7,b-54,24);emo(c,'🎈',a+w+8,b-60,22)}]));
  Y.diners.forEach(d=>D.push([ck(d.x,d.y,d.x+d.y+(d.state==='sit'||d.state==='eat'?.02:0)),()=>drawDiner(c,d),'diner']));
  Y.cust.forEach((p,k)=>{if(p.state!=='gone')D.push([ck(p.x,p.y,p.x+p.y),()=>drawCust(c,p),'cust'+k])});
  Y.staff.forEach(s=>D.push([ck(s.x,s.y,s.x+s.y),()=>drawStaff(c,s),'staff']));
@@ -6467,7 +6492,8 @@ function drawCust(c,p){const [x,y]=iso(p.x,p.y),O0=Y.O,sortN=O0&&O0.t==='sort'&&
  let m=p.mood;if(!m&&p.state==='wait'&&O&&!O.done&&front&&O.t!=='sort')m=O.t==='find'?`${O.got}/${O.need}`:O.t==='order'?`${O.next}/${O.need}`:O.t==='pair'?'❓':'🔬';
  if(m){bubble(c,x,ty,m);if(p.state==='wait'&&!p.mood){c.strokeStyle=`rgba(90,176,230,${.5+.5*Math.sin(Y.t*5)})`;c.lineWidth=3;c.beginPath();c.ellipse(x,y,20,10,0,0,TAU);c.stroke();c.lineWidth=1}}}
 // the shop sign stands on the sidewalk by the café entrance, facing the street along the right edge of the floor
-function drawSign(c){const y0=-1.8,y1=.9,x=MW+1.05,H=54,P=30,[ax,ay]=iso(x,y1),[bx,by]=iso(x,y0);
+function drawSign(c){const y0=-1.8,y1=.9,x=MW+1.05,H=54,P=30,[ax,ay]=iso(x,y1),[bx,by]=iso(x,y0),im=shopPic('shop-sign');
+ if(im)return signPic(c,im,x,y0,y1);
  [[ax,ay],[bx,by]].forEach(([px,py])=>{c.fillStyle='rgba(0,0,0,.18)';c.beginPath();c.ellipse(px,py,9,4.5,0,0,TAU);c.fill();c.fillStyle='#b8323f';c.fillRect(px-3,py-P,6,P)});
  const pts=[[ax,ay-P],[bx,by-P],[bx,by-P-H],[ax,ay-P-H]],dep=[[ax+6,ay-P+3],[bx+6,by-P+3],[bx+6,by-P-H+3],[ax+6,ay-P-H+3]];
  const sv=lvOf('sign');poly(c,dep,'#b8323f');poly(c,pts,sv?'#ffcf3a':'#ff5a6a');c.strokeStyle='#ffffff';c.lineWidth=3;poly(c,pts,null,'#ffffff');c.lineWidth=1;
@@ -6476,6 +6502,21 @@ function drawSign(c){const y0=-1.8,y1=.9,x=MW+1.05,H=54,P=30,[ax,ay]=iso(x,y1),[
  const [mx,my]=iso(x,(y0+y1)/2);emo(c,'🍔',mx-16,my-P-H-12,30);emo(c,'🍔',mx+18,my-P-H-26,30);
  if(sv>=3){const b=Math.sin(Y.t*3)*4;c.globalAlpha=.35+.2*Math.sin(Y.t*5);c.fillStyle='#fff3a0';c.beginPath();c.arc(mx+2,my-P-H-58+b,26,0,TAU);c.fill();c.globalAlpha=1;emo(c,'⭐',mx+2,my-P-H-58+b,36)}
  if(sv&&Math.floor(Y.t*3)%2)emo(c,'✨',mx+40,my-P-H-30,16)}
+// the painted sign (a blank board on two legs) turned to face the street the same way, with the name written on it.
+// Its levels: a golden board, then blinking bulbs along the frame, then a star on top.
+function signPic(c,im,x,y0,y1){const [mx,my]=iso(x,(y0+y1)/2),sv=lvOf('sign'),w=106,h=w*im.naturalHeight/im.naturalWidth,top=-h*157/161;
+ const at=(lx,ly)=>[mx+lx,my+ly-.5*lx];// board point → screen: lx across the board, ly from the ground line (up is negative)
+ [-.267,.267].forEach(f=>{const [px,py]=at(f*w,0);c.fillStyle='rgba(0,0,0,.18)';c.beginPath();c.ellipse(px,py,11,5,0,0,TAU);c.fill()});
+ c.save();c.translate(mx,my);c.transform(1,-.5,0,1,0,0);c.drawImage(im,-w/2,top,w,h);
+ const iw=w*186/240,ih=h*70/161,iy=top+h*28/161;
+ if(sv){c.globalAlpha=.6;c.fillStyle='#ffd23f';c.beginPath();c.roundRect(-iw/2,iy,iw,ih,8);c.fill();c.globalAlpha=1}
+ const nm=L('과학 버거','Science Burger'),cy=iy+ih/2;c.textAlign='center';c.textBaseline='middle';c.fillStyle='#e0533d';c.font=`900 18px ${TF}`;
+ if(c.measureText(nm).width>(iw-8)*1.25&&nm.includes(' ')){const [a,b]=nm.split(' ');c.font=`900 15px ${TF}`;c.fillText(a,0,cy-8,iw-8);c.fillText(b,0,cy+8,iw-8)}
+ else c.fillText(nm,0,cy+1,iw-8);c.restore();
+ if(sv>=2)for(let k=0;k<=8;k++){const lx=-w*.42+w*.84*k/8,on=(Math.floor(Y.t*4)+k)%2;[top+h*14/161,top+h*116/161].forEach(ly=>{const [px,py]=at(lx,ly);c.fillStyle=on?'#fff7b0':'#ff9f1a';c.beginPath();c.arc(px,py,3.2,0,TAU);c.fill()})}
+ const tp=my+top+h*12/161;emo(c,'🍔',mx-16,tp-12,30);emo(c,'🍔',mx+18,tp-26,30);
+ if(sv>=3){const b=Math.sin(Y.t*3)*4;c.globalAlpha=.35+.2*Math.sin(Y.t*5);c.fillStyle='#fff3a0';c.beginPath();c.arc(mx+2,tp-58+b,26,0,TAU);c.fill();c.globalAlpha=1;emo(c,'⭐',mx+2,tp-58+b,36)}
+ if(sv&&Math.floor(Y.t*3)%2)emo(c,'✨',mx+40,tp-30,16)}
 function drawFoe(c){const f=Y.foe,[x,y]=iso(f.x,f.y);shadow(c,x,y,26);const im=Y.im.foe;
  if(ok_(im)){const h=96,w=h*im.naturalWidth/im.naturalHeight;c.drawImage(im,x-w/2,y-h+Math.sin(f.ph)*3,w,h)}else emo(c,Y.ses.foe.icon,x,y-40,60)}
 
@@ -6501,10 +6542,11 @@ function listen(){const cv=Y.el.cv,on=(t,ev,fn,o)=>{t.addEventListener(ev,fn,o);
  const key=e=>{if(!Y||$('modalRoot').innerHTML)return;if(Y.board||Y.card){if(e.key==='Escape'&&e.type==='keydown'){closeCard();closeBoard()}return}const m={ArrowLeft:'l',ArrowRight:'r',ArrowUp:'u',ArrowDown:'d'}[e.key];if(!m)return;Y.keys[m]=e.type==='keydown';e.preventDefault()};
  on(window,'keydown',key);on(window,'keyup',key);on(window,'blur',()=>{if(Y)Y.keys={}});
  let rt=0;on(window,'resize',()=>{clearTimeout(rt);rt=setTimeout(resize,100)})}
-return {open,stop,get _y(){return Y},_route:(x,y)=>route(x,y),_tile:()=>Y&&[Y.me.x,Y.me.y],_step:dt=>update(dt),_free:(x,y)=>freeR(x,y),_thing:(x,y)=>thingAt(x,y),
+return {open,stop,face,get _y(){return Y},_route:(x,y)=>route(x,y),_tile:()=>Y&&[Y.me.x,Y.me.y],_step:dt=>update(dt),_free:(x,y)=>freeR(x,y),_thing:(x,y)=>thingAt(x,y),
  _board:openBoard,_unboard:closeBoard,_card:id=>{const u=UPG.find(x=>x.id===id);openCard(u,lvOf(id)+1,'test')},_cardBuy:()=>buyCard(),_cardClose:()=>closeCard(),
  _buy:id=>{const u=UPG.find(x=>x.id===id);openCard(u,lvOf(id)+1,'test');buyCard()},_pads:()=>pads(),_mess:()=>{if(Y){Y.messAt=Y.t+.01}},_spawn:()=>spawnDiner()};
 })();
+const custFace=e=>Tyc.face(e);
 
 // The lab plays (shown on the lab table). Each gets its box, its data and api {fb, miss, done, alive}.
 const PLAYS={};
@@ -6614,15 +6656,17 @@ function finalIntro(){
  {acts:{go:()=>()=>{const ids=CARDS.filter(c=>cardOk(c)).map(c=>c.id);startSession({mode:'final',pool:poolOf(ids),grad:FINAL.grad,title:'🦹 FINAL',foe:{icon:FINAL.icon,img:FINAL.img,name:FINAL.name,hi:FINAL.hi,lose:FINAL.lose,hp:D().fin,boss:true}})}},onOpen:()=>speak(FINAL.hi)});
 }
 const openWorldIds=()=>WORLDS.map((_,i)=>i).filter(worldOpen);
+// the review foe: a gang of mistake monsters (one picture for the whole gang)
+const MISTAKE_IMG='images/sci-mon-mistake.webp';
 function startReview(){
  const {weak,due}=reviewList();let ids=[...weak,...due].slice(0,6),extra=false;
  if(!ids.length){const known=Object.keys(S.cards).filter(id=>cardOk(CARD[id]));
-  if(known.length<3){modal(`<div style="font-size:64px">👾</div><h2>${L('복습 몬스터','Review monsters')}</h2><p>${L('틀린 문제는 오답 몬스터가 되어 여기에 모여요. 다시 맞히면 물리칠 수 있어요! 먼저 모험을 해 봐요.','Questions you miss turn into mistake monsters that gather here. Beat them by answering again! Go on an adventure first.')}</p><div class="row"><button class="btn green" type="button" data-act="close">${L('알겠어요','Okay')}</button></div>`);return}
+  if(known.length<3){modal(`<div style="font-size:64px">${pic(MISTAKE_IMG,'👾')}</div><h2>${L('복습 몬스터','Review monsters')}</h2><p>${L('틀린 문제는 오답 몬스터가 되어 여기에 모여요. 다시 맞히면 물리칠 수 있어요! 먼저 모험을 해 봐요.','Questions you miss turn into mistake monsters that gather here. Beat them by answering again! Go on an adventure first.')}</p><div class="row"><button class="btn green" type="button" data-act="close">${L('알겠어요','Okay')}</button></div>`);return}
   ids=shuffle(known).slice(0,5);extra=true}
  const go2=()=>startSession({mode:'review',pool:poolOf(ids),cards:ids,grad:'linear-gradient(135deg,#7b4dff,#2c2a7a)',title:`👾 ${L('복습','Review')}`,
-  foe:{icon:'👾',img:'',name:L('오답 몬스터 무리','Mistake monsters'),hi:L('크크크, 우리를 또 틀려 봐라!','Heh heh, get us wrong again!'),hp:Math.max(3,Math.min(10,ids.reduce((a,id)=>a+(S.weak[id]||1),0)))}});
- modal(`<div style="font-size:64px">👾</div><h2>${L('복습 몬스터','Review monsters')}</h2><p>${extra?L('오답 몬스터가 없어요! 대신 배운 카드로 복습해요.','No mistake monsters! Let’s review cards you’ve learned instead.'):[weak.length?L(`오답 몬스터 ${weak.length}마리`,`${weak.length} mistake monster${weak.length===1?'':'s'}`):'',due.length?L(`복습할 카드 ${due.length}장`,`${due.length} card${due.length===1?'':'s'} to review`):''].filter(Boolean).join(L(', ',' and '))+L('이 기다려요. 몬스터는 두 번 맞혀야 사라져요!',' waiting. A monster disappears after 2 right answers!')}</p>
-  <div class="mons">${ids.map(id=>`<span title="${esc(CARD[id].title)}">${S.weak[id]?'👾':''}${icon(CARD[id].icon)}</span>`).join('')}</div>
+  foe:{icon:'👾',img:MISTAKE_IMG,name:L('오답 몬스터 무리','Mistake monsters'),hi:L('크크크, 우리를 또 틀려 봐라!','Heh heh, get us wrong again!'),hp:Math.max(3,Math.min(10,ids.reduce((a,id)=>a+(S.weak[id]||1),0)))}});
+ modal(`<div style="font-size:64px">${pic(MISTAKE_IMG,'👾')}</div><h2>${L('복습 몬스터','Review monsters')}</h2><p>${extra?L('오답 몬스터가 없어요! 대신 배운 카드로 복습해요.','No mistake monsters! Let’s review cards you’ve learned instead.'):[weak.length?L(`오답 몬스터 ${weak.length}마리`,`${weak.length} mistake monster${weak.length===1?'':'s'}`):'',due.length?L(`복습할 카드 ${due.length}장`,`${due.length} card${due.length===1?'':'s'} to review`):''].filter(Boolean).join(L(', ',' and '))+L('이 기다려요. 몬스터는 두 번 맞혀야 사라져요!',' waiting. A monster disappears after 2 right answers!')}</p>
+  <div class="mons">${ids.map(id=>`<span title="${esc(CARD[id].title)}">${S.weak[id]?pic(MISTAKE_IMG,'👾'):''}${icon(CARD[id].icon)}</span>`).join('')}</div>
   <div class="row"><button class="btn green" type="button" data-act="go">⚔️ ${L('복습 시작!','Start review!')}</button></div>`,{acts:{go:()=>()=>go2()}});
 }
 function startDaily(){
@@ -6698,7 +6742,7 @@ function mountQ(q,second){
  $('ctag').innerHTML=`${ch.tag[0]} ${esc(ch.tag[1])}`;
  const cb=$('cueBox');if(cb)cb.remove();
  if(second)$('chal').querySelector('.chead').insertAdjacentHTML('afterend',`<div class="ls-cuebox" id="cueBox">💡 ${clueHTML(q)}</div>`);
- if(PS.fresh&&PS.fresh.includes(q.c)&&LEARN[q.c]&&!PS.cueSeen.has(q.c)){PS.cueSeen.add(q.c);$('ctag').insertAdjacentHTML('beforeend',`<button class="ls-cue" type="button" data-cue="${q.c}">${LEARN[q.c].who} ${L('가게 기억 힌트','Shop memory hint')}</button>`)}
+ if(PS.fresh&&PS.fresh.includes(q.c)&&LEARN[q.c]&&!PS.cueSeen.has(q.c)){PS.cueSeen.add(q.c);$('ctag').insertAdjacentHTML('beforeend',`<button class="ls-cue" type="button" data-cue="${q.c}">${custFace(LEARN[q.c].who)} ${L('가게 기억 힌트','Shop memory hint')}</button>`)}
  const old=$('cbody'),box=document.createElement('div');box.className='cbody';box.id='cbody';old.replaceWith(box);
  $('fb').classList.add('hidden');$('fb').innerHTML='';
  const session=PS;
@@ -6708,7 +6752,7 @@ function mountQ(q,second){
 }
 // A first wrong try in a battle costs nothing: the shop take-away (or the card) comes back as a clue and the same
 // question is asked again. Only the second miss costs a heart. Labs already give sims their own extra tries.
-const clueHTML=q=>{const c=CARD[q.c],X=LEARN[q.c];return X?`${X.who} “${esc(T(X.thanks))}”`:`${icon(c.icon)} ${esc(c.text)}`};
+const clueHTML=q=>{const c=CARD[q.c],X=LEARN[q.c];return X?`${custFace(X.who)} “${esc(T(X.thanks))}”`:`${icon(c.icon)} ${esc(c.text)}`};
 function secondChance(ch){
  const q=ch.q,c=CARD[q.c],X=LEARN[q.c],clue=clueHTML(q);
  PS.retries=(PS.retries||0)+1;PS.retryCards.add(q.c);PS.combo=0;PS.miss=(PS.miss||0)+1;SFX.oops();drawStatus();
@@ -6727,7 +6771,7 @@ function reviveModal(){
 }
 $('v-play').addEventListener('click',e=>{
  const cue=e.target.closest('[data-cue]');
- if(cue){SFX.hint();const X=LEARN[cue.dataset.cue];cue.remove();$('chal').querySelector('.chead').insertAdjacentHTML('afterend',`<div class="ls-cuebox" id="cueBox">${X.who} “${esc(T(X.thanks))}”</div>`);speak(T(X.thanks));return}
+ if(cue){SFX.hint();const X=LEARN[cue.dataset.cue];cue.remove();$('chal').querySelector('.chead').insertAdjacentHTML('afterend',`<div class="ls-cuebox" id="cueBox">${custFace(X.who)} “${esc(T(X.thanks))}”</div>`);speak(T(X.thanks));return}
  const t=e.target.closest('[data-tool]'),sb=e.target.closest('#sayBtn'),nx=e.target.closest('[data-next]'),cc=e.target.closest('[data-cardchip]'),wy=e.target.closest('[data-sayfb]');
  if(sb){SFX.click();if(PS&&PS.cur)speak(PS.cur.say);return}
  if(wy){SFX.click();speak(wy.dataset.sayfb);return}
@@ -6838,7 +6882,7 @@ function showFeedback(ok,info,{dmg=0,crit=false,blocked=false,second=false}){
  const head=ok?`✅ ${praise} ${dmg?`<span class="dm">${crit?'💥':'⚔️'} −${dmg}</span>`:''}`:`❌ ${praise} ${blocked?`<span class="dm sh">🛡️ ${L('방패가 막았어요!','Shield blocked it!')}</span>`:PS.foe?`<span class="dm hurt">💔 −1</span>`:''}`;
  const nextLabel=PS.over?(PS.won||!PS.foe?L('결과 보기 ▶','See results ▶'):L('결과 보기 ▶','See results ▶')):L('다음 문제 ▶','Next ▶');
  $('fb').className='fb '+(ok?'ok':'bad');
- $('fb').innerHTML=`<div class="fbh">${head}</div>${!ok&&ans?`<div class="fba">👉 ${L('정답','Answer')}: <b>${esc(ans)}</b></div>`:''}<div class="fbw"><button class="sayb sm" type="button" data-sayfb="${esc(why)}">🔊</button> 💡 ${esc(why)}</div>${!ok&&LEARN[c.id]&&S.cards[c.id]?`<div class="fbl">🏪 ${LEARN[c.id].who} ${L('손님 말 기억나요?','Remember the customer?')} “${esc(T(LEARN[c.id].thanks))}”</div>`:''}
+ $('fb').innerHTML=`<div class="fbh">${head}</div>${!ok&&ans?`<div class="fba">👉 ${L('정답','Answer')}: <b>${esc(ans)}</b></div>`:''}<div class="fbw"><button class="sayb sm" type="button" data-sayfb="${esc(why)}">🔊</button> 💡 ${esc(why)}</div>${!ok&&LEARN[c.id]&&S.cards[c.id]?`<div class="fbl">🏪 ${custFace(LEARN[c.id].who)} ${L('손님 말 기억나요?','Remember the customer?')} “${esc(T(LEARN[c.id].thanks))}”</div>`:''}
   <div class="fbr"><button class="cardchip" type="button" data-cardchip="${c.id}">${icon(c.icon)} ${esc(c.title)}</button><button class="btn ${PS.over?'gold':'green'} next" type="button" data-next>${nextLabel}</button></div>`;
  $('fb').classList.remove('hidden');
  const fb=$('fb');setTimeout(()=>{if(fb.isConnected)fb.scrollIntoView({block:'nearest',behavior:'smooth'})},60);
@@ -7010,13 +7054,13 @@ function openChest(P,stars,then){
  let item=null;if(Math.random()<(gold?.6:.3)){item=pick(['hint','potion','power','shield'])}
  const r=grant({coins,items:item?{[item]:1}:{}},true);save();
  const done=[...new Set(loot.map(x=>x.st.w))].filter(w=>stkPage(w)===STK[w].length&&!S.stkGift[w]);
- const box=`<div class="chestwrap"><div class="chestbox ${gold?'gold':''}" id="chestBox">${gold?'🎁':'🧰'}</div><p class="sub" id="chestHint">${gold?L('황금 상자예요! 눌러서 열어 봐요!','A golden chest! Tap to open it!'):L('보물상자! 눌러서 열어 봐요!','A treasure chest! Tap to open it!')}</p><div class="loot hidden" id="loot"></div></div>`;
+ const box=`<div class="chestwrap"><div class="chestbox ${gold?'gold':''}" id="chestBox">${gold?pic('images/sci-chest-gold.webp','🎁'):pic('images/sci-chest-wood.webp','🧰')}</div><p class="sub" id="chestHint">${gold?L('황금 상자예요! 눌러서 열어 봐요!','A golden chest! Tap to open it!'):L('보물상자! 눌러서 열어 봐요!','A treasure chest! Tap to open it!')}</p><div class="loot hidden" id="loot"></div></div>`;
  modal(`<h2>${gold?L('✨ 황금 보물상자','✨ Golden chest'):L('🧰 보물상자','🧰 Treasure chest')}</h2>${box}<div class="row hidden" id="chestBtns"><button class="btn ghost" type="button" data-act="album">📒 ${L('앨범 보기','Album')}</button><button class="btn green" type="button" data-act="go">${L('좋아요! ▶','Great! ▶')}</button></div>`,
  {closable:false,cls:'chestm',onOpen:b=>{let opened=false;const cb=b.querySelector('#chestBox');
    const open=()=>{if(opened)return;opened=true;SFX.click();cb.classList.add('shake');setTimeout(()=>{cb.classList.remove('shake');cb.classList.add('pop');SFX.win();celebrate();
      const lt=b.querySelector('#loot');b.querySelector('#chestHint').classList.add('hidden');lt.classList.remove('hidden');
      lt.innerHTML=loot.map(({st,isNew},i)=>`<button type="button" class="lootc ${st.r?'rare':''}" style="animation-delay:${.15+i*.35}s" data-fact="${esc(st.name+'. '+st.fact)}"><span class="stk ${st.r?'rare':''}">${st.e}</span><b>${esc(st.name)}</b>${isNew?`<i class="nw">${st.r?L('✨ 희귀 새 스티커!','✨ Rare new sticker!'):L('🆕 새 스티커!','🆕 New sticker!')}</i>`:`<i class="dup">${L('있는 스티커 → 🪙15','Duplicate → 🪙15')}</i>`}<small>${esc(st.fact)}</small></button>`).join('')+
-      `<div class="lootc small" style="animation-delay:${.15+loot.length*.35}s"><span class="stk coin">🪙</span><b>+${r.coins}</b></div>`+(item?`<div class="lootc small" style="animation-delay:${.3+loot.length*.35}s"><span class="stk">${pic(ITEMS[item].img,ITEMS[item].icon)}</span><b>${esc(ITEMS[item].name)} +1</b></div>`:'');
+      `<div class="lootc small" style="animation-delay:${.15+loot.length*.35}s"><span class="stk coin">${COIN}</span><b>+${r.coins}</b></div>`+(item?`<div class="lootc small" style="animation-delay:${.3+loot.length*.35}s"><span class="stk">${pic(ITEMS[item].img,ITEMS[item].icon)}</span><b>${esc(ITEMS[item].name)} +1</b></div>`:'');
      loot.forEach((x,i)=>setTimeout(()=>{(x.st.r?SFX.level:SFX.star)(i);},250+i*350));
      b.querySelector('#chestBtns').classList.remove('hidden');const first=loot.find(x=>x.isNew)||loot[0];setTimeout(()=>speak(first.st.name+'! '+first.st.fact),500)},520)};
    cb.addEventListener('click',open);b.querySelector('#chestHint').addEventListener('click',open);

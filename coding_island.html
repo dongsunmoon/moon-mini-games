@@ -425,8 +425,7 @@ body:not(.playing):not(.staged) #coachDock{bottom:calc(var(--nav) + 10px + env(s
 .pgoal{display:flex;flex-wrap:wrap;align-items:center;gap:4px;margin:8px;background:#fff;border-radius:14px;padding:6px 10px;box-shadow:0 3px 0 #d6c6ff}.pgoal small{font-weight:900;color:#6a4bd8;margin-right:4px}
 .pgi{font-size:20px;display:inline-flex;align-items:center;gap:2px}.pgi .lc{display:inline-block;width:12px;height:12px;border-radius:50%;border:1px solid #888}
 .pscene{position:relative;flex:1;display:grid;place-items:center;padding:6px 0 10px}
-.wheel{width:min(240px,64vw);height:auto;filter:drop-shadow(0 0 10px var(--lc,#fff))}.coaster{width:min(320px,86vw)}
-.ccar.flip{animation:flip .6s}@keyframes flip{to{rotate:360deg}}
+svg.wheel{width:min(240px,64vw);height:auto;filter:drop-shadow(0 0 10px var(--lc,#fff))}svg.coaster{width:calc(100% - 16px);max-width:560px;height:auto}
 .pbell,.pflash{position:absolute;top:8px;right:16px;font-size:30px;opacity:.25}.pflash{right:56px}.pbell.ring{animation:ring .6s;opacity:1}.pflash.flash{animation:flash .6s;opacity:1}
 @keyframes ring{20%,60%{transform:rotate(25deg)}40%,80%{transform:rotate(-25deg)}}@keyframes flash{0%{filter:brightness(3)}100%{filter:none}}
 .pgate{position:absolute;left:8px;right:8px;bottom:8px;display:flex;justify-content:space-between;gap:8px}
@@ -3459,36 +3458,68 @@ function KitchenView(host,m){const want=MISSION.ref(m).stage.result();let plate=
  return {apply,reset:()=>{plate=[];served=0;render()},el:host}}
 // ---------------------------------------------------------------- the funpark ride: ferris wheel, roller coaster, or the boarding gate with its queue
 const LIGHTC={red:'#ff5a5a',yellow:'#ffd23f',green:'#4cd36a',blue:'#4f9bff',purple:'#a46bff',pink:'#ff7ec0',orange:'#ff9b3d',white:'#ffffff'};
-function ParkView(host,m){const ride=(m.park&&m.park.ride)||'wheel',want=MISSION.ref(m).stage.result().events;let ang=0,lights='white',queue=[],car=0;
+function ParkView(host,m){const ride=(m.park&&m.park.ride)||'wheel',want=MISSION.ref(m).stage.result().events;let lights='white',queue=[],gen=0,co=null;
  const goalIcons=want.map(e=>{const [a,v]=e.split(':');return {spin:'🎡',bell:'🔔',photo:'📸',up:'⬆️',down:'⬇️',loop:'🔄',ride:'🎟️',wave:'👋',light:'💡'}[a]+(a==='light'?`<i class="lc" style="background:${LIGHTC[v]}"></i>`:'')});
- function wheelSVG(){const spokes=[...Array(8)].map((_,i)=>{const a=i*Math.PI/4,x=60+46*Math.cos(a),y=60+46*Math.sin(a);return `<line x1="60" y1="60" x2="${x}" y2="${y}" stroke="#7a6bd8" stroke-width="3"/><g class="cab" style="--x:${x}px;--y:${y}px"><circle cx="${x}" cy="${y}" r="9" fill="${['#ff7aa8','#ffd23f','#5fd3e6','#9be36b'][i%4]}" stroke="#fff" stroke-width="2"/></g>`}).join('');
-  return `<svg viewBox="0 0 120 150" class="wheel"><path d="M60 60 L30 145 M60 60 L90 145" stroke="#5a4bb8" stroke-width="5"/><g class="rot" style="transform-origin:60px 60px"><circle cx="60" cy="60" r="46" fill="none" stroke="#7a6bd8" stroke-width="4"/><circle cx="60" cy="60" r="46" class="glow" fill="none" stroke-width="7" stroke-dasharray="2 8"/>${spokes}</g><circle cx="60" cy="60" r="7" fill="#5a4bb8"/></svg>`}
- function coasterSVG(){return `<svg viewBox="0 0 160 110" class="coaster"><path id="ctrack" d="M8 96 C30 96 30 20 55 20 C80 20 70 92 95 92 C112 92 118 50 128 50 C142 50 145 96 154 96" fill="none" stroke="#ff7a5c" stroke-width="5"/><path d="M8 100 H154" stroke="#c9a46a" stroke-width="4"/><g class="ccar"><rect x="-9" y="-7" width="18" height="11" rx="4" fill="#4f9bff"/><circle cx="-5" cy="5" r="3" fill="#333"/><circle cx="5" cy="5" r="3" fill="#333"/><text x="0" y="-8" font-size="10" text-anchor="middle">🐍</text></g></svg>`}
- function draw(){
+ // animations run by requestAnimationFrame with SVG transform attributes (CSS transforms on SVG parts turn about the corner of
+ // the picture in some browsers); a newer tween on the same lane, or a redraw (gen), stops the older one
+ const lane={},ease=p=>p<.5?2*p*p:1-2*(1-p)*(1-p),smooth=p=>p*p*(3-2*p);
+ function tween(k,d,f){const id=lane[k]=(lane[k]||0)+1,g=gen,t0=performance.now();
+  return new Promise(res=>{if(!(d>0)){f(1);return res()}const fr=now=>{if(g!==gen||lane[k]!==id)return res();const p=Math.min(1,(now-t0)/d);f(p);if(p<1)requestAnimationFrame(fr);else res()};requestAnimationFrame(fr)})}
+ // ferris wheel: the rim turns about the hub and each gondola turns back about its own hook, so it keeps hanging straight down
+ function wheelSVG(){const pts=[...Array(8)].map((_,i)=>{const a=i*Math.PI/4;return [+(60+46*Math.cos(a)).toFixed(2),+(60+46*Math.sin(a)).toFixed(2)]});
+  const spokes=pts.map(([x,y])=>`<line x1="60" y1="60" x2="${x}" y2="${y}" stroke="#7a6bd8" stroke-width="3"/>`).join('');
+  const cabs=pts.map(([x,y],i)=>`<g class="cab" data-x="${x}" data-y="${y}"><path d="M${x} ${y}v4" stroke="#5a4bb8" stroke-width="1.6"/><rect x="${x-7}" y="${y+3}" width="14" height="11" rx="4" fill="${['#ff7aa8','#ffd23f','#5fd3e6','#9be36b'][i%4]}" stroke="#fff" stroke-width="1.6"/><rect x="${x-4.5}" y="${y+5}" width="9" height="3.5" rx="1.5" fill="#fff" opacity=".8"/><circle cx="${x}" cy="${y}" r="2" fill="#5a4bb8"/></g>`).join('');
+  return `<svg viewBox="0 0 120 150" class="wheel"><path d="M60 60 L30 145 M60 60 L90 145" stroke="#5a4bb8" stroke-width="5"/><g class="rot">${spokes}<circle cx="60" cy="60" r="46" fill="none" stroke="#7a6bd8" stroke-width="4"/><circle cx="60" cy="60" r="46" class="glow" fill="none" stroke-width="7" stroke-dasharray="2 8"/>${cabs}</g><circle cx="60" cy="60" r="7" fill="#5a4bb8"/></svg>`}
+ function setAng(a){const r=host.querySelector('.rot');if(!r)return;r.setAttribute('transform',`rotate(${a} 60 60)`);host.querySelectorAll('.cab').forEach(c=>c.setAttribute('transform',`rotate(${-a} ${c.dataset.x} ${c.dataset.y})`))}
+ // roller coaster: the code lays the track. Each up() / down() / loop() adds one piece and the car rides it, so the ride on
+ // screen is exactly the code; the requested ride shows as a faint dashed track to compare. Heights are levels 0–4: the
+ // station is level 1, up() climbs 2, down() drops 1 (a little dip at the bottom), loop() is a loop-the-loop at the same height.
+ const SW=36,RAD=13,X0=26,lvY=l=>92-16*l;
+ function piece(a,x0,l0){const y0=lvY(l0);
+  if(a==='loop')return {l:l0,f:t=>[x0+SW*t+RAD*Math.sin(2*Math.PI*t),y0-RAD*(1-Math.cos(2*Math.PI*t))]};
+  if(a==='down'&&l0===0)return {l:0,f:t=>[x0+SW*t,y0+6*Math.sin(Math.PI*t)]};
+  const l1=a==='up'?Math.min(4,l0+2):l0-1,y1=lvY(l1);return {l:l1,f:t=>[x0+SW*t,y0+(y1-y0)*smooth(t)]}}
+ const MOVE=['up','down','loop'],moves=evs=>evs.filter(e=>MOVE.includes(e));
+ const line=(f,to=1,n=48)=>{const o=[];for(let i=0;i<=n;i++){const p=f(to*i/n);o.push(p[0].toFixed(1)+' '+p[1].toFixed(1))}return 'M'+o.join('L')};
+ const vb=n=>`0 -6 ${X0+Math.max(3,n)*SW+12} 112`;
+ function coasterSVG(){let x=X0,l=1;const ghost=moves(want).map(a=>{const p=piece(a,x,l);x+=SW;l=p.l;return line(p.f)}).join('');
+  return `<svg viewBox="${vb(moves(want).length)}" class="coaster" id="cSvg"><path d="M-20 101H2000" stroke="#c9a46a" stroke-width="4"/>
+   <path d="M6 ${lvY(1)+2}V100M${X0-4} ${lvY(1)+2}V100" stroke="#e0b98a" stroke-width="2.5"/><path d="M2 ${lvY(1)}H${X0}" stroke="#ff7a5c" stroke-width="4" stroke-linecap="round"/>
+   <path d="${ghost}" fill="none" stroke="#ff7a5c" stroke-opacity=".4" stroke-width="2.5" stroke-dasharray="3 4" stroke-linecap="round"/><g id="cPosts"></g><g id="cTrack"></g>
+   <g class="ccar"><rect x="-8" y="-11" width="16" height="9" rx="3.5" fill="#4f9bff"/><circle cx="-4.5" cy="-2.5" r="2.5" fill="#333"/><circle cx="4.5" cy="-2.5" r="2.5" fill="#333"/><text x="0" y="-12" font-size="9" text-anchor="middle">🐍</text></g></svg>`}
+ function carAt(f,t){const c=host.querySelector('.ccar');if(!c)return;const p=f(t),a=f(Math.max(0,t-.004)),b=f(Math.min(1,t+.004));
+  c.setAttribute('transform',`translate(${p[0].toFixed(2)} ${p[1].toFixed(2)}) rotate(${(Math.atan2(b[1]-a[1],b[0]-a[0])*180/Math.PI).toFixed(1)})`)}
+ function rideOn(a,d){const svg=host.querySelector('#cSvg'),trk=host.querySelector('#cTrack');if(!svg||!trk)return 0;
+  const p=piece(a,co.x,co.l),x0=co.x;co.x+=SW;co.l=p.l;co.n++;svg.setAttribute('viewBox',vb(Math.max(co.n,moves(want).length)));
+  const NS='http://www.w3.org/2000/svg',seg=document.createElementNS(NS,'path');
+  [['fill','none'],['stroke','#ff7a5c'],['stroke-width','4'],['stroke-linecap','round']].forEach(([k,v])=>seg.setAttribute(k,v));trk.appendChild(seg);
+  // the car slows on a climb, speeds up on a drop and keeps an even speed round a loop
+  const go=a==='up'?k=>1-(1-k)*(1-k)*.6-(1-k)*.4:a==='down'?k=>.3*k+.7*k*k:k=>k;
+  return tween('car',d,k=>{const t=go(k);seg.setAttribute('d',line(p.f,t));carAt(p.f,t);
+   if(k===1){const e=p.f(1),post=document.createElementNS(NS,'path');post.setAttribute('d',`M${(a==='loop'?x0+SW/2:e[0]).toFixed(1)} ${(a==='loop'?lvY(p.l)+2:e[1]+2).toFixed(1)}V100`);
+    post.setAttribute('stroke','#e0b98a');post.setAttribute('stroke-width','2.5');const ps=host.querySelector('#cPosts');if(ps)ps.appendChild(post)}})}
+ function draw(){gen++;
   host.innerHTML=`<div class="parkv ${ride}"><div class="pgoal"><small>${L('부탁','Request')}</small>${goalIcons.map(g=>`<span class="pgi">${g}</span>`).join('')}</div>
    <div class="pscene">${ride==='coaster'?coasterSVG():wheelSVG()}<div class="pbell" id="pBell">🔔</div><div class="pflash" id="pFlash">📸</div>
    ${ride==='gate'?`<div class="pgate"><div class="pq" id="pQ"></div><div class="pboard" id="pBoard"></div></div>`:''}</div>
    </div>`;
   if(ride==='gate'){const hs=(/heights? = \[?([^\]\n]*)/.exec(curStart()||'')||[,''])[1].split(',').map(x=>x.trim()).filter(Boolean);queue=hs.map((h,i)=>({h,em:['🐰','🐻','🦊','🐼','🐨','🐯'][i%6]}));drawQ()}
-  setLight(lights);rotate(0)}
+  co=ride==='coaster'?{x:X0,l:1,n:0}:null;if(co)carAt(t=>[X0-10+10*t,lvY(1)],1);
+  setLight(lights);setAng(0)}
  let startCode=m.start;const curStart=()=>startCode;
  function drawQ(){const q=host.querySelector('#pQ');if(q)q.innerHTML=queue.map((p,i)=>`<span class="qp ${i===0?'first':''}">${p.em}<small>${p.h}</small></span>`).join('')}
  function setLight(c){lights=c;const g=host.querySelector('.glow');if(g)g.setAttribute('stroke',LIGHTC[c]||'#fff');host.querySelector('.pscene').style.setProperty('--lc',LIGHTC[c]||'#fff')}
- function rotate(d){const r=host.querySelector('.rot');if(!r)return;r.style.transition=d?`transform ${d}ms ease-in-out`:'none';r.style.transform=`rotate(${ang}deg)`;host.querySelectorAll('.cab').forEach(c=>{c.style.transition=r.style.transition;c.style.transform=`rotate(${-ang}deg)`})}
- function moveCar(t,d){const p=host.querySelector('#ctrack'),c=host.querySelector('.ccar');if(!p||!c)return;const len=p.getTotalLength(),from=car,to=t,t0=performance.now();
-  return new Promise(res=>{const fr=now=>{const k=Math.min(1,(now-t0)/d),v=from+(to-from)*k,pt=p.getPointAtLength(len*v);c.setAttribute('transform',`translate(${pt.x},${pt.y})`);if(k<1)requestAnimationFrame(fr);else{car=to;res()}};requestAnimationFrame(fr)})}
- function apply(ev,dur){const sc=host.querySelector('.pscene');
+ function apply(ev,dur){
   switch(ev.a){
-   case 'spin':ang+=360;rotate(dur*2.2);sfx('turn');return dur*2.3;
+   case 'spin':tween('wheel',dur*2.2,k=>setAng(360*ease(k)));sfx('turn');return dur*2.3;
    case 'light':setLight(ev.v);sfx('print');return dur*.8;
    case 'bell':{const b=host.querySelector('#pBell');b.classList.remove('ring');void b.offsetWidth;b.classList.add('ring');sfx('good');return dur}
    case 'photo':{const f=host.querySelector('#pFlash');f.classList.remove('flash');void f.offsetWidth;f.classList.add('flash');sfx('coin');return dur}
-   case 'up':return moveCar(.2,dur*1.6);case 'down':return moveCar(Math.min(1,car+.3),dur*1.2);
-   case 'loop':{const c=host.querySelector('.ccar');if(c){c.classList.remove('flip');void c.offsetWidth;c.classList.add('flip')}sfx('turn');return dur*1.4}
+   case 'up':case 'down':case 'loop':if(!co)return 0;if(ev.a==='loop')sfx('turn');return rideOn(ev.a,dur*(ev.a==='down'?1.2:1.6));
    case 'ride':case 'wave':{const p=queue.shift(),b=host.querySelector('#pBoard');if(b&&p)b.insertAdjacentHTML('beforeend',`<span class="pb ${ev.a}">${p.em}${ev.a==='ride'?'🎡':'👋'}</span>`);drawQ();sfx(ev.a==='ride'?'coin':'tap');return dur*1.2}}
   return 0}
  draw();
- return {apply,reset:(start)=>{ang=0;car=0;lights='white';if(start)startCode=start;draw()},el:host}}
+ return {apply,reset:(start)=>{lights='white';if(start)startCode=start;draw()},el:host}}
 // ================================================================ Little Coding Island · park rides (mini-games)
 // Four rides in Py's Funpark: 🎣 Fishing Pier, 🏎️ Kart Track, 🚀 Space Arcade, 🤿 Treasure Dive Pool.
 // The fishing pier is a real fishing game whose rod runs a small program the child can change. The other three re-ask what

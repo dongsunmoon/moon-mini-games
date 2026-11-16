@@ -391,6 +391,8 @@ body.bigcode .code,body.bigcode .typed textarea,body.bigcode .typed .thl,body.bi
 .gc .apple{position:absolute;inset:0;display:grid;place-items:center;font-size:calc(var(--cs)*.6);animation:appear .3s}.gc .apple b{position:absolute;right:2px;bottom:0;font-size:12px;background:#fff;border-radius:8px;padding:0 4px;color:#c2272d}
 .grid .head{position:absolute;left:0;top:0;width:var(--cs);height:var(--cs);transition:transform .28s ease-in-out;z-index:3;padding:calc(var(--cs)*.06)}
 .grid .head svg{width:100%;height:100%;overflow:visible}
+.gc .gim{width:84%;height:84%;object-fit:contain;display:block;pointer-events:none}.gc .gim.gG{width:98%;height:98%}.gc .apple .gim{width:72%;height:72%}
+.grid .head .gim{width:100%;height:100%;object-fit:contain;display:block}.grid .head img.rainbow{animation:rainbow 4s linear infinite}
 .grid .head.bump{animation:bump .45s}.grid .head.chomp .tongue{animation:tongue .35s}
 .grid .head .tongue{opacity:0}
 .grid .body{position:absolute;inset:0;pointer-events:none;z-index:2}
@@ -587,6 +589,14 @@ button.vm{border:0;background:none;padding:0;display:flex;flex-direction:column;
 .reqrow .vill{width:52px;height:52px;flex:0 0 52px}
 .reqcard{text-align:center}.reqcard .vill.big{width:120px;height:120px}.reqsay{font-size:17px;font-weight:800;background:#fff7ec;border-radius:16px;padding:10px 12px}
 .chestopen{font-size:90px;text-align:center;animation:pop .6s}
+/* painted pictures in place of emoji (tryPic, placePic, wearPic, itemPic, decoPic); the emoji stays if a file is missing */
+.wpic{width:1.3em;height:1.3em;object-fit:contain;display:block}.shead .wic .wpic,.mlp-place .wic .wpic{width:58px;height:58px}
+.go .wpic{width:44px;height:44px}.big .wpic{width:104px;height:104px;margin:0 auto}
+.gchest .gcpic{width:48px;height:48px;object-fit:contain;display:block;margin:auto}
+.chestopen img{width:124px;height:124px;object-fit:contain;display:block;margin:0 auto}
+.rew span img{width:30px;height:30px;object-fit:contain;vertical-align:middle}
+.gift img{width:60px;height:60px;object-fit:contain;margin:0 auto}
+.big .bb-img{width:110px;margin:0 auto}.gift .bb-img{width:72px;height:72px}
 /* coach in dialogues and the play header */
 .coachline .cimg{width:64px;height:64px;object-fit:contain;flex:0 0 64px}.coachline .bubble{border-color:#c7d6ff;background:#f6f8ff}
 .pbtn.hintb img{width:40px;height:40px;object-fit:contain}
@@ -787,6 +797,7 @@ button.vm{border:0;background:none;padding:0;display:flex;flex-direction:column;
 .dv-sea::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 20% 30%,#ffffff22 0 6px,transparent 7px),radial-gradient(circle at 70% 60%,#ffffff22 0 4px,transparent 5px),radial-gradient(circle at 45% 80%,#ffffff1a 0 5px,transparent 6px);background-size:180px 220px;animation:pgBub 6s linear infinite}
 @keyframes pgBub{to{background-position:0 -220px}}
 .dv-boat{position:absolute;top:-4px;left:50%;transform:translateX(-50%);font-size:40px}
+.dv-boat .pgi{width:60px;height:60px}.dv-diver .pgi~.mask{display:none}
 .dv-diver{position:absolute;left:0;top:0;width:60px;height:60px;display:grid;place-items:center;font-size:42px;transition:transform .7s ease-in-out;z-index:3}
 .dv-diver .mask{position:absolute;right:-8px;top:-6px;font-size:22px;font-style:normal}.dv-diver .pgi{width:60px;height:60px}
 .dv-floor{position:absolute;left:0;right:0;bottom:0;height:46%;display:flex;align-items:flex-end;justify-content:center;gap:clamp(4px,1.6vw,14px);padding:0 8px 16px;background:linear-gradient(180deg,transparent 40%,#e8cf8f 41%,#c9a85f)}
@@ -812,6 +823,8 @@ button.vm{border:0;background:none;padding:0;display:flex;flex-direction:column;
 @media (prefers-reduced-motion:reduce){.sp-stars,.dv-sea::before,.fs-me,.fs-py,.fs-card .fs-pic::before,.fs-card .fs-pic img{animation:none}}
 .fs-ic.pgi{display:inline-block;width:24px;height:24px;vertical-align:middle}.fs-book .fs-ic.pgi{width:32px;height:32px;margin:auto}.fs-book{display:grid;place-items:center;padding:4px}
 .pg-big .pg-hero.pgi{width:120px;height:120px;margin:0 auto 2px}
+.pg-fin{position:relative;width:max-content;max-width:100%;margin:0 auto}.pg-fin .pg-medal{position:absolute;right:-16px;bottom:0;font-size:40px;font-style:normal;line-height:1;filter:drop-shadow(0 3px 4px rgba(0,0,0,.25))}.pg-fin .pge+.pg-medal{display:none}
+.fs-bait,.fs-want img.fs-bait{width:1.35em;height:1.35em;object-fit:contain;vertical-align:-.3em;display:inline-block;flex:none;font-size:inherit}
 /* ================================================================ boss battles */
 .stage.boss{background:#1b1440}
 .bb{position:absolute;inset:0;display:flex;flex-direction:column;color:#fff;overflow:hidden;background:linear-gradient(180deg,#2c1f63 0%,#171035 70%)}
@@ -852,6 +865,7 @@ button.vm{border:0;background:none;padding:0;display:flex;flex-direction:column;
 .bb-py .py.big{width:clamp(84px,13vh,120px);height:clamp(84px,13vh,120px)}
 .bb-hearts{display:flex;gap:2px;font-size:20px;background:#0004;border-radius:12px;padding:2px 8px}.bb-hearts i{font-style:normal}.bb-hearts i.off{opacity:.45}
 .bb-shield{position:absolute;right:-12px;top:6px;font-size:30px;animation:bbBob 1.6s ease-in-out infinite}
+.bb-shield img{width:38px;height:38px;object-fit:contain;display:block}
 .bb-fx{position:absolute;inset:0;pointer-events:none}
 .bb-bit,.bb-gl{position:absolute;left:0;top:0;font-style:normal;font-weight:900;font-size:22px;color:#aaffc8;text-shadow:0 0 8px #6dffa8,0 0 2px #fff;animation:bbFly .7s cubic-bezier(.3,.6,.4,1) both}
 .bb-gl{color:#ff9bd2;text-shadow:0 0 8px #ff5ca8;font-size:26px;animation-duration:.55s}
@@ -887,7 +901,7 @@ button.vm{border:0;background:none;padding:0;display:flex;flex-direction:column;
 .bb-row{display:flex;gap:8px;justify-content:flex-end;margin-top:12px;flex-wrap:wrap}.bb-row .btn{flex:0 1 auto}
 .bb-items{flex:0 0 auto;display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:8px 10px calc(8px + env(safe-area-inset-bottom));border-top:1px solid #eee6d6;background:#fff}
 .bb-it{display:flex;flex-direction:column;align-items:center;gap:0;min-height:56px;border:2px solid #eee6d6;border-radius:14px;background:#fffaf0;color:#3a2f55;padding:4px 2px}
-.bb-it span{font-size:20px;line-height:1.1}.bb-it small{font-size:12px;font-weight:800;white-space:nowrap}.bb-it b{font-size:12px;color:#7a3fd1}
+.bb-it span{font-size:20px;line-height:1.1}.bb-it span img{width:28px;height:28px;object-fit:contain;display:block}.bb-it small{font-size:12px;font-weight:800;white-space:nowrap}.bb-it b{font-size:12px;color:#7a3fd1}
 .bb-it.off{opacity:.4}.bb-it.on{border-color:#ffb020;background:#fff3cc;box-shadow:0 0 0 3px #ffe08a}
 /* end cards */
 .bb-over{position:absolute;inset:0;z-index:10;background:rgba(14,8,40,.6);display:grid;place-items:center;padding:16px;animation:fade .2s}
@@ -3306,6 +3320,13 @@ const PY_TINT={leaf:'',sky:'hue-rotate(130deg) saturate(1.15)',berry:'hue-rotate
 // (.pyhat.im / .pyacc.im); the emoji comes back if a picture fails to load
 const WEAR_IMG={hat:new Set(['cap','bow','flower','party','tophat','crown','grad','chef','straw','helmet','clover','cowboy','wizard']),acc:new Set(['glasses','shades','scarf','star','headphones','butterfly','backpack','medal','balloon'])};
 const wearPic=(kind,id,e)=>WEAR_IMG[kind].has(id)?`<img src="images/py-${kind}-${id}.webp" alt="" draggable="false" onerror="this.parentNode.classList.remove('im');this.replaceWith('${e}')">`:e;
+// a painted picture in place of an emoji: tries images/<name>.webp for each name in turn, then shows fb (an emoji or HTML).
+// A missing file is remembered for the visit, so a picture that is not drawn yet costs one try and shows up once it is added.
+const PIC_MISS=new Set();
+const tryPic=(names,fb,cls='',attrs='')=>{const s=names.filter(n=>n&&!PIC_MISS.has(n));return s.length?`<img class="${cls}" src="images/${s[0]}.webp" alt="" draggable="false" data-s="${s.join(' ')}" data-fb="${encodeURIComponent(fb)}" ${attrs} onerror="picNext(this)">`:fb};
+function picNext(el){const s=(el.dataset.s||'').split(' ');PIC_MISS.add(s.shift());if(s[0]){el.dataset.s=s.join(' ');el.src=`images/${s[0]}.webp`}else if(el.parentNode)el.outerHTML=decodeURIComponent(el.dataset.fb||'')}
+// a place's picture (images/py-place-<n>.webp), its emoji if the file fails
+const placePic=(w,cls='wpic')=>tryPic(['py-place-'+w.n],w.icon,cls);
 let pyN=0;
 function pySVG(mood='happy',o={}){const pose=PY_POSE[mood]||'hi';
  if(PY_HAVE.has(pose)){const col=o.color||S.wear.color,hid=o.hat??S.wear.hat,aid=o.acc??S.wear.acc,hat=HATS[hid]||HATS[''],acc=ACCS[aid]||ACCS[''];
@@ -3426,6 +3447,11 @@ const capFn=(fill)=>captOn()?(i,l)=>CAPTION.of(fill?fill(i,l):l):null;
 
 // ---------------------------------------------------------------- the garden grid (Py the snake from above)
 const CELL={'#':'🪨','T':'🌳','~':'','F':'🌼','G':'🏠'};
+// painted pieces on the board (the emoji until the picture is in images/): rocks, flowers, Py's house as the goal; apples and Py's head below
+const CELL_PIC={'#':'py-grid-rock','F':'py-deco-flowers','G':'py-deco-house'};
+const cellPic=c=>CELL_PIC[c]?tryPic([CELL_PIC[c]],CELL[c],'gim g'+(c==='#'?'R':c)):(CELL[c]||'');
+// Py's head from above (images/py-grid-head.webp faces right; the board turns it), tinted like the 3D Py; the SVG head until then
+const gridHead=()=>{const col=S.wear.color;return tryPic(['py-grid-head'],pyHeadSVG(),'gim ghead'+(col==='rainbow'?' rainbow':''),`style="filter:${PY_TINT[col]||'none'}"`)};
 const DIRANG={E:0,S:90,W:180,N:-90};
 function pyHeadSVG(){const c=COLORS[S.wear.color]||COLORS.leaf,main=c[0].startsWith('url')?(S.wear.color==='gold'?'#ffc53d':'#4fb6ff'):c[0];
  return `<svg viewBox="0 0 40 40"><ellipse cx="20" cy="20" rx="17" ry="14" fill="${main}" stroke="${c[1]}" stroke-width="2"/><circle cx="27" cy="13" r="4.2" fill="#fff"/><circle cx="27" cy="27" r="4.2" fill="#fff"/><circle cx="28.4" cy="13" r="2.4" fill="#1f2b55"/><circle cx="28.4" cy="27" r="2.4" fill="#1f2b55"/><circle cx="12" cy="20" r="2" fill="${c[1]}" opacity=".5"/><path class="tongue" d="M37 20 h5 l2 -2 M42 20 l2 2" stroke="#ff4f6d" stroke-width="2" fill="none" stroke-linecap="round"/></svg>`}
@@ -3433,9 +3459,9 @@ function GridView(host,cfg){const g=STAGE.parseGrid(cfg);let cs=48;
  const st={x:g.px,y:g.py,d:g.dir,ang:DIRANG[g.dir],trail:[],grow:0,food:{...g.food}};
  function size(){const w=Math.max(200,(host.clientWidth||340)-8);cs=Math.floor(Math.min(56,w/g.w,(innerHeight*.42)/g.h));host.style.setProperty('--cs',cs+'px')}
  function cellHTML(x,y){const c=(g.rows[y]&&g.rows[y][x])||'.',k=x+','+y,n=st.food[k]||0;
-  return `<div class="gc ${c==='~'?'water':c==='#'||c==='T'?'block':''} ${(x+y)%2?'odd':''}" data-k="${k}">${CELL[c]||''}${n?`<span class="apple">🍎${n>1?`<b>${n}</b>`:''}</span>`:''}</div>`}
+  return `<div class="gc ${c==='~'?'water':c==='#'||c==='T'?'block':''} ${(x+y)%2?'odd':''}" data-k="${k}">${cellPic(c)}${n?`<span class="apple">${tryPic(['py-grid-apple'],'🍎','gim')}${n>1?`<b>${n}</b>`:''}</span>`:''}</div>`}
  function draw(){size();let h='';for(let y=0;y<g.h;y++)for(let x=0;x<g.w;x++)h+=cellHTML(x,y);
-  host.innerHTML=`<div class="grid" style="grid-template-columns:repeat(${g.w},var(--cs));width:calc(${g.w} * var(--cs))">${h}<div class="body" id="gBody"></div><div class="head" id="gHead">${pyHeadSVG()}</div><div class="gsay" id="gSay"></div></div><div class="gstat" id="gStat"></div>`;
+  host.innerHTML=`<div class="grid" style="grid-template-columns:repeat(${g.w},var(--cs));width:calc(${g.w} * var(--cs))">${h}<div class="body" id="gBody"></div><div class="head" id="gHead">${gridHead()}</div><div class="gsay" id="gSay"></div></div><div class="gstat" id="gStat"></div>`;
   place(true);stat()}
  const headEl=()=>host.querySelector('.head'),bodyEl=()=>host.querySelector('.body');
  function place(instant){const h=headEl();if(!h)return;h.style.transition=instant?'none':'';h.style.transform=`translate(${st.x*cs}px,${st.y*cs}px) rotate(${st.ang}deg)`;
@@ -3721,9 +3747,11 @@ const out=code=>{const r=PY.run(code,{maxTrace:1,vars:false});return r.err||r.ne
 const fails=code=>{const r=PY.run(code,{maxTrace:1,vars:false});return !!(r.err||r.need)};
 const FRUIT=['🍎','🍌','🍇','🍓','🍒','🍑','🍉','🍋'],PETS=['🐶','🐱','🐰','🐻','🐼','🐸','🦊','🐯'],GEMS=['💎','🐚','👑','⭐','🪙','🔮','🧸','🎁'];
 // optional pictures (emoji/canvas until they are in images/)
-const GAME_IMG=new Set(['pg-chest','pg-locker','pg-diver','pg-crab','pg-door','pg-rocket','pg-racer','pg-fisher','pg-bucket','pg-fish-bg','pg-fish-pier','pg-fish-bobber','pg-fish-book','pg-fish-rod']);
+const GAME_IMG=new Set(['pg-chest','pg-locker','pg-diver','pg-crab','pg-door','pg-rocket','pg-racer','pg-fisher','pg-bucket','pg-fish-bg','pg-fish-pier','pg-fish-bobber','pg-fish-book','pg-fish-rod','py-deco-sail']);
 // a picture that turns back into its emoji if it fails to load
 const img=(k,fb,cls='')=>GAME_IMG.has(k)?`<img class="pgi ${cls}" src="images/${k}.webp" alt="" draggable="false" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'pge ${cls}',textContent:'${fb}'}))">`:`<span class="pge ${cls}">${fb}</span>`;
+// canvas pictures that may come later (images/<k>.webp): loaded on first use and drawn once ready; the shape or emoji until then
+const CPIC={};const cpic=k=>{let m=CPIC[k];if(!m){m=CPIC[k]=new Image();m.src=`images/${k}.webp`}return m.complete&&m.naturalWidth?m:null};
 
 // ---------------------------------------------------------------- questions whose answer is one short value (kart)
 // gen(lv) → {show, code, wrong:[…mix-ups]} ; the answer is whatever the code really prints
@@ -3814,6 +3842,8 @@ function finishExit(){const g=G,cb=g.opts.onExit;stop();if(cb)cb()}
 function howTo(icon,title,lines,tip,start){const seen=(S.games.seen=S.games.seen||{});G.paused=true;
  overlay(`<div class="pg-big">${icon}</div><h3>${esc(T(title))}</h3><ul class="pg-how">${lines.map(l=>`<li>${tx(l)}</li>`).join('')}</ul><button class="btn wide" type="button" data-pa="go">▶ ${L('시작!','Start!')}</button>`,{go:()=>{closeOverlay();G.paused=false;if(window.coachTalk)coachTalk.hide();hush();start()}});
  if(!seen[G.id]&&window.coachTalk){seen[G.id]=1;save(true);coachTalk('idea',tip,{ms:6000})}else say(T(lines[0]).replace(/`/g,''))}
+// each ride's hero picture (as on its start card) heads its results card, with 🏆 or 🎉 on it
+const HERO_PIC={fish:'pg-fisher',race:'pg-racer',shoot:'pg-rocket',dive:'pg-diver'};
 // round over: apples by how it went (2–10, never 0), best score, ride level up/down, results card (o: the ride's own praise and label)
 function finish(total,extra='',o={}){if(!G||G.done)return;G.done=true;G.paused=true;const id=G.id,acc=G.right/Math.max(1,G.right+G.wrong),played=Math.min(1,(G.right+G.wrong)/Math.max(1,total));
  const apples=clamp(Math.round(2+8*acc*played),2,10),bests=S.games.best=S.games.best||{},plays=S.games.plays=S.games.plays||{},lvs=S.games.lv=S.games.lv||{};
@@ -3822,7 +3852,7 @@ function finish(total,extra='',o={}){if(!G||G.done)return;G.done=true;G.paused=t
  const res={id,score:G.score,right:G.right,wrong:G.wrong,apples,best:bests[id],newBest,level:lvs[id]};
  const praise=o.praise||(acc>=.9?L('완벽해요! 코드를 척척 읽네요!','Perfect! You read code like a pro!'):acc>=.7?L('정말 잘했어요! 코드 읽는 눈이 좋아요.','Great job! You have a sharp eye for code.'):acc>=.4?L('좋아요! 할수록 더 빨라질 거예요.','Nice! You’ll get faster every time.'):L('끝까지 했어요! 다음엔 천천히 읽어 봐요.','You finished! Next time read slowly.'));
  SND.ok();if(newBest&&typeof celebrate==='function')celebrate(26);
- overlay(`<div class="pg-big">${acc>=.7?'🏆':'🎉'}</div><h3>${L('놀이 끝!','Ride over!')}</h3><p class="pg-praise">${esc(praise)}</p>${extra}
+ overlay(`<div class="pg-big pg-fin">${HERO_PIC[id]?img(HERO_PIC[id],acc>=.7?'🏆':'🎉','pg-hero'):tryPic(['py-wow'],`<span class="pge pg-hero">${acc>=.7?'🏆':'🎉'}</span>`,'pgi pg-hero')}<i class="pg-medal">${acc>=.7?'🏆':'🎉'}</i></div><h3>${L('놀이 끝!','Ride over!')}</h3><p class="pg-praise">${esc(praise)}</p>${extra}
   <div class="pg-stats"><span><b>${G.score}</b><small>⭐ ${L('점수','score')}</small></span><span><b>${G.right}/${G.right+G.wrong}</b><small>✅ ${o.right||L('맞힘','right')}</small></span><span><b>${bests[id]}</b><small>🏅 ${L('최고','best')}${newBest?' 🆕':''}</small></span></div>
   <div class="pg-apples">+${apples} 🍎</div>${lvs[id]>lv0?`<p class="pg-lv">⬆️ ${L(`놀이 레벨 ${lvs[id]}! 조금 더 어려워져요`,`Ride level ${lvs[id]}! A bit harder next time`)}</p>`:''}
   <div class="pg-row"><button class="btn ghost" type="button" data-pa="again">🔄 ${L('다시 하기','Play again')}</button><button class="btn" type="button" data-pa="out">${L('나가기','Done')} ▶</button></div>`,
@@ -3835,6 +3865,9 @@ function finish(total,extra='',o={}){if(!G||G.done)return;G.done=true;G.paused=t
 // program, and what the child has learned decides how much of it they can change (the bait → bait and depth boxes → a for
 // loop that casts by itself → if big/small picks the reel → a list of baits). The default code always works.
 const BAIT={worm:['🪱','지렁이','worm'],shrimp:['🦐','새우','shrimp'],bread:['🍞','빵','bread']};
+// a bait's picture (images/pg-bait-<id>.webp) once it is drawn, else its emoji: in the page and on the line (canvas, current font)
+const baitPic=k=>BAIT[k]?tryPic(['pg-bait-'+k],BAIT[k][0],'fs-bait'):'🎣';
+const baitDraw=(c,k,x,y,s)=>{const m=cpic('pg-bait-'+k);if(m)c.drawImage(m,x-s/2,y-s/2,s,s);else c.fillText((BAIT[k]||BAIT.worm)[0],x,y)};
 const DEPTHW={1:['얕은 곳','shallow'],2:['중간','middle'],3:['깊은 곳','deep']};
 // [id, ko, en, depth band 1–3, favourite bait, big?, cm min, cm max, rarity 1 common · 2 uncommon · 3 rare]
 const FISHES=[['bluegill','블루길','Bluegill',1,'worm',0,10,22,1],['anchovy','멸치','Anchovy',1,'bread',0,7,13,1],['mullet','숭어','Mullet',1,'bread',1,30,60,1],
@@ -3946,7 +3979,7 @@ function fishGame(){const play=shell(LIST[0].name,'🎣','fish'),lv=level(),rod=
  // ---- HUD: the wanted poster, casts left, my bucket, the fish book
  function hud(){const w=wanted,bk=BAIT[w.bait],clue=tier===1?`🎯 ${L(['가까이','중간쯤','멀리'][w.band-1],['near','middle','far'][w.band-1])}`:`📏 depth ${w.band}`;
   wantEl.className='fs-want'+(st.wantedGot?' got':'');
-  wantEl.innerHTML=`${fishPic(w.id)}<span><i>${st.wantedGot?'✅ '+L('찾았다!','Found!'):'🎯 '+L('오늘의 목표','Wanted')}</i><b>${esc(L(w.ko,w.en))}</b><small>${bk[0]} ${esc(L(bk[1],bk[2]))} · ${clue}</small></span>`;
+  wantEl.innerHTML=`${fishPic(w.id)}<span><i>${st.wantedGot?'✅ '+L('찾았다!','Found!'):'🎯 '+L('오늘의 목표','Wanted')}</i><b>${esc(L(w.ko,w.en))}</b><small>${baitPic(w.bait)} ${esc(L(bk[1],bk[2]))} · ${clue}</small></span>`;
   $q('.fs-n').textContent=`🎣 ${Math.min(total,tries()+(st.cur?1:0))}/${total}`;$q('.fs-bucket b').textContent=st.caught.length}
  // ---- the rod's code panel: tap a value to change it
  function rodSum(){const c=rodFill(tier,vals),bs=tier===5?[...(/baits = \[(.*)\]/.exec(c)||['',''])[1].matchAll(/"(\w+)"/g)].map(m=>m[1]):[(/"(\w+)"/.exec(c)||['','worm'])[1]],d=/depth = (\d)/.exec(c),n=/range\((\d)\)/.exec(c);
@@ -3955,7 +3988,7 @@ function fishGame(){const play=shell(LIST[0].name,'🎣','fish'),lv=level(),rod=
   rodTab.innerHTML=`<span class="fs-tt">${img('pg-fish-rod','🎣','fs-ic')} ${L('낚싯대 코드','Rod code')}</span><span class="fs-sum">${esc(rodSum())}</span><span class="arr">▲</span>`;
   rodTab.setAttribute('aria-expanded',rodEl.classList.contains('open')?'true':'false');
   rodBody.innerHTML=`<p class="fs-rtip">${tx(RODTIP[tier])}</p>`+codeHTML(ROD[tier].join('\n'),{cls:'fs-codebox',
-   slot:(k,op)=>{const v=op[vals[k]]??op[0],bk=/^"(\w+)"$/.exec(v);return `<button type="button" class="slot fs-slot ${/^\d+$/.test(v)?'num':''}" data-k="${k}">${hl(v)}${bk&&BAIT[bk[1]]?`<i>${BAIT[bk[1]][0]}</i>`:''}</button>`},
+   slot:(k,op)=>{const v=op[vals[k]]??op[0],bk=/^"(\w+)"$/.exec(v);return `<button type="button" class="slot fs-slot ${/^\d+$/.test(v)?'num':''}" data-k="${k}">${hl(v)}${bk&&BAIT[bk[1]]?`<i>${baitPic(bk[1])}</i>`:''}</button>`},
    capt:capOn?i=>rodCap(filled[i]):null})+`<p class="fs-rnote">${L('▶ 던질 때마다 이 코드가 실행돼요.','▶ This code runs every time you cast.')}</p>`}
  function rodOpen(on){rodEl.classList.toggle('open',on);rodTab.setAttribute('aria-expanded',on?'true':'false')}
  listen(rodTab,'click',()=>{sfx('tap');rodOpen(!rodEl.classList.contains('open'))});
@@ -4036,7 +4069,7 @@ function fishGame(){const play=shell(LIST[0].name,'🎣','fish'),lv=level(),rod=
  function openBook(){if(G.paused||G.done)return;sfx('tap');G.paused=true;st.holding=false;if(st.ph==='charge'){st.ph='ready';powEl.classList.remove('on');meDo('')}
   const n=ALLFISH.filter(f=>dex[f.id]).length;
   overlay(`<h3>📖 ${L('낚시 도감','Catch book')} <small class="fs-cnt">${n}/${ALLFISH.length}</small></h3><div class="fs-dex">${ALLFISH.map(f=>{const k=dex[f.id]||0;
-   return `<div class="fs-dx ${k?'got':''} ${f.gold?'gold':''}"><span class="fs-dpic">${fishPic(f.id)}</span><b>${k?esc(L(f.ko,f.en)):'???'}</b><small>${k?`×${k} · ${book.big[f.id]||'?'}cm`:f.gold?'✨ ???':`📏 ${f.band} · ${BAIT[f.bait][0]}`}</small></div>`}).join('')}</div>
+   return `<div class="fs-dx ${k?'got':''} ${f.gold?'gold':''}"><span class="fs-dpic">${fishPic(f.id)}</span><b>${k?esc(L(f.ko,f.en)):'???'}</b><small>${k?`×${k} · ${book.big[f.id]||'?'}cm`:f.gold?'✨ ???':`📏 ${f.band} · ${baitPic(f.bait)}`}</small></div>`}).join('')}</div>
    <p class="fs-dexnote">${L('📏 숫자는 사는 깊이, 그림은 좋아하는 미끼예요.','📏 is the depth it lives at; the picture is its favourite bait.')}</p><button class="btn wide" type="button" data-pa="close">${L('닫기','Close')}</button>`,{close:()=>{closeOverlay();G.paused=false}})}
  listen($q('.fs-book'),'click',openBook);listen(wantEl,'click',openBook);
  // ---- input: hold and let go to cast, tap to hook, hold to reel
@@ -4122,13 +4155,13 @@ function fishGame(){const play=shell(LIST[0].name,'🎣','fish'),lv=level(),rod=
   c.fillStyle='#3d4b63';c.beginPath();c.arc(hand.x-2,hand.y+6,6,0,7);c.fill();if(st.ph==='reel'&&st.holding){const a=t*18;c.strokeStyle='#cfd8e6';c.lineWidth=2;c.beginPath();c.moveTo(hand.x-2,hand.y+6);c.lineTo(hand.x-2+Math.cos(a)*8,hand.y+6+Math.sin(a)*8);c.stroke()}
   const tp={x:tip.x,y:tip.y+bendK*.3};c.strokeStyle='rgba(255,255,255,.9)';c.lineWidth=1.3;c.beginPath();c.moveTo(tp.x,tp.y);
   const ph=st.ph;
-  if(ph==='ready'||ph==='charge'||ph==='done'||ph==='reveal'||(ph==='lost'&&st.slack>0)){const dy=ph==='lost'?40*st.slack+20:22;c.lineTo(tp.x+Math.sin(t*2)*2,tp.y+dy);c.stroke();if(ph!=='lost'){c.font='15px serif';c.textBaseline='middle';const b=(/"(\w+)"/.exec(rodFill(tier,vals))||['','worm'])[1];c.fillText((BAIT[b]||BAIT.worm)[0],tp.x+Math.sin(t*2)*2,tp.y+dy+8)}}
+  if(ph==='ready'||ph==='charge'||ph==='done'||ph==='reveal'||(ph==='lost'&&st.slack>0)){const dy=ph==='lost'?40*st.slack+20:22;c.lineTo(tp.x+Math.sin(t*2)*2,tp.y+dy);c.stroke();if(ph!=='lost'){c.font='15px serif';c.textBaseline='middle';const b=(/"(\w+)"/.exec(rodFill(tier,vals))||['','worm'])[1];baitDraw(c,BAIT[b]?b:'worm',tp.x+Math.sin(t*2)*2,tp.y+dy+8,18)}}
   else if(ph==='fly'){c.quadraticCurveTo((tp.x+st.bx)/2,Math.min(tp.y,st.by)-10,st.bx,st.by);c.stroke();bob(st.bx,st.by,false)}
   else if(ph==='reel'){const f=fishAt();c.quadraticCurveTo((tp.x+f.x)/2,(tp.y+f.y)/2+(1-st.ten)*34,f.x+f.s*.9,f.y);c.stroke()}
   else if(ph==='land'&&st.jump){const j=jumpAt();c.lineTo(j.x,j.y);c.stroke()}
   else if(st.cur){const by=hz-2+(st.dip?st.dip*7:Math.sin(t*2.4)*1.6);c.quadraticCurveTo((tp.x+st.bx)/2,Math.max(tp.y,by)+28,st.bx,by);c.stroke();
    c.strokeStyle='rgba(255,255,255,.45)';c.lineWidth=1;c.beginPath();c.moveTo(st.bx,by+6);c.lineTo(st.bx,st.hy);c.stroke();
-   if(st.hy>hz+8&&ph!=='lost'){c.font='14px serif';c.textBaseline='middle';c.fillText(BAIT[st.cur.bait][0],st.bx,st.hy+6)}
+   if(st.hy>hz+8&&ph!=='lost'){c.font='14px serif';c.textBaseline='middle';baitDraw(c,st.cur.bait,st.bx,st.hy+6,17)}
    bob(st.bx,by,st.dip>.8);
    if(ph==='bite'){const k=1+Math.sin(t*16)*.08;c.save();c.translate(st.bx,hz-40);c.scale(k,k);c.fillStyle='#fff';c.strokeStyle='#ff4f6d';c.lineWidth=3;c.beginPath();c.arc(0,0,17,0,7);c.fill();c.stroke();
     c.fillStyle='#ff3b3b';c.font='bold 24px system-ui,sans-serif';c.textAlign='center';c.textBaseline='middle';c.fillText('!',0,1);c.restore()}}
@@ -4193,9 +4226,10 @@ function raceGame(){const play=shell(LIST[1].name,'🏎️','race'),lv=level(),k
   const g=st.gate;if(g){const y=ky-(g.d-st.d);if(y>-60&&y<H){const ls=lanesOf(g);cx.fillStyle='#ffb020';cx.fillRect(l0,y-34,rw,6);
    ls.forEach((l,k)=>{const x=laneX(l),bw=rw/3-14;cx.fillStyle='#fff';cx.strokeStyle='#ff7a3d';cx.lineWidth=3;roundRect(cx,x-bw/2,y-30,bw,40,10);cx.fill();cx.stroke();cx.fillStyle='#1d2f4a';cx.font=`bold ${String(g.q.opts[k]).length>5?15:20}px ui-monospace,Menlo,monospace`;cx.textBaseline='middle';cx.fillText(g.q.opts[k],x,y-10);cx.textBaseline='alphabetic'});
    if(ls.length===2){cx.font='26px serif';cx.fillText('🚧',laneX(1),y-2)}}}
-  const by=ky-(st.bug-st.d);if(by>-60&&by<H+60){let bl=((Math.floor(st.bug/500)%3)+3)%3;if(bl===st.lane&&Math.abs(by-ky)<70)bl=st.lane===2?1:st.lane+1;drawKart(laneX(bl),by,'#8e5bd6','🐛',0)}
-  drawKart(st.x,ky,'#3fbf62','🐍',st.spin*Math.PI*2,st.boostT>0)}
- function drawKart(x,y,col,face,rot,boost){cx.save();cx.translate(x,y);cx.rotate(rot);if(boost){cx.fillStyle='#ffb02088';cx.beginPath();cx.moveTo(-12,26);cx.lineTo(0,58+Math.random()*10);cx.lineTo(12,26);cx.fill()}
+  const by=ky-(st.bug-st.d);if(by>-60&&by<H+60){let bl=((Math.floor(st.bug/500)%3)+3)%3;if(bl===st.lane&&Math.abs(by-ky)<70)bl=st.lane===2?1:st.lane+1;drawKart(laneX(bl),by,'#8e5bd6','🐛',0,false,'pg-kart-bug')}
+  drawKart(st.x,ky,'#3fbf62','🐍',st.spin*Math.PI*2,st.boostT>0,'pg-kart-py')}
+ function drawKart(x,y,col,face,rot,boost,pic){cx.save();cx.translate(x,y);cx.rotate(rot);if(boost){cx.fillStyle='#ffb02088';cx.beginPath();cx.moveTo(-12,26);cx.lineTo(0,58+Math.random()*10);cx.lineTo(12,26);cx.fill()}
+  const m=pic&&cpic(pic);if(m){const h=54,w=h*m.naturalWidth/m.naturalHeight;cx.drawImage(m,-w/2,-h/2,w,h);cx.restore();return}   // the painted kart (top-down) once it is in images/
   cx.fillStyle='#222';for(const [a,b] of [[-20,-16],[14,-16],[-20,12],[14,12]])roundRect(cx,a,b,8,14,3),cx.fill();
   cx.fillStyle=col;roundRect(cx,-16,-24,32,50,12);cx.fill();cx.fillStyle='#ffffff55';roundRect(cx,-10,-20,20,10,5);cx.fill();cx.font='24px serif';cx.textAlign='center';cx.fillText(face,0,10);cx.restore()}
  function tick(dt){if(st.over)return false;
@@ -4256,7 +4290,7 @@ function shootGame(){const play=shell(LIST[2].name,'🚀','shoot'),lv=level(),sh
 // ================================================================ 🤿 Treasure Dive Pool — a list of chests: swim to the one the code points at
 function diveGame(){const play=shell(LIST[3].name,'🤿','dive'),lv=level(),suit=gear('suit'),total=8,airMax=[26,22,18,15,13,11][lv-1]+suit*4;
  let q=null,qn=0,air=airMax,busy=false,W=0,H=0;
- play.innerHTML=`<div class="dv-card"><div class="dv-code"></div><b class="dv-ask"></b><div class="dv-air"><i></i><span>🫧</span></div></div><div class="dv-sea"><div class="dv-boat">⛵</div><div class="dv-diver">${img('pg-diver','🐍','diver')}<i class="mask">🤿</i></div><div class="dv-floor"></div><div class="dv-crab">${img('pg-crab','🦀','crab')}<span class="say"></span></div><span class="qn"></span></div>`;
+ play.innerHTML=`<div class="dv-card"><div class="dv-code"></div><b class="dv-ask"></b><div class="dv-air"><i></i><span>🫧</span></div></div><div class="dv-sea"><div class="dv-boat">${img('py-deco-sail','⛵','boat')}</div><div class="dv-diver">${img('pg-diver','🐍','diver')}<i class="mask">🤿</i></div><div class="dv-floor"></div><div class="dv-crab">${img('pg-crab','🦀','crab')}<span class="say"></span></div><span class="qn"></span></div>`;
  const sea=play.querySelector('.dv-sea'),floor=play.querySelector('.dv-floor'),diver=play.querySelector('.dv-diver'),crab=play.querySelector('.dv-crab');
  const size=()=>{const r=sea.getBoundingClientRect();W=r.width;H=r.height};
  const home=()=>{diver.style.transform=`translate(${W/2-30}px,${18}px)`};
@@ -4375,10 +4409,10 @@ const ITEMS_B=[['shield','🛡️','방패|Shield'],['bolt','⚡','번개|Bolt']
 // the ride each bug broke, painted (a funpark picture for the rides without their own); its emoji if the picture fails
 const RIDE_ART={tangle:'boss-ride-tangle',hushy:'py-deco-tent',swappy:'py-deco-icecream',loopy:'py-spot-wheel',dither:'boss-ride-dither',nonstop:'boss-ride-nonstop',forgetty:'boss-ride-forgetty',mixy:'boss-ride-mixy',snatchy:'boss-ride-snatchy',doubly:'py-deco-balloon',squishy:'py-deco-carousel',jumbly:'boss-ride-jumbly',king:'py-deco-castle'};
 const ridePic=b=>RIDE_ART[b.id]?`<img src="images/${RIDE_ART[b.id]}.webp" alt="" draggable="false" onerror="this.replaceWith('${b.ride.emoji}')">`:b.ride.emoji;
-function bossPic(b,cls=''){
- if(BOSS_IMG.has(b.id))return `<img class="bb-img ${cls}" src="images/boss-${b.id}.webp" alt="" draggable="false">`;
- return `<span class="bb-emo ${cls} ${b.rainbow?'rainbow':''} ${b.crown?'crowned':''}">${b.crown?'<i class="bb-crown">👑</i>':''}${b.emoji}<i class="bb-eyes"></i></span>`}
-const friendPic=(cls='')=>BOSS_IMG.has('ladybug-friend')?`<img class="bb-img ${cls}" src="images/ladybug-friend.webp" alt="" draggable="false">`:`<span class="bb-emo ${cls}">🐞</span>`;
+function bossPic(b,cls=''){const emo=`<span class="bb-emo ${cls} ${b.rainbow?'rainbow':''} ${b.crown?'crowned':''}">${b.crown?'<i class="bb-crown">👑</i>':''}${b.emoji}<i class="bb-eyes"></i></span>`;
+ return BOSS_IMG.has(b.id)?tryPic(['boss-'+b.id],emo,'bb-img '+cls):emo}
+// a beaten bug's ladybug friend: its own picture (images/ladybug-friend-<id>.webp) once drawn, else the shared ladybug, else 🐞
+const friendPic=(b,cls='')=>tryPic([b&&b.id?'ladybug-friend-'+b.id:'',BOSS_IMG.has('ladybug-friend')?'ladybug-friend':''],`<span class="bb-emo ${cls}">🐞</span>`,'bb-img '+cls);
 function startBoss(n,host,opts={}){
  const b=BOSS_BY[n]||BOSSES[0],diff=clamp(opts.diff||S.opt.diff||1,1,3);const items=opts.items||S.items||{};const use=opts.useItem||(id=>useItem(id));
  const maxHp=Math.max(3,b.hp+(diff===1?-1:diff===3?2:0)),maxHearts=diff===1?4:3;
@@ -4392,7 +4426,7 @@ function startBoss(n,host,opts={}){
    <div class="bb-arena">
     <div class="bb-ride glitch">${ridePic(b)}</div>
     <div class="bb-boss"><div class="bb-hp" role="img" aria-label="${L('버그 체력','Bug energy')}"><i></i><span></span></div><div class="bb-sprite">${bossPic(b)}</div><div class="bb-say"></div></div>
-    <div class="bb-py"><div class="bb-shield hidden">🛡️</div><div class="bb-pyp">${pySVG('happy',{cls:'big'})}</div><div class="bb-hearts"></div></div>
+    <div class="bb-py"><div class="bb-shield hidden">${tryPic(['py-item-shield'],'🛡️')}</div><div class="bb-pyp">${pySVG('happy',{cls:'big'})}</div><div class="bb-hearts"></div></div>
     <div class="bb-fx"></div>
    </div>
    <div class="bb-side"><div class="bb-panel" aria-live="polite"></div><div class="bb-items"></div></div>
@@ -4403,7 +4437,7 @@ function startBoss(n,host,opts={}){
  function drawHp(){$b('.bb-hp i').style.width=(100*st.hp/maxHp)+'%';$b('.bb-hp span').textContent=`${st.hp} / ${maxHp}`}
  function drawHearts(){$b('.bb-hearts').innerHTML=[...Array(Math.max(maxHearts,st.hearts))].map((_,i)=>`<i class="${i<st.hearts?'':'off'}">${i<st.hearts?'❤️':'🤍'}</i>`).join('');$b('.bb-shield').classList.toggle('hidden',!st.shield)}
  function drawItems(){const q=st.q;$b('.bb-items').innerHTML=ITEMS_B.map(([id,ic,nm])=>{const n=items[id]||0;const can=n>0&&st.phase==='q'&&!st.busy&&(id!=='heart'||st.hearts<maxHearts+2)&&(id!=='card'||(q&&q.left.length>2))&&(id!=='shield'||!st.shield)&&(id!=='bolt'||!st.bolt);
-  return `<button type="button" class="bb-it ${can?'':'off'} ${(id==='shield'&&st.shield)||(id==='bolt'&&st.bolt)?'on':''}" data-it="${id}" aria-label="${T(nm)} ${n}"><span>${ic}</span><small>${T(nm)}</small><b>${n}</b></button>`}).join('')}
+  return `<button type="button" class="bb-it ${can?'':'off'} ${(id==='shield'&&st.shield)||(id==='bolt'&&st.bolt)?'on':''}" data-it="${id}" aria-label="${T(nm)} ${n}"><span>${typeof itemPic==='function'?itemPic(id,ic):ic}</span><small>${T(nm)}</small><b>${n}</b></button>`}).join('')}
  function bossSay(text,ms=1800){const s=$b('.bb-say');s.textContent=T(text);s.classList.remove('show');void s.offsetWidth;s.classList.add('show');clearTimeout(s._t);s._t=setTimeout(()=>s.classList.remove('show'),ms)}
  function pyMood(m){$b('.bb-pyp').innerHTML=pySVG(m,{cls:'big'})}
  drawHp();drawHearts();drawItems();
@@ -4470,13 +4504,13 @@ function startBoss(n,host,opts={}){
   const res={won:true,right:st.right,wrong:st.wrong,turns:st.turns,n,stars:stars()};
   S.boss.won[n]=true;S.boss.best[n]=Math.max(S.boss.best[n]||0,res.stars);save(true);
   sfx('win');$b('.bb-sprite').classList.add('morph');pyMood('wow');
-  later(()=>{$b('.bb-sprite').innerHTML=friendPic();$b('.bb-sprite').classList.remove('morph','hurt','taunt');$b('.bb-sprite').classList.add('friend');$b('.bb-ride').classList.remove('glitch');$b('.bb-ride').classList.add('fixed');$b('.bb-hp').classList.add('hidden');
+  later(()=>{$b('.bb-sprite').innerHTML=friendPic(b);$b('.bb-sprite').classList.remove('morph','hurt','taunt');$b('.bb-sprite').classList.add('friend');$b('.bb-ride').classList.remove('glitch');$b('.bb-ride').classList.add('fixed');$b('.bb-hp').classList.add('hidden');
    if(typeof celebrate==='function')celebrate(50);sfx('fanfare');
    dialogue([`coach:${b.defeat}`,'py:고마워, 친구! 이제 같이 놀자!|Thanks, friend! Let’s play together!'],()=>result(res),{last:L('결과 보기 ▶','See results ▶'),after:true})},1100)}
  function result(res){const ov=$b('.bb-over');ov.classList.remove('hidden');
   ov.innerHTML=`<div class="bb-card" role="dialog" aria-modal="true"><div class="bb-stars">${[1,2,3].map(i=>`<i class="${i<=res.stars?'on':''}">⭐</i>`).join('')}</div>
    <h2>🎉 ${L(`${T(b.ride.name)}이(가) 다시 돌아가요!`,`The ${T(b.ride.name)} works again!`).replace('이(가)',josaRide(T(b.ride.name)))}</h2>
-   <div class="bb-friend">${friendPic('mid')}<div><b>${tx(b.friend.name)}</b><small>${tx(b.friend.job)}</small><span>${L('무당벌레 친구가 생겼어요!','A new ladybug friend!')}</span></div></div>
+   <div class="bb-friend">${friendPic(b,'mid')}<div><b>${tx(b.friend.name)}</b><small>${tx(b.friend.job)}</small><span>${L('무당벌레 친구가 생겼어요!','A new ladybug friend!')}</span></div></div>
    <p class="bb-score">✅ ${L(`맞힌 문제 ${res.right}개`,`${res.right} right`)} · 💡 ${L(`다시 배운 문제 ${res.wrong}개`,`${res.wrong} learned`)}</p>
    <p class="bb-praise">${esc(T(res.wrong===0?'한 번도 안 틀렸어요! 코드를 정말 꼼꼼히 읽었네요.|No mistakes at all! You read the code so carefully.':res.wrong<=2?'틀린 문제도 설명을 보고 다시 배웠어요. 그게 진짜 실력이에요!|You learned from the ones you missed. That’s real skill!':'끝까지 포기하지 않고 버그를 고쳤어요. 정말 멋져요!|You never gave up and fixed the bug. Amazing!'))}</p>
    <button type="button" class="btn wide bb-done">🎡 ${L('놀이공원으로!','Back to the park!')}</button></div>`;
@@ -4574,8 +4608,8 @@ const rideOpen=g=>maxWorld()>=g.world||(WORLDS[g.world-1]&&worldDone(WORLDS[g.wo
 
 RENDER.school=()=>{markDay();refreshReqs();const d=daily();
  $('v-school').innerHTML=`<div class="vtop card"><div class="goals">${GOALS.map(([k,n,ic,t])=>`<span class="goal ${(d[k]||0)>=n?'on':''}">${ic}<b>${T(t)}</b><small>${Math.min(d[k]||0,n)}/${n}</small></span>`).join('')}
-  <button type="button" class="gchest ${dailyDone()&&!d.got?'ready':''} ${d.got?'got':''}" data-a="chest" aria-label="${L('오늘의 상자','Daily chest')}">${d.got?'✅':'🎁'}</button></div>
-  ${(()=>{const nm=nextMission();return nm?`<button class="btn wide go" type="button" data-a="mission" data-id="${nm.id}"><span>${worldOf(nm).icon}</span><span class="gtxt"><small>${L('이어서 배우기','Keep learning')} · ${nm.world}-${nm.idx+1} ${KIND[nm.kind][0]}</small><b>${tx(nm.title)}</b></span><span>▶</span></button>`:''})()}
+  <button type="button" class="gchest ${dailyDone()&&!d.got?'ready':''} ${d.got?'got':''}" data-a="chest" aria-label="${L('오늘의 상자','Daily chest')}">${d.got?'✅':tryPic(['pg-chest'],'🎁','gcpic')}</button></div>
+  ${(()=>{const nm=nextMission();return nm?`<button class="btn wide go" type="button" data-a="mission" data-id="${nm.id}"><span>${placePic(worldOf(nm))}</span><span class="gtxt"><small>${L('이어서 배우기','Keep learning')} · ${nm.world}-${nm.idx+1} ${KIND[nm.kind][0]}</small><b>${tx(nm.title)}</b></span><span>▶</span></button>`:''})()}
   <div class="row vrow">${reviewDue().length?`<button class="btn gold" type="button" data-a="review">🧠 ${L(`기억 퀴즈 ${reviewDue().length}문제`,`Memory quiz · ${reviewDue().length}`)}</button>`:''}${HAS_ML?`<button class="btn ghost" type="button" data-a="book">📒 ${L('개념 노트','Concept notebook')}</button>`:''}</div></div>
   ${mapHTML()}
   <div class="card parent"><b>👪 ${L('어른들께','For grown-ups')}</b><p>${L('🍔 내 가게에서는 아이가 가르친 파이썬 코드대로 로봇이 요리하고, 필요한 순간(칩 칸이 모자랄 때 반복, 주문이 여러 가지일 때 조건)에 문 코치가 짧게 가르쳐요. 이곳 학교에서는 개념을 차근차근 배워요. ','🍔 In My shop, robots cook by the Python code the child teaches them, and Coach Moon teaches a short lesson the moment it’s needed (a loop when the chip runs out of lines, an if when orders differ). Here at school, ideas are learned step by step. ')}${L('진짜 파이썬 문법을 아이 눈높이로 배워요. 섬마다 한 가지 개념을 문 코치와 배우고(보고 배우기 → 빈칸 → 예측 → 버그 고치기 → 만들기), 배운 개념으로 마을 주민의 부탁(레스토랑 레시피, 놀이기구 조종)을 코드로 해결하며 써먹어요. 보스전과 놀이기구 미니게임도 모두 코드 읽기 연습이에요. 틀려도 벌칙이 없고, 힌트는 언제나 무료예요.','Real Python at a child’s pace. Each place teaches one idea with Coach Moon; villagers then ask for things that need that idea (restaurant recipes, running rides) so kids use it right away. Boss battles and ride mini-games are code-reading practice too. Mistakes cost nothing and hints are always free.')}</p></div>
@@ -4595,7 +4629,7 @@ function villageCoach(){if(now()-VC_AT<60000||modalOpen())return;VC_AT=now();con
 function placeSheet(n){const w=WORLDS[n-1];if(!w)return;
  if(!worldOpen(n)){const p=WORLDS[n-2];sfx('oops');coachTalk('idea',`${n-1}번 장소에서 미션을 ${worldNeed(p)-worldDone(p)}개 더 하면 여기가 열려요!|Do ${worldNeed(p)-worldDone(p)} more mission(s) at place ${n-1} to open this one!`);return}
  const cur=nextMission(),fix=restored(n),boss=bossReady(n);
- modal(`<div class="shead"><span class="wic">${w.icon}</span><div><h2>${w.n}. ${tx(w.name)}</h2><p class="muted">${tx(w.concept)} · ${worldDone(w)}/${w.missions.length} ${fix?'· ✨'+L('복구 완료','restored'):''}</p></div></div>
+ modal(`<div class="shead"><span class="wic">${placePic(w)}</span><div><h2>${w.n}. ${tx(w.name)}</h2><p class="muted">${tx(w.concept)} · ${worldDone(w)}/${w.missions.length} ${fix?'· ✨'+L('복구 완료','restored'):''}</p></div></div>
   ${!fix?`<p class="glitchnote">🐛 ${bossOn()&&BOSS_BY[n]?L(`${josa(T(BOSS_BY[n].name),'이')} ${BOSS_BY[n].ride.emoji} ${josa(T(BOSS_BY[n].ride.name),'을')} 고장 냈어요! 미션을 하면 버그가 도망가고, 마지막에 보스를 물리치면 다시 움직여요.`,`${T(BOSS_BY[n].name)} broke the ${BOSS_BY[n].ride.emoji} ${T(BOSS_BY[n].ride.name)}! Missions chase the bugs away, and beating the boss makes it run again.`):L('버그 군단이 이곳을 고장 냈어요! 미션을 하면 버그가 도망가고, 마지막에 보스를 물리치면 다시 반짝반짝해져요.','The bug gang broke this place! Missions chase the bugs away, and beating the boss at the end makes it shine again.')}</p>`:bossOn()&&BOSS_BY[n]?`<p class="glitchnote fixed">✨ ${BOSS_BY[n].ride.emoji} ${L(`${josa(T(BOSS_BY[n].ride.name),'이')} 다시 움직여요! 🐞 ${josa(T(BOSS_BY[n].friend.name),'이')} 일하고 있어요.`,`The ${T(BOSS_BY[n].ride.name)} runs again! 🐞 ${T(BOSS_BY[n].friend.name)} works here now.`)}</p>`:''}
   <div class="mnodes">${w.missions.map(m=>{const open=missionOpen(m),d=S.done[m.id];return `<button type="button" class="mnode ${d?'done':''} ${open?'':'locked'} ${cur&&cur.id===m.id?'cur':''}" data-act="m" data-id="${m.id}"><span class="mk">${d?'✅':open?KIND[m.kind][0]:'🔒'}</span><span class="mt"><b>${m.idx+1}. ${tx(m.title)}</b><small>${T(KIND[m.kind][1])}${d&&d.b?' · ⭐':''}</small></span></button>`}).join('')}
    ${bossOn()?`<button type="button" class="mnode boss ${boss?'cur':S.boss.won[n]?'done':'locked'}" data-act="boss"><span class="mk">${S.boss.won[n]?'🐞':'⚔️'}</span><span class="mt"><b>${L('보스전','Boss battle')}: ${tx((BOSSES.find(b=>b.n===n)||{}).name||'버그 보스|Bug boss')}</b><small>${S.boss.won[n]?L('무찔렀어요! 무당벌레 친구가 됐어요','Beaten! Now a ladybug friend'):boss?L('지금 도전할 수 있어요!','Ready to fight!'):L('미션을 모두 하면 나타나요','Appears when all missions are done')}</small></span></button>`:''}</div>
@@ -4605,7 +4639,7 @@ function placeSheet(n){const w=WORLDS[n-1];if(!w)return;
  if(!S.seen['w'+n]){if(HAS_ML&&MiniLesson.seen('py:w'+n)){S.seen['w'+n]=1;save(true)}else setTimeout(()=>{closeModal();worldIntro(n)},300)}}
 // a spot (restaurant or ferris wheel): the requests waiting there
 function spotSheet(k){const s=SPOT[k],rs=reqAt(k);
- modal(`<div class="shead"><span class="wic">${s.icon}</span><div><h2>${tx(s.name)}</h2><p class="muted">${k==='kitchen'?L('주문대로 레시피를 코딩해요','Code recipes to order'):L('부탁대로 놀이기구를 코딩해요','Code the rides as asked')}</p></div></div>
+ modal(`<div class="shead"><span class="wic">${SPOT_IMG.has(k)?tryPic(['py-spot-'+k],s.icon,'wpic'):s.icon}</span><div><h2>${tx(s.name)}</h2><p class="muted">${k==='kitchen'?L('주문대로 레시피를 코딩해요','Code recipes to order'):L('부탁대로 놀이기구를 코딩해요','Code the rides as asked')}</p></div></div>
   ${rs.length?rs.map(({m,i})=>`<button type="button" class="reqrow" data-act="r" data-i="${i}">${villagerPic(m.who)}<span><b>${esc(L(m.who[1],m.who[2]))}</b><small>${tx(m.say)}</small></span><span class="rew">+${m.reward} 🍎</span></button>`).join(''):`<p class="muted center">${L('지금은 부탁이 없어요. 곧 주민이 찾아와요!','No requests right now. Villagers will come soon!')}</p>`}`,{cls:'sheet',acts:{r:b=>()=>reqSheet(+b.dataset.i)}})}
 function reqSheet(i){const m=(S.reqs||[])[i];if(!m)return;
  modal(`<div class="reqcard">${villagerPic(m.who,'big')}<h2>${esc(L(m.who[1],m.who[2]))}${L('의 부탁','’s request')}</h2><p class="reqsay">“${tx(m.say)}”</p><p class="muted">${m.place==='kitchen'?'🍔 '+L('레스토랑','Restaurant'):'🎡 '+L('놀이공원','Funpark')} · ${L('보상','Reward')} +${m.reward} 🍎 +1 🎟️</p></div>
@@ -4618,12 +4652,12 @@ function chestRoll(big){const pool=[];const unowned=(set,kind)=>Object.entries(s
  return pick(pool)}
 const ri=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
 function giveChest(big){const [k,v]=chestRoll(big);let what='';
- if(k==='apples'){addApples(v);what=`🍎 ×${v}`}else if(k==='tickets'){addTickets(v);what=`🎟️ ×${v}`}else if(k==='item'){S.items[v]=(S.items[v]||0)+1;what=`${POWER[v][0]} ${T(POWER[v][1])}`}
- else if(k==='hat'){S.owned.hat.push(v);what=`${HATS[v][0]} ${T(HATS[v][1])}`}else if(k==='acc'){S.owned.acc.push(v);what=`${ACCS[v][0]} ${T(ACCS[v][1])}`}else if(k==='deco'){placeDeco(v);what=`${DECOS[v][0]} ${T(DECOS[v][1])}`}
+ if(k==='apples'){addApples(v);what=`🍎 ×${v}`}else if(k==='tickets'){addTickets(v);what=`🎟️ ×${v}`}else if(k==='item'){S.items[v]=(S.items[v]||0)+1;what=`${typeof itemPic==='function'?itemPic(v,POWER[v][0]):POWER[v][0]} ${T(POWER[v][1])}`}
+ else if(k==='hat'){S.owned.hat.push(v);what=`${wearPic('hat',v,HATS[v][0])} ${T(HATS[v][1])}`}else if(k==='acc'){S.owned.acc.push(v);what=`${wearPic('acc',v,ACCS[v][0])} ${T(ACCS[v][1])}`}else if(k==='deco'){placeDeco(v);what=`${typeof decoPic==='function'?decoPic(v):DECOS[v][0]} ${T(DECOS[v][1])}`}
  save();return what}
 function openDailyChest(){const d=daily();if(d.got||!dailyDone()){sfx('oops');coachTalk('idea','📚 배우기 1, 🙋 주민 돕기 2, 🎢 놀이기구 1을 하면 상자가 열려요!|Learn 1, help 2 villagers and ride 1 to open the chest!');return}
  d.got=true;const a=giveChest(false),b=giveChest(false);sfx('fanfare');celebrate(40);
- modal(`<div class="chestopen">🎁</div><h2>${L('오늘의 보물 상자!','Today’s treasure chest!')}</h2><div class="rew"><span>${a}</span><span>${b}</span></div>${typeof coachLine==='function'?coachLine('big'):''}<button class="btn wide" type="button" data-act="close">${L('좋아요!','Yay!')}</button>`,{onClose:()=>{if(VIEW==='home')RENDER.home()}})}
+ modal(`<div class="chestopen">${tryPic(['sci-chest-wood','pg-chest'],'🎁')}</div><h2>${L('오늘의 보물 상자!','Today’s treasure chest!')}</h2><div class="rew"><span>${a}</span><span>${b}</span></div>${typeof coachLine==='function'?coachLine('big'):''}<button class="btn wide" type="button" data-act="close">${L('좋아요!','Yay!')}</button>`,{onClose:()=>{if(VIEW==='home')RENDER.home()}})}
 // ---------------------------------------------------------------- boss battles (boss.js) and what they unlock
 function startBossFlow(n){if(!bossOn())return;const b=BOSSES.find(x=>x.n===n);if(!b)return;hush();coachTalk.hide();
  const host=openStage('boss');S.boss.tries[n]=(S.boss.tries[n]||0)+1;save(true);
@@ -4634,8 +4668,8 @@ function bossResult(n,res){const b=BOSSES.find(x=>x.n===n);
  const first=!S.friends.includes(n);S.boss.won[n]=true;if(first)S.friends.push(n);   // boss.js marks won itself, so the friends list tells a first win
  const apples=first?20:5,tk=first?3:1;addApples(apples);addTickets(tk);addXP(first?30:5);const gift=first?giveChest(true):'';
  if(first)trophy(n===13?'king':'boss'+n);save();sfx('fanfare');celebrate(70);go('school');
- modal(`<div class="big">🐞✨</div><h2>${n===13?L('버그 대왕을 고쳤어요!','King Buggle is debugged!'):L(`${T(WORLDS[n-1].name)} 복구!`,`${T(WORLDS[n-1].name)} restored!`)}</h2>
-  <p>${tx(b.defeat||'버그가 무당벌레 친구가 됐어요!|The bug became a ladybug friend!')}</p>${b.friend?`<div class="gift">🐞 <b>${tx(b.friend.name)}</b><small>${tx(b.friend.job||'')}</small></div>`:''}
+ modal(`<div class="big">${ridePic(b)}</div><h2>${n===13?L('버그 대왕을 고쳤어요!','King Buggle is debugged!'):L(`${T(WORLDS[n-1].name)} 복구!`,`${T(WORLDS[n-1].name)} restored!`)}</h2>
+  <p>${tx(b.defeat||'버그가 무당벌레 친구가 됐어요!|The bug became a ladybug friend!')}</p>${b.friend?`<div class="gift">${friendPic(b)}<b>${tx(b.friend.name)}</b><small>${tx(b.friend.job||'')}</small></div>`:''}
   <div class="rew"><span>+${apples} 🍎</span><span>+${tk} 🎟️</span>${gift?`<span>🎁 ${gift}</span>`:''}</div>${typeof coachLine==='function'?coachLine('big'):''}<button class="btn wide" type="button" data-act="close">${L('마을 보기','See the village')}</button>`,{cls:'wide'})}
 // ---------------------------------------------------------------- trophies (recognition for things done, never for speed)
 const TROPHIES={first:['🌱','첫 미션|First mission'],job1:['🙋','첫 부탁 해결|First request'],job10:['🍔','주민 도우미 10번|10 requests'],job30:['🏅','마을 영웅|Village hero (30 requests)'],bug1:['🐞','첫 버그 고치기|First bug fixed'],bug10:['🔎','버그 탐정|Bug detective (10)'],
@@ -4653,12 +4687,12 @@ const GEAR={rod:['🎣','낚싯대|Fishing rod','fish','물고기가 천천히 �
  ship:['🚀','로켓 레이저|Rocket laser','shoot','레이저가 빨라지고 방패가 늘어요|Faster laser and an extra shield'],suit:['🤿','잠수복|Diving suit','dive','공기가 더 오래가요|Your air lasts longer']};
 const GEAR_PRICE=[40,80,150];
 const ITEM_IMG=new Set(['shield','bolt','heart','card','rod','kart','ship','suit']);   // add 'shield','bolt','heart','card','rod','kart','ship','suit' once images/py-item-<id>.webp exist
-const itemPic=(id,em)=>ITEM_IMG.has(id)?`<img src="images/py-item-${id}.webp" alt="">`:em;
+const itemPic=(id,em)=>ITEM_IMG.has(id)?`<img src="images/py-item-${id}.webp" alt="" draggable="false" onerror="this.replaceWith('${em}')">`:em;
 const DECOS={tree:['🌳','큰 나무|Big tree',20],flowers:['🌷','꽃밭|Flower bed',15],bench:['🪑','벤치|Bench',15],lamp:['🏮','등불|Lantern',25],bike:['🚲','자전거|Bicycle',30],balloon:['🎈','풍선 가게|Balloon stand',50],
  fountain:['⛲','분수|Fountain',60],cafe:['☕','카페|Café',70],icecream:['🍦','아이스크림 카트|Ice-cream cart',70],house:['🏡','파이의 집|Py’s house',80],rainbow:['🌈','무지개 아치|Rainbow arch',90],
  sail:['⛵','요트|Sailboat',100],carousel:['🎠','회전목마|Carousel',120],tent:['🎪','서커스 텐트|Circus tent',150],tower:['🗼','전망대|Lookout tower',180],castle:['🏰','성|Castle',250]};
 const DECO_IMG=new Set(['balloon','bench','bike','cafe','carousel','castle','flowers','fountain','house','icecream','lamp','rainbow','sail','tent','tower','tree']);   // add ids once images/py-deco-<id>.webp exist
-const decoPic=id=>DECO_IMG.has(id)?`<img src="images/py-deco-${id}.webp" alt="">`:DECOS[id][0];
+const decoPic=id=>DECO_IMG.has(id)?`<img src="images/py-deco-${id}.webp" alt="" draggable="false" onerror="this.replaceWith('${DECOS[id][0]}')">`:DECOS[id][0];
 function placeDeco(id){S.deco=S.deco||[];if(S.deco.includes(id))return;const i=PLOTS.findIndex((_,k)=>!S.deco[k]);if(i<0)return false;S.deco[i]=id;checkTrophies();return true}
 // more looks for Py (added to the wardrobe lists in core.js)
 Object.assign(HATS,{straw:['👒','밀짚모자|Straw hat',30],helmet:['⛑️','안전모|Safety helmet',35],clover:['🍀','네잎클로버|Clover',20],cowboy:['🤠','카우보이|Cowboy',45],wizard:['🧙','마법사 모자|Wizard',70]});
@@ -4715,7 +4749,7 @@ function rideDone(res){res=res||{};const quiet=!!res.again;const ap=Math.max(1,r
 let ME='dress';
 RENDER.me=()=>{let body='';
  if(ME==='dress')body=wardrobeHTML(false)+`<p class="muted center">${L('새 옷과 색깔은 🛍️ 상점에서 사요.','Buy new looks in the 🛍️ shop.')}</p>`;
- else if(ME==='friends'){const bs=bossOn()?BOSSES:[];body=bs.length?`<p class="muted">${L('보스를 물리치면 버그가 무당벌레 친구가 되어 마을에서 일해요.','Beaten bosses become ladybug friends who work in the village.')}</p><div class="items">${bs.map(b=>{const got=S.friends.includes(b.n);return `<div class="item ${got?'own':''}"><span class="em">${got?(typeof bossPic==='function'?bossPic(b,true):'🐞'):'❔'}</span><b>${got&&b.friend?tx(b.friend.name):'???'}</b><small>${got&&b.friend?tx(b.friend.job||''):b.n===13?L('버그 대왕','King Buggle'):L(`${b.n}번 장소 보스`,`Boss of place ${b.n}`)}</small></div>`}).join('')}</div>`:`<p class="muted">${L('보스전이 곧 열려요!','Boss battles are coming!')}</p>`}
+ else if(ME==='friends'){const bs=bossOn()?BOSSES:[];body=bs.length?`<p class="muted">${L('보스를 물리치면 버그가 무당벌레 친구가 되어 마을에서 일해요.','Beaten bosses become ladybug friends who work in the village.')}</p><div class="items">${bs.map(b=>{const got=S.friends.includes(b.n);return `<div class="item ${got?'own':''}"><span class="em">${got?(typeof friendPic==='function'?friendPic(b):'🐞'):'❔'}</span><b>${got&&b.friend?tx(b.friend.name):'???'}</b><small>${got&&b.friend?tx(b.friend.job||''):b.n===13?L('버그 대왕','King Buggle'):L(`${b.n}번 장소 보스`,`Boss of place ${b.n}`)}</small></div>`}).join('')}</div>`:`<p class="muted">${L('보스전이 곧 열려요!','Boss battles are coming!')}</p>`}
  else if(ME==='trophy')body=`<div class="items">${Object.entries(TROPHIES).map(([id,t])=>{const got=(S.trophies||[]).includes(id);return `<div class="item ${got?'own':''}"><span class="em">${got?t[0]:'🔒'}</span><b>${T(t[1])}</b></div>`}).join('')}</div>`;
  else if(ME==='works')body=worksHTML();
  $('v-me').innerHTML=`<h2 class="vtitle">🎒 ${L('내 파이','My Py')}</h2><div class="card statrow"><span><b>${Object.keys(S.done).length}</b><small>📚 ${L('미션','missions')}</small></span><span><b>${S.stats.jobs||0}</b><small>🙋 ${L('부탁','requests')}</small></span><span><b>${S.stats.fixed}</b><small>🐞 ${L('고친 버그','bugs fixed')}</small></span><span><b>${(S.friends||[]).length}</b><small>🐞 ${L('친구','friends')}</small></span></div>
@@ -5159,7 +5193,7 @@ function draw(){const c=Y.ctx,me=Y.me,dec=lvOf('decor'),sg=lvOf('sign');c.lineJo
  const mo=menuOpen();const mb=iso(8.6,0);c.save();c.translate(mb[0],mb[1]-wh+22);c.transform(1,.5,0,1,0,0);c.fillStyle='#3a2b26';c.beginPath();c.roundRect(-6,-16,Math.max(80,mo.length*36+8),66,8);c.fill();
  mo.forEach((k,j)=>{const m=MENU[k],bx=14+j*36,p=dishPic(k);if(p){const h=34,w=h*p.naturalWidth/p.naturalHeight;c.drawImage(p,bx-w/2,17-h/2,w,h);return}miniDish(c,m.dish,bx,38,9);c.font=`900 11px ${TF}`;c.fillStyle='#ffd23f';c.textAlign='center';c.fillText(m.e,bx,-4)});c.restore();
  // the school door on the left wall
- const sd=iso(0,8.5);c.save();c.translate(sd[0],sd[1]);c.transform(1,-.5,0,1,0,0);c.fillStyle='#7a5bd8';c.beginPath();c.roundRect(-20,-82,40,80,[14,14,0,0]);c.fill();c.fillStyle='#fff';c.font=`800 12px ${TF}`;c.textAlign='center';c.fillText(L('학교','School'),0,-90);emo(c,'🏫',0,-48,26);c.restore();
+ const sd=iso(0,8.5);c.save();c.translate(sd[0],sd[1]);c.transform(1,-.5,0,1,0,0);{const m=img('images/rb-school.webp');if(ok_(m)){const h=86,w=h*m.naturalWidth/m.naturalHeight;c.drawImage(m,-w/2,-h,w,h)}else{c.fillStyle='#7a5bd8';c.beginPath();c.roundRect(-20,-82,40,80,[14,14,0,0]);c.fill();emo(c,'🏫',0,-48,26)}}c.fillStyle='#fff';c.font=`800 12px ${TF}`;c.textAlign='center';c.fillText(L('학교','School'),0,-90);c.restore();
  for(let x=0;x<MW;x++)for(let y=0;y<MH;y++){const kit=x<7;poly(c,quad(x,y,x+1,y+1),kit?((x+y)%2?'#e8f4ff':'#f4faff'):((x+y)%2?'#f6c58c':'#f9cf9b'),kit?'rgba(120,150,200,.25)':'rgba(180,110,50,.25)')}
  box(c,0,MH,MW,.16,12,'#ffcf7a','#f39a2c','#f39a2c');box(c,MW,0,.16,MH,12,'#ffcf7a','#f39a2c','#f39a2c');
  // pass-through counter between kitchen and dining room
@@ -5394,7 +5428,7 @@ const WL={
   key:['w12-1','w12-6']}};
 function pyWorldLesson(n){const w=WORLDS[n-1],d=WL[n];if(!w||!d)return null;const ci=COACH_INTRO[n],ii=w.intro||[];
  return {id:'py:w'+n,icon:w.icon,title:mlPair(w.concept),
-  steps:[{say:mlPair(ci||ii[0]),art:b=>{b.innerHTML=`<div class="mlp"><div class="mlp-place"><span class="wic">${w.icon}</span><span><b>${w.n}. ${tx(w.name)}</b><small>💡 ${tx(w.concept)}</small></span></div>${ci&&ii[0]?pyLine(ii[0],'wow'):''}</div>`},after:()=>{if(ci&&ii[0])say(T(ii[0]))}},
+  steps:[{say:mlPair(ci||ii[0]),art:b=>{b.innerHTML=`<div class="mlp"><div class="mlp-place"><span><b>${w.n}. ${tx(w.name)}</b><small>💡 ${tx(w.concept)}</small></span></div>${ci&&ii[0]?pyLine(ii[0],'wow'):''}</div>`},after:()=>{if(ci&&ii[0])say(T(ii[0]))}},
    ii[1]?{say:mlPair(ii[1]),art:d.a1}:null,ii[2]?{say:mlPair(ii[2]),art:d.a2}:null,d.tr()].filter(Boolean),
   key:d.key.map(k=>Array.isArray(k)?k:MBY[k]?mlPair(MBY[k].learn):/^i\d$/.test(k)?mlPair(ii[+k[1]]):mlPair(k))}}
 // ---- short lessons for the new syntax in the middle of a place (shown before that mission the first time)
@@ -5676,12 +5710,12 @@ function jobDone(code){const m=P.m;S.stats.jobs=(S.stats.jobs||0)+1;S.lastJobs=[
    {cls:'result',acts:{home:()=>()=>go('school'),next:()=>()=>{const i=(S.reqs||[]).findIndex(x=>x.place===m.place);const k=i>=0?i:0;if(S.reqs[k])openMission(S.reqs[k],{job:k});else go('school')}}})},900)}
 function nextInWorld(m){const w=worldOf(m),n=w.missions[m.idx+1];if(n)return n;const nw=WORLDS[m.world];return nw&&worldOpen(nw.n)?nw.missions.find(x=>!doneM(x.id))||null:null}
 function worldComplete(w){if(bossOn()&&!S.boss.won[w.n]){const prize=WORLD_PRIZE[w.n];if(prize&&!S.owned[prize[0]].includes(prize[1]))S.owned[prize[0]].push(prize[1]);save();
-  modal(`<div class="big">⚔️🐛</div><h2>${L('버그 보스가 나타났어요!','A bug boss appears!')}</h2>${pyLine(`${T(w.name)}의 미션을 다 했더니 심술쟁이 버그 보스가 나왔어요! 배운 코드로 고쳐 줘요!|You finished every mission at ${T(w.name)} and the grumpy boss bug came out! Let’s debug it with what we learned!`,'wow')}
+  modal(`<div class="big">${BOSS_BY[w.n]?bossPic(BOSS_BY[w.n]):'⚔️🐛'}</div><h2>${L('버그 보스가 나타났어요!','A bug boss appears!')}</h2>${pyLine(`${T(w.name)}의 미션을 다 했더니 심술쟁이 버그 보스가 나왔어요! 배운 코드로 고쳐 줘요!|You finished every mission at ${T(w.name)} and the grumpy boss bug came out! Let’s debug it with what we learned!`,'wow')}
    <div class="row"><button class="btn ghost" type="button" data-act="later">${L('나중에','Later')}</button><button class="btn" type="button" data-act="fight">⚔️ ${L('지금 도전!','Fight now!')}</button></div>`,{closable:false,acts:{later:()=>()=>go('school'),fight:()=>()=>startBossFlow(w.n)}});return}
  const prize=WORLD_PRIZE[w.n];let gift='';
- if(prize){const [kind,id]=prize,own=S.owned[kind];if(!own.includes(id)){own.push(id);const item=kind==='color'?COLORS[id]:kind==='hat'?HATS[id]:ACCS[id];gift=`<div class="gift">🎁 ${L('선물','Gift')}: ${kind==='color'?'':item[0]} <b>${T(kind==='color'?item[3]:item[1])}</b><small>${L('꾸미기에서 입혀 봐요','Try it on in the wardrobe')}</small></div>`}}
+ if(prize){const [kind,id]=prize,own=S.owned[kind];if(!own.includes(id)){own.push(id);const item=kind==='color'?COLORS[id]:kind==='hat'?HATS[id]:ACCS[id];gift=`<div class="gift">🎁 ${L('선물','Gift')}: ${kind==='color'?'':wearPic(kind,id,item[0])} <b>${T(kind==='color'?item[3]:item[1])}</b><small>${L('꾸미기에서 입혀 봐요','Try it on in the wardrobe')}</small></div>`}}
  addApples(10);save();sfx('fanfare');celebrate(60);
- modal(`<div class="big">${w.icon}</div><h2>🏝️ ${L(`${tx(w.name)} 완성!`,`${tx(w.name)} complete!`)}</h2>${pyLine(`${josa(T(w.concept),'을')} 모두 배웠어요! 마을에 불이 하나 더 켜졌어요.|${T(w.concept)}: learned! Another light is on in the village.`)}
+ modal(`<div class="big">${placePic(w)}</div><h2>🏝️ ${L(`${tx(w.name)} 완성!`,`${tx(w.name)} complete!`)}</h2>${pyLine(`${josa(T(w.concept),'을')} 모두 배웠어요! 마을에 불이 하나 더 켜졌어요.|${T(w.concept)}: learned! Another light is on in the village.`)}
   <div class="rew"><span>+10 🍎</span></div>${gift}${typeof coachLine==='function'?coachLine('big'):''}<button class="btn wide" type="button" data-act="go">${L('학교 지도 보기','See the school map')} ▶</button>`,{cls:'wide',acts:{go:()=>()=>go('school')},onOpen:()=>say(L(`${T(w.name)} 완성! 정말 멋져요!`,`${T(w.name)} complete! Amazing!`))})}
 
 // ---------------------------------------------------------------- hints: nudge → specific → show a way (always free)

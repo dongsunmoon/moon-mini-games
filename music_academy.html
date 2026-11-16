@@ -728,6 +728,13 @@ main{width:min(980px,100%);margin:0 auto;padding:14px max(12px,env(safe-area-ins
 .pod .pic{font-size:44px}.pod b{font-size:13.5px}.pod em{font-style:normal;font-weight:900;color:var(--brand-d)}
 .pod .blk{width:100%;border-radius:12px 12px 0 0;display:grid;place-items:start center;padding-top:6px;font-size:30px;background:linear-gradient(180deg,#e9e2ff,#cfc2ff)}
 .pod.p1 .blk{height:110px;background:linear-gradient(180deg,#fff1b8,#ffc83d)}.pod.p2 .blk{height:80px}.pod.p3 .blk{height:56px}
+/* contest faces: the rivals' pictures (mus-r-*) and the player's own character (coachMe), the emoji if a file is missing */
+.rsplash .big .ei{width:150px;height:150px;border-radius:28px;object-fit:cover;vertical-align:middle;box-shadow:0 10px 26px rgba(0,0,0,.28)}
+.contest .cinfo .rvs .ei{width:22px;height:22px;vertical-align:-5px;margin-right:1px}
+.rrow b .ei{width:16px;height:16px;vertical-align:-3px}.rrow b .ava{width:16px;height:16px;font-size:11px;box-shadow:none;vertical-align:-3px}
+.srow .ic{display:grid;place-items:center;width:36px;height:36px;flex:0 0 36px}.srow .ic .ei{width:36px;height:36px}.srow .ic .ava{width:32px;height:32px;font-size:20px;box-shadow:0 0 0 2px #fff,0 2px 6px rgba(0,0,0,.15)}
+.pod .pic{display:grid;place-items:center;height:68px}.pod .pic .ei{width:66px;height:66px}.pod .pic .ava{width:60px;height:60px;font-size:36px}
+.finalmsg p .ei{width:34px;height:34px;vertical-align:-10px}
 .finalmsg b{font-size:21px}.finalmsg.hide,.ceremony .rewards.hide,.ceremony .row.hide,.drumroll.hide{display:none}
 
 /* stickers, shop, trophies */
@@ -3668,7 +3675,7 @@ RENDER.instr=()=>{const fams=['key','string','wood','brass','perc'];
 // ---------------------------------------------------------------- contests: rivals race you live, medals for the top three
 let CT=null;
 RENDER.contests=()=>{$('v-contests').innerHTML=`<div class="room"><h2 class="h2w">🏆 ${L('음악 대회','Music contests')}</h2><p class="sub wsub">${L('배운 실력으로 대회에 나가 메달을 따요! 몇 번이든 다시 도전할 수 있어요.','Use what you’ve learned to win medals! You can try as many times as you like.')}</p>
- ${CONTESTS.map(c=>{const open=contestOpen(c),rec=S.contests[c.id]||{};return `<button type="button" class="contest ${open?'':'locked'}" data-c="${c.id}" style="background:${c.bg}"><span class="cic">${pic(`images/mus-c-${c.id}.webp`,c.icon)}</span><span class="cinfo"><b>${esc(T(c.name))}</b><small>${c.rounds.length}${L('라운드',' rounds')} · ${c.rivals.map(r=>RIVALS[r].icon).join('')}</small>${open?'':`<small>🔒 ${esc(T(LESSON_BY[c.after].t))} ${L('레슨 후','after the lesson')}</small>`}</span><span class="cmedal">${['','🥉','🥈','🥇'][rec.medal||0]||(open?'▶':'🔒')}</span></button>`}).join('')}</div>`;
+ ${CONTESTS.map(c=>{const open=contestOpen(c),rec=S.contests[c.id]||{};return `<button type="button" class="contest ${open?'':'locked'}" data-c="${c.id}" style="background:${c.bg}"><span class="cic">${pic(`images/mus-c-${c.id}.webp`,c.icon)}</span><span class="cinfo"><b>${esc(T(c.name))}</b><small>${c.rounds.length}${L('라운드',' rounds')} · <span class="rvs">${c.rivals.map(r=>pic(RIVALS[r].img,RIVALS[r].icon)).join('')}</span></small>${open?'':`<small>🔒 ${esc(T(LESSON_BY[c.after].t))} ${L('레슨 후','after the lesson')}</small>`}</span><span class="cmedal">${['','🥉','🥈','🥇'][rec.medal||0]||(open?'▶':'🔒')}</span></button>`}).join('')}</div>`;
  $('v-contests').querySelectorAll('[data-c]').forEach(b=>b.addEventListener('click',()=>{const c=CONTESTS.find(x=>x.id===b.dataset.c);if(!contestOpen(c)){SFX.pop();toast('🔒 '+L('레슨을 더 하면 열려요!','Opens after more lessons!'));return}SFX.click();contestLobby(c)}))};
 const roundName=r=>r.type==='song'?'🎹 '+T(SONGS[r.song].t):r.type==='drum'?'🥁 '+T(DRUMS[r.pattern].t):r.type==='beat'?'💓 '+L('박자 지키기','Keep the beat'):r.type==='echo'?'👂 '+L('리듬 따라 하기','Copy the rhythm'):'📖 '+L('리듬 읽기','Rhythm reading');
 function contestLobby(c){go('contest');const rec=S.contests[c.id]||{};
@@ -3681,39 +3688,42 @@ function contestLobby(c){go('contest');const rec=S.contests[c.id]||{};
 // rivals stay close to the player so every round feels like a real race
 function rivalLive(i,frac,live){const off=[-.04,.03,-.07,.05][i%4]+Math.sin(frac*7+i*2)*.035;return clamp(live+off,0,1)}
 function contestRound(){const c=CT.c,r=c.rounds[CT.i];RUN={kind:'contest'};const host=playView(`${c.icon} ${T(c.name)} · ${L('라운드','Round')} ${CT.i+1}/${c.rounds.length}`);
- host.innerHTML=`<div class="rsplash"><div class="big">${c.icon}</div><h2>${L('라운드','Round')} ${CT.i+1}</h2><p>${esc(roundName(r))}</p><div class="rivals mini">${c.rivals.map(id=>`<span>${pic(RIVALS[id].img,RIVALS[id].icon)}</span>`).join('')}</div></div>`;
+ host.innerHTML=`<div class="rsplash"><div class="big">${pic(`images/mus-c-${c.id}.webp`,c.icon)}</div><h2>${L('라운드','Round')} ${CT.i+1}</h2><p>${esc(roundName(r))}</p><div class="rivals mini">${c.rivals.map(id=>`<span>${pic(RIVALS[id].img,RIVALS[id].icon)}</span>`).join('')}</div></div>`;
  speak(L(`라운드 ${CT.i+1}! ${roundName(r)}`,`Round ${CT.i+1}! ${roundName(r)}`));
  setTimeout(()=>{if(VIEW!=='play'||RUN.kind!=='contest')return;const tier=CONTESTS.indexOf(c)>=3?2:1;
   runActivity({...r,count:r.count||3},host,{contest:true,tier,teacher:r.type==='drum'?'boom':r.type==='song'?'mia':'hop',
-   tick:(frac,live,score,h)=>{const box=h.querySelector('.hw-rivals');if(!box)return;const rows=[{n:S.av+' '+S.name,v:live,me:true},...c.rivals.map((id,i)=>({n:RIVALS[id].icon+' '+T(RIVALS[id].name),v:rivalLive(i,frac,live)}))].sort((a,b)=>b.v-a.v);
-    box.innerHTML=rows.map((x,k)=>`<div class="rrow ${x.me?'me':''}"><span>${k+1}</span><b>${esc(x.n)}</b><i style="width:${Math.round(x.v*100)}%"></i></div>`).join('')},
+   tick:(frac,live,score,h)=>{const box=h.querySelector('.hw-rivals');if(!box)return;const rows=[{k:'me',v:live},...c.rivals.map((id,i)=>({k:id,v:rivalLive(i,frac,live)}))].sort((a,b)=>b.v-a.v);
+    if(!box.children.length)box.innerHTML=['me',...c.rivals].map(k=>`<div class="rrow ${k==='me'?'me':''}" data-k="${k}"><span></span><b>${k==='me'?`<span class="ava">${coachMe(S.av)}</span> ${esc(S.name)}`:`${pic(RIVALS[k].img,RIVALS[k].icon)} ${esc(T(RIVALS[k].name))}`}</b><i></i></div>`).join('');
+    rows.forEach((x,k)=>{const el=box.querySelector(`[data-k="${x.k}"]`);if(!el)return;el.style.order=k;el.firstElementChild.textContent=k+1;el.lastElementChild.style.width=Math.round(x.v*100)+'%'})},
    done:res=>{CT.accs.push(res.acc);trackStats(res);roundResult(res)}})},1900)}
 function rivalTargets(){// final averages for the rivals, decided by how well the player did
  const c=CT.c,A=CT.accs.reduce((a,b)=>a+b,0)/CT.accs.length*100,[g,s,b]=c.medal,place=A>=g?1:A>=s?2:A>=b?3:4,above=place-1;
  return {A,place,targets:c.rivals.map((_,i)=>i<above?clamp(A+1+i*1.5+Math.random()*2,0,99.5):clamp(A-1.5-(i-above)*2.5-Math.random()*3,15,99))}}
+// a contest row's face: the rival's picture, or the player's own character; each falls back to its emoji
+const rivIc=x=>x.me?`<span class="ava">${coachMe(S.av)}</span>`:pic(x.img,x.ic);
 function roundResult(res){stopActivity();const c=CT.c,last=CT.i===c.rounds.length-1,host=$('host');
  // rivals' round scores: neck and neck along the way, landing on their targets in the final round
  const {targets}=rivalTargets();
  c.rivals.forEach((_,i)=>{const prev=CT.riv[i],n=CT.accs.length;let v;if(last){const need=targets[i]*n-prev.reduce((a,b)=>a+b,0);v=clamp(need,20,100)}else v=clamp(res.acc*100+[-3,2,-6][i%3]+(Math.random()*6-3),20,100);prev.push(v)});
- const rows=[{n:S.name,ic:S.av,v:res.acc*100,me:true},...c.rivals.map((id,i)=>({n:T(RIVALS[id].name),ic:RIVALS[id].icon,v:CT.riv[i][CT.riv[i].length-1]}))].sort((a,b)=>b.v-a.v);
- host.innerHTML=`<div class="standings card"><h2>${L('라운드','Round')} ${CT.i+1} ${L('결과','results')}</h2>${rows.map((x,k)=>`<div class="srow ${x.me?'me':''}"><span class="pl">${k+1}</span><span class="ic">${esc(x.ic)}</span><b>${esc(x.n)}</b><div class="sbar"><i style="width:0" data-w="${x.v.toFixed(1)}"></i></div><em>${Math.round(x.v*10)}</em></div>`).join('')}
+ const rows=[{n:S.name,ic:S.av,v:res.acc*100,me:true},...c.rivals.map((id,i)=>({n:T(RIVALS[id].name),ic:RIVALS[id].icon,img:RIVALS[id].img,v:CT.riv[i][CT.riv[i].length-1]}))].sort((a,b)=>b.v-a.v);
+ host.innerHTML=`<div class="standings card"><h2>${L('라운드','Round')} ${CT.i+1} ${L('결과','results')}</h2>${rows.map((x,k)=>`<div class="srow ${x.me?'me':''}"><span class="pl">${k+1}</span><span class="ic">${rivIc(x)}</span><b>${esc(x.n)}</b><div class="sbar"><i style="width:0" data-w="${x.v.toFixed(1)}"></i></div><em>${Math.round(x.v*10)}</em></div>`).join('')}
   <p class="center">${rows[0].me?'😆 '+L('지금 1등이에요!','You’re in 1st place!'):rows.findIndex(x=>x.me)<=1?'🔥 '+L('아슬아슬해요! 조금만 더!','So close! Just a bit more!'):'💪 '+L('아직 끝나지 않았어요! 힘내요!','It’s not over yet! You can do it!')}</p>
   <button class="btn gold cta" id="ctNext" type="button">${last?'🏆 '+L('최종 결과 발표!','Final results!'):L('다음 라운드 ▶','Next round ▶')}</button></div>`;
  setTimeout(()=>host.querySelectorAll('.sbar i').forEach(i=>i.style.width=i.dataset.w+'%'),80);(rows[0].me?SFX.good:SFX.pop)();
  $('ctNext').addEventListener('click',()=>{if(last)ceremony();else{CT.i++;contestRound()}})}
 function ceremony(){CT.over=true;const c=CT.c,host=$('host'),n=CT.accs.length,me=CT.accs.reduce((a,b)=>a+b,0)/n*100;
- const all=[{n:S.name,ic:S.av,v:me,me:true},...c.rivals.map((id,i)=>({id,n:T(RIVALS[id].name),ic:RIVALS[id].icon,v:CT.riv[i].reduce((a,b)=>a+b,0)/n}))].sort((a,b)=>b.v-a.v);
+ const all=[{n:S.name,ic:S.av,v:me,me:true},...c.rivals.map((id,i)=>({id,n:T(RIVALS[id].name),ic:RIVALS[id].icon,img:RIVALS[id].img,v:CT.riv[i].reduce((a,b)=>a+b,0)/n}))].sort((a,b)=>b.v-a.v);
  const place=all.findIndex(x=>x.me)+1,medal=place<=3?4-place:0,rec=S.contests[c.id]||{medal:0,best:0,n:0};
  const firstGold=medal===3&&rec.medal<3;S.contests[c.id]={medal:Math.max(rec.medal,medal),best:Math.max(rec.best,me/100),n:rec.n+1};
  const coins=Math.round(c.prize*[.2,.4,.6,1][medal]),st=firstGold?giveSticker(pick(['🏅','👑','💎','🏰']))||giveSticker():null;save();try{LR.save()}catch(e){}
  host.innerHTML=`<div class="ceremony card"><h2>${c.icon} ${L('최종 결과','Final results')}</h2><div class="drumroll">🥁 ${L('두구두구두구…','Drumroll…')}</div>
-  <div class="podium">${[2,1,3].map(p=>{const x=all[p-1];return x?`<div class="pod p${p} hide" data-p="${p}"><span class="pic">${esc(x.ic)}</span><b>${esc(x.n)}</b><em>${Math.round(x.v*10)}${L('점',' pts')}</em><div class="blk">${['','🥇','🥈','🥉'][p]}</div></div>`:''}).join('')}</div>
+  <div class="podium">${[2,1,3].map(p=>{const x=all[p-1];return x?`<div class="pod p${p} hide" data-p="${p}"><span class="pic">${rivIc(x)}</span><b>${esc(x.n)}</b><em>${Math.round(x.v*10)}${L('점',' pts')}</em><div class="blk">${['','🥇','🥈','🥉'][p]}</div></div>`:''}).join('')}</div>
   <div class="finalmsg hide"></div><div class="rewards hide">${COIN} +${coins}${st?` <span class="stk">${st}</span>`:''}</div>
   <div class="row hide" id="cerBtns"><button class="btn ghost" id="ctAgain" type="button">↻ ${L('다시 도전','Try again')}</button><button class="btn gold" id="ctOut" type="button">${L('대회 목록','Contests')}</button></div></div>`;
  SFX.roll(2);const reveal=p=>{const el=host.querySelector(`.pod[data-p="${p}"]`);if(el){el.classList.remove('hide');SFX.star(3-p)}};
  setTimeout(()=>reveal(3),1700);setTimeout(()=>reveal(2),2600);setTimeout(()=>{reveal(1);host.querySelector('.drumroll').classList.add('hide');
   const rival=all.find(x=>!x.me&&x.id),rv=rival?RIVALS[rival.id]:null,msg=place===1?L('🥇 1등! 우승이에요! 정말 대단해요!','🥇 1st place! You won! Amazing!'):place===2?L('🥈 2등! 정말 아슬아슬했어요!','🥈 2nd place! That was so close!'):place===3?L('🥉 3등! 메달을 땄어요!','🥉 3rd place! You won a medal!'):L('🎗️ 참가 리본! 다음엔 꼭 메달!','🎗️ Participation ribbon! A medal is next!');
-  const fm=host.querySelector('.finalmsg');fm.innerHTML=`<b>${msg}</b>${rv?`<p>${esc(rival.ic)} “${esc(T(place===1?rv.lose:rv.win))}”</p>`:''}${coachLine(place===1?'big':place<=3?'up':'try')}`;fm.classList.remove('hide');host.querySelector('.rewards').classList.remove('hide');$('cerBtns').classList.remove('hide');
+  const fm=host.querySelector('.finalmsg');fm.innerHTML=`<b>${msg}</b>${rv?`<p>${pic(rv.img,rival.ic)} “${esc(T(place===1?rv.lose:rv.win))}”</p>`:''}${coachLine(place===1?'big':place<=3?'up':'try')}`;fm.classList.remove('hide');host.querySelector('.rewards').classList.remove('hide');$('cerBtns').classList.remove('hide');
   if(place===1){SFX.win();setTimeout(SFX.cheer,300);celebrate()}else if(place<=3){SFX.fanfare();celebrate('stars')}else SFX.good();speak(msg.replace(/^\S+\s/,''));
   grant({coins,xp:30+medal*15});checkTrophies()},3600);
  host.addEventListener('click',e=>{if(e.target.id==='ctAgain'){CT={c,i:0,accs:[],riv:c.rivals.map(()=>[])};contestRound()}if(e.target.id==='ctOut')go('contests')})}

@@ -310,7 +310,8 @@ main{width:min(1120px,100%);margin:0 auto;padding:14px max(12px,env(safe-area-in
 .missions .rw{font-weight:900;font-size:14px;color:#8a5a00;white-space:nowrap}
 .missions .ok{color:var(--green-d)}
 .missions .chest{display:flex;align-items:center;gap:10px;margin-top:10px;padding:10px;border-radius:16px;background:#fff7db}
-.missions .chest .big{font-size:34px}
+.missions .chest .big{font-size:34px}.missions .chest .big .ei{width:42px;height:42px}
+.opp .ei{width:30px;height:30px;vertical-align:-9px}
 .resume{display:flex;align-items:center;gap:12px;background:#fff;border-radius:20px;padding:12px 14px;box-shadow:var(--shadow);border:0;text-align:left;width:100%}
 .resume .ic{font-size:36px}
 .resume .ic .ei{width:46px;height:46px;border-radius:12px;object-fit:cover}
@@ -2407,8 +2408,11 @@ const rnd=n=>Math.floor(Math.random()*n),pick=a=>a[rnd(a.length)];
 const shuffle=a=>{for(let i=a.length-1;i>0;i--){const k=rnd(i+1);[a[i],a[k]]=[a[k],a[i]]}return a};
 const num=n=>Number(n).toLocaleString(LANG==='en'?'en-US':'ko-KR');
 const dayKey=(d=new Date())=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
-const pic=(src,emoji)=>src?`<img class="ei" src="${src}" data-emoji="${emoji}" alt="" draggable="false">`:emoji;
-document.addEventListener('error',e=>{const t=e.target;if(t&&t.tagName==='IMG'&&t.dataset.emoji!==undefined)t.replaceWith(document.createTextNode(t.dataset.emoji))},true);
+const PIC_MISS=new Set();
+const pic=(src,emoji)=>src&&!PIC_MISS.has(src)?`<img class="ei" src="${src}" data-emoji="${emoji}" alt="" draggable="false">`:emoji;
+document.addEventListener('error',e=>{const t=e.target;if(t&&t.tagName==='IMG'&&t.dataset.emoji!==undefined){PIC_MISS.add(t.getAttribute('src'));t.replaceWith(document.createTextNode(t.dataset.emoji))}},true);
+// each mode's picture (images/chess-mode-<k>.webp): home tiles, puzzle bars and result windows; the emoji until it is drawn
+const modePic=(k,e)=>pic(`images/chess-mode-${k}.webp`,e);
 const COIN=pic('images/coin.webp','🪙');
 // Korean particle after a name: 이/가, 은/는, 을/를 depending on the last syllable
 const josa=(w,a,b)=>{const c=String(w).trim().slice(-1).charCodeAt(0);return w+(c>=0xac00&&c<=0xd7a3&&(c-0xac00)%28?a:b)};
@@ -2876,19 +2880,19 @@ function renderHome(){
  ${S.battle?`<button class="resume" type="button" data-go="resume"><span class="ic">${pic(BOTS[S.battle.bi].img,BOTS[S.battle.bi].icon)}</span><span><b>${L('대결 이어하기','Continue your battle')}</b><br><small class="sub">${esc(BOTS[S.battle.bi].name)} · ${L(`${Math.ceil(S.battle.moves.length/2)}수째`,`move ${Math.ceil(S.battle.moves.length/2)}`)}</small></span></button>`:''}
  <button class="btn green cta" type="button" data-go="continue">▶ ${nx.boss?L('보스에게 도전!','Challenge the boss!'):nx.all?L('모험 다시 보기','Replay the adventure'):L('모험 계속하기','Continue the adventure')}<small>${ch.icon} ${esc(ch.name)} · ${nx.boss?esc(BOTS[ch.boss].name):L(`스테이지 ${nx.c+1}-${nx.s+1}`,`Stage ${nx.c+1}-${nx.s+1}`)}</small></button>
  <div class="tiles">
-  ${tile('map','t-adv','🗺️',L('모험 지도','Adventure'),`⭐ ${totalStars()}/180`)}
-  ${tile('rated','t-rated','🧩',L('실력 퍼즐','Rated puzzles'),`${L('점수','Score')} ${num(S.rating)}`)}
-  ${tile('rush','t-rush','⚡',L('번개 퍼즐','Lightning'),`${L('최고','Best')} ${S.rushBest}`)}
-  ${tile('battle','t-battle','⚔️',L('AI 대결','AI battle'),`${bots}/${BOTS.length} ${L('상대','rivals')}`)}
-  ${tile('daily','t-daily','📅',L('오늘의 퍼즐','Daily puzzle'),dailyDone?L('✅ 완료','✅ Done'):L('새 문제!','New!'),dailyDone?0:true)}
+  ${tile('map','t-adv',modePic('map','🗺️'),L('모험 지도','Adventure'),`⭐ ${totalStars()}/180`)}
+  ${tile('rated','t-rated',modePic('rated','🧩'),L('실력 퍼즐','Rated puzzles'),`${L('점수','Score')} ${num(S.rating)}`)}
+  ${tile('rush','t-rush',modePic('rush','⚡'),L('번개 퍼즐','Lightning'),`${L('최고','Best')} ${S.rushBest}`)}
+  ${tile('battle','t-battle',modePic('battle','⚔️'),L('AI 대결','AI battle'),`${bots}/${BOTS.length} ${L('상대','rivals')}`)}
+  ${tile('daily','t-daily',modePic('daily','📅'),L('오늘의 퍼즐','Daily puzzle'),dailyDone?L('✅ 완료','✅ Done'):L('새 문제!','New!'),dailyDone?0:true)}
   ${tile('shop','t-shop',COIN,L('상점','Shop'),`${num(S.coins)} ${L('코인','coins')}`)}
-  ${tile('trophy','t-trophy','🏆',L('업적','Trophies'),`${S.ach.length}/${ACH.length}`,claim)}
-  ${tile('learn','t-bag','📒',L('개념 노트','Concept notebook'),`${L('규칙과 기술','Rules & tricks')} ✅ ${Object.keys(CH_LS).filter(chSeen).length}/${Object.keys(CH_LS).length}`)}
+  ${tile('trophy','t-trophy',modePic('trophy','🏆'),L('업적','Trophies'),`${S.ach.length}/${ACH.length}`,claim)}
+  ${tile('learn','t-bag',modePic('learn','📒'),L('개념 노트','Concept notebook'),`${L('규칙과 기술','Rules & tricks')} ✅ ${Object.keys(CH_LS).filter(chSeen).length}/${Object.keys(CH_LS).length}`)}
  </div>
  <div class="card missions"><div class="panelhead"><h2 class="h2" style="margin:0">📋 ${L('오늘의 임무','Today’s missions')}</h2><span class="sub">${L('매일 새로 바뀌어요','New every day')}</span></div>
   ${ms.map(({m,def})=>`<div class="row"><span class="ic">${def.icon}</span><div class="txt">${esc(def.text)}<div class="mbar"><i style="width:${m.n/def.goal*100}%"></i></div></div>
    ${m.got?`<span class="rw ok">✅</span>`:m.n>=def.goal?`<button class="btn gold small" type="button" data-claim="${m.id}">${COIN} +${MISSION_COINS}</button>`:`<span class="rw">${m.n}/${def.goal}</span>`}</div>`).join('')}
-  <div class="chest"><span class="big">${S.missions.chest?'📭':'🎁'}</span><div class="txt" style="flex:1;font-weight:800">${S.missions.chest?L('오늘의 보물상자를 열었어요. 내일 또 만나요!','You opened today’s chest. See you tomorrow!'):L('임무 3개를 모두 끝내면 보물상자를 열 수 있어요!','Finish all 3 missions to open the treasure chest!')}</div>
+  <div class="chest"><span class="big">${S.missions.chest?'📭':pic('images/pg-chest.webp','🎁')}</span><div class="txt" style="flex:1;font-weight:800">${S.missions.chest?L('오늘의 보물상자를 열었어요. 내일 또 만나요!','You opened today’s chest. See you tomorrow!'):L('임무 3개를 모두 끝내면 보물상자를 열 수 있어요!','Finish all 3 missions to open the treasure chest!')}</div>
    ${!S.missions.chest?`<button class="btn small ${allGot?'gold':''}" type="button" data-chest ${allGot?'':'disabled'}>${L('열기','Open')}</button>`:''}</div>
  </div>
  <p class="foot">${L('퍼즐 출처: Lichess 공개 퍼즐 데이터베이스 (CC0)','Puzzles: Lichess open puzzle database (CC0)')}<br>${COPYRIGHT}</p>
@@ -2915,7 +2919,7 @@ function openMissionChest(){
 function mathChest(title,done){
  const a=100+rnd(150),b=60+rnd(140),ans=a+b,opts=shuffle([ans,ans+10*(1+rnd(4)),ans-10*(1+rnd(4))]);
  let answered=false;
- modal(`<div style="font-size:70px">🎁</div><h2>${esc(title)}</h2><p>${L('상자 안에 코인 주머니가 2개 있어요. 모두 몇 개일까요? 맞히면 보너스 +50!','There are two coin bags inside. How many coins in total? Get it right for +50 bonus!')}</p>
+ modal(`<div style="font-size:70px">${pic('images/sci-chest-wood.webp','🎁')}</div><h2>${esc(title)}</h2><p>${L('상자 안에 코인 주머니가 2개 있어요. 모두 몇 개일까요? 맞히면 보너스 +50!','There are two coin bags inside. How many coins in total? Get it right for +50 bonus!')}</p>
   <div class="math" style="font-size:24px">${COIN} ${a} + ${COIN} ${b} = ?</div>
   <div class="choices">${opts.map(o=>`<button type="button" data-act="ans" data-v="${o}">${o}</button>`).join('')}</div>
   <p id="chestMsg" style="min-height:24px"></p><div class="row"><button class="btn gold hidden" id="chestTake" type="button" data-act="take">${L('받기','Collect')}</button></div>`,
@@ -2992,7 +2996,7 @@ function startDaily(){
   const pool=PUZ.map((p,i)=>i).filter(i=>!STAGE_SET.has(i)&&Math.abs(PUZ[i].rating-S.rating)<=150);
   S.daily={day:d,idx:pool.length?pool[h%pool.length]:h%PUZ.length,done:false};save();
  }
- if(S.daily.done){modal(`<div style="font-size:64px">📅</div><h2>${L('오늘의 퍼즐 완료!','Daily puzzle done!')}</h2><p>${L('내일 새로운 문제가 기다려요. 실력 퍼즐도 도전해 봐요!','A new one arrives tomorrow. Try the rated puzzles too!')}</p><div class="row"><button class="btn" type="button" data-act="again">${L('다시 풀어 보기','Solve it again')}</button><button class="btn green" type="button" data-act="rated">🧩 ${L('실력 퍼즐','Rated')}</button></div>`,{acts:{again:()=>()=>startPuzzle(S.daily.idx,'daily',{replay:true}),rated:()=>startRated}});return}
+ if(S.daily.done){modal(`<div style="font-size:64px">${modePic('daily','📅')}</div><h2>${L('오늘의 퍼즐 완료!','Daily puzzle done!')}</h2><p>${L('내일 새로운 문제가 기다려요. 실력 퍼즐도 도전해 봐요!','A new one arrives tomorrow. Try the rated puzzles too!')}</p><div class="row"><button class="btn" type="button" data-act="again">${L('다시 풀어 보기','Solve it again')}</button><button class="btn green" type="button" data-act="rated">🧩 ${L('실력 퍼즐','Rated')}</button></div>`,{acts:{again:()=>()=>startPuzzle(S.daily.idx,'daily',{replay:true}),rated:()=>startRated}});return}
  pzBefore(S.daily.idx,()=>startPuzzle(S.daily.idx,'daily'));
 }
 function startPuzzle(idx,mode,extra={}){
@@ -3015,7 +3019,7 @@ function renderPuzzleBars(){
  else{
   const ch=z.mode==='stage'?CHAPTERS[z.c]:null;
   const label=z.mode==='stage'?`${ch.icon} ${esc(ch.name)} · ${L('스테이지','Stage')} ${z.c+1}-${z.k+1}`:z.mode==='daily'?`📅 ${L('오늘의 퍼즐','Daily puzzle')}`:`🧩 ${L('실력 퍼즐','Rated puzzle')}`;
-  $('topBar').innerHTML=`<div class="av">${z.mode==='stage'?pic(ch.img,ch.icon):z.mode==='daily'?'📅':'🧩'}</div><div class="who"><b>${label}</b><small>${L('문제 난이도','Difficulty')} ${z.p.rating} · ${L('내 점수','My score')} ${num(S.rating)}</small></div>`;
+  $('topBar').innerHTML=`<div class="av">${z.mode==='stage'?pic(ch.img,ch.icon):z.mode==='daily'?modePic('daily','📅'):modePic('rated','🧩')}</div><div class="who"><b>${label}</b><small>${L('문제 난이도','Difficulty')} ${z.p.rating} · ${L('내 점수','My score')} ${num(S.rating)}</small></div>`;
  }
  const myTurn=BD.pos&&BD.pos.turn===BD.side&&!z.done;
  $('botBar').innerHTML=`<div class="av">${pic(COACHES[S.equip.coach].img,COACHES[S.equip.coach].icon)}</div><div class="who"><b>${L('나','Me')} · ${sideName(BD.side)}</b><small>${titleOf(S.lvl).icon} Lv.${S.lvl}${S.cleanRun>=2&&z.mode!=='rush'?` · 🔥 ${L(`${S.cleanRun}연속 완벽`,`${S.cleanRun} perfect in a row`)}`:''}</small></div><span class="turn ${myTurn?'on':''}">${myTurn?L('내 차례!','Your move!'):z.done?'✅':'…'}</span>`;
@@ -3103,7 +3107,7 @@ function puzzleSolved(mate){
  say(`${COACHES[S.equip.coach].say} ${head} ${pick([L('멋진 수였어요!','What a move!'),L('역시 체스 기사!','A true chess knight!'),L('머리가 쑥쑥 자라고 있어요!','Your brain is growing!')])}`);
  const r=grant({coins,xp});
  if(dr)extra+=`<span class="rate">🧠 ${num(S.rating-dr)} → ${num(S.rating)} (${dr>0?'+':''}${dr})</span>`;
- const starRow=z.mode==='stage'?`<div class="bigstars">${[0,1,2].map(i=>`<span class="${i<stars?'':'dim'}">⭐</span>`).join('')}</div>`:`<div style="font-size:64px">${z.mode==='daily'?'📅':'🧩'}</div>`;
+ const starRow=z.mode==='stage'?`<div class="bigstars">${[0,1,2].map(i=>`<span class="${i<stars?'':'dim'}">⭐</span>`).join('')}</div>`:`<div style="font-size:64px">${z.mode==='daily'?modePic('daily','📅'):modePic('rated','🧩')}</div>`;
  const tip=!clean?`<p>${L(`실수 ${z.mistakes}번 · 힌트 ${z.hints}번. 실수 없이 풀면 별 3개!`,`${z.mistakes} mistake(s) · ${z.hints} hint(s). Solve with none for 3 stars!`)}</p>`:'';
  let acts={},btns='';
  if(z.mode==='stage'){
@@ -3125,7 +3129,7 @@ function giveUp(){
  const play=()=>{if(PZ!==z)return;if(z.step>=z.p.moves.length){end();return}const m=BD.pos.fromUci(z.p.moves[z.step]);BD.hint={f:m.f,t:m.t};marks();setTimeout(()=>{if(PZ!==z)return;boardPlay(m);z.step++;setTimeout(play,650)},500)};
  const end=()=>{
   const ls=TH_LS[z.p.theme],acts={retry:()=>()=>startPuzzle(z.idx,z.mode,{c:z.c,k:z.k,replay:z.replay}),next:()=>z.mode==='stage'?()=>go('map'):z.mode==='rated'?startRated:()=>go('home'),close:()=>()=>go(gameBack()),les:()=>{MiniLesson.open(chL(ls));return false}};
-  modal(`<div style="font-size:64px">💪</div><h2>${L('다음엔 꼭 풀 수 있어요!','You will get it next time!')}</h2><p>${L('정답을 봤으니 이제 한 번 직접 풀어 봐요. 언제든 다시 도전할 수 있어요.','Now that you have seen it, try solving it yourself. You can retry anytime.')}</p>${ls?`<p><button class="mlx-chip" type="button" data-act="les">📖 ${L('개념 다시 보기','See the idea again')}</button></p>`:''}${dr?`<div class="rewards"><span class="rate">🧠 ${num(S.rating-dr)} → ${num(S.rating)} (${dr})</span></div>`:''}
+  modal(`<div style="font-size:64px">${pic((COACHES[S.equip.coach]||COACHES.puppy).img,'💪')}</div><h2>${L('다음엔 꼭 풀 수 있어요!','You will get it next time!')}</h2><p>${L('정답을 봤으니 이제 한 번 직접 풀어 봐요. 언제든 다시 도전할 수 있어요.','Now that you have seen it, try solving it yourself. You can retry anytime.')}</p>${ls?`<p><button class="mlx-chip" type="button" data-act="les">📖 ${L('개념 다시 보기','See the idea again')}</button></p>`:''}${dr?`<div class="rewards"><span class="rate">🧠 ${num(S.rating-dr)} → ${num(S.rating)} (${dr})</span></div>`:''}
    <div class="row"><button class="btn ghost" type="button" data-act="next">${z.mode==='stage'?L('지도로','Map'):z.mode==='rated'?L('다른 퍼즐','Another puzzle'):L('홈','Home')}</button><button class="btn green" type="button" data-act="retry">↺ ${L('직접 풀어 보기','Try it myself')}</button></div>`,{acts,closable:false});
  };
  if(BD.pos.turn!==BD.side){setTimeout(play,900)}else play();
@@ -3136,7 +3140,7 @@ function giveUp(){
 let RUSH=null;
 function rushIntro(){
  const t=S.inv.time>0,h=S.inv.heart>0;let useT=false,useH=false;
- modal(`<div style="font-size:64px">⚡</div><h2>${L('번개 퍼즐','Lightning puzzles')}</h2><p>${L('3분 동안 퍼즐을 최대한 많이 풀어요! 틀리면 ❤️가 줄어요. 풀수록 점점 어려워져요.','Solve as many puzzles as you can in 3 minutes! A wrong move costs a ❤️. They get harder as you go.')}</p>
+ modal(`<div style="font-size:64px">${modePic('rush','⚡')}</div><h2>${L('번개 퍼즐','Lightning puzzles')}</h2><p>${L('3분 동안 퍼즐을 최대한 많이 풀어요! 틀리면 ❤️가 줄어요. 풀수록 점점 어려워져요.','Solve as many puzzles as you can in 3 minutes! A wrong move costs a ❤️. They get harder as you go.')}</p>
   <div class="rewards"><span>${L('최고 기록','Best')} ${S.rushBest}</span><span class="coin">${COIN} ${L('1문제당 +5','+5 per puzzle')}</span></div>
   <div class="tools" style="margin-top:12px">${toolBtn('t',pic(ITEMS.time.img,ITEMS.time.icon),L('+30초 쓰기','Use +30s'),{n:S.inv.time,dis:!t})}${toolBtn('h',pic(ITEMS.heart.img,ITEMS.heart.icon),L('목숨 +1 쓰기','Use +1 life'),{n:S.inv.heart,dis:!h})}</div>
   <div class="row"><button class="btn gold" type="button" data-act="go">⚡ ${L('시작!','Start!')}</button></div>`,
@@ -3169,7 +3173,7 @@ function rushEnd(){
  const best=r.score>S.rushBest;if(best)S.rushBest=r.score;S.rushPlays++;track('rush');
  const res=grant({coins:r.score*5+(best&&r.score>0?50:0),xp:r.score*3+5});
  if(r.score>0){SFX.win();celebrate()}else SFX.lose();
- modal(`<div style="font-size:64px">⚡</div><h2>${best&&r.score>0?L('새 기록!','New record!'):L('번개 퍼즐 끝!','Time’s up!')}</h2><div class="levelup"><div class="num" style="width:100px;height:100px;font-size:44px">${r.score}</div></div><p>${L(`최고 기록 ${S.rushBest}`,`Best ${S.rushBest}`)}</p>${rewardChips(res,best&&r.score>0?`<span class="item">🏅 ${L('신기록 보너스 +50','Record bonus +50')}</span>`:'')}
+ modal(`<div style="font-size:64px">${modePic('rush','⚡')}</div><h2>${best&&r.score>0?L('새 기록!','New record!'):L('번개 퍼즐 끝!','Time’s up!')}</h2><div class="levelup"><div class="num" style="width:100px;height:100px;font-size:44px">${r.score}</div></div><p>${L(`최고 기록 ${S.rushBest}`,`Best ${S.rushBest}`)}</p>${rewardChips(res,best&&r.score>0?`<span class="item">🏅 ${L('신기록 보너스 +50','Record bonus +50')}</span>`:'')}
   <div class="row"><button class="btn ghost" type="button" data-act="home">${L('홈','Home')}</button><button class="btn gold" type="button" data-act="again">⚡ ${L('한 번 더!','Again!')}</button></div>`,{closable:false,acts:{home:()=>()=>go('home'),again:()=>rushIntro}});
  RUSH=null;
 }
@@ -3289,15 +3293,15 @@ function battleOver(res,why){
   S.wins++;S.botWins[b.id]=(S.botWins[b.id]||0)+1;track('win');
   coins=b.reward*(first?2:1);xp=40+bt.bi*15;
   if(bossFirst){S.bossWins.push(bt.boss);coins+=200+bt.boss*100;xp+=100;extra+=`<span class="item">🗺️ ${L('새 지역이 열렸어요!','A new land is open!')}</span>`}
-  title=L('승리!','Victory!');icon='🏆';line=b.lose;SFX.win();celebrate();setTimeout(()=>celebrate('fireworks'),600);
- }else if(res==='draw'){coins=Math.round(b.reward/3);xp=20;title=L('무승부!','Draw!');icon='🤝';line=why==='stalemate'?L('스테일메이트! 둘 차례인데 둘 수 있는 수가 하나도 없고, 체크도 아니라서 무승부예요.','Stalemate! The player to move has no legal move and is not in check, so it is a draw.'):why==='fifty'?L('양쪽이 50수씩 두는 동안 잡기도 폰 이동도 없어서 무승부예요.','Both sides made 50 moves with no capture and no pawn move, so it is a draw.'):why==='repeat'?L('같은 자리가 3번 나와서 무승부예요.','The same position happened 3 times, so it is a draw.'):L('기물이 부족해서 무승부예요.','Not enough pieces to checkmate, so it is a draw.');SFX.good()}
- else{coins=10;xp=10;title=why==='resign'?L('기권했어요','You resigned'):L('아쉬워요!','So close!');icon='💪';line=b.win;SFX.lose()}
+  title=L('승리!','Victory!');icon=modePic('trophy','🏆');line=b.lose;SFX.win();celebrate();setTimeout(()=>celebrate('fireworks'),600);
+ }else if(res==='draw'){coins=Math.round(b.reward/3);xp=20;title=L('무승부!','Draw!');icon=pic('images/chess-res-draw.webp','🤝');line=why==='stalemate'?L('스테일메이트! 둘 차례인데 둘 수 있는 수가 하나도 없고, 체크도 아니라서 무승부예요.','Stalemate! The player to move has no legal move and is not in check, so it is a draw.'):why==='fifty'?L('양쪽이 50수씩 두는 동안 잡기도 폰 이동도 없어서 무승부예요.','Both sides made 50 moves with no capture and no pawn move, so it is a draw.'):why==='repeat'?L('같은 자리가 3번 나와서 무승부예요.','The same position happened 3 times, so it is a draw.'):L('기물이 부족해서 무승부예요.','Not enough pieces to checkmate, so it is a draw.');SFX.good()}
+ else{coins=10;xp=10;title=why==='resign'?L('기권했어요','You resigned'):L('아쉬워요!','So close!');icon=pic((COACHES[S.equip.coach]||COACHES.puppy).img,'💪');line=b.win;SFX.lose()}
  const r=grant({coins,xp});save();if(res==='win')try{LR.save()}catch(e){}
  say(res==='win'?`${b.icon} “${b.lose}” ${L('대단해요!','Amazing!')}`:res==='lose'?L('괜찮아요! 퍼즐로 연습하면 더 강해져요. 다시 도전해 봐요!','That’s okay! Practice puzzles to get stronger, then try again!'):line);
  const bossNext=res==='win'&&bt.boss!=null&&bt.boss+1<CHAPTERS.length;
  // the rule behind the ending, one tap away: stalemate, or how a checkmate happens
  const les=why==='stalemate'?'stale':res==='lose'&&why==='mate'?'mate':null,chip=les?`<p><button class="mlx-chip" type="button" data-act="les">📖 ${L(`${tx(CH_LS[les].title)} 다시 보기`,`Review: ${tx(CH_LS[les].title)}`)}</button></p>`:'';
- setTimeout(()=>modal(`<div style="font-size:70px">${icon}</div><h2>${title}</h2><p>${b.icon} ${esc(b.name)}: “${esc(res==='draw'?line:res==='win'?b.lose:b.win)}”</p>${res==='draw'?'':`<p>${esc(res==='lose'?L('질 때도 도전 보상을 받아요. 다음엔 이길 수 있어요!','You still get a reward for trying. You can win next time!'):'')}</p>`}${coachLine(res==='win'?(bossFirst?'big':'up'):res==='draw'?'up':'try')}${rewardChips(r,extra)}${chip}
+ setTimeout(()=>modal(`<div style="font-size:70px">${icon}</div><h2>${title}</h2><p class="opp">${pic(b.img,b.icon)} ${esc(b.name)}: “${esc(res==='draw'?line:res==='win'?b.lose:b.win)}”</p>${res==='draw'?'':`<p>${esc(res==='lose'?L('질 때도 도전 보상을 받아요. 다음엔 이길 수 있어요!','You still get a reward for trying. You can win next time!'):'')}</p>`}${coachLine(res==='win'?(bossFirst?'big':'up'):res==='draw'?'up':'try')}${rewardChips(r,extra)}${chip}
   <div class="row"><button class="btn ghost" type="button" data-act="out">${bt.boss!=null?L('지도로','Map'):L('상대 고르기','Rivals')}</button>${res==='win'?(bossNext?`<button class="btn green" type="button" data-act="nextland">${CHAPTERS[bt.boss+1].icon} ${L('새 지역으로!','To the new land!')}</button>`:''):`<button class="btn red" type="button" data-act="again">⚔️ ${L('다시 도전','Rematch')}</button>`}</div>`,
   {closable:false,acts:{les:()=>{MiniLesson.open(chL(les));return false},out:()=>()=>go(bt.boss!=null?'map':'battle'),again:()=>()=>startBattle(bt.bi,bt.me,{boss:bt.boss}),nextland:()=>()=>{mapChapter=bt.boss+1;S.lastChapter=mapChapter;save();go('map')}}}),res==='win'?1200:900);
 }

@@ -119,9 +119,10 @@ function coachStart(hello,tips){const game=(location.pathname.split('/').pop()||
 //   calls api.done(); "🤔 알려 줘요" runs show(box,api) (or just api.done()) so not knowing never blocks or costs anything.
 //   after(box,api), if given, runs once the teacher has finished reading the step (for example to play a demo).
 //   key holds the 1–3 lines to remember; they close the lesson and stay in the notebook.
-// · MiniLesson.cfg({voice:(text,onEnd)=>…, stop:()=>…, who:{img,name}}) once per game: the game's own read-aloud (it
+// · MiniLesson.cfg({voice:(text,onEnd)=>…, stop:()=>…, who:{img,name}, pics:{lessonId:{stepIndex:'images/x.webp'}}}) once per game: the game's own read-aloud (it
 //   respects the game's voice switch; onEnd, when the game supports it, runs after the line), what to stop when a page
-//   changes (demos, sounds), and the default teacher.
+//   changes (demos, sounds), the default teacher, and painted pictures shown on top of some steps (a step may also
+//   have img). A picture that isn't there yet is simply left out. Coach Moon teaches in his pointing pose when it exists.
 // · MiniLesson.open(lesson,{onDone,onClose}) plays a lesson. MiniLesson.before(lesson,go) plays it the first time and
 //   then calls go(); later it calls go() at once. Closing early also calls go(), so a lesson never traps the child.
 // · MiniLesson.book({title,groups:[{name:[ko,en],items:[{id,title,icon,key,lesson}]}],open}) shows the notebook; an
@@ -133,23 +134,25 @@ const MiniLesson=(()=>{let C={voice:null,who:null},el=null,cur=null,back=null,la
  const seen=id=>{try{return !!LR.les()[id]}catch(e){return false}};
  const talk=(t,cb)=>{try{if(C.voice){if(C.voice.length>1){C.voice(t,cb);return}C.voice(t)}}catch(e){}if(cb)setTimeout(cb,400)},
   hush=()=>{try{if(C.stop)C.stop()}catch(e){}try{speechSynthesis.cancel()}catch(e){}};
- function shell(cls){close(true);lastFocus=document.activeElement;el=document.createElement('div');el.className='mlx '+(cls||'');
+ // focus goes back where the child was before the first window (a lesson opened from the notebook keeps that place)
+ function shell(cls){close(true);const a=document.activeElement;if(a&&a!==document.body&&!(a.closest&&a.closest('.mlx')))lastFocus=a;el=document.createElement('div');el.className='mlx '+(cls||'');
   el.setAttribute('role','dialog');el.setAttribute('aria-modal','true');document.body.appendChild(el);document.addEventListener('keydown',key,true);return el}
  function close(quiet){if(!el)return;hush();document.removeEventListener('keydown',key,true);el.remove();el=null;const c=cur;cur=null;
-  if(!quiet){if(c&&c.o.onClose)c.o.onClose(c.done);if(back){const b=back;back=null;book(b.spec,b.at)}else if(lastFocus&&lastFocus.focus)try{lastFocus.focus()}catch(e){}}}
+  if(!quiet){if(c&&c.o.onClose)c.o.onClose(c.done);if(back){const b=back;back=null;book(b.spec,b.at)}else if(lastFocus&&lastFocus.isConnected&&lastFocus.focus)try{lastFocus.focus()}catch(e){}}}
  function key(e){if(!el)return;if(e.key==='Escape'){e.preventDefault();e.stopPropagation();close();return}
   if(!cur)return;if(e.key==='ArrowRight'){const b=el.querySelector('[data-m=next]');if(b&&!b.disabled){e.preventDefault();b.click()}}else if(e.key==='ArrowLeft'&&cur.i>0){e.preventDefault();go(cur.i-1)}}
  function open(ls,o={}){if(!ls||!ls.steps||!ls.steps.length)return;const who=ls.who||C.who||{img:'images/coach-moon-idea.webp',name:['문 코치','Coach Moon']};
   shell('');cur={ls,o,who,i:0,done:false,ok:{}};
   el.setAttribute('aria-labelledby','mlxT');
+  const wImg=/coach-moon-(idea|hi)\.webp$/.test(who.img||'')?'images/coach-moon-teach.webp':who.img;
   el.innerHTML=`<div class="mlx-card"><div class="mlx-top"><span class="mlx-kick">📖 ${L('미니 수업','Mini lesson')}</span><b id="mlxT">${ls.icon?ls.icon+' ':''}${E(ls.title)}</b><button type="button" class="mlx-x" data-m="x" aria-label="${L('닫기','Close')}">✕</button></div>
    <div class="mlx-dots" aria-hidden="true"></div><div class="mlx-stage"></div>
-   <div class="mlx-talk"><img src="${coachEsc(who.img)}" alt="" onerror="this.remove()"><p aria-live="polite"></p><button type="button" class="mlx-hear" data-m="hear" aria-label="${L('다시 듣기','Hear again')}">🔊</button></div>
+   <div class="mlx-talk"><img src="${coachEsc(wImg)}" data-alt="${coachEsc(who.img)}" alt="" onerror="if(this.dataset.alt&&!this.dataset.f){this.dataset.f=1;this.src=this.dataset.alt}else this.remove()"><p aria-live="polite"></p><button type="button" class="mlx-hear" data-m="hear" aria-label="${L('다시 듣기','Hear again')}">🔊</button></div>
    <div class="mlx-nav"></div></div>`;
   el.addEventListener('click',e=>{const b=e.target.closest('[data-m]');if(!b||!cur)return;const m=b.dataset.m;
    if(m==='x')close();else if(m==='hear')talk(el.querySelector('.mlx-talk p').textContent);else if(m==='prev')go(cur.i-1);else if(m==='next')go(cur.i+1);
    else if(m==='help'){const s=cur.ls.steps[cur.i];try{if(s.show)s.show(el.querySelector('.mlx-stage'),api(cur.i))}catch(e){}api(cur.i).done()}
-   else if(m==='again')go(0);else if(m==='end'){const c=cur;close(true);if(back){const b=back;back=null;book(b.spec,b.at)}else if(lastFocus&&lastFocus.focus)try{lastFocus.focus()}catch(e){}if(c.o.onDone)c.o.onDone()}});
+   else if(m==='again')go(0);else if(m==='end'){const c=cur;close(true);if(back){const b=back;back=null;book(b.spec,b.at)}else if(lastFocus&&lastFocus.isConnected&&lastFocus.focus)try{lastFocus.focus()}catch(e){}if(c.o.onDone)c.o.onDone()}});
   go(0)}
  // what a step's picture can do: mark the try as done (enables 다음), go on, or say a short line in the bubble
  function api(i){return {L,T,done(){if(!cur||cur.i!==i)return;cur.ok[i]=1;const n=el.querySelector('[data-m=next]'),h=el.querySelector('[data-m=help]');if(n){n.disabled=false;n.textContent=L('다음','Next')+' ▶';n.classList.add('ready');n.focus()}if(h)h.remove()},
@@ -165,6 +168,7 @@ const MiniLesson=(()=>{let C={voice:null,who:null},el=null,cur=null,back=null,la
    nav.querySelector('[data-m=end]').focus();return}
   const s=ls.steps[i],t=T(s.say);stage.className='mlx-stage';stage.innerHTML='';p.textContent=t;
   try{if(typeof s.art==='function')s.art(stage,api(i));else if(s.art)stage.innerHTML=s.art}catch(e){stage.textContent=''}
+  const pic=(C.pics&&C.pics[ls.id]||{})[i]||s.img;if(pic)stage.insertAdjacentHTML('afterbegin',`<img class="mlx-pic" src="${coachEsc(pic)}" alt="" onerror="this.remove()">`);
   if(!stage.childNodes.length)stage.classList.add('none');
   const wait=s.try&&!cur.ok[i];
   nav.innerHTML=`<button type="button" class="mlx-b ghost" data-m="prev" ${i?'':'disabled'} aria-label="${L('이전','Back')}">◀</button>${wait?`<button type="button" class="mlx-b help" data-m="help">🤔 ${L('알려 줘요','Show me')}</button>`:''}<button type="button" class="mlx-b go" data-m="next" ${wait?'disabled':''}>${wait?L('해 봐요','Your turn'):L('다음','Next')} ▶</button>`;
@@ -481,6 +485,56 @@ button,input,select{font:inherit}button{cursor:pointer;touch-action:manipulation
 @media(max-width:400px){.ch-steps .se{display:none}}
 @media(max-width:520px){.lab-ov .lab-lanes,.lab-ov .lab-note{display:none}.lab-ov .lab-opts{grid-template-columns:repeat(3,1fr);gap:6px}.lab-ov .lab-opt{font-size:14px;padding:8px 5px;min-height:58px;line-height:1.25}.lab-ov .lab-diff{font-size:13px;padding:6px 9px}.lab-ov .lab-ask{margin:6px 0}.lab-ov .result-card{padding:12px}
  .lab-grid{grid-template-columns:1fr}.lab-steps{grid-template-columns:1fr}.lab-steps li{display:flex;gap:6px;align-items:baseline;text-align:left}.result-actions.three{grid-template-columns:1fr}.replay-skip{bottom:150px}.lab-q{font-size:16px}}
+/* mini lessons (MiniLesson): pictures and small tries on a lesson page (a white card), and the 📖 concept notebook buttons */
+.lab-books{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}.lab-books .note-side{margin-top:0}
+.nb-book{width:100%;margin:0 0 12px}.ch-books{display:flex;justify-content:flex-end;margin:-2px 0 10px}
+.mrl-again{display:flex;width:fit-content;margin:0 auto 10px}
+.mrl{width:100%;display:grid;gap:8px;justify-items:center;color:#22305e;font-size:15px;line-height:1.45}
+.mrl-cv{display:block;width:100%;max-width:430px;height:auto}
+.mrl-row{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;width:100%}.mrl-row.two{display:grid;grid-template-columns:1fr 1fr;max-width:430px}
+.mrl-b{min-height:48px;border:0;border-radius:14px;padding:6px 16px;background:#5b6cff;color:#fff;font-size:16px;font-weight:900;line-height:1.25;box-shadow:0 3px 0 #3c4bd0}
+.mrl-b.alt{background:#fff1c9;color:#7a5200;box-shadow:0 3px 0 #ecd28a}.mrl-b.on{background:#e6f8ee;color:#1d6b42;box-shadow:0 3px 0 #a8dfbf}
+.mrl-b:active:not(:disabled){transform:translateY(2px);box-shadow:none}.mrl-b[hidden]{display:none}
+.mrl-cap{margin:0;min-height:1.45em;font-size:15px;font-weight:800;text-align:center;color:#3a4690}.mrl-cap b{color:#c0322a}
+.mrl-chips{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin:0;padding:0;list-style:none}
+.mrl-chips li{background:#fff;border:1px solid #dfe5f7;border-radius:999px;padding:6px 11px;font-size:14px;font-weight:800}.mrl-chips li.on{background:#fff3cf;border-color:#f3dc92}
+.mrl-steps{display:flex;align-items:center;justify-content:center;gap:4px;flex-wrap:wrap}
+.mrl-steps span{display:grid;justify-items:center;gap:2px;min-width:88px;background:#fff;border:1px solid #dfe5f7;border-radius:16px;padding:10px 8px;text-align:center}
+.mrl-steps i{font-style:normal;font-size:30px;line-height:1.1}.mrl-steps b{font-size:15px;font-weight:900}.mrl-steps small{font-size:12.5px;font-weight:700;color:#5d6896}
+.mrl-steps em{font-style:normal;font-weight:900;color:#8a96d8}
+.mrl-steps4{display:flex;gap:4px;width:100%;max-width:430px}.mrl-steps4 span{flex:1;text-align:center;padding:7px 2px;border-radius:12px;background:#fff;border:1px solid #dfe5f7;font-size:13.5px;font-weight:900;color:#7a86b8}
+.mrl-steps4 span.on{background:#5b6cff;border-color:#5b6cff;color:#fff}.mrl-steps4 i{font-style:normal}
+.mrl-icons{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.mrl-icons span{display:grid;justify-items:center;gap:3px;min-width:92px;background:#fff;border:1px solid #dfe5f7;border-radius:16px;padding:10px;font-size:14.5px;font-weight:900;text-align:center}
+.mrl-icons i{font-style:normal;font-size:34px;line-height:1.1}.mrl-icons b{font-size:13.5px;color:#b4247a}
+.mrl-card{width:100%;max-width:400px;display:grid;gap:6px;background:#fff;border:1px solid #dfe5f7;border-radius:16px;padding:10px 12px;text-align:left;font-size:14.5px;font-weight:700}
+.mrl-card p{margin:0}.mrl-card b{font-weight:900}.mrl-card small{font-size:12.5px;color:#5d6896}.mrl-card .ok{font-weight:900;color:#1d7a4a}.mrl-card .big{font-size:18px;font-weight:900}
+.mrl-card .tag{display:inline-block;margin-left:4px;padding:1px 8px;border-radius:99px;background:#e6f8ee;color:#1d6b42;font-size:12.5px;font-weight:900}
+.mrl-two{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%}
+.mrl-bar{display:grid;grid-template-columns:24px 1fr auto;gap:6px;align-items:center}
+.mrl-bar .sw{width:22px;height:22px;border-radius:7px;display:grid;place-items:center;font-size:12.5px;font-weight:900;color:#14203a}.mrl-bar .sw.a{background:#7df9ff}.mrl-bar .sw.b{background:#ffd84a}
+.mrl-bar .bt{height:16px;border-radius:8px;background:#e3e8fb;position:relative;overflow:hidden}.mrl-bar .bt i{position:absolute;inset:0 auto 0 0;border-radius:8px}
+.mrl-bar i.a{background:#1fa2c4}.mrl-bar i.b{background:#d99a16}.mrl-bar em{font-style:normal;font-size:13px;font-weight:900;white-space:nowrap}
+.mrl-found{list-style:none;margin:0;padding:0;display:grid;gap:8px;width:100%}
+.mrl-found li{display:grid;gap:3px;background:#fff;border:1px solid #c9ecd6;border-radius:14px;padding:8px 11px;text-align:left}
+.mrl-found b{font-size:15px;font-weight:900}.mrl-found span{font-size:14px;font-weight:900;color:#1d7a4a}.mrl-found small{font-size:13.5px;font-weight:700;color:#4a5588;line-height:1.45}
+.mrl-dark{width:100%;background:#13213d;color:#f4f7ff;border-radius:14px;padding:6px 10px 10px}.mrl-dark .gauge{margin-top:0}
+.mrl-dk{margin:0;font-size:14px;font-weight:800;color:#cfe0ff}.mrl-dk.ok{color:#7df9c8;font-size:16px;font-weight:900}
+.mrl-hands{display:flex;gap:0;font-size:56px;line-height:1}.mrl-hands span{display:inline-block}.mrl-hands .l{transform:scaleX(-1)}
+.mrl-hands.rub .l{animation:mrlRubL .36s ease-in-out}.mrl-hands.rub .r{animation:mrlRubR .36s ease-in-out}
+@keyframes mrlRubL{25%{transform:scaleX(-1) translateY(-9px)}75%{transform:scaleX(-1) translateY(9px)}}@keyframes mrlRubR{25%{transform:translateY(9px)}75%{transform:translateY(-9px)}}
+.mrl-meter{width:min(100%,260px);height:16px;border-radius:9px;background:#e3e8fb;overflow:hidden}.mrl-meter i{display:block;height:100%;width:0;background:linear-gradient(90deg,#ffd36b,#ff6b3d);transition:width .3s}
+.mrl-sponge{width:170px;height:96px;margin-top:22px;border:0;border-radius:20px;font-size:26px;color:#7a5200;transform-origin:50% 100%;transition:transform .4s cubic-bezier(.3,1.9,.5,1);
+ background:radial-gradient(circle at 22% 30%,#e3ab22 0 6px,transparent 7px),radial-gradient(circle at 58% 62%,#e3ab22 0 8px,transparent 9px),radial-gradient(circle at 80% 28%,#e3ab22 0 5px,transparent 6px),radial-gradient(circle at 36% 74%,#e3ab22 0 4px,transparent 5px),#ffd34d;box-shadow:inset 0 -7px 0 #e9b630,0 4px 0 #c99a1c}
+.mrl-sponge.sq{transform:scale(1.14,.55);transition:transform .16s ease-out}
+.mrl-cycle{position:relative;display:grid;grid-template-columns:1fr 1fr;grid-template-areas:"a b" "d c";gap:30px 40px;width:min(100%,330px);margin:4px 0}
+.mrl-cycle button{min-height:58px;border:2px solid #dfe5f7;border-radius:16px;background:#fff;color:#22305e;font-size:16px;font-weight:900;display:flex;align-items:center;justify-content:center;gap:6px}
+.mrl-cycle button span{font-size:22px}.mrl-cycle button.on{background:#e6f8ee;border-color:#2fbf71;color:#1d6b42}
+.mrl-cycle i{position:absolute;font-style:normal;font-size:20px;font-weight:900;color:#8a96d8;line-height:1}.mrl-cycle.done i{color:#2fbf71}
+.mrl-cycle .c1{left:50%;top:29px;transform:translate(-50%,-50%)}.mrl-cycle .c2{right:calc(25% - 10px);top:50%;transform:translate(50%,-50%) rotate(90deg)}
+.mrl-cycle .c3{left:50%;bottom:29px;transform:translate(-50%,50%) rotate(180deg)}.mrl-cycle .c4{left:calc(25% - 10px);top:50%;transform:translate(-50%,-50%) rotate(-90deg)}
+@media(max-width:520px){.lab-books{grid-template-columns:1fr}.mrl-two{grid-template-columns:1fr}}@media(max-width:400px){.mrl-steps4 i{display:none}}
+@media (prefers-reduced-motion:reduce){.mrl-hands.rub span{animation:none}.mrl-sponge,.mrl-sponge.sq,.mrl-meter i{transition:none}}
 /*COACH:BEGIN*/
 /* Coach Moon: one line inside result windows (.mcoach) and a corner bubble at good moments (#coachPop, never takes taps) */
 .mcoach{display:flex;align-items:flex-end;gap:8px;margin:10px auto 6px;max-width:330px;text-align:left}
@@ -503,6 +557,7 @@ button,input,select{font:inherit}button{cursor:pointer;touch-action:manipulation
 .mlx-x{grid-area:x;width:44px;height:44px;border:0;border-radius:14px;background:#eef1ff;color:#3a4690;font-size:20px;font-weight:900;cursor:pointer}
 .mlx-dots{display:flex;gap:6px;justify-content:center}.mlx-dots i{width:8px;height:8px;border-radius:5px;background:#dfe4fb;transition:width .2s}.mlx-dots i.on{background:#9aa8ff}.mlx-dots i.now{width:22px;background:#5b6cff}
 .mlx-stage{min-height:190px;display:grid;place-items:center;background:linear-gradient(180deg,#f5f7ff,#eef7ff);border:1px solid #e1e7fb;border-radius:18px;padding:10px;overflow:hidden;position:relative}
+.mlx-pic{display:block;width:100%;max-width:420px;max-height:170px;object-fit:contain;margin:0 auto 6px}
 .mlx-stage.none{min-height:0;padding:0;border:0;background:none}
 .mlx-stage>svg,.mlx-stage>canvas,.mlx-stage>img{max-width:100%;height:auto}
 .mlx-stage.sum{background:linear-gradient(180deg,#fff9e6,#fff3cf);border-color:#f3dc92;place-items:stretch;gap:8px}
@@ -2072,7 +2127,7 @@ function chalShow(rank){
  $('resultCard').innerHTML=`<div class="ch-res"><div class="lab-head">🎯 ${L('설계 도전','Design challenge')} · ${ch.ic} ${esc(ch.t)}</div>${stepsHTML([2])}
   <div class="ch-time">⏱️ ${L('우승 시간','Winning time')} ${sec(t)}</div>${force?chalForceView(ch,j.o):gaugeHTML({zones,now:t,base,old:(base!=null?old.slice(0,-1):old).slice(-4),guess,label,near:ch.id==='same'&&base!=null})}${chalMsg(ch,j,prev,starN(gained))}
   ${guess!=null?`<p class="ch-guess">🤔 ${L(`내 예상 ${guess}초 → 실제 ${sec(t)} (${sec(Math.abs(t-guess))} 차이)`,`My guess ${guess} s → actual ${sec(t)} (${sec(Math.abs(t-guess))} off)`)}</p>`:''}
-  ${coachHere(j.ok?'clap':'idea',hint,hint)}
+  ${coachHere(j.ok?'clap':'idea',hint,hint)}<button type="button" class="mlx-chip mrl-again" data-act="lesson" data-ls="${(CH_LS[ch.id]||['gauge'])[0]}">📖 ${L('개념 다시 보기','See the idea again')}</button>
   <div class="result-actions"><button class="control" type="button" data-act="chAgain">🔁 ${L('그대로 다시 시험','Test it again')}</button><button class="primary" type="button" data-act="chFix">🔧 ${L('코스 고치기','Improve the course')}</button></div>
   ${stars}<div class="ch-podium">${top}</div>
   <div class="result-actions"><button class="control" type="button" data-act="chBoard">🎯 ${L('도전 목록','Challenges')}</button><button class="control" type="button" data-act="chExit">🏁 ${L('레이스로','Back to races')}</button></div></div>`;
@@ -2082,10 +2137,10 @@ function chalShow(rank){
  checkBadges()}
 function openChalBoard(opener){
  if(phase==='countdown'||phase==='running')return;
- $('chalBody').innerHTML=`${stepsHTML([])}<p class="ch-intro">${L('엔지니어처럼 목표에 맞는 코스를 설계해요. 시험 주행에서 우승 시간이나 들어온 순서를 진짜로 재서 확인해요. 시험 주행은 응원 없이 코스의 힘만으로 달려요.','Design a course that meets the goal, like an engineer. A test run measures the real winning time or finishing order. Test runs have no cheering, so only the course decides.')} · ⭐ ${chalStars()}/${CHALS.length*3}</p>
+ $('chalBody').innerHTML=`${stepsHTML([])}<p class="ch-intro">${L('엔지니어처럼 목표에 맞는 코스를 설계해요. 시험 주행에서 우승 시간이나 들어온 순서를 진짜로 재서 확인해요. 시험 주행은 응원 없이 코스의 힘만으로 달려요.','Design a course that meets the goal, like an engineer. A test run measures the real winning time or finishing order. Test runs have no cheering, so only the course decides.')} · ⭐ ${chalStars()}/${CHALS.length*3}</p><div class="ch-books"><button type="button" class="chip" data-book="1">📖 ${L('개념 노트','Concept notebook')}</button></div>
   <div class="ch-grid">${CHALS.map(ch=>{const c=chalGet(ch.id);return `<button type="button" class="ch-card${c.s&1?' met':''}" data-ch="${ch.id}"><span class="ci" aria-hidden="true">${ch.ic}</span><span class="ct"><b>${esc(ch.t)}</b><span class="cg">${esc(ch.g)}</span><small>📐 ${esc(ch.r)}</small>${starsHTML(c.s)}<small>${c.n?L(`시험 ${c.n}번`,`${c.n} test run${c.n===1?'':'s'}`)+(c.prev?' · '+L('지난 시험 ','last ')+sec(c.prev.t):''):L('새 도전','New challenge')}</small></span></button>`}).join('')}</div>`;
  openModal('chalModal',opener||$('chalBtn'))}
-function startChallenge(id,opener){
+function startChallenge0(id,opener){
  const ch=CHAL_BY[id];if(!ch||phase==='countdown'||phase==='running')return;const c=chalGet(id);
  draft={name:ch.t,theme:c.theme??6,mods:(c.mods.length?c.mods:ch.start).slice(),idx:null,ch:id,guess:null};buildMsg='';
  closeModal('chalModal');renderBuilder();
@@ -2129,6 +2184,7 @@ function openNotebook(opener){
  const busy=phase==='running'||phase==='countdown',rec=EXPS.filter(e=>stats.labs[e.id]?.v),older=EXPS.filter(e=>stats.labs[e.id]&&!stats.labs[e.id].v),left=EXPS.filter(e=>!stats.labs[e.id]);
  stats.notes++;save();
  $('noteBody').innerHTML=`<p class="nb-sum">${L('실험할 때마다 내 예상과 잰 결과가 여기에 적혀요. 막대그래프로 두 길을 비교해 봐요!','Every experiment writes your guess and the measured result here. Compare the two lanes on the bar graph!')} · ${L(`기록 ${rec.length}/${EXPS.length}`,`${rec.length}/${EXPS.length} recorded`)}</p>
+  <button type="button" class="small-btn nb-book" data-book="1" ${busy?'disabled':''}>📖 ${L(`개념 노트 · 배운 개념 다시 보기 (${mrSeenN()}/${MRL_IDS.length})`,`Concept notebook · review the ideas (${mrSeenN()}/${MRL_IDS.length})`)}</button>
   ${rec.length?'':`<p class="nb-empty">📝 ${L('아직 적힌 실험이 없어요. 실험을 하나 하면 첫 기록이 생겨요!','Nothing written yet. Do one experiment and your first record appears!')}</p>`}
   <div class="nb-list">${rec.map(e=>noteEntryHTML(e,busy)).join('')}${older.map(e=>`<article class="nb"><h3 class="nb-h"><span aria-hidden="true">${e.ic}</span>${esc(e.t)}<small>✅ ${L(`실험 ${stats.labs[e.id].n}번`,`${stats.labs[e.id].n} run${stats.labs[e.id].n===1?'':'s'}`)}</small></h3><p>${L('노트가 생기기 전에 한 실험이에요. 다시 하면 결과가 여기에 적혀요.','Done before the notebook existed. Run it again to write the result here.')}</p><button type="button" class="small-btn" data-exp="${e.id}" ${busy?'disabled':''}>🔬 ${L('다시 해 보기','Try it again')}</button></article>`).join('')}</div>
   ${left.length?`<h3>${L('아직 안 해 본 실험','Not tried yet')}</h3><div class="nb-left">${left.map(e=>`<button type="button" class="chip" data-exp="${e.id}" ${busy?'disabled':''}>${e.ic} ${esc(e.t)}</button>`).join('')}</div>`:''}`;
@@ -2148,9 +2204,9 @@ function openLabPicker(opener){
  const done=Object.keys(stats.labs).length;
  $('labBody').innerHTML=`<ol class="lab-steps"><li>🤔 <b>${L('예상하기','Predict')}</b> <span>${L('어떻게 될까?','What will happen?')}</span></li><li>👀 <b>${L('실험 보기','Watch')}</b> <span>${L('두 길을 나란히 비교해요','Two lanes side by side')}</span></li><li>💡 <b>${L('이유 알기','Explain')}</b> <span>${L('왜 그럴까?','Why did it happen?')}</span></li></ol>
   <p class="lab-ok">${L('예상이 틀려도 괜찮아요! 틀린 예상에서 더 많이 배워요.','It is fine to guess wrong! Wrong guesses teach us the most.')}</p>
-  <div class="lab-grid">${labListHTML()}</div><button type="button" class="small-btn note-side" data-note="1">📒 ${L(`실험 노트 보기 (${done}/${EXPS.length})`,`Open the lab notebook (${done}/${EXPS.length})`)}</button>`;
+  <div class="lab-grid">${labListHTML()}</div><div class="lab-books"><button type="button" class="small-btn note-side" data-note="1">📒 ${L(`실험 노트 보기 (${done}/${EXPS.length})`,`Open the lab notebook (${done}/${EXPS.length})`)}</button><button type="button" class="small-btn note-side" data-book="1">📖 ${L(`개념 노트 (${mrSeenN()}/${MRL_IDS.length})`,`Concept notebook (${mrSeenN()}/${MRL_IDS.length})`)}</button></div>`;
  openModal('labModal',opener||$('labBtn'))}
-function enterLab(id){const ex=EXPS.find(e=>e.id===id);if(!ex)return;chalRun=null;labMode=true;labExp=ex;labPred=null;closeModal('labModal');prepare();labPredictCard();scrollToScene()}
+function enterLab0(id){const ex=EXPS.find(e=>e.id===id);if(!ex)return;chalRun=null;labMode=true;labExp=ex;labPred=null;closeModal('labModal');prepare();labPredictCard();scrollToScene()}
 function exitLab(){labMode=false;labExp=null;labPred=null;prepare();setCaption(L('🏁 레이스로 돌아왔어요! 출발 버튼을 눌러요.','🏁 Back to racing! Press Start.'))}
 function labPredictCard(){
  const ex=labExp;phase='ready';
@@ -2191,7 +2247,7 @@ function labExplain(){
  const predTxt=ex.opts.find(o=>o[0]===labPred)?.[1]||'';
  $('resultCard').innerHTML=`<div class="lab-head">${ex.ic} ${esc(ex.t)}</div><div class="lab-result">${esc(head)}</div><p class="lab-detail">${esc(detail)}</p>
   <p class="lab-fb ${right?'ok':'new'}">${right?L('🎯 예상이 맞았어요! 과학자처럼 생각했어요.','🎯 Your guess was right! You thought like a scientist.'):L('🔍 예상과 달랐어요! 그래서 실험이 재밌어요. 과학자들도 이렇게 새로 알게 돼요.','🔍 Not what you guessed! That is what makes experiments fun. Scientists learn new things exactly like this.')}<small>${L('내 예상','My guess')}: ${esc(predTxt)}</small></p>
-  <div class="lab-why"><b>💡 ${L('왜 그럴까요?','Why?')}</b>${esc(ex.why)}</div><p class="lab-life">🏠 ${esc(ex.life)}</p>
+  <div class="lab-why"><b>💡 ${L('왜 그럴까요?','Why?')}</b>${esc(ex.why)}</div><p class="lab-life">🏠 ${esc(ex.life)}</p><button type="button" class="mlx-chip mrl-again" data-act="lesson" data-ls="${LAB_LS[ex.id]}">📖 ${L('개념 다시 보기','See the idea again')}</button>
   ${right?coachHere('clap','예상하고, 지켜보고, 확인까지! 진짜 과학자의 방법이에요 🌙','Predict, watch, check: that is exactly how real scientists work 🌙'):coachHere('idea','예상이 달라도 괜찮아요. 왜 그런지 알게 된 게 더 멋진 일이에요 🌙','A different result is okay. Finding out why is the best part 🌙')}
   <div class="lab-mini"><button class="small-btn" type="button" data-act="peek">👀 ${L('실험 장면 다시 보기','Look at the experiment')}</button><button class="small-btn" type="button" data-act="note">📒 ${L('노트에 적었어요','Saved in my notebook')}</button></div>
   <div class="result-actions three"><button class="control" type="button" data-act="labAgain">🔁 ${L('다시 실험','Run again')}</button><button class="primary" type="button" data-act="labNext">🔬 ${L('다음 실험','Next experiment')}</button><button class="control" type="button" data-act="labExit">🏁 ${L('레이스로','Back to races')}</button></div>`;
@@ -2219,6 +2275,307 @@ function drawLab(){
  // a ring and the material's emoji follow each ball, so it stays easy to spot on a small phone screen
  st.marbles.forEach((m,i)=>{if(!m.look||m.hid)return;const lane=i%2;ctx.strokeStyle=lane?'#ffd84a':'#7df9ff';ctx.globalAlpha=.85;ctx.lineWidth=2*k;ctx.beginPath();ctx.arc(m.x,m.y,R+5*k,0,TAU);ctx.stroke();ctx.globalAlpha=1;ctx.font=`${Math.round(13*k)}px system-ui`;ctx.fillText(m.look.ic,m.x,m.y-R-11*k)});
  ctx.textAlign='left';ctx.textBaseline='alphabetic'}
+
+// ---------------------------------------------------------------- mini lessons and the 📖 concept notebook (MiniLesson, shared in the coach block)
+// Parents asked for time to learn the idea before the experiments. Each lesson teaches the words, the fair-test idea and what to
+// watch, but never the answer of a "predict first" experiment: the experiment shows that. Once an experiment of a lesson's topic
+// is done, its result and one-line tip (IX) join the lesson as "what we found" pages (so they show in the notebook, never before the lab).
+// · before a lab (enterLab): the fair-test lesson, the topic's lesson before the first lab of that topic, and from the second lab
+//   on the measuring lesson. Before a design challenge that was never tested (startChallenge): the engineer lesson, then the one the
+//   challenge needs (fair test, or the forces it uses), and once any challenge was tested, the time-ruler lesson.
+// · at most two in a row, each offered once per visit; closing early goes on, and the 📖 concept notebook keeps them all.
+// · lessons open only from menus and result cards, never while a race runs, so no race is left running behind one.
+let mrlRaf=0;
+// the lesson reads with the race voice (it respects the 🗣️ switch) but leaves the race caption as it was
+MiniLesson.cfg({voice:t=>{const c=$('caption').textContent;speak(t,true);setCaption(c)},stop:()=>cancelAnimationFrame(mrlRaf),who:{img:'images/coach-moon-idea.webp',name:['문 코치','Coach Moon']}});
+// a lesson picture: a small canvas painted with the game's own marble painter (paintBall), redrawn every frame while it is on the
+// page. t = seconds since it appeared (held still when the device asks for less motion); S.go() starts an action, S.k() = seconds since.
+function mrlCv(box,label,draw,o={}){const w=o.w||320,h=o.h||170,d=Math.min(2,window.devicePixelRatio||1),cv=document.createElement('canvas');
+ cv.width=Math.round(w*d);cv.height=Math.round(h*d);cv.className='mrl-cv';cv.setAttribute('role','img');cv.setAttribute('aria-label',L(label[0],label[1]));box.appendChild(cv);
+ const g=cv.getContext('2d'),t0=performance.now(),S={at:null,go(){S.at=performance.now()},k(){return S.at==null?-1:RM?99:(performance.now()-S.at)/1000}};
+ const loop=now=>{if(!cv.isConnected)return;g.setTransform(d,0,0,d,0,0);g.clearRect(0,0,w,h);try{draw(g,RM?(o.still??1.2):(now-t0)/1000,S)}catch(e){return}if(!o.once)mrlRaf=requestAnimationFrame(loop)};
+ mrlRaf=requestAnimationFrame(loop);return S}
+// every picture starts with this box; box._show is what "🤔 알려 줘요" does on a try page
+const mrlBox=(box,html='')=>{box._show=null;const d=document.createElement('div');d.className='mrl';d.innerHTML=html;box.appendChild(d);return d};
+const mrlShow=b=>{try{if(b._show)b._show()}catch(e){}};
+const MRL_GOLD={c:'#ffb020',lite:mix('#ffb020','#ffffff',.55),dark:mix('#ffb020','#000000',.45)};
+function mrlBall(g,x,y,r,m,ang=0,sx=1,sy=1){const M=MATS[m]||MRL_GOLD;g.save();g.translate(x,y);g.scale(sx,sy);paintBall(g,0,0,r,M.c,M,ang,M.metal?'metal':M.matte?'matte':'plain',0);g.restore()}
+function mrlLine(g,pts,col='#6d7fa6',w=7){g.lineCap='round';g.lineJoin='round';g.strokeStyle=col;g.lineWidth=w;g.beginPath();pts.forEach(([x,y],i)=>i?g.lineTo(x,y):g.moveTo(x,y));g.stroke()}
+function mrlArrow(g,x0,y0,x1,y1,col,w=4){const a=Math.atan2(y1-y0,x1-x0),hl=w*2.6+5;g.strokeStyle=g.fillStyle=col;g.lineWidth=w;g.lineCap='round';g.beginPath();g.moveTo(x0,y0);g.lineTo(x1-Math.cos(a)*hl*.7,y1-Math.sin(a)*hl*.7);g.stroke();
+ g.beginPath();g.moveTo(x1,y1);g.lineTo(x1-Math.cos(a-.5)*hl,y1-Math.sin(a-.5)*hl);g.lineTo(x1-Math.cos(a+.5)*hl,y1-Math.sin(a+.5)*hl);g.closePath();g.fill()}
+function mrlText(g,s,x,y,o={}){const z=o.size||14;g.font=`${o.w||800} ${z}px system-ui,-apple-system,'Apple SD Gothic Neo','Noto Sans KR',sans-serif`;g.textAlign=o.align||'center';g.textBaseline='middle';
+ if(o.bg){const tw=g.measureText(s).width,pw=tw+16,ph=z+10,px=o.align==='left'?x-8:o.align==='right'?x-tw-8:x-pw/2;g.fillStyle=o.bg;g.beginPath();if(g.roundRect)g.roundRect(px,y-ph/2,pw,ph,ph/2);else g.rect(px,y-ph/2,pw,ph);g.fill()}
+ g.fillStyle=o.col||'#22305e';g.fillText(s,x,y)}
+function mrlGround(g,y,w=320){g.fillStyle='#d5def3';g.fillRect(0,y,w,60);g.fillStyle='#aebbe0';g.fillRect(0,y,w,3)}
+// the grey wedge under a ramp, then the rail on top
+function mrlRamp(g,p0,p1,fl,col){g.fillStyle='#e1e7f7';g.beginPath();g.moveTo(p0[0],p0[1]+3);g.lineTo(p1[0],p1[1]+3);g.lineTo(p1[0],fl);g.lineTo(p0[0],fl);g.closePath();g.fill();mrlLine(g,[p0,p1],col)}
+// a point s px along the rail from p0 toward p1, lifted so a marble of radius r sits on top
+function mrlOn(p0,p1,s,r){const dx=p1[0]-p0[0],dy=p1[1]-p0[1],l=Math.hypot(dx,dy),ux=dx/l,uy=dy/l;let nx=uy,ny=-ux;if(ny>0){nx=-nx;ny=-ny}return [p0[0]+ux*s+nx*(r+3.5),p0[1]+uy*s+ny*(r+3.5)]}
+const mrlBtn=(txt,attr='',alt)=>`<button type="button" class="mrl-b${alt?' alt':''}" ${attr}>${txt}</button>`;
+
+// 🌍 gravity: a marble falls; it rolls down a slope; books tilt a ramp (try); a stopwatch times a roll to the finish
+const mrlFall=box=>mrlCv(mrlBox(box),['구슬이 아래로 떨어지는 그림','A marble falling down'],(g,t)=>{const k=t%1.7,u=Math.min(1,k/.75),y=24+110*u*u;
+ mrlGround(g,146);mrlBall(g,118,y,12,'glass',0);mrlArrow(g,200,34,200,126,'#e23d9b',5);mrlText(g,L('중력','Gravity'),246,80,{col:'#b4247a',size:17,w:900});mrlText(g,L('🌍 지구가 끌어당겨요','🌍 Earth pulls it down'),160,160,{size:13,col:'#3a4690'})},{still:.7});
+const mrlRoll=box=>mrlCv(mrlBox(box),['비탈을 따라 굴러 내려가는 구슬','A marble rolling down a slope'],(g,t)=>{const p0=[26,40],p1=[294,128],k=t%2.5,s=Math.min(1,k/1.7)**2*250,[x,y]=mrlOn(p0,p1,s+10,12);
+ mrlGround(g,150);mrlRamp(g,p0,p1,150);mrlBall(g,x,y,12,'glass',s/12);mrlArrow(g,x,y+14,x,y+46,'#e23d9b',4);mrlText(g,L('중력','Gravity'),x+(x>210?-34:34),y+32,{col:'#b4247a',size:13,w:900})},{still:.9});
+function mrlTilt(box,api){const d=mrlBox(box);let n=1,shown=1;
+ mrlCv(d,['책을 쌓아 기울인 비탈','A ramp tilted on a stack of books'],g=>{shown+=(n-shown)*(RM?1:.16);const fl=150,p0=[66,fl-30*shown-2],p1=[298,fl];
+  mrlGround(g,fl);for(let i=0;i<n;i++){const y=fl-30*(i+1)+2;g.fillStyle=['#ff7a59','#4fb3ff','#ffc93c'][i];g.fillRect(28,y,76,28);g.fillStyle='rgba(255,255,255,.65)';g.fillRect(32,y+6,68,3)}
+  mrlLine(g,[p0,p1]);const [x,y]=mrlOn(p0,p1,16,11),[sx,sy]=mrlOn(p0,p1,31,0);mrlLine(g,[[sx,sy+2],[sx,sy-12]],'#ff5c8a',4);mrlBall(g,x,y,11,'glass',0);
+  const steep=n>=3;mrlText(g,n===1?L('🌄 완만해요','🌄 Gentle'):n===2?L('조금 더 기울었어요','Tilting more'):L('⛰️ 가팔라요!','⛰️ Steep!'),226,34,{size:16,w:900,bg:steep?'#ffe1a6':'#e6ecff',col:steep?'#8a4b00':'#3a4690'})});
+ d.insertAdjacentHTML('beforeend',`<div class="mrl-row">${mrlBtn('📚 '+L('책 한 권 더','One more book'),'data-k="1"')}${mrlBtn(L('한 권 빼기','One book less'),'data-k="-1"',1)}</div>`);
+ const set=k=>{k=clamp(k,1,3);if(k===n)return;n=k;tone(420+n*130,70,'triangle',.06);if(n===3){api.say('맞아요, 이제 가팔라요! 책을 쌓을수록 비탈이 많이 기울어요.','Yes, now it is steep! The more books, the more the slope tilts.');api.done()}};
+ d.addEventListener('click',e=>{const b=e.target.closest('[data-k]');if(b)set(n+ +b.dataset.k)});box._show=()=>set(3)}
+const mrlTimer=box=>mrlCv(mrlBox(box),['결승선까지 걸린 시간을 재는 그림','Timing a marble to the finish line'],(g,t)=>{const p0=[22,56],p1=[262,128],k=t%3.4,run=1.5,s=Math.min(1,k/run)**2*226,[x,y]=mrlOn(p0,p1,s+12,11),tm=Math.min(k,run);
+ mrlGround(g,150);mrlRamp(g,p0,p1,150);mrlLine(g,[p1,[304,128]]);for(let i=0;i<6;i++){g.fillStyle=i%2?'#22305e':'#fff';g.fillRect(262,76+i*8,7,8)}g.fillStyle='#22305e';g.fillRect(269,72,2,52);
+ mrlBall(g,x,y,11,'glass',s/11);mrlText(g,`⏱️ ${tm.toFixed(2)}${L('초',' s')}`,90,26,{size:17,w:900,bg:k>=run?'#ffe1a6':'#fff'});if(k>=run)mrlText(g,L('🏁 도착!','🏁 Finish!'),262,56,{size:14,w:900,col:'#1d7a4a'})},{still:2});
+
+// 🧶 friction: ice and carpet up close; rub your hands (try); a pushed box slows to a stop; the two lab slides
+const mrlFibers=(g,pts)=>{let q=7;const rnd=()=>(q=(q*9301+49297)%233280)/233280;g.lineWidth=2.2;g.lineCap='round';pts(rnd).forEach(([x,y,a,c])=>{g.strokeStyle=c;g.beginPath();g.moveTo(x,y);g.lineTo(x+Math.cos(a)*6,y+Math.sin(a)*6);g.stroke()})};
+const mrlTile=(g,x,y,w,h,f)=>{g.fillStyle=f;g.beginPath();if(g.roundRect)g.roundRect(x,y,w,h,14);else g.rect(x,y,w,h);g.fill()};
+const mrlSurf=box=>mrlCv(mrlBox(box),['매끈한 얼음과 보송보송한 카펫','Smooth ice and fuzzy carpet'],g=>{const gr=g.createLinearGradient(0,30,0,118);gr.addColorStop(0,'#f4fcff');gr.addColorStop(1,'#9fd6ff');mrlTile(g,22,30,126,88,gr);
+ g.strokeStyle='rgba(255,255,255,.95)';g.lineWidth=4;g.lineCap='round';for(const [a,b,c] of [[40,56,64],[58,92,44],[96,68,34]]){g.beginPath();g.moveTo(a,b);g.lineTo(a+c,b-c*.35);g.stroke()}
+ mrlTile(g,172,30,126,88,'#c8506a');mrlFibers(g,rnd=>Array.from({length:190},()=>[178+rnd()*112,36+rnd()*76,-1.9+rnd()*.9,rnd()<.5?'#ea8aa0':'#93304b']));
+ mrlText(g,L('🧊 매끈해요','🧊 Smooth'),85,142,{size:15,w:900});mrlText(g,L('🧶 보송보송해요','🧶 Fuzzy'),235,142,{size:15,w:900})},{once:1});
+function mrlRub(box,api){const d=mrlBox(box,`<div class="mrl-hands" aria-hidden="true"><span class="l">✋</span><span class="r">✋</span></div><div class="mrl-meter" role="img" aria-label="${esc(L('얼마나 따뜻한지','How warm'))}"><i></i></div><p class="mrl-cap" aria-live="polite">${L('두 손을 비벼 봐요','Rub the two hands together')}</p>${mrlBtn('🤲 '+L('쓱쓱 비비기','Rub'))}`);
+ let n=0;const hands=d.querySelector('.mrl-hands'),bar=d.querySelector('.mrl-meter i'),cap=d.querySelector('.mrl-cap');
+ const rub=()=>{if(n>=4)return;n++;hands.classList.remove('rub');void hands.offsetWidth;hands.classList.add('rub');bar.style.width=n*25+'%';tone(260+n*50,70,'triangle',.04);
+  cap.textContent=n<4?L(`쓱쓱! ${n}번`,`Rub, rub! ${n}`):L('♨️ 따뜻해졌어요!','♨️ Nice and warm!');
+  if(n===4){api.say('따뜻해졌죠? 손바닥을 비비면 마찰이 생기고, 마찰 때문에 열이 나요. 진짜 손으로도 해 봐요!','Warm, right? Rubbing your palms makes friction, and friction makes heat. Try it with your real hands too!');api.done()}};
+ d.querySelector('.mrl-b').addEventListener('click',rub);box._show=()=>{while(n<4)rub()}}
+const mrlSlide=box=>mrlCv(mrlBox(box),['밀어 준 상자가 마찰 때문에 느려지다 멈추는 그림','A pushed box slowing to a stop because of friction'],(g,t)=>{const k=t%3.2,v0=170,dec=110,te=v0/dec,tt=Math.min(k,te),x=40+v0*tt-.5*dec*tt*tt;
+ mrlGround(g,138);g.fillStyle='#d89b5b';g.fillRect(x,90,56,48);g.strokeStyle='#a8703a';g.lineWidth=3;g.strokeRect(x+1.5,91.5,53,45);
+ if(k<.45)mrlArrow(g,x-46,114,x-5,114,'#2f7bff',5);if(k<te){mrlArrow(g,x+44,146,x+10,146,'#e23d9b',4);mrlText(g,L('마찰력','Friction'),x+28,161,{size:12.5,w:900,col:'#b4247a'})}
+ mrlText(g,k<.45?L('밀기 ➡','Push ➡'):k<te?L('점점 느려져요','Slowing down'):L('멈췄어요','Stopped'),160,40,{size:15,w:900,bg:'#fff'})},{still:.8});
+const mrlIceCarpet=box=>mrlCv(mrlBox(box),['얼음길과 카펫길','An ice slide and a carpet slide'],g=>{mrlGround(g,150);
+ [[0,1],[164,0]].forEach(([o,ice])=>{const p0=[o+16,54],p1=[o+148,126];mrlRamp(g,p0,p1,150,ice?'#9fd6ff':'#c8506a');
+  if(!ice)mrlFibers(g,rnd=>Array.from({length:40},(_,i)=>{const s=i/40;return [p0[0]+(p1[0]-p0[0])*s+rnd()*3,p0[1]+(p1[1]-p0[1])*s-3,-2+rnd()*.8,rnd()<.5?'#ea8aa0':'#93304b']}));
+  const [x,y]=mrlOn(p0,p1,14,11);mrlBall(g,x,y,11,'glass',0);mrlText(g,ice?L('🧊 얼음길','🧊 Ice'):L('🧶 카펫길','🧶 Carpet'),o+82,24,{size:14,w:900,bg:'#fff'})});
+ mrlText(g,'?',160,98,{size:32,w:900,col:'#5b6cff'})},{once:1});
+
+// 🏀 bouncing: a ball squashes and springs back (slow motion); press a sponge (try); a bounce measured in ruler squares
+const mrlSquash=box=>mrlCv(mrlBox(box),['공이 바닥에서 살짝 눌렸다가 튀어 오르는 그림','A ball squashing on the floor, then bouncing up'],(g,t)=>{const fl=146,r=16,top=24,H=fl-r-top,k=t%2.7;let y,sx=1,sy=1,lab='';
+ if(k<.8){const u=k/.8;y=top+H*u*u}else if(k<1.1){const q=Math.sin(Math.PI*(k-.8)/.3);sy=1-.36*q;sx=1+.28*q;y=fl-r*sy;lab=L('꾹! 살짝 눌려요','Squash!')}
+ else if(k<1.75){const u=(k-1.1)/.65;y=fl-r-H*.6*(1-(1-u)**2);if(k<1.45)lab=L('펴지면서 튀어 올라요','Springs back up')}else{const u=Math.min(1,(k-1.75)/.65);y=fl-r-H*.6*(1-u*u)}
+ mrlGround(g,fl);mrlBall(g,150,y,r,'gold',0,sx,sy);if(lab)mrlText(g,lab,240,70,{size:14,w:900,bg:'#ffe1a6',col:'#8a4b00'});mrlText(g,L('🎬 느린 화면','🎬 Slow motion'),56,22,{size:12.5,w:800,col:'#3a4690'})},{still:.95});
+function mrlSponge(box,api){const d=mrlBox(box,`<button type="button" class="mrl-sponge" aria-label="${esc(L('스펀지 누르기','Press the sponge'))}"><span aria-hidden="true">👇</span></button><p class="mrl-cap" aria-live="polite">${L('노란 스펀지를 눌러 봐요','Press the yellow sponge')}</p>`);
+ const b=d.querySelector('.mrl-sponge'),cap=d.querySelector('.mrl-cap');let n=0;
+ const press=()=>{b.classList.add('sq');tone(220,90,'sine',.06);cap.textContent=L('꾹 눌렸어요…','Squashed…');
+  setTimeout(()=>{b.classList.remove('sq');tone(560,90,'triangle',.06);cap.textContent=L('뿅! 원래 모양으로 돌아왔어요','Boing! Back to its own shape');if(!n++){api.say('손을 떼니까 스펀지가 다시 원래 모양이 됐어요. 이런 성질이 탄성이에요!','When you let go, the sponge went back to its own shape. That is what elastic means!');api.done()}},RM?150:550)};
+ b.addEventListener('click',press);box._show=press}
+const mrlRuler=box=>mrlCv(mrlBox(box),['튀어 오른 높이를 자의 칸 수로 재는 그림','Measuring a bounce in ruler squares'],(g,t)=>{const fl=156,r=12,sq=17,z=fl-r,peak=z-5*sq,k=t%2.1,u=Math.min(1,k/1.4),y=z-5*sq*(1-(2*u-1)**2),rx=232;
+ mrlGround(g,fl);g.strokeStyle='#56688a';g.lineWidth=1.5;for(let q=0;q<=7;q++){const yy=z-q*sq;g.beginPath();g.moveTo(rx,yy);g.lineTo(rx+(q%5?8:15),yy);g.stroke();if(q===5)mrlText(g,'5',rx+26,yy,{size:12,w:800})}
+ g.setLineDash([6,5]);g.strokeStyle='#1fa2c4';g.lineWidth=2.5;g.beginPath();g.moveTo(96,peak);g.lineTo(rx,peak);g.stroke();g.setLineDash([]);
+ mrlBall(g,130,y,r,'gold',0);mrlText(g,L('↕ 5칸','↕ 5 squares'),62,peak,{size:15,w:900,col:'#127a96'});mrlText(g,L('📏 자','📏 ruler'),rx+8,z-7.6*sq,{size:12.5,w:800,col:'#3a4690'})},{still:.7});
+
+// 🎳 pushes: push a marble (try); a marble hits one standing still; wind waves a flag; the two lab balls on a balance
+function mrlPush(box,api){const d=mrlBox(box),fl=128,v0=210,dec=125,te=v0/dec;
+ const S=mrlCv(d,['구슬을 밀어서 움직이는 그림','Pushing a marble to get it moving'],(g,t,S)=>{const k=S.k(),tt=k<0?0:Math.min(k,te),x=44+v0*tt-.5*dec*tt*tt;
+  mrlGround(g,fl);mrlBall(g,x,fl-12,12,'glass',(x-44)/12);if(k>=0&&k<.3)mrlText(g,'👉',x-30,fl-12,{size:26});
+  mrlText(g,k<0?L('가만히 있어요','Standing still'):k<te?L('움직여요!','Moving!'):L('멈췄어요','Stopped'),160,34,{size:16,w:900,bg:'#fff'})},{still:0,h:150});
+ d.insertAdjacentHTML('beforeend',mrlBtn('👉 '+L('구슬 밀기','Push the marble')));
+ const push=()=>{S.go();tone(420,80,'triangle',.07);if(!d.dataset.ok){d.dataset.ok=1;setTimeout(()=>{api.say('힘을 주니까 가만히 있던 구슬이 움직이기 시작했어요!','The push got the still marble moving!');api.done()},RM?0:900)}};
+ d.querySelector('.mrl-b').addEventListener('click',push);box._show=push}
+const mrlCrash=box=>mrlCv(mrlBox(box),['굴러온 구슬이 가만히 있던 구슬에 부딪치는 그림','A rolling marble bumping into a marble standing still'],(g,t)=>{const fl=128,r=12,k=t%3.2,v=130,xb0=180,tc=(xb0-2*r-30)/v;let xa,xb;
+ if(k<tc){xa=30+v*k;xb=xb0}else{const dec=90,tt=Math.min(k-tc,v/dec);xa=xb0-2*r;xb=xb0+v*tt-.5*dec*tt*tt}
+ mrlGround(g,fl);mrlBall(g,xa,fl-r,r,'glass',xa/r);mrlBall(g,xb,fl-r,r,'glass',xb/r);
+ if(k>=tc&&k<tc+.5)mrlText(g,L('쾅!','Bump!'),xb0-r,fl-44,{size:18,w:900,col:'#e23d9b'});
+ mrlText(g,k<tc?L('굴러가요 ➡','Rolling ➡'):L('맞은 구슬이 굴러가요','The hit marble rolls on'),160,30,{size:14.5,w:900,bg:'#fff'})},{still:1.2,h:150});
+const mrlWind=box=>mrlCv(mrlBox(box),['바람에 펄럭이는 깃발','A flag flapping in the wind'],(g,t)=>{g.strokeStyle='rgba(91,108,255,.5)';g.lineWidth=3;g.lineCap='round';
+ for(let i=0;i<7;i++){const y=28+i*17,x=((t*150+i*57)%380)-60;g.beginPath();g.moveTo(x,y);g.lineTo(x+46,y);g.stroke()}
+ mrlGround(g,150);g.fillStyle='#6d7fa6';g.fillRect(196,28,5,122);g.fillStyle='#ff5c8a';g.beginPath();g.moveTo(201,32);
+ for(let s=0;s<=1.0001;s+=.1)g.lineTo(201+s*96,32+Math.sin(t*7-s*6)*7*s);for(let s=1;s>=-.0001;s-=.1)g.lineTo(201+s*96,88+Math.sin(t*7-s*6)*7*s);g.closePath();g.fill();
+ mrlText(g,L('💨 바람이 밀어요','💨 The wind pushes'),96,136,{size:14,w:900,bg:'#fff'})},{still:.4});
+const mrlScale=box=>mrlCv(mrlBox(box),['쇠구슬과 유리구슬을 저울에 단 그림','A steel ball and a glass marble on a balance'],(g,t)=>{const cx=160,cy=50,a=.15+Math.sin(t*1.8)*.012,arm=100,dx=Math.cos(a)*arm,dy=Math.sin(a)*arm;
+ mrlGround(g,150);g.fillStyle='#8a96c8';g.beginPath();g.moveTo(cx,cy);g.lineTo(cx-20,150);g.lineTo(cx+20,150);g.closePath();g.fill();mrlLine(g,[[cx-dx,cy-dy],[cx+dx,cy+dy]],'#56688a',6);
+ [[-1,'glass'],[1,'steel']].forEach(([s,m])=>{const px=cx+s*dx,py=cy+s*dy;g.strokeStyle='#8a96c8';g.lineWidth=2;g.beginPath();g.moveTo(px,py);g.lineTo(px-20,py+34);g.moveTo(px,py);g.lineTo(px+20,py+34);g.stroke();g.fillStyle='#56688a';g.fillRect(px-26,py+34,52,5);mrlBall(g,px,py+22,12,m,0)});
+ mrlText(g,L('🔮 유리구슬','🔮 Glass'),cx-dx,cy-dy+56,{size:13.5,w:900});mrlText(g,L('⚙️ 쇠구슬 · 3배 무거워요','⚙️ Steel · 3× heavier'),314,cy+dy+56,{size:13.5,w:900,align:'right'});mrlText(g,L('크기는 같아요','Same size'),cx,16,{size:13,w:800,col:'#3a4690'})},{still:0});
+
+// 🧲 magnets: a bar magnet's two poles; bring two magnets together, then flip one (try); what the two lab balls are made of (try)
+function mrlMag(g,x,y,w,h,nLeft){const hw=w/2,red='#e8453c',blue='#3d7bff';g.fillStyle=nLeft?red:blue;g.fillRect(x,y,hw,h);g.fillStyle=nLeft?blue:red;g.fillRect(x+hw,y,hw,h);
+ g.strokeStyle='rgba(0,0,0,.2)';g.lineWidth=2;g.strokeRect(x+1,y+1,w-2,h-2);mrlText(g,nLeft?'N':'S',x+hw/2,y+h/2+1,{size:18,w:900,col:'#fff'});mrlText(g,nLeft?'S':'N',x+hw*1.5,y+h/2+1,{size:18,w:900,col:'#fff'})}
+const mrlBar=box=>mrlCv(mrlBox(box),['N극과 S극이 있는 막대자석','A bar magnet with an N pole and an S pole'],(g,t)=>{g.setLineDash([5,6]);g.lineDashOffset=-t*16;g.strokeStyle='rgba(91,108,255,.45)';g.lineWidth=2;
+ for(const q of [1,2,3]){g.beginPath();g.ellipse(160,82,84+q*16,18+q*17,0,0,TAU);g.stroke()}g.setLineDash([]);mrlMag(g,80,64,160,38,true);
+ mrlText(g,L('N극','N pole'),120,150,{size:14,w:900,col:'#c0322a',bg:'#fff'});mrlText(g,L('S극','S pole'),200,150,{size:14,w:900,col:'#2456c8',bg:'#fff'})},{still:0});
+function mrlSnap(box,api){const d=mrlBox(box);let mode=0;// 0 apart, 1 brought close (opposite poles face each other), 2 flipped (like poles face each other)
+ const S=mrlCv(d,['두 자석을 가까이 가져가는 그림','Bringing two magnets close together'],(g,t,S)=>{const k=Math.max(0,S.k()),w=120,h=34,y=70;let x=188;
+  if(mode===1){const u=Math.min(1,k/.45);x=188-(188-144)*u*u}else if(mode===2){const u=Math.min(1,k/.6);x=152+52*(1-(1-u)**2)}
+  mrlMag(g,24,y,w,h,false);mrlMag(g,x,y,w,h,mode===2);
+  if(mode===1&&k>=.45)mrlText(g,L('딱! 끌어당겨요','Click! They pull together'),160,36,{size:15,w:900,bg:'#ffe1a6',col:'#8a4b00'});
+  if(mode===2&&k>.12)mrlText(g,L('밀어내요!','They push apart!'),160,36,{size:15,w:900,bg:'#e6ecff',col:'#3a4690'});
+  if(mode===0)mrlText(g,L('S극과 N극이 마주 보고 있어요','An S pole faces an N pole'),160,138,{size:13.5,w:800,col:'#3a4690'});
+  else mrlText(g,mode===1?L('다른 극끼리 (N ↔ S)','Opposite poles (N ↔ S)'):L('같은 극끼리 (N ↔ N)','Like poles (N ↔ N)'),160,138,{size:13.5,w:800,col:'#3a4690'})},{still:0,h:156});
+ d.insertAdjacentHTML('beforeend',`<div class="mrl-row">${mrlBtn('🧲 '+L('가까이 가져가기','Bring it closer'),'data-m="1"')}${mrlBtn('🔄 '+L('돌려서 다시 대 보기','Flip it and try again'),'data-m="2" hidden',1)}</div>`);
+ const act=m=>{mode=m;S.go();tone(m===1?660:330,90,'triangle',.07);
+  if(m===1){d.querySelector('[data-m="2"]').hidden=false;setTimeout(()=>{api.say('딱 붙었어요! N극과 S극처럼 다른 극끼리는 서로 끌어당겨요.','Click! Opposite poles, like N and S, pull together.');api.done()},RM?0:500)}
+  else api.say('이번에는 밀려나요! N극과 N극처럼 같은 극끼리는 서로 밀어내요.','This time it is pushed away! Like poles, like N and N, push apart.')};
+ d.addEventListener('click',e=>{const b=e.target.closest('[data-m]');if(b)act(+b.dataset.m)});box._show=()=>act(1)}
+function mrlMat(box,api){const d=mrlBox(box);mrlCv(d,['쇠구슬과 유리구슬','A steel ball and a glass marble'],g=>{mrlBall(g,86,62,30,'steel',0);mrlBall(g,234,62,30,'glass',0);mrlText(g,'🧲 ?',160,62,{size:22,w:900})},{once:1,h:124});
+ d.insertAdjacentHTML('beforeend',`<div class="mrl-row two">${mrlBtn('⚙️ '+L('무엇으로 만들었을까?','What is it made of?'),'data-m="steel"',1)}${mrlBtn('🔮 '+L('무엇으로 만들었을까?','What is it made of?'),'data-m="glass"',1)}</div>`);
+ const seen=new Set(),tap=b=>{const m=b.dataset.m;b.textContent=m==='steel'?L('⚙️ 쇠(철)로 만들었어요','⚙️ Made of steel (iron)'):L('🔮 유리로 만들었어요','🔮 Made of glass');b.classList.add('on');tone(m==='steel'?440:880,80,'triangle',.06);seen.add(m);
+  if(seen.size===2&&!d.dataset.ok){d.dataset.ok=1;api.say('재료가 서로 달라요! 자석이 어느 구슬을 끌어당길지는 실험에서 확인해 봐요.','They are made of different materials! Which one the magnet pulls, you will find out in the lab.');api.done()}};
+ d.addEventListener('click',e=>{const b=e.target.closest('[data-m]');if(b)tap(b)});box._show=()=>d.querySelectorAll('[data-m]').forEach(tap)}
+
+// ➰ springs, fans and the gravity well: squash a spring and let go (try); a fan's wind pushes a falling marble; a marble circles into the well
+function mrlSpring(box,api){const d=mrlBox(box),cx=160,base=150,rest=104,r=12,v0=300,gv=560;
+ const S=mrlCv(d,['용수철이 펴지며 구슬을 튕겨 올리는 그림','A spring stretching back and flinging a marble up'],(g,t,S)=>{const k=S.k();let pad=rest,h=0;
+  if(k>=0&&k<.6)pad=rest+26*Math.min(1,k/.5);else if(k>=.6&&k<.68)pad=rest+26-32*((k-.6)/.08);else if(k>=.68&&k<.85)pad=rest-6+6*((k-.68)/.17);
+  if(k>=.64){const u=k-.64;h=Math.max(0,v0*u-.5*gv*u*u)}
+  g.strokeStyle='#6d7fa6';g.lineWidth=4;g.lineJoin='round';g.beginPath();const n=7,seg=(base-pad)/n;g.moveTo(cx,base);for(let i=1;i<n;i++)g.lineTo(cx+(i%2?-16:16),base-seg*i);g.lineTo(cx,pad);g.stroke();
+  mrlGround(g,base+8);g.fillStyle='#56688a';g.fillRect(cx-34,base,68,8);g.fillRect(cx-26,pad-4,52,6);const by=pad-4-r-h;mrlBall(g,cx,by,r,'glass',0);
+  if(h>0)mrlText(g,L('휙!','Whoosh!'),cx+54,by,{size:15,w:900,col:'#e23d9b'});else if(k>=0&&k<.6)mrlText(g,L('꾹 누르는 중','Squashing'),cx+84,pad,{size:13.5,w:900,col:'#3a4690'})},{still:0});
+ d.insertAdjacentHTML('beforeend',mrlBtn('➰ '+L('꾹 눌렀다 놓기','Squash it, then let go')));
+ const go=()=>{S.go();tone(240,120,'sine',.06);setTimeout(()=>tone(760,90,'triangle',.07),RM?0:600);if(!d.dataset.ok){d.dataset.ok=1;setTimeout(()=>{api.say('눌렸던 용수철이 펴지면서 구슬을 밀어 올렸어요!','The squashed spring stretched back and pushed the marble up!');api.done()},RM?0:1700)}};
+ d.querySelector('.mrl-b').addEventListener('click',go);box._show=go}
+const mrlFan=box=>mrlCv(mrlBox(box),['선풍기 바람에 옆으로 밀리며 떨어지는 구슬','A marble pushed sideways by a fan as it falls'],(g,t)=>{const fx=46,fy=78,k=t%2.4,u=Math.min(k,1.3);
+ g.strokeStyle='rgba(91,108,255,.45)';g.lineWidth=3;g.lineCap='round';for(let i=0;i<5;i++){const y=fy-34+i*17,x=fx+40+((t*160+i*41)%210);g.beginPath();g.moveTo(x,y);g.lineTo(x+30,y);g.stroke()}
+ mrlGround(g,158);g.fillStyle='#56688a';g.fillRect(fx-4,fy,8,80);g.fillRect(fx-20,fy+76,40,6);g.strokeStyle='#8a96c8';g.lineWidth=3;g.beginPath();g.arc(fx,fy,36,0,TAU);g.stroke();
+ g.save();g.translate(fx,fy);g.rotate(t*14);g.fillStyle='#4fc8e8';for(let b=0;b<3;b++){g.rotate(TAU/3);g.beginPath();g.ellipse(0,-16,9,16,0,0,TAU);g.fill()}g.restore();g.fillStyle='#22305e';g.beginPath();g.arc(fx,fy,5,0,TAU);g.fill();
+ g.fillStyle='rgba(91,108,255,.35)';for(let q=0;q<u;q+=.13){g.beginPath();g.arc(120+35*q*q,18+75*q*q,2.5,0,TAU);g.fill()}mrlBall(g,120+35*u*u,18+75*u*u,11,'glass',u*4);
+ mrlText(g,L('💨 바람이 옆으로 밀어요','💨 Wind pushes it sideways'),310,18,{size:13,w:900,bg:'#fff',align:'right'})},{still:1});
+const mrlWell=box=>mrlCv(mrlBox(box),['중력 우물에서 빙글빙글 돌다가 가운데로 들어가는 구슬','A marble circling in the gravity well, then dropping into the middle'],(g,t)=>{const cx=160,cy=80,Rw=66,k=t%4.2,u=Math.min(1,k/3.4);
+ const gr=g.createRadialGradient(cx,cy,4,cx,cy,Rw);gr.addColorStop(0,'#05030f');gr.addColorStop(.2,'#2a1d66');gr.addColorStop(1,'#a99bff');g.fillStyle=gr;g.beginPath();g.arc(cx,cy,Rw,0,TAU);g.fill();
+ g.strokeStyle='rgba(255,255,255,.25)';g.lineWidth=1.5;for(const q of [.35,.6,.85]){g.beginPath();g.arc(cx,cy,Rw*q,0,TAU);g.stroke()}
+ for(const a of [.45,Math.PI-.45,Math.PI+.45,-.45])mrlArrow(g,cx+Math.cos(a)*(Rw+26),cy+Math.sin(a)*(Rw+26),cx+Math.cos(a)*(Rw+6),cy+Math.sin(a)*(Rw+6),'#e23d9b',3);
+ if(u<1){const rad=8+(Rw-18)*(1-u)**.8,th=-1+9*u+7*u*u,sc=u>.92?1-(u-.92)/.08*.6:1;mrlBall(g,cx+Math.cos(th)*rad,cy+Math.sin(th)*rad,10*sc,'glass',th)}else if(k<3.9)mrlText(g,L('쏙!','Plop!'),cx,cy-26,{size:16,w:900,col:'#fff'});
+ mrlText(g,L('🕳️ 가운데로 당겨요','🕳️ Pulls toward the middle'),cx,160,{size:13.5,w:900,col:'#3a4690'})},{still:1.4});
+const mrlPP=box=>mrlBox(box,`<div class="mrl-icons"><span><i>➰</i>${L('용수철','Spring')}<b>${L('밀어요 ➡','Pushes ➡')}</b></span><span><i>💨</i>${L('바람','Wind')}<b>${L('밀어요 ➡','Pushes ➡')}</b></span><span><i>🕳️</i>${L('중력 우물','Gravity well')}<b>${L('⬅ 당겨요','⬅ Pulls')}</b></span></div>`);
+
+// ⚖️ a fair test and 📏 measuring: the lab's three steps; two lanes alike; fix an unfair pair (try); run it twice; measure a roll (try); read the notebook
+const mrlSteps3=box=>mrlBox(box,`<div class="mrl-steps" role="list"><span role="listitem"><i aria-hidden="true">🤔</i><b>${L('예상하기','Predict')}</b><small>${L('어떻게 될까?','What will happen?')}</small></span><em aria-hidden="true">➜</em><span role="listitem"><i aria-hidden="true">👀</i><b>${L('실험 보기','Watch')}</b><small>${L('두 길을 나란히','Two lanes side by side')}</small></span><em aria-hidden="true">➜</em><span role="listitem"><i aria-hidden="true">💡</i><b>${L('이유 알기','Explain')}</b><small>${L('왜 그럴까?','Why?')}</small></span></div>`);
+function mrlLanes(g,A,B){[A,B].forEach((c,i)=>{const o=i*160,p0=[o+18,48],p1=[o+148,48+c.drop];g.fillStyle=i?'#fff6dc':'#e6f7fc';if(g.roundRect){g.beginPath();g.roundRect(o+6,8,148,136,14);g.fill()}else g.fillRect(o+6,8,148,136);
+ mrlLine(g,[p0,p1],'#6d7fa6',6);const [x,y]=mrlOn(p0,p1,12,10);mrlBall(g,x,y,10,c.mat,0);mrlText(g,i?'B':'A',o+24,24,{size:14,w:900,bg:i?'#ffd84a':'#7df9ff'})})}
+const mrlSame=box=>{const d=mrlBox(box);mrlCv(d,['똑같이 만든 두 길','Two lanes set up the same way'],g=>mrlLanes(g,{drop:64,mat:'glass'},{drop:64,mat:'glass'}),{once:1,h:150});
+ d.insertAdjacentHTML('beforeend',`<ul class="mrl-chips"><li>✅ ${L('같은 비탈','Same slope')}</li><li>✅ ${L('같은 구슬','Same ball')}</li><li>✅ ${L('같은 출발 높이','Same start height')}</li><li class="on">🔁 ${L('바꾸는 건 딱 하나!','Change just one thing!')}</li></ul>`)};
+function mrlFix(box,api){const d=mrlBox(box);let fixed=false;mrlCv(d,['기울기와 구슬이 다른 두 길','Two lanes with a different slope and a different ball'],g=>mrlLanes(g,{drop:40,mat:'glass'},{drop:94,mat:fixed?'glass':'steel'}),{h:150});
+ d.insertAdjacentHTML('beforeend',`<p class="mrl-cap" aria-live="polite"></p>${mrlBtn('🔮 '+L('B 구슬을 유리구슬로 바꾸기','Swap B’s ball for a glass marble'))}`);
+ const cap=d.querySelector('.mrl-cap'),b=d.querySelector('.mrl-b'),txt=()=>{cap.innerHTML=fixed?L('A와 다른 점: 기울기 <b>1가지</b> ✅ 공정한 시험!','Different from A: the slope, <b>1 thing</b> ✅ A fair test!'):L('A와 다른 점: 기울기, 구슬 <b>2가지</b> 🤔','Different from A: the slope and the ball, <b>2 things</b> 🤔')};txt();
+ const fix=()=>{if(fixed)return;fixed=true;txt();b.disabled=true;tone(880,90,'triangle',.07);api.say('좋아요! 이제 다른 점은 기울기 하나뿐이에요. 결과가 달라지면 기울기 때문이라고 말할 수 있어요.','Great! Now only the slope is different. If the results differ, you know it is because of the slope.');api.done()};
+ b.addEventListener('click',fix);box._show=fix}
+// a small bar pair like the lab notebook's: [label, A value, B value, unit, max]
+const mrlBarsHTML=(a,b,unit,max)=>[['a','A',a],['b','B',b]].map(([c,n,v])=>`<div class="mrl-bar"><span class="sw ${c}">${n}</span><span class="bt"><i class="${c}" style="width:${(v/max*100).toFixed(0)}%"></i></span><em>${v}${unit}</em></div>`).join('');
+const mrlRepeat=box=>mrlBox(box,`<div class="mrl-card" role="img" aria-label="${esc(L('1번째와 2번째 실험 모두 A 6칸, B 3칸','Run 1 and run 2: A 6 squares, B 3 squares both times'))}"><b>🔁 ${L('1번째 실험','Run 1')}</b>${mrlBarsHTML(6,3,L('칸',' sq'),8)}<b>🔁 ${L('2번째 실험','Run 2')}</b>${mrlBarsHTML(6,3,L('칸',' sq'),8)}<p class="ok">✅ ${L('두 번 다 비슷해요 → 믿을 수 있어요!','About the same both times → you can trust it!')}</p></div>`);
+function mrlMeasure(box,api){const d=mrlBox(box),sq=24,x0=40,fl=112,v0=200,dist=6*sq,dec=v0*v0/(2*dist),te=v0/dec;
+ const S=mrlCv(d,['자의 칸 수로 굴러간 거리를 재는 그림','Measuring how far a marble rolls in ruler squares'],(g,t,S)=>{const k=S.k(),tt=k<0?0:Math.min(k,te),x=x0+v0*tt-.5*dec*tt*tt;
+  mrlGround(g,fl);g.strokeStyle='#56688a';g.lineWidth=1.5;for(let q=0;q<=11;q++){const xx=x0+q*sq;g.beginPath();g.moveTo(xx,fl+4);g.lineTo(xx,fl+(q%5?11:17));g.stroke();if(q%5===0)mrlText(g,String(q),xx,fl+28,{size:12,w:800})}
+  if(k>=0){g.strokeStyle='#1fa2c4';g.lineWidth=4;g.beginPath();g.moveTo(x0,fl+1);g.lineTo(x,fl+1);g.stroke()}mrlBall(g,x,fl-12,12,'glass',(x-x0)/12);
+  const n=Math.floor((x-x0)/sq+1e-6);mrlText(g,`↔ ${n}${L('칸',' squares')}`,92,26,{size:16,w:900,bg:k>=te?'#d8f3ff':'#fff',col:'#127a96'});mrlText(g,`⏱️ ${tt.toFixed(2)}${L('초',' s')}`,232,26,{size:16,w:900,bg:k>=te?'#ffe1a6':'#fff'})},{still:0,h:150});
+ d.insertAdjacentHTML('beforeend',mrlBtn('🔮 '+L('굴려서 재기','Roll it and measure')));
+ const roll=()=>{S.go();tone(500,80,'triangle',.06);if(!d.dataset.ok){d.dataset.ok=1;setTimeout(()=>{api.say(`6칸 굴러갔고, 걸린 시간은 ${te.toFixed(2)}초예요. 숫자로 재면 정확하게 비교할 수 있어요!`,`It rolled 6 squares in ${te.toFixed(2)} seconds. Measuring with numbers lets you compare exactly!`);api.done()},RM?0:(te+.25)*1000)}};
+ d.querySelector('.mrl-b').addEventListener('click',roll);box._show=roll}
+const mrlRecord=box=>mrlBox(box,`<div class="mrl-card"><b>📒 ${L('실험 노트','Lab notebook')}</b><p>🤔 <b>${L('내 예상','My guess')}</b> · ${L('A가 더 멀리 가요','A goes farther')}</p><p>👀 <b>${L('결과','Result')}</b> · ${L('A가 더 멀리 갔어요','A went farther')} <span class="tag">${L('예상과 같아요','Matched my guess')}</span></p>${mrlBarsHTML(6,3,L('칸',' sq'),8)}<small>${L('↔️ 간 거리 · 막대가 길수록 멀리 갔어요','↔️ Distance · a longer bar went farther')}</small></div>`);
+const mrlRead=box=>mrlBox(box,`<div class="mrl-two"><div class="mrl-card"><b>↔️ ${L('간 거리','Distance')}</b>${mrlBarsHTML(6,3,L('칸',' sq'),8)}<p class="ok">${L('긴 막대 = 더 멀리','Longer bar = farther')}</p></div><div class="mrl-card"><b>⏱️ ${L('걸린 시간','Time taken')}</b>${mrlBarsHTML(1.2,1.8,L('초',' s'),2.2)}<p class="ok">${L('짧은 막대 = 먼저 도착','Shorter bar = arrived first')}</p></div></div>`);
+
+// 🛠️ engineers: what they make; a challenge card (plan); build and test; the four steps round and round (try); ⏱️ the time ruler
+const mrlEng=box=>mrlBox(box,`<div class="mrl-icons"><span><i>🌉</i>${L('다리','Bridges')}</span><span><i>🎢</i>${L('놀이기구','Rides')}</span><span><i>🔮</i>${L('구슬 코스','Marble runs')}</span></div>`);
+const mrlStrip=on=>`<div class="mrl-steps4">${STEPS.map(([e,s],i)=>`<span class="${on.includes(i)?'on':''}"><i aria-hidden="true">${e} </i>${esc(s)}</span>`).join('')}</div>`;
+const mrlPlan=box=>{const ch=CHAL_BY.slow;mrlBox(box,`${mrlStrip([0])}<div class="mrl-card"><b>${ch.ic} ${esc(ch.t)}</b><p>🎯 <b>${L('목표','Goal')}</b> · ${esc(ch.g)}</p><p>📐 <b>${L('규칙','Rule')}</b> · ${esc(ch.r)}</p><p>🤔 <b>${L('내 예상','My guess')}</b> · ${L('32초','32 s')}</p></div>`)};
+const mrlTest=box=>mrlBox(box,`${mrlStrip([1,2])}<div class="mrl-card"><p>🛠️ ${L('조각을 골라 코스를 만들어요','Pick pieces and build the course')}</p><p>🏁 ${L('시험 주행: 응원 없이 코스만으로 달려요','Test run: no cheering, only the course decides')}</p><p class="big">⏱️ ${L('우승 시간','Winning time')} ${sec(26.4)}</p></div>`);
+function mrlCycle(box,api){const d=mrlBox(box,`<div class="mrl-cycle">${STEPS.map(([e,s],i)=>`<button type="button" data-i="${i}" style="grid-area:${'abcd'[i]}"><span aria-hidden="true">${e}</span>${esc(s)}</button>`).join('')}<i class="c1" aria-hidden="true">➜</i><i class="c2" aria-hidden="true">➜</i><i class="c3" aria-hidden="true">➜</i><i class="c4" aria-hidden="true">➜</i></div><p class="mrl-cap" aria-live="polite">${L('📝 계획부터 시작해요','Start with 📝 Plan')}</p>`);
+ let n=0;const cap=d.querySelector('.mrl-cap'),bs=[...d.querySelectorAll('[data-i]')];
+ const tap=i=>{if(n>=4)return;if(i!==n){tone(300,70,'sine',.04);const [e,s]=STEPS[n];cap.textContent=L(`다음은 ${e} ${s}${jo(s,'이에요','예요')}`,`Next comes ${e} ${s}`);return}
+  bs[i].classList.add('on');n++;tone(520+n*110,80,'triangle',.06);if(n<4){const [e,s]=STEPS[n];cap.textContent=L(`좋아요! 다음은 ${e} ${s}`,`Good! Next: ${e} ${s}`);return}
+  cap.textContent=L('🔁 그리고 다시 📝 계획으로!','🔁 And back to 📝 Plan!');d.querySelector('.mrl-cycle').classList.add('done');api.say('잘했어요! 고친 다음에는 다시 계획하고, 만들고, 시험해요. 이렇게 돌면서 설계가 점점 좋아져요.','Well done! After improving, you plan, build and test again. Going round like this makes the design better and better.');api.done()};
+ d.addEventListener('click',e=>{const b=e.target.closest('[data-i]');if(b)tap(+b.dataset.i)});box._show=()=>{while(n<4)tap(n)}}
+const mrlDark=(box,html)=>mrlBox(box,`<div class="mrl-dark">${html}</div>`);
+const mrlG1=box=>mrlDark(box,`<p class="mrl-dk">${CHAL_BY.slow.ic} ${esc(CHAL_BY.slow.t)} · 🎯 ${L('30초 이상','30 s or more')}</p>${gaugeHTML({zones:[[30,null]],now:26.4,label:L('우승 시간 26.4초, 목표 30초 이상','Winning time 26.4 s, goal 30 s or more')})}`);
+function mrlG2(box,api){let ok=false;const d=mrlBox(box),draw=()=>{d.innerHTML=`<div class="mrl-dark"><p class="mrl-dk">${CHAL_BY.slow.ic} ${esc(CHAL_BY.slow.t)} · 🎯 ${L('30초 이상','30 s or more')}</p>${gaugeHTML(ok?{zones:[[30,null]],now:31.2,old:[26.4],label:L('우승 시간 31.2초, 목표 30초 이상','Winning time 31.2 s, goal 30 s or more')}:{zones:[[30,null]],now:26.4,label:L('우승 시간 26.4초, 목표 30초 이상','Winning time 26.4 s, goal 30 s or more')})}<p class="mrl-dk ${ok?'ok':''}" role="status">${ok?L('🎉 목표 달성!','🎉 Goal met!'):L('🔧 아직이에요 · 3.6초 더 느려야 해요','🔧 Not yet · it needs to be 3.6 s slower')}</p></div>${ok?'':mrlBtn('🔧 '+L('고쳐서 다시 시험','Improve and test again'))}`;
+  const b=d.querySelector('.mrl-b');if(b)b.addEventListener('click',fix)},
+ fix=()=>{if(ok)return;ok=true;draw();tone(880,120,'triangle',.08);api.say('31.2초! 핀이 초록 칸 안에 들어왔어요. 목표 달성이에요!','31.2 seconds! The pin is inside the green zone. Goal met!');api.done()};draw();box._show=fix}
+const mrlG3=box=>mrlDark(box,`<p class="mrl-dk">${CHAL_BY.one.ic} ${esc(CHAL_BY.one.t)} · ${L('기준','Baseline')} ${sec(22)}</p>${gaugeHTML({zones:[[0,18],[26,null]],base:22,guess:27,label:L('기준 22초, 목표는 18초 이하 또는 26초 이상, 내 예상 27초','Baseline 22 s, goal 18 s or less or 26 s or more, my guess 27 s')})}`);
+
+// ---- the lessons. Strings are [ko, en]. steps() builds the pages each time, so a lesson can show what the child has found since.
+const MRL={
+ gravity:{icon:'🌍',title:['중력과 비탈','Gravity and slopes'],
+  key:[['중력은 지구가 물체를 아래로 끌어당기는 힘이에요.','Gravity is Earth’s pull that brings things down.'],['많이 기울면 가파르고, 조금 기울면 완만해요.','A slope that tilts a lot is steep; one that tilts a little is gentle.']],
+  steps:()=>[
+   {say:['손에서 구슬을 놓으면 아래로 떨어져요. 지구가 물체를 끌어당기기 때문이에요. 이 힘을 중력이라고 해요.','Let go of a marble and it falls. Earth pulls things toward it. This pull is called gravity.'],art:mrlFall},
+   {say:['비탈 위의 구슬은 곧장 떨어지지 못해요. 대신 중력에 끌려서 비탈을 따라 굴러 내려가요.','On a slope, a marble can’t fall straight down. Gravity pulls it, so it rolls down along the slope instead.'],art:mrlRoll},
+   {say:['비탈이 기운 정도를 기울기라고 해요. 많이 기울면 ‘가파르다’, 조금 기울면 ‘완만하다’고 해요. 책을 쌓아서 비탈을 가파르게 만들어 보세요!','How much a slope tilts is its steepness. A lot of tilt is steep; a little is gentle. Stack books to make the slope steep!'],try:true,art:mrlTilt,show:mrlShow},
+   {say:['빠르기는 물체가 얼마나 빠르게 움직이는지를 나타내요. 같은 길에서는 먼저 도착한 구슬이 더 빨라요. 실험에서는 무게, 기울기, 출발 높이, 길 모양을 하나씩 바꾸며 누가 먼저 오는지, 얼마나 멀리 가는지 지켜봐요.','Speed is how fast something moves. On the same path, the marble that arrives first is faster. In the lab you will change the weight, the steepness, the starting height or the shape of the path, one at a time, and watch who arrives first or how far it goes.'],art:mrlTimer}]},
+ friction:{icon:'🧶',title:['마찰과 표면','Friction and surfaces'],
+  key:[['마찰력은 두 표면이 비빌 때 움직임을 방해하는 힘이에요.','Friction is a force between rubbing surfaces that works against motion.'],['표면에 따라 마찰력의 크기가 달라요.','Different surfaces have different amounts of friction.']],
+  steps:()=>[
+   {say:['물체의 겉면을 표면이라고 해요. 얼음처럼 매끈한 표면도 있고, 카펫처럼 보송보송하고 울퉁불퉁한 표면도 있어요.','The outside of a thing is its surface. Some surfaces are smooth, like ice. Some are fuzzy and bumpy, like carpet.'],art:mrlSurf},
+   {say:['두 표면이 닿아서 서로 비빌 때 생기는 힘을 마찰력이라고 해요. 두 손을 비벼 보세요. 따뜻해지는 것도 마찰 때문이에요!','When two surfaces touch and rub, there is a force called friction. Rub the two hands together. The warmth comes from friction!'],try:true,art:mrlRub,show:mrlShow},
+   {say:['마찰력은 움직이는 쪽과 반대로 작용해서 움직임을 방해해요. 그래서 밀어 준 상자도 점점 느려지다가 멈춰요.','Friction acts against the way something moves. That is why a pushed box slows down and stops.'],art:mrlSlide},
+   {say:['표면마다 마찰력의 크기가 달라요. 실험에서는 얼음길과 카펫길처럼 표면만 다르게 하고, 어느 구슬이 먼저 도착하는지 지켜봐요.','Each surface has its own amount of friction. In the lab only the surface is different, ice or carpet, and you watch which marble arrives first.'],art:mrlIceCarpet}]},
+ bounce:{icon:'🏀',title:['튀어 오르기와 탄성','Bouncing and elastic things'],
+  key:[['탄성은 눌렸다가 원래 모양으로 돌아가려는 성질이에요.','Elastic things spring back to their shape after being squashed or stretched.'],['공은 바닥에서 살짝 눌렸다가 펴지면서 튀어 올라요.','A ball squashes a little on the floor, then springs back up.']],
+  steps:()=>[
+   {say:['공이 바닥에 부딪히는 순간, 공은 살짝 찌그러졌다가 다시 펴져요. 펴지면서 바닥을 밀어서 튀어 올라요. 느린 화면으로 봐요!','When a ball hits the floor, it squashes a little, then springs back. As it springs back it pushes on the floor, and up it goes. Here it is in slow motion!'],art:mrlSquash},
+   {say:['눌리거나 늘어났다가 원래 모양으로 돌아가려는 성질을 탄성이라고 해요. 스펀지와 용수철에도 탄성이 있어요. 스펀지를 눌러 보세요!','Springing back to its own shape after being squashed or stretched is called being elastic. Sponges and springs are elastic. Press the sponge!'],try:true,art:mrlSponge,show:mrlShow},
+   {say:['실험에서는 공이 튀어 오른 높이를 자의 칸 수로 재요. 칸 수가 많을수록 높이 튄 거예요. 공의 재료나 떨어뜨리는 높이를 바꿔 보며 지켜봐요.','In the lab you measure how high a ball bounces by counting ruler squares. More squares means a higher bounce. You will change what the ball is made of, or how high it drops from, and watch.'],art:mrlRuler}]},
+ push:{icon:'🎳',title:['밀기와 부딪치기','Pushes and crashes'],
+  key:[['힘은 밀거나 당기는 것이에요. 힘을 받으면 움직임이 바뀌어요.','A force is a push or a pull. A force changes how things move.'],['부딪치면 두 물체가 서로를 밀어요.','When two things crash, they push on each other.']],
+  steps:()=>[
+   {say:['미는 것과 당기는 것을 힘이라고 해요. 힘을 주면 가만히 있던 물체가 움직이고, 움직이던 물체는 빨라지거나 느려지거나 방향이 바뀌어요. 구슬을 밀어 보세요!','A push or a pull is a force. A force can start something moving, and it can speed up, slow down or turn something that is already moving. Push the marble!'],try:true,art:mrlPush,show:mrlShow},
+   {say:['구슬이 다른 구슬에 부딪치면 서로를 밀어요. 그래서 가만히 있던 구슬은 굴러가고, 부딪친 구슬은 느려져요.','When a marble bumps into another marble, they push on each other. The one standing still starts rolling, and the one that hit it slows down.'],art:mrlCrash},
+   {say:['움직이는 공기인 바람도 물체를 밀어요. 바람이 세게 불면 깃발이 펄럭이고 우산이 뒤집히기도 해요.','Wind is moving air, and it pushes things too. A strong wind makes flags flap and can even flip an umbrella.'],art:mrlWind},
+   {say:['실험에서는 무거운 쇠구슬과 가벼운 유리구슬을 써요. 크기는 같고 쇠구슬이 3배 무거워요. 같은 바람에 밀릴 때나 서로 부딪칠 때 얼마나 멀리 가는지 칸으로 재며 지켜봐요.','In the lab you will use a heavy steel ball and a light glass marble. They are the same size, but the steel ball is 3 times heavier. Count squares to see how far they go when the same wind pushes them, or when they crash.'],art:mrlScale}]},
+ magnet:{icon:'🧲',title:['자석의 힘','Magnets'],
+  key:[['자석은 닿지 않아도 끌어당기거나 밀어낼 수 있어요.','A magnet can pull or push without touching.'],['다른 극끼리는 끌어당기고, 같은 극끼리는 밀어내요.','Opposite poles pull together; like poles push apart.']],
+  steps:()=>[
+   {say:['자석은 닿지 않아도 끌어당기거나 밀어내는 힘이 있어요. 자석의 양쪽 끝을 N극과 S극이라고 해요.','A magnet can pull or push things without touching them. The two ends of a magnet are called the N pole and the S pole.'],art:mrlBar},
+   {say:['두 자석을 가까이 가져가 볼까요? 버튼을 눌러 보세요!','Let’s bring two magnets close together. Press the button!'],try:true,art:mrlSnap,show:mrlShow},
+   {say:['자석에 끌려가는 물체도 있고, 끌려가지 않는 물체도 있어요. 물체를 만든 재료에 따라 달라요. 실험에 나오는 두 구슬은 무엇으로 만들었는지 눌러서 알아보세요.','Some things are pulled by a magnet and some are not. It depends on what they are made of. Tap to find out what the two balls in the lab are made of.'],try:true,art:mrlMat,show:mrlShow}]},
+ pushpull:{icon:'➰',title:['용수철·선풍기·중력 우물','Springs, fans and the gravity well'],
+  key:[['눌린 용수철은 펴지면서 밀어요. 이 힘이 탄성력이에요.','A squashed spring pushes as it springs back. That push is elastic force.'],['바람은 물체를 밀고, 중력 우물은 가운데로 당겨요.','Wind pushes things; the gravity well pulls toward its middle.'],['모형은 진짜를 간단하게 흉내 내어 알아보기 쉽게 만든 거예요.','A model is a simple copy of the real thing that makes it easier to study.']],
+  steps:()=>[
+   {say:['눌린 용수철은 원래 길이로 돌아가려고 해요. 그래서 펴지면서 구슬을 밀어 튕겨 보내요. 이 힘을 탄성력이라고 해요. 용수철을 눌렀다 놓아 보세요!','A squashed spring wants to get back to its own length. As it stretches back, it pushes the marble and flings it. This push is called elastic force. Squash the spring and let go!'],try:true,art:mrlSpring,show:mrlShow},
+   {say:['선풍기는 공기를 밀어서 바람을 만들어요. 그 바람이 떨어지는 구슬을 옆으로 밀어요.','A fan pushes air and makes wind. The wind pushes a falling marble sideways.'],art:mrlFan},
+   {say:['중력 우물은 블랙홀을 흉내 낸 모형이에요. 가운데로 끌어당겨서 구슬이 빙글빙글 돌다가 가운데로 쏙 들어가요. 모형은 진짜를 간단하게 흉내 내어 알아보기 쉽게 만든 거예요.','The gravity well is a model of a black hole. It pulls toward the middle, so marbles circle round and round, then drop into the middle. A model is a simple copy of the real thing that makes it easier to study.'],art:mrlWell},
+   {say:['용수철과 바람은 구슬을 밀고, 중력 우물은 구슬을 가운데로 당겨요. 실험에서는 용수철을 누른 정도, 선풍기와의 거리, 우물에 들어가는 빠르기를 하나씩 바꾸며 지켜봐요.','Springs and wind push the marble; the gravity well pulls it toward the middle. In the lab you will change how far the spring is squashed, how far the ball is from the fan, or how fast it goes into the well, one at a time, and watch.'],art:mrlPP}]},
+ fair:{icon:'⚖️',title:['공정한 시험','A fair test'],
+  key:[['공정한 시험: 딱 한 가지만 바꾸고 나머지는 똑같이 해요.','A fair test: change just one thing and keep everything else the same.'],['먼저 예상하고, 지켜보고, 왜 그런지 생각해요.','Predict first, then watch, then think about why.'],['다시 해서 같은 결과가 나오면 더 믿을 수 있어요.','If a test gives the same result again, you can trust it more.']],
+  steps:()=>[
+   {say:['과학자는 궁금한 것을 실험으로 알아봐요. 먼저 어떻게 될지 예상하고, 실험을 지켜본 다음, 왜 그런지 생각해요. 예상이 틀려도 괜찮아요!','Scientists find things out with experiments. First they predict what will happen, then they watch, then they think about why. A wrong guess is okay!'],art:mrlSteps3},
+   {say:['두 길을 비교할 때는 딱 한 가지만 다르게 하고, 나머지는 모두 똑같이 해요. 이것을 공정한 시험이라고 해요.','To compare two lanes, make just one thing different and keep everything else the same. This is called a fair test.'],art:mrlSame},
+   {say:['B 길은 A 길과 두 가지가 달라요. 기울기도 다르고 구슬도 달라요. 이러면 무엇 때문에 결과가 달라졌는지 알 수 없어요. B의 구슬을 A와 같은 유리구슬로 바꿔 보세요!','Lane B is different from lane A in two ways: the slope and the ball. Then you can’t tell which one made the difference. Swap B’s ball for a glass marble like A’s!'],try:true,art:mrlFix,show:mrlShow},
+   {say:['같은 실험을 한 번 더 해서 결과를 비교하는 것도 중요해요. 두 번 해도 비슷한 결과가 나오면 더 믿을 수 있어요.','It also helps to run the same test again and compare. If it comes out about the same twice, you can trust it more.'],art:mrlRepeat}]},
+ measure:{icon:'📏',title:['재어 보고 기록하기','Measure and record'],
+  key:[['시간은 초로, 거리와 높이는 자의 칸 수로 재요.','Time is measured in seconds; distance and height in ruler squares.'],['잰 결과는 노트에 기록하고 막대그래프로 비교해요.','Write down what you measure and compare it on a bar graph.'],['시간 막대는 짧을수록 빠르고, 거리 막대는 길수록 멀리 갔어요.','On a time graph the shorter bar was faster; on a distance graph the longer bar went farther.']],
+  steps:()=>[
+   {say:['과학자는 ‘더 빠른 것 같아’ 하고 끝내지 않고 직접 재요. 이 실험실에서는 시간을 초로 재고, 거리와 높이는 자의 칸 수로 재요. 구슬을 굴려서 재 보세요!','Scientists don’t stop at “it looks faster”. They measure. In this lab, time is measured in seconds, and distance and height are counted in ruler squares. Roll the marble and measure it!'],try:true,art:mrlMeasure,show:mrlShow},
+   {say:['잰 결과는 잊어버리기 전에 기록해요. 📒 실험 노트에는 내 예상과 잰 결과가 적히고, 막대그래프로 두 길을 한눈에 비교할 수 있어요.','Write down what you measured before you forget. The 📒 lab notebook keeps your guess and the measured results, and a bar graph compares the two lanes at a glance.'],art:mrlRecord},
+   {say:['막대그래프를 읽을 때는 무엇을 쟀는지 먼저 봐요. 거리나 높이는 막대가 길수록 멀리, 높이 간 거예요. 시간은 막대가 짧을수록 먼저 도착한 거예요.','When you read a bar graph, first check what was measured. For distance or height, a longer bar went farther or higher. For time, a shorter bar arrived first.'],art:mrlRead}]},
+ engineer:{icon:'🛠️',title:['엔지니어의 방법','How engineers work'],
+  key:[['계획 → 만들기 → 시험 → 고치기, 그리고 다시!','Plan → build → test → improve, and again!'],['목표와 규칙을 먼저 확인해요.','Check the goal and the rules first.'],['시험 결과를 보고 고치면 설계가 점점 좋아져요.','Each test result shows you how to make the design better.']],
+  steps:()=>[
+   {say:['엔지니어는 문제를 해결할 물건을 설계하고 만드는 사람이에요. 다리도, 놀이기구도, 구슬 코스도 엔지니어가 설계해요.','Engineers design and build things that solve problems. Bridges, rides and marble runs are all designed by engineers.'],art:mrlEng},
+   {say:['먼저 📝 계획해요. 목표가 무엇인지, 지켜야 할 규칙이 무엇인지 확인하고 어떤 조각을 쓸지 정해요. 결과를 미리 예상해 봐도 좋아요.','First, 📝 plan. Check the goal and the rules you must follow, then choose your pieces. You can guess the result ahead of time, too.'],art:mrlPlan},
+   {say:['그다음 🛠️ 만들고 🏁 시험해요. 시험 주행은 응원 없이 코스만으로 달려서 우승 시간을 진짜로 재요.','Then 🛠️ build it and 🏁 test it. A test run has no cheering, so only the course decides, and it measures the real winning time.'],art:mrlTest},
+   {say:['목표에 못 미쳐도 괜찮아요. 🔧 고쳐서 다시 시험하면 돼요. 엔지니어는 이 네 단계를 몇 번이고 돌아요. 네 단계를 차례대로 눌러 보세요!','Missing the goal is okay: 🔧 improve it and test again. Engineers go round these four steps again and again. Tap the four steps in order!'],try:true,art:mrlCycle,show:mrlShow}]},
+ gauge:{icon:'⏱️',title:['시간 자 읽기','Reading the time ruler'],
+  key:[['초록 칸은 목표, 하얀 핀은 이번 시험의 우승 시간이에요.','The green zone is the goal; the white pin is this test’s winning time.'],['핀이 초록 칸 밖이면 고쳐서 다시 시험해요.','If the pin is outside the green zone, improve the course and test again.'],['◆ 기준과 비교하면 얼마나 달라졌는지 알 수 있어요.','Compare with the ◆ baseline to see how much it changed.']],
+  steps:()=>[
+   {say:['시험 주행이 끝나면 시간 자에 결과가 나와요. 초록 칸이 목표이고, 하얀 핀이 이번 시험의 우승 시간이에요.','After a test run, the time ruler shows the result. The green zone is the goal, and the white pin is this test’s winning time.'],art:mrlG1},
+   {say:['핀이 초록 칸 밖에 있으면 아직이에요. 26.4초는 목표인 30초보다 3.6초 빨라요. 더 느려지게 고쳐서 다시 시험해 보세요!','If the pin is outside the green zone, not yet. 26.4 seconds is 3.6 seconds faster than the 30-second goal. Improve the course so it is slower, then test again!'],try:true,art:mrlG2,show:mrlShow},
+   {say:[`‘${CHAL_BY.one.t}’처럼 지난 시험과 비교하는 도전에서는 지난 시험 시간이 ◆ 기준으로 나와요. 🤔는 내 예상이에요. 기준에서 얼마나 달라졌는지 봐요.`,`In challenges that compare with the last test, like “${CHAL_BY.one.t}”, the last test’s time shows as the ◆ baseline. 🤔 is your guess. See how far the new time is from the baseline.`],art:mrlG3}]}};
+const MRL_IDS=Object.keys(MRL),MRL_GROUPS=[[['⛰️ 힘과 운동','⛰️ Forces and motion'],['gravity','friction','bounce','push','magnet','pushpull']],[['🔬 과학자처럼','🔬 Like a scientist'],['fair','measure']],[['🛠️ 엔지니어처럼','🛠️ Like an engineer'],['engineer','gauge']]];
+// which lesson teaches each experiment's topic, and which lessons a design challenge needs
+const LAB_LS={weight:'gravity',slope:'gravity',height:'gravity',curve:'gravity',friction:'friction',bounce:'bounce',drop:'bounce',wind:'push',crash:'push',magnet:'magnet',spring:'pushpull',fan:'pushpull',well:'pushpull'};
+const CH_LS={one:['fair'],double:['fair'],same:['fair'],team:['pushpull','magnet'],sort:['pushpull','magnet']};
+// a lesson, plus "what we found" pages once experiments of its topic are done (two experiments a page, so a lesson stays at
+// six pages or fewer): each one's result and its one-line tip
+function mrLesson(id){const d=MRL[id];if(!d)return null;const found=EXPS.filter(e=>LAB_LS[e.id]===id&&stats.labs[e.id]),steps=d.steps(),tip=e=>L(IX[e.id].tip[0],IX[e.id].tip[1]);
+ for(let i=0;i<found.length;i+=2){const part=found.slice(i,i+2);steps.push({say:(i?L('실험에서 알아낸 것이 더 있어요. ','There is more from your experiments. '):L('실험에서 알아낸 것이에요. ','Here is what your experiments showed. '))+part.map(tip).join(' '),
+  art:`<div class="mrl"><ul class="mrl-found">${part.map(e=>`<li><b>${e.ic} ${esc(e.t)}</b><span>${esc(labHead(e,e.ans))}</span><small>💡 ${esc(tip(e))}</small></li>`).join('')}</ul></div>`})}
+ return {id:'mr:'+id,icon:d.icon,title:d.title,steps,key:d.key.concat(found.map(e=>IX[e.id].tip)).slice(0,3)}}
+const mrSeenN=()=>MRL_IDS.filter(id=>MiniLesson.seen('mr:'+id)).length;
+const mrOffered=new Set();
+// play up to two lessons the child has not finished (each offered once per visit), then go on
+function mrLessonsThen(ids,go){const list=[...new Set(ids.filter(Boolean))].filter(id=>MRL[id]&&!MiniLesson.seen('mr:'+id)&&!mrOffered.has(id)).slice(0,2);
+ const step=()=>{const id=list.shift();if(!id){go();return}mrOffered.add(id);MiniLesson.before(mrLesson(id),step)};step()}
+function enterLab(id){if(!EXPS.some(e=>e.id===id)||phase==='countdown'||phase==='running'){enterLab0(id);return}
+ const g=LAB_LS[id],any=Object.keys(stats.labs).length>0,first=!EXPS.some(e=>LAB_LS[e.id]===g&&stats.labs[e.id]);
+ mrLessonsThen(['fair',first&&g,any&&'measure'],()=>enterLab0(id))}
+function startChallenge(id,opener){const ch=CHAL_BY[id];if(!ch||phase==='countdown'||phase==='running')return;const go=()=>startChallenge0(id,opener);
+ if(chalGet(id).n>0){go();return}const tested=CHALS.some(c=>chalGet(c.id).n>0);
+ mrLessonsThen(['engineer',...(CH_LS[id]||[]),tested&&!ch.team&&!ch.sort&&'gauge'],go)}
+const openMrLesson=id=>{if(phase==='countdown'||phase==='running')return;const ls=mrLesson(id);if(ls)MiniLesson.open(ls)};
+function openMrBook(at){if(phase==='countdown'||phase==='running')return;
+ MiniLesson.book({title:['마블 레이스 개념 노트','Marble Rush concept notebook'],open:at,groups:MRL_GROUPS.map(([name,ids])=>({name,items:ids.map(id=>{const ls=mrLesson(id);return {id:ls.id,icon:ls.icon,title:ls.title,key:ls.key,lesson:()=>mrLesson(id)}})}))})}
 
 // ---------------------------------------------------------------- workshop (my marble's look) and badge book
 let skinRaf=0;
@@ -2255,12 +2612,12 @@ $('skinBtn').addEventListener('click',e=>openSkins(e.currentTarget));
 $('badgeBtn').addEventListener('click',e=>{renderBadges();openModal('badgeModal',e.currentTarget)});
 $('chalBtn').addEventListener('click',e=>openChalBoard(e.currentTarget));
 $('noteBtn').addEventListener('click',e=>openNotebook(e.currentTarget));$('noteSide').addEventListener('click',e=>openNotebook(e.currentTarget));
-$('chalBody').addEventListener('click',e=>{const b=e.target.closest('[data-ch]');if(b)startChallenge(b.dataset.ch)});
-$('noteBody').addEventListener('click',e=>{const b=e.target.closest('[data-exp]');if(!b||b.disabled||phase==='running'||phase==='countdown')return;closeModal('noteModal');closeModal('labModal');enterLab(b.dataset.exp)});
+$('chalBody').addEventListener('click',e=>{if(e.target.closest('[data-book]')){openMrBook(2);return}const b=e.target.closest('[data-ch]');if(b)startChallenge(b.dataset.ch)});
+$('noteBody').addEventListener('click',e=>{const bk=e.target.closest('[data-book]');if(bk){if(!bk.disabled)openMrBook();return}const b=e.target.closest('[data-exp]');if(!b||b.disabled||phase==='running'||phase==='countdown')return;closeModal('noteModal');closeModal('labModal');enterLab(b.dataset.exp)});
 $('replaySkip').addEventListener('click',endReplay);
 $('peekBack').addEventListener('click',()=>{$('peekBack').classList.add('hidden');$('resultOverlay').classList.remove('hidden')});
 $('buildBody').addEventListener('click',e=>{const b=e.target.closest('[data-b]');if(b&&!b.disabled)builderAct(b)});
-$('labBody').addEventListener('click',e=>{if(e.target.closest('[data-note]')){openNotebook(e.target.closest('[data-note]'));return}const b=e.target.closest('[data-exp]');if(b)enterLab(b.dataset.exp)});
+$('labBody').addEventListener('click',e=>{if(e.target.closest('[data-note]')){openNotebook(e.target.closest('[data-note]'));return}if(e.target.closest('[data-book]')){openMrBook();return}const b=e.target.closest('[data-exp]');if(b)enterLab(b.dataset.exp)});
 $('labList').addEventListener('click',e=>{const b=e.target.closest('[data-exp]');if(b&&phase!=='running'&&phase!=='countdown')enterLab(b.dataset.exp)});
 $('skinBody').addEventListener('click',e=>{const b=e.target.closest('[data-look]');if(!b)return;const k=b.dataset.look,id=b.dataset.id;
  if(!unlocked(k,id)){const bd=badgeFor(k,id);setCaption(L(`🔒 ${bd?bd.ic+' '+bd.n+' 배지('+bd.d+')를 받으면 열려요!':'아직 잠겨 있어요.'}`,`🔒 ${bd?'Earn the '+bd.ic+' '+bd.n+' badge ('+bd.d+') to open it!':'Still locked.'}`));const sb=$('skinBody').querySelector('.skin-top p');if(sb)sb.textContent=$('caption').textContent;tone(260,90);return}
@@ -2276,7 +2633,7 @@ $('resultCard').addEventListener('click',e=>{const a=e.target.closest('[data-act
  else if(a==='replay')startReplay();else if(a==='peek'){$('resultOverlay').classList.add('hidden');$('peekBack').classList.remove('hidden');try{$('peekBack').focus({preventScroll:true})}catch(e){}}else if(a==='edit')openBuilder(worldIdx-WORLDS.length,e.target.closest('[data-act]'));
  else if(a==='pred'){labPred=e.target.closest('[data-k]').dataset.k;labFresh=true;tone(700,80,'triangle',.07);coachTell('idea','좋은 예상이에요! 이제 실험으로 확인해 봐요 🌙','Great guess! Now let’s test it 🌙',{gap:45000,ms:3500});startRace()}
  else if(a==='labAgain'){prepare();startRace()}else if(a==='labList')openLabPicker(e.target.closest('[data-act]'));else if(a==='labExit')exitLab();
- else if(a==='note')openNotebook(e.target.closest('[data-act]'));
+ else if(a==='note')openNotebook(e.target.closest('[data-act]'));else if(a==='lesson')openMrLesson(e.target.closest('[data-act]').dataset.ls);
  else if(a==='chAgain'){if(chalRun){prepare();startRace()}}else if(a==='chFix'){if(chalRun)startChallenge(chalRun.id,e.target.closest('[data-act]'))}else if(a==='chBoard')openChalBoard(e.target.closest('[data-act]'));else if(a==='chExit')chalExit();
  else if(a==='labNext'){const k=EXPS.indexOf(labExp),nx=EXPS.find((x,i)=>i>k&&!stats.labs[x.id])||EXPS.find(x=>!stats.labs[x.id])||EXPS[(k+1)%EXPS.length];enterLab(nx.id)}
  else if(a==='next'){prepare();startRace()}else if(a==='newLeague'){startLeague();prepare();startRace()}});
@@ -2308,7 +2665,7 @@ function resetGame(){
  try{localStorage.removeItem('marbleRush.v2');localStorage.removeItem('marble3dsettings')}catch(e){}
  try{LR.forget()}catch(e){}  // the parents' report forgets this game too (no save can run until LR.resume below)
  worldIdx=0;numBalls=8;voiceOn=true;sfxOn=true;mine=0;mineStats={races:0,wins:0};voicePick={};names=Array(16).fill('');mode='single';league=null;
- customs=[];skin={pat:'plain',trail:'none'};stats=freshStats();badges=[];chal={};chalRun=null;draft=null;labMode=false;labExp=null;labPred=null;labFresh=false;
+ customs=[];skin={pat:'plain',trail:'none'};stats=freshStats();badges=[];chal={};chalRun=null;draft=null;labMode=false;labExp=null;labPred=null;labFresh=false;mrOffered.clear();
  try{LR.resume()}catch(e){}  // a fresh record from the fresh state above
  $('namesPanel').classList.add('hidden');fillVoiceSelect();prepare();closeModal('settingsModal');
  setCaption(L('🗑️ 마블 레이스 기록을 지웠어요. 처음부터 다시 시작해요!','🗑️ Marble Rush records erased. A fresh start!'))}
@@ -2316,7 +2673,7 @@ $('resetDataBtn').addEventListener('click',e=>askConfirm({title:L('🗑️ 정�
  text:L(`${ME?ME.name+'의 ':''}마블 레이스 기록(응원 기록, 구슬 이름, 리그 점수, 내 코스, 설계 도전, 배지, 실험 노트, 설정)만 지워져요. 다른 게임${ME?'과 다른 플레이어':''} 기록은 그대로예요. 되돌릴 수 없어요.`,`Only ${ME?ME.name+"'s ":''}Marble Rush records (cheering record, marble names, league points, courses, design challenges, badges, lab notebook, settings) are erased. Other games${ME?' and other players':''} keep theirs. This cannot be undone.`),
  no:L('아니요','No'),yes:L('지울래요','Erase'),opener:e.currentTarget,onYes:resetGame}));
 if(ME){$('meAv').textContent=ME.av;$('meName').textContent=ME.name;$('meChip').title=L(`플레이어: ${ME.name}`,`Player: ${ME.name}`);$('meChip').classList.remove('hidden');$('mineLabel').textContent=L(`${ME.av} ${ME.name}의 응원 구슬`,`${ME.av} ${ME.name}'s marble`)}
-window.addEventListener('keydown',e=>{if(modalStack.length||['INPUT','SELECT','TEXTAREA'].includes(e.target.tagName))return;if(e.code==='Space'){e.preventDefault();togglePause()}else if(e.code==='KeyC')cheer();else if(e.code==='KeyV'){cam.mode=(cam.mode+1)%3;setControls()}});
+window.addEventListener('keydown',e=>{if(modalStack.length||MiniLesson.on||['INPUT','SELECT','TEXTAREA'].includes(e.target.tagName))return;if(e.code==='Space'){e.preventDefault();togglePause()}else if(e.code==='KeyC')cheer();else if(e.code==='KeyV'){cam.mode=(cam.mode+1)%3;setControls()}});
 window.addEventListener('resize',resize);
 if('speechSynthesis' in window){speechSynthesis.getVoices();speechSynthesis.addEventListener?.('voiceschanged',fillVoiceSelect)}
 fillVoiceSelect();setTimeout(fillVoiceSelect,600);
@@ -2447,6 +2804,7 @@ window.__marble={get:()=>({phase,st,course,cam,league,mode,timeScale,labMode,lab
 requestAnimationFrame(frame);
 })();
 </script>
+<script>/* mini-lesson pictures (prompt file step 23): shown on top of these lesson pages once the file exists */try{MiniLesson.cfg({pics:{'mr:gravity':{0:'images/mr-ls-gravity.webp'},'mr:friction':{0:'images/mr-ls-surfaces.webp'},'mr:magnet':{0:'images/mr-ls-magnets.webp'},'mr:pushpull':{2:'images/mr-ls-well.webp'},'mr:engineer':{0:'images/mr-ls-engineer.webp'}}})}catch(e){}</script>
 <script>/* Coach Moon says hello once a day, shares a tip and suggests a break after a long session */try{coachStart(["오늘은 어떤 구슬을 응원할까요?", "Which marble will you cheer for today?"],[["구슬마다 이름을 지어 주면 응원이 더 신나요!", "Give the marbles names. Cheering is more fun!"], ["리그는 5경기 점수를 모두 더해요. 끝까지 응원해요!", "A league adds up all 5 races. Cheer to the end!"], ["🛠️ 코스 만들기로 나만의 코스를 설계해 봐요. 달려 보고 고치면 더 멋져져요!", "🛠️ Design your own course. Test it, then make it even better!"], ["🔬 구슬 실험실에서 먼저 예상하고 실험해 봐요. 틀린 예상도 멋진 공부예요!", "🔬 In the marble lab, guess first, then test. Wrong guesses teach a lot too!"]])}catch(e){}</script>
 </body>
 </html>

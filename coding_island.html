@@ -119,9 +119,10 @@ function coachStart(hello,tips){const game=(location.pathname.split('/').pop()||
 //   calls api.done(); "🤔 알려 줘요" runs show(box,api) (or just api.done()) so not knowing never blocks or costs anything.
 //   after(box,api), if given, runs once the teacher has finished reading the step (for example to play a demo).
 //   key holds the 1–3 lines to remember; they close the lesson and stay in the notebook.
-// · MiniLesson.cfg({voice:(text,onEnd)=>…, stop:()=>…, who:{img,name}}) once per game: the game's own read-aloud (it
+// · MiniLesson.cfg({voice:(text,onEnd)=>…, stop:()=>…, who:{img,name}, pics:{lessonId:{stepIndex:'images/x.webp'}}}) once per game: the game's own read-aloud (it
 //   respects the game's voice switch; onEnd, when the game supports it, runs after the line), what to stop when a page
-//   changes (demos, sounds), and the default teacher.
+//   changes (demos, sounds), the default teacher, and painted pictures shown on top of some steps (a step may also
+//   have img). A picture that isn't there yet is simply left out. Coach Moon teaches in his pointing pose when it exists.
 // · MiniLesson.open(lesson,{onDone,onClose}) plays a lesson. MiniLesson.before(lesson,go) plays it the first time and
 //   then calls go(); later it calls go() at once. Closing early also calls go(), so a lesson never traps the child.
 // · MiniLesson.book({title,groups:[{name:[ko,en],items:[{id,title,icon,key,lesson}]}],open}) shows the notebook; an
@@ -133,23 +134,25 @@ const MiniLesson=(()=>{let C={voice:null,who:null},el=null,cur=null,back=null,la
  const seen=id=>{try{return !!LR.les()[id]}catch(e){return false}};
  const talk=(t,cb)=>{try{if(C.voice){if(C.voice.length>1){C.voice(t,cb);return}C.voice(t)}}catch(e){}if(cb)setTimeout(cb,400)},
   hush=()=>{try{if(C.stop)C.stop()}catch(e){}try{speechSynthesis.cancel()}catch(e){}};
- function shell(cls){close(true);lastFocus=document.activeElement;el=document.createElement('div');el.className='mlx '+(cls||'');
+ // focus goes back where the child was before the first window (a lesson opened from the notebook keeps that place)
+ function shell(cls){close(true);const a=document.activeElement;if(a&&a!==document.body&&!(a.closest&&a.closest('.mlx')))lastFocus=a;el=document.createElement('div');el.className='mlx '+(cls||'');
   el.setAttribute('role','dialog');el.setAttribute('aria-modal','true');document.body.appendChild(el);document.addEventListener('keydown',key,true);return el}
  function close(quiet){if(!el)return;hush();document.removeEventListener('keydown',key,true);el.remove();el=null;const c=cur;cur=null;
-  if(!quiet){if(c&&c.o.onClose)c.o.onClose(c.done);if(back){const b=back;back=null;book(b.spec,b.at)}else if(lastFocus&&lastFocus.focus)try{lastFocus.focus()}catch(e){}}}
+  if(!quiet){if(c&&c.o.onClose)c.o.onClose(c.done);if(back){const b=back;back=null;book(b.spec,b.at)}else if(lastFocus&&lastFocus.isConnected&&lastFocus.focus)try{lastFocus.focus()}catch(e){}}}
  function key(e){if(!el)return;if(e.key==='Escape'){e.preventDefault();e.stopPropagation();close();return}
   if(!cur)return;if(e.key==='ArrowRight'){const b=el.querySelector('[data-m=next]');if(b&&!b.disabled){e.preventDefault();b.click()}}else if(e.key==='ArrowLeft'&&cur.i>0){e.preventDefault();go(cur.i-1)}}
  function open(ls,o={}){if(!ls||!ls.steps||!ls.steps.length)return;const who=ls.who||C.who||{img:'images/coach-moon-idea.webp',name:['문 코치','Coach Moon']};
   shell('');cur={ls,o,who,i:0,done:false,ok:{}};
   el.setAttribute('aria-labelledby','mlxT');
+  const wImg=/coach-moon-(idea|hi)\.webp$/.test(who.img||'')?'images/coach-moon-teach.webp':who.img;
   el.innerHTML=`<div class="mlx-card"><div class="mlx-top"><span class="mlx-kick">📖 ${L('미니 수업','Mini lesson')}</span><b id="mlxT">${ls.icon?ls.icon+' ':''}${E(ls.title)}</b><button type="button" class="mlx-x" data-m="x" aria-label="${L('닫기','Close')}">✕</button></div>
    <div class="mlx-dots" aria-hidden="true"></div><div class="mlx-stage"></div>
-   <div class="mlx-talk"><img src="${coachEsc(who.img)}" alt="" onerror="this.remove()"><p aria-live="polite"></p><button type="button" class="mlx-hear" data-m="hear" aria-label="${L('다시 듣기','Hear again')}">🔊</button></div>
+   <div class="mlx-talk"><img src="${coachEsc(wImg)}" data-alt="${coachEsc(who.img)}" alt="" onerror="if(this.dataset.alt&&!this.dataset.f){this.dataset.f=1;this.src=this.dataset.alt}else this.remove()"><p aria-live="polite"></p><button type="button" class="mlx-hear" data-m="hear" aria-label="${L('다시 듣기','Hear again')}">🔊</button></div>
    <div class="mlx-nav"></div></div>`;
   el.addEventListener('click',e=>{const b=e.target.closest('[data-m]');if(!b||!cur)return;const m=b.dataset.m;
    if(m==='x')close();else if(m==='hear')talk(el.querySelector('.mlx-talk p').textContent);else if(m==='prev')go(cur.i-1);else if(m==='next')go(cur.i+1);
    else if(m==='help'){const s=cur.ls.steps[cur.i];try{if(s.show)s.show(el.querySelector('.mlx-stage'),api(cur.i))}catch(e){}api(cur.i).done()}
-   else if(m==='again')go(0);else if(m==='end'){const c=cur;close(true);if(back){const b=back;back=null;book(b.spec,b.at)}else if(lastFocus&&lastFocus.focus)try{lastFocus.focus()}catch(e){}if(c.o.onDone)c.o.onDone()}});
+   else if(m==='again')go(0);else if(m==='end'){const c=cur;close(true);if(back){const b=back;back=null;book(b.spec,b.at)}else if(lastFocus&&lastFocus.isConnected&&lastFocus.focus)try{lastFocus.focus()}catch(e){}if(c.o.onDone)c.o.onDone()}});
   go(0)}
  // what a step's picture can do: mark the try as done (enables 다음), go on, or say a short line in the bubble
  function api(i){return {L,T,done(){if(!cur||cur.i!==i)return;cur.ok[i]=1;const n=el.querySelector('[data-m=next]'),h=el.querySelector('[data-m=help]');if(n){n.disabled=false;n.textContent=L('다음','Next')+' ▶';n.classList.add('ready');n.focus()}if(h)h.remove()},
@@ -165,6 +168,7 @@ const MiniLesson=(()=>{let C={voice:null,who:null},el=null,cur=null,back=null,la
    nav.querySelector('[data-m=end]').focus();return}
   const s=ls.steps[i],t=T(s.say);stage.className='mlx-stage';stage.innerHTML='';p.textContent=t;
   try{if(typeof s.art==='function')s.art(stage,api(i));else if(s.art)stage.innerHTML=s.art}catch(e){stage.textContent=''}
+  const pic=(C.pics&&C.pics[ls.id]||{})[i]||s.img;if(pic)stage.insertAdjacentHTML('afterbegin',`<img class="mlx-pic" src="${coachEsc(pic)}" alt="" onerror="this.remove()">`);
   if(!stage.childNodes.length)stage.classList.add('none');
   const wait=s.try&&!cur.ok[i];
   nav.innerHTML=`<button type="button" class="mlx-b ghost" data-m="prev" ${i?'':'disabled'} aria-label="${L('이전','Back')}">◀</button>${wait?`<button type="button" class="mlx-b help" data-m="help">🤔 ${L('알려 줘요','Show me')}</button>`:''}<button type="button" class="mlx-b go" data-m="next" ${wait?'disabled':''}>${wait?L('해 봐요','Your turn'):L('다음','Next')} ▶</button>`;
@@ -584,6 +588,33 @@ button.vm{border:0;background:none;padding:0;display:flex;flex-direction:column;
 .tile,.ocard{display:inline-flex;flex-direction:column;align-items:flex-start;gap:2px}.ocard{align-items:stretch}
 .tcap{font-family:system-ui,-apple-system,'Apple SD Gothic Neo',sans-serif;font-size:12.5px;font-weight:800;color:#5d6f8c;white-space:normal;line-height:1.25}
 .ridecard.pic{padding:8px 8px 12px}.ridecard .rimg{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:14px;margin-bottom:4px;box-shadow:0 3px 8px rgba(0,0,0,.12)}
+/* ---------------------------------------------------------------- mini lessons: the pictures inside Coach Moon's lessons (MiniLesson) */
+.vrow{margin-top:10px}.vrow .btn{flex:1 1 40%}
+.mlp{width:100%;display:grid;grid-template-columns:minmax(0,1fr);gap:8px;text-align:left}
+.mlp .code{background:var(--codebg);border:1px solid #ece6cf;border-radius:14px;padding:6px 2px;font-size:15px}
+.mlp .tout.mini{margin:0;min-height:0;max-height:150px}
+.mlp .mem{margin:0;box-shadow:none;padding:8px 10px}
+.mlp .pyline{margin:0}
+.mlp-r:empty,.mlp-e:empty{display:none}.mlp-r .mlp{gap:6px}
+.cl.mlin{background:#e6f2ff;box-shadow:inset 4px 0 0 #3a9be8}
+.cl.mlok{background:#e3f9e8;box-shadow:inset 4px 0 0 var(--leaf)}.cl.mlok .ct::after{content:" ✅"}
+.cl.mlno{background:#f1f1f1;opacity:.6}
+.mlp-place{display:flex;align-items:center;gap:12px;background:#fff;border-radius:16px;padding:10px 12px;box-shadow:0 2px 0 #e1e7fb}
+.mlp-place .wic{font-size:40px;line-height:1}.mlp-place b{display:block;font-size:18px;font-weight:900}.mlp-place small{display:block;font-size:14px;font-weight:800;color:var(--muted)}
+.mlp-note{margin:0;font-size:14px;font-weight:700;line-height:1.45;color:#4a5588}
+.mlp-err{background:#ffe9ec;border-radius:12px;padding:8px 10px;color:#9b1c35;font-size:14px;font-weight:700;line-height:1.45}.mlp-err b{font-family:var(--mono)}
+.mlp-again{justify-self:center}
+.mlp-g{display:flex;flex-direction:column;align-items:center;gap:4px}
+.mlp-tiles{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+.mlp-tile{min-width:58px;min-height:54px;padding:4px 14px;border:3px solid #dfe7f5;border-radius:16px;background:#fff;font:inherit;font-size:26px;font-weight:900;color:var(--code);cursor:pointer;box-shadow:0 3px 0 #dfe7f5}
+.mlp-tiles.code .mlp-tile{font-family:var(--mono);font-size:16px;font-weight:700}
+.mlp-tiles.train::before{content:"🚂";font-size:30px;align-self:center}.mlp-tiles.train .mlp-tile{border-radius:12px 12px 6px 6px;border-bottom-width:6px}
+.mlp-tile.ok{border-color:var(--leaf);background:#e3f9e8}.mlp-tile.no{opacity:.55}.mlp-tile:disabled{cursor:default}
+.mlp-cmp{display:grid;gap:6px}.mlp-cmp>div{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:10px;background:#fff;border-radius:12px;padding:6px 10px;box-shadow:0 2px 0 #e1e7fb}
+.mlp-cmp code{font-size:16px}.mlp-cmp span{font-weight:800;color:#4a5588}.mlp-cmp b{font-family:var(--mono);font-size:16px}.mlp-cmp b.t{color:#1c8a4a}.mlp-cmp b.f{color:#c8223a}
+.mlp-nums{display:flex;gap:8px;justify-content:center}.mlp-nums span{width:46px;height:46px;border-radius:50%;display:grid;place-items:center;background:#fff;font-family:var(--mono);font-size:20px;font-weight:900;color:#7a3fd1;box-shadow:0 2px 0 #e1e7fb}.mlp-nums .x{text-decoration:line-through;opacity:.4}
+.mlp-chips{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}.mlp-chips span{background:#fff;border-radius:12px;padding:6px 10px;font-size:14px;font-weight:800;box-shadow:0 2px 0 #e1e7fb}
+.mlx-talk p code,.mlx-key li code,.mlx-item code,#mlxT code{font-size:.9em}
 /* ================================================================ Little Coding Island · park rides */
 .pg{position:absolute;inset:0;display:flex;flex-direction:column;overflow:hidden;color:var(--ink);user-select:none;-webkit-user-select:none;touch-action:manipulation}
 .pg-top{position:relative;z-index:6;display:flex;align-items:center;gap:8px;padding:6px max(8px,env(safe-area-inset-right)) 6px max(10px,env(safe-area-inset-left));background:rgba(255,255,255,.88);box-shadow:0 2px 10px rgba(0,0,0,.12)}
@@ -920,6 +951,7 @@ button.rbm:hover{border-color:#ffb020}.rbm b{font-size:14px;line-height:1.25}.rb
 .mlx-x{grid-area:x;width:44px;height:44px;border:0;border-radius:14px;background:#eef1ff;color:#3a4690;font-size:20px;font-weight:900;cursor:pointer}
 .mlx-dots{display:flex;gap:6px;justify-content:center}.mlx-dots i{width:8px;height:8px;border-radius:5px;background:#dfe4fb;transition:width .2s}.mlx-dots i.on{background:#9aa8ff}.mlx-dots i.now{width:22px;background:#5b6cff}
 .mlx-stage{min-height:190px;display:grid;place-items:center;background:linear-gradient(180deg,#f5f7ff,#eef7ff);border:1px solid #e1e7fb;border-radius:18px;padding:10px;overflow:hidden;position:relative}
+.mlx-pic{display:block;width:100%;max-width:420px;max-height:170px;object-fit:contain;margin:0 auto 6px}
 .mlx-stage.none{min-height:0;padding:0;border:0;background:none}
 .mlx-stage>svg,.mlx-stage>canvas,.mlx-stage>img{max-width:100%;height:auto}
 .mlx-stage.sum{background:linear-gradient(180deg,#fff9e6,#fff3cf);border-color:#f3dc92;place-items:stretch;gap:8px}
@@ -3304,7 +3336,7 @@ function nextModal(){const m=MQ.shift();if(!m)return;CUR=m;document.body.classLi
 function closeModal(after){const m=CUR;CUR=null;$('modalRoot').innerHTML='';document.body.classList.remove('modaling');if(m&&m.onClose)m.onClose();if(after)after();if(!CUR)nextModal();
  if(!CUR){const f=MFOCUS;MFOCUS=null;if(f&&f.isConnected&&document.activeElement===document.body)try{f.focus({preventScroll:true})}catch(e){}}}
 window.addEventListener('keydown',e=>{if(!CUR||e.key!=='Escape')return;e.preventDefault();e.stopImmediatePropagation();if(CUR.closable!==false&&!e.repeat){sfx('tap');closeModal()}},true);
-const modalOpen=()=>!!CUR;
+const modalOpen=()=>!!CUR||(typeof MiniLesson!=='undefined'&&MiniLesson.on);
 
 // ---------------------------------------------------------------- shared helpers for the island, the shop, mini-games and boss battles
 const RENDER={};let VIEW='home';   // one render function per screen (filled by village.js, shop.js, app.js)
@@ -4506,7 +4538,7 @@ RENDER.school=()=>{markDay();refreshReqs();const d=daily();
  $('v-school').innerHTML=`<div class="vtop card"><div class="goals">${GOALS.map(([k,n,ic,t])=>`<span class="goal ${(d[k]||0)>=n?'on':''}">${ic}<b>${T(t)}</b><small>${Math.min(d[k]||0,n)}/${n}</small></span>`).join('')}
   <button type="button" class="gchest ${dailyDone()&&!d.got?'ready':''} ${d.got?'got':''}" data-a="chest" aria-label="${L('오늘의 상자','Daily chest')}">${d.got?'✅':'🎁'}</button></div>
   ${(()=>{const nm=nextMission();return nm?`<button class="btn wide go" type="button" data-a="mission" data-id="${nm.id}"><span>${worldOf(nm).icon}</span><span class="gtxt"><small>${L('이어서 배우기','Keep learning')} · ${nm.world}-${nm.idx+1} ${KIND[nm.kind][0]}</small><b>${tx(nm.title)}</b></span><span>▶</span></button>`:''})()}
-  ${reviewDue().length?`<button class="btn gold wide" type="button" data-a="review">🧠 ${L(`기억 퀴즈 ${reviewDue().length}문제`,`Memory quiz · ${reviewDue().length}`)}</button>`:''}</div>
+  <div class="row vrow">${reviewDue().length?`<button class="btn gold" type="button" data-a="review">🧠 ${L(`기억 퀴즈 ${reviewDue().length}문제`,`Memory quiz · ${reviewDue().length}`)}</button>`:''}${HAS_ML?`<button class="btn ghost" type="button" data-a="book">📒 ${L('개념 노트','Concept notebook')}</button>`:''}</div></div>
   ${mapHTML()}
   <div class="card parent"><b>👪 ${L('어른들께','For grown-ups')}</b><p>${L('🍔 내 가게에서는 아이가 가르친 파이썬 코드대로 로봇이 요리하고, 필요한 순간(칩 칸이 모자랄 때 반복, 주문이 여러 가지일 때 조건)에 문 코치가 짧게 가르쳐요. 이곳 학교에서는 개념을 차근차근 배워요. ','🍔 In My shop, robots cook by the Python code the child teaches them, and Coach Moon teaches a short lesson the moment it’s needed (a loop when the chip runs out of lines, an if when orders differ). Here at school, ideas are learned step by step. ')}${L('진짜 파이썬 문법을 아이 눈높이로 배워요. 섬마다 한 가지 개념을 문 코치와 배우고(보고 배우기 → 빈칸 → 예측 → 버그 고치기 → 만들기), 배운 개념으로 마을 주민의 부탁(레스토랑 레시피, 놀이기구 조종)을 코드로 해결하며 써먹어요. 보스전과 놀이기구 미니게임도 모두 코드 읽기 연습이에요. 틀려도 벌칙이 없고, 힌트는 언제나 무료예요.','Real Python at a child’s pace. Each place teaches one idea with Coach Moon; villagers then ask for things that need that idea (restaurant recipes, running rides) so kids use it right away. Boss battles and ride mini-games are code-reading practice too. Mistakes cost nothing and hints are always free.')}</p></div>
   ${COPYRIGHT()}`;
@@ -4529,10 +4561,10 @@ function placeSheet(n){const w=WORLDS[n-1];if(!w)return;
   ${!fix?`<p class="glitchnote">🐛 ${bossOn()&&BOSS_BY[n]?L(`${josa(T(BOSS_BY[n].name),'이')} ${BOSS_BY[n].ride.emoji} ${josa(T(BOSS_BY[n].ride.name),'을')} 고장 냈어요! 미션을 하면 버그가 도망가고, 마지막에 보스를 물리치면 다시 움직여요.`,`${T(BOSS_BY[n].name)} broke the ${BOSS_BY[n].ride.emoji} ${T(BOSS_BY[n].ride.name)}! Missions chase the bugs away, and beating the boss makes it run again.`):L('버그 군단이 이곳을 고장 냈어요! 미션을 하면 버그가 도망가고, 마지막에 보스를 물리치면 다시 반짝반짝해져요.','The bug gang broke this place! Missions chase the bugs away, and beating the boss at the end makes it shine again.')}</p>`:bossOn()&&BOSS_BY[n]?`<p class="glitchnote fixed">✨ ${BOSS_BY[n].ride.emoji} ${L(`${josa(T(BOSS_BY[n].ride.name),'이')} 다시 움직여요! 🐞 ${josa(T(BOSS_BY[n].friend.name),'이')} 일하고 있어요.`,`The ${T(BOSS_BY[n].ride.name)} runs again! 🐞 ${T(BOSS_BY[n].friend.name)} works here now.`)}</p>`:''}
   <div class="mnodes">${w.missions.map(m=>{const open=missionOpen(m),d=S.done[m.id];return `<button type="button" class="mnode ${d?'done':''} ${open?'':'locked'} ${cur&&cur.id===m.id?'cur':''}" data-act="m" data-id="${m.id}"><span class="mk">${d?'✅':open?KIND[m.kind][0]:'🔒'}</span><span class="mt"><b>${m.idx+1}. ${tx(m.title)}</b><small>${T(KIND[m.kind][1])}${d&&d.b?' · ⭐':''}</small></span></button>`}).join('')}
    ${bossOn()?`<button type="button" class="mnode boss ${boss?'cur':S.boss.won[n]?'done':'locked'}" data-act="boss"><span class="mk">${S.boss.won[n]?'🐞':'⚔️'}</span><span class="mt"><b>${L('보스전','Boss battle')}: ${tx((BOSSES.find(b=>b.n===n)||{}).name||'버그 보스|Bug boss')}</b><small>${S.boss.won[n]?L('무찔렀어요! 무당벌레 친구가 됐어요','Beaten! Now a ladybug friend'):boss?L('지금 도전할 수 있어요!','Ready to fight!'):L('미션을 모두 하면 나타나요','Appears when all missions are done')}</small></span></button>`:''}</div>
-  <div class="row"><button class="btn ghost" type="button" data-act="story">📖 ${L('이야기','Story')}</button>${cur&&cur.world===n?`<button class="btn" type="button" data-act="go">▶ ${L('이어서','Continue')}</button>`:boss?`<button class="btn" type="button" data-act="boss">⚔️ ${L('보스 도전','Fight the boss')}</button>`:''}</div>`,
+  <div class="row"><button class="btn ghost" type="button" data-act="story">📖 ${L('이야기','Story')}</button>${HAS_ML?`<button class="btn ghost" type="button" data-act="book">📒 ${L('개념 노트','Concept notebook')}</button>`:''}${cur&&cur.world===n?`<button class="btn" type="button" data-act="go">▶ ${L('이어서','Continue')}</button>`:boss?`<button class="btn" type="button" data-act="boss">⚔️ ${L('보스 도전','Fight the boss')}</button>`:''}</div>`,
  {cls:'sheet',acts:{m:b=>{const m=MBY[b.dataset.id];if(!missionOpen(m)){sfx('oops');toast('🔒 '+L('앞의 미션을 먼저 해요!','Do the one before first!'));return false}return ()=>openMission(m.id)},
-  go:()=>()=>openMission(cur.id),story:()=>()=>worldIntro(n),boss:()=>{if(!bossReady(n)){if(!S.boss.won[n]){sfx('oops');toast(L('미션을 모두 하면 보스가 나타나요!','The boss appears after all missions!'))}return false}return ()=>startBossFlow(n)}}});
- if(!S.seen['w'+n])setTimeout(()=>{closeModal();worldIntro(n)},300)}
+  go:()=>()=>openMission(cur.id),story:()=>()=>worldIntro(n,true),book:()=>()=>openPyBook(n),boss:()=>{if(!bossReady(n)){if(!S.boss.won[n]){sfx('oops');toast(L('미션을 모두 하면 보스가 나타나요!','The boss appears after all missions!'))}return false}return ()=>startBossFlow(n)}}});
+ if(!S.seen['w'+n]){if(HAS_ML&&MiniLesson.seen('py:w'+n)){S.seen['w'+n]=1;save(true)}else setTimeout(()=>{closeModal();worldIntro(n)},300)}}
 // a spot (restaurant or ferris wheel): the requests waiting there
 function spotSheet(k){const s=SPOT[k],rs=reqAt(k);
  modal(`<div class="shead"><span class="wic">${s.icon}</span><div><h2>${tx(s.name)}</h2><p class="muted">${k==='kitchen'?L('주문대로 레시피를 코딩해요','Code recipes to order'):L('부탁대로 놀이기구를 코딩해요','Code the rides as asked')}</p></div></div>
@@ -5191,24 +5223,250 @@ const COACH_INTRO={1:'버그들이 해변 길을 뒤죽박죽 만들었어요! �
  3:'보물 상자의 이름표가 다 떨어졌어요. 변수는 이름표 붙은 상자예요. 같이 붙여요!|The treasure boxes lost their name tags. A variable is a box with a name tag. Let’s label them!',
  4:'풍차가 한 번만 돌고 멈춰요! 반복(`for`)으로 계속 돌게 해 봐요.|The windmill turns once and stops! Let’s keep it turning with a `for` loop.',
  5:'갈림길 표지판이 엉망이에요. `if` 조건으로 알맞은 길을 고르게 해요!|The crossroads signs are a mess. Use `if` to choose the right way!',
- 6:'폭포 물레방아가 멈췄어요. `while`은 조건이 참인 동안 계속 돌려요!|The waterfall wheel stopped. `while` keeps it going while the condition is true!',
+ 6:'폭포 물레방아가 멈췄어요. `while` 반복은 조건이 참인 동안 계속 돌려요!|The waterfall wheel stopped. `while` keeps it going while the condition is true!',
  7:'공방의 기계 설명서가 사라졌어요. 함수(`def`)로 나만의 명령을 발명해요!|The workshop lost its manuals. Let’s invent our own commands with `def`!',
  8:'기차 칸 순서가 뒤섞였어요. 리스트는 0번부터 세는 기차예요!|The train cars got mixed up. A list is a train counted from 0!',
  9:'매점 메뉴판의 이름표가 바뀌었어요. 딕셔너리로 이름표와 값을 짝지어요!|The snack menu labels got swapped. A dict pairs labels with values!',
  10:'스티커 주머니에 같은 스티커가 잔뜩! 세트는 똑같은 건 하나만 넣어요.|The sticker pouch is full of copies! A set keeps only one of each.',
  11:'쿠키 공장의 쿠키틀이 망가졌어요. 클래스는 쿠키틀, 객체는 쿠키예요!|The cookie cutters broke. A class is a cutter; objects are the cookies!',
  12:'드디어 축제 광장이에요! 배운 걸 모두 모아서 버그 대왕을 막아요!|At last, the festival plaza! Let’s put everything together and stop King Buggle!'};
-function worldIntro(n,then){const w=WORLDS[n-1];S.seen['w'+n]=1;save(true);let demo='';const ci=COACH_INTRO[n];
- if(w.demo){const r=PY.run(w.demo);demo=`<div class="demo"><small>${L('작은 예시','A tiny example')}</small>${codeHTML(w.demo)}${r.out?`<pre class="tout mini">${esc(r.out)}</pre>`:''}<div class="mem" id="introMem"></div></div>`}
- modal(`<div class="big">${w.icon}</div><h2>${w.n}. ${tx(w.name)}</h2><p class="muted">${tx(w.concept)}</p>
-  ${ci?`<div class="pyline coachline"><img class="cimg" src="images/coach-moon-idea.webp" alt=""><div class="bubble"><p><b>🌙 ${L('문 코치','Coach Moon')}</b> ${tx(ci)}</p></div></div>`:''}${w.intro.map((l,i)=>pyLine(l,i===0?'wow':'happy')).join('')}${demo}
-  <button class="btn wide" type="button" data-act="go">${L('같이 시작해요!','Let’s start together!')}</button>`,{cls:'wide intro',
-  onOpen:box=>{if(w.demo){const r=PY.run(w.demo);MemView(box.querySelector('#introMem')).render(r.trace[r.trace.length-1].vars)}sayLines([...(ci?[T(ci)]:[]),...w.intro.map(T)])},onClose:()=>hush(),acts:{go:()=>then||null}})}
+// ---------------------------------------------------------------- mini lessons (MiniLesson, in the coach block) and the concept notebook
+// Coach Moon teaches each place's idea before its missions. The world lesson (py:wN) is built from his opening line,
+// the place's concept, Py's three intro lines and the place's tiny example (run here by PY), with one small "your turn",
+// and ends with the place's learn lines. It plays the first time a place opens (it replaced the old story window), and
+// 📖 이야기 plays it again. Syntax that first shows up in the middle of a place gets a short lesson of its own
+// (py:<mission id>, PY_SUB) the first time that mission opens; jobs, the robot shop and chip lessons never get one.
+// 📒 개념 노트 (school view, each place's sheet) lists them all, and after a miss 📖 개념 다시 보기 opens the mission's
+// lesson. Every example is real Python run by the game's own runner, so what a lesson shows is what really happens.
+const HAS_ML=typeof MiniLesson!=='undefined';
+function worldIntro(n,again){const back=()=>{if(VIEW==='school'&&!modalOpen())placeSheet(n)};S.seen['w'+n]=1;save(true);if(!HAS_ML)return;
+ hush();coachTalk.hide();const ls=pyWorldLesson(n);if(again)MiniLesson.open(ls,{onDone:back,onClose:back});else MiniLesson.before(ls,back)}
 function sayLines(ls,i=0){if(i>=ls.length)return;say(ls[i],{onend:()=>{if(CUR)sayLines(ls,i+1)}})}
+const mlPair=s=>{const p=String(s==null?'':s).split('|');return [p[0],p[1]??p[0]]};
+const ML={run:0,t:0},mlStop=()=>{ML.run++;clearTimeout(ML.t)};
+const mlPlain=s=>String(s).replace(/`([^`]*)`/g,'$1');
+// MiniLesson writes plain text; words in `backticks` are drawn as code (like everywhere in the game) and read the game's way
+function mlMark(root){if(!root)return;root.querySelectorAll('.mlx-talk p,.mlx-key li,.mlx-item b,.mlx-item small,#mlxT').forEach(e=>{const t=e.textContent;
+ if(t.includes('`')){e.dataset.src=t;e.innerHTML=rich(t)}else if(e.dataset.src&&mlPlain(e.dataset.src)!==t)delete e.dataset.src})}
+function mlVoice(t,cb){const p=document.querySelector('.mlx-talk p');if(p&&p.dataset.src&&mlPlain(p.dataset.src)===t)t=p.dataset.src;else mlMark(document.querySelector('.mlx'));say(t,{onend:cb})}
+if(HAS_ML){MiniLesson.cfg({voice:(t,cb)=>mlVoice(t,cb),stop:()=>{mlStop();hush()},who:{img:'images/coach-moon-idea.webp',name:['문 코치','Coach Moon']}});
+ new MutationObserver(ms=>ms.forEach(m=>m.addedNodes.forEach(x=>{if(x.classList&&x.classList.contains('mlx'))mlMark(x)}))).observe(document.body,{childList:true})}
+// lesson pictures, drawn with the game's own code view, memory boxes and garden
+const mlCap=o=>o.capt===true?(i,l)=>CAPTION.of(l):o.capt===false?null:capFn();
+const mlCode=(code,o={})=>codeHTML(code,{cur:o.cur||0,mark:o.mark,capt:mlCap(o),cls:o.cls});
+const mlNote=n=>n?`<p class="mlp-note">${rich(L(n[0],n[1]))}</p>`:'';
+const mlVars=r=>{const t=r&&r.trace||[];for(let i=t.length-1;i>=0;i--)if(t[i].vars)return t[i].vars;return null};
+function mlOut(r){if(!r)return '';const ls=r.out.replace(/\n$/,'').split('\n'),out=r.out?(ls.length>8?[...ls.slice(0,6),'…'].join('\n'):ls.join('\n')):'';
+ return `${out?`<pre class="tout mini">${esc(out)}</pre>`:''}${r.err?`<div class="mlp-err">🐞 <b>${esc(r.err.type)}</b> ${esc(L(r.err.ko,r.err.en))}</div>`:''}`}
+// the code, what it printed (or its error) and the memory boxes at the end
+function mlShow(b,code,o={}){const r=o.run===false?null:PY.run(code,o.py||{});
+ b.innerHTML=`<div class="mlp">${o.top||''}${mlCode(code,o)}${mlOut(r)}${o.mem&&r?'<div class="mem mlp-mem"></div>':''}${mlNote(o.note)}</div>`;
+ if(o.mem&&r)MemView(b.querySelector('.mlp-mem')).render(mlVars(r));return r}
+// the program played line by line: the line now running, what it prints, the garden and the memory boxes; 🔁 plays it again
+function mlPlay(b,code,o={}){b.innerHTML=`<div class="mlp">${o.top||''}<div class="mlp-c"></div>${o.grid?'<div class="mlp-g"></div>':''}<pre class="tout mini hidden"></pre><div class="mlp-e"></div>${o.mem?'<div class="mem mlp-mem hidden"></div>':''}${mlNote(o.note)}<button type="button" class="mlx-chip mlp-again">🔁 ${L('다시 보기','Watch again')}</button></div>`;
+ const box=b.querySelector('.mlp'),c=box.querySelector('.mlp-c'),out=box.querySelector('.tout'),er=box.querySelector('.mlp-e'),g=box.querySelector('.mlp-g'),mem=o.mem?MemView(box.querySelector('.mlp-mem')):null;
+ const draw=n=>{c.innerHTML=mlCode(code,{...o,cur:n})},add=s=>{out.classList.remove('hidden');out.textContent+=s;out.scrollTop=out.scrollHeight};
+ function start(){const me=++ML.run;clearTimeout(ML.t);let view=null,r;
+  if(o.grid){const st=STAGE.grid(o.grid);r=PY.run(code,{world:st.api});view=GridView(g,o.grid)}else r=PY.run(code,o.py||{});
+  out.textContent='';out.classList.add('hidden');er.innerHTML='';if(mem)mem.reset();
+  const ms=(o.ms||720)/(S.opt.speed||1);let i=0,ei=0;
+  const tick=()=>{if(me!==ML.run||!box.isConnected)return;const t=r.trace[i];
+   if(!t||t.end){while(ei<r.events.length){const ev=r.events[ei++];if(ev.t==='out')add(ev.s)}draw(0);if(r.err)er.innerHTML=mlOut({out:'',err:r.err});if(o.onEnd)o.onEnd(r);return}
+   if(t.line)draw(t.line);let wait=ms;
+   while(ei<r.events.length&&r.events[ei].step===i){const ev=r.events[ei++];if(ev.t==='out'){add(ev.s);sfx('print')}else if(ev.t==='act'&&view){const d=view.apply(ev,ms*.8);wait=Math.max(wait,(+d||0)+120)}}
+   if(mem)mem.render((r.trace[i+1]||t).vars);i++;ML.t=setTimeout(tick,wait)};
+  tick()}
+ box.querySelector('.mlp-again').addEventListener('click',()=>{sfx('tap');start()});draw(0);start()}
+// a little table: an expression, what it asks or does, and what Python says
+const mlCmp=(rows,note)=>`<div class="mlp"><div class="mlp-cmp">${rows.map(([e,m])=>{const v=PY.run('print('+e+')').out.trim();return `<div><code>${esc(e)}</code><span>${esc(L(m[0],m[1]))}</span><b class="${v==='True'?'t':v==='False'?'f':''}">${esc(v)}</b></div>`}).join('')}</div>${mlNote(note)}</div>`;
+// "your turn" steps. Not knowing never costs anything: a wrong tap gets a kind word, 🤔 알려 줘요 shows the answer
+function mlTap(say,code,ok,o={}){return {say,try:true,show:b=>{const x=b.querySelector('.mlp');if(x&&x._show)x._show()},
+ art:(b,api)=>{b.innerHTML=`<div class="mlp">${o.top||''}<div class="mlp-c"></div>${o.out?mlOut(PY.run(code,o.py||{})):''}${mlNote(o.note)}</div>`;
+  const box=b.querySelector('.mlp'),c=box.querySelector('.mlp-c'),ls=code.split('\n');let marks={},won=false;
+  const draw=()=>{c.innerHTML=mlCode(code,{...o,mark:marks,cls:'tappable'})};
+  box._show=()=>{won=true;marks={};ok.forEach(k=>marks[k]='mlok');draw();api.say(o.yes)};
+  c.addEventListener('click',e=>{const ln=e.target.closest('[data-ln]');if(!ln||won)return;const n=+ln.dataset.ln;if(!(ls[n-1]||'').trim())return;
+   if(ok.includes(n)){sfx('good');box._show();api.done()}else{sfx('tap');marks={...marks,[n]:'mlno'};draw();api.say((o.no&&o.no[n])||o.no0||['그 줄이 아니에요. 다시 찾아봐요!','Not that one. Have another look!'])}});
+  draw()}}}
+// tiles to tap: some are right (find), or o.all: every tile runs its own code and the child just watches what changes
+function mlPick(say,items,o={}){return {say,try:true,show:b=>{const x=b.querySelector('.mlp');if(x&&x._show)x._show()},
+ art:(b,api)=>{b.innerHTML=`<div class="mlp">${o.top||''}<div class="mlp-tiles ${o.cls||''}">${items.map((x,i)=>`<button type="button" class="mlp-tile" data-i="${i}">${x.h}</button>`).join('')}</div><div class="mlp-r"></div>${mlNote(o.note)}</div>`;
+  const box=b.querySelector('.mlp'),res=box.querySelector('.mlp-r');let won=false;
+  const pick=i=>{const x=items[i],el=box.querySelector(`[data-i="${i}"]`),code=typeof x.code==='function'?x.code():x.code;
+   if(code){if(o.play)mlPlay(res,code,o.run||{});else mlShow(res,code,o.run||{})}
+   if(x.ok||o.all){if(!o.all){won=true;box.querySelectorAll('.mlp-tile').forEach(t=>{if(t!==el)t.disabled=true})}box.querySelectorAll('.mlp-tile.ok').forEach(t=>t.classList.remove('ok'));el.classList.add('ok');sfx('good');api.say(x.say||o.yes);api.done()}
+   else{el.classList.add('no');sfx('tap');api.say(x.say||o.no||['다시 골라 봐요!','Try another one!'])}};
+  box._show=()=>{const i=items.findIndex(x=>x.ok);pick(i<0?0:i)};
+  box.querySelector('.mlp-tiles').addEventListener('click',e=>{const t=e.target.closest('[data-i]');if(!t||won)return;pick(+t.dataset.i)});
+  if(o.init)o.init(res)}}}
+// ---- one lesson per place: the story, Py's two teaching lines with pictures, a "your turn", then the learn lines
+const WLDEMO={2:'print("Hi, friend!")\nprint(3 + 4)',4:'for i in range(3):\n    print("Whirl")',5:'apples = 5\nif apples > 3:\n    print("Lots of apples! 🍎")',
+ 6:'cup = 0\nwhile cup < 3:\n    cup = cup + 1\n    print("Pouring water 💧", cup)\nprint("The cup is full!")',7:'def hello():\n    print("Hi!")\n    print("Nice to meet you! 🐍")\n\nhello()\nhello()',
+ 12:'festival = ["🎈", "🍭", "🎆"]\nfor thing in festival:\n    print(thing, "ready!")'};
+const wDemo=n=>LANG==='en'&&WLDEMO[n]?WLDEMO[n]:WORLDS[n-1].demo;
+const WL={
+ 1:{a1:b=>mlPlay(b,'move()\nmove()\neat()',{grid:MBY['w1-1'].grid,capt:true}),
+  a2:b=>mlShow(b,'move()\nmove()\neat()',{run:false,capt:true,note:['💡 작은 글씨가 그 줄의 뜻이에요. ➡️ 앞으로 한 칸, 😋 사과 먹기!','💡 The small words tell you what each line means: ➡️ one step forward, 😋 eat the apple!']}),
+  tr:()=>mlTap(['네 차례예요! 컴퓨터가 가장 먼저 하는 줄을 눌러 봐요.','Your turn! Tap the line the computer does first.'],'move()\nmove()\neat()',[1],{yes:['맞아요! 맨 위 1번째 줄부터 차례대로 해요.','Yes! It starts at the top, with line 1, and goes in order.'],no0:['그 줄은 나중에 해요. 맨 위를 봐요!','That line comes later. Look at the top!']}),
+  key:['w1-1','w1-4']},
+ 2:{a1:b=>mlShow(b,L('print("안녕, 친구!")','print("Hi, friend!")')),a2:b=>mlPlay(b,wDemo(2)),
+  tr:()=>mlTap(['네 차례예요! 화면에 7을 보여 주는 줄을 눌러 봐요.','Your turn! Tap the line that shows 7 on the screen.'],wDemo(2),[2],{out:true,yes:['맞아요! 따옴표가 없어서 3 + 4를 계산해 7을 보여 줘요.','Yes! There are no quotes, so it works out 3 + 4 and shows 7.'],no0:['그 줄은 따옴표 안의 글자를 보여 줘요. 다른 줄을 봐요!','That line shows the text inside the quotes. Look at the other line!']}),
+  key:['w2-1','i2']},
+ 3:{a1:b=>mlShow(b,'apples = 3',{mem:true}),a2:b=>mlPlay(b,'apples = 3\nprint(apples)',{mem:true}),
+  tr:()=>mlTap(['네 차례예요! 상자에 3을 넣는 줄을 눌러 봐요.','Your turn! Tap the line that puts 3 in the box.'],'apples = 3\nprint(apples)',[1],{yes:['맞아요! `=` 기호가 오른쪽 값을 왼쪽 이름표 상자에 넣어요.','Yes! The `=` sign puts the value on the right into the box named on the left.'],no0:['그 줄은 상자 속 값을 꺼내 보여 줘요. 값을 넣는 줄을 찾아봐요.','That line takes out what’s in the box and shows it. Find the line that puts it in.']}),
+  key:['w3-1','w3-2']},
+ 4:{a1:b=>mlPlay(b,wDemo(4)),a2:b=>mlShow(b,wDemo(4),{run:false,mark:{2:'mlin'},note:['점선 칸이 들여쓰기예요. 들여 쓴 줄이 반복 안에 있어요.','The dotted space is the indent. The indented line is inside the loop.']}),
+  tr:()=>mlTap(['네 차례예요! 3번 반복하는 줄을 눌러 봐요.','Your turn! Tap the line that runs 3 times.'],wDemo(4),[2],{yes:['맞아요! 들여 쓴 줄이라서 반복 안에서 3번 해요.','Yes! It’s indented, so it runs 3 times inside the loop.'],no:{1:['`for` 줄은 몇 번 반복할지 정해요. 그 아래 들여 쓴 줄을 봐요.','The `for` line says how many times. Look at the indented line under it.']}}),
+  key:['w4-1','i1']},
+ 5:{a1:b=>mlPlay(b,wDemo(5)),a2:b=>{b.innerHTML=mlCmp([['5 > 3',['더 커요?','bigger?']],['2 < 1',['더 작아요?','smaller?']],['4 == 4',['같아요?','the same?']],['4 != 4',['달라요?','different?']]])},
+  tr:()=>mlTap(['네 차례예요! 답이 참(`True`)일 때만 하는 줄을 눌러 봐요.','Your turn! Tap the line that runs only when the answer is `True`.'],wDemo(5),[3],{yes:['맞아요! `if` 줄 아래에 들여 쓴 줄이에요.','Yes! It’s the indented line under the `if`.'],no:{1:['그 줄은 상자에 값을 넣어요. 언제나 해요.','That line puts a value in a box. It always runs.'],2:['그 줄은 질문을 해요. 질문 아래 들여 쓴 줄을 봐요.','That line asks the question. Look at the indented line under it.']}}),
+  key:['w5-1','w5-2']},
+ 6:{a1:b=>mlPlay(b,wDemo(6),{mem:true}),a2:b=>mlPlay(b,'while front_is_clear():\n    move()\neat()',{grid:MBY['w6-1'].grid}),
+  tr:()=>mlTap(['네 차례예요! 한 바퀴 돌 때마다 다시 묻는 줄을 눌러 봐요.','Your turn! Tap the line that asks its question again each time round.'],wDemo(6),[2],{yes:['맞아요! `while` 줄이 매번 물어요. 답이 거짓이 되면 멈춰요.','Yes! The `while` line asks every time. When the answer turns `False`, the loop stops.'],no0:['그 줄은 질문을 하지 않아요. 질문하는 줄을 찾아봐요.','That line doesn’t ask anything. Find the line that asks.']}),
+  key:['w6-1','i2']},
+ 7:{a1:b=>mlShow(b,wDemo(7),{run:false,mark:{1:'mlin',2:'mlin',3:'mlin'},note:['📋 1~3번째 줄은 카드에 적어 두기만 해요. 아직 아무 일도 안 일어나요!','📋 Lines 1–3 only write the card. Nothing happens yet!']}),a2:b=>mlPlay(b,wDemo(7)),
+  tr:()=>mlTap(['네 차례예요! 레시피 카드를 부르는 줄을 하나 눌러 봐요.','Your turn! Tap a line that calls the recipe card.'],wDemo(7),[5,6],{yes:['맞아요! 이름 뒤에 `()` 괄호를 붙이면 카드에 적힌 대로 해요.','Yes! The name with `()` after it does what the card says.'],no0:['그 줄은 카드에 적힌 내용이에요. 카드 밖에서 이름을 부르는 줄을 찾아봐요.','That line is written on the card. Find a line outside the card that calls its name.']}),
+  key:['w7-1','w7-2']},
+ 8:{a1:b=>mlShow(b,'fruits = ["🍎", "🍌", "🍇"]',{mem:true}),a2:b=>mlPlay(b,wDemo(8),{mem:true}),
+  tr:()=>mlPick(['네 차례예요! 1번 칸에 탄 과일을 눌러 봐요.','Your turn! Tap the fruit riding in car 1.'],['🍎','🍌','🍇'].map((f,i)=>({h:f,ok:i===1})),{cls:'train',yes:['맞아요! 맨 앞 🍎가 0번, 그다음 🍌가 1번이에요.','Yes! The first car, 🍎, is car 0, so 🍌 is car 1.'],no:['그 칸은 다른 번호예요. 맨 앞 칸이 0번이에요!','That car has a different number. The first car is car 0!']}),
+  key:['w8-1','i1']},
+ 9:{a1:b=>mlShow(b,'menu = {"🍔": 3, "🧃": 2}',{mem:true}),a2:b=>mlPlay(b,wDemo(9),{mem:true}),
+  tr:()=>mlPick(['네 차례예요! `"🧃": 2` 짝에서 이름표(키)를 눌러 봐요.','Your turn! In the pair `"🧃": 2`, tap the name tag (the key).'],[{h:hl('"🧃"'),ok:true},{h:hl('2')}],{cls:'code',yes:['맞아요! 이름표는 `:` 기호 앞, 값은 뒤에 있어요.','Yes! The key comes before the `:`, and the value after it.'],no:['그건 사물함 속 값이에요. 이름표는 `:` 기호 앞에 있어요.','That’s the value in the locker. The key is before the `:`.']}),
+  key:['w9-1','i2']},
+ 10:{a1:b=>mlPlay(b,wDemo(10),{mem:true}),a2:b=>mlShow(b,'stickers = {"🐶", "🐱"}\nprint(stickers[0])',{mem:true,note:['🫧 세트에는 칸 번호가 없어서 `[0]` 코드를 쓰면 오류가 나요.','🫧 A set has no car numbers, so `[0]` gives an error.']}),
+  tr:()=>mlPick(['네 차례예요! 스티커를 눌러 주머니에 넣어 봐요. 🐶를 또 넣으면 어떻게 될까요?','Your turn! Tap a sticker to put it in the pouch. What happens if you add 🐶 again?'],[['🐶',['🐶는 벌써 있어서 그대로 2장이에요!','🐶 was already there, so there are still 2!']],['🐰',['새 스티커라서 3장이 됐어요!','A new sticker, so now there are 3!']]].map(([f,s])=>({h:f,say:s,code:`stickers = {"🐶", "🐱"}\nstickers.add("${f}")\nprint(len(stickers))`})),{all:true,run:{mem:true}}),
+  key:['w10-1','i2']},
+ 11:{a1:b=>mlShow(b,wDemo(11),{run:false,mark:{1:'mlin',2:'mlin',3:'mlin'},note:['🍪 1~3번째 줄이 쿠키틀(클래스)이에요. 틀만 있고 아직 쿠키는 없어요.','🍪 Lines 1–3 are the cutter (the class). Just the cutter, no cookies yet.']}),a2:b=>mlPlay(b,wDemo(11),{mem:true}),
+  tr:()=>mlTap(['네 차례예요! 쿠키틀로 쿠키(객체)를 찍는 줄을 하나 눌러 봐요.','Your turn! Tap a line that presses out a cookie (an object) with the cutter.'],wDemo(11),[5,6],{yes:['맞아요! 틀 이름 뒤 괄호에 모양을 넣으면 새 쿠키가 생겨요.','Yes! The cutter’s name with a shape in brackets makes a new cookie.'],no0:['그 줄은 쿠키를 찍지 않아요. 틀 이름 뒤에 괄호가 붙은 줄을 찾아봐요.','That line doesn’t press out a cookie. Find a line with brackets right after the cutter’s name.']}),
+  key:[['클래스는 쿠키틀, 객체는 그 틀로 찍은 쿠키예요. `__init__` 메서드가 새 객체에 이름표를 붙여요.','A class is a cookie cutter; an object is a cookie made from it. `__init__` gives each new object its name tag.'],'w11-2']},
+ 12:{a1:b=>{b.innerHTML=`<div class="mlp"><div class="mlp-chips">${LIVE().filter(w=>w.n<12).map(w=>`<span>${w.icon} ${tx(w.concept)}</span>`).join('')}</div></div>`},a2:b=>mlPlay(b,wDemo(12)),
+  tr:()=>mlTap(['네 차례예요! 리스트에서 하나씩 꺼내는 줄을 눌러 봐요.','Your turn! Tap the line that takes things out of the list one by one.'],wDemo(12),[2],{yes:['맞아요! `for` 반복이 칸마다 하나씩 꺼내서 `thing` 상자에 넣어요.','Yes! The `for` loop takes each car in turn and puts it in the `thing` box.'],no0:['그 줄은 하나씩 꺼내지 않아요. `for` 단어가 있는 줄을 봐요.','That line doesn’t take things out one by one. Look for the line with `for`.']}),
+  key:['w12-1','w12-6']}};
+function pyWorldLesson(n){const w=WORLDS[n-1],d=WL[n];if(!w||!d)return null;const ci=COACH_INTRO[n],ii=w.intro||[];
+ return {id:'py:w'+n,icon:w.icon,title:mlPair(w.concept),
+  steps:[{say:mlPair(ci||ii[0]),art:b=>{b.innerHTML=`<div class="mlp"><div class="mlp-place"><span class="wic">${w.icon}</span><span><b>${w.n}. ${tx(w.name)}</b><small>💡 ${tx(w.concept)}</small></span></div>${ci&&ii[0]?pyLine(ii[0],'wow'):''}</div>`},after:()=>{if(ci&&ii[0])say(T(ii[0]))}},
+   ii[1]?{say:mlPair(ii[1]),art:d.a1}:null,ii[2]?{say:mlPair(ii[2]),art:d.a2}:null,d.tr()].filter(Boolean),
+  key:d.key.map(k=>Array.isArray(k)?k:MBY[k]?mlPair(MBY[k].learn):/^i\d$/.test(k)?mlPair(ii[+k[1]]):mlPair(k))}}
+// ---- short lessons for the new syntax in the middle of a place (shown before that mission the first time)
+const PY_SUB={
+ 'w2-2':()=>{const ok=L('print("🍩 도넛")','print("🍩 donut")'),noq=L('print(도넛)','print(donut)'),half=L('print("도넛)','print("donut)');
+  return {icon:'💬',title:['글자는 따옴표로 감싸요','Wrap text in quotes'],steps:[
+   {say:['글자를 보여 줄 때는 글자 앞뒤를 따옴표 " "로 감싸요. 따옴표가 ‘여기부터 여기까지 글자예요’ 하고 알려 줘요.','To show text, wrap it in quotes " " at both ends. The quotes tell Python where the text starts and where it ends.'],art:b=>mlShow(b,ok)},
+   {say:['따옴표를 빼먹으면 파이썬은 그 글자를 상자(변수) 이름으로 생각해요. 그런 상자가 없어서 오류가 나요.','Leave out the quotes, and Python thinks the word is the name of a box (a variable). There’s no such box, so you get an error.'],art:b=>mlShow(b,noq)},
+   {say:['따옴표는 꼭 짝으로 써요. 앞에 하나, 뒤에 하나! 하나만 쓰면 글자가 어디서 끝나는지 몰라서 오류가 나요.','Quotes always come in pairs: one at the front, one at the end! With only one, Python can’t tell where the text ends, so you get an error.'],art:b=>mlShow(b,half)},
+   mlPick(['네 차례예요! 화면에 글자가 바르게 나오는 코드를 눌러 봐요.','Your turn! Tap the code that shows the text the right way.'],[{h:hl(noq),code:noq},{h:hl(ok),code:ok,ok:true},{h:hl(half),code:half}],{cls:'code',yes:['맞아요! 앞뒤에 따옴표가 하나씩 있어요.','Yes! There’s a quote at each end.'],no:['아쉬워요. 오류 설명을 읽고 다른 코드를 눌러 봐요.','Not quite. Read the error, then try another code.']})],
+  key:[mlPair(MBY['w2-2'].learn),['따옴표는 앞뒤 짝으로 써요. 하나라도 빠지면 오류가 나요.','Quotes come in pairs, front and back. If one is missing, you get an error.']]}},
+ 'w2-3':()=>{const sums='print(4 + 5)\nprint(10 - 3)\nprint(2 * 6)';
+  return {icon:'🧮',title:['파이썬으로 계산해요','Doing math with Python'],steps:[
+   {say:['파이썬은 계산을 잘해요. 더하기는 `+`, 빼기는 `-`, 곱하기는 `*` 기호를 써요. 곱하기는 × 대신 별표예요!','Python is great at math. Use `+` to add, `-` to subtract and `*` to multiply. For times, it’s a star instead of ×!'],art:b=>{b.innerHTML=mlCmp([['4 + 5',['더하기','add']],['10 - 3',['빼기','subtract']],['2 * 6',['곱하기','multiply']]])}},
+   {say:['`print()` 괄호 안에 계산식을 넣으면 파이썬이 먼저 계산하고, 그 답을 화면에 보여 줘요.','Put a sum inside `print()`, and Python works it out first, then shows the answer on the screen.'],art:b=>mlPlay(b,sums)},
+   {say:['계산식을 따옴표로 감싸면 글자가 돼요. 글자는 계산하지 않고 쓴 그대로 보여 줘요.','Wrap a sum in quotes, and it becomes text. Text isn’t worked out; it’s shown just as it’s written.'],art:b=>mlShow(b,'print("10 - 3")')},
+   mlTap(['네 차례예요! 화면에 12를 보여 주는 줄을 눌러 봐요.','Your turn! Tap the line that shows 12 on the screen.'],sums,[3],{out:true,yes:['맞아요! `2 * 6` 계산식은 2 곱하기 6, 12예요.','Yes! `2 * 6` means 2 times 6, which is 12.'],no0:['그 줄의 답은 12가 아니에요. 곱하기 기호를 찾아봐요.','That line’s answer isn’t 12. Look for the times sign.']})],
+  key:[mlPair(MBY['w2-3'].learn),['곱하기는 `*` 기호예요. 따옴표 안의 계산식은 글자라서 쓴 그대로 나와요.','`*` means times. A sum inside quotes is text, so it’s shown as written.']]}},
+ 'w3-5':()=>{const join=L('print(2 + 3)\nprint("파이" + "썬")','print(2 + 3)\nprint("sun" + "flower")'),bad=L('age = 3\nprint("나이: " + age)','age = 3\nprint("Age: " + age)'),good=L('age = 3\nprint("나이: " + str(age))','age = 3\nprint("Age: " + str(age))');
+  return {icon:'🔤',title:['글자와 숫자 잇기','Joining text and numbers'],steps:[
+   {say:['`+` 기호는 숫자끼리는 더하고, 글자끼리는 이어 붙여요.','The `+` sign adds numbers together, and joins pieces of text together.'],art:b=>mlShow(b,join)},
+   {say:['그런데 글자와 숫자를 `+` 기호로 바로 이으면 오류가 나요. 더할지 이을지 파이썬이 알 수 없거든요.','But joining text and a number with `+` gives an error. Python can’t tell whether to add or to join.'],art:b=>mlShow(b,bad,{mem:true})},
+   {say:['`str()` 함수로 숫자를 글자로 바꾸면 이어 붙일 수 있어요. `str(3)` 코드는 글자 "3"이 돼요.','Change the number into text with `str()`, and then you can join them. `str(3)` becomes the text "3".'],art:b=>mlPlay(b,good,{mem:true})},
+   {say:['거꾸로 `int()` 함수는 글자 "3"을 숫자 3으로 바꿔요. 숫자가 되면 계산할 수 있어요.','The other way round, `int()` turns the text "3" into the number 3. Then you can do math with it.'],art:b=>mlShow(b,'print(int("3") + 4)')}],
+  key:[mlPair(MBY['w3-5'].learn),['`int()` 함수는 글자로 된 숫자를 진짜 숫자로 바꿔요.','`int()` turns a number written as text into a real number.']]}},
+ 'w4-3':()=>{const loop=n=>L(`for i in range(${n}):\n    print("바퀴", i)`,`for i in range(${n}):\n    print("lap", i)`);
+  return {icon:'🔢',title:['반복 상자 `i`','The loop box `i`'],steps:[
+   {say:['`for i in range(4):` 줄에 나오는 `i` 이름표 상자가 반복 상자예요. 한 바퀴 돌 때마다 상자 속 숫자가 바뀌어요.','In `for i in range(4):`, the box named `i` is the loop box. Its number changes every time round.'],art:b=>mlPlay(b,loop(4),{mem:true})},
+   {say:['`range(4)` 코드는 0, 1, 2, 3을 차례로 줘요. 0부터 시작해서 4 바로 앞에서 멈춰요. 모두 4번이에요!','`range(4)` gives 0, 1, 2, 3 in turn. It starts at 0 and stops just before 4. That’s 4 times in all!'],art:b=>{b.innerHTML=`<div class="mlp"><div class="mlp-nums">${[0,1,2,3].map(k=>`<span>${k}</span>`).join('')}<span class="x">4</span></div>${mlNote(['4는 들어가지 않아요. 그래도 0부터 세니까 모두 4개예요.','4 isn’t included, but counting from 0 still gives 4 numbers.'])}</div>`}},
+   mlPick(['네 차례예요! `range()` 코드를 눌러서 반복 상자가 어떻게 세는지 봐요.','Your turn! Tap a `range()` code and watch how the loop box counts.'],[2,5].map(n=>({h:hl(`range(${n})`),code:loop(n),say:[`0부터 ${n-1}까지, 모두 ${n}번 돌아요!`,`From 0 to ${n-1}: ${n} times round!`]})),{all:true,play:true,run:{mem:true},cls:'code'})],
+  key:[mlPair(MBY['w4-3'].learn),['`range(4)` 코드는 0, 1, 2, 3을 줘요. 끝 숫자 4는 들어가지 않아요.','`range(4)` gives 0, 1, 2, 3. The end number 4 is left out.']]}},
+ 'w4-4':()=>{const a=L('for i in range(3):\n    print("🐑")\nprint("😴 쿨쿨")','for i in range(3):\n    print("🐑")\nprint("😴 zzz")'),c=L('for i in range(3):\n    print("🐑")\n    print("😴 쿨쿨")','for i in range(3):\n    print("🐑")\n    print("😴 zzz")');
+  return {icon:'📐',title:['들여쓰기: 반복 안과 밖','Indenting: inside or outside the loop'],steps:[
+   {say:['반복 줄 아래에서 앞을 띄운(들여 쓴) 줄만 반복 안에 들어가요. 점선이 그 표시예요.','Under a loop line, only the lines with space at the front (indented lines) are inside the loop. The dotted line shows it.'],art:b=>mlShow(b,a,{run:false,mark:{2:'mlin'}})},
+   {say:['▶ 실행하면 들여 쓴 🐑 줄은 3번 해요. 들여 쓰지 않은 😴 줄은 반복이 끝난 뒤 1번만 해요.','Watch it run. The indented 🐑 line runs 3 times. The 😴 line isn’t indented, so it runs just once, after the loop.'],art:b=>mlPlay(b,a)},
+   {say:['😴 줄도 들여 쓰면 반복 안으로 들어가서 3번 나와요. 줄 앞의 빈칸 몇 개가 이렇게 중요해요!','Indent the 😴 line too, and it moves inside the loop, so it shows 3 times. A few spaces at the front matter this much!'],art:b=>mlPlay(b,c)},
+   mlTap(['네 차례예요! 이 코드에서 딱 한 번만 하는 줄을 눌러 봐요.','Your turn! In this code, tap the line that runs only once.'],a,[3],{yes:['맞아요! 들여 쓰지 않아서 반복 밖에 있어요. 반복이 끝나고 한 번 해요.','Yes! It isn’t indented, so it’s outside the loop. It runs once, after the loop.'],no:{1:['`for` 줄은 바퀴마다 다시 와서 다음 수를 꺼내요. 반복이 끝난 뒤의 줄을 찾아봐요.','The `for` line comes back every time round to get the next number. Look for the line after the loop.'],2:['그 줄은 들여 써서 반복 안에 있어요. 3번 해요.','That line is indented, so it’s inside the loop. It runs 3 times.']}})],
+  key:[mlPair(MBY['w4-4'].learn),['반복 안의 줄들은 모두 같은 칸만큼 들여 써서 줄을 맞춰요.','Lines inside a loop are all indented by the same amount, lined up.']]}},
+ 'w5-3':()=>{const code=n=>L(`cookies = ${n}\nif cookies > 5:\n    print("파티 해요! 🎉")\nelse:\n    print("조금씩 나눠 먹어요 🍪")`,`cookies = ${n}\nif cookies > 5:\n    print("Party time! 🎉")\nelse:\n    print("Let’s share them 🍪")`);
+  return {icon:'↪️',title:['아니면 `else`','Otherwise: `else`'],steps:[
+   {say:['`if` 줄의 답이 거짓(`False`)이면 들여 쓴 줄을 건너뛰어요. 그때 할 일은 `else:` 줄 아래에 적어요.','When the `if` answer is `False`, its indented lines are skipped. Write what to do instead under an `else:` line.'],art:b=>mlShow(b,code(2),{run:false,mark:{4:'mlin',5:'mlin'}})},
+   {say:['▶ 보세요. 쿠키 2개는 5개보다 많지 않아서 답이 거짓이에요. 그래서 `else` 아래 줄만 해요.','Watch. 2 is not more than 5, so the answer is `False`. Only the line under `else` runs.'],art:b=>mlPlay(b,code(2))},
+   mlPick(['네 차례예요! 쿠키 수를 눌러 바꿔 봐요. 코드가 어느 길로 가는지 봐요.','Your turn! Tap to change the number of cookies, and see which way the code goes.'],[8,3].map(n=>({h:hl(`cookies = ${n}`),code:code(n),say:n>5?['참이라서 `if` 아래 줄만 해요!','`True`, so only the line under `if` runs!']:['거짓이라서 `else` 아래 줄만 해요!','`False`, so only the line under `else` runs!']})),{all:true,play:true,cls:'code'}),
+   {say:['`>=` 기호는 ‘크거나 같아요?’, `<=` 기호는 ‘작거나 같아요?’예요. 두 수가 같아도 답이 참이에요.','`>=` asks “bigger or the same?”, and `<=` asks “smaller or the same?”. If the two numbers are the same, the answer is `True`.'],art:b=>{b.innerHTML=mlCmp([['5 >= 5',['크거나 같아요?','bigger or the same?']],['4 >= 5',['크거나 같아요?','bigger or the same?']],['3 <= 5',['작거나 같아요?','smaller or the same?']]])}}],
+  key:[mlPair(MBY['w5-3'].learn),['`>=` 기호는 ‘크거나 같아요?’, `<=` 기호는 ‘작거나 같아요?’예요.','`>=` asks “bigger or the same?”, and `<=` asks “smaller or the same?”']]}},
+ 'w5-5':()=>{const code=n=>L(`score = ${n}\nif score > 9:\n    print("🥇 금메달")\nelif score > 5:\n    print("🥈 은메달")\nelse:\n    print("🥉 동메달")`,`score = ${n}\nif score > 9:\n    print("🥇 gold medal")\nelif score > 5:\n    print("🥈 silver medal")\nelse:\n    print("🥉 bronze medal")`);
+  return {icon:'🪜',title:['길이 여러 개: `elif`','More paths: `elif`'],steps:[
+   {say:['길이 셋 이상이면 `elif` 줄을 써요. ‘아니고, 만약 ~이면?’ 하고 한 번 더 물어요.','For three or more paths, use an `elif` line. It asks once more: “or else, if…?”'],art:b=>mlShow(b,code(7),{run:false,mark:{4:'mlin'}})},
+   {say:['▶ 보세요. 파이썬은 위에서부터 차례로 물어요. 처음으로 참인 길 하나만 가고, 나머지는 건너뛰어요.','Watch. Python asks from the top, in order. It takes only the first `True` path and skips the rest.'],art:b=>mlPlay(b,code(7))},
+   mlPick(['네 차례예요! 점수를 눌러 바꿔 봐요. 어느 메달 줄로 가는지 봐요.','Your turn! Tap to change the score, and see which medal line runs.'],[10,3].map(n=>({h:hl(`score = ${n}`),code:code(n),say:n>9?['10은 9보다 커서 첫 번째 길로 가요!','10 is bigger than 9, so it takes the first path!']:['3은 두 질문 모두 거짓이라서 `else` 길로 가요!','For 3, both questions are `False`, so it takes the `else` path!']})),{all:true,play:true,cls:'code'})],
+  key:[mlPair(MBY['w5-5'].learn),['참인 길을 찾으면 그 아래 질문은 더 하지 않아요.','Once a path is `True`, the questions below it are skipped.']]}},
+ 'w6-4':()=>{const good=L('n = 0\nwhile n < 3:\n    print(n)\n    n = n + 1\nprint("끝!")','n = 0\nwhile n < 3:\n    print(n)\n    n = n + 1\nprint("Done!")'),bad=L('n = 0\nwhile n < 3:\n    print(n)\nn = n + 1\nprint("끝!")','n = 0\nwhile n < 3:\n    print(n)\nn = n + 1\nprint("Done!")');
+  return {icon:'♾️',title:['끝나지 않는 반복','A loop that never ends'],steps:[
+   {say:['`while` 반복은 답이 참인 동안 계속 돌아요. 그래서 반복 안에서 무언가가 바뀌어야 언젠가 멈춰요.','A `while` loop keeps going while the answer is `True`. So something inside the loop must change, or it never stops.'],art:b=>mlPlay(b,good,{mem:true})},
+   {say:['한 바퀴마다 `n = n + 1` 줄이 상자 값을 1씩 키워요. n이 3이 되면 `n < 3` 질문의 답이 거짓이 돼서 멈춰요.','Each time round, the `n = n + 1` line makes the box 1 bigger. When n reaches 3, the answer to `n < 3` turns `False`, and the loop stops.'],art:b=>mlShow(b,good,{run:false,mark:{4:'mlin'}})},
+   {say:['그 줄을 들여 쓰지 않으면 반복 밖으로 나가요. 그러면 n은 계속 0이라서 끝없이 돌아요. 이걸 무한 반복이라고 해요.','If that line isn’t indented, it’s outside the loop. Then n stays 0 and the loop goes round forever. That’s called an infinite loop.'],art:b=>mlShow(b,bad,{mark:{4:'err'},py:{maxOut:40}})},
+   mlTap(['네 차례예요! 이 반복이 언젠가 멈추게 해 주는 줄을 눌러 봐요.','Your turn! Tap the line that makes this loop stop in the end.'],good,[4],{yes:['맞아요! 이 줄이 n을 키워서 언젠가 `n < 3` 질문의 답이 거짓이 돼요.','Yes! This line makes n bigger, so one day the answer to `n < 3` turns `False`.'],no:{2:['그 줄은 질문을 해요. 질문의 답을 바꾸는 줄을 찾아봐요.','That line asks the question. Find the line that changes the answer.']},no0:['그 줄은 n을 바꾸지 않아요. 상자 값을 바꾸는 줄을 찾아봐요.','That line doesn’t change n. Find the line that changes the box.']})],
+  key:[mlPair(MBY['w6-4'].learn),['값을 바꾸는 줄도 반복 안에 들어가게 들여 써요.','Indent the line that changes the value, so it’s inside the loop.']]}},
+ 'w7-4':()=>{const card=L('def snack(food):\n    print("냠냠", food)','def snack(food):\n    print("Yum", food)'),full=card+'\n\nsnack("🍎")\nsnack("🍩")';
+  return {icon:'🥣',title:['재료 칸: 매개변수','Ingredient slots: parameters'],steps:[
+   {say:['레시피 카드 이름 뒤 괄호 안에 재료 칸을 만들 수 있어요. 이 칸을 매개변수라고 해요.','You can put an ingredient slot inside the brackets after a recipe card’s name. This slot is called a parameter.'],art:b=>mlShow(b,full,{run:false,mark:{1:'mlin'}})},
+   {say:['카드를 부를 때 괄호 안에 넣은 값이 재료 칸에 들어가요. `snack("🍎")` 코드로 부르면 food 상자에 🍎가 들어가요.','When you call the card, the value in the brackets goes into the slot. Calling `snack("🍎")` puts 🍎 in the food box.'],art:b=>mlPlay(b,full,{mem:true})},
+   mlPick(['네 차례예요! 간식을 눌러서 `snack()` 카드에 재료로 넣어 봐요.','Your turn! Tap a snack to pass it to the `snack()` card.'],['🍌','🥕','🍪'].map(f=>({h:f,code:card+`\n\nsnack("${f}")`,say:['같은 카드인데 재료만 바뀌었어요!','Same card, just a different ingredient!']})),{all:true,play:true,run:{mem:true}})],
+  key:[mlPair(MBY['w7-4'].learn),mlPair(MBY['w7-5'].learn)]}},
+ 'w7-6':()=>{const code='def double(n):\n    return n * 2\n\nx = double(4)\nprint(x)';
+  return {icon:'↩️',title:['값을 돌려주는 `return`','Giving a value back: `return`'],steps:[
+   {say:['함수는 계산한 답을 `return` 단어로 돌려줄 수 있어요. 돌려받은 값은 상자에 넣거나 화면에 보여 줄 수 있어요.','A function can give back the answer it worked out with `return`. You can keep that value in a box or show it on the screen.'],art:b=>mlShow(b,code,{run:false,mark:{2:'mlin'}})},
+   {say:['▶ 보세요. `double(4)` 코드로 부르면 n 상자에 4가 들어가요. `return` 줄이 4 * 2를 계산해 8을 돌려주고, 8이 x 상자에 들어가요.','Watch. Calling `double(4)` puts 4 in the n box. The `return` line works out 4 * 2 and gives back 8, and 8 goes into the x box.'],art:b=>mlPlay(b,code,{mem:true})},
+   {say:['돌려받은 값은 바로 다음 계산에도 쓸 수 있어요. `print()` 명령은 화면에 보여 주기만 하고 값을 돌려주지 않아요.','A value you get back can go straight into more math. `print()` only shows things on the screen; it doesn’t give a value back.'],art:b=>mlShow(b,'def double(n):\n    return n * 2\n\nprint(double(10) + 1)')}],
+  key:[mlPair(MBY['w7-6'].learn),['`return` 단어로 돌려받은 값은 상자에 넣거나 다시 계산에 쓸 수 있어요.','A value from `return` can be kept in a box or used in more math.']]}},
+ 'w8-2':()=>{const code='pets = ["🐶", "🐱", "🐰"]\nprint(pets[0])\nprint(pets[2])',toys='toys = ["🚗", "🎈", "🧸", "⚽"]';
+  return {icon:'🎫',title:['칸 번호로 꺼내기','Taking out a car by its number'],steps:[
+   {say:['기차 이름 뒤 대괄호 `[ ]` 안에 칸 번호를 쓰면 그 칸의 값을 꺼내요. 맨 앞 칸은 0번이에요.','Write a car number in square brackets `[ ]` after the train’s name to take out that car’s value. The first car is car 0.'],art:b=>mlPlay(b,code,{mem:true})},
+   {say:['칸이 3개면 번호는 0, 1, 2예요. 3번 칸은 없어서 `IndexError` 오류가 나요. `pets[-1]` 코드는 맨 끝 칸이에요.','With 3 cars, the numbers are 0, 1 and 2. There’s no car 3, so you get an `IndexError`. `pets[-1]` is the last car.'],art:b=>mlShow(b,'pets = ["🐶", "🐱", "🐰"]\nprint(pets[-1])\nprint(pets[3])')},
+   mlPick(['네 차례예요! `toys[2]` 코드가 꺼내는 장난감을 눌러 봐요.','Your turn! Tap the toy that `toys[2]` takes out.'],['🚗','🎈','🧸','⚽'].map((t,i)=>({h:t,ok:i===2,code:i===2?toys+'\nprint(toys[2])':null})),{cls:'train',top:mlCode(toys),yes:['맞아요! 0번 🚗, 1번 🎈, 2번 🧸예요.','Yes! Car 0 is 🚗, car 1 is 🎈 and car 2 is 🧸.'],no:['그 칸은 다른 번호예요. 맨 앞 🚗가 0번이에요!','That car has a different number. The first one, 🚗, is car 0!']})],
+  key:[mlPair(MBY['w8-2'].learn),['칸 번호는 0부터 세요. 칸이 3개면 마지막 칸은 2번이에요.','Car numbers start at 0. With 3 cars, the last one is car 2.']]}},
+ 'w8-5':()=>{const base='basket = ["🍎"]\nbasket.append("🍌")\nbasket.append("🍇")\nprint(basket)\nprint(len(basket))',add=[],grow=()=>'basket = ["🍎"]\n'+add.map(f=>`basket.append("${f}")\n`).join('')+'print(len(basket))';
+  return {icon:'➕',title:['기차 끝에 붙이기: `append`','Adding cars: `append`'],steps:[
+   {say:['`append` 메서드는 리스트 맨 끝에 새 칸을 붙여요. 기차 이름 뒤에 점을 찍고 써요.','`append` adds a new car to the end of a list. Write it after the train’s name and a dot.'],art:b=>mlPlay(b,base,{mem:true})},
+   {say:['점 뒤에 쓰는 이런 명령을 메서드라고 해요. 칸이 늘어서 `len()` 함수의 답도 1에서 3으로 커졌어요.','A command written after a dot like this is called a method. The train got longer, so `len()` went from 1 to 3.'],art:b=>mlShow(b,base,{mark:{2:'mlin',3:'mlin'},mem:true})},
+   mlPick(['네 차례예요! 과일을 눌러서 기차 끝에 붙여 봐요.','Your turn! Tap a fruit to add it to the end of the train.'],['🍌','🍇','🍓'].map(f=>({h:f,code:()=>{if(add.length<5)add.push(f);return grow()},say:['기차 끝에 새 칸이 붙었어요!','A new car joined the end of the train!']})),{all:true,run:{mem:true},init:res=>{add.length=0;mlShow(res,grow(),{mem:true})}})],
+  key:[mlPair(MBY['w8-5'].learn)]}},
+ 'w9-3':()=>{const getEx=L('menu = {"🍔": 3}\nprint(menu.get("🍔", "없어요"))\nprint(menu.get("🍩", "없어요"))','menu = {"🍔": 3}\nprint(menu.get("🍔", "none"))\nprint(menu.get("🍩", "none"))'),mine='menu = {"🍦": 4, "🍪": 1}';
+  return {icon:'🗝️',title:['안전하게 열기: `get`','Opening safely: `get`'],steps:[
+   {say:['없는 이름표로 사물함을 열면 `KeyError` 오류가 나요. 그런 이름표가 없다는 뜻이에요.','Open a locker with a tag that isn’t there, and you get a `KeyError`. It means there’s no such tag.'],art:b=>mlShow(b,'menu = {"🍔": 3}\nprint(menu["🍩"])',{mem:true})},
+   {say:['`get` 메서드는 이름표가 있으면 그 값을 줘요. 없으면 오류 대신 괄호 속 두 번째 값을 줘요.','`get` gives the value if the tag is there. If it isn’t, it gives the second value in the brackets instead of an error.'],art:b=>mlPlay(b,getEx)},
+   mlPick(['네 차례예요! 음식을 눌러서 `get` 메서드로 사물함을 열어 봐요.','Your turn! Tap a food to open its locker with `get`.'],['🍦','🍪','🍩'].map(f=>({h:f,code:mine+`\nprint(menu.get("${f}", 0))`,say:f==='🍩'?['그런 이름표가 없어서 대신 값 0을 줬어요. 오류는 없어요!','No such tag, so it gave the spare value, 0. No error!']:['이름표가 있어서 그 사물함의 값을 줬어요!','The tag is there, so it gave that locker’s value!']})),{all:true,top:mlCode(mine)})],
+  key:[['`get` 메서드는 이름표가 없어도 오류 없이 대신 값을 줘요. 메뉴에 없을지도 모를 때 써요.','`get` gives a spare value instead of an error when a tag is missing. Use it when a tag might not be there.']]}},
+ 'w10-5':()=>{const pair='mine = {"🐶", "🐱"}\nfriend = {"🐱", "🐰"}\nboth = mine | friend',code=f=>`mine = {"🐶", "🐱"}\nfriend = {"🐰", "${f}"}\nboth = mine | friend\nprint(len(both))`;
+  return {icon:'🤝',title:['주머니 합치기','Joining two pouches'],steps:[
+   {say:['`|` 기호(세로 막대)는 두 세트 주머니를 하나로 합쳐요.','The bar sign `|` joins two set pouches into one.'],art:b=>mlShow(b,pair,{mem:true})},
+   {say:['두 주머니에 다 있던 🐱는 합친 주머니에 한 장만 남아요. 그래서 4장이 아니라 3장이에요.','The 🐱 that was in both pouches is kept only once. So there are 3 stickers, not 4.'],art:b=>mlPlay(b,pair+'\nprint(len(both))\nprint("🐰" in both)',{mem:true})},
+   mlPick(['네 차례예요! 친구 주머니에 넣을 스티커를 골라서 합쳐 봐요.','Your turn! Pick a sticker for your friend’s pouch, then join the pouches.'],[['🐶',['🐶는 내 주머니에도 있어서 합치면 3장이에요!','🐶 is in my pouch too, so joined there are 3!']],['🦊',['새 스티커 🦊 덕분에 합치면 4장이에요!','The new 🦊 makes 4 when joined!']]].map(([f,s])=>({h:f,code:code(f),say:s})),{all:true,run:{mem:true}})],
+  key:[mlPair(MBY['w10-5'].learn)]}},
+ 'w10-6':()=>{const pair='mine = {"🐶", "🐱", "🐰"}\nfriend = {"🐱", "🐼"}',ab='a = {"🍎", "🍌"}\nb = {"🍌", "🍇"}';
+  return {icon:'🔍',title:['겹치는 것과 나만 있는 것','Shared, and mine only'],steps:[
+   {say:['`&` 기호는 두 주머니에 다 있는 스티커만 골라요. 겹치는 것만 남아요.','The `&` sign picks only the stickers that are in both pouches: just the shared ones.'],art:b=>mlPlay(b,pair+'\nprint(mine & friend)',{mem:true})},
+   {say:['`-` 기호는 내 주머니에서 친구 주머니에도 있는 걸 빼요. 나만 가진 스티커가 남아요.','The `-` sign takes away whatever is also in my friend’s pouch. The stickers only I have are left.'],art:b=>mlShow(b,pair+'\nonly_me = mine - friend\nprint(len(only_me))',{mem:true})},
+   mlPick(['네 차례예요! `a & b` 코드가 남기는 과일을 눌러 봐요.','Your turn! Tap the fruit that `a & b` keeps.'],['🍎','🍌','🍇'].map(f=>({h:f,ok:f==='🍌',code:f==='🍌'?ab+'\nprint(a & b)':null})),{top:mlCode(ab),yes:['맞아요! 🍌만 두 주머니에 다 있어요.','Yes! Only 🍌 is in both pouches.'],no:['그 과일은 한쪽 주머니에만 있어요. 둘 다 있는 걸 찾아봐요.','That fruit is in only one pouch. Find the one in both.']})],
+  key:[mlPair(MBY['w10-6'].learn)]}},
+ 'w11-3':()=>{const cls=L('class Robot:\n    def __init__(self, name):\n        self.name = name\n\n    def beep(self):\n        print(self.name, "삐빅!")','class Robot:\n    def __init__(self, name):\n        self.name = name\n\n    def beep(self):\n        print(self.name, "beep!")'),
+   one=cls+L('\n\nr = Robot("로보")\nr.beep()','\n\nr = Robot("Robo")\nr.beep()'),both=cls+L('\n\na = Robot("로보")\nb = Robot("삐삐")\na.beep()\nb.beep()','\n\na = Robot("Robo")\nb = Robot("Pip")\na.beep()\nb.beep()');
+  return {icon:'🗣️',title:['객체가 하는 일: 메서드','Methods: things an object can do'],steps:[
+   {say:['쿠키틀(클래스) 안에 `def` 단어로 만든 함수는 그 틀로 찍은 객체가 할 줄 아는 일이 돼요. 이런 함수를 메서드라고 해요.','A function made with `def` inside a cutter (a class) becomes something its objects can do. It’s called a method.'],art:b=>mlShow(b,one,{run:false,mark:{5:'mlin',6:'mlin'}})},
+   {say:['메서드는 객체 이름 뒤에 점을 찍고 불러요. `r.beep()` 코드로 부르면 `self` 자리에 r이 들어가요.','Call a method with a dot after the object’s name. When you call `r.beep()`, r goes into the `self` slot.'],art:b=>mlPlay(b,one,{mem:true})},
+   {say:['객체가 둘이면 누가 불렀는지에 따라 `self` 자리에 들어가는 객체가 달라져요. 그래서 저마다 자기 이름을 말해요.','With two objects, what goes into `self` depends on who called. So each one says its own name.'],art:b=>mlPlay(b,both)},
+   mlTap(['네 차례예요! 삐삐가 말하게 하는 줄을 눌러 봐요.','Your turn! Tap the line that makes Pip speak.'],both,[11],{out:true,yes:['맞아요! `b.beep()` 코드로 부르면 `self` 자리에 b, 삐삐가 들어가요.','Yes! Calling `b.beep()` puts b, Pip, into the `self` slot.'],no0:['그 줄은 삐삐를 부르지 않아요. 삐삐가 든 상자 이름을 찾아봐요.','That line doesn’t call Pip. Find the box Pip is in.']})],
+  key:[mlPair(MBY['w11-3'].learn),mlPair(MBY['w11-4'].learn)]}}};
+function pySubLesson(id){const f=PY_SUB[id];if(!f)return null;const ls=f();ls.id='py:'+id;return ls}
+// the lesson a mission belongs to: its own short lesson if it has one, else its place's lesson
+const pyLessonOf=m=>!m||m.rb||!m.world?null:PY_SUB[m.id]?pySubLesson(m.id):pyWorldLesson(m.world);
+const ideaChip=()=>HAS_ML&&P&&!P.job&&pyLessonOf(P.m)?`<button class="mlx-chip" type="button" data-a="idea">📖 ${L('개념 다시 보기','See the idea again')}</button>`:'';
+// 📒 the concept notebook: one group per place, its lesson first and then its short lessons; the place in hand opens
+function openPyBook(n){if(!HAS_ML)return;hush();coachTalk.hide();const at=n||(nextMission()||{}).world||1;
+ MiniLesson.book({title:['코딩 개념 노트','Coding concept notebook'],open:at-1,groups:LIVE().map(w=>({name:mlPair(w.name).map(x=>`${w.icon} ${w.n}. ${x}`),
+  items:[pyWorldLesson(w.n),...w.missions.filter(m=>PY_SUB[m.id]).map(m=>pySubLesson(m.id))].filter(Boolean).map(ls=>({id:ls.id,icon:ls.icon,title:ls.title,key:ls.key,lesson:()=>ls.id==='py:w'+w.n?pyWorldLesson(w.n):pySubLesson(ls.id.slice(3))}))}))})}
 
 // ---------------------------------------------------------------- playing a mission
 let P=null;const PLAY={n:0,next:null};
 function openMission(id,o={}){const m=typeof id==='object'?id:MBY[id];if(!m)return;const job=o.job!=null;
+ // new syntax in the middle of a place: its short lesson comes first, the first time (closing it early just goes on)
+ if(HAS_ML&&!job&&!m.rb&&!o.review&&!o.taught&&PY_SUB[m.id]&&!doneM(m.id)&&missionOpen(m)&&!MiniLesson.seen('py:'+m.id)){hush();coachTalk.hide();MiniLesson.before(pySubLesson(m.id),()=>openMission(m.id,{...o,taught:true}));return}
  if(!job&&!m.rb&&!missionOpen(m)&&!o.review){sfx('oops');toast('🔒 '+L('앞의 미션을 먼저 해요!','Do the mission before it first!'));return}
  go('play');P={m,job,jobIdx:o.job,tries:0,hints:0,errSeen:false,review:o.review||null,picked:null,firstPick:null,inputs:[],seed:Math.floor(Math.random()*1e9),fixLines:m.code?m.code.split('\n'):null,wrongTaps:0,ran:false};
  renderPlay();
@@ -5312,7 +5570,7 @@ function respond(r,code){const m=P.m;let j=P.job||m.cases?JOBS.judge(m,r,code):M
  if(m.kind==='choose'&&P.tries>=2)html+=`<p class="why">💭 ${tx(m.why)}</p>`;
  if(m.kind==='fix'&&!P.fixedOnce)html+=`<p class="small">👆 ${L('버그가 있는 줄을 눌러서 고쳐요.','Tap the line with the bug to fix it.')}</p>`;
  if(P.tries>=3&&P.hints===0)html+=`<p class="small">💡 ${L('막히면 오른쪽 위 💡 힌트를 눌러요. 힌트는 공짜예요!','Stuck? Tap 💡 at the top right. Hints are free!')}</p>`;
- pySays(html+`<button class="sayb" type="button" data-say="${esc(stripTags(html))}|${esc(stripTags(html))}" aria-label="${L('다시 듣기','Hear again')}">🔊</button>`,mood);
+ pySays(html+`<button class="sayb" type="button" data-say="${esc(stripTags(html))}|${esc(stripTags(html))}" aria-label="${L('다시 듣기','Hear again')}">🔊</button>`+ideaChip(),mood);
  say(stripTags(html).replace(/What Python said.*|파이썬이 보여 준 메시지.*/s,''));save(true);
  if(P.tries===2||P.tries===4)setTimeout(()=>{if(!P||P.m!==m||P.running)return;const h=m.hints[Math.min(P.hints,m.hints.length-1)];
   coachTalk('idea',P.tries===2?`같이 생각해 봐요! ${T(h)}|Let’s think together! ${T(h)}`:'👣 한 줄씩 실행해서 어디서 달라지는지 같이 볼까요?|Shall we step through it line by line and see where it changes?',{say:false,acts:[{t:'👣 같이 한 줄씩|👣 Step together',f:()=>runCode(true)},{t:'💡 더 알려 줘요|💡 More help',f:()=>hint()}]})},1500)}
@@ -5326,7 +5584,7 @@ function predictPick(i){if(P.running||P.answered!=null&&P.answered!==false)retur
 function predictAfter(r){const m=P.m,ok=MISSION.norm(m.options[P.pickedOpt])===MISSION.norm(r.out),right=m.options.findIndex(o=>MISSION.norm(o)===MISSION.norm(r.out));P.answered=true;
  document.querySelectorAll('.popt').forEach(b=>{const i=+b.dataset.i;b.classList.toggle('right',i===right);b.classList.toggle('wrong',i===P.pickedOpt&&!ok);b.disabled=true});runbar();
  if(ok){if(typeof coachAnswer==='function')coachAnswer(true,lrSkill(m),lrItem(m,undefined,m.options[right]));success(m.code,{predicted:P.firstPick===right})}
- else{P.tries++;if(typeof LR!=='undefined')LR.ans(false,lrSkill(m),lrItem(m,lrBoth(lrOut(m.options[P.pickedOpt]),lrOut(m.options[P.pickedOpt])),m.options[right]));sfx('oops');pySays(`<p>💡 ${L('아하! 실제로는 초록색 답이 나왔어요.','Aha! The green answer is what really happens.')}</p><p class="why">${tx(m.why)}</p><button class="btn small" type="button" data-a="gotit">👍 ${L('알겠어요!','Got it!')}</button>`,'think');say(L('아하! 실제로는 초록색 답이 나왔어요. ','Aha! The green answer is what really happens. ')+T(m.why))}}
+ else{P.tries++;if(typeof LR!=='undefined')LR.ans(false,lrSkill(m),lrItem(m,lrBoth(lrOut(m.options[P.pickedOpt]),lrOut(m.options[P.pickedOpt])),m.options[right]));sfx('oops');pySays(`<p>💡 ${L('아하! 실제로는 초록색 답이 나왔어요.','Aha! The green answer is what really happens.')}</p><p class="why">${tx(m.why)}</p><button class="btn small" type="button" data-a="gotit">👍 ${L('알겠어요!','Got it!')}</button>${ideaChip()}`,'think');say(L('아하! 실제로는 초록색 답이 나왔어요. ','Aha! The green answer is what really happens. ')+T(m.why))}}
 function choosePick(i){if(P.running)return;P.picked=i;if(P.firstPick==null)P.firstPick=i;sfx('tap');document.querySelectorAll('.copt').forEach(b=>b.classList.toggle('on',+b.dataset.i===i));P.ed.setCode(P.m.options[i]);runCode()}
 function fixTap(ln){const m=P.m;if(P.running)return;
  if(ln===m.bug){sfx('tap');chooser(L(`${ln}번째 줄을 어떻게 고칠까요?`,`How should line ${ln} be?`),shuffle(m.fixes),P.fixLines[ln-1],v=>{P.fixLines[ln-1]=v;P.fixedOnce=true;P.ed.setCode(P.fixLines.join('\n'));P.ed.setMarks({[ln]:'fixed'});pySays(`<p>🔧 ${L('줄을 바꿨어요! ▶ 실행해서 확인해요.','Line changed! Press ▶ to check.')}</p>`,'happy')});return}
@@ -5463,6 +5721,8 @@ function wire(){
    case 'lab':sfx('tap');go('lab');break;
    case 'mission':sfx('tap');openMission(b.dataset.id);break;
    case 'review':sfx('tap');startReview();break;
+   case 'book':sfx('tap');openPyBook();break;
+   case 'idea':sfx('tap');if(P&&P.m&&HAS_ML){const ls=pyLessonOf(P.m);if(ls){hush();MiniLesson.open(ls)}}break;
    case 'back':sfx('tap');if(P&&P.lab)go('arcade');else if(P&&P.m&&P.m.rb)go('home');else go('school');break;
    case 'hint':hint();break;
    case 'run':if(!P)break;P.lab?labRun(false):runCode(false);break;
@@ -5624,6 +5884,7 @@ function boot(){applyLang();document.body.classList.toggle('bigcode',!!S.opt.big
  if(!S.tut.hello&&!mid)welcome()}
 boot();
 </script>
+<script>/* mini-lesson pictures (prompt file step 23): shown on top of these lesson pages once the file exists */try{MiniLesson.cfg({pics:{'py:w1':{0:'images/py-place-1.webp'},'py:w2':{0:'images/py-place-2.webp'},'py:w3':{0:'images/py-place-3.webp',1:'images/py-idea-box.webp'},'py:w4':{0:'images/py-place-4.webp'},'py:w5':{0:'images/py-place-5.webp'},'py:w6':{0:'images/py-place-6.webp'},'py:w7':{0:'images/py-place-7.webp',1:'images/py-idea-recipe.webp'},'py:w8':{0:'images/py-place-8.webp',2:'images/py-idea-train.webp'},'py:w9':{0:'images/py-place-9.webp',1:'images/py-idea-lockers.webp'},'py:w10':{0:'images/py-place-10.webp',1:'images/py-idea-pouch.webp'},'py:w11':{0:'images/py-place-11.webp',1:'images/py-idea-cutter.webp'},'py:w12':{0:'images/py-place-12.webp'},'py:w7-4':{0:'images/py-idea-recipe.webp'},'py:w8-2':{0:'images/py-idea-train.webp'},'py:w10-5':{0:'images/py-idea-pouch.webp'}}})}catch(e){}</script>
 <script>try{coachStart(['꼬마 코딩 섬에 온 걸 환영해요!','Welcome to Little Coding Island!'],[['코드가 안 될 때는 👣 한 줄씩 실행해 보면 버그가 잘 보여요.','When code doesn’t work, 👣 step through it line by line to spot the bug.'],['틀린 코드도 소중해요. 무엇이 다른지 비교하면서 배우거든요.','Wrong code is precious too. You learn by comparing what’s different.'],['하루에 미션 한두 개면 충분해요. 꾸준함이 최고예요!','One or two missions a day is plenty. Steady wins!']])}catch(e){}</script>
 </body>
 </html>

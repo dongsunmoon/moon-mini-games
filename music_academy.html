@@ -119,9 +119,10 @@ function coachStart(hello,tips){const game=(location.pathname.split('/').pop()||
 //   calls api.done(); "🤔 알려 줘요" runs show(box,api) (or just api.done()) so not knowing never blocks or costs anything.
 //   after(box,api), if given, runs once the teacher has finished reading the step (for example to play a demo).
 //   key holds the 1–3 lines to remember; they close the lesson and stay in the notebook.
-// · MiniLesson.cfg({voice:(text,onEnd)=>…, stop:()=>…, who:{img,name}}) once per game: the game's own read-aloud (it
+// · MiniLesson.cfg({voice:(text,onEnd)=>…, stop:()=>…, who:{img,name}, pics:{lessonId:{stepIndex:'images/x.webp'}}}) once per game: the game's own read-aloud (it
 //   respects the game's voice switch; onEnd, when the game supports it, runs after the line), what to stop when a page
-//   changes (demos, sounds), and the default teacher.
+//   changes (demos, sounds), the default teacher, and painted pictures shown on top of some steps (a step may also
+//   have img). A picture that isn't there yet is simply left out. Coach Moon teaches in his pointing pose when it exists.
 // · MiniLesson.open(lesson,{onDone,onClose}) plays a lesson. MiniLesson.before(lesson,go) plays it the first time and
 //   then calls go(); later it calls go() at once. Closing early also calls go(), so a lesson never traps the child.
 // · MiniLesson.book({title,groups:[{name:[ko,en],items:[{id,title,icon,key,lesson}]}],open}) shows the notebook; an
@@ -133,23 +134,25 @@ const MiniLesson=(()=>{let C={voice:null,who:null},el=null,cur=null,back=null,la
  const seen=id=>{try{return !!LR.les()[id]}catch(e){return false}};
  const talk=(t,cb)=>{try{if(C.voice){if(C.voice.length>1){C.voice(t,cb);return}C.voice(t)}}catch(e){}if(cb)setTimeout(cb,400)},
   hush=()=>{try{if(C.stop)C.stop()}catch(e){}try{speechSynthesis.cancel()}catch(e){}};
- function shell(cls){close(true);lastFocus=document.activeElement;el=document.createElement('div');el.className='mlx '+(cls||'');
+ // focus goes back where the child was before the first window (a lesson opened from the notebook keeps that place)
+ function shell(cls){close(true);const a=document.activeElement;if(a&&a!==document.body&&!(a.closest&&a.closest('.mlx')))lastFocus=a;el=document.createElement('div');el.className='mlx '+(cls||'');
   el.setAttribute('role','dialog');el.setAttribute('aria-modal','true');document.body.appendChild(el);document.addEventListener('keydown',key,true);return el}
  function close(quiet){if(!el)return;hush();document.removeEventListener('keydown',key,true);el.remove();el=null;const c=cur;cur=null;
-  if(!quiet){if(c&&c.o.onClose)c.o.onClose(c.done);if(back){const b=back;back=null;book(b.spec,b.at)}else if(lastFocus&&lastFocus.focus)try{lastFocus.focus()}catch(e){}}}
+  if(!quiet){if(c&&c.o.onClose)c.o.onClose(c.done);if(back){const b=back;back=null;book(b.spec,b.at)}else if(lastFocus&&lastFocus.isConnected&&lastFocus.focus)try{lastFocus.focus()}catch(e){}}}
  function key(e){if(!el)return;if(e.key==='Escape'){e.preventDefault();e.stopPropagation();close();return}
   if(!cur)return;if(e.key==='ArrowRight'){const b=el.querySelector('[data-m=next]');if(b&&!b.disabled){e.preventDefault();b.click()}}else if(e.key==='ArrowLeft'&&cur.i>0){e.preventDefault();go(cur.i-1)}}
  function open(ls,o={}){if(!ls||!ls.steps||!ls.steps.length)return;const who=ls.who||C.who||{img:'images/coach-moon-idea.webp',name:['문 코치','Coach Moon']};
   shell('');cur={ls,o,who,i:0,done:false,ok:{}};
   el.setAttribute('aria-labelledby','mlxT');
+  const wImg=/coach-moon-(idea|hi)\.webp$/.test(who.img||'')?'images/coach-moon-teach.webp':who.img;
   el.innerHTML=`<div class="mlx-card"><div class="mlx-top"><span class="mlx-kick">📖 ${L('미니 수업','Mini lesson')}</span><b id="mlxT">${ls.icon?ls.icon+' ':''}${E(ls.title)}</b><button type="button" class="mlx-x" data-m="x" aria-label="${L('닫기','Close')}">✕</button></div>
    <div class="mlx-dots" aria-hidden="true"></div><div class="mlx-stage"></div>
-   <div class="mlx-talk"><img src="${coachEsc(who.img)}" alt="" onerror="this.remove()"><p aria-live="polite"></p><button type="button" class="mlx-hear" data-m="hear" aria-label="${L('다시 듣기','Hear again')}">🔊</button></div>
+   <div class="mlx-talk"><img src="${coachEsc(wImg)}" data-alt="${coachEsc(who.img)}" alt="" onerror="if(this.dataset.alt&&!this.dataset.f){this.dataset.f=1;this.src=this.dataset.alt}else this.remove()"><p aria-live="polite"></p><button type="button" class="mlx-hear" data-m="hear" aria-label="${L('다시 듣기','Hear again')}">🔊</button></div>
    <div class="mlx-nav"></div></div>`;
   el.addEventListener('click',e=>{const b=e.target.closest('[data-m]');if(!b||!cur)return;const m=b.dataset.m;
    if(m==='x')close();else if(m==='hear')talk(el.querySelector('.mlx-talk p').textContent);else if(m==='prev')go(cur.i-1);else if(m==='next')go(cur.i+1);
    else if(m==='help'){const s=cur.ls.steps[cur.i];try{if(s.show)s.show(el.querySelector('.mlx-stage'),api(cur.i))}catch(e){}api(cur.i).done()}
-   else if(m==='again')go(0);else if(m==='end'){const c=cur;close(true);if(back){const b=back;back=null;book(b.spec,b.at)}else if(lastFocus&&lastFocus.focus)try{lastFocus.focus()}catch(e){}if(c.o.onDone)c.o.onDone()}});
+   else if(m==='again')go(0);else if(m==='end'){const c=cur;close(true);if(back){const b=back;back=null;book(b.spec,b.at)}else if(lastFocus&&lastFocus.isConnected&&lastFocus.focus)try{lastFocus.focus()}catch(e){}if(c.o.onDone)c.o.onDone()}});
   go(0)}
  // what a step's picture can do: mark the try as done (enables 다음), go on, or say a short line in the bubble
  function api(i){return {L,T,done(){if(!cur||cur.i!==i)return;cur.ok[i]=1;const n=el.querySelector('[data-m=next]'),h=el.querySelector('[data-m=help]');if(n){n.disabled=false;n.textContent=L('다음','Next')+' ▶';n.classList.add('ready');n.focus()}if(h)h.remove()},
@@ -165,6 +168,7 @@ const MiniLesson=(()=>{let C={voice:null,who:null},el=null,cur=null,back=null,la
    nav.querySelector('[data-m=end]').focus();return}
   const s=ls.steps[i],t=T(s.say);stage.className='mlx-stage';stage.innerHTML='';p.textContent=t;
   try{if(typeof s.art==='function')s.art(stage,api(i));else if(s.art)stage.innerHTML=s.art}catch(e){stage.textContent=''}
+  const pic=(C.pics&&C.pics[ls.id]||{})[i]||s.img;if(pic)stage.insertAdjacentHTML('afterbegin',`<img class="mlx-pic" src="${coachEsc(pic)}" alt="" onerror="this.remove()">`);
   if(!stage.childNodes.length)stage.classList.add('none');
   const wait=s.try&&!cur.ok[i];
   nav.innerHTML=`<button type="button" class="mlx-b ghost" data-m="prev" ${i?'':'disabled'} aria-label="${L('이전','Back')}">◀</button>${wait?`<button type="button" class="mlx-b help" data-m="help">🤔 ${L('알려 줘요','Show me')}</button>`:''}<button type="button" class="mlx-b go" data-m="next" ${wait?'disabled':''}>${wait?L('해 봐요','Your turn'):L('다음','Next')} ▶</button>`;
@@ -930,6 +934,7 @@ button.setrow{flex-wrap:nowrap}
 .mlx-x{grid-area:x;width:44px;height:44px;border:0;border-radius:14px;background:#eef1ff;color:#3a4690;font-size:20px;font-weight:900;cursor:pointer}
 .mlx-dots{display:flex;gap:6px;justify-content:center}.mlx-dots i{width:8px;height:8px;border-radius:5px;background:#dfe4fb;transition:width .2s}.mlx-dots i.on{background:#9aa8ff}.mlx-dots i.now{width:22px;background:#5b6cff}
 .mlx-stage{min-height:190px;display:grid;place-items:center;background:linear-gradient(180deg,#f5f7ff,#eef7ff);border:1px solid #e1e7fb;border-radius:18px;padding:10px;overflow:hidden;position:relative}
+.mlx-pic{display:block;width:100%;max-width:420px;max-height:170px;object-fit:contain;margin:0 auto 6px}
 .mlx-stage.none{min-height:0;padding:0;border:0;background:none}
 .mlx-stage>svg,.mlx-stage>canvas,.mlx-stage>img{max-width:100%;height:auto}
 .mlx-stage.sum{background:linear-gradient(180deg,#fff9e6,#fff3cf);border-color:#f3dc92;place-items:stretch;gap:8px}

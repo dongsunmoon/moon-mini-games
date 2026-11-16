@@ -119,9 +119,10 @@ function coachStart(hello,tips){const game=(location.pathname.split('/').pop()||
 //   calls api.done(); "🤔 알려 줘요" runs show(box,api) (or just api.done()) so not knowing never blocks or costs anything.
 //   after(box,api), if given, runs once the teacher has finished reading the step (for example to play a demo).
 //   key holds the 1–3 lines to remember; they close the lesson and stay in the notebook.
-// · MiniLesson.cfg({voice:(text,onEnd)=>…, stop:()=>…, who:{img,name}}) once per game: the game's own read-aloud (it
+// · MiniLesson.cfg({voice:(text,onEnd)=>…, stop:()=>…, who:{img,name}, pics:{lessonId:{stepIndex:'images/x.webp'}}}) once per game: the game's own read-aloud (it
 //   respects the game's voice switch; onEnd, when the game supports it, runs after the line), what to stop when a page
-//   changes (demos, sounds), and the default teacher.
+//   changes (demos, sounds), the default teacher, and painted pictures shown on top of some steps (a step may also
+//   have img). A picture that isn't there yet is simply left out. Coach Moon teaches in his pointing pose when it exists.
 // · MiniLesson.open(lesson,{onDone,onClose}) plays a lesson. MiniLesson.before(lesson,go) plays it the first time and
 //   then calls go(); later it calls go() at once. Closing early also calls go(), so a lesson never traps the child.
 // · MiniLesson.book({title,groups:[{name:[ko,en],items:[{id,title,icon,key,lesson}]}],open}) shows the notebook; an
@@ -133,23 +134,25 @@ const MiniLesson=(()=>{let C={voice:null,who:null},el=null,cur=null,back=null,la
  const seen=id=>{try{return !!LR.les()[id]}catch(e){return false}};
  const talk=(t,cb)=>{try{if(C.voice){if(C.voice.length>1){C.voice(t,cb);return}C.voice(t)}}catch(e){}if(cb)setTimeout(cb,400)},
   hush=()=>{try{if(C.stop)C.stop()}catch(e){}try{speechSynthesis.cancel()}catch(e){}};
- function shell(cls){close(true);lastFocus=document.activeElement;el=document.createElement('div');el.className='mlx '+(cls||'');
+ // focus goes back where the child was before the first window (a lesson opened from the notebook keeps that place)
+ function shell(cls){close(true);const a=document.activeElement;if(a&&a!==document.body&&!(a.closest&&a.closest('.mlx')))lastFocus=a;el=document.createElement('div');el.className='mlx '+(cls||'');
   el.setAttribute('role','dialog');el.setAttribute('aria-modal','true');document.body.appendChild(el);document.addEventListener('keydown',key,true);return el}
  function close(quiet){if(!el)return;hush();document.removeEventListener('keydown',key,true);el.remove();el=null;const c=cur;cur=null;
-  if(!quiet){if(c&&c.o.onClose)c.o.onClose(c.done);if(back){const b=back;back=null;book(b.spec,b.at)}else if(lastFocus&&lastFocus.focus)try{lastFocus.focus()}catch(e){}}}
+  if(!quiet){if(c&&c.o.onClose)c.o.onClose(c.done);if(back){const b=back;back=null;book(b.spec,b.at)}else if(lastFocus&&lastFocus.isConnected&&lastFocus.focus)try{lastFocus.focus()}catch(e){}}}
  function key(e){if(!el)return;if(e.key==='Escape'){e.preventDefault();e.stopPropagation();close();return}
   if(!cur)return;if(e.key==='ArrowRight'){const b=el.querySelector('[data-m=next]');if(b&&!b.disabled){e.preventDefault();b.click()}}else if(e.key==='ArrowLeft'&&cur.i>0){e.preventDefault();go(cur.i-1)}}
  function open(ls,o={}){if(!ls||!ls.steps||!ls.steps.length)return;const who=ls.who||C.who||{img:'images/coach-moon-idea.webp',name:['문 코치','Coach Moon']};
   shell('');cur={ls,o,who,i:0,done:false,ok:{}};
   el.setAttribute('aria-labelledby','mlxT');
+  const wImg=/coach-moon-(idea|hi)\.webp$/.test(who.img||'')?'images/coach-moon-teach.webp':who.img;
   el.innerHTML=`<div class="mlx-card"><div class="mlx-top"><span class="mlx-kick">📖 ${L('미니 수업','Mini lesson')}</span><b id="mlxT">${ls.icon?ls.icon+' ':''}${E(ls.title)}</b><button type="button" class="mlx-x" data-m="x" aria-label="${L('닫기','Close')}">✕</button></div>
    <div class="mlx-dots" aria-hidden="true"></div><div class="mlx-stage"></div>
-   <div class="mlx-talk"><img src="${coachEsc(who.img)}" alt="" onerror="this.remove()"><p aria-live="polite"></p><button type="button" class="mlx-hear" data-m="hear" aria-label="${L('다시 듣기','Hear again')}">🔊</button></div>
+   <div class="mlx-talk"><img src="${coachEsc(wImg)}" data-alt="${coachEsc(who.img)}" alt="" onerror="if(this.dataset.alt&&!this.dataset.f){this.dataset.f=1;this.src=this.dataset.alt}else this.remove()"><p aria-live="polite"></p><button type="button" class="mlx-hear" data-m="hear" aria-label="${L('다시 듣기','Hear again')}">🔊</button></div>
    <div class="mlx-nav"></div></div>`;
   el.addEventListener('click',e=>{const b=e.target.closest('[data-m]');if(!b||!cur)return;const m=b.dataset.m;
    if(m==='x')close();else if(m==='hear')talk(el.querySelector('.mlx-talk p').textContent);else if(m==='prev')go(cur.i-1);else if(m==='next')go(cur.i+1);
    else if(m==='help'){const s=cur.ls.steps[cur.i];try{if(s.show)s.show(el.querySelector('.mlx-stage'),api(cur.i))}catch(e){}api(cur.i).done()}
-   else if(m==='again')go(0);else if(m==='end'){const c=cur;close(true);if(back){const b=back;back=null;book(b.spec,b.at)}else if(lastFocus&&lastFocus.focus)try{lastFocus.focus()}catch(e){}if(c.o.onDone)c.o.onDone()}});
+   else if(m==='again')go(0);else if(m==='end'){const c=cur;close(true);if(back){const b=back;back=null;book(b.spec,b.at)}else if(lastFocus&&lastFocus.isConnected&&lastFocus.focus)try{lastFocus.focus()}catch(e){}if(c.o.onDone)c.o.onDone()}});
   go(0)}
  // what a step's picture can do: mark the try as done (enables 다음), go on, or say a short line in the bubble
  function api(i){return {L,T,done(){if(!cur||cur.i!==i)return;cur.ok[i]=1;const n=el.querySelector('[data-m=next]'),h=el.querySelector('[data-m=help]');if(n){n.disabled=false;n.textContent=L('다음','Next')+' ▶';n.classList.add('ready');n.focus()}if(h)h.remove()},
@@ -165,6 +168,7 @@ const MiniLesson=(()=>{let C={voice:null,who:null},el=null,cur=null,back=null,la
    nav.querySelector('[data-m=end]').focus();return}
   const s=ls.steps[i],t=T(s.say);stage.className='mlx-stage';stage.innerHTML='';p.textContent=t;
   try{if(typeof s.art==='function')s.art(stage,api(i));else if(s.art)stage.innerHTML=s.art}catch(e){stage.textContent=''}
+  const pic=(C.pics&&C.pics[ls.id]||{})[i]||s.img;if(pic)stage.insertAdjacentHTML('afterbegin',`<img class="mlx-pic" src="${coachEsc(pic)}" alt="" onerror="this.remove()">`);
   if(!stage.childNodes.length)stage.classList.add('none');
   const wait=s.try&&!cur.ok[i];
   nav.innerHTML=`<button type="button" class="mlx-b ghost" data-m="prev" ${i?'':'disabled'} aria-label="${L('이전','Back')}">◀</button>${wait?`<button type="button" class="mlx-b help" data-m="help">🤔 ${L('알려 줘요','Show me')}</button>`:''}<button type="button" class="mlx-b go" data-m="next" ${wait?'disabled':''}>${wait?L('해 봐요','Your turn'):L('다음','Next')} ▶</button>`;
@@ -571,11 +575,31 @@ main{width:min(1120px,100%);margin:0 auto;padding:14px max(12px,env(safe-area-in
 .switch::after{content:"";position:absolute;left:4px;top:4px;width:24px;height:24px;border-radius:50%;background:#fff;transition:left .18s;box-shadow:0 2px 4px rgba(0,0,0,.25)}
 .switch.on{background:var(--green)}
 .switch.on::after{left:30px}
-.tipcard{text-align:left}
-.tipcard .demo{font-size:15px;font-weight:800;background:#f3f4ff;border-radius:14px;padding:10px 12px;margin-top:8px;color:var(--ink)}
 .values{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin-top:8px}
 .values span{display:flex;flex-direction:column;align-items:center;font-weight:900;background:#f3f4ff;border-radius:12px;padding:4px 8px;min-width:52px}
 .values .pc{position:static;width:38px;height:38px;transform:none}
+/* lesson boards inside the mini lessons (lbDraw): the main board's squares and pieces, drawn small from a FEN */
+.lbw{display:flex;flex-direction:column;align-items:center;gap:8px;width:100%}
+.lb{position:relative;width:min(calc(var(--c) * 52px),100%,316px);aspect-ratio:var(--c)/var(--r);display:grid;grid-template-columns:repeat(var(--c),1fr);grid-template-rows:repeat(var(--r),1fr);margin:4px;border-radius:8px;overflow:hidden;box-shadow:0 0 0 4px var(--frame1,#6b4b32),0 8px 18px rgba(30,20,90,.25);touch-action:manipulation;user-select:none;-webkit-user-select:none}
+.lb.try .sq{cursor:pointer}
+.mlx-stage:has(.lbw){flex-shrink:0} /* never squeeze a lesson board; the lesson card scrolls instead */
+@media (max-height:720px){.lb{width:min(calc(var(--c) * 52px),100%,236px)}}
+.lb .sq .co{font-size:10px}
+.lb-pcs{position:absolute;inset:0;pointer-events:none}
+.lb .pc{width:calc(100% / var(--c));height:calc(100% / var(--r))}
+.lb-ar{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:6}
+.lb .sq.lbx::before{content:"✕";position:absolute;inset:0;display:grid;place-items:center;color:#e8243c;font-size:24px;font-weight:900;line-height:1;text-shadow:0 0 3px #fff,0 0 6px #fff;z-index:4;pointer-events:none}
+.lbcap{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:6px;background:#fff;border-radius:12px;padding:4px 12px;font-size:16px;font-weight:900;color:#26326a;box-shadow:0 2px 0 #e1e7fb}
+.lb-re{min-height:40px;border:0;border-radius:20px;padding:0 14px;background:#eef1ff;color:#3a4690;font:inherit;font-size:14px;font-weight:900;cursor:pointer}
+.lbic{display:inline-block;width:1.25em;height:1.25em;vertical-align:-.28em}
+.lbic .pc,.lbpc .pc,.lbpro .pc{position:static;display:block;width:100%;height:100%;transform:none}
+.lbpc{display:inline-block;width:30px;height:30px}
+.lbpro{display:flex;gap:10px;justify-content:center;background:#fff;border-radius:16px;padding:10px 14px;box-shadow:0 4px 12px rgba(30,20,90,.15)}
+.lbpro .pc{width:54px;height:54px}
+.lbth{display:flex;flex-wrap:wrap;justify-content:center;gap:8px}
+.lbth span{background:#fff;border-radius:14px;padding:8px 12px;font-size:15px;font-weight:900;box-shadow:0 2px 0 #e1e7fb}
+.mlx .values>span{min-width:50px;padding:4px 6px;font-size:15px}.mlx .values .pc{width:40px;height:40px;min-width:0;padding:0;background:none}
+.goal .mlx-chip{margin-top:6px}
 
 /* ---------------------------------------------------------------- responsive */
 @media (max-width:880px){
@@ -629,6 +653,7 @@ main{width:min(1120px,100%);margin:0 auto;padding:14px max(12px,env(safe-area-in
 .mlx-x{grid-area:x;width:44px;height:44px;border:0;border-radius:14px;background:#eef1ff;color:#3a4690;font-size:20px;font-weight:900;cursor:pointer}
 .mlx-dots{display:flex;gap:6px;justify-content:center}.mlx-dots i{width:8px;height:8px;border-radius:5px;background:#dfe4fb;transition:width .2s}.mlx-dots i.on{background:#9aa8ff}.mlx-dots i.now{width:22px;background:#5b6cff}
 .mlx-stage{min-height:190px;display:grid;place-items:center;background:linear-gradient(180deg,#f5f7ff,#eef7ff);border:1px solid #e1e7fb;border-radius:18px;padding:10px;overflow:hidden;position:relative}
+.mlx-pic{display:block;width:100%;max-width:420px;max-height:170px;object-fit:contain;margin:0 auto 6px}
 .mlx-stage.none{min-height:0;padding:0;border:0;background:none}
 .mlx-stage>svg,.mlx-stage>canvas,.mlx-stage>img{max-width:100%;height:auto}
 .mlx-stage.sum{background:linear-gradient(180deg,#fff9e6,#fff3cf);border-color:#f3dc92;place-items:stretch;gap:8px}
@@ -2429,7 +2454,7 @@ const CHAPTERS=[
 ];
 CHAPTERS.forEach((c,i)=>{c.img=`images/chess-ch${i+1}.webp`});
 const SKILL_NAME={h:L('공짜 기물 잡기','Grab free pieces'),m1:L('1수 체크메이트','Mate in one'),f:L('포크 공격','Forks'),p:L('핀과 꼬치','Pins and skewers'),m2:L('2수 체크메이트','Mate in two'),a:L('종합 도전','Grand challenge')};
-// short lessons shown before a chapter starts and in the Chess class
+// each land's trick: the teaching text of its mini lesson (CH_LS, after the parents' report)
 const LESSONS=[
  {icon:'🎁',title:SKILL_NAME.h,text:L('상대 기물을 잡았을 때 내 기물이 다시 잡히지 않으면 “공짜”예요! 잡기 전에 그 칸을 상대가 지키고 있는지 꼭 확인해요.','If you take a piece and nobody can take yours back, it is free! Before you capture, check whether that square is guarded.'),
   demo:L('기물 점수로 계산해요. 비숍(3점)으로 룩(5점)을 잡고 비숍을 잃으면 5 − 3 = 2점 이득!','Count with piece points. Take a rook (5) with a bishop (3) and lose the bishop: 5 − 3 = 2 points ahead!'),values:true},
@@ -2853,7 +2878,7 @@ function renderHome(){
   ${tile('daily','t-daily','📅',L('오늘의 퍼즐','Daily puzzle'),dailyDone?L('✅ 완료','✅ Done'):L('새 문제!','New!'),dailyDone?0:true)}
   ${tile('shop','t-shop',COIN,L('상점','Shop'),`${num(S.coins)} ${L('코인','coins')}`)}
   ${tile('trophy','t-trophy','🏆',L('업적','Trophies'),`${S.ach.length}/${ACH.length}`,claim)}
-  ${tile('learn','t-bag','📖',L('체스 교실','Chess class'),L('기술 배우기','Learn tricks'))}
+  ${tile('learn','t-bag','📒',L('개념 노트','Concept notebook'),`${L('규칙과 기술','Rules & tricks')} ✅ ${Object.keys(CH_LS).filter(chSeen).length}/${Object.keys(CH_LS).length}`)}
  </div>
  <div class="card missions"><div class="panelhead"><h2 class="h2" style="margin:0">📋 ${L('오늘의 임무','Today’s missions')}</h2><span class="sub">${L('매일 새로 바뀌어요','New every day')}</span></div>
   ${ms.map(({m,def})=>`<div class="row"><span class="ic">${def.icon}</span><div class="txt">${esc(def.text)}<div class="mbar"><i style="width:${m.n/def.goal*100}%"></i></div></div>
@@ -2921,24 +2946,11 @@ function renderMap(){
 $('v-map').addEventListener('click',e=>{
  const cp=e.target.closest('[data-chap]'),st=e.target.closest('[data-stage]'),bs=e.target.closest('[data-boss]'),ls=e.target.closest('[data-lesson]');
  if(cp){SFX.click();const i=+cp.dataset.chap;if(!chapterUnlocked(i)){toast('🔒 '+L('이전 지역의 보스를 이기면 열려요!','Beat the previous boss to open this land!'));return}mapChapter=i;S.lastChapter=i;save();renderMap();return}
- if(ls){SFX.click();lessonModal(+ls.dataset.lesson);return}
+ if(ls){SFX.click();MiniLesson.open(chL(CH_OF[+ls.dataset.lesson]));return}
  if(st){const k=+st.dataset.stage;if(!stageUnlocked(mapChapter,k)){toast('🔒 '+L('앞 스테이지를 먼저 깨요!','Clear the stage before it first!'));return}SFX.click();startStage(mapChapter,k);return}
  if(bs){if(!bossUnlocked(+bs.dataset.boss)){toast('🔒 '+L('스테이지 10개를 모두 깨면 보스가 나타나요!','Clear all 10 stages to meet the boss!'));return}SFX.click();bossIntro(+bs.dataset.boss)}
 });
 function valuesRow(){return `<div class="values ps-${S.equip.pieces}">${[[1,1],[2,3],[3,3],[4,5],[5,9]].map(([t,v])=>`<span>${pieceHTML(t)}${v}${L('점','')}</span>`).join('')}</div>`}
-function lessonModal(c,then){
- const l=LESSONS[c];
- modal(`<div class="tipcard"><div style="font-size:54px;text-align:center">${l.icon}</div><h2 style="text-align:center">${esc(l.title)}</h2><p style="color:var(--ink)">${esc(l.text)}</p>${l.values?valuesRow():''}<div class="demo">💡 ${esc(l.demo)}</div></div>
-  <div class="row"><button class="btn green" type="button" data-act="${then?'go':'close'}">${then?L('알겠어요, 시작!','Got it, let’s go!'):L('알겠어요!','Got it!')}</button></div>`,
- {acts:{go:()=>then},onOpen:()=>speak(l.title+'. '+l.text)});
- if(!S.lessons.includes(c)){S.lessons.push(c);save()}
-}
-function openClass(){
- modal(`<h2>📖 ${L('체스 교실','Chess class')}</h2><p>${L('기물 점수와 퍼즐 기술을 배워요.','Learn piece points and puzzle tricks.')}</p>${valuesRow()}
-  <div style="display:grid;gap:8px;margin-top:12px;text-align:left">${LESSONS.map((l,i)=>`<button class="resume" type="button" data-act="l${i}" style="box-shadow:none;background:#f3f4ff"><span class="ic">${l.icon}</span><span><b>${esc(l.title)}</b><br><small class="sub">${esc(l.text.slice(0,46))}…</small></span></button>`).join('')}</div>`,
- {acts:Object.fromEntries(LESSONS.map((l,i)=>['l'+i,()=>()=>lessonModal(i)]))});
-}
-
 // ---------------------------------------------------------------- game screen
 let MODE=null; // 'puzzle' | 'battle'
 function setupGame(mode){
@@ -2960,13 +2972,13 @@ let PZ=null;
 function startStage(c,k){
  mapChapter=c;S.lastChapter=c;save();
  const go=()=>startPuzzle(ADV_STAGES[c][k],'stage',{c,k});
- if(!S.lessons.includes(c)&&k===0)lessonModal(c,go);else go();
+ if(k===0)chBefore(CH_START[c],go);else go(); // the land's lesson (and one rules lesson it builds on) before its first stage
 }
 function startRated(){
  const seen=new Set(S.seen);let pool=[];
  for(let w=80;w<=600&&pool.length<3;w+=80)pool=PUZ.map((p,i)=>i).filter(i=>!STAGE_SET.has(i)&&!seen.has(i)&&Math.abs(PUZ[i].rating-S.rating)<=w);
  if(!pool.length)pool=PUZ.map((p,i)=>i).filter(i=>!STAGE_SET.has(i));
- startPuzzle(pick(pool),'rated');
+ const i=pick(pool);pzBefore(i,()=>startPuzzle(i,'rated')); // a theme met for the first time gets its lesson first
 }
 function startDaily(){
  const d=dayKey();
@@ -2976,7 +2988,7 @@ function startDaily(){
   S.daily={day:d,idx:pool.length?pool[h%pool.length]:h%PUZ.length,done:false};save();
  }
  if(S.daily.done){modal(`<div style="font-size:64px">📅</div><h2>${L('오늘의 퍼즐 완료!','Daily puzzle done!')}</h2><p>${L('내일 새로운 문제가 기다려요. 실력 퍼즐도 도전해 봐요!','A new one arrives tomorrow. Try the rated puzzles too!')}</p><div class="row"><button class="btn" type="button" data-act="again">${L('다시 풀어 보기','Solve it again')}</button><button class="btn green" type="button" data-act="rated">🧩 ${L('실력 퍼즐','Rated')}</button></div>`,{acts:{again:()=>()=>startPuzzle(S.daily.idx,'daily',{replay:true}),rated:()=>startRated}});return}
- startPuzzle(S.daily.idx,'daily');
+ pzBefore(S.daily.idx,()=>startPuzzle(S.daily.idx,'daily'));
 }
 function startPuzzle(idx,mode,extra={}){
  const p=PUZ[idx],pos=new Position(p.fen);
@@ -3004,9 +3016,11 @@ function renderPuzzleBars(){
  $('botBar').innerHTML=`<div class="av">${pic(COACHES[S.equip.coach].img,COACHES[S.equip.coach].icon)}</div><div class="who"><b>${L('나','Me')} · ${sideName(BD.side)}</b><small>${titleOf(S.lvl).icon} Lv.${S.lvl}${S.cleanRun>=2&&z.mode!=='rush'?` · 🔥 ${L(`${S.cleanRun}연속 완벽`,`${S.cleanRun} perfect in a row`)}`:''}</small></div><span class="turn ${myTurn?'on':''}">${myTurn?L('내 차례!','Your move!'):z.done?'✅':'…'}</span>`;
 }
 function renderPuzzleGoal(){
- const z=PZ,t=THEMES[z.p.theme];
- $('goalCard').innerHTML=`<span class="ic">${t.icon}</span><div><b>${esc(t.goal)}</b><small>${esc(t.name)} · ${L(`${z.p.moves.length>>1}수 문제`,`${z.p.moves.length>>1}-move puzzle`)}</small></div>`;
+ const z=PZ,t=THEMES[z.p.theme],ls=z.mode!=='rush'&&z.missed&&TH_LS[z.p.theme];
+ $('goalCard').innerHTML=`<span class="ic">${t.icon}</span><div><b>${esc(t.goal)}</b><small>${esc(t.name)} · ${L(`${z.p.moves.length>>1}수 문제`,`${z.p.moves.length>>1}-move puzzle`)}</small>${ls?`<button class="mlx-chip" type="button" data-les="${ls}">📖 ${L('개념 다시 보기','See the idea again')}</button>`:''}</div>`;
 }
+// after a miss, the theme's mini lesson is one tap away (the puzzle waits underneath)
+$('goalCard').addEventListener('click',e=>{const b=e.target.closest('[data-les]');if(b){SFX.click();MiniLesson.open(chL(b.dataset.les))}});
 function toolBtn(act,icon,label,{n=null,cls='',wide=false,dis=false}={}){return `<button class="tool ${cls} ${wide?'wide':''}" type="button" data-tool="${act}" ${dis?'disabled':''}><span class="ic">${icon}</span>${label}${n!=null?`<span class="n ${n?'':'zero'}">${n}</span>`:''}</button>`}
 function renderPuzzleTools(){
  const z=PZ;if(!z)return;
@@ -3048,6 +3062,7 @@ function puzzleMove(m){
  }
  z.busy=true;flashSq(m.t,'bad',700);shakeBoard();SFX.bad();
  if(z.mode==='rush'){try{LR.ans(false,pzSkill(z),lr)}catch(e){}rushMiss();return}
+ if(!z.missed){z.missed=true;renderPuzzleGoal()} // the theme's lesson is now one tap away
  if(S.shieldOn&&S.inv.shield>0&&!z.shieldUsed){S.inv.shield--;z.shieldUsed=true;try{LR.ans(false,pzSkill(z),lr)}catch(e){}say(L('🛡️ 방패가 실수를 막아 줬어요! 다시 생각해 봐요.','🛡️ Your shield blocked that mistake! Think again.'));boardMsg('🛡️')}
  else{z.mistakes++;if(z.mode!=='rush')coachAnswer(false,pzSkill(z),lr);say(z.missSaid?pick([L('괜찮아요, 다시 해 봐요!','That’s okay, try again!'),L('아깝다! 다른 수를 찾아봐요.','So close! Look for another move.')]):THEMES[z.p.theme].miss);z.missSaid=true}
  save();renderPuzzleTools();
@@ -3104,8 +3119,8 @@ function giveUp(){
  say(L('정답을 보여줄게요. 잘 봐 두면 다음엔 꼭 풀 수 있어요!','Here is the answer. Watch closely and you will get it next time!'));
  const play=()=>{if(PZ!==z)return;if(z.step>=z.p.moves.length){end();return}const m=BD.pos.fromUci(z.p.moves[z.step]);BD.hint={f:m.f,t:m.t};marks();setTimeout(()=>{if(PZ!==z)return;boardPlay(m);z.step++;setTimeout(play,650)},500)};
  const end=()=>{
-  const acts={retry:()=>()=>startPuzzle(z.idx,z.mode,{c:z.c,k:z.k,replay:z.replay}),next:()=>z.mode==='stage'?()=>go('map'):z.mode==='rated'?startRated:()=>go('home'),close:()=>()=>go(gameBack())};
-  modal(`<div style="font-size:64px">💪</div><h2>${L('다음엔 꼭 풀 수 있어요!','You will get it next time!')}</h2><p>${L('정답을 봤으니 이제 한 번 직접 풀어 봐요. 언제든 다시 도전할 수 있어요.','Now that you have seen it, try solving it yourself. You can retry anytime.')}</p>${dr?`<div class="rewards"><span class="rate">🧠 ${num(S.rating-dr)} → ${num(S.rating)} (${dr})</span></div>`:''}
+  const ls=TH_LS[z.p.theme],acts={retry:()=>()=>startPuzzle(z.idx,z.mode,{c:z.c,k:z.k,replay:z.replay}),next:()=>z.mode==='stage'?()=>go('map'):z.mode==='rated'?startRated:()=>go('home'),close:()=>()=>go(gameBack()),les:()=>{MiniLesson.open(chL(ls));return false}};
+  modal(`<div style="font-size:64px">💪</div><h2>${L('다음엔 꼭 풀 수 있어요!','You will get it next time!')}</h2><p>${L('정답을 봤으니 이제 한 번 직접 풀어 봐요. 언제든 다시 도전할 수 있어요.','Now that you have seen it, try solving it yourself. You can retry anytime.')}</p>${ls?`<p><button class="mlx-chip" type="button" data-act="les">📖 ${L('개념 다시 보기','See the idea again')}</button></p>`:''}${dr?`<div class="rewards"><span class="rate">🧠 ${num(S.rating-dr)} → ${num(S.rating)} (${dr})</span></div>`:''}
    <div class="row"><button class="btn ghost" type="button" data-act="next">${z.mode==='stage'?L('지도로','Map'):z.mode==='rated'?L('다른 퍼즐','Another puzzle'):L('홈','Home')}</button><button class="btn green" type="button" data-act="retry">↺ ${L('직접 풀어 보기','Try it myself')}</button></div>`,{acts,closable:false});
  };
  if(BD.pos.turn!==BD.side){setTimeout(play,900)}else play();
@@ -3188,16 +3203,18 @@ function bossIntro(c){
   <p>${L('보스를 이기면 다음 지역이 열려요! 내 기물은 백(먼저 두기)이에요.','Beat the boss to open the next land! You play White and move first.')}</p>
   <div class="row"><button class="btn red" type="button" data-act="fight">⚔️ ${L('도전!','Fight!')}</button></div>`,{acts:{fight:()=>()=>startBattle(CHAPTERS[c].boss,WHITE,{boss:c})},onOpen:()=>speak(b.hi)});
 }
-function startBattle(bi,me,{boss=null,resume=null}={}){
+function startBattle(bi,me,{boss=null,resume=null,ready=false,taught=false}={}){
+ // a new battle: the rules lessons not watched yet come first (two at most)
+ if(!resume&&!ready){chBefore(BATTLE_LS,n=>startBattle(bi,me,{boss,ready:true,taught:n>0}));return}
  const bot=BOTS[bi],pos=new Position();
  setupGame('battle');PZ=null;
- BT={bi,bot,me,boss,moves:[],sans:[],keys:{},over:false,thinking:false};
+ BT={bi,bot,me,boss,moves:[],sans:[],keys:{},over:false,thinking:false,taught};
  if(resume)for(const u of resume){const m=pos.fromUci(u);if(!m)break;BT.sans.push(pos.san(m));pos.make(m);BT.moves.push(u);const k=pos.key();BT.keys[k]=(BT.keys[k]||0)+1}
  BD.side=me;BD.onMove=battleMove;BD.interactive=false;boardSet(pos,me===BLACK);
  S.battles+=resume?0:1;saveBattle();renderBattle();
  say(resume?L('대결을 이어서 해요. 화이팅!','Let’s continue the battle. You can do it!'):`${bot.icon} ${bot.name}: “${bot.hi}”`);
  $('goalCard').innerHTML=`<span class="ic">${pic(bot.img,bot.icon)}</span><div><b>${boss!=null?'BOSS · ':''}${esc(bot.name)}</b><small>💪 ${L('힘','Power')} ${bot.power} · ${L('체크메이트로 이겨요!','Win by checkmate!')}</small></div>`;
- if(pos.turn!==me)botThink();else BD.interactive=true;
+ if(pos.turn!==me)botThink();else{BD.interactive=true;battleTeach()}
 }
 function saveBattle(){if(BT&&!BT.over){S.battle={bi:BT.bi,me:BT.me,boss:BT.boss,moves:BT.moves.slice()};save()}}
 function capturedBy(side){const out=[];for(const h of BD.pos.hist){const m=h[0];if(m.c&&colorOf(m.p)===side)out.push(m.c)}return out.sort((a,b)=>typeOf(a)-typeOf(b))}
@@ -3228,6 +3245,7 @@ function botThink(){
   if(!bt.over){BD.interactive=true;renderBattle();
    if(BD.pos.inCheck())say(L('체크! 킹을 지켜요!','Check! Protect your king!'));
    else if(big)say(L(`앗, ${josa(bt.bot.name,'이','가')} 큰 기물을 잡았어요. 반격해 봐요!`,`Oh no, ${bt.bot.name} took a big piece. Strike back!`));
+   battleTeach();
   }
  },Math.max(0,wait-(Date.now()-t0))));
 }
@@ -3272,9 +3290,11 @@ function battleOver(res,why){
  const r=grant({coins,xp});save();if(res==='win')try{LR.save()}catch(e){}
  say(res==='win'?`${b.icon} “${b.lose}” ${L('대단해요!','Amazing!')}`:res==='lose'?L('괜찮아요! 퍼즐로 연습하면 더 강해져요. 다시 도전해 봐요!','That’s okay! Practice puzzles to get stronger, then try again!'):line);
  const bossNext=res==='win'&&bt.boss!=null&&bt.boss+1<CHAPTERS.length;
- setTimeout(()=>modal(`<div style="font-size:70px">${icon}</div><h2>${title}</h2><p>${b.icon} ${esc(b.name)}: “${esc(res==='draw'?line:res==='win'?b.lose:b.win)}”</p>${res==='draw'?'':`<p>${esc(res==='lose'?L('질 때도 도전 보상을 받아요. 다음엔 이길 수 있어요!','You still get a reward for trying. You can win next time!'):'')}</p>`}${coachLine(res==='win'?(bossFirst?'big':'up'):res==='draw'?'up':'try')}${rewardChips(r,extra)}
+ // the rule behind the ending, one tap away: stalemate, or how a checkmate happens
+ const les=why==='stalemate'?'stale':res==='lose'&&why==='mate'?'mate':null,chip=les?`<p><button class="mlx-chip" type="button" data-act="les">📖 ${L(`${tx(CH_LS[les].title)} 다시 보기`,`Review: ${tx(CH_LS[les].title)}`)}</button></p>`:'';
+ setTimeout(()=>modal(`<div style="font-size:70px">${icon}</div><h2>${title}</h2><p>${b.icon} ${esc(b.name)}: “${esc(res==='draw'?line:res==='win'?b.lose:b.win)}”</p>${res==='draw'?'':`<p>${esc(res==='lose'?L('질 때도 도전 보상을 받아요. 다음엔 이길 수 있어요!','You still get a reward for trying. You can win next time!'):'')}</p>`}${coachLine(res==='win'?(bossFirst?'big':'up'):res==='draw'?'up':'try')}${rewardChips(r,extra)}${chip}
   <div class="row"><button class="btn ghost" type="button" data-act="out">${bt.boss!=null?L('지도로','Map'):L('상대 고르기','Rivals')}</button>${res==='win'?(bossNext?`<button class="btn green" type="button" data-act="nextland">${CHAPTERS[bt.boss+1].icon} ${L('새 지역으로!','To the new land!')}</button>`:''):`<button class="btn red" type="button" data-act="again">⚔️ ${L('다시 도전','Rematch')}</button>`}</div>`,
-  {closable:false,acts:{out:()=>()=>go(bt.boss!=null?'map':'battle'),again:()=>()=>startBattle(bt.bi,bt.me,{boss:bt.boss}),nextland:()=>()=>{mapChapter=bt.boss+1;S.lastChapter=mapChapter;save();go('map')}}}),res==='win'?1200:900);
+  {closable:false,acts:{les:()=>{MiniLesson.open(chL(les));return false},out:()=>()=>go(bt.boss!=null?'map':'battle'),again:()=>()=>startBattle(bt.bi,bt.me,{boss:bt.boss}),nextland:()=>()=>{mapChapter=bt.boss+1;S.lastChapter=mapChapter;save();go('map')}}}),res==='win'?1200:900);
 }
 
 // ---------------------------------------------------------------- shop
@@ -3465,6 +3485,244 @@ function learnSummary(){
 }
 LR.set(learnSummary);
 
+// ---------------------------------------------------------------- mini lessons (MiniLesson, shared in the coach block)
+// Kids met puzzles and battles before anyone showed them how the pieces move. These short lessons teach the pieces, the
+// rules and each land's trick on a small board: see it, hear it, then make one move. They play once before a land's
+// first stage, before the first puzzle of a theme, before battles (the rules, two at most) and when a special move
+// first turns up in a battle; the concept notebook (📒 home tile) has them all. lbVerify() checks every board claim
+// (legal position, legal move, check, mate, stalemate, pin…) with the game's own engine.
+const tx=x=>Array.isArray(x)?L(x[0],x[1]):String(x==null?'':x);
+const sqv=x=>typeof x==='number'?x:Chess.sqOf(x);
+const LBT=[];const lbLater=(f,ms)=>{const t=setTimeout(f,ms);LBT.push(t);return t};
+function lbStop(){while(LBT.length)clearTimeout(LBT.pop())}
+const LB_COL={o:'#ff8a00',r:'#f0364f',g:'#17b45f',b:'#2f7dff'},LB_CLS=['sel','last','mv','cap','chk','good','bad','hintF','hintT','lbx'];
+const LB_OK=['잘했어요!','Well done!'],LB_MISS=['괜찮아요. 다른 수를 찾아봐요.','That’s okay. Try another move.'];
+function lbArea(a){const m=/^([a-h])([1-8])-([a-h])([1-8])$/.exec(a||'a1-h8');return {f0:m[1].charCodeAt(0)-97,f1:m[3].charCodeAt(0)-97,top:8-m[4],bot:8-m[2]}}
+// lbDraw(box,o) draws a lesson board from o.fen (the game board is never touched):
+// · o.area 'c3-f6' crops it; o.hl {class:[squares]} paints squares with the board's own classes (sel, good, bad, hintT…,
+//   lbx = a red ✕); o.dots [squares] shows where those pieces may go (Position.legal); o.last 'd7d5' marks a move just
+//   played; o.arrows [[from,to,flags,label]] (flags: o/r/g/b colour, n = the knight's L, d = dashed, x = a line through
+//   pieces that is not one move); o.tags [[square,label,colour]] puts numbered rings on squares; o.cap is a line (or a function giving HTML) under the board; o.demo [uci…] plays after
+//   the teacher's line, with a "watch again" button.
+// · A try (lbTry): the child taps a piece of the side to move, then a square. Only legal moves are played. o.want [uci…]
+//   and/or o.test(posAfter,m,uci) (true, or a [ko,en] hint) decide; o.no(posAfter,m,uci) gives a hint for a miss, which
+//   is then taken back: no penalty, no timer. o.tap [squares] (o.all: every one) asks for taps instead of a move.
+//   o.then {reply,want/test,…} goes on after the reply. o.answer (uci, or a function of the position) or want[0] is what
+//   "🤔 알려 줘요" shows. o.v(h) is a self-check of the page's claim, run by lbVerify().
+function lbDraw(box,o){
+ const A=lbArea(o.area),cols=A.f1-A.f0+1,rows=A.bot-A.top+1,inA=s=>(s>>4)>=A.top&&(s>>4)<=A.bot&&(s&7)>=A.f0&&(s&7)<=A.f1;
+ let h='';for(let r=A.top;r<=A.bot;r++)for(let c=A.f0;c<=A.f1;c++)h+=`<div class="sq${(r+c)&1?' dk':''}" data-sq="${r*16+c}">${c===A.f0?`<span class="co r">${8-r}</span>`:''}${r===A.bot?`<span class="co f">${'abcdefgh'[c]}</span>`:''}</div>`;
+ const cap=typeof o.cap==='function'?o.cap():o.cap?esc(tx(o.cap)):'',w=document.createElement('div');w.className='lbw';
+ w.innerHTML=`<div class="lb bt-${S.equip.board} ps-${S.equip.pieces}" style="--c:${cols};--r:${rows}" aria-label="${esc(L('체스판','Chess board'))}">${h}<div class="lb-pcs"></div><svg class="lb-ar" viewBox="0 0 ${cols} ${rows}" aria-hidden="true"></svg></div>${cap?`<div class="lbcap">${cap}</div>`:''}`;
+ box.appendChild(w);
+ const el=w.firstChild,pcs=el.querySelector('.lb-pcs'),svg=el.querySelector('.lb-ar'),Q={},lastOf=u=>[u.slice(0,2),u.slice(2,4)];
+ el.querySelectorAll('.sq').forEach(q=>{Q[q.dataset.sq]=q});
+ const B={el,w,o,pos:null,at:{},
+  place(e,s){const t=`translate(${((s&7)-A.f0)*100}%,${((s>>4)-A.top)*100}%)`;e.style.transform=t;e.style.setProperty('--t',t)},
+  add(s,p){if(!inA(s))return null;const e=document.createElement('div');e.className='pc '+(colorOf(p)?'b':'w');e.innerHTML=pieceSVG(p);B.place(e,s);pcs.appendChild(e);B.at[s]=e;return e},
+  mark(c,list){for(const x of list||[]){const q=Q[sqv(x)];if(q)q.classList.add(c)}},
+  clear(...cs){for(const k in Q)Q[k].classList.remove(...(cs.length?cs:LB_CLS))},
+  dots(list){const ms=B.pos.legal();for(const x of list||[]){const f=sqv(x);for(const m of ms)if(m.f===f){const q=Q[m.t];if(q)q.classList.add(B.pos.b[m.t]||(m.fl&2)?'cap':'mv')}}},
+  chk(){B.clear('chk');if(B.pos.inCheck())B.mark('chk',[B.pos.ks[B.pos.turn>>3]])},
+  reset(){B.pos=new Position(o.fen);B.at={};pcs.innerHTML='';for(let s=0;s<120;s++){if(s&0x88){s+=7;continue}if(B.pos.b[s])B.add(s,B.pos.b[s])}
+   B.clear();for(const c in o.hl||{})B.mark(c,o.hl[c]);if(o.last)B.mark('last',lastOf(o.last));B.marks();B.dots(o.dots);B.chk()},
+  marks(off){svg.innerHTML=off?'':(o.arrows||[]).map(a=>lbArrow(a,A,B.pos)).join('')+(o.tags||[]).map(([q,lab,c])=>{const s=sqv(q),x=(s&7)-A.f0+.5,y=(s>>4)-A.top+.5,col=LB_COL[c||'r'];return `<circle cx="${x}" cy="${y}" r=".3" fill="#fff" stroke="${col}" stroke-width=".08" opacity=".95"/><text x="${x}" y="${(y+.12).toFixed(2)}" text-anchor="middle" font-size=".36" font-weight="900" fill="${col}">${lab}</text>`}).join('')},
+  // animate a legal move, then make it (captures, en passant, castling and promotion as on the game board)
+  play(m){const pos=B.pos,us=pos.turn;
+   if(m.c){const cs=m.fl&2?(us===WHITE?m.t+16:m.t-16):m.t,e=B.at[cs];delete B.at[cs];if(e){e.classList.add('gone');setTimeout(()=>e.remove(),260)}}
+   let e=B.at[m.f];delete B.at[m.f];if(e){B.place(e,m.t);B.at[m.t]=e}else e=B.add(m.t,m.p);
+   if(m.fl&4){const rf=m.t>m.f?m.t+1:m.t-2,rt=m.t>m.f?m.t-1:m.t+1,r=B.at[rf];delete B.at[rf];if(r){B.place(r,rt);B.at[rt]=r}}
+   if(m.pr&&e)lbLater(()=>{e.innerHTML=pieceSVG(m.pr);e.classList.remove('pop');void e.offsetWidth;e.classList.add('pop')},180);
+   pos.make(m);B.clear('last','sel','mv','cap','hintF','hintT');B.mark('last',[m.f,m.t]);B.chk();
+   if(pos.inCheck())SFX.check();else if(m.c)SFX.capture();else SFX.move()},
+  undo(){const pos=B.pos,h=pos.hist[pos.hist.length-1];if(!h)return;const m=h[0];pos.undo();const us=pos.turn;
+   const e=B.at[m.t];delete B.at[m.t];if(e){B.place(e,m.f);B.at[m.f]=e;if(m.pr)e.innerHTML=pieceSVG(m.p)}
+   if(m.fl&4){const rf=m.t>m.f?m.t+1:m.t-2,rt=m.t>m.f?m.t-1:m.t+1,r=B.at[rt];delete B.at[rt];if(r){B.place(r,rf);B.at[rf]=r}}
+   if(m.c){const c=B.add(m.fl&2?(us===WHITE?m.t+16:m.t-16):m.t,m.c);if(c){c.style.opacity='0';setTimeout(()=>{c.style.opacity=''},30)}}
+   B.clear('last','good','bad');const p=pos.hist[pos.hist.length-1];if(p)B.mark('last',[p[0].f,p[0].t]);else if(o.last)B.mark('last',lastOf(o.last));B.chk()},
+  demo(list){B.reset();let b=w.querySelector('.lb-re');if(b)b.hidden=true;
+   list.forEach((u,i)=>lbLater(()=>{const m=B.pos.fromUci(u);if(!i)B.marks(true);if(m)B.play(m)},900+i*1100));
+   lbLater(()=>{if(!b){b=document.createElement('button');b.type='button';b.className='lb-re';b.textContent='🔁 '+L('다시 보기','Watch again');b.addEventListener('click',()=>{SFX.click();B.demo(list)});w.appendChild(b)}b.hidden=false},900+list.length*1100)}};
+ B.reset();return B}
+function lbArrow(a,A,pos){if(typeof a==='string')a=[a.slice(0,2),a.slice(2,4)];
+ const [f,t,fl='',lab]=a,col=LB_COL[(fl.match(/[orgb]/)||['o'])[0]],P=s=>[(s&7)-A.f0+.5,(s>>4)-A.top+.5],p0=P(sqv(f)),p1=P(sqv(t)),pts=[p0];
+ if(fl.includes('n'))pts.push(Math.abs(p1[1]-p0[1])>1.5?[p0[0],p1[1]]:[p1[0],p0[1]]);
+ const q=pts[pts.length-1],d=Math.hypot(p1[0]-q[0],p1[1]-q[1])||1,ux=(p1[0]-q[0])/d,uy=(p1[1]-q[1])/d,k=pos&&pos.b[sqv(t)]?.32:.1,tip=[p1[0]-ux*k,p1[1]-uy*k],base=[tip[0]-ux*.34,tip[1]-uy*.34];
+ const n1=pts[1]||p1,e=Math.hypot(n1[0]-p0[0],n1[1]-p0[1])||1,lp=fl.includes('n')?pts[1]:[(p0[0]+p1[0])/2,(p0[1]+p1[1])/2];pts[0]=[p0[0]+(n1[0]-p0[0])/e*.18,p0[1]+(n1[1]-p0[1])/e*.18];
+ const F=p=>p[0].toFixed(2)+' '+p[1].toFixed(2),head=[tip,[base[0]-uy*.2,base[1]+ux*.2],[base[0]+uy*.2,base[1]-ux*.2]].map(p=>p.map(v=>v.toFixed(2)).join(',')).join(' ');
+ return `<g opacity=".88"><path d="M${[...pts,base].map(F).join('L')}" fill="none" stroke="${col}" stroke-width=".15" stroke-linecap="round" stroke-linejoin="round"${fl.includes('d')?' stroke-dasharray=".16 .13"':''}/><polygon points="${head}" fill="${col}"/>${lab?`<circle cx="${lp[0].toFixed(2)}" cy="${lp[1].toFixed(2)}" r=".27" fill="#fff" stroke="${col}" stroke-width=".07"/><text x="${lp[0].toFixed(2)}" y="${(lp[1]+.11).toFixed(2)}" text-anchor="middle" font-size=".32" font-weight="900" fill="${col}">${lab}</text>`:''}</g>`}
+const lbReply=(p,r)=>{const v=typeof r==='function'?r(p):r;return typeof v==='string'?p.fromUci(v):v||p.legal()[0]||null};
+const lbAns=(p,x)=>(typeof x.answer==='function'?x.answer(p):x.answer)||(x.want&&x.want[0])||null;
+function lbTry(B,o0,api){let o=o0,sel=-1,busy=false,undoT=0;B.el.classList.add('try');
+ const unsel=()=>{sel=-1;B.clear('sel','mv','cap')};
+ const judge=(m,u)=>{if(o.want&&o.want.includes(u))return true;if(o.test){const r=o.test(B.pos,m,u);if(r)return r}return o.no&&o.no(B.pos,m,u)||null};
+ function move(m){const u=B.pos.uci(m);busy=true;B.play(m);const r=judge(m,u);
+  if(r===true){B.mark('good',[m.t]);lbLater(()=>SFX.good(),200);api.say(tx(typeof o.ok==='function'?o.ok(B.pos,m):o.ok||LB_OK));
+   if(o.then){const nx=o.then;lbLater(()=>{const rm=lbReply(B.pos,nx.reply);if(rm)B.play(rm);B.clear('good');o=nx;busy=false;if(nx.say)api.say(tx(nx.say));if(B.wantShow){B.wantShow=false;B.won=false;B.show()}},1400)}
+   else{B.won=true;api.done()}return}
+  lbLater(()=>B.mark('bad',[m.t]),40);api.say(tx(r||o.miss||LB_MISS));
+  undoT=lbLater(()=>{undoT=0;B.undo();busy=false},1500)}
+ B.el.addEventListener('click',e=>{const q=e.target.closest('[data-sq]');if(!q||busy||B.won)return;const s=+q.dataset.sq,p=B.pos.b[s];
+  if(o.tap){const want=o.tap.map(sqv);B.got=B.got||new Set();
+   if(want.includes(s)){B.got.add(s);B.mark('good',[s]);SFX.good();if(!o.all||B.got.size===want.length){B.won=true;api.say(tx(o.ok||LB_OK));api.done()}else api.say(tx(o.more||LB_OK))}
+   else{SFX.click();q.classList.add('bad');lbLater(()=>q.classList.remove('bad'),700);api.say(tx(o.miss||LB_MISS))}return}
+  if(sel>=0&&s!==sel){const ms=B.pos.legal().filter(m=>m.f===sel&&m.t===s);if(ms.length){unsel();move(ms.find(x=>!x.pr||typeOf(x.pr)===5)||ms[0]);return}}
+  if(p&&colorOf(p)===B.pos.turn){if(sel===s){unsel();return}unsel();sel=s;B.mark('sel',[s]);B.dots([s]);SFX.click();
+   if(!B.pos.legal().some(m=>m.f===s))api.say(tx(o.stuck||['이 기물은 지금 갈 수 있는 칸이 없어요.','This piece has nowhere to go right now.']));return}
+  if(sel>=0){api.say(tx(o.nope||['그 칸으로는 갈 수 없어요. 점이 있는 칸을 골라요.','It can’t go there. Pick a square with a dot.']));return}
+  if(p)api.say(tx(['그건 상대 기물이에요. 내 기물을 먼저 눌러요.','That is the other side’s piece. Tap one of yours first.']))});
+ // "🤔 알려 줘요": light up the answer, then play it (and the rest of the line)
+ B.show=()=>{if(B.won)return;if(busy&&!undoT){B.wantShow=true;return}B.won=true;if(undoT){clearTimeout(undoT);undoT=0;B.undo()}unsel();busy=true;
+  if(o.tap){B.mark('hintT',o.tap);api.say(tx(o.ok||LB_OK));return}
+  api.say(tx(['이렇게 하면 돼요. 잘 봐요!','Here is how. Watch!']));
+  const run=x=>{const a=lbAns(B.pos,x),m=a&&B.pos.fromUci(a);if(!m)return;B.mark('hintF',[m.f]);B.mark('hintT',[m.t]);
+   lbLater(()=>{B.play(m);B.mark('good',[m.t]);if(!x.then)api.say(tx(typeof x.ok==='function'?x.ok(B.pos,m):x.ok||LB_OK));if(x.then)lbLater(()=>{const rm=lbReply(B.pos,x.then.reply);if(rm)B.play(rm);B.clear('good');lbLater(()=>run(x.then),600)},1100)},1000)};
+  run(o)}}
+// one lesson page with a board; a page with want/test/tap is a try
+function lbStep(say,o){const t=!!(o.want||o.test||o.tap);
+ return {say,board:o,try:t,art:(box,api)=>{const B=lbDraw(box,o);box._lb=B;if(t)lbTry(B,o,api)},
+  after:o.demo?box=>{if(box._lb)box._lb.demo(o.demo)}:null,show:t?box=>{if(box._lb&&box._lb.show)box._lb.show()}:null}}
+const lbPc=p=>`<span class="lbpc ps-${S.equip.pieces}">${pieceHTML(p)}</span>`;
+// does the piece on f attack (or guard) square t? (a legal move of the side to move counts too)
+function lbAttacks(pos,f,t){const fs=sqv(f),ts=sqv(t),p=pos.b[fs];if(!p)return false;const c=colorOf(p);
+ if(pos.turn===c&&pos.legal().some(m=>m.f===fs&&m.t===ts))return true;
+ const Q=new Position(pos.fen()),q=Q.b[ts];if(!q||colorOf(q)===c){if(q&&typeOf(q)===6)return false;Q.b[ts]=1|(c^8)}
+ Q.turn=c;Q.ep=-1;return Q.pseudo().some(m=>m.f===fs&&m.t===ts)}
+// does the move leave a forced mate next move? (for the mate-in-two try)
+function lbMate2(p){if(p.status()==='mate')return true;const rs=p.legal();if(!rs.length)return false;
+ return rs.every(r=>{p.make(r);const k=p.legal().some(x=>{p.make(x);const s=p.status()==='mate';p.undo();return s});p.undo();return k})}
+const lbMateMove=p=>{const m=p.legal().find(x=>{p.make(x);const s=p.status()==='mate';p.undo();return s});return m?p.uci(m):null};
+const [PIN_T,SKW_T]=(()=>{const s=LESSONS[3].text,k=L(' 꼬치:',' Skewer:'),i=s.indexOf(k);return i<0?[s,s]:[s.slice(0,i),s.slice(i+1)]})();
+const thTip=k=>[TH_LR[k][3],TH_LR[k][4]];
+// the lessons: icon (a number draws that piece), title, steps, the lines to remember
+const CH_LS={
+ rook:{icon:4,title:['룩과 비숍','Rook and bishop'],key:[['룩은 똑바로, 비숍은 대각선으로, 길이 막힐 때까지 가요.','Rooks go straight and bishops go diagonally, as far as the path is clear.'],['상대 기물이 있는 칸에 들어가면 잡아요. 뛰어넘지는 못해요.','Land on an enemy piece to capture it. They can’t jump over pieces.']],steps:[
+  lbStep(['룩은 앞뒤와 옆으로 똑바로 가요. 길이 막히지 않으면 몇 칸이든 갈 수 있어요.','The rook moves in straight lines: forward, back and sideways, as many squares as it likes while the path is clear.'],{fen:'k7/8/8/8/3R4/8/8/7K w - - 0 1',dots:['d4'],v:h=>h.moves('d4').length===14}),
+  lbStep(['비숍은 대각선으로 비스듬히 가요. 그래서 처음에 선 칸과 같은 색 칸에만 다녀요.','The bishop moves diagonally, as far as the path is clear, so it always stays on squares of one color.'],{fen:'k7/8/8/8/3B4/8/8/7K w - - 0 1',dots:['d4'],v:h=>h.moves('d4').length===13}),
+  lbStep(['룩도 비숍도 다른 기물을 뛰어넘지 못해요. 상대 기물이 있는 칸에 들어가면 그 기물을 잡아요.','Rooks and bishops can’t jump over pieces. They capture an enemy piece by landing on its square.'],{fen:'k7/8/3P4/8/3R2n1/8/8/7K w - - 0 1',dots:['d4'],hl:{lbx:['d7','d8']},v:h=>!h.moves('d4').some(m=>m.t===h.sq('d7'))&&h.moves('d4').some(m=>m.t===h.sq('g4')&&m.c)}),
+  lbStep(['해 봐요! 비숍으로 상대 룩을 잡아요. 비숍을 누르고, 갈 칸을 눌러요.','Your turn! Capture the enemy rook with the bishop. Tap the bishop, then tap where it goes.'],{fen:'k7/8/5r2/8/8/8/1B6/7K w - - 0 1',want:['b2f6'],ok:['잡았어요! 비숍이 대각선으로 쭉 갔어요.','Got it! The bishop slid all the way along the diagonal.'],miss:['비숍은 대각선으로 가요. 룩까지 길이 열려 있는지 봐요!','Bishops go diagonally. Is the path to the rook open?']})]},
+ queen:{icon:5,title:['퀸과 킹','Queen and king'],key:[['퀸은 룩과 비숍을 합친 기물: 똑바로도 대각선으로도 멀리 가요.','The queen is a rook and a bishop in one: straight or diagonal, as far as the path is clear.'],['킹은 모든 방향으로 한 칸씩. 공격받는 칸에는 못 가요.','The king steps one square any way, but never onto an attacked square.']],steps:[
+  lbStep(['퀸은 룩과 비숍을 합친 기물이에요. 똑바로도, 대각선으로도 멀리 갈 수 있어서 가장 힘이 세요.','The queen is a rook and a bishop in one. She goes straight or diagonally, as far as the path is clear, so she is the strongest piece.'],{fen:'k7/8/8/8/3Q4/8/8/7K w - - 0 1',dots:['d4'],v:h=>h.moves('d4').length===27}),
+  lbStep(['킹도 모든 방향으로 갈 수 있지만, 딱 한 칸씩만 가요.','The king can also go in any direction, but only one square at a time.'],{fen:'k7/8/8/8/4K3/8/8/8 w - - 0 1',dots:['e4'],v:h=>h.moves('e4').length===8}),
+  lbStep(['킹은 상대가 공격하는 칸으로는 절대 못 가요. ✕ 칸은 상대 룩이 지키고 있어요.','The king may never step onto a square the enemy attacks. The rook guards the squares marked ✕.'],{fen:'k2r4/8/8/8/4K3/8/8/8 w - - 0 1',dots:['e4'],hl:{lbx:['d3','d4','d5']},arrows:[['d8','d3','r']],v:h=>h.moves('e4').length===5&&!h.moves('e4').some(m=>(m.t&7)===3)}),
+  lbStep(['해 봐요! 킹을 안전한 칸으로 한 칸 옮겨요.','Your turn! Move the king one square to a safe spot.'],{fen:'k2r4/8/8/8/4K3/8/8/8 w - - 0 1',test:()=>true,answer:'e4f4',ok:['좋아요! 공격받지 않는 칸으로 갔어요.','Nice! You moved to a square that is not attacked.'],nope:['그 칸은 룩이 지키고 있어요. 점이 있는 칸으로 가요.','The rook guards that square. Pick a square with a dot.']})]},
+ knight:{icon:2,title:['나이트','Knight'],key:[['나이트는 L자 모양: 두 칸 가고 옆으로 한 칸.','The knight moves in an L: two squares, then one to the side.'],['나이트만 다른 기물을 뛰어넘을 수 있어요.','Only the knight can jump over other pieces.']],steps:[
+  lbStep(['나이트는 L자 모양으로 움직여요. 한쪽으로 두 칸 가고, 옆으로 한 칸!','The knight moves in an L shape: two squares one way, then one square to the side.'],{fen:'k7/8/8/8/3N4/8/8/7K w - - 0 1',dots:['d4'],arrows:[['d4','e6','on'],['d4','b3','on']],v:h=>h.moves('d4').length===8}),
+  lbStep(['나이트는 다른 기물을 뛰어넘을 수 있는 하나뿐인 기물이에요. 폰들 너머로 훌쩍!','The knight is the only piece that can jump over other pieces. Hop, right over the pawns!'],{fen:'k7/8/8/8/8/8/PPP5/1N5K w - - 0 1',dots:['b1'],arrows:[['b1','c3','on']],v:h=>h.moves('b1').length===3}),
+  lbStep(['해 봐요! 나이트로 상대 룩을 잡아요.','Your turn! Capture the enemy rook with the knight.'],{fen:'7k/8/8/2br4/8/2N5/8/7K w - - 0 1',want:['c3d5'],ok:['잡았어요! L자 끝에 룩이 있었어요.','Got it! The rook was at the end of an L.'],miss:['나이트는 L자로만 가요. 룩이 L자 끝에 있나요?','The knight only moves in an L. Is the rook at the end of one?']})]},
+ pawn:{icon:1,title:['폰','Pawn'],key:[['폰은 앞으로 한 칸, 처음 자리에서는 두 칸까지 갈 수 있어요.','Pawns move forward one square, or two from their starting square.'],['폰은 앞쪽 대각선으로만 잡아요. 뒤로는 못 가요.','Pawns capture one square diagonally forward, and never move back.']],steps:[
+  lbStep(['폰은 앞으로 한 칸씩 가요. 처음 자리에서는 두 칸 갈 수도 있어요. 뒤로는 못 가요.','A pawn moves forward one square. From its starting square it may move two. It can never move backward.'],{fen:'k7/8/8/8/1P6/8/4P3/7K w - - 0 1',dots:['e2','b4'],v:h=>h.moves('e2').length===2&&h.moves('b4').length===1}),
+  lbStep(['해 봐요! 처음 자리에 있는 폰 하나를 두 칸 앞으로 보내요.','Your turn! Move a pawn from its starting square two squares forward.'],{fen:'k7/8/8/8/8/8/PPPP4/7K w - - 0 1',test:(p,m)=>!!(m.fl&1),answer:'d2d4',ok:['좋아요! 처음 한 번은 두 칸도 돼요.','Good! On its first move a pawn may go two.'],miss:['한 칸도 괜찮지만, 이번엔 두 칸 가 봐요!','One square is fine too, but this time try two!']}),
+  lbStep(['폰은 잡을 때만 앞쪽 대각선으로 한 칸 가요. 바로 앞에 있는 기물은 잡지 못하고, 길이 막혀요.','A pawn captures one square diagonally forward. It can’t capture the piece straight in front; that piece just blocks the way.'],{fen:'k7/8/8/3npb2/4P3/8/8/7K w - - 0 1',dots:['e4'],hl:{lbx:['e5']},v:h=>h.moves('e4').length===2&&h.moves('e4').every(m=>m.c)}),
+  lbStep(['해 봐요! 폰으로 상대 기물을 하나 잡아요.','Your turn! Capture an enemy piece with your pawn.'],{fen:'k7/8/8/3npb2/4P3/8/8/7K w - - 0 1',want:['e4d5','e4f5'],ok:['잡았어요! 폰은 대각선으로 잡아요.','Got it! Pawns capture diagonally.'],nope:['바로 앞은 막혀 있어요. 앞쪽 대각선을 봐요!','Straight ahead is blocked. Look diagonally forward!']})]},
+ values:{icon:'💎',title:['기물 점수','Piece points'],key:[['폰 1 · 나이트 3 · 비숍 3 · 룩 5 · 퀸 9점','Pawn 1 · knight 3 · bishop 3 · rook 5 · queen 9'],['주고받기 전에 얻는 점수와 잃는 점수를 비교해요.','Before a trade, compare the points you win with the points you lose.']],steps:[
+  {say:['기물마다 점수가 있어요. 폰 1점, 나이트 3점, 비숍 3점, 룩 5점, 퀸 9점! 킹은 점수가 없어요. 킹이 체크메이트되면 게임이 끝나니까요.','Each piece has points: pawn 1, knight 3, bishop 3, rook 5, queen 9. The king has no points, because when the king is checkmated the game is over.'],art:box=>{box.innerHTML=`<div class="lbw">${valuesRow()}</div>`}},
+  lbStep(['나이트(3점)로 퀸(9점)을 잡고 폰이 나이트를 다시 잡아도, 9 − 3 = 6점 이득이에요.','Take a queen (9) with a knight (3). Even if the pawn takes your knight back, you are 9 − 3 = 6 points ahead.'],{fen:'6k1/8/3p4/4q3/8/5N2/8/6K1 w - - 0 1',arrows:[['f3','e5','g'],['d6','e5','r']],cap:()=>`${lbPc(5|BLACK)} 9 − ${lbPc(2)} 3 = <b>+6</b>`,v:h=>h.attacks(h.after('f3e5'),'d6','e5')}),
+  lbStep(['해 봐요! 나이트로 잡을 수 있는 기물이 두 개예요. 점수가 더 큰 기물을 잡아요.','Your turn! The knight can capture two pieces. Take the one worth more points.'],{fen:'7k/8/2r1p3/8/3N4/8/8/K7 w - - 0 1',want:['d4c6'],ok:['맞아요! 룩은 5점, 폰은 1점이에요.','Right! The rook is worth 5 and the pawn only 1.'],no:(p,m,u)=>u==='d4e6'?['폰은 1점이에요. 룩은 5점이라 더 커요!','A pawn is worth 1. The rook is worth 5!']:null,miss:['나이트로 잡을 수 있는 두 기물을 찾아서 점수를 비교해요.','Find the two pieces the knight can take and compare their points.'],v:h=>!h.after('d4c6').attacked(h.sq('c6'),BLACK)&&!!h.pos.fromUci('d4e6')})]},
+ check:{icon:'⚠️',title:['체크와 피하는 법','Check and how to escape it'],key:[['킹이 공격받는 것이 체크예요.','Check means the king is under attack.'],['체크에서 벗어나기: ① 피하기 ② 막기 ③ 잡기','Get out of check: ① move away, ② block, ③ capture.'],['셋 다 안 되면 체크메이트, 게임이 끝나요.','If none of them works, it is checkmate and the game is over.']],steps:[
+  lbStep(['킹이 공격받으면 ‘체크’라고 해요. 체크를 받으면 바로 킹을 구해야 해요.','When a king is attacked, it is in check. A king in check must be saved right away.'],{fen:'4r2k/8/8/8/8/8/8/4K3 w - - 0 1',arrows:[['e8','e1','r']],v:h=>h.pos.inCheck()}),
+  lbStep(['체크에서 벗어나는 방법은 세 가지예요. ① 킹이 피하기 ② 사이를 막기 ③ 공격한 기물 잡기.','There are three ways out of check: ① move the king away, ② block the attack, ③ capture the attacker.'],{fen:'7k/8/8/4r3/8/5N2/8/2B1K3 w - - 0 1',arrows:[['e1','d1','g','1'],['c1','e3','b','2'],['f3','e5','o','3']],v:h=>h.pos.inCheck()&&['e1d1','c1e3','f3e5'].every(u=>!!h.pos.fromUci(u))&&!h.pos.fromUci('e1e2')}),
+  lbStep(['해 봐요! 체크에서 벗어나요. 세 방법 중 아무거나 좋아요.','Your turn! Get out of check. Any of the three ways is fine.'],{fen:'7k/8/8/4r3/8/5N2/8/2B1K3 w - - 0 1',test:()=>true,answer:'f3e5',ok:(p,m)=>typeOf(m.p)===6?['① 킹이 피했어요! 잘했어요.','① The king moved away. Well done!']:m.c?['③ 공격한 룩을 잡았어요! 최고예요.','③ You captured the attacking rook. Great!']:['② 사이를 막았어요! 잘했어요.','② You blocked the attack. Well done!'],nope:['그 수로는 체크가 안 풀려요. 점이 있는 칸만 돼요.','That doesn’t get you out of check. Only squares with a dot work.']})]},
+ mate:{icon:'🏁',title:['체크메이트','Checkmate'],key:[['체크메이트: 체크인데 피하기·막기·잡기가 모두 안 될 때예요.','Checkmate: the king is in check and can’t move away, block or capture.'],['체크메이트를 하면 게임에서 이겨요!','Checkmate wins the game!']],steps:[
+  lbStep(['체크인데 ① 피할 칸도 없고 ② 막을 수도 없고 ③ 잡을 수도 없으면 체크메이트! 체크메이트를 하면 게임에서 이겨요.','If the king is in check and ① can’t move away, ② can’t block and ③ can’t capture, it is checkmate. Checkmate wins the game!'],{fen:'4R1k1/5ppp/8/8/8/8/8/6K1 b - - 0 1',arrows:[['e8','g8','r']],hl:{lbx:['f8','h8']},v:h=>h.pos.status()==='mate'}),
+  lbStep(['그런데 폰 하나가 미리 앞으로 나가 있었다면? 킹이 빈칸으로 피할 수 있으니 체크메이트가 아니라 그냥 체크예요.','But what if one pawn had moved up earlier? The king can slip into the gap, so it is only check, not checkmate.'],{fen:'4R1k1/5pp1/7p/8/8/8/8/6K1 b - - 0 1',arrows:[['g8','h7','g']],v:h=>h.pos.inCheck()&&!h.pos.status()&&!!h.pos.fromUci('g8h7')}),
+  lbStep(['해 봐요! 룩으로 체크메이트를 해요.','Your turn! Checkmate with the rook.'],{fen:'7k/6pp/8/8/8/8/8/R5K1 w - - 0 1',test:p=>p.status()==='mate',answer:'a1a8',ok:['체크메이트! 킹이 갈 곳이 하나도 없어요.','Checkmate! The king has nowhere to go.'],no:p=>p.inCheck()?['체크는 맞아요. 그런데 킹이 피할 수 있어요.','That is check, but the king can still escape.']:null,miss:['킹이 갇혀 있는 맨 뒷줄을 노려 봐요!','Aim at the back row where the king is stuck!'],v:h=>h.mates()===1})]},
+ stale:{icon:'🤝',title:['스테일메이트','Stalemate'],key:[['스테일메이트: 둘 수가 없는데 체크는 아니면 무승부예요.','Stalemate: no legal move, but not in check. It is a draw.'],['이기고 있을 땐, 체크메이트가 아니라면 상대에게 둘 수를 남겨 줘요.','When you are winning, leave the other side a move unless you are giving checkmate.']],steps:[
+  lbStep(['스테일메이트! 둘 차례인데 둘 수 있는 수가 하나도 없고, 체크도 아니라서 무승부예요.','Stalemate! The player to move has no legal move and is not in check, so it is a draw.'],{fen:'k7/8/1Q6/8/8/8/8/7K b - - 0 1',hl:{lbx:['a7','b7','b8']},v:h=>h.pos.status()==='stalemate'}),
+  lbStep(['흑 킹은 공격받고 있지 않아요. 그런데 갈 수 있는 칸을 퀸이 모두 지키고, 다른 기물도 없어요. 그래서 비겨요.','The black king is not attacked. But the queen guards every square it could go to, and there is no other piece to move. So it is a draw.'],{fen:'k7/8/1Q6/8/8/8/8/7K b - - 0 1',arrows:[['b6','a7','r'],['b6','b8','r']],v:h=>h.pos.status()==='stalemate'&&!h.pos.inCheck()}),
+  lbStep(['해 봐요! 퀸으로 체크메이트를 해요. 스테일메이트가 되지 않게 조심!','Your turn! Checkmate with the queen, and be careful not to make stalemate!'],{fen:'k7/8/1K6/8/2Q5/8/8/8 w - - 0 1',test:p=>p.status()==='mate',answer:'c4c8',ok:['체크메이트! 스테일메이트를 피했어요.','Checkmate! You avoided stalemate.'],no:p=>p.status()==='stalemate'?['앗, 스테일메이트예요! 둘 수가 없는데 체크가 아니라서 비겨요. 다시 해 봐요.','Oops, stalemate! They can’t move but are not in check, so it is a draw. Try again.']:p.inCheck()?['체크지만 킹이 피할 수 있어요.','That is check, but the king can escape.']:null,miss:['킹을 공격하면서 도망칠 칸도 막는 수를 찾아요.','Find a move that attacks the king and covers its escape squares too.'],v:h=>h.after('c4c8').status()==='mate'&&h.after('c4c7').status()==='stalemate'})]},
+ castle:{icon:'🏰',title:['캐슬링','Castling'],key:[['캐슬링: 킹이 룩 쪽으로 두 칸, 룩은 킹 바로 옆으로 가요.','Castling: the king moves two squares toward a rook, and the rook lands right beside it.'],['킹과 룩이 처음 자리이고 사이가 비어야 해요. 킹이 체크이거나 공격받는 칸을 지나가면 안 돼요.','Neither has moved, the squares between are empty, and the king is not in check or crossing an attacked square.']],steps:[
+  lbStep(['캐슬링은 킹과 룩이 한 번에 함께 움직이는 특별한 수예요. 킹이 룩 쪽으로 두 칸 가고, 룩은 킹을 넘어 바로 옆에 서요.','Castling is a special move where the king and a rook move together. The king steps two squares toward the rook, and the rook jumps over to stand right beside it.'],{fen:'r3k2r/pppppppp/8/8/8/8/PPPPPPPP/R3K2R w KQkq - 0 1',demo:['e1g1','e8c8'],cap:['백: 킹 쪽 캐슬링 · 흑: 퀸 쪽 캐슬링','White: kingside · Black: queenside'],v:h=>!!h.pos.fromUci('e1c1')}),
+  lbStep(['조건이 있어요. 킹과 그 룩이 아직 한 번도 움직이지 않았고, 둘 사이 칸이 모두 비어 있어야 해요.','There are rules. The king and that rook must not have moved yet, and every square between them must be empty.'],{fen:'r3k2r/pppppppp/8/8/8/8/PPPPPPPP/R3K2R w KQkq - 0 1',hl:{good:['b1','c1','d1','f1','g1']},v:h=>!!h.pos.fromUci('e1g1')&&!!h.pos.fromUci('e1c1')}),
+  lbStep(['체크를 받고 있을 때나, 킹이 지나가거나 도착할 칸을 상대가 공격할 때도 캐슬링은 못 해요. 여기선 비숍이 길목을 지켜요.','You also can’t castle while in check, or if the king would cross or land on a square the enemy attacks. Here the bishop guards the way.'],{fen:'4k3/8/8/8/2b5/8/8/4K2R w K - 0 1',arrows:[['c4','f1','r']],hl:{bad:['f1'],lbx:['g1']},v:h=>!h.pos.fromUci('e1g1')&&!h.pos.inCheck()&&h.attacks(h.pos,'c4','f1')}),
+  lbStep(['해 봐요! 캐슬링을 해요. 킹을 누르고, 룩 쪽으로 두 칸 옆 칸을 눌러요.','Your turn! Castle. Tap the king, then the square two steps toward a rook.'],{fen:'r3k2r/ppp2ppp/2n2n2/3pp3/3PP3/2N2N2/PPP2PPP/R3K2R w KQkq - 0 1',test:(p,m)=>!!(m.fl&4),answer:'e1g1',ok:['캐슬링 성공! 킹은 안전하게, 룩은 싸우러 나왔어요.','You castled! The king is safe and the rook is ready to play.'],miss:['캐슬링은 킹을 룩 쪽으로 두 칸 옮겨요.','To castle, move the king two squares toward a rook.']})]},
+ ep:{icon:'👻',title:['앙파상','En passant'],key:[['두 칸 뛴 상대 폰이 내 폰 옆에 서면, 지나간 칸으로 가며 잡을 수 있어요.','If an enemy pawn jumps two squares to land beside yours, capture it on the square it skipped.'],['앙파상은 바로 다음 수에만 할 수 있어요.','En passant is only allowed on the very next move.']],steps:[
+  lbStep(['상대 폰이 처음 자리에서 두 칸 뛰어 내 폰 바로 옆에 서면, 한 칸만 온 것처럼 대각선으로 잡을 수 있어요. 이걸 ‘앙파상’이라고 해요.','When an enemy pawn jumps two squares from its start and lands right beside your pawn, you may capture it as if it had moved only one. This is called en passant.'],{fen:'4k3/3p4/8/4P3/8/8/8/4K3 b - - 0 1',demo:['d7d5','e5d6'],v:h=>{const m=h.after('d7d5').fromUci('e5d6');return !!m&&!!(m.fl&2)}}),
+  lbStep(['해 봐요! 상대 폰이 방금 두 칸 뛰었어요. 내 폰을 상대 폰이 지나간 칸으로 옮겨서 잡아요.','Your turn! The enemy pawn just jumped two squares. Capture it by moving your pawn to the square it skipped.'],{fen:'4k3/8/8/3pP3/8/8/8/4K3 w - d6 0 2',last:'d7d5',want:['e5d6'],ok:['앙파상! 지나간 폰을 잡았어요.','En passant! You caught the pawn that ran past.'],no:(p,m,u)=>u==='e5e6'?['앞으로 가도 되지만, 지금은 앙파상으로 잡을 수 있어요!','Moving forward is allowed, but right now you can capture en passant!']:null,v:h=>!!(h.pos.fromUci('e5d6').fl&2)}),
+  {say:['앙파상은 상대 폰이 두 칸 뛴 바로 다음 수에만 할 수 있어요. 한 수 지나면 기회가 사라져요.','You can only capture en passant on the very next move. Wait one move and the chance is gone.']}]},
+ promo:{icon:'⭐',title:['폰 승진','Promotion'],key:[['폰이 끝줄에 닿으면 퀸·룩·비숍·나이트 중 하나로 바뀌어요.','A pawn that reaches the last row becomes a queen, rook, bishop or knight.'],thTip('pr')],steps:[
+  lbStep(['폰이 맨 끝줄에 닿으면 퀸, 룩, 비숍, 나이트 중 하나로 바뀌어요. 이걸 ‘승진’이라고 해요. 보통은 가장 센 퀸을 골라요.','When a pawn reaches the last row, it turns into a queen, rook, bishop or knight. This is called promotion. Most of the time you pick the queen, the strongest.'],{fen:'8/1P5k/8/8/8/8/8/K7 w - - 0 1',demo:['b7b8q'],v:h=>!!h.pos.fromUci('b7b8q')}),
+  {say:['승진할 때는 네 기물 중 하나를 골라요. 대결에서는 이렇게 고르는 창이 떠요.','When you promote, you pick one of four pieces. In a battle, a little menu like this pops up.'],art:box=>{box.innerHTML=`<div class="lbw"><div class="lbpro ps-${S.equip.pieces}">${[5,4,3,2].map(t=>pieceHTML(t)).join('')}</div></div>`}},
+  lbStep(['해 봐요! 폰 앞이 막혀 있어요. 대각선으로 상대 기물을 잡으면서 끝줄에 가요.','Your turn! The way straight ahead is blocked. Capture diagonally to reach the last row.'],{fen:'2rn3k/3P4/8/8/8/8/8/K7 w - - 0 1',test:(p,m)=>!!m.pr,answer:'d7c8q',ok:['승진! 폰이 퀸이 됐어요.','Promotion! Your pawn became a queen.'],nope:['바로 앞은 나이트가 막고 있어요. 앞쪽 대각선을 봐요!','The knight blocks the way. Look diagonally forward!'],v:h=>!h.pos.fromUci('d7d8')})]},
+ free:{icon:'🎁',title:SKILL_NAME.h,key:[['잡은 뒤에 내 기물이 다시 잡히지 않으면 공짜예요.','If nobody can take your piece back, the capture is free.'],thTip('h')],steps:[
+  lbStep(LESSONS[0].text,{fen:'6k1/2p5/3n1b2/8/8/8/1B6/3R2K1 w - - 0 1',arrows:[['d1','d6','o'],['c7','d6','r'],['b2','f6','g']],v:h=>!h.after('b2f6').attacked(h.sq('f6'),BLACK)&&h.after('d1d6').attacked(h.sq('d6'),BLACK)}),
+  lbStep(['룩으로 나이트를 잡으면 폰이 룩을 다시 잡아요. 비숍은 아무도 지키지 않으니 공짜예요!','If the rook takes the knight, the pawn takes the rook back. Nobody guards the bishop, so it is free!'],{fen:'6k1/2p5/3n1b2/8/8/8/1B6/3R2K1 w - - 0 1',hl:{bad:['d6'],good:['f6']},arrows:[['c7','d6','r']]}),
+  {say:LESSONS[0].demo,art:box=>{box.innerHTML=`<div class="lbw">${valuesRow()}<div class="lbcap">${lbPc(4|BLACK)} 5 − ${lbPc(3)} 3 = <b>+2</b></div></div>`}},
+  lbStep(['해 봐요! 공짜로 잡을 수 있는 기물을 찾아서 잡아요.','Your turn! Find a piece you can take for free, and take it.'],{fen:'6k1/5ppp/3p4/4n1b1/8/5N2/5PPP/6K1 w - - 0 1',want:['f3g5'],ok:['공짜! 아무도 비숍을 지키지 않았어요.','Free! Nobody was guarding the bishop.'],no:(p,m,u)=>u==='f3e5'?['그 나이트는 폰이 지키고 있어요. 잡으면 내 나이트도 잡혀요!','A pawn guards that knight. If you take it, your knight gets taken too!']:null,miss:thTip('h'),v:h=>!h.after('f3g5').attacked(h.sq('g5'),BLACK)&&h.after('f3e5').attacked(h.sq('e5'),BLACK)})]},
+ mate1:{icon:'👑',title:SKILL_NAME.m1,key:[['체크메이트: 킹이 피하지도, 막지도, 잡지도 못할 때예요.','Checkmate: the king can’t run away, block or capture.'],thTip('m1')],steps:[
+  lbStep(LESSONS[1].text,{fen:'4k3/4Q3/4K3/8/8/8/8/8 b - - 0 1',hl:{lbx:['d8','f8','d7','f7']},v:h=>h.pos.status()==='mate'}),
+  lbStep(LESSONS[1].demo,{fen:'6k1/5ppp/8/8/2B5/8/5PPP/3R2K1 w - - 0 1',arrows:[['d1','d8','o'],['c4','f7','o']],demo:['d1d8'],v:h=>h.after('d1d8').status()==='mate'&&h.after('c4f7').inCheck()&&!h.after('c4f7').status()}),
+  lbStep(['해 봐요! 한 수 만에 체크메이트를 찾아요.','Your turn! Find checkmate in one move.'],{fen:'r6k/5ppp/8/8/6Q1/8/1B3PPP/6K1 w - - 0 1',test:p=>p.status()==='mate',answer:'g4g7',ok:['체크메이트! 비숍이 퀸을 지켜 줘서 킹이 잡을 수 없어요.','Checkmate! The bishop guards the queen, so the king can’t take it.'],no:p=>p.inCheck()?['체크지만 상대가 막거나 피할 수 있어요. 다른 체크를 찾아봐요!','That is check, but they can block, capture or escape. Find another check!']:null,miss:thTip('m1'),v:h=>h.mates()===1&&h.after('g4c8').inCheck()&&!h.after('g4c8').status()})]},
+ fork:{icon:'🍴',title:SKILL_NAME.f,key:[['포크: 한 기물로 상대 기물 두 개를 한꺼번에 공격해요.','Fork: one piece attacks two enemy pieces at once.'],['체크하면서 다른 기물도 노리는 포크가 가장 강해요.','The strongest fork gives check and attacks another piece too.'],thTip('f')],steps:[
+  lbStep(LESSONS[2].text,{fen:'6k1/4r3/1q6/3N4/8/8/8/7K b - - 0 1',arrows:[['d5','b6','rn'],['d5','e7','rn']]}),
+  lbStep(LESSONS[2].demo,{fen:'r3k3/2N5/8/8/8/8/8/4K3 b - - 0 1',arrows:[['c7','e8','rn'],['c7','a8','rn']],v:h=>h.pos.inCheck()&&h.pos.legal().every(m=>{const Q=new Position(h.pos.fen());Q.make(m);return !!Q.fromUci('c7a8')})}),
+  lbStep(['해 봐요! 나이트로 체크하면서 퀸까지 공격하는 포크를 찾아요.','Your turn! Find a knight fork that gives check and attacks the queen too.'],{fen:'6k1/5ppp/2q5/3N4/8/8/5PPP/6K1 w - - 0 1',want:['d5e7'],ok:['포크! 킹이 피하고 나면 퀸을 잡아요.','Fork! Once the king steps away, you take the queen.'],no:p=>p.inCheck()?['체크는 맞아요! 그런데 퀸은 공격하지 않아요.','That is check! But it doesn’t attack the queen.']:null,miss:thTip('f'),v:h=>{const Q=h.after('d5e7');return Q.inCheck()&&h.attacks(Q,'e7','c6')&&!Q.attacked(h.sq('e7'),BLACK)}})]},
+ pin:{icon:'📌',title:SKILL_NAME.p,key:[['핀: 앞의 기물이 비키면 뒤의 큰 기물이 잡히니 못 움직여요.','Pin: the front piece can’t move, or the bigger piece behind it is lost.'],['꼬치: 앞의 큰 기물이 비키면 뒤의 기물을 잡아요.','Skewer: the big piece in front moves away, and you take the one behind.'],thTip('p')],steps:[
+  lbStep(PIN_T,{fen:'4k3/8/2n5/1B6/8/8/8/4K3 b - - 0 1',arrows:[['b5','e8','rdx']],v:h=>h.moves('c6').length===0&&!h.pos.inCheck()}),
+  lbStep(['해 봐요! 비숍 때문에 움직이지 못하는 상대 기물을 눌러요.','Your turn! Tap the enemy piece that can’t move because of the bishop.'],{fen:'4k3/8/2n5/1B6/8/8/8/4K3 b - - 0 1',tap:['c6'],ok:['맞아요! 나이트가 비키면 킹이 공격받아서 못 움직여요.','Right! If the knight moved, the king would be attacked, so it can’t move.'],miss:['비숍과 상대 킹 사이에 선 기물을 찾아봐요.','Look for the piece standing between the bishop and the king.'],v:h=>h.moves('c6').length===0}),
+  lbStep(SKW_T,{fen:'4q3/8/8/4k3/8/8/8/4R2K b - - 0 1',arrows:[['e1','e8','rdx']],demo:['e5d6','e1e8'],v:h=>h.pos.inCheck()&&h.pos.legal().every(m=>{const Q=new Position(h.pos.fen());Q.make(m);return !!Q.fromUci('e1e8')})}),
+  lbStep(LESSONS[3].demo+' '+L('비숍으로 핀을 만들어 봐요!','Make a pin with your bishop!'),{fen:'4k3/8/2n5/8/8/8/8/4KB2 w - - 0 1',test:p=>p.legal().every(m=>m.f!==Chess.sqOf('c6'))&&!p.inCheck(),answer:'f1b5',ok:['핀! 이제 나이트는 꼼짝 못 해요.','A pin! Now the knight is stuck.'],miss:thTip('p')})]},
+ mate2:{icon:'👑',title:SKILL_NAME.m2,key:[['첫 수로 킹을 가두고, 두 번째 수로 체크메이트!','First move: trap the king. Second move: checkmate!'],thTip('m2'),['상대가 어떻게 막을지도 생각해요.','Think about how they will defend.']],steps:[
+  lbStep(LESSONS[4].text,{fen:'k7/8/8/8/8/8/6R1/4K2R w - - 0 1',demo:['g2g7','a8b8','h1h8'],v:h=>{const Q=h.after('g2g7');return Q.legal().length===1&&h.after('h1h8',h.after('a8b8',Q)).status()==='mate'&&h.mates()===0}}),
+  lbStep(LESSONS[4].demo+' '+L('여기서는 룩을 내주는 희생이에요!','Here it is a rook sacrifice!'),{fen:'3r2k1/5ppp/8/8/8/8/4RPPP/4R1K1 w - - 0 1',demo:['e2e8','d8e8','e1e8'],v:h=>{const Q=h.after('e2e8');return Q.legal().length===1&&h.after('e1e8',h.after('d8e8',Q)).status()==='mate'}}),
+  lbStep(['해 봐요! 두 수 만에 체크메이트해요. 먼저 킹이 빠져나갈 줄을 막아요.','Your turn! Checkmate in two moves. First, cut off the row the king could escape to.'],{fen:'7k/8/8/8/8/8/1R6/R3K3 w - - 0 1',test:p=>lbMate2(p)?true:p.legal().length?['그러면 킹이 빠져나갈 수 있어요. 먼저 킹이 갇히게 길을 막아 봐요!','Then the king can slip away. First cut off its escape!']:['앗, 스테일메이트예요! 상대가 둘 수 있는 수를 남겨 줘요.','Oops, stalemate! Leave them a move.'],answer:'b2b7',ok:['좋아요! 킹이 맨 끝줄에 갇혔어요.','Good! The king is trapped on the back row.'],
+   then:{reply:p=>p.fromUci('h8g8')||p.legal()[0],say:['상대 킹이 움직였어요. 이제 체크메이트!','Their king moved. Now checkmate!'],test:p=>p.status()==='mate',answer:lbMateMove,ok:['체크메이트! 두 수 만에 해냈어요.','Checkmate in two! You did it.'],no:p=>p.inCheck()?['체크지만 킹이 피할 수 있어요.','That is check, but the king can escape.']:null,miss:['맨 끝줄을 노려 봐요!','Aim at the back row!']},
+   v:h=>h.mates()===0&&lbMate2(h.after('b2b7'))})]},
+ discover:{icon:'💥',title:THEMES.d.name,key:[['숨은 공격: 내 기물이 비키면 뒤의 룩·비숍·퀸이 공격해요.','Discovered attack: move one piece, and the rook, bishop or queen behind it attacks.'],['비키는 기물로 체크까지 하면 두 곳을 한 번에 노려요.','If the piece that moves also gives check, you threaten two things at once.'],thTip('d')],steps:[
+  lbStep(LESSONS[5].demo,{fen:'6k1/3q1ppp/8/8/8/3B4/5PPP/3R2K1 w - - 0 1',arrows:[['d1','d7','rdx']],v:h=>!h.attacks(h.pos,'d1','d7')&&h.attacks(h.after('d3h7'),'d1','d7')}),
+  lbStep(['비숍이 비키면서 체크까지 하면? 상대가 킹을 지키는 동안 룩이 퀸을 잡아요.','What if the bishop moves away with check? While they save their king, the rook takes the queen.'],{fen:'6k1/3q1ppp/8/8/8/3B4/5PPP/3R2K1 w - - 0 1',demo:['d3h7','g8h7','d1d7'],v:h=>{const Q=h.after('d3h7');return Q.inCheck()&&Q.legal().every(m=>{const R=new Position(Q.fen());R.make(m);return !!R.fromUci('d1d7')})}}),
+  lbStep(['해 봐요! 나이트를 비켜서 숨은 공격을 해요. 체크까지 하면 최고!','Your turn! Move the knight to open a discovered attack. Even better with check!'],{fen:'4q1k1/5ppp/8/8/4N3/8/5PPP/4R1K1 w - - 0 1',want:['e4f6'],ok:['최고예요! 체크를 막는 동안 룩이 퀸을 잡아요.','Brilliant! While they deal with the check, your rook takes the queen.'],no:(p,m)=>m.f===Chess.sqOf('e4')?['룩이 퀸을 노리게 됐어요! 그런데 상대 퀸이 먼저 내 룩을 잡을 수 있어요. 체크하면서 비켜 봐요.','Now your rook attacks the queen! But their queen can take your rook first. Move away with check.']:null,miss:thTip('d'),
+   v:h=>{const Q=h.after('e4f6');return Q.inCheck()&&h.attacks(Q,'e1','e8')&&h.moves('e4').filter(m=>h.pos.uci(m)!=='e4f6').every(m=>{const R=new Position(h.pos.fen());R.make(m);return !!R.fromUci('e8e1')})}})]},
+ mixed:{icon:'🐉',title:SKILL_NAME.a,key:[['문제를 보면 어떤 기술인지 먼저 생각해요.','First think about which trick fits the puzzle.'],thTip('a')],steps:[
+  {say:LESSONS[5].text,art:box=>{box.innerHTML=`<div class="lbw"><div class="lbth">${['h','m1','f','p','d'].map(k=>`<span>${THEMES[k].icon} ${esc(THEMES[k].name)}</span>`).join('')}</div></div>`}},
+  lbStep(['어떤 기술인지 모르겠으면 체크, 잡기, 공격 순서로 살펴봐요. 먼저 체크! 퀸이 1, 2, 3번 칸으로 가면 모두 체크예요.','Not sure which trick fits? Look at checks, then captures, then attacks. Checks first: the queen gives check on square 1, 2 or 3.'],{fen:'r5k1/6pp/8/8/8/8/5PPP/3Q2K1 w - - 0 1',tags:[['d8','1'],['b3','2'],['d5','3']],v:h=>{const c=h.pos.legal().filter(m=>{h.pos.make(m);const k=h.pos.inCheck();h.pos.undo();return k}).map(m=>h.pos.uci(m)).sort().join();return c==='d1b3,d1d5,d1d8'}}),
+  lbStep(['해 봐요! 세 체크 중에서 상대 룩까지 공격하는 수를 골라요.','Your turn! Of the three checks, pick the one that also attacks the rook.'],{fen:'r5k1/6pp/8/8/8/8/5PPP/3Q2K1 w - - 0 1',want:['d1d5'],ok:['맞아요! 퀸 포크예요. 킹이 피하면 룩을 잡아요.','Right! A queen fork. When the king steps away, you take the rook.'],no:(p,m,u)=>u==='d1d8'?['체크지만 상대 룩이 퀸을 잡아 버려요!','That is check, but their rook just takes your queen!']:u==='d1b3'?['체크는 맞아요. 그런데 룩은 공격하지 않아요.','That is check, but it doesn’t attack the rook.']:null,miss:thTip('a'),v:h=>h.attacks(h.after('d1d5'),'d5','a8')&&!h.after('d1d5').attacked(h.sq('d5'),BLACK)})]},
+};
+const CH_GROUPS=[{name:['기물과 규칙','Pieces and rules'],ids:['rook','queen','knight','pawn','values','check','mate','stale','castle','ep','promo']},{name:['전술 기술','Tactics'],ids:['free','mate1','fork','pin','mate2','discover','mixed']}];
+const CH_OF=['free','mate1','fork','pin','mate2','mixed'];                                                     // each land's own lesson (map banner)
+const CH_START=[['values','free'],['check','mate1'],['knight','fork'],['rook','pin'],['queen','mate2'],['mixed','discover']]; // before a land's first stage
+const TH_LS={h:'free',m1:'mate1',f:'fork',p:'pin',s:'pin',m2:'mate2',d:'discover',pr:'promo',a:'mixed'};       // before the first puzzle of a theme
+const BATTLE_LS=['check','mate','pawn','stale'];                                                              // before a battle, two at most
+const chWho=()=>{const c=COACHES[S.equip.coach]||COACHES.puppy;return {img:c.img,name:c.name}};
+function chL(id){const d=CH_LS[id];if(!d)return null;return {id:'ch:'+id,icon:typeof d.icon==='number'?`<span class="lbic ps-${S.equip.pieces}">${pieceHTML(d.icon)}</span>`:d.icon,title:d.title,who:chWho(),steps:d.steps,key:d.key}}
+const chSeen=id=>MiniLesson.seen('ch:'+id);
+const CH_OFFERED=new Set(); // offered once per visit, so closing a lesson early never makes it chase the child
+// play up to two lessons not watched yet, then go on (then gets how many were offered)
+function chBefore(ids,then){const list=ids.filter(id=>CH_LS[id]&&!chSeen(id)&&!CH_OFFERED.has(id)).slice(0,2),n=list.length;
+ const step=()=>{const id=list.shift();if(!id){then&&then(n);return}CH_OFFERED.add(id);MiniLesson.before(chL(id),step)};step()}
+const pzBefore=(idx,go)=>chBefore([TH_LS[PUZ[idx].theme]].filter(Boolean),go);
+// a special move the child has not learned turns up in a battle: teach it now (once per battle)
+function battleTeach(){const bt=BT;if(!bt||bt.over||bt.taught||MiniLesson.on||CUR||BD.pos.turn!==bt.me)return;const ms=BD.pos.legal();
+ const t=[['ep',m=>m.fl&2],['promo',m=>m.pr],['castle',m=>m.fl&4]].find(([id,f])=>!chSeen(id)&&!CH_OFFERED.has(id)&&ms.some(f));if(!t)return;
+ bt.taught=true;CH_OFFERED.add(t[0]);say(L('지금 쓸 수 있는 특별한 수가 있어요! 잠깐 배워 봐요.','There is a special move you can use right now! Let’s learn it quickly.'),false);
+ setTimeout(()=>{if(BT===bt&&!bt.over&&!MiniLesson.on)MiniLesson.open(chL(t[0]))},500)}
+// the concept notebook (📒 home tile): every lesson in two groups, the watched ones ticked
+function openClass(){MiniLesson.book({title:['체스 개념 노트','Chess concept notebook'],groups:CH_GROUPS.map(g=>({name:g.name,items:g.ids.map(id=>{const ls=chL(id);return {id:ls.id,icon:ls.icon,title:ls.title,key:ls.key,lesson:()=>chL(id)}})}))})}
+// every board claim, checked with the engine: legal positions, legal moves and arrows, accepted answers, and o.v
+function lbVerify(){const out=[],leg=(Q,u)=>{const m=Q.fromUci(u);return m&&Q.uci(m).startsWith(u)?m:null};
+ for(const id in CH_LS){const d=CH_LS[id];
+  (d.key||[]).forEach(k=>{if(String(k[0]).length>70||String(k[1]).length>110)out.push(id+': key line too long: '+String(k[1]).slice(0,40))});
+  if(d.steps.length<3||d.steps.length>6)out.push(id+': '+d.steps.length+' steps');
+  d.steps.forEach((st,i)=>{const o=st.board,at=id+' #'+(i+1);if(!o)return;
+   try{const P=new Position(o.fen),bd=P.fen().split(' ')[0],rows=bd.split('/');
+    if((bd.match(/K/g)||[]).length!==1||(bd.match(/k/g)||[]).length!==1)out.push(at+': one king each');
+    if(/[pP]/.test(rows[0]+rows[7]))out.push(at+': a pawn on an end row');
+    if(P.inCheck(P.turn^8))out.push(at+': the side not to move is in check');
+    for(const u of o.want||[])if(!leg(P,u))out.push(at+': want '+u+' is not legal');
+    if(o.demo){const Q=new Position(o.fen);for(const u of o.demo){const m=leg(Q,u);if(!m){out.push(at+': demo '+u+' is not legal');break}Q.make(m)}}
+    for(const a of o.arrows||[]){const [f,t,fl='']=typeof a==='string'?[a.slice(0,2),a.slice(2,4)]:a;if(!fl.includes('x')&&!lbAttacks(P,f,t))out.push(at+': arrow '+f+t+' is no move or attack')}
+    for(const s of o.tap||[])if(!P.b[sqv(s)])out.push(at+': tap '+s+' is empty');
+    if(st.try&&!o.tap){let x=o;const Q=new Position(o.fen);for(let n=0;x&&n<6;n++){const u=lbAns(Q,x),m=u&&leg(Q,u);if(!m){out.push(at+': answer '+u+' is not legal');break}
+     const uu=Q.uci(m);Q.make(m);if(!((x.want&&x.want.includes(uu))||(x.test&&x.test(Q,m,uu)===true))){out.push(at+': answer '+uu+' is not accepted');break}
+     if(!x.then)break;const r=lbReply(Q,x.then.reply);if(!r){out.push(at+': no reply');break}Q.make(r);x=x.then}}
+    if(o.v){const h={pos:new Position(o.fen),sq:sqv,attacks:lbAttacks,moves:(s,Q)=>(Q||h.pos).legal().filter(m=>m.f===sqv(s)),
+      after:(u,from)=>{const Q=new Position(from?from.fen():o.fen),m=leg(Q,u);if(!m)throw new Error(u+' is not legal');Q.make(m);return Q},
+      mates:Q=>{Q=Q||h.pos;return Q.legal().filter(m=>{Q.make(m);const r=Q.status()==='mate';Q.undo();return r}).length}};
+     if(o.v(h)!==true)out.push(at+': its claim is false')}
+   }catch(e){out.push(at+': '+e.message)}})}
+ return out}
+MiniLesson.cfg({voice:t=>speak(t),stop:()=>lbStop(),who:chWho()});
+
 // ---------------------------------------------------------------- start
 boardBuild();applyLang();updateHud();ensureMissions();$('homeLink').href='index.html?lang='+LANG;
 // No title screen: open straight onto the home screen
@@ -3483,8 +3741,10 @@ window.addEventListener('beforeunload',()=>{if(BT&&!BT.over)saveBattle();save()}
 window.__chessTest={get:()=>S,set:o=>{Object.assign(S,o);save();updateHud()},PUZ,ADV_STAGES,BD,
  solve:()=>{if(!PZ||PZ.done)return false;const m=BD.pos.fromUci(PZ.p.moves[PZ.step]);if(!m)return false;BD.onMove(m);return true},
  wrong:()=>{if(!PZ||PZ.done)return false;const exp=PZ.p.moves[PZ.step];const m=BD.pos.legal().find(x=>BD.pos.uci(x)!==exp&&!(()=>{BD.pos.make(x);const s=BD.pos.status()==='mate';BD.pos.undo();return s})());if(!m)return false;BD.onMove(m);return true},
- pz:()=>PZ,bt:()=>BT,rush:()=>RUSH,go,startStage,startBattle,startRated,bossIntro,battleOver:r=>battleOver(r,'test')};
+ pz:()=>PZ,bt:()=>BT,rush:()=>RUSH,go,startStage,startBattle,startRated,bossIntro,battleOver:r=>battleOver(r,'test'),
+ lessons:{verify:lbVerify,ids:Object.keys(CH_LS),open:id=>MiniLesson.open(chL(id)),book:openClass,teach:battleTeach}};
 </script>
+<script>/* mini-lesson pictures (prompt file step 23): shown on top of these lesson pages once the file exists */try{MiniLesson.cfg({pics:{'ch:values':{0:'images/ch-ls-values.webp'},'ch:castle':{0:'images/ch-ls-castle.webp'},'ch:stale':{0:'images/ch-ls-stalemate.webp'},'ch:ep':{2:'images/ch-ls-enpassant.webp'},'ch:promo':{0:'images/ch-ls-promotion.webp'}}})}catch(e){}</script>
 <script>/* Coach Moon says hello once a day, shares a tip and suggests a break after a long session */try{coachStart(["오늘도 체스 기사단 출동!", "Chess Knights, let’s go!"],[["퍼즐은 먼저 체크, 잡기, 공격을 찾아봐요!", "In puzzles, look for checks, captures and attacks first!"], ["급하게 두지 말고, 상대가 무엇을 노리는지 먼저 봐요.", "Don’t rush. First see what your opponent is aiming at."], ["막히면 힌트를 써도 괜찮아요. 힌트로도 배워요!", "Stuck? It’s fine to use a hint. Hints teach too!"]])}catch(e){}</script>
 </body>
 </html>

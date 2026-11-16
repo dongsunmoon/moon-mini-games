@@ -32,6 +32,7 @@ const L=(ko,en)=>LANG==='en'?en:ko;
 // · mx: kinds of questions the child got wrong (up to 40), from coachAnswer(ok,skillId,item) with
 //   item={id,q:[ko,en],a:[ko,en],g?:[ko,en],tip?:[ko,en]}: the latest example, the right answer, the child's answer,
 //   how many misses, and how many right answers in a row since the last miss (so the report can say "fixed now").
+// · ls: the mini lessons (MiniLesson, in lesson.js) the child watched to the end, with the first day.
 // A game's reset must call LR.forget() so the report forgets only that game; LR.resume() starts a fresh record.
 const LR=(()=>{const f=(location.pathname.split('/').pop()||'').replace(/\.html$/,'');
  const KEY={math_aquarium:'mathAquarium.learn',science_guardians:'scienceGuardians.learn',music_academy:'musicAcademy.learn',chess_knights:'chessKnights.learn',detective_game:'little-detective-learn',marble_rush_3d:'marbleRush.learn',coding_island:'pythonIsland.learn',python_island:'pythonIsland.learn'}[f];
@@ -58,6 +59,8 @@ const LR=(()=>{const f=(location.pathname.split('/').pop()||'').replace(/\.html$
    dirty=true},
   set(f){fn=f;setTimeout(save,1500)},save,
   stat(id){const x=(load().sk||{})[id];return x?{r:x[0],w:x[1]}:null},
+  // mini lessons watched to the end (MiniLesson): lesson id → the first day; les() returns them all
+  les(id){const r=load();if(id==null)return r.ls||{};if(!(r.ls||(r.ls={}))[id]){r.ls[id]=day();dirty=true;if(!off)save()}return r.ls},
   forget(){off=true;R=null;try{localStorage.removeItem(KEY)}catch(e){}},
   resume(){off=!KEY;R=null;dirty=false}}})();
 const coachEsc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -108,6 +111,77 @@ function coachStart(hello,tips){const game=(location.pathname.split('/').pop()||
    if(!retry){const c=new SpeechSynthesisUtterance(u.text);['lang','voice','rate','pitch','volume'].forEach(k=>{try{c[k]=u[k]}catch(e){}});setTimeout(()=>send(c,my,true),200)}
    else if(!told){told=true;if(typeof coachPop==='function')coachPop('idea','목소리가 잠깐 멈췄어요. 브라우저를 완전히 껐다 켜면 다시 들려요 🌙','The voice got stuck. Close the browser fully and open it again to hear it 🌙',{force:true,ms:8000})}},3000)};
  ss.speak=u=>{const my=gen,wait=cutAt+150-performance.now();if(wait>0)setTimeout(()=>send(u,my,false),wait);else send(u,my,false)}})();
+// Mini lessons (미니 수업) and the concept notebook (개념 노트), shared by every game. Kids asked for time to learn
+// before solving, so a teacher talks the child through a few short pages first: see, hear, then do one small thing.
+// · A lesson: {id, title:[ko,en], icon, who?:{img,name:[ko,en]}, steps:[...], key:[[ko,en],...], cta?:[ko,en]}
+//   Each step is {say:[ko,en], art?, try?, show?}. art is an HTML string, or a function (box,api) that draws the
+//   picture with the game's own helpers. On a "try" step the child does the small thing in the picture and the game
+//   calls api.done(); "🤔 알려 줘요" runs show(box,api) (or just api.done()) so not knowing never blocks or costs anything.
+//   after(box,api), if given, runs once the teacher has finished reading the step (for example to play a demo).
+//   key holds the 1–3 lines to remember; they close the lesson and stay in the notebook.
+// · MiniLesson.cfg({voice:(text,onEnd)=>…, stop:()=>…, who:{img,name}}) once per game: the game's own read-aloud (it
+//   respects the game's voice switch; onEnd, when the game supports it, runs after the line), what to stop when a page
+//   changes (demos, sounds), and the default teacher.
+// · MiniLesson.open(lesson,{onDone,onClose}) plays a lesson. MiniLesson.before(lesson,go) plays it the first time and
+//   then calls go(); later it calls go() at once. Closing early also calls go(), so a lesson never traps the child.
+// · MiniLesson.book({title,groups:[{name:[ko,en],items:[{id,title,icon,key,lesson}]}],open}) shows the notebook; an
+//   item's lesson is a lesson object or a function that returns one. After a lesson the notebook comes back.
+// · What was watched to the end is kept in the game's learning record (LR.les), so it resets with the game and the
+//   parents' report can show it.
+const MiniLesson=(()=>{let C={voice:null,who:null},el=null,cur=null,back=null,lastFocus=null;
+ const T=x=>Array.isArray(x)?L(x[0],x[1]):String(x==null?'':x),E=s=>coachEsc(T(s));
+ const seen=id=>{try{return !!LR.les()[id]}catch(e){return false}};
+ const talk=(t,cb)=>{try{if(C.voice){if(C.voice.length>1){C.voice(t,cb);return}C.voice(t)}}catch(e){}if(cb)setTimeout(cb,400)},
+  hush=()=>{try{if(C.stop)C.stop()}catch(e){}try{speechSynthesis.cancel()}catch(e){}};
+ function shell(cls){close(true);lastFocus=document.activeElement;el=document.createElement('div');el.className='mlx '+(cls||'');
+  el.setAttribute('role','dialog');el.setAttribute('aria-modal','true');document.body.appendChild(el);document.addEventListener('keydown',key,true);return el}
+ function close(quiet){if(!el)return;hush();document.removeEventListener('keydown',key,true);el.remove();el=null;const c=cur;cur=null;
+  if(!quiet){if(c&&c.o.onClose)c.o.onClose(c.done);if(back){const b=back;back=null;book(b.spec,b.at)}else if(lastFocus&&lastFocus.focus)try{lastFocus.focus()}catch(e){}}}
+ function key(e){if(!el)return;if(e.key==='Escape'){e.preventDefault();e.stopPropagation();close();return}
+  if(!cur)return;if(e.key==='ArrowRight'){const b=el.querySelector('[data-m=next]');if(b&&!b.disabled){e.preventDefault();b.click()}}else if(e.key==='ArrowLeft'&&cur.i>0){e.preventDefault();go(cur.i-1)}}
+ function open(ls,o={}){if(!ls||!ls.steps||!ls.steps.length)return;const who=ls.who||C.who||{img:'images/coach-moon-idea.webp',name:['문 코치','Coach Moon']};
+  shell('');cur={ls,o,who,i:0,done:false,ok:{}};
+  el.setAttribute('aria-labelledby','mlxT');
+  el.innerHTML=`<div class="mlx-card"><div class="mlx-top"><span class="mlx-kick">📖 ${L('미니 수업','Mini lesson')}</span><b id="mlxT">${ls.icon?ls.icon+' ':''}${E(ls.title)}</b><button type="button" class="mlx-x" data-m="x" aria-label="${L('닫기','Close')}">✕</button></div>
+   <div class="mlx-dots" aria-hidden="true"></div><div class="mlx-stage"></div>
+   <div class="mlx-talk"><img src="${coachEsc(who.img)}" alt="" onerror="this.remove()"><p aria-live="polite"></p><button type="button" class="mlx-hear" data-m="hear" aria-label="${L('다시 듣기','Hear again')}">🔊</button></div>
+   <div class="mlx-nav"></div></div>`;
+  el.addEventListener('click',e=>{const b=e.target.closest('[data-m]');if(!b||!cur)return;const m=b.dataset.m;
+   if(m==='x')close();else if(m==='hear')talk(el.querySelector('.mlx-talk p').textContent);else if(m==='prev')go(cur.i-1);else if(m==='next')go(cur.i+1);
+   else if(m==='help'){const s=cur.ls.steps[cur.i];try{if(s.show)s.show(el.querySelector('.mlx-stage'),api(cur.i))}catch(e){}api(cur.i).done()}
+   else if(m==='again')go(0);else if(m==='end'){const c=cur;close(true);if(back){const b=back;back=null;book(b.spec,b.at)}else if(lastFocus&&lastFocus.focus)try{lastFocus.focus()}catch(e){}if(c.o.onDone)c.o.onDone()}});
+  go(0)}
+ // what a step's picture can do: mark the try as done (enables 다음), go on, or say a short line in the bubble
+ function api(i){return {L,T,done(){if(!cur||cur.i!==i)return;cur.ok[i]=1;const n=el.querySelector('[data-m=next]'),h=el.querySelector('[data-m=help]');if(n){n.disabled=false;n.textContent=L('다음','Next')+' ▶';n.classList.add('ready');n.focus()}if(h)h.remove()},
+  next(){if(cur&&cur.i===i)go(i+1)},say(ko,en){if(!cur||cur.i!==i)return;const t=en==null?T(ko):L(ko,en);el.querySelector('.mlx-talk p').textContent=t;talk(t)}}}
+ function go(i){if(!cur||!el)return;const ls=cur.ls,n=ls.steps.length;if(i<0)return;hush();cur.i=i;
+  const dots=el.querySelector('.mlx-dots'),stage=el.querySelector('.mlx-stage'),p=el.querySelector('.mlx-talk p'),nav=el.querySelector('.mlx-nav');
+  dots.innerHTML=Array.from({length:n+1},(_,k)=>`<i class="${k<i?'on':k===i?'now':''}"></i>`).join('');
+  if(i>=n){// the last page: what to remember
+   if(!cur.done){cur.done=true;try{LR.les(ls.id)}catch(e){}}
+   stage.className='mlx-stage sum';stage.innerHTML=`<div class="mlx-key"><b>✨ ${L('핵심 정리','Remember')}</b><ul>${(ls.key||[]).map(k=>`<li>${E(k)}</li>`).join('')}</ul></div><small class="mlx-saved">📒 ${L('개념 노트에 넣어 뒀어요. 언제든 다시 볼 수 있어요.','Saved in your concept notebook. Open it any time.')}</small>`;
+   const t=L('잘 들었어요! 이것만 기억하면 돼요.','Great listening! Just remember this.')+' '+(ls.key||[]).map(T).join(' ');p.textContent=t;talk(t);
+   nav.innerHTML=`<button type="button" class="mlx-b ghost" data-m="again">🔁 ${L('처음부터','From the start')}</button><button type="button" class="mlx-b go" data-m="end">${ls.cta?E(ls.cta):L('좋아요, 해 볼게요!','Got it, let’s go!')} ▶</button>`;
+   nav.querySelector('[data-m=end]').focus();return}
+  const s=ls.steps[i],t=T(s.say);stage.className='mlx-stage';stage.innerHTML='';p.textContent=t;
+  try{if(typeof s.art==='function')s.art(stage,api(i));else if(s.art)stage.innerHTML=s.art}catch(e){stage.textContent=''}
+  if(!stage.childNodes.length)stage.classList.add('none');
+  const wait=s.try&&!cur.ok[i];
+  nav.innerHTML=`<button type="button" class="mlx-b ghost" data-m="prev" ${i?'':'disabled'} aria-label="${L('이전','Back')}">◀</button>${wait?`<button type="button" class="mlx-b help" data-m="help">🤔 ${L('알려 줘요','Show me')}</button>`:''}<button type="button" class="mlx-b go" data-m="next" ${wait?'disabled':''}>${wait?L('해 봐요','Your turn'):L('다음','Next')} ▶</button>`;
+  talk(t,()=>{if(cur&&cur.i===i&&el&&s.after)try{s.after(stage,api(i))}catch(e){}});const f=nav.querySelector('[data-m=next]');if(!wait&&f)f.focus()}
+ function before(ls,go_){if(!ls||seen(ls.id)){go_&&go_();return}let went=false;const g=()=>{if(!went){went=true;go_&&go_()}};open(ls,{onDone:g,onClose:g})}
+ // the notebook: every topic of the game, the ones already watched ticked; tap one to watch it again
+ function book(spec,at){const s=shell('book');back=null;const gs=spec.groups||[],all=gs.reduce((a,g)=>a.concat(g.items),[]),have=all.filter(x=>seen(x.id)).length;
+  const openAt=at!=null?at:spec.open!=null?spec.open:Math.max(0,gs.findIndex(g=>g.items.some(x=>!seen(x.id))));
+  s.setAttribute('aria-labelledby','mlxT');
+  s.innerHTML=`<div class="mlx-card"><div class="mlx-top"><span class="mlx-kick">📒 ${L('개념 노트','Concept notebook')}</span><b id="mlxT">${E(spec.title||['배운 개념 모아 보기','Everything you learned'])}</b><button type="button" class="mlx-x" data-m="x" aria-label="${L('닫기','Close')}">✕</button></div>
+   <p class="mlx-intro">${L(`짧은 수업으로 개념을 먼저 배워요. 다 들은 수업에는 ✅가 붙어요. <b>${have} / ${all.length}</b>`,`Short lessons to learn each idea first. Lessons you finished get a ✅. <b>${have} / ${all.length}</b>`)}</p>
+   <div class="mlx-groups">${gs.map((g,gi)=>{const h=g.items.filter(x=>seen(x.id)).length;return `<details ${gi===openAt?'open':''} data-g="${gi}"><summary><span>${E(g.name)}</span><small>${h}/${g.items.length}</small></summary><ul>${g.items.map((x,xi)=>`<li><button type="button" class="mlx-item ${seen(x.id)?'seen':''}" data-g="${gi}" data-x="${xi}"><span class="ic">${x.icon||'📖'}</span><span class="tx"><b>${E(x.title)}</b>${x.key&&x.key.length?`<small>${E(x.key[0])}</small>`:''}</span><span class="st">${seen(x.id)?'✅':'▶'}</span></button></li>`).join('')}</ul></details>`}).join('')}</div></div>`;
+  s.addEventListener('click',e=>{const b=e.target.closest('[data-m],[data-x]');if(!b)return;if(b.dataset.m==='x'){close();return}
+   const g=+b.dataset.g,x=gs[g]&&gs[g].items[+b.dataset.x];if(!x)return;let ls=x.lesson;try{if(typeof ls==='function')ls=ls()}catch(e){ls=null}if(!ls)return;
+   close(true);open(ls);back={spec,at:g}});
+  const f=s.querySelector('details[open] .mlx-item')||s.querySelector('.mlx-x');if(f)try{f.focus({preventScroll:true})}catch(e){}}
+ return {cfg(o){Object.assign(C,o||{})},open,before,book,seen,close:()=>close(),get on(){return !!el}}})();
 /*COACH:END*/
 function applyLang(){if(LANG!=='en')return;document.querySelectorAll('[data-en]').forEach(el=>{el.textContent=el.dataset.en});document.querySelectorAll('[data-en-html]').forEach(el=>{el.innerHTML=el.dataset.enHtml});for(const a of ['aria-label','placeholder','title'])document.querySelectorAll('[data-en-'+a+']').forEach(el=>el.setAttribute(a,el.getAttribute('data-en-'+a)))}
 function setLang(next){try{localStorage.setItem('moonGames.lang',next)}catch(e){}try{speechSynthesis.cancel()}catch(e){}const u=new URL(location.href);u.searchParams.set('lang',next);location.replace(u.href)}
@@ -419,6 +493,51 @@ button,input,select{font:inherit}button{cursor:pointer;touch-action:manipulation
 #coachPop p{margin:8px 0 0;background:#fff;border:2px solid #c9d4ff;border-radius:4px 16px 16px 16px;padding:6px 11px;font-size:13.5px;font-weight:700;line-height:1.38;color:#2a3470;box-shadow:0 8px 20px rgba(20,30,80,.22)}
 #coachPop b{display:block;font-size:11px;font-weight:900;color:#5b6cff}
 @media (prefers-reduced-motion:reduce){#coachPop{transition:opacity .2s;transform:none}}
+/* Mini lessons (.mlx) and the concept notebook (.mlx.book): one window, a picture, the teacher's line, big buttons */
+.mlx{position:fixed;inset:0;z-index:2147483100;display:grid;place-items:center;padding:max(10px,env(safe-area-inset-top)) max(8px,env(safe-area-inset-right)) max(10px,env(safe-area-inset-bottom)) max(8px,env(safe-area-inset-left));background:rgba(18,24,58,.55);font-family:system-ui,-apple-system,'Apple SD Gothic Neo','Noto Sans KR',sans-serif;color:#22305e;animation:mlxIn .2s ease}
+@keyframes mlxIn{from{opacity:0}}
+.mlx-card{width:min(560px,100%);max-height:100%;display:flex;flex-direction:column;gap:10px;background:#fff;border-radius:24px;padding:12px 14px 14px;box-shadow:0 18px 50px rgba(10,20,60,.35);overflow:auto;text-align:left}
+.mlx-top{display:grid;grid-template-columns:1fr 44px;grid-template-areas:"k x" "t x";align-items:center;column-gap:8px}
+.mlx-kick{grid-area:k;font-size:12.5px;font-weight:900;color:#5b6cff;letter-spacing:.02em}
+.mlx-top b{grid-area:t;font-size:19px;font-weight:900;line-height:1.25;text-wrap:balance}
+.mlx-x{grid-area:x;width:44px;height:44px;border:0;border-radius:14px;background:#eef1ff;color:#3a4690;font-size:20px;font-weight:900;cursor:pointer}
+.mlx-dots{display:flex;gap:6px;justify-content:center}.mlx-dots i{width:8px;height:8px;border-radius:5px;background:#dfe4fb;transition:width .2s}.mlx-dots i.on{background:#9aa8ff}.mlx-dots i.now{width:22px;background:#5b6cff}
+.mlx-stage{min-height:190px;display:grid;place-items:center;background:linear-gradient(180deg,#f5f7ff,#eef7ff);border:1px solid #e1e7fb;border-radius:18px;padding:10px;overflow:hidden;position:relative}
+.mlx-stage.none{min-height:0;padding:0;border:0;background:none}
+.mlx-stage>svg,.mlx-stage>canvas,.mlx-stage>img{max-width:100%;height:auto}
+.mlx-stage.sum{background:linear-gradient(180deg,#fff9e6,#fff3cf);border-color:#f3dc92;place-items:stretch;gap:8px}
+.mlx-key b{display:block;font-size:17px;font-weight:900;color:#8a5a00;margin-bottom:6px}
+.mlx-key ul{margin:0;padding:0;list-style:none;display:grid;gap:8px}
+.mlx-key li{position:relative;padding:10px 12px 10px 38px;background:#fff;border-radius:14px;font-size:16px;font-weight:800;line-height:1.45;box-shadow:0 2px 0 #f0d78a}
+.mlx-key li::before{content:'✔';position:absolute;left:12px;top:9px;width:20px;height:20px;border-radius:50%;background:#2fbf71;color:#fff;font-size:12px;display:grid;place-items:center}
+.mlx-saved{font-size:13px;font-weight:700;color:#8a6a1a;text-align:center}
+.mlx-talk{display:flex;align-items:flex-end;gap:8px}
+.mlx-talk img{width:56px;height:66px;flex:0 0 56px;object-fit:contain;object-position:50% 100%}
+.mlx-talk p{flex:1;margin:0;background:#f2f5ff;border:1px solid #dfe5f7;border-radius:16px 16px 16px 4px;padding:10px 12px;font-size:16.5px;font-weight:700;line-height:1.5;color:#26326a;white-space:pre-line}
+.mlx-hear{flex:0 0 44px;width:44px;height:44px;border:0;border-radius:50%;background:#eef1ff;font-size:19px;cursor:pointer}
+.mlx-nav{display:flex;gap:8px}
+.mlx-b{min-height:50px;border:0;border-radius:16px;padding:0 16px;font:inherit;font-size:16.5px;font-weight:900;cursor:pointer}
+.mlx-b.ghost{background:#eef1ff;color:#3a4690;min-width:56px}.mlx-b.ghost:disabled{opacity:.35;cursor:default}
+.mlx-b.go{flex:1;background:#5b6cff;color:#fff;box-shadow:0 4px 0 #3c4bd0}.mlx-b.go:disabled{background:#c9cff3;box-shadow:none;cursor:default}
+.mlx-b.go.ready{animation:mlxPop .45s ease}@keyframes mlxPop{50%{transform:scale(1.05)}}
+.mlx-b.help{background:#fff1c9;color:#7a5200;box-shadow:0 3px 0 #ecd28a}
+.mlx button:focus-visible{outline:3px solid #ffb02e;outline-offset:2px}
+.mlx-intro{margin:0;font-size:14.5px;font-weight:700;line-height:1.5;color:#4a5588}
+.mlx-groups{display:grid;gap:8px}
+.mlx-groups details{border:1px solid #e1e7fb;border-radius:16px;background:#f8f9ff}
+.mlx-groups summary{list-style:none;display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:48px;padding:6px 14px;font-size:16px;font-weight:900;cursor:pointer}
+.mlx-groups summary::-webkit-details-marker{display:none}.mlx-groups summary::after{content:'▾';color:#8a96d8}.mlx-groups details[open] summary::after{content:'▴'}
+.mlx-groups summary small{margin-left:auto;font-size:13px;font-weight:800;color:#6b77b8}
+.mlx-groups ul{list-style:none;margin:0;padding:0 8px 8px;display:grid;gap:6px}
+.mlx-item{width:100%;display:flex;align-items:center;gap:10px;min-height:52px;padding:8px 10px;border:1px solid #e3e8fb;border-radius:14px;background:#fff;font:inherit;color:inherit;text-align:left;cursor:pointer}
+.mlx-item .ic{font-size:24px;flex:0 0 30px;text-align:center}
+.mlx-item .tx{flex:1;min-width:0;display:grid;gap:2px}.mlx-item .tx b{font-size:15.5px;font-weight:900;line-height:1.3}
+.mlx-item .tx small{font-size:13px;font-weight:700;color:#5d6896;line-height:1.35}
+.mlx-item .st{font-size:18px}.mlx-item.seen{background:#f2fbf5;border-color:#c9ecd6}
+/* a small "📖 개념 다시 보기" chip a game can put next to a question */
+.mlx-chip{display:inline-flex;align-items:center;gap:4px;min-height:40px;padding:0 12px;border:0;border-radius:20px;background:#eef1ff;color:#3a4690;font:inherit;font-size:14px;font-weight:900;cursor:pointer}
+@media (max-width:420px){.mlx-card{padding:10px 12px 12px;border-radius:20px}.mlx-stage{min-height:170px}.mlx-talk p{font-size:16px}}
+@media (prefers-reduced-motion:reduce){.mlx{animation:none}.mlx-b.go.ready{animation:none}.mlx-dots i{transition:none}}
 /*COACH:END*/
 </style>
 </head>

@@ -32,6 +32,7 @@ const L=(ko,en)=>LANG==='en'?en:ko;
 // · mx: kinds of questions the child got wrong (up to 40), from coachAnswer(ok,skillId,item) with
 //   item={id,q:[ko,en],a:[ko,en],g?:[ko,en],tip?:[ko,en]}: the latest example, the right answer, the child's answer,
 //   how many misses, and how many right answers in a row since the last miss (so the report can say "fixed now").
+// · ls: the mini lessons (MiniLesson, in lesson.js) the child watched to the end, with the first day.
 // A game's reset must call LR.forget() so the report forgets only that game; LR.resume() starts a fresh record.
 const LR=(()=>{const f=(location.pathname.split('/').pop()||'').replace(/\.html$/,'');
  const KEY={math_aquarium:'mathAquarium.learn',science_guardians:'scienceGuardians.learn',music_academy:'musicAcademy.learn',chess_knights:'chessKnights.learn',detective_game:'little-detective-learn',marble_rush_3d:'marbleRush.learn',coding_island:'pythonIsland.learn',python_island:'pythonIsland.learn'}[f];
@@ -58,6 +59,8 @@ const LR=(()=>{const f=(location.pathname.split('/').pop()||'').replace(/\.html$
    dirty=true},
   set(f){fn=f;setTimeout(save,1500)},save,
   stat(id){const x=(load().sk||{})[id];return x?{r:x[0],w:x[1]}:null},
+  // mini lessons watched to the end (MiniLesson): lesson id → the first day; les() returns them all
+  les(id){const r=load();if(id==null)return r.ls||{};if(!(r.ls||(r.ls={}))[id]){r.ls[id]=day();dirty=true;if(!off)save()}return r.ls},
   forget(){off=true;R=null;try{localStorage.removeItem(KEY)}catch(e){}},
   resume(){off=!KEY;R=null;dirty=false}}})();
 const coachEsc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -108,6 +111,77 @@ function coachStart(hello,tips){const game=(location.pathname.split('/').pop()||
    if(!retry){const c=new SpeechSynthesisUtterance(u.text);['lang','voice','rate','pitch','volume'].forEach(k=>{try{c[k]=u[k]}catch(e){}});setTimeout(()=>send(c,my,true),200)}
    else if(!told){told=true;if(typeof coachPop==='function')coachPop('idea','목소리가 잠깐 멈췄어요. 브라우저를 완전히 껐다 켜면 다시 들려요 🌙','The voice got stuck. Close the browser fully and open it again to hear it 🌙',{force:true,ms:8000})}},3000)};
  ss.speak=u=>{const my=gen,wait=cutAt+150-performance.now();if(wait>0)setTimeout(()=>send(u,my,false),wait);else send(u,my,false)}})();
+// Mini lessons (미니 수업) and the concept notebook (개념 노트), shared by every game. Kids asked for time to learn
+// before solving, so a teacher talks the child through a few short pages first: see, hear, then do one small thing.
+// · A lesson: {id, title:[ko,en], icon, who?:{img,name:[ko,en]}, steps:[...], key:[[ko,en],...], cta?:[ko,en]}
+//   Each step is {say:[ko,en], art?, try?, show?}. art is an HTML string, or a function (box,api) that draws the
+//   picture with the game's own helpers. On a "try" step the child does the small thing in the picture and the game
+//   calls api.done(); "🤔 알려 줘요" runs show(box,api) (or just api.done()) so not knowing never blocks or costs anything.
+//   after(box,api), if given, runs once the teacher has finished reading the step (for example to play a demo).
+//   key holds the 1–3 lines to remember; they close the lesson and stay in the notebook.
+// · MiniLesson.cfg({voice:(text,onEnd)=>…, stop:()=>…, who:{img,name}}) once per game: the game's own read-aloud (it
+//   respects the game's voice switch; onEnd, when the game supports it, runs after the line), what to stop when a page
+//   changes (demos, sounds), and the default teacher.
+// · MiniLesson.open(lesson,{onDone,onClose}) plays a lesson. MiniLesson.before(lesson,go) plays it the first time and
+//   then calls go(); later it calls go() at once. Closing early also calls go(), so a lesson never traps the child.
+// · MiniLesson.book({title,groups:[{name:[ko,en],items:[{id,title,icon,key,lesson}]}],open}) shows the notebook; an
+//   item's lesson is a lesson object or a function that returns one. After a lesson the notebook comes back.
+// · What was watched to the end is kept in the game's learning record (LR.les), so it resets with the game and the
+//   parents' report can show it.
+const MiniLesson=(()=>{let C={voice:null,who:null},el=null,cur=null,back=null,lastFocus=null;
+ const T=x=>Array.isArray(x)?L(x[0],x[1]):String(x==null?'':x),E=s=>coachEsc(T(s));
+ const seen=id=>{try{return !!LR.les()[id]}catch(e){return false}};
+ const talk=(t,cb)=>{try{if(C.voice){if(C.voice.length>1){C.voice(t,cb);return}C.voice(t)}}catch(e){}if(cb)setTimeout(cb,400)},
+  hush=()=>{try{if(C.stop)C.stop()}catch(e){}try{speechSynthesis.cancel()}catch(e){}};
+ function shell(cls){close(true);lastFocus=document.activeElement;el=document.createElement('div');el.className='mlx '+(cls||'');
+  el.setAttribute('role','dialog');el.setAttribute('aria-modal','true');document.body.appendChild(el);document.addEventListener('keydown',key,true);return el}
+ function close(quiet){if(!el)return;hush();document.removeEventListener('keydown',key,true);el.remove();el=null;const c=cur;cur=null;
+  if(!quiet){if(c&&c.o.onClose)c.o.onClose(c.done);if(back){const b=back;back=null;book(b.spec,b.at)}else if(lastFocus&&lastFocus.focus)try{lastFocus.focus()}catch(e){}}}
+ function key(e){if(!el)return;if(e.key==='Escape'){e.preventDefault();e.stopPropagation();close();return}
+  if(!cur)return;if(e.key==='ArrowRight'){const b=el.querySelector('[data-m=next]');if(b&&!b.disabled){e.preventDefault();b.click()}}else if(e.key==='ArrowLeft'&&cur.i>0){e.preventDefault();go(cur.i-1)}}
+ function open(ls,o={}){if(!ls||!ls.steps||!ls.steps.length)return;const who=ls.who||C.who||{img:'images/coach-moon-idea.webp',name:['문 코치','Coach Moon']};
+  shell('');cur={ls,o,who,i:0,done:false,ok:{}};
+  el.setAttribute('aria-labelledby','mlxT');
+  el.innerHTML=`<div class="mlx-card"><div class="mlx-top"><span class="mlx-kick">📖 ${L('미니 수업','Mini lesson')}</span><b id="mlxT">${ls.icon?ls.icon+' ':''}${E(ls.title)}</b><button type="button" class="mlx-x" data-m="x" aria-label="${L('닫기','Close')}">✕</button></div>
+   <div class="mlx-dots" aria-hidden="true"></div><div class="mlx-stage"></div>
+   <div class="mlx-talk"><img src="${coachEsc(who.img)}" alt="" onerror="this.remove()"><p aria-live="polite"></p><button type="button" class="mlx-hear" data-m="hear" aria-label="${L('다시 듣기','Hear again')}">🔊</button></div>
+   <div class="mlx-nav"></div></div>`;
+  el.addEventListener('click',e=>{const b=e.target.closest('[data-m]');if(!b||!cur)return;const m=b.dataset.m;
+   if(m==='x')close();else if(m==='hear')talk(el.querySelector('.mlx-talk p').textContent);else if(m==='prev')go(cur.i-1);else if(m==='next')go(cur.i+1);
+   else if(m==='help'){const s=cur.ls.steps[cur.i];try{if(s.show)s.show(el.querySelector('.mlx-stage'),api(cur.i))}catch(e){}api(cur.i).done()}
+   else if(m==='again')go(0);else if(m==='end'){const c=cur;close(true);if(back){const b=back;back=null;book(b.spec,b.at)}else if(lastFocus&&lastFocus.focus)try{lastFocus.focus()}catch(e){}if(c.o.onDone)c.o.onDone()}});
+  go(0)}
+ // what a step's picture can do: mark the try as done (enables 다음), go on, or say a short line in the bubble
+ function api(i){return {L,T,done(){if(!cur||cur.i!==i)return;cur.ok[i]=1;const n=el.querySelector('[data-m=next]'),h=el.querySelector('[data-m=help]');if(n){n.disabled=false;n.textContent=L('다음','Next')+' ▶';n.classList.add('ready');n.focus()}if(h)h.remove()},
+  next(){if(cur&&cur.i===i)go(i+1)},say(ko,en){if(!cur||cur.i!==i)return;const t=en==null?T(ko):L(ko,en);el.querySelector('.mlx-talk p').textContent=t;talk(t)}}}
+ function go(i){if(!cur||!el)return;const ls=cur.ls,n=ls.steps.length;if(i<0)return;hush();cur.i=i;
+  const dots=el.querySelector('.mlx-dots'),stage=el.querySelector('.mlx-stage'),p=el.querySelector('.mlx-talk p'),nav=el.querySelector('.mlx-nav');
+  dots.innerHTML=Array.from({length:n+1},(_,k)=>`<i class="${k<i?'on':k===i?'now':''}"></i>`).join('');
+  if(i>=n){// the last page: what to remember
+   if(!cur.done){cur.done=true;try{LR.les(ls.id)}catch(e){}}
+   stage.className='mlx-stage sum';stage.innerHTML=`<div class="mlx-key"><b>✨ ${L('핵심 정리','Remember')}</b><ul>${(ls.key||[]).map(k=>`<li>${E(k)}</li>`).join('')}</ul></div><small class="mlx-saved">📒 ${L('개념 노트에 넣어 뒀어요. 언제든 다시 볼 수 있어요.','Saved in your concept notebook. Open it any time.')}</small>`;
+   const t=L('잘 들었어요! 이것만 기억하면 돼요.','Great listening! Just remember this.')+' '+(ls.key||[]).map(T).join(' ');p.textContent=t;talk(t);
+   nav.innerHTML=`<button type="button" class="mlx-b ghost" data-m="again">🔁 ${L('처음부터','From the start')}</button><button type="button" class="mlx-b go" data-m="end">${ls.cta?E(ls.cta):L('좋아요, 해 볼게요!','Got it, let’s go!')} ▶</button>`;
+   nav.querySelector('[data-m=end]').focus();return}
+  const s=ls.steps[i],t=T(s.say);stage.className='mlx-stage';stage.innerHTML='';p.textContent=t;
+  try{if(typeof s.art==='function')s.art(stage,api(i));else if(s.art)stage.innerHTML=s.art}catch(e){stage.textContent=''}
+  if(!stage.childNodes.length)stage.classList.add('none');
+  const wait=s.try&&!cur.ok[i];
+  nav.innerHTML=`<button type="button" class="mlx-b ghost" data-m="prev" ${i?'':'disabled'} aria-label="${L('이전','Back')}">◀</button>${wait?`<button type="button" class="mlx-b help" data-m="help">🤔 ${L('알려 줘요','Show me')}</button>`:''}<button type="button" class="mlx-b go" data-m="next" ${wait?'disabled':''}>${wait?L('해 봐요','Your turn'):L('다음','Next')} ▶</button>`;
+  talk(t,()=>{if(cur&&cur.i===i&&el&&s.after)try{s.after(stage,api(i))}catch(e){}});const f=nav.querySelector('[data-m=next]');if(!wait&&f)f.focus()}
+ function before(ls,go_){if(!ls||seen(ls.id)){go_&&go_();return}let went=false;const g=()=>{if(!went){went=true;go_&&go_()}};open(ls,{onDone:g,onClose:g})}
+ // the notebook: every topic of the game, the ones already watched ticked; tap one to watch it again
+ function book(spec,at){const s=shell('book');back=null;const gs=spec.groups||[],all=gs.reduce((a,g)=>a.concat(g.items),[]),have=all.filter(x=>seen(x.id)).length;
+  const openAt=at!=null?at:spec.open!=null?spec.open:Math.max(0,gs.findIndex(g=>g.items.some(x=>!seen(x.id))));
+  s.setAttribute('aria-labelledby','mlxT');
+  s.innerHTML=`<div class="mlx-card"><div class="mlx-top"><span class="mlx-kick">📒 ${L('개념 노트','Concept notebook')}</span><b id="mlxT">${E(spec.title||['배운 개념 모아 보기','Everything you learned'])}</b><button type="button" class="mlx-x" data-m="x" aria-label="${L('닫기','Close')}">✕</button></div>
+   <p class="mlx-intro">${L(`짧은 수업으로 개념을 먼저 배워요. 다 들은 수업에는 ✅가 붙어요. <b>${have} / ${all.length}</b>`,`Short lessons to learn each idea first. Lessons you finished get a ✅. <b>${have} / ${all.length}</b>`)}</p>
+   <div class="mlx-groups">${gs.map((g,gi)=>{const h=g.items.filter(x=>seen(x.id)).length;return `<details ${gi===openAt?'open':''} data-g="${gi}"><summary><span>${E(g.name)}</span><small>${h}/${g.items.length}</small></summary><ul>${g.items.map((x,xi)=>`<li><button type="button" class="mlx-item ${seen(x.id)?'seen':''}" data-g="${gi}" data-x="${xi}"><span class="ic">${x.icon||'📖'}</span><span class="tx"><b>${E(x.title)}</b>${x.key&&x.key.length?`<small>${E(x.key[0])}</small>`:''}</span><span class="st">${seen(x.id)?'✅':'▶'}</span></button></li>`).join('')}</ul></details>`}).join('')}</div></div>`;
+  s.addEventListener('click',e=>{const b=e.target.closest('[data-m],[data-x]');if(!b)return;if(b.dataset.m==='x'){close();return}
+   const g=+b.dataset.g,x=gs[g]&&gs[g].items[+b.dataset.x];if(!x)return;let ls=x.lesson;try{if(typeof ls==='function')ls=ls()}catch(e){ls=null}if(!ls)return;
+   close(true);open(ls);back={spec,at:g}});
+  const f=s.querySelector('details[open] .mlx-item')||s.querySelector('.mlx-x');if(f)try{f.focus({preventScroll:true})}catch(e){}}
+ return {cfg(o){Object.assign(C,o||{})},open,before,book,seen,close:()=>close(),get on(){return !!el}}})();
 /*COACH:END*/
 function applyLang(){if(LANG!=='en')return;document.querySelectorAll('[data-en]').forEach(el=>{el.textContent=el.dataset.en});for(const a of ['aria-label','placeholder','title'])document.querySelectorAll('[data-en-'+a+']').forEach(el=>el.setAttribute(a,el.getAttribute('data-en-'+a)))}
 function setLang(next){try{localStorage.setItem('moonGames.lang',next)}catch(e){}try{speechSynthesis.cancel()}catch(e){}const u=new URL(location.href);u.searchParams.set('lang',next);location.replace(u.href)}
@@ -809,6 +883,30 @@ button.setrow{flex-wrap:nowrap}
 .nr-grow{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin:6px 0}
 .nr-grow span{background:#f6f2ff;border-radius:99px;padding:4px 11px;font-weight:900;font-size:14px}
 .result .nr-card{margin:8px 0}
+/* topics: pick one thing to practise, with concept lessons first */
+.topics .dhead{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}.topics .dhead b{font-size:17px}
+.tgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.tpb{border:0;border-radius:18px;background:#fff;box-shadow:inset 0 0 0 2px color-mix(in srgb,var(--tc) 35%,#fff),0 4px 0 color-mix(in srgb,var(--tc) 30%,#fff);padding:10px 4px 8px;display:flex;flex-direction:column;align-items:center;gap:2px;min-height:96px;text-align:center;cursor:pointer}
+.tpb .ic{font-size:30px;line-height:1.1}.tpb b{font-size:13.5px;line-height:1.25;word-break:keep-all}.tpb small{font-size:12px;font-weight:800;color:var(--muted)}
+@media (max-width:420px){.tgrid{grid-template-columns:repeat(2,1fr)}.tpb{flex-direction:row;min-height:58px;padding:8px 10px;text-align:left;gap:8px}.tpb b{flex:1}}
+.topic{display:grid;gap:12px}.topic .uhead{margin-bottom:0}.topic .card{margin:0}.topic h3{margin:0 0 4px;font-size:18px}.topic .sub{margin:0 0 10px}
+.cnlist{display:grid;gap:8px}
+.cnb{width:100%;display:flex;align-items:center;gap:10px;min-height:58px;padding:8px 12px;border:2px solid #ece6ff;border-radius:16px;background:#fbf9ff;text-align:left;cursor:pointer}
+.cnb .ic{font-size:26px;flex:0 0 32px;text-align:center}.cnb .tx{flex:1;min-width:0;display:grid;gap:2px}.cnb .tx b{font-size:16px}.cnb .tx small{font-size:13px;font-weight:700;color:var(--muted);line-height:1.35}
+.cnb .st{font-size:20px}.cnb.seen{background:#f1fbf4;border-color:#c8ecd4}
+.drills{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.drill{border:0;border-radius:16px;background:#fff7e6;box-shadow:0 4px 0 #f1ddb0;padding:10px;display:flex;flex-direction:column;align-items:flex-start;gap:2px;min-height:76px;text-align:left;cursor:pointer}
+.drill .ic{font-size:24px}.drill b{font-size:14.5px;line-height:1.3}.drill small{font-size:12px;font-weight:800;color:#8a6a1a}
+.tlessons{display:grid;gap:6px}
+.tl{width:100%;display:flex;align-items:center;gap:10px;min-height:50px;padding:6px 12px;border:0;border-radius:14px;background:#f6f2ff;text-align:left;cursor:pointer}
+.tl .ic{font-size:20px}.tl b{flex:1;font-size:15px}.tl small{color:#f5b301;font-size:14px;letter-spacing:1px}.tl.locked{opacity:.55}.tl.done{background:#eefaf2}
+.cnvis{width:100%;margin:0;background:none}.cndemo{margin-top:6px}
+.cn-drum{position:relative;width:150px;height:150px;border-radius:50%;border:0;font-size:70px;background:radial-gradient(circle at 40% 35%,#fff,#ffd9b8);box-shadow:0 7px 0 #e9b48c,0 14px 24px rgba(0,0,0,.15);touch-action:manipulation;cursor:pointer}
+.cn-drum b{position:absolute;right:4px;top:4px;min-width:34px;height:34px;border-radius:17px;background:#ff8a3d;color:#fff;font-size:18px;display:grid;place-items:center}
+.cn-drum.hit{animation:cnHit .22s}@keyframes cnHit{50%{transform:scale(.92)}}
+.cn-keys{width:100%;max-width:440px;height:150px}
+.pk.cn-ok{background:var(--nc)!important;box-shadow:0 0 0 3px #fff inset,0 0 14px var(--nc)}
+.cn-pads{display:flex;gap:10px;justify-content:center}.cn-pads .vp{border:0;cursor:pointer;touch-action:manipulation}
 /*COACH:BEGIN*/
 /* Coach Moon: one line inside result windows (.mcoach) and a corner bubble at good moments (#coachPop, never takes taps) */
 .mcoach{display:flex;align-items:flex-end;gap:8px;margin:10px auto 6px;max-width:330px;text-align:left}
@@ -821,6 +919,51 @@ button.setrow{flex-wrap:nowrap}
 #coachPop p{margin:8px 0 0;background:#fff;border:2px solid #c9d4ff;border-radius:4px 16px 16px 16px;padding:6px 11px;font-size:13.5px;font-weight:700;line-height:1.38;color:#2a3470;box-shadow:0 8px 20px rgba(20,30,80,.22)}
 #coachPop b{display:block;font-size:11px;font-weight:900;color:#5b6cff}
 @media (prefers-reduced-motion:reduce){#coachPop{transition:opacity .2s;transform:none}}
+/* Mini lessons (.mlx) and the concept notebook (.mlx.book): one window, a picture, the teacher's line, big buttons */
+.mlx{position:fixed;inset:0;z-index:2147483100;display:grid;place-items:center;padding:max(10px,env(safe-area-inset-top)) max(8px,env(safe-area-inset-right)) max(10px,env(safe-area-inset-bottom)) max(8px,env(safe-area-inset-left));background:rgba(18,24,58,.55);font-family:system-ui,-apple-system,'Apple SD Gothic Neo','Noto Sans KR',sans-serif;color:#22305e;animation:mlxIn .2s ease}
+@keyframes mlxIn{from{opacity:0}}
+.mlx-card{width:min(560px,100%);max-height:100%;display:flex;flex-direction:column;gap:10px;background:#fff;border-radius:24px;padding:12px 14px 14px;box-shadow:0 18px 50px rgba(10,20,60,.35);overflow:auto;text-align:left}
+.mlx-top{display:grid;grid-template-columns:1fr 44px;grid-template-areas:"k x" "t x";align-items:center;column-gap:8px}
+.mlx-kick{grid-area:k;font-size:12.5px;font-weight:900;color:#5b6cff;letter-spacing:.02em}
+.mlx-top b{grid-area:t;font-size:19px;font-weight:900;line-height:1.25;text-wrap:balance}
+.mlx-x{grid-area:x;width:44px;height:44px;border:0;border-radius:14px;background:#eef1ff;color:#3a4690;font-size:20px;font-weight:900;cursor:pointer}
+.mlx-dots{display:flex;gap:6px;justify-content:center}.mlx-dots i{width:8px;height:8px;border-radius:5px;background:#dfe4fb;transition:width .2s}.mlx-dots i.on{background:#9aa8ff}.mlx-dots i.now{width:22px;background:#5b6cff}
+.mlx-stage{min-height:190px;display:grid;place-items:center;background:linear-gradient(180deg,#f5f7ff,#eef7ff);border:1px solid #e1e7fb;border-radius:18px;padding:10px;overflow:hidden;position:relative}
+.mlx-stage.none{min-height:0;padding:0;border:0;background:none}
+.mlx-stage>svg,.mlx-stage>canvas,.mlx-stage>img{max-width:100%;height:auto}
+.mlx-stage.sum{background:linear-gradient(180deg,#fff9e6,#fff3cf);border-color:#f3dc92;place-items:stretch;gap:8px}
+.mlx-key b{display:block;font-size:17px;font-weight:900;color:#8a5a00;margin-bottom:6px}
+.mlx-key ul{margin:0;padding:0;list-style:none;display:grid;gap:8px}
+.mlx-key li{position:relative;padding:10px 12px 10px 38px;background:#fff;border-radius:14px;font-size:16px;font-weight:800;line-height:1.45;box-shadow:0 2px 0 #f0d78a}
+.mlx-key li::before{content:'✔';position:absolute;left:12px;top:9px;width:20px;height:20px;border-radius:50%;background:#2fbf71;color:#fff;font-size:12px;display:grid;place-items:center}
+.mlx-saved{font-size:13px;font-weight:700;color:#8a6a1a;text-align:center}
+.mlx-talk{display:flex;align-items:flex-end;gap:8px}
+.mlx-talk img{width:56px;height:66px;flex:0 0 56px;object-fit:contain;object-position:50% 100%}
+.mlx-talk p{flex:1;margin:0;background:#f2f5ff;border:1px solid #dfe5f7;border-radius:16px 16px 16px 4px;padding:10px 12px;font-size:16.5px;font-weight:700;line-height:1.5;color:#26326a;white-space:pre-line}
+.mlx-hear{flex:0 0 44px;width:44px;height:44px;border:0;border-radius:50%;background:#eef1ff;font-size:19px;cursor:pointer}
+.mlx-nav{display:flex;gap:8px}
+.mlx-b{min-height:50px;border:0;border-radius:16px;padding:0 16px;font:inherit;font-size:16.5px;font-weight:900;cursor:pointer}
+.mlx-b.ghost{background:#eef1ff;color:#3a4690;min-width:56px}.mlx-b.ghost:disabled{opacity:.35;cursor:default}
+.mlx-b.go{flex:1;background:#5b6cff;color:#fff;box-shadow:0 4px 0 #3c4bd0}.mlx-b.go:disabled{background:#c9cff3;box-shadow:none;cursor:default}
+.mlx-b.go.ready{animation:mlxPop .45s ease}@keyframes mlxPop{50%{transform:scale(1.05)}}
+.mlx-b.help{background:#fff1c9;color:#7a5200;box-shadow:0 3px 0 #ecd28a}
+.mlx button:focus-visible{outline:3px solid #ffb02e;outline-offset:2px}
+.mlx-intro{margin:0;font-size:14.5px;font-weight:700;line-height:1.5;color:#4a5588}
+.mlx-groups{display:grid;gap:8px}
+.mlx-groups details{border:1px solid #e1e7fb;border-radius:16px;background:#f8f9ff}
+.mlx-groups summary{list-style:none;display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:48px;padding:6px 14px;font-size:16px;font-weight:900;cursor:pointer}
+.mlx-groups summary::-webkit-details-marker{display:none}.mlx-groups summary::after{content:'▾';color:#8a96d8}.mlx-groups details[open] summary::after{content:'▴'}
+.mlx-groups summary small{margin-left:auto;font-size:13px;font-weight:800;color:#6b77b8}
+.mlx-groups ul{list-style:none;margin:0;padding:0 8px 8px;display:grid;gap:6px}
+.mlx-item{width:100%;display:flex;align-items:center;gap:10px;min-height:52px;padding:8px 10px;border:1px solid #e3e8fb;border-radius:14px;background:#fff;font:inherit;color:inherit;text-align:left;cursor:pointer}
+.mlx-item .ic{font-size:24px;flex:0 0 30px;text-align:center}
+.mlx-item .tx{flex:1;min-width:0;display:grid;gap:2px}.mlx-item .tx b{font-size:15.5px;font-weight:900;line-height:1.3}
+.mlx-item .tx small{font-size:13px;font-weight:700;color:#5d6896;line-height:1.35}
+.mlx-item .st{font-size:18px}.mlx-item.seen{background:#f2fbf5;border-color:#c9ecd6}
+/* a small "📖 개념 다시 보기" chip a game can put next to a question */
+.mlx-chip{display:inline-flex;align-items:center;gap:4px;min-height:40px;padding:0 12px;border:0;border-radius:20px;background:#eef1ff;color:#3a4690;font:inherit;font-size:14px;font-weight:900;cursor:pointer}
+@media (max-width:420px){.mlx-card{padding:10px 12px 12px;border-radius:20px}.mlx-stage{min-height:170px}.mlx-talk p{font-size:16px}}
+@media (prefers-reduced-motion:reduce){.mlx{animation:none}.mlx-b.go.ready{animation:none}.mlx-dots i{transition:none}}
 /*COACH:END*/
 </style>
 </head>
@@ -837,6 +980,7 @@ button.setrow{flex-wrap:nowrap}
  <section class="view hidden" id="v-who"></section>
  <section class="view" id="v-home"></section>
  <section class="view hidden" id="v-path"></section>
+ <section class="view hidden" id="v-topic"></section>
  <section class="view hidden" id="v-lesson"></section>
  <section class="view hidden" id="v-play"></section>
  <section class="view hidden" id="v-songs"></section>
@@ -2929,7 +3073,8 @@ function applyOpts(){SND.on=ROOT.opt.sound;TIMING.calib=(ROOT.opt.calib||0)/1000
 // ---------------------------------------------------------------- progress
 const lessonIdx=id=>LESSONS.findIndex(l=>l.id===id);
 const lessonDone=id=>!!(S.lessons[id]&&(S.lessons[id].s>=1||S.lessons[id].pass));
-const lessonOpen=i=>i===0||lessonDone(LESSONS[i-1].id);
+// each unit opens on its own (UNIT_NEED, with the topics below); inside a unit the lessons go in order
+const lessonOpen=i=>{const l=LESSONS[i],prev=LESSONS[i-1];if(!l)return false;if(prev&&prev.u===l.u)return lessonDone(prev.id);return !unitNeed(l.u).length};
 const nextLesson=()=>LESSONS.find((l,i)=>lessonOpen(i)&&!lessonDone(l.id))||null;
 const doneCount=()=>LESSONS.filter(l=>lessonDone(l.id)).length;
 const starTotal=()=>Object.values(S.lessons).reduce((a,b)=>a+(b.s||0),0);
@@ -3050,6 +3195,7 @@ RENDER.home=()=>{ensureDaily();const nl=nextLesson(),t=nl?TEACHERS[teacherOf(nl)
    ${doneN===3&&d.chest?`<p class="center sub">🎉 ${L('오늘 연습 끝! 내일 또 만나요!','All done today! See you tomorrow!')}</p>`:''}</div>
   ${nl?`<button class="cta next" id="nextBtn" type="button" style="background:${t.bg}"><span class="tface big">${pic(t.img,t.icon)}</span><span class="ct"><small>${L('이어서 배우기','Continue learning')} · ${esc(T(unitOf(nl).t))}</small><b>${esc(T(nl.t))}</b></span><span class="go">▶</span></button>`
    :`<div class="card center"><div class="big">🎓</div><b>${L('모든 레슨을 마쳤어요! 대회와 연습실에서 실력을 뽐내요!','You finished every lesson! Show off in contests and practice rooms!')}</b></div>`}
+  ${topicsHTML()}
   ${nrOpen()?nrBanner():''}
   <div class="tiles">
    ${tile('path','t-path','🗺️',L('배움 지도','Lesson map'),`${doneCount()}/${LESSONS.length}`)}
@@ -3069,25 +3215,177 @@ RENDER.home=()=>{ensureDaily();const nl=nextLesson(),t=nl?TEACHERS[teacherOf(nl)
  v.querySelectorAll('[data-go]').forEach(b=>b.addEventListener('click',()=>{SFX.click();go(b.dataset.go)}));
  v.querySelectorAll('[data-daily]').forEach(b=>b.addEventListener('click',()=>{SFX.click();startDaily(+b.dataset.daily)}));
  v.querySelectorAll('[data-teacher]').forEach(b=>b.addEventListener('click',()=>teacherCard(b.dataset.teacher)));
+ v.querySelectorAll('[data-topic]').forEach(b=>b.addEventListener('click',()=>{SFX.click();openTopic(b.dataset.topic)}));$('nbBtn').addEventListener('click',()=>{SFX.click();openNotebook()});
  if($('nextBtn'))$('nextBtn').addEventListener('click',()=>{SFX.click();openLesson(nl.id)});
  if($('chestBtn'))$('chestBtn').addEventListener('click',openDailyChest);if($('nrBan'))$('nrBan').addEventListener('click',openNR);
  $('heroFace').addEventListener('click',openMe);$('trophyBtn').addEventListener('click',()=>go('trophies'))};
 const tile=(go,cls,ic,name,small,dot=0)=>`<button class="tile ${cls}" type="button" data-go="${go}"><span class="ic">${ic}</span><b>${esc(name)}</b><small>${esc(small)}</small>${dot?'<span class="dot">!</span>':''}</button>`;
 function teacherCard(k){const t=TEACHERS[k],units=UNITS.filter(u=>u.teacher===k);modal(`<div class="tcard"><span class="tface huge" style="background:${t.bg}">${pic(t.img,t.icon)}</span><h2>${esc(T(t.name))}</h2><p class="sub">${esc(T(t.role))}</p><p class="say">“${esc(T(pick(t.hi)))}”</p>
- ${units.map(u=>`<button class="btn ghost small" data-act="u" data-u="${u.id}" type="button">${u.ic} ${esc(T(u.t))}</button>`).join('')}${k==='mia'?`<button class="btn green small" data-act="nr" type="button">🎼 ${L('음표 마을 · 음표 읽기 연습','Note Town · note reading practice')}</button>`:''}</div>`,{acts:{u:b=>()=>{PATH_FOCUS=b.dataset.u;go('path')},nr:()=>()=>openNR()},onOpen:()=>speak(T(pick(t.hi)))})}
+ ${units.map(u=>`<button class="btn ghost small" data-act="u" data-u="${u.id}" type="button">${u.ic} ${esc(T(u.t))}</button>`).join('')}${k==='mia'?`<button class="btn green small" data-act="nr" type="button">🎼 ${L('음표 마을 · 음표 읽기 연습','Note Town · note reading practice')}</button>`:''}</div>`,{acts:{u:b=>()=>{const tp=TOPICS.find(x=>x.ls.includes(b.dataset.u));if(tp)openTopic(tp.id);else{PATH_FOCUS=b.dataset.u;go('path')}},nr:()=>()=>openNR()},onOpen:()=>speak(T(pick(t.hi)))})}
 
 // ---------------------------------------------------------------- lesson map
 let PATH_FOCUS=null;
 RENDER.path=()=>{const nl=nextLesson();let html='<div class="path">';
  UNITS.forEach(u=>{const ls=LESSONS.filter(l=>l.u===u.id),t=TEACHERS[u.teacher],dn=ls.filter(l=>lessonDone(l.id)).length;
-  html+=`<section class="unit" id="unit-${u.id}"><div class="uhead" style="background:${t.bg}"><span class="tface">${pic(t.img,t.icon)}</span><div><b>${u.ic} ${esc(T(u.t))}</b><small>${esc(T(t.name))} · ${dn}/${ls.length}</small></div></div>${u.id==='E'?`<button class="btn gold small nrgo" type="button" data-nr="1">🎼 ${L('음표 마을에서 음표 읽기 연습','Practice reading notes in Note Town')}</button>`:''}<div class="nodes">`;
+  html+=`<section class="unit" id="unit-${u.id}"><div class="uhead" style="background:${t.bg}"><span class="tface">${pic(t.img,t.icon)}</span><div><b>${u.ic} ${esc(T(u.t))}</b><small>${esc(T(t.name))} · ${dn}/${ls.length}${unitNeed(u.id).length?' · 🔒 '+L(`먼저 ‘${unitNeed(u.id).map(x=>T(LESSON_BY[x].t)).join('’, ‘')}’`,`after “${unitNeed(u.id).map(x=>T(LESSON_BY[x].t)).join('”, “')}”`):''}</small></div></div>${u.id==='E'?`<button class="btn gold small nrgo" type="button" data-nr="1">🎼 ${L('음표 마을에서 음표 읽기 연습','Practice reading notes in Note Town')}</button>`:''}<div class="nodes">`;
   ls.forEach((l,j)=>{const i=lessonIdx(l.id),open=lessonOpen(i),st=(S.lessons[l.id]||{}).s||0,cur=nl&&nl.id===l.id;
    html+=`<button class="node ${open?'':'locked'} ${cur?'cur':''} ${lessonDone(l.id)?'done':''}" type="button" data-lesson="${l.id}" style="--off:${[0,34,52,34,0,-34,-52,-34][j%8]}px"><span class="nb">${open?ACT_ICON[l.a.type]||'🎵':'🔒'}</span><span class="nt">${esc(T(l.t))}</span><span class="ns">${'★'.repeat(st)}${'☆'.repeat(3-st)}</span>${cur?`<span class="here">${L('여기!','Here!')}</span>`:''}</button>`});
   html+='</div></section>'});
  $('v-path').innerHTML=html+'</div>';
  $('v-path').querySelectorAll('[data-nr]').forEach(b=>b.addEventListener('click',openNR));
- $('v-path').querySelectorAll('[data-lesson]').forEach(b=>b.addEventListener('click',()=>{const i=lessonIdx(b.dataset.lesson);if(!lessonOpen(i)){SFX.pop();toast('🔒 '+L('앞의 레슨을 먼저 해요!','Finish the lesson before it first!'));return}SFX.click();openLesson(b.dataset.lesson)}));
+ $('v-path').querySelectorAll('[data-lesson]').forEach(b=>b.addEventListener('click',()=>tryOpenLesson(b.dataset.lesson)));
  const target=PATH_FOCUS?$('unit-'+PATH_FOCUS):$('v-path').querySelector('.node.cur');PATH_FOCUS=null;if(target)setTimeout(()=>target.scrollIntoView({block:'center'}),60)};
+
+// ---------------------------------------------------------------- topics: practise one thing at a time, after a mini lesson
+// Parents asked for rhythm or scale practice on its own (not only down the one lesson path) and for time to learn an idea
+// before being asked about it. A topic page has three parts:
+// · concept lessons (MiniLesson, the shared player in the coach block): the lesson slides that teach the idea, with their
+//   demos, a small try, and 1–3 lines to remember. All of them are in the 📒 concept notebook too.
+// · drills: an activity to repeat as often as the child likes, outside the lesson path (no unlocks, small rewards). The
+//   first time, the drill's concept lesson plays first.
+// · the lessons of the topic's units.
+// A concept's `from` lists lesson slides as 'lessonId.slideIndex'; `tr` adds a try step at the end.
+const CN=(id,icon,t,from,key,tr)=>({id,icon,t,from,key,tr});
+const TOPICS=[
+ {id:'beat',ic:'💓',t:'박자·리듬|Beat and rhythm',teacher:'hop',ls:['A','C','F','j1','j5'],
+  cn:[CN('cn-beat','💓','박과 빠르기|The beat and tempo',['a1.0','a1.1','a2.0','a2.1'],['박은 시계처럼 똑같은 간격으로 계속되는 음악의 맥박이에요.|The beat is music’s steady pulse, even like a ticking clock.','박이 빠르고 느린 정도가 빠르기예요. 빨라져도 간격은 고르게 지켜요.|How fast the beat goes is the tempo. Fast or slow, keep it even.'],()=>tryTap(4,'북을 똑같은 간격으로 네 번 쳐 봐요. 하나, 둘, 셋, 넷!|Tap the drum four times, evenly. One, two, three, four!')),
+   CN('cn-accent','💥','센박과 여린박|Strong and weak beats',['a4.0','a4.1'],['박을 넷씩 묶으면 첫째 박이 가장 센 ‘센박’이에요.|Group the beats in fours and the first one is the strongest.','4박자는 센박-여린박-중간 센박-여린박 순서로 흘러가요.|Four-beat time goes strong, weak, medium, weak.']),
+   CN('cn-notes','🎵','음표의 길이|How long notes last',['c1.0','c1.1','c5.0','j5.0'],['4분음표는 1박, 2분음표는 2박, 온음표는 4박이에요.|A quarter note is 1 beat, a half note 2, a whole note 4.','8분음표는 반 박이라 두 개가 1박, 16분음표는 네 개가 1박이에요.|Two eighth notes make one beat; so do four sixteenth notes.'],()=>tryTap(2,'2분음표는 2박이에요. “하나, 둘” 세면서 북을 두 번 쳐 봐요.|A half note lasts 2 beats. Count “one, two” and tap the drum twice.')),
+   CN('cn-rests','🤫','쉼표|Rests',['c3.0','c3.1'],['쉼표는 소리를 내지 않고 쉬는 박이에요.|A rest is a beat of silence.','4분쉼표는 1박, 2분쉼표는 2박을 쉬어요.|A quarter rest is 1 beat; a half rest is 2.']),
+   CN('cn-dotted','⏺️','점음표|Dotted notes',['j1.0'],['점이 붙으면 원래 길이의 반만큼 더 길어져요.|A dot makes a note half as long again.','점4분음표는 1박 반, 점2분음표는 3박이에요.|A dotted quarter note is 1½ beats; a dotted half note is 3.']),
+   CN('cn-bars','📏','마디와 박자표|Bars and time signatures',['f1.0','f3.0','f2.0','f4.0'],['세로줄로 나눈 한 칸이 마디예요.|Each space between bar lines is a bar (a measure).','4/4는 한 마디에 4분음표 4개, 3/4은 3개, 2/4는 2개만큼 들어가요.|In 4/4 a bar holds four quarter notes, in 3/4 three, in 2/4 two.'])],
+  dr:[{ic:'💓',t:'박자 맞추기|Keep the beat',spec:{type:'beat',bpm:76,beats:16},cn:'cn-beat'},
+   {ic:'🐇',t:'빠른 박, 느린 박|Slow and fast beats',spec:{type:'beat',segs:[[64,8],[104,12]]},cn:'cn-beat'},
+   {ic:'🧠',t:'마음속 박자|The beat inside you',spec:{type:'beat',bpm:84,beats:24,fade:[8,20]},cn:'cn-beat'},
+   {ic:'📖',t:'리듬 읽기 1 · 4분음표와 2분음표|Read rhythms 1 · quarters and halves',spec:{type:'read',level:1,count:4,bpm:72},cn:'cn-notes'},
+   {ic:'🤫',t:'리듬 읽기 2 · 쉼표|Read rhythms 2 · rests',spec:{type:'read',level:2,count:4,bpm:72},cn:'cn-rests'},
+   {ic:'🎵',t:'리듬 읽기 3 · 8분음표|Read rhythms 3 · eighth notes',spec:{type:'read',level:3,count:4,bpm:70},cn:'cn-notes'},
+   {ic:'⏺️',t:'리듬 읽기 4 · 점음표|Read rhythms 4 · dotted notes',spec:{type:'read',level:4,count:4,bpm:70},cn:'cn-dotted'},
+   {ic:'📏',t:'3박자 리듬 읽기|Read rhythms in 3/4',spec:{type:'read',level:'w3',count:4,bpm:80,sig:3},cn:'cn-bars'},
+   {ic:'👂',t:'리듬 따라 하기 · 쉬움|Copy the rhythm · easy',spec:{type:'echo',level:1,count:4,bpm:80},cn:'cn-notes'},
+   {ic:'👂',t:'리듬 따라 하기 · 보통|Copy the rhythm · medium',spec:{type:'echo',level:3,count:4,bpm:80},cn:'cn-notes'},
+   {ic:'👂',t:'리듬 따라 하기 · 어려움|Copy the rhythm · hard',spec:{type:'echo',level:5,count:4,bpm:70},cn:'cn-notes'}]},
+ {id:'keys',ic:'🎹',t:'높낮이·건반|High, low and the keys',teacher:'mia',ls:['B','j3','j4'],
+  cn:[CN('cn-pitch','🐦','높은 소리, 낮은 소리|High and low sounds',['b1.0','b1.1','b7.0'],['소리가 높고 낮은 정도를 음높이라고 해요.|How high or low a sound is, is its pitch.','피아노는 오른쪽으로 갈수록 높은 소리가 나요.|On a piano, sounds get higher to the right.']),
+   CN('cn-keymap','🗺️','건반 지도와 도레미|The key map and do-re-mi',['b2.0','b2.1','b3.0','b3.1'],['검은 건반 2개 묶음 바로 왼쪽 흰 건반이 도예요.|The white key just left of a pair of black keys is C (Do).','흰 건반은 도·레·미·파·솔·라·시, 그리고 다시 도예요.|The white keys go C D E F G A B, then C again.'],()=>tryKeys({from:60,to:72,labels:false,want:[60],say:'이름이 없는 건반이에요. 검은 건반 2개 바로 왼쪽, ‘도’를 찾아 눌러 봐요!|These keys have no names. Find C (Do), just left of the two black keys, and press it!'})),
+   CN('cn-black','♯','검은 건반과 ♯·♭|Black keys, sharps and flats',['j3.0','i3.1'],['♯(올림표)는 반음 올리고, ♭(내림표)는 반음 내려요.|A sharp (♯) raises a note a half step; a flat (♭) lowers it.','도 바로 오른쪽 검은 건반은 도♯, 레♭이라고도 해요.|The black key just right of C is C♯, also called D♭.'])],
+  dr:[{ic:'🎵',t:'높은 소리 낮은 소리|High or low',spec:{type:'pitch',task:'hl',count:6},cn:'cn-pitch'},
+   {ic:'📈',t:'올라가요, 내려가요|Going up, going down',spec:{type:'pitch',task:'contour',count:6},cn:'cn-pitch'},
+   {ic:'🗺️',t:'도와 파 찾기|Find C and F',spec:{type:'keys',task:'findCF',count:6},cn:'cn-keymap'},
+   {ic:'🎹',t:'도레미 건반 찾기|Find the white keys',spec:{type:'keys',task:'name',range:[60,72],count:8},cn:'cn-keymap'},
+   {ic:'⚫',t:'검은 건반 이름|Name the black keys',spec:{type:'keys',task:'black',count:6},cn:'cn-black'}]},
+ {id:'staff',ic:'🎼',t:'오선 읽기|Reading the staff',teacher:'mia',ls:['E'],
+  cn:[CN('cn-staff','🎼','오선과 높은음자리표|The staff and the treble clef',['e1.0','e1.1'],['다섯 줄을 오선이라고 하고, 아래부터 첫째 줄로 세요.|The five lines are the staff. Count them from the bottom.','높은음자리표는 둘째 줄이 솔이라고 알려 줘요. 위로 갈수록 높은 소리예요.|The treble clef marks the second line as G (Sol). Higher on the staff means a higher sound.']),
+   CN('cn-midc','🪜','가온 도와 한 칸씩|Middle C, one step at a time',['e2.0','e3.0','e5.0'],['가온 도는 오선 아래 짧은 덧줄에 있어요.|Middle C sits on a short ledger line below the staff.','줄-칸-줄-칸, 한 자리 올라갈 때마다 한 음씩 높아져요.|Line, space, line, space: each step up is the next note up.'])],
+  dr:[{ic:'🏘️',t:'음표 마을|Note Town',nr:true,cn:'cn-midc'},
+   {ic:'🎼',t:'오선 음표 1 · 도레미|Staff notes 1 · C D E',spec:{type:'notes',range:[60,64],count:8},cn:'cn-midc'},
+   {ic:'🎼',t:'오선 음표 2 · 도부터 솔|Staff notes 2 · C to G',spec:{type:'notes',range:[60,67],count:10},cn:'cn-midc'},
+   {ic:'🎼',t:'오선 음표 3 · 높은 도까지|Staff notes 3 · up to high C',spec:{type:'notes',range:[60,72],count:12},cn:'cn-midc'},
+   {ic:'❓',t:'오선 퀴즈|Staff quiz',spec:{type:'quiz',bank:'staffbasics',count:6},cn:'cn-staff'}]},
+ {id:'scale',ic:'🌈',t:'음계·화음|Scales and chords',teacher:'harmo',ls:['G'],
+  cn:[CN('cn-steps','🪜','반음과 온음|Half steps and whole steps',['g1.0','g1.1','g1.2'],['바로 옆 건반(검은 건반도 세요)까지가 반음, 반음 두 개가 온음이에요.|The very next key (black keys count) is a half step; two half steps make a whole step.','미-파, 시-도는 흰 건반끼리지만 반음이에요.|E–F and B–C are both white keys, yet only a half step apart.'],()=>tryKeys({from:60,to:72,labels:true,want:[65],say:'미에서 반음 위 건반을 눌러 봐요.|Press the key a half step above E (Mi).'})),
+   CN('cn-scale','🌈','장음계|The major scale',['g3.0'],['장음계는 온-온-반-온-온-온-반 순서로 올라가요.|A major scale goes whole, whole, half, whole, whole, whole, half.','도에서 시작하는 장음계가 다장조예요.|The major scale that starts on C is C major.'],()=>tryKeys({from:60,to:72,labels:true,want:[60,62,64,65,67,69,71,72],say:'도부터 높은 도까지 흰 건반을 차례로 눌러 장음계를 만들어 봐요.|Press the white keys from C up to high C, in order, to make the scale.'})),
+   CN('cn-majmin','😊','장조와 단조|Major and minor',['g4.0','g4.1','g4.2'],['장조는 밝은 느낌, 단조는 슬프거나 신비로운 느낌이 많이 나요.|Major often sounds bright; minor often sounds sad or mysterious.','라에서 시작하는 라시도레미파솔라는 단음계예요.|A B C D E F G A, starting on A, is a minor scale.']),
+   CN('cn-chord','🎶','화음|Chords',['g5.0','g5.1','g6.0','g7.0'],['여러 음이 함께 어울려 나는 소리가 화음이에요. 하나 건너 하나씩 쌓아요.|Notes sounding together make a chord. Stack every other note.','다장조의 주요 화음은 도미솔, 파라도, 솔시레예요.|The main chords in C major are C–E–G, F–A–C and G–B–D.'],()=>tryKeys({from:60,to:72,labels:true,want:[60,64,67],any:true,say:'도·미·솔을 하나씩 눌러 화음을 만들어 봐요.|Press C, E and G to build the chord.'}))],
+  dr:[{ic:'🪜',t:'반음·온음 맞히기|Half or whole step?',spec:{type:'steps',task:'name',count:8},cn:'cn-steps'},
+   {ic:'🔎',t:'반음·온음 건반 찾기|Find half and whole steps',spec:{type:'steps',task:'find',count:8},cn:'cn-steps'},
+   {ic:'🌈',t:'장음계 만들기|Build the major scale',spec:{type:'scale',task:'build',key:'C'},cn:'cn-scale'},
+   {ic:'😊',t:'장조일까, 단조일까|Major or minor?',spec:{type:'scale',task:'majmin',count:6},cn:'cn-majmin'},
+   {ic:'🎶',t:'화음 만들기|Build chords',spec:{type:'chord',task:'build',chords:['C','F','G'],count:5},cn:'cn-chord'},
+   {ic:'🎭',t:'밝은 화음, 슬픈 화음|Bright or sad chord?',spec:{type:'chord',task:'majmin',count:6},cn:'cn-chord'}]},
+ {id:'expr',ic:'🔊',t:'셈여림·빠르기·기호|Loud, soft, fast, slow',teacher:'mia',ls:['I'],
+  cn:[CN('cn-dyn','🔊','셈여림|Loud and soft',['i1.0','i1.1'],['p(피아노)는 여리게, f(포르테)는 세게예요.|p (piano) means soft; f (forte) means loud.','<는 점점 세게(크레셴도), >는 점점 여리게(데크레셴도)예요.|< means get louder (crescendo); > means get softer (decrescendo).']),
+   CN('cn-tempo','🐇','빠르기말|Tempo words',['a2.0','i2.0'],['알레그로는 빠르게, 모데라토는 보통 빠르게예요.|Allegro means fast; Moderato means at a medium speed.','안단테는 느리게, 아다지오는 아주 느리게예요.|Andante means slow, like walking; Adagio means very slow.']),
+   CN('cn-symbols','🔁','악보 기호|Music signs',['i3.0','i3.1'],['도돌이표를 만나면 앞으로 돌아가 한 번 더 연주해요.|At a repeat sign, go back and play that part again.','끝세로줄은 곡이 끝났다는 뜻이에요.|The final bar line means the end of the piece.'])],
+  dr:[{ic:'🔊',t:'셈여림 퀴즈|Loud and soft quiz',spec:{type:'quiz',bank:'dyn',count:6},cn:'cn-dyn'},
+   {ic:'🐇',t:'빠르기말 퀴즈|Tempo words quiz',spec:{type:'quiz',bank:'tempo',count:6},cn:'cn-tempo'},
+   {ic:'🔁',t:'악보 기호 퀴즈|Music signs quiz',spec:{type:'quiz',bank:'symbols',count:6},cn:'cn-symbols'}]},
+ {id:'drum',ic:'🥁',t:'드럼|Drums',teacher:'boom',ls:['D','j2'],
+  cn:[CN('cn-kit','🥁','드럼 세트|The drum kit',['d1.0','d1.1'],['발로 밟는 베이스 드럼은 “쿵”, 스네어 드럼은 “짝”, 하이햇은 “칫”이에요.|The bass drum (played with the foot) goes boom, the snare goes clap, the hi-hat goes tss.'],()=>tryPads('베이스 드럼, 스네어 드럼, 하이햇을 한 번씩 쳐 봐요.|Hit the bass drum, the snare and the hi-hat once each.')),
+   CN('cn-groove','🎸','쿵짝 리듬과 8비트|Boom-clap and the 8-beat',['d2.0','d3.0','d4.0'],['1박과 3박은 쿵, 2박과 4박은 짝! 많은 노래의 기본 리듬이에요.|Boom on beats 1 and 3, clap on 2 and 4: the basic groove of many songs.','하이햇을 한 마디에 8번 치면 8비트, 다음 부분으로 넘어가는 신호는 필인이에요.|Eight hi-hat hits a bar make an 8-beat; a fill signals the next part.'])],
+  dr:[{ic:'🥁',t:'드럼 세트 퀴즈|Drum kit quiz',spec:{type:'quiz',bank:'drumkit',count:6},cn:'cn-kit'},
+   {ic:'💥',t:'센박 치기|Strong beats',spec:{type:'drum',pattern:'accent4',bars:6,bpm:76,lanes:['kick','hat']},cn:'cn-groove'},
+   {ic:'🥁',t:'쿵-짝 쿵-짝|Boom-clap',spec:{type:'drum',pattern:'boomclap',bars:6,bpm:80,lanes:['kick','snare']},cn:'cn-groove'},
+   {ic:'🎸',t:'하이햇 8비트|Hi-hat 8-beat',spec:{type:'drum',pattern:'rock',bars:6,bpm:72},cn:'cn-groove'},
+   {ic:'🎛️',t:'드럼 연습실|Drum room',go:'drums'}]},
+ {id:'sing',ic:'🎤',t:'노래와 발성|Singing and voice',teacher:'lala',ls:['S'],
+  cn:[CN('cn-posture','🧍','바른 자세와 숨쉬기|Posture and breathing',['s1.0','s1.1','s2.0','s2.1'],['등은 쭉 펴고 어깨는 편하게, 숨은 배로 들이마셔요.|Stand tall, relax your shoulders and breathe into your belly.','노래 전에 허밍이나 입술 떨기로 목을 풀어요.|Warm up with humming or lip trills before you sing.']),
+   CN('cn-match','🎯','같은 높이로 부르기|Singing the same pitch',['s3.0','s4.0','s6.0'],['먼저 잘 듣고, 같은 높이로 “아~” 하고 불러요.|Listen first, then sing “ahh” at the same pitch.','소리를 지르지 말고 물을 자주 마셔 목을 아껴요.|Don’t shout, and sip water to look after your voice.'])],
+  dr:[{ic:'🌬️',t:'숨쉬기 연습|Breathing practice',spec:{type:'breath',cycles:3},cn:'cn-posture'},
+   {ic:'🚨',t:'사이렌 목 풀기|Siren warm-up',spec:{type:'sing',task:'siren'},cn:'cn-posture'},
+   {ic:'🎯',t:'음 따라 부르기|Match the note',spec:{type:'sing',task:'match',count:5},cn:'cn-match'},
+   {ic:'🪜',t:'도레미파솔 부르기|Sing C D E F G',spec:{type:'sing',task:'scale'},cn:'cn-match'}]},
+ {id:'instr',ic:'🎺',t:'악기|Instruments',teacher:'hoot',ls:['H'],
+  cn:[CN('cn-family','🎻','악기 가족|Instrument families',['h1.0','h1.1','h2.0','h4.0'],['줄을 쓰면 현악기, 불면 관악기, 두드리면 타악기, 건반을 누르면 건반악기예요.|Strings, wind (you blow), percussion (you hit) and keyboard (you press keys).','관악기는 목관악기와 금관악기로 나눠요.|Wind instruments split into woodwinds and brass.']),
+   CN('cn-korean','🪘','우리 악기|Korean instruments',['h3.0','h3.1'],['가야금·해금은 줄을, 대금은 불어서, 장구·북은 두드려서 소리를 내요.|The gayageum and haegeum use strings, the daegeum is blown, and the janggu and buk are struck.','꽹과리·징·장구·북으로 하는 공연을 사물놀이라고 해요.|Samulnori is played on the kkwaenggwari, jing, janggu and buk.'])],
+  dr:[{ic:'🎻',t:'악기 가족 퀴즈|Instrument family quiz',spec:{type:'quiz',bank:'family',count:6},cn:'cn-family'},
+   {ic:'👂',t:'소리 듣고 맞히기|Name it by its sound',spec:{type:'listen',task:'family',count:6},cn:'cn-family'},
+   {ic:'🪘',t:'우리 악기 퀴즈|Korean instruments quiz',spec:{type:'quiz',bank:'korean',count:6},cn:'cn-korean'},
+   {ic:'🎼',t:'오케스트라 퀴즈|Orchestra quiz',spec:{type:'quiz',bank:'orch',count:5},cn:'cn-family'},
+   {ic:'📚',t:'악기 도감|Instrument book',go:'instr'}]}];
+const TOPIC_BY=Object.fromEntries(TOPICS.map(t=>[t.id,t])),CN_BY={},CN_TOPIC={};
+TOPICS.forEach(tp=>tp.cn.forEach(c=>{CN_BY[c.id]=c;CN_TOPIC[c.id]=tp}));
+const topicLessons=tp=>tp.ls.flatMap(x=>x.length===1?LESSONS.filter(l=>l.u===x):[LESSON_BY[x]]).filter(Boolean);
+// the concept lesson a lesson's own slides belong to (for "📖 개념 다시 보기" after a hard try)
+const cnOfLesson=id=>Object.values(CN_BY).find(c=>c.from.some(r=>r.split('.')[0]===id))||null;
+// a unit opens once the lesson it builds on is done; inside a unit the lessons stay in order
+const UNIT_NEED={C:'a2',D:'a2',E:'b3',F:'c2',G:'b3',I:'b3',J:['c3','b5']};
+const unitNeed=u=>[].concat(UNIT_NEED[u]||[]).filter(id=>!lessonDone(id));
+
+// a concept as a MiniLesson: the teacher reads each slide, then its demo plays; a try comes last
+function cnArt(v,p){return box=>{box.innerHTML=`<div class="vis cnvis">${visHTML(v,p)}</div>${p?`<button type="button" class="btn ghost small cndemo">🎵 ${L('다시 들어 보기','Hear it again')}</button>`:''}`;
+ const b=box.querySelector('.cndemo');if(b)b.addEventListener('click',()=>{stopVoice();demo(p,box.querySelector('.vis'))})}}
+function cnLesson(c){const tp=CN_TOPIC[c.id],t=TEACHERS[tp.teacher];
+ const steps=c.from.map(r=>{const [lid,k]=r.split('.'),s=LESSON_BY[lid].intro[+k];return {say:T(s.t),art:cnArt(s.v,s.p),after:s.p?box=>{const v=box.querySelector('.vis');if(v)demo(s.p,v)}:null}});
+ if(c.tr)steps.push(c.tr());
+ return {id:c.id,icon:c.icon,title:T(c.t),who:{img:t.img,name:T(t.name)},steps,key:c.key.map(T)}}
+const openCN=(id,o)=>{const c=CN_BY[id];if(c)MiniLesson.open(cnLesson(c),o)};
+// small tries inside a concept lesson: no score, no time limit, and "🤔 알려 줘요" always helps
+const yo=w=>{const c=w.charCodeAt(w.length-1);return w+(c>=0xAC00&&c<=0xD7A3&&(c-0xAC00)%28>0?'이에요':'예요')};
+function tryTap(n,say){return {say:T(say),try:true,art:(box,api)=>{box.innerHTML=`<button type="button" class="cn-drum" aria-label="${L('북 치기','Tap the drum')}">🥁<b>0</b></button>`;let k=0;const b=box.querySelector('.cn-drum');
+ b.addEventListener('pointerdown',async e=>{e.preventDefault();await ensureAudio();if(AC)drum('tom',AC.currentTime+.01,.9);k++;b.querySelector('b').textContent=k;b.classList.remove('hit');void b.offsetWidth;b.classList.add('hit');
+  if(k<n)api.say(cntWord(k-1));else if(k===n){api.say(L('잘했어요!','Well done!'));api.done()}})}}}
+function tryKeys({from,to,labels,want,any,say}){return {say:T(say),try:true,art:(box,api)=>{box.innerHTML='<div class="cn-keys"></div>';const got=new Set();let i=0;
+ const kb=buildKeys(box.querySelector('.cn-keys'),{from,to,labels,onDown:async m=>{await ensureAudio();if(AC)play('piano',m,AC.currentTime+.01,.6,.8);
+  const ok=any?want.includes(m)&&!got.has(m):m===want[i];const nm=noteName(m).split(' ')[0];
+  if(ok){got.add(m);i++;const k=kb.keyEl(m);if(k)k.classList.add('cn-ok');if(got.size===want.length){api.say(L(`${nm}! 아주 잘했어요!`,`${nm}! Great job!`));api.done()}else api.say(L(`${nm}, 좋아요!`,`${nm}, good!`))}
+  else if(!got.has(m))api.say(L(`그건 ${yo(nm)}. 다시 찾아봐요.`,`That’s ${nm}. Try again.`))}});
+ box._kb=kb},show:box=>{const kb=box._kb;if(kb)want.forEach(m=>{const k=kb.keyEl(m);if(k)k.classList.add('cn-ok')})}}}
+function tryPads(say){return {say:T(say),try:true,art:(box,api)=>{const got=new Set();
+ box.innerHTML=`<div class="vpads cn-pads">${['kick','snare','hat'].map(k=>`<button type="button" class="vp" data-d="${k}" style="--c:${DRUM_LANES[k].col}">${DRUM_LANES[k].icon}<small>${esc(T(DRUM_LANES[k].sub))}</small></button>`).join('')}</div>`;
+ box.querySelectorAll('.vp').forEach(b=>b.addEventListener('pointerdown',async e=>{e.preventDefault();await ensureAudio();const k=b.dataset.d;if(AC)drum(k,AC.currentTime+.01,1);b.classList.remove('hit');void b.offsetWidth;b.classList.add('hit');got.add(k);api.say(T(DRUM_LANES[k].sub)+' · “'+T(DRUM_LANES[k].name)+'!”');if(got.size===3)api.done()}))}}}
+
+// the topic page
+let TOPIC='beat';
+function openTopic(id){TOPIC=id;go('topic')}
+RENDER.topic=()=>{const tp=TOPIC_BY[TOPIC]||TOPICS[0],t=TEACHERS[tp.teacher],ls=topicLessons(tp),seen=id=>MiniLesson.seen(id);
+ $('v-topic').innerHTML=`<div class="topic">
+  <div class="uhead" style="background:${t.bg}"><span class="tface">${pic(t.img,t.icon)}</span><div><b>${tp.ic} ${esc(T(tp.t))}</b><small>${esc(T(t.name))}</small></div></div>
+  <div class="card"><h3>📖 ${L('먼저 개념 배우기','Learn the idea first')}</h3><p class="sub">${L('짧은 수업이에요. 보고, 듣고, 직접 해 봐요.','Short lessons: watch, listen, then try.')}</p>
+   <div class="cnlist">${tp.cn.map(c=>`<button class="cnb ${seen(c.id)?'seen':''}" data-cn="${c.id}" type="button"><span class="ic">${c.icon}</span><span class="tx"><b>${esc(T(c.t))}</b><small>${esc(T(c.key[0]))}</small></span><span class="st">${seen(c.id)?'✅':'▶'}</span></button>`).join('')}</div></div>
+  <div class="card"><h3>🎯 ${L('골라서 연습하기','Pick a practice')}</h3><p class="sub">${L('몇 번이든 다시 할 수 있어요. 레슨 진도와는 따로예요.','Repeat as often as you like. It’s separate from the lesson path.')}</p>
+   <div class="drills">${tp.dr.map((d,i)=>`<button class="drill" data-dr="${i}" type="button"><span class="ic">${d.ic}</span><b>${esc(T(d.t))}</b>${d.cn&&!seen(d.cn)?`<small>📖 ${L('수업 먼저','lesson first')}</small>`:''}</button>`).join('')}</div></div>
+  <div class="card"><h3>📚 ${L('이 주제의 레슨','Lessons in this topic')}</h3><div class="tlessons">${ls.map(l=>{const open=lessonOpen(lessonIdx(l.id)),st=(S.lessons[l.id]||{}).s||0;return `<button class="tl ${open?'':'locked'} ${lessonDone(l.id)?'done':''}" data-lesson="${l.id}" type="button"><span class="ic">${open?ACT_ICON[l.a.type]||'🎵':'🔒'}</span><b>${esc(T(l.t))}</b><small>${'★'.repeat(st)}${'☆'.repeat(3-st)}</small></button>`}).join('')}</div></div>
+  ${COPYRIGHT()}</div>`;
+ const v=$('v-topic');
+ v.querySelectorAll('[data-cn]').forEach(b=>b.addEventListener('click',()=>{SFX.click();openCN(b.dataset.cn,{onClose:()=>RENDER.topic(),onDone:()=>RENDER.topic()})}));
+ v.querySelectorAll('[data-dr]').forEach(b=>b.addEventListener('click',()=>{SFX.click();startDrill(tp,+b.dataset.dr)}));
+ v.querySelectorAll('[data-lesson]').forEach(b=>b.addEventListener('click',()=>tryOpenLesson(b.dataset.lesson)))};
+// a lesson that is still locked says which lesson opens it
+function tryOpenLesson(id){const i=lessonIdx(id),l=LESSONS[i];if(lessonOpen(i)){SFX.click();openLesson(id);return}SFX.pop();
+ const prev=LESSONS[i-1],need=prev&&prev.u===l.u?[prev.id]:unitNeed(l.u);toast('🔒 '+L(`먼저 ‘${need.map(x=>T(LESSON_BY[x].t)).join('’, ‘')}’ 레슨을 해요!`,`First do the lesson “${need.map(x=>T(LESSON_BY[x].t)).join('”, “')}”!`))}
+function startDrill(tp,i){const d=tp.dr[i];
+ const run=()=>{if(d.nr){openNR();return}if(d.go){go(d.go);return}
+  const host=playView(d.ic+' '+T(d.t));RUN={kind:'room',drill:tp.id};const spec={...d.spec};
+  withHowTo(spec,host,()=>runActivity(spec,host,{teacher:tp.teacher,tier:1,done:r=>{trackStats(r);if(spec.type==='drum')recordDrum(spec.pattern,r);save();try{LR.save()}catch(e){}
+   showResult(r,{teacher:tp.teacher,title:d.ic+' '+T(d.t),xp:8,coins:5,again:()=>startDrill(tp,i),concept:d.cn&&r.stars<2?d.cn:null,done:()=>openTopic(tp.id),doneLabel:L('주제로 돌아가기','Back to the topic')})}}))};
+ const c=d.cn&&CN_BY[d.cn];if(c)MiniLesson.before(cnLesson(c),run);else run()}
+// the notebook: every concept lesson, by topic
+function openNotebook(at){MiniLesson.book({title:['음악 개념 노트','Music concept notebook'],open:at,groups:TOPICS.map(tp=>({name:[tp.ic+' '+tp.t.split('|')[0],tp.ic+' '+tp.t.split('|')[1]],items:tp.cn.map(c=>({id:c.id,icon:c.icon,title:T(c.t),key:c.key.map(T),lesson:()=>cnLesson(c)}))}))})}
+// on home: one row per topic, to go straight to what the child wants to practise
+MiniLesson.cfg({voice:(t,cb)=>speak(t,{onend:cb}),stop:()=>{stopDemo();stopVoice()},who:{img:TEACHERS.mia.img,name:T(TEACHERS.mia.name)}});
+function topicsHTML(){return `<div class="card topics"><div class="dhead"><b>🎯 ${L('골라서 연습해요','Pick what to practise')}</b><button class="btn ghost small" id="nbBtn" type="button">📒 ${L('개념 노트','Concept notebook')}</button></div>
+ <div class="tgrid">${TOPICS.map(tp=>{const n=tp.cn.filter(c=>MiniLesson.seen(c.id)).length;return `<button class="tpb" type="button" data-topic="${tp.id}" style="--tc:${TEACHERS[tp.teacher].col}"><span class="ic">${tp.ic}</span><b>${esc(T(tp.t))}</b><small>📖 ${n}/${tp.cn.length}</small></button>`}).join('')}</div></div>`}
 
 // ---------------------------------------------------------------- lesson intro: watch and listen first
 let LES=null;
@@ -3187,6 +3485,7 @@ function lessonDone2(id,r){const l=LESSON_BY[id],prev=S.lessons[id]||{s:0,best:0
  save();try{LR.save()}catch(e){}showResult(r,{teacher:teacherOf(l),title:T(l.t),prevBest:prev.best,first:first&&rec.pass,unlockedByEffort:!r.stars&&fails>=3,xp,coins,sticker:st,practice:l.u==='E'&&nrOpen()?openNR:null,
   again:()=>startLessonActivity(id),easy:(l.a.type==='song'||l.a.type==='drum'||l.a.type==='read'||l.a.type==='echo'||l.a.type==='beat')&&r.stars<2?()=>startLessonActivity(id,{easy:true}):null,
   step:l.a.type==='song'&&!l.a.step&&r.stars<2?()=>{const host=playView(T(l.t));RUN={kind:'room'};runActivity({type:'song',song:l.a.song,step:true},host,{teacher:'mia',done:r2=>showResult(r2,{teacher:'mia',title:T(l.t),again:()=>startLessonActivity(id),xp:5,coins:5})})}:null,
+  concept:r.stars<2&&cnOfLesson(id)?cnOfLesson(id).id:null,
   next:rec.pass?()=>{const n=LESSONS[lessonIdx(id)+1];if(n)openLesson(n.id);else go('path')}:null})}
 function trackStats(r){S.stats.plays++;if(r.timed){S.stats.taps+=(r.p||0)+(r.g||0)+(r.o||0);S.stats.perfect+=r.p||0;S.stats.maxCombo=Math.max(S.stats.maxCombo,r.maxCombo||0)}if(r.kind==='sing')S.stats.sings++;practiced()}
 function recordSong(id,r){if(!id)return;const p=S.songs[id]||{best:0,stars:0,n:0};S.songs[id]={best:r.step?p.best:Math.max(p.best,r.acc),stars:r.step?p.stars:Math.max(p.stars,r.stars),n:p.n+1}}
@@ -3210,13 +3509,13 @@ function showResult(r,o){stopActivity();const host=$('host')||playView(o.title||
   <div class="teach"><span class="tface huge" style="background:${t.bg}">${pic(t.img,t.icon)}</span><div class="say">${esc(line)}</div></div>
   ${adv.length?`<ul class="advice">${adv.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`:''}${coachLine(calm?(r.nr.grew.length?'up':'good'):r.stars>=3||improved?'up':r.stars>=1?'good':'try')}
   <div class="rewards">${o.xp?`<span>⭐ +${o.xp} XP</span>`:''}${o.coins?`<span>${COIN} +${o.coins}</span>`:''}${o.sticker?`<span class="stk">${o.sticker} ${L('새 스티커!','New sticker!')}</span>`:''}</div>
-  <div class="row rbtns">${o.again?`<button class="btn ghost" id="rAgain" type="button">↻ ${L('다시','Again')}</button>`:''}${o.easy?`<button class="btn ghost" id="rEasy" type="button">🐢 ${L('느리게 연습','Practice slowly')}</button>`:''}${o.step?`<button class="btn ghost" id="rStep" type="button">👣 ${L('기다려 주기 연습','Wait-for-me practice')}</button>`:''}${o.practice?`<button class="btn gold" id="rNR" type="button">🎼 ${L('음표 마을 연습','Note Town practice')}</button>`:''}
+  <div class="row rbtns">${o.again?`<button class="btn ghost" id="rAgain" type="button">↻ ${L('다시','Again')}</button>`:''}${o.easy?`<button class="btn ghost" id="rEasy" type="button">🐢 ${L('느리게 연습','Practice slowly')}</button>`:''}${o.step?`<button class="btn ghost" id="rStep" type="button">👣 ${L('기다려 주기 연습','Wait-for-me practice')}</button>`:''}${o.practice?`<button class="btn gold" id="rNR" type="button">🎼 ${L('음표 마을 연습','Note Town practice')}</button>`:''}${o.concept?`<button class="btn ghost" id="rCn" type="button">📖 ${L('개념 다시 보기','See the idea again')}</button>`:''}
    ${o.next?`<button class="btn green" id="rNext" type="button">${o.nextLabel||L('다음 ▶','Next ▶')}</button>`:`<button class="btn gold" id="rDone" type="button">${o.doneLabel||L('확인','Done')}</button>`}</div></div>`;
  host.querySelectorAll('.rstars span.on').forEach((s,i)=>setTimeout(()=>{s.classList.add('pop');SFX.star(i)},300+i*280));
  if(calm){if(r.nr.grew.length)setTimeout(()=>celebrate('stars'),400)}else if(r.stars>=3)setTimeout(()=>celebrate(),400);else if(r.stars>=1)setTimeout(()=>celebrate('stars'),400);
  speak(line+(adv.length?' '+adv[0]:''));
  const bind=(id,f)=>{const b=$(id);if(b)b.addEventListener('click',()=>{SFX.click();stopVoice();f()})};
- bind('rAgain',o.again);bind('rEasy',o.easy);bind('rStep',o.step);bind('rNR',o.practice);bind('rNext',o.next);bind('rDone',o.done||(()=>back()));
+ bind('rAgain',o.again);bind('rEasy',o.easy);bind('rStep',o.step);bind('rNR',o.practice);bind('rCn',o.concept?()=>openCN(o.concept):null);bind('rNext',o.next);bind('rDone',o.done||(()=>back()));
  checkTrophies()}
 
 // ---------------------------------------------------------------- daily practice (three short tasks, a chest and the streak)

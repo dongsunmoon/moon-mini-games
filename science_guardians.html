@@ -66,6 +66,9 @@ const LR=(()=>{const f=(location.pathname.split('/').pop()||'').replace(/\.html$
 const coachEsc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const coachNm=()=>{try{return MGP.me&&MGP.me.name||''}catch(e){return ''}};
 const coachPick=a=>a[Math.random()*a.length|0];
+// the player's face as their game character (images/aq-me-<key>.webp) from the emoji the profile stores; other emoji stay as they are
+const COACH_ME={'🐰':'bunny','🐻':'bear','🦊':'fox','🐼':'panda','🐨':'koala','🐯':'tiger','🦁':'lion','🐸':'frog','🐱':'cat','🐶':'puppy','🐥':'chick','🦄':'unicorn','🐙':'octopus','🐬':'dolphin','🦖':'dino','⭐':'star'};
+const coachMe=(av,cls='')=>{const k=COACH_ME[String(av||'').replace(/\ufe0f/g,'')];return k?`<img class="me-pic ${cls}" src="images/aq-me-${k}.webp" alt="" draggable="false" data-e="${coachEsc(av)}" onerror="this.replaceWith(document.createTextNode(this.dataset.e))">`:coachEsc(av||'')};
 const coachSay_=t=>{const nm=coachNm(),ok=t.filter(x=>nm||!/\{nm\}/.test(x[0])),x=coachPick(ok.length?ok:t);return L(x[0],x[1]).replace(/\{nm\}/g,coachEsc(nm))};
 const COACH={
  up:['clap',[['꾸준히 한 덕분이에요. 정말 멋져요!','Your steady practice paid off. Awesome!'],['어제보다 오늘 더 잘하고 있어요!','You’re doing even better than yesterday!'],['계속 도전해서 여기까지 왔어요!','You kept trying, and look how far you’ve come!'],['{nm}의 노력이 반짝반짝 빛나요 ✨','Your hard work is shining, {nm} ✨'],['문 코치가 박수 쳐요! 짝짝짝 👏','Coach Moon is clapping for you! 👏'],['이 기세 그대로 가 봐요! 🌙','Keep this going! 🌙']]],
@@ -1146,6 +1149,7 @@ button.ty-prog:active{transform:translateY(2px)}
 .sgl{display:grid;justify-items:center;gap:6px;text-align:center;width:100%}.sgl .sic{font-size:56px;line-height:1}.sgl .sic .svgi,.sgl .sic img{width:64px;height:64px}
 .sgl b{font-size:19px}.sgl p{margin:0;font-size:15.5px;line-height:1.5;font-weight:700;color:#33405f}.sgl .life{background:#fff7e0;border-radius:12px;padding:8px 10px;font-size:14px;font-weight:700;color:#6b5210;width:100%;box-sizing:border-box}
 .cards-top{display:flex;gap:8px;flex-wrap:wrap}.cards-top .btn{flex:1 1 200px}
+.ava{overflow:hidden}
 /*COACH:BEGIN*/
 /* Coach Moon: one line inside result windows (.mcoach) and a corner bubble at good moments (#coachPop, never takes taps) */
 .mcoach{display:flex;align-items:flex-end;gap:8px;margin:10px auto 6px;max-width:330px;text-align:left}
@@ -1157,6 +1161,7 @@ button.ty-prog:active{transform:translateY(2px)}
 #coachPop img{width:54px;height:64px;flex:0 0 54px;object-fit:contain;object-position:50% 0;filter:drop-shadow(0 4px 8px rgba(0,0,0,.28))}
 #coachPop p{margin:8px 0 0;background:#fff;border:2px solid #c9d4ff;border-radius:4px 16px 16px 16px;padding:6px 11px;font-size:13.5px;font-weight:700;line-height:1.38;color:#2a3470;box-shadow:0 8px 20px rgba(20,30,80,.22)}
 #coachPop b{display:block;font-size:11px;font-weight:900;color:#5b6cff}
+.me-pic{width:100%;height:100%;object-fit:cover;object-position:50% 18%;border-radius:inherit;display:block}
 @media (prefers-reduced-motion:reduce){#coachPop{transition:opacity .2s;transform:none}}
 /* Mini lessons (.mlx) and the concept notebook (.mlx.book): one window, a picture, the teacher's line, big buttons */
 .mlx{position:fixed;inset:0;z-index:2147483100;display:grid;place-items:center;padding:max(10px,env(safe-area-inset-top)) max(8px,env(safe-area-inset-right)) max(10px,env(safe-area-inset-bottom)) max(8px,env(safe-area-inset-left));background:rgba(18,24,58,.55);font-family:system-ui,-apple-system,'Apple SD Gothic Neo','Noto Sans KR',sans-serif;color:#22305e;animation:mlxIn .2s ease}
@@ -5493,7 +5498,7 @@ function speak(text){
 const stopVoice=()=>{try{speechSynthesis.cancel()}catch(e){}};
 
 // ---------------------------------------------------------------- HUD, toasts, modals, effects
-const avatarHTML=(s=S,cls='')=>`<span class="ava ${cls}" style="background:${(SUITS.find(x=>x.id===s.equip.suit)||SUITS[0]).bg}">${esc(s.av)}</span>`;
+const avatarHTML=(s=S,cls='')=>`<span class="ava ${cls}" style="background:${(SUITS.find(x=>x.id===s.equip.suit)||SUITS[0]).bg}">${coachMe(s.av)}</span>`;
 function updateHud(){
  const t=titleOf(S.lvl);
  $('lvlNum').textContent=S.lvl;$('lvlName').innerHTML=`${t.icon} ${esc(S.name)}<small>${num(S.xp)}/${num(xpNeed(S.lvl))} XP</small>`;

@@ -66,6 +66,9 @@ const LR=(()=>{const f=(location.pathname.split('/').pop()||'').replace(/\.html$
 const coachEsc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const coachNm=()=>{try{return MGP.me&&MGP.me.name||''}catch(e){return ''}};
 const coachPick=a=>a[Math.random()*a.length|0];
+// the player's face as their game character (images/aq-me-<key>.webp) from the emoji the profile stores; other emoji stay as they are
+const COACH_ME={'🐰':'bunny','🐻':'bear','🦊':'fox','🐼':'panda','🐨':'koala','🐯':'tiger','🦁':'lion','🐸':'frog','🐱':'cat','🐶':'puppy','🐥':'chick','🦄':'unicorn','🐙':'octopus','🐬':'dolphin','🦖':'dino','⭐':'star'};
+const coachMe=(av,cls='')=>{const k=COACH_ME[String(av||'').replace(/\ufe0f/g,'')];return k?`<img class="me-pic ${cls}" src="images/aq-me-${k}.webp" alt="" draggable="false" data-e="${coachEsc(av)}" onerror="this.replaceWith(document.createTextNode(this.dataset.e))">`:coachEsc(av||'')};
 const coachSay_=t=>{const nm=coachNm(),ok=t.filter(x=>nm||!/\{nm\}/.test(x[0])),x=coachPick(ok.length?ok:t);return L(x[0],x[1]).replace(/\{nm\}/g,coachEsc(nm))};
 const COACH={
  up:['clap',[['꾸준히 한 덕분이에요. 정말 멋져요!','Your steady practice paid off. Awesome!'],['어제보다 오늘 더 잘하고 있어요!','You’re doing even better than yesterday!'],['계속 도전해서 여기까지 왔어요!','You kept trying, and look how far you’ve come!'],['{nm}의 노력이 반짝반짝 빛나요 ✨','Your hard work is shining, {nm} ✨'],['문 코치가 박수 쳐요! 짝짝짝 👏','Coach Moon is clapping for you! 👏'],['이 기세 그대로 가 봐요! 🌙','Keep this going! 🌙']]],
@@ -912,6 +915,7 @@ button.setrow{flex-wrap:nowrap}
 .pk.cn-ok{background:var(--nc)!important;box-shadow:0 0 0 3px #fff inset,0 0 14px var(--nc)}
 .cn-pads{display:flex;gap:10px;justify-content:center}.cn-pads .vp{border:0;cursor:pointer;touch-action:manipulation}
 .vimg{width:min(260px,70%);height:auto;aspect-ratio:1;object-fit:contain;filter:drop-shadow(0 6px 10px rgba(0,0,0,.12))}
+#avaBtn{display:grid;place-items:center;width:100%;height:100%;border-radius:50%;overflow:hidden}.ava{overflow:hidden}
 /*COACH:BEGIN*/
 /* Coach Moon: one line inside result windows (.mcoach) and a corner bubble at good moments (#coachPop, never takes taps) */
 .mcoach{display:flex;align-items:flex-end;gap:8px;margin:10px auto 6px;max-width:330px;text-align:left}
@@ -923,6 +927,7 @@ button.setrow{flex-wrap:nowrap}
 #coachPop img{width:54px;height:64px;flex:0 0 54px;object-fit:contain;object-position:50% 0;filter:drop-shadow(0 4px 8px rgba(0,0,0,.28))}
 #coachPop p{margin:8px 0 0;background:#fff;border:2px solid #c9d4ff;border-radius:4px 16px 16px 16px;padding:6px 11px;font-size:13.5px;font-weight:700;line-height:1.38;color:#2a3470;box-shadow:0 8px 20px rgba(20,30,80,.22)}
 #coachPop b{display:block;font-size:11px;font-weight:900;color:#5b6cff}
+.me-pic{width:100%;height:100%;object-fit:cover;object-position:50% 18%;border-radius:inherit;display:block}
 @media (prefers-reduced-motion:reduce){#coachPop{transition:opacity .2s;transform:none}}
 /* Mini lessons (.mlx) and the concept notebook (.mlx.book): one window, a picture, the teacher's line, big buttons */
 .mlx{position:fixed;inset:0;z-index:2147483100;display:grid;place-items:center;padding:max(10px,env(safe-area-inset-top)) max(8px,env(safe-area-inset-right)) max(10px,env(safe-area-inset-bottom)) max(8px,env(safe-area-inset-left));background:rgba(18,24,58,.55);font-family:system-ui,-apple-system,'Apple SD Gothic Neo','Noto Sans KR',sans-serif;color:#22305e;animation:mlxIn .2s ease}
@@ -3121,7 +3126,7 @@ const stopVoice=()=>{saySeq++;try{speechSynthesis.cancel()}catch(e){}};
 
 // ---------------------------------------------------------------- HUD, modals, toasts, effects
 function updateHud(){const t=titleOf(S.lvl);$('lvlNum').textContent=S.lvl;$('lvlName').innerHTML=`${esc(S.name)} <small>${t.icon} ${esc(t.name)}</small>`;$('xpFill').style.width=Math.min(100,100*S.xp/xpNeed(S.lvl))+'%';
- $('coinNum').textContent=num(S.coins);$('streakNum').textContent=S.streak.n;$('streakPill').classList.toggle('lit',S.streak.last===dayKey());$('avaBtn').textContent=S.av;
+ $('coinNum').textContent=num(S.coins);$('streakNum').textContent=S.streak.n;$('streakPill').classList.toggle('lit',S.streak.last===dayKey());$('avaBtn').innerHTML=coachMe(S.av);
  $('lvlBtn').setAttribute('aria-label',L(`${S.name} · 레벨 ${S.lvl} · 내 정보`,`${S.name} · Level ${S.lvl} · My info`))}
 function toast(html){const t=document.createElement('div');t.className='toast';t.innerHTML=html;$('toasts').appendChild(t);setTimeout(()=>t.classList.add('out'),2300);setTimeout(()=>t.remove(),2700)}
 let MQ=[],CUR=null,MFOCUS=null;
@@ -3196,7 +3201,7 @@ const RENDER={};
 RENDER.home=()=>{ensureDaily();const nl=nextLesson(),t=nl?TEACHERS[teacherOf(nl)]:null,ti=titleOf(S.lvl),d=S.daily,doneN=d.done.filter(Boolean).length;
  const week=[];for(let i=6;i>=0;i--){const dt=new Date();dt.setDate(dt.getDate()-i);const k=dayKey(dt);week.push({k,on:!!S.days[k],today:i===0,lab:dt.toLocaleDateString(LANG==='en'?'en-US':'ko-KR',{weekday:'narrow'})})}
  $('v-home').innerHTML=`<div class="home">
-  <div class="hero"><button class="face" id="heroFace" type="button" aria-label="${esc(L('내 정보','My info'))}"><span class="ava big">${esc(S.av)}</span></button><div class="hinfo"><div class="t1">${ti.icon} ${esc(ti.name)} · Lv.${S.lvl}</div><div class="t2">${esc(S.name)}</div>
+  <div class="hero"><button class="face" id="heroFace" type="button" aria-label="${esc(L('내 정보','My info'))}"><span class="ava big">${coachMe(S.av)}</span></button><div class="hinfo"><div class="t1">${ti.icon} ${esc(ti.name)} · Lv.${S.lvl}</div><div class="t2">${esc(S.name)}</div>
    <div class="stats"><span>🔥 ${L(`${S.streak.n}일 연속`,`${S.streak.n}-day streak`)}</span><span>⭐ ${starTotal()}</span><span>🛡️ ${S.streak.shields}</span></div></div></div>
   <div class="card daily"><div class="dhead"><b>📅 ${L('오늘의 연습','Today’s practice')}</b><span class="sub">${doneN}/3</span></div>
    <div class="week">${week.map(w=>`<span class="${w.on?'on':''} ${w.today?'today':''}"><i>${w.on?'🔥':''}</i><small>${esc(w.lab)}</small></span>`).join('')}</div>
@@ -3753,7 +3758,7 @@ function playerForm(isNew,idx=ROOT.cur){const p=isNew?freshP():ROOT.P[idx];let a
    p.name=n;p.av=av;p.faceSet=true;save();applyOpts();updateHud();if(VIEW==='who')RENDER.who()}}})}
 // my info: the avatar and level button only shows who is playing and how far they are; it never leaves by itself
 function openMe(){const t=titleOf(S.lvl),need=xpNeed(S.lvl),nx=TITLES.find(x=>x[0]>S.lvl);
- modal(`<div class="mecard center"><span class="ava big">${esc(S.av)}</span><h2>${esc(S.name)}</h2><p class="newtitle">${t.icon} ${esc(t.name)} · Lv.${S.lvl}</p>
+ modal(`<div class="mecard center"><span class="ava big">${coachMe(S.av)}</span><h2>${esc(S.name)}</h2><p class="newtitle">${t.icon} ${esc(t.name)} · Lv.${S.lvl}</p>
   <div class="mexp"><div class="xpbar"><i style="width:${Math.min(100,100*S.xp/need)}%"></i></div><small>⭐ ${num(S.xp)} / ${num(need)} XP · ${L(`다음 레벨까지 ${num(Math.max(0,need-S.xp))}`,`${num(Math.max(0,need-S.xp))} to the next level`)}</small></div>
   ${nx?`<p class="sub">${L('다음 칭호','Next title')}: ${nx[1]} ${esc(T(nx[2]))} · Lv.${nx[0]}</p>`:''}
   <div class="mestats"><span>🔥 ${L(`${S.streak.n}일 연속`,`${S.streak.n}-day streak`)}</span><span>🎓 ${doneCount()}/${LESSONS.length}</span><span>⭐ ${starTotal()}</span><span>📒 ${S.stickers.length}</span></div>

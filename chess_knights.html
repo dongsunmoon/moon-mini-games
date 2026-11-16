@@ -66,6 +66,9 @@ const LR=(()=>{const f=(location.pathname.split('/').pop()||'').replace(/\.html$
 const coachEsc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const coachNm=()=>{try{return MGP.me&&MGP.me.name||''}catch(e){return ''}};
 const coachPick=a=>a[Math.random()*a.length|0];
+// the player's face as their game character (images/aq-me-<key>.webp) from the emoji the profile stores; other emoji stay as they are
+const COACH_ME={'🐰':'bunny','🐻':'bear','🦊':'fox','🐼':'panda','🐨':'koala','🐯':'tiger','🦁':'lion','🐸':'frog','🐱':'cat','🐶':'puppy','🐥':'chick','🦄':'unicorn','🐙':'octopus','🐬':'dolphin','🦖':'dino','⭐':'star'};
+const coachMe=(av,cls='')=>{const k=COACH_ME[String(av||'').replace(/\ufe0f/g,'')];return k?`<img class="me-pic ${cls}" src="images/aq-me-${k}.webp" alt="" draggable="false" data-e="${coachEsc(av)}" onerror="this.replaceWith(document.createTextNode(this.dataset.e))">`:coachEsc(av||'')};
 const coachSay_=t=>{const nm=coachNm(),ok=t.filter(x=>nm||!/\{nm\}/.test(x[0])),x=coachPick(ok.length?ok:t);return L(x[0],x[1]).replace(/\{nm\}/g,coachEsc(nm))};
 const COACH={
  up:['clap',[['꾸준히 한 덕분이에요. 정말 멋져요!','Your steady practice paid off. Awesome!'],['어제보다 오늘 더 잘하고 있어요!','You’re doing even better than yesterday!'],['계속 도전해서 여기까지 왔어요!','You kept trying, and look how far you’ve come!'],['{nm}의 노력이 반짝반짝 빛나요 ✨','Your hard work is shining, {nm} ✨'],['문 코치가 박수 쳐요! 짝짝짝 👏','Coach Moon is clapping for you! 👏'],['이 기세 그대로 가 봐요! 🌙','Keep this going! 🌙']]],
@@ -631,6 +634,7 @@ main{width:min(1120px,100%);margin:0 auto;padding:14px max(12px,env(safe-area-in
  .modal h2{font-size:23px}
 }
 @media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+.av .me-pic,.mav .me-pic{width:100%;height:100%}.mav{display:inline-grid;width:40px;height:40px;border-radius:50%;overflow:hidden;vertical-align:middle}
 /*COACH:BEGIN*/
 /* Coach Moon: one line inside result windows (.mcoach) and a corner bubble at good moments (#coachPop, never takes taps) */
 .mcoach{display:flex;align-items:flex-end;gap:8px;margin:10px auto 6px;max-width:330px;text-align:left}
@@ -642,6 +646,7 @@ main{width:min(1120px,100%);margin:0 auto;padding:14px max(12px,env(safe-area-in
 #coachPop img{width:54px;height:64px;flex:0 0 54px;object-fit:contain;object-position:50% 0;filter:drop-shadow(0 4px 8px rgba(0,0,0,.28))}
 #coachPop p{margin:8px 0 0;background:#fff;border:2px solid #c9d4ff;border-radius:4px 16px 16px 16px;padding:6px 11px;font-size:13.5px;font-weight:700;line-height:1.38;color:#2a3470;box-shadow:0 8px 20px rgba(20,30,80,.22)}
 #coachPop b{display:block;font-size:11px;font-weight:900;color:#5b6cff}
+.me-pic{width:100%;height:100%;object-fit:cover;object-position:50% 18%;border-radius:inherit;display:block}
 @media (prefers-reduced-motion:reduce){#coachPop{transition:opacity .2s;transform:none}}
 /* Mini lessons (.mlx) and the concept notebook (.mlx.book): one window, a picture, the teacher's line, big buttons */
 .mlx{position:fixed;inset:0;z-index:2147483100;display:grid;place-items:center;padding:max(10px,env(safe-area-inset-top)) max(8px,env(safe-area-inset-right)) max(10px,env(safe-area-inset-bottom)) max(8px,env(safe-area-inset-left));background:rgba(18,24,58,.55);font-family:system-ui,-apple-system,'Apple SD Gothic Neo','Noto Sans KR',sans-serif;color:#22305e;animation:mlxIn .2s ease}
@@ -2711,7 +2716,7 @@ function askPromo(opts,f){
 function updateHud(){
  const t=titleOf(S.lvl),me=MGP.me,xpTxt=`${num(S.xp)}/${num(xpNeed(S.lvl))} XP`,b=$('lvlNum');
  if(me){ // the player picked on the main page: their avatar + name lead the HUD
-  b.classList.add('me');b.innerHTML=`<span class="av">${esc(me.av)}</span><b>${S.lvl}</b>`;
+  b.classList.add('me');b.innerHTML=`<span class="av">${coachMe(me.av)}</span><b>${S.lvl}</b>`;
   $('lvlName').innerHTML=`<span class="pn">${esc(me.name)}</span><small>${t.icon} ${esc(t.name)} · ${xpTxt}</small>`;
   $('lvlBtn').setAttribute('aria-label',L(`${me.name} · 레벨 ${S.lvl} · ${t.name} · ${xpTxt}`,`${me.name} · Level ${S.lvl} · ${t.name} · ${xpTxt}`));
  }else{b.textContent=S.lvl;$('lvlName').innerHTML=`${t.icon} ${esc(t.name)}<small>${xpTxt}</small>`;$('lvlBtn').setAttribute('aria-label',L(`레벨 ${S.lvl} · ${t.name} · ${xpTxt}`,`Level ${S.lvl} · ${t.name} · ${xpTxt}`))}
@@ -2850,7 +2855,7 @@ function confirmLeave(leave){
 $('homeLink').addEventListener('click',e=>{if(gameUnfinished()){e.preventDefault();const href=$('homeLink').href;confirmLeave(()=>{leaveGame();location.href=href})}});
 $('coinPill').addEventListener('click',()=>{SFX.click();if(VIEW!=='game')go('shop');else toast(`${COIN} ${num(S.coins)} ${L('코인','coins')}`)});
 $('lvlBtn').addEventListener('click',()=>{SFX.click();const t=titleOf(S.lvl),nt=TITLES.find(x=>x[0]>S.lvl),me=MGP.me;
- modal(`${me?`<div class="meline"><span class="mav">${esc(me.av)}</span><b>${esc(me.name)}</b></div>`:''}<h2>${t.icon} ${esc(t.name)}</h2><p>Lv.${S.lvl} · ${num(S.xp)}/${num(xpNeed(S.lvl))} XP</p><div class="xpbar" style="max-width:none;height:14px;background:#eef0fb"><i style="width:${S.xp/xpNeed(S.lvl)*100}%"></i></div>
+ modal(`${me?`<div class="meline"><span class="mav">${coachMe(me.av)}</span><b>${esc(me.name)}</b></div>`:''}<h2>${t.icon} ${esc(t.name)}</h2><p>Lv.${S.lvl} · ${num(S.xp)}/${num(xpNeed(S.lvl))} XP</p><div class="xpbar" style="max-width:none;height:14px;background:#eef0fb"><i style="width:${S.xp/xpNeed(S.lvl)*100}%"></i></div>
  ${nt?`<p>${L(`레벨 ${nt[0]}이 되면 ${nt[1]} ${esc(nt[2])} 칭호!`,`At level ${nt[0]}: ${nt[1]} ${esc(nt[2])}`)}</p>`:''}
  <div class="rewards"><span class="rate">🧠 ${L('퍼즐 점수','Puzzle score')} ${num(S.rating)}</span><span>🧩 ${num(S.solved)}</span><span>⭐ ${totalStars()}</span><span>⚔️ ${S.wins}</span></div>
  <p>${L('퍼즐을 풀고 대결에서 이기면 XP가 쌓여요. 레벨이 오르면 코인과 아이템 선물!','Solve puzzles and win battles to earn XP. Every level up brings coins and items!')}</p>

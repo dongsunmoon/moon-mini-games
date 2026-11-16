@@ -907,6 +907,7 @@ button.setrow{flex-wrap:nowrap}
 .cn-keys{width:100%;max-width:440px;height:150px}
 .pk.cn-ok{background:var(--nc)!important;box-shadow:0 0 0 3px #fff inset,0 0 14px var(--nc)}
 .cn-pads{display:flex;gap:10px;justify-content:center}.cn-pads .vp{border:0;cursor:pointer;touch-action:manipulation}
+.vimg{width:min(260px,70%);height:auto;aspect-ratio:1;object-fit:contain;filter:drop-shadow(0 6px 10px rgba(0,0,0,.12))}
 /*COACH:BEGIN*/
 /* Coach Moon: one line inside result windows (.mcoach) and a corner bubble at good moments (#coachPop, never takes taps) */
 .mcoach{display:flex;align-items:flex-end;gap:8px;margin:10px auto 6px;max-width:330px;text-align:left}
@@ -1427,6 +1428,10 @@ const LESSONS=[
   a:{type:'echo',level:5,count:4,bpm:70}},
 ];
 const LESSON_BY=Object.fromEntries(LESSONS.map(l=>[l.id,l]));
+// painted pictures for the slides that only had emoji (images/mus-ls-*.webp, prompt file step 23); until a file exists the emoji shows
+const SLIDE_IMG={'a1.1':'mus-ls-heart','a2.1':'mus-ls-tempo','i2.0':'mus-ls-tempo','b1.0':'mus-ls-highlow','b7.0':'mus-ls-updown','s1.0':'mus-ls-posture','s1.1':'mus-ls-breath',
+ 's2.0':'mus-ls-warmup','s2.1':'mus-ls-vowels','s6.0':'mus-ls-voicecare','g4.0':'mus-ls-majmin','h4.0':'mus-ls-orchestra','d1.0':'mus-ls-drumkit','d1.1':'mus-ls-drumkit'};
+Object.entries(SLIDE_IMG).forEach(([r,img])=>{const [l,k]=r.split('.'),s=LESSON_BY[l]&&LESSON_BY[l].intro[+k];if(s)s.v={...(s.v||{}),img}});
 
 // ---------------------------------------------------------------- contests
 const CONTESTS=[
@@ -3405,7 +3410,8 @@ RENDER.lesson=()=>{if(!LES)return;const l=LES.l,k=teacherOf(l),t=TEACHERS[k],s=l
 // what the teacher shows on a slide
 function staffNotes(n){return typeof n==='string'?parseMelody(n).filter(x=>!x.rest).map(x=>({m:x.m,d:x.d})):n}
 function visHTML(v,p){let h='';v=v||{};
- if(v.emoji)h+=`<div class="vemoji">${esc(v.emoji)}</div>`;
+ if(v.img)h+=`<img class="vimg" src="images/${v.img}.webp" alt="" data-emoji="${esc(v.emoji||'🎶')}" onerror="this.outerHTML='<div class=&quot;vemoji&quot;>'+this.dataset.emoji+'</div>'">`;
+ else if(v.emoji)h+=`<div class="vemoji">${esc(v.emoji)}</div>`;
  if(v.text)h+=`<div class="vtext">${esc(v.text)}</div>`;
  if(v.pulse)h+=`<div class="vpulse" style="--d:${60/v.pulse}s"><i></i><b>🥁</b></div>`;
  if(v.bar)h+=`<div class="vbar">${barHTML(v.bar)}</div>`;

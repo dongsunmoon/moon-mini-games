@@ -533,7 +533,7 @@ function render(){const app=$('app'),R=records(),m=DEMO?{name:L('하늘','Sky'),
  app.innerHTML=h;LASTA=A;bindCommon()}
 let LASTA=null;
 function subjectCard(g,rec,p,a,A){const S=rec.sum,sk=allSkills(S),prog=sk.length?sk.reduce((t,k)=>t+(+k.p||0),0)/sk.length:0;
- const nM=sk.filter(k=>k.st===2).length,nP=sk.filter(k=>k.st===1).length;
+ const nM=sk.filter(k=>k.st===2).length,nP=sk.filter(k=>k.st===1).length,nL=Object.keys(rec.ls||{}).length;
  const lastDay=Object.keys(rec.days||{}).filter(k=>rec.days[k].s>=30||rec.days[k].r+rec.days[k].w>0).sort().pop();
  const acc=p.r+p.w?p.r/(p.r+p.w):null,info={};A.skills.filter(s=>s.g===g).forEach(s=>info[s.k.id]=s);
  const stat=k=>{const s=info[k.id];return s&&s.att>=3?{r:s.r,w:s.w,a:s.acc}:null};
@@ -556,7 +556,7 @@ function subjectCard(g,rec,p,a,A){const S=rec.sum,sk=allSkills(S),prog=sk.length
  const home=(S.home||[]).slice(0,3).map(t=>`<li>🏠 <span>${esc(T(t))}</span></li>`).join('');
  return `<section class="card subj" style="--c:${g.c}" id="s-${g.id}" data-subjcard="${g.id}"${SUBJ===g.id?'':' hidden'}>
   <div class="s-top"><div class="s-ic">${esc(g.icon)}</div><div class="s-tt"><h3>${esc(T(g.subj))}</h3><p>${esc(T(g.game))} · ${lastDay?L(`최근 학습 ${ago(lastDay)}`,`Last played ${ago(lastDay)}`):L('아직 기록 없음','No play yet')}</p>
-   <div class="chips">${lvChip(a.lv)}${S.level?`<span class="chip c">📍 ${esc(T(S.level))}</span>`:''}<span class="chip">✅ ${L(`익힘 ${nM}`,`${nM} mastered`)}</span>${nP?`<span class="chip">🟡 ${L(`연습 중 ${nP}`,`${nP} practising`)}</span>`:''}</div></div>
+   <div class="chips">${lvChip(a.lv)}${S.level?`<span class="chip c">📍 ${esc(T(S.level))}</span>`:''}<span class="chip">✅ ${L(`익힘 ${nM}`,`${nM} mastered`)}</span>${nP?`<span class="chip">🟡 ${L(`연습 중 ${nP}`,`${nP} practising`)}</span>`:''}${nL?`<span class="chip" title="${esc(L('끝까지 들은 개념 미니 수업','Concept mini lessons watched to the end'))}">📖 ${L(`미니 수업 ${nL}`,`${nL} mini lesson${nL>1?'s':''}`)}</span>`:''}</div></div>
    <div class="ring">${ringSVG(prog,g.c)}<span>${L('진도','Progress')}</span></div></div>
   <div class="s-body">
    ${S.focus?`<p class="focus">${esc(T(S.focus))}</p>`:''}
@@ -605,6 +605,7 @@ function planItems(A,R,played){const items=[],used=new Set();
  const idle=LEARN.map(id=>GAMES.find(g=>g.id===id)).find(g=>{const d=R[g.id].r?R[g.id].r.days||{}:{};for(let i=0;i<14;i++){const x=d[dkey(daysAgo(i))];if(x&&(x.s>=60||x.r+x.w))return false}return true});
  if(idle)items.push({id:'idle:'+idle.id,ic:idle.icon,t:L(`${subjName(idle)} 다시 시작하기`,`Pick ${subjName(idle)} back up`),p:R[idle.id].r||R[idle.id].saved?L('2주 넘게 쉬었어요. 짧게 한 판만 해도 좋아요.','It’s been over two weeks. One short round is plenty.'):L('아직 안 해 본 과목이에요. 한 번 같이 열어 보세요.','Not tried yet. Open it together once.'),d:L('10분씩 2번','10 min × 2'),go:idle.file});
  if(A.mist.some(x=>x.often))items.push({id:'redo',ic:'🔁',t:L('틀린 문제 3개 같이 풀기','Redo 3 missed questions together'),p:L('‘틀린 문제’ 탭에서 정답 가리기를 켜고 아이에게 물어보세요. 맞히면 크게 칭찬해 주세요.','In the Missed tab, turn on “hide answers” and ask your child. Celebrate the right ones!'),d:L('5분','5 min'),tab:'mistakes'});
+ items.push({id:'lesson',ic:'📖',t:L('미니 수업 하나 같이 보기','Watch one mini lesson together'),p:L('게임의 ‘개념 노트’에서 아이가 고른 수업을 같이 보고, 마지막 ‘핵심 정리’를 아이가 설명하게 해 보세요.','Open the game’s concept notebook, watch a lesson your child picks, then ask them to explain the “Remember” lines.'),d:L('5분','5 min')});
  items.push({id:'ask',ic:'💬',t:L('“어떻게 풀었어?” 물어보기','Ask “How did you solve it?”'),p:L('결과보다 생각한 과정을 물어보면 아이가 더 깊이 배워요.','Asking about the thinking, not the score, deepens learning.'),d:L('하루 1번','once a day')});
  return items.slice(0,5)}
 function homeHTML(A,R,played,dayAll){const wk=week(0),pl=getS('moonGames.reportPlan')||{};const done=pl.w===wk?pl.d||{}:{};
@@ -680,7 +681,8 @@ function demoRecords(){const out={};let seed=7;const rnd=()=>(seed=(seed*16807)%
   const sk={},skw={};allSkills(sum).forEach((k,i)=>{if(k.st===0)return;const base=k.st===2?.92:.6,lift=k.st===1&&i%2===0?.26:0;
    for(let w=0;w<8;w++){const n=3+Math.floor(rnd()*6),a=Math.min(.98,base+(w<2?lift:0)+(rnd()-.5)*.08),r=Math.round(n*a);(skw[k.id]=skw[k.id]||{})[week(w)]=[r,n-r];const x=sk[k.id]||(sk[k.id]=[0,0]);x[0]+=r;x[1]+=n-r}});
   const mx={};(DEMO_MX[sum.id]||[]).forEach(e=>{mx[e.id]={...e,f:dkey(daysAgo(20)),l:dkey(daysAgo(e.ago||2))}});
-  return {v:1,days,sum,when,at:Date.now(),sk,skw,mx}};
+  const ls={};Array.from({length:Math.min(9,allSkills(sum).length)},(_,i)=>{ls['demo'+i]=dkey(daysAgo(i*4))});
+  return {v:1,days,sum,when,at:Date.now(),sk,skw,mx,ls}};
  for(const g of GAMES){const s=DEMO_SUM[g.id];if(s){s.id=g.id;out[g.id]={r:mk(s,g.id==='math'?14:g.id==='music'?8:g.id==='science'?7:g.id==='coding'?6:3,g.id==='chess'?.74:.86,g.id==='math'?.25:g.id==='marble'?.8:.55),saved:true}}else out[g.id]={r:null,saved:false}}
  return out}
 const mxe=(id,s,qk,qe,ak,ae,gk,ge,n,k,ok,tk,te,ago)=>({id,s,q:[qk,qe],a:[ak,ae],g:gk?[gk,ge]:undefined,n,k,ok,tip:tk?[tk,te]:undefined,ago});

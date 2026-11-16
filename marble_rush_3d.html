@@ -481,6 +481,14 @@ button,input,select{font:inherit}button{cursor:pointer;touch-action:manipulation
 .bars .a{background:#1fa2c4}.bars .b{background:#bd8410}
 .nb-axis{font-size:12.5px;color:#a9bbd8}.nb .nb-why{background:#0c172bcc;border-radius:10px;padding:6px 10px;margin-top:6px}
 .nb .small-btn{margin-top:8px}.nb-left{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}.nb-empty{font-size:15px;color:#cfe0ff;line-height:1.5;margin:0 0 10px}
+/* pictures for course pieces, experiments, design challenges and badges (images/mr-*.webp, see mrPic); a picture that fails to load turns back into its emoji */
+.mr-pic{display:inline-block;width:1.6em;height:1.6em;object-fit:contain;vertical-align:middle;-webkit-user-drag:none;user-select:none;pointer-events:none}
+.piece .pi .mr-pic{display:block;width:40px;height:40px}.bt-ic .mr-pic{display:block;width:34px;height:34px}
+.lc-ic{min-width:46px;text-align:center}.lc-ic .mr-pic{display:block;width:46px;height:46px}
+.ch-card .ci .mr-pic{display:block;width:50px;height:50px}.badge .bi .mr-pic{display:block;width:48px;height:48px}
+.lab-head .mr-pic{width:32px;height:32px;margin:-4px 2px -2px 0}.nb-h>span .mr-pic{display:block;width:32px;height:32px}
+.chip .mr-pic{width:28px;height:28px;margin:-4px 0}.ch-head b .mr-pic{width:32px;height:32px;margin:-4px 2px -2px 0}
+.mrl-found b .mr-pic,.mrl-card b .mr-pic{width:30px;height:30px;margin:-4px 2px -2px 0}.mrl-icons i .mr-pic{display:block;width:50px;height:50px}
 @media(max-width:520px){.ch-grid{grid-template-columns:1fr}.ch-card{min-height:0}.ch-steps li{font-size:12px;padding:6px 2px}.bars .bl{max-width:120px}.ch-time{font-size:20px}.guess>span:first-child{flex:1 1 100%}.ch-card small,.guess small{font-size:14px}}
 @media(max-width:400px){.ch-steps .se{display:none}}
 @media(max-width:520px){.lab-ov .lab-lanes,.lab-ov .lab-note{display:none}.lab-ov .lab-opts{grid-template-columns:repeat(3,1fr);gap:6px}.lab-ov .lab-opt{font-size:14px;padding:8px 5px;min-height:58px;line-height:1.25}.lab-ov .lab-diff{font-size:13px;padding:6px 9px}.lab-ov .lab-ask{margin:6px 0}.lab-ov .result-card{padding:12px}
@@ -1316,6 +1324,15 @@ const CHALS=[
  {id:'sort',ic:'➰',t:L('용수철 분류기','Spring sorter'),g:L('용수철을 알맞게 눌러서 🔮 유리구슬만 건너고 ⚙️ 쇠구슬은 그물에 떨어지게 해요','Squash the spring just right, so only 🔮 glass marbles fly across and ⚙️ steel ones drop into the net'),r:L('🧲 자석 드럼과 ➰ 용수철 발사대를 넣어요','Include a 🧲 magnet drum and a ➰ spring launcher'),start:['magnet','spring1','pegs'],
   b:[L('모든 구슬이 건너게도 해 봐요 (쇠구슬도!)','Also get every marble across, steel ones too'),L('용수철 발사대 2개 모두에서 성공','Do it with 2 spring launchers')],sort:1}];
 const CHAL_BY=Object.fromEntries(CHALS.map(c=>[c.id,c]));
+// Pictures for the icons above: images/mr-piece-<id>, mr-exp-<id>, mr-chal-<id>, mr-badge-<id>.webp. Each one stands where the emoji was
+// and turns back into that emoji if the file cannot load (the container's font size still fits the emoji).
+const mrPic=(file,em)=>`<img class="mr-pic" src="images/${file}.webp" alt="" draggable="false" data-em="${esc(em)}" onerror="this.replaceWith(this.dataset.em)">`;
+const piecePic=m=>{const p=pieceOf(m);return mrPic('mr-piece-'+p,PIECE_BY[p]?.[1]||'')};
+// Experiment pictures show the moment before the test. Two of them also draw the force at work (the magnet's field lines bending
+// toward the steel ball, the fan's wind fading with distance), which gives the answer away, so those keep the emoji until the child has done them.
+const EXP_PIC_AFTER=['magnet','fan'];
+const expPic=e=>EXP_PIC_AFTER.includes(e.id)&&!stats.labs[e.id]?e.ic:mrPic('mr-exp-'+e.id,e.ic);
+const chalPic=ch=>mrPic('mr-chal-'+ch.id,ch.ic),badgePic=b=>mrPic('mr-badge-'+b.id,b.ic);
 // About how many seconds each piece adds to a race in this simulation (measured headless; used only to pick a hint, never shown)
 const COST={zigzag:10.7,ramps3:9.6,honey:9,ice:6.7,wash2:4.9,tramp:4.6,ramps2b:4.1,jump:4,split:3.9,funnels3:3.9,fan:3.2,pegs:2.5,spinner:1.9,bumpers:1.6,spring:5.2,blow:4.8,well:3.6,magnet:3.4};
 // pieces where marbles bounce off things, so the same course gives a slightly different time each run
@@ -1933,9 +1950,9 @@ function renderBuilder(){
  $('buildBody').innerHTML=`${d.ch?chalStripHTML(d):`<div class="b-saved">${customs.length?`<span>${L('내 코스','My courses')}:</span>${customs.map((c,i)=>`<button type="button" class="chip${d.idx===i?' on':''}" data-b="edit" data-i="${i}">🛠️ ${esc(c.name)}</button>`).join('')}<button type="button" class="chip" data-b="new">➕ ${L('새 코스','New')}</button>`:''}<button type="button" class="chip" data-b="board">🎯 ${L('설계 도전','Design challenges')}</button></div>
   <label class="b-name"><span>🏷️ ${L('코스 이름','Course name')}</span><input id="bName" type="text" maxlength="12" value="${esc(d.name)}" aria-label="${L('코스 이름','Course name')}"></label>`}
   <h3>① ${L('조각을 눌러 코스에 넣어요','Tap a piece to add it')} <small>${d.mods.length}/${MAX_PIECES}</small></h3>
-  <div class="b-pieces">${PIECES.map(([id,ic,n,desc])=>`<button type="button" class="piece" data-b="add" data-p="${id}" ${full?'disabled':''}><span class="pi">${ic}</span><b>${esc(n)}</b><small>${esc(desc)}</small></button>`).join('')}</div>
+  <div class="b-pieces">${PIECES.map(([id,,n,desc])=>`<button type="button" class="piece" data-b="add" data-p="${id}" ${full?'disabled':''}><span class="pi">${piecePic(id)}</span><b>${esc(n)}</b><small>${esc(desc)}</small></button>`).join('')}</div>
   <h3>② ${L('내 코스 순서','Your course, top to bottom')}</h3>
-  <ol class="b-track"><li class="fixed">🚦 ${L('출발','Start')}</li>${d.mods.map((m,i)=>{const [,ic,n]=PIECE_BY[pieceOf(m)],sp=pieceOf(m)==='spring',lv=sp?springLv(m):0;return `<li${sp?' class="has-lv"':''}><span class="bt-n">${i+1}</span><span class="bt-ic">${ic}</span><b>${esc(n)}</b><span class="bt-tools"><button type="button" class="mini-btn" data-b="up" data-i="${i}" ${i?'':'disabled'} aria-label="${L('위로','Move up')}">▲</button><button type="button" class="mini-btn" data-b="down" data-i="${i}" ${i<d.mods.length-1?'':'disabled'} aria-label="${L('아래로','Move down')}">▼</button><button type="button" class="mini-btn" data-b="del" data-i="${i}" aria-label="${L('빼기','Remove')}">✕</button></span>${sp?`<span class="bt-lv"><span>${L('누른 정도','Squash')}</span><button type="button" class="mini-btn" data-b="lvm" data-i="${i}" ${lv>1?'':'disabled'} aria-label="${L('용수철 덜 누르기','Squash the spring less')}">−</button><span class="lv-dots" role="img" aria-label="${esc(L(`3단계 중 ${lv}단계`,`level ${lv} of 3`))}">${[1,2,3].map(k=>`<i class="${k<=lv?'on':''}"></i>`).join('')}</span><button type="button" class="mini-btn" data-b="lvp" data-i="${i}" ${lv<3?'':'disabled'} aria-label="${L('용수철 더 꾹 누르기','Squash the spring more')}">+</button></span>`:''}</li>`}).join('')}<li class="fixed">🏁 ${L('결승','Finish')}</li></ol>
+  <ol class="b-track"><li class="fixed">🚦 ${L('출발','Start')}</li>${d.mods.map((m,i)=>{const [,,n]=PIECE_BY[pieceOf(m)],sp=pieceOf(m)==='spring',lv=sp?springLv(m):0;return `<li${sp?' class="has-lv"':''}><span class="bt-n">${i+1}</span><span class="bt-ic" aria-hidden="true">${piecePic(m)}</span><b>${esc(n)}</b><span class="bt-tools"><button type="button" class="mini-btn" data-b="up" data-i="${i}" ${i?'':'disabled'} aria-label="${L('위로','Move up')}">▲</button><button type="button" class="mini-btn" data-b="down" data-i="${i}" ${i<d.mods.length-1?'':'disabled'} aria-label="${L('아래로','Move down')}">▼</button><button type="button" class="mini-btn" data-b="del" data-i="${i}" aria-label="${L('빼기','Remove')}">✕</button></span>${sp?`<span class="bt-lv"><span>${L('누른 정도','Squash')}</span><button type="button" class="mini-btn" data-b="lvm" data-i="${i}" ${lv>1?'':'disabled'} aria-label="${L('용수철 덜 누르기','Squash the spring less')}">−</button><span class="lv-dots" role="img" aria-label="${esc(L(`3단계 중 ${lv}단계`,`level ${lv} of 3`))}">${[1,2,3].map(k=>`<i class="${k<=lv?'on':''}"></i>`).join('')}</span><button type="button" class="mini-btn" data-b="lvp" data-i="${i}" ${lv<3?'':'disabled'} aria-label="${L('용수철 더 꾹 누르기','Squash the spring more')}">+</button></span>`:''}</li>`}).join('')}<li class="fixed">🏁 ${L('결승','Finish')}</li></ol>
   <h3>③ ${L('경기장 꾸미기','Pick a look')}</h3>
   <div class="b-themes">${WORLDS.map((w,i)=>`<button type="button" class="chip${d.theme===i?' on':''}" data-b="theme" data-i="${i}" style="--a:${w.bg[0]};--b:${w.bg[1]}"><i></i>${esc(w.name)}</button>`).join('')}</div>
   <p class="b-tip">💡 ${d.ch?L('시험 주행에서는 응원 없이 코스만으로 달려요. 결과를 보고 고쳐서 다시 시험해요!','Test runs have no cheering, so only the course decides. Look at the result, improve, and test again!'):L('엔지니어처럼 해 봐요: 만들기 → 달려 보기 → 고치기! 어떤 조각이 재밌을지 예상해 보세요.','Work like an engineer: build → test → improve! Guess which pieces will be the most fun.')}</p>
@@ -2124,7 +2141,7 @@ function chalShow(rank){
  const stars=`<ul class="ch-star-list">${[L(`목표: ${ch.g}`,`Goal: ${ch.g}`),...ch.b].map((txt,i)=>{const bit=1<<i,on=c.s&bit;return `<li class="${on?'':'off'}">${on?'⭐':'☆'} ${esc(txt)}${gained&bit?`<span class="nw">${L('새 별!','New!')}</span>`:''}</li>`}).join('')}</ul>`;
  const top=rank.slice(0,3).filter(m=>m.done).map((m,i)=>`<span>${['🥇','🥈','🥉'][i]} ${esc(nameOf(m.id))} ${sec(m.finishTime-st.raceT0)}</span>`).join('');
  const hint=chalHint(ch,run,j,prev);
- $('resultCard').innerHTML=`<div class="ch-res"><div class="lab-head">🎯 ${L('설계 도전','Design challenge')} · ${ch.ic} ${esc(ch.t)}</div>${stepsHTML([2])}
+ $('resultCard').innerHTML=`<div class="ch-res"><div class="lab-head">🎯 ${L('설계 도전','Design challenge')} · ${chalPic(ch)} ${esc(ch.t)}</div>${stepsHTML([2])}
   <div class="ch-time">⏱️ ${L('우승 시간','Winning time')} ${sec(t)}</div>${force?chalForceView(ch,j.o):gaugeHTML({zones,now:t,base,old:(base!=null?old.slice(0,-1):old).slice(-4),guess,label,near:ch.id==='same'&&base!=null})}${chalMsg(ch,j,prev,starN(gained))}
   ${guess!=null?`<p class="ch-guess">🤔 ${L(`내 예상 ${guess}초 → 실제 ${sec(t)} (${sec(Math.abs(t-guess))} 차이)`,`My guess ${guess} s → actual ${sec(t)} (${sec(Math.abs(t-guess))} off)`)}</p>`:''}
   ${coachHere(j.ok?'clap':'idea',hint,hint)}<button type="button" class="mlx-chip mrl-again" data-act="lesson" data-ls="${(CH_LS[ch.id]||['gauge'])[0]}">📖 ${L('개념 다시 보기','See the idea again')}</button>
@@ -2138,7 +2155,7 @@ function chalShow(rank){
 function openChalBoard(opener){
  if(phase==='countdown'||phase==='running')return;
  $('chalBody').innerHTML=`${stepsHTML([])}<p class="ch-intro">${L('엔지니어처럼 목표에 맞는 코스를 설계해요. 시험 주행에서 우승 시간이나 들어온 순서를 진짜로 재서 확인해요. 시험 주행은 응원 없이 코스의 힘만으로 달려요.','Design a course that meets the goal, like an engineer. A test run measures the real winning time or finishing order. Test runs have no cheering, so only the course decides.')} · ⭐ ${chalStars()}/${CHALS.length*3}</p><div class="ch-books"><button type="button" class="chip" data-book="1">📖 ${L('개념 노트','Concept notebook')}</button></div>
-  <div class="ch-grid">${CHALS.map(ch=>{const c=chalGet(ch.id);return `<button type="button" class="ch-card${c.s&1?' met':''}" data-ch="${ch.id}"><span class="ci" aria-hidden="true">${ch.ic}</span><span class="ct"><b>${esc(ch.t)}</b><span class="cg">${esc(ch.g)}</span><small>📐 ${esc(ch.r)}</small>${starsHTML(c.s)}<small>${c.n?L(`시험 ${c.n}번`,`${c.n} test run${c.n===1?'':'s'}`)+(c.prev?' · '+L('지난 시험 ','last ')+sec(c.prev.t):''):L('새 도전','New challenge')}</small></span></button>`}).join('')}</div>`;
+  <div class="ch-grid">${CHALS.map(ch=>{const c=chalGet(ch.id);return `<button type="button" class="ch-card${c.s&1?' met':''}" data-ch="${ch.id}"><span class="ci" aria-hidden="true">${chalPic(ch)}</span><span class="ct"><b>${esc(ch.t)}</b><span class="cg">${esc(ch.g)}</span><small>📐 ${esc(ch.r)}</small>${starsHTML(c.s)}<small>${c.n?L(`시험 ${c.n}번`,`${c.n} test run${c.n===1?'':'s'}`)+(c.prev?' · '+L('지난 시험 ','last ')+sec(c.prev.t):''):L('새 도전','New challenge')}</small></span></button>`}).join('')}</div>`;
  openModal('chalModal',opener||$('chalBtn'))}
 function startChallenge0(id,opener){
  const ch=CHAL_BY[id];if(!ch||phase==='countdown'||phase==='running')return;const c=chalGet(id);
@@ -2148,7 +2165,7 @@ function startChallenge0(id,opener){
  $('buildModal').querySelector('.modal-card').scrollTop=0}
 function chalStripHTML(d){
  const ch=CHAL_BY[d.ch],c=chalGet(d.ch),[rs,rt]=chalRule(ch,d.mods,c),zones=chalZones(ch.id,c.prev);
- return `<div class="ch-strip"><div class="ch-head"><b>${ch.ic} ${esc(ch.t)}</b>${starsHTML(c.s)}</div>
+ return `<div class="ch-strip"><div class="ch-head"><b>${chalPic(ch)} ${esc(ch.t)}</b>${starsHTML(c.s)}</div>
   <p class="ch-goal">🎯 ${esc(ch.g)}<small>📐 ${esc(ch.r)}</small></p>${stepsHTML(c.n?[3]:[0,1])}
   ${c.prev&&!(ch.team||ch.sort)?gaugeHTML({zones,base:c.prev.t,guess:d.guess,near:ch.id==='same',label:L(`지난 시험 ${sec(c.prev.t)}`,`Last test ${sec(c.prev.t)}`)+(zones.length?L(`, 목표 ${zoneText(ch.id,c.prev)}`,`, goal ${zoneText(ch.id,c.prev)}`):'')}):''}
   <p class="ch-rule ${rs===true?'ok':rs===false?'no':''}" role="status">${esc(rt)}</p>
@@ -2175,7 +2192,7 @@ function noteEntryHTML(e,busy){
  const pred=e.opts.find(o=>o[0]===r.p)?.[1],same=r.p&&r.w&&r.p===r.w;
  const axis=time?L('⏱️ 걸린 시간 · 막대가 짧을수록 먼저 도착했어요','⏱️ Time taken · a shorter bar arrived first'):laps?L('🌀 돈 바퀴 수 · 막대가 길수록 많이 돌았어요','🌀 Laps · a longer bar circled more'):e.measure==='up'?L('↕️ 튀어 오른 높이 · 막대가 길수록 높이 튀었어요','↕️ Bounce height · a longer bar bounced higher'):L('↔️ 간 거리 · 막대가 길수록 멀리 갔어요','↔️ Distance · a longer bar went farther');
  const aria=e.lanes.map((ln,i)=>`${'AB'[i]} ${ln.name} ${txt(vals[i])}`).join(', ');
- return `<article class="nb"><h3 class="nb-h"><span aria-hidden="true">${e.ic}</span>${esc(e.t)}<small>${L(`실험 ${r.n}번`,`${r.n} run${r.n===1?'':'s'}`)}</small></h3>
+ return `<article class="nb"><h3 class="nb-h"><span aria-hidden="true">${expPic(e)}</span>${esc(e.t)}<small>${L(`실험 ${r.n}번`,`${r.n} run${r.n===1?'':'s'}`)}</small></h3>
   ${pred?`<p>🤔 <b>${L('내 예상','My guess')}</b> · ${esc(pred)}</p>`:''}<p>👀 <b>${L('결과','Result')}</b> · ${esc(labHead(e,r.w||'same'))}${pred?`<span class="nb-tag ${same?'ok':'new'}">${same?L('예상과 같아요','Matched my guess'):L('예상과 달라요','Different from my guess')}</span>`:''}</p>
   <div class="bars" role="img" aria-label="${esc(aria)}">${e.lanes.map((ln,i)=>`<span class="bl" aria-hidden="true"><i class="sw ${'ab'[i]}">${'AB'[i]}</i><span>${esc(ln.name)}</span></span><span class="bt" aria-hidden="true"><i class="${'ab'[i]}" style="width:${W(vals[i]).toFixed(1)}%"></i><em style="left:calc(${W(vals[i]).toFixed(1)}% + 6px)">${txt(vals[i])}</em></span>`).join('')}</div>
   <p class="nb-axis">${axis}</p><p class="nb-why">💡 ${esc(firstSentence(e.why))}</p>
@@ -2186,8 +2203,8 @@ function openNotebook(opener){
  $('noteBody').innerHTML=`<p class="nb-sum">${L('실험할 때마다 내 예상과 잰 결과가 여기에 적혀요. 막대그래프로 두 길을 비교해 봐요!','Every experiment writes your guess and the measured result here. Compare the two lanes on the bar graph!')} · ${L(`기록 ${rec.length}/${EXPS.length}`,`${rec.length}/${EXPS.length} recorded`)}</p>
   <button type="button" class="small-btn nb-book" data-book="1" ${busy?'disabled':''}>📖 ${L(`개념 노트 · 배운 개념 다시 보기 (${mrSeenN()}/${MRL_IDS.length})`,`Concept notebook · review the ideas (${mrSeenN()}/${MRL_IDS.length})`)}</button>
   ${rec.length?'':`<p class="nb-empty">📝 ${L('아직 적힌 실험이 없어요. 실험을 하나 하면 첫 기록이 생겨요!','Nothing written yet. Do one experiment and your first record appears!')}</p>`}
-  <div class="nb-list">${rec.map(e=>noteEntryHTML(e,busy)).join('')}${older.map(e=>`<article class="nb"><h3 class="nb-h"><span aria-hidden="true">${e.ic}</span>${esc(e.t)}<small>✅ ${L(`실험 ${stats.labs[e.id].n}번`,`${stats.labs[e.id].n} run${stats.labs[e.id].n===1?'':'s'}`)}</small></h3><p>${L('노트가 생기기 전에 한 실험이에요. 다시 하면 결과가 여기에 적혀요.','Done before the notebook existed. Run it again to write the result here.')}</p><button type="button" class="small-btn" data-exp="${e.id}" ${busy?'disabled':''}>🔬 ${L('다시 해 보기','Try it again')}</button></article>`).join('')}</div>
-  ${left.length?`<h3>${L('아직 안 해 본 실험','Not tried yet')}</h3><div class="nb-left">${left.map(e=>`<button type="button" class="chip" data-exp="${e.id}" ${busy?'disabled':''}>${e.ic} ${esc(e.t)}</button>`).join('')}</div>`:''}`;
+  <div class="nb-list">${rec.map(e=>noteEntryHTML(e,busy)).join('')}${older.map(e=>`<article class="nb"><h3 class="nb-h"><span aria-hidden="true">${expPic(e)}</span>${esc(e.t)}<small>✅ ${L(`실험 ${stats.labs[e.id].n}번`,`${stats.labs[e.id].n} run${stats.labs[e.id].n===1?'':'s'}`)}</small></h3><p>${L('노트가 생기기 전에 한 실험이에요. 다시 하면 결과가 여기에 적혀요.','Done before the notebook existed. Run it again to write the result here.')}</p><button type="button" class="small-btn" data-exp="${e.id}" ${busy?'disabled':''}>🔬 ${L('다시 해 보기','Try it again')}</button></article>`).join('')}</div>
+  ${left.length?`<h3>${L('아직 안 해 본 실험','Not tried yet')}</h3><div class="nb-left">${left.map(e=>`<button type="button" class="chip" data-exp="${e.id}" ${busy?'disabled':''}>${expPic(e)} ${esc(e.t)}</button>`).join('')}</div>`:''}`;
  openModal('noteModal',opener||$('noteBtn'));$('noteModal').querySelector('.modal-card').scrollTop=0}
 
 // ---------------------------------------------------------------- marble lab: predict → observe → explain
@@ -2198,7 +2215,7 @@ function setupLab(){
  const n=ex.kind==='crash'?4:2,mats=ex.kind==='crash'?[ex.lanes[0].mat,ex.lanes[1].mat,ex.lanes[0].target,ex.lanes[1].target]:ex.lanes.map(l=>l.mat);
  st=Sim.createState(course,n,[...Array(n).keys()]);st.marbles.forEach((m,i)=>{const M=MATS[mats[i]];m.mass=M.mass;m.bounce=M.bounce;m.look=M;m.ang=0;m.mag=M.metal?1:0});
  for(let i=0;i<40;i++)Sim.step(st,1/60);labStart=st.marbles.map(m=>m.x);labRes=[{},{}];labEndAt=0}
-function labListHTML(){return EXPS.map(e=>{const r=stats.labs[e.id];return `<button type="button" class="lab-card${labExp&&labExp.id===e.id&&labMode?' on':''}" data-exp="${e.id}"><span class="lc-ic">${e.ic}</span><span class="lc-tx"><b>${esc(e.t)}</b><small>${esc(e.q)}</small></span><span class="lc-done">${r?'✅'+(r.n>1?' ×'+r.n:''):''}</span></button>`}).join('')}
+function labListHTML(){return EXPS.map(e=>{const r=stats.labs[e.id];return `<button type="button" class="lab-card${labExp&&labExp.id===e.id&&labMode?' on':''}" data-exp="${e.id}"><span class="lc-ic" aria-hidden="true">${expPic(e)}</span><span class="lc-tx"><b>${esc(e.t)}</b><small>${esc(e.q)}</small></span><span class="lc-done">${r?'✅'+(r.n>1?' ×'+r.n:''):''}</span></button>`}).join('')}
 function openLabPicker(opener){
  if(phase==='countdown'||phase==='running')return;
  const done=Object.keys(stats.labs).length;
@@ -2210,7 +2227,7 @@ function enterLab0(id){const ex=EXPS.find(e=>e.id===id);if(!ex)return;chalRun=nu
 function exitLab(){labMode=false;labExp=null;labPred=null;prepare();setCaption(L('🏁 레이스로 돌아왔어요! 출발 버튼을 눌러요.','🏁 Back to racing! Press Start.'))}
 function labPredictCard(){
  const ex=labExp;phase='ready';
- $('resultCard').innerHTML=`<div class="lab-head">${ex.ic} ${esc(ex.t)}</div><p class="lab-q">${esc(ex.q)}</p><p class="lab-diff">🔎 ${esc(ex.diff)}</p>
+ $('resultCard').innerHTML=`<div class="lab-head">${expPic(ex)} ${esc(ex.t)}</div><p class="lab-q">${esc(ex.q)}</p><p class="lab-diff">🔎 ${esc(ex.diff)}</p>
   <div class="lab-lanes">${ex.lanes.map((l,i)=>`<span><i>${'AB'[i]}</i>${esc(l.name)}</span>`).join('')}</div>
   <p class="lab-ask">🤔 ${L('어떻게 될지 예상해 보세요!','What do you think will happen?')}</p>
   <div class="lab-opts">${ex.opts.map(([k,t])=>`<button type="button" class="primary lab-opt" data-act="pred" data-k="${k}">${k==='same'?'🤝':k==='A'?'🅰️':'🅱️'} ${esc(t)}</button>`).join('')}</div>
@@ -2245,13 +2262,13 @@ function labExplain(){
  // the report counts only the first test of each guess, and keeps the question, the right answer and (when it differed) the guess
  if(labFresh){labFresh=false;const it=IX[ex.id];try{LR.ans(right,'exp_'+ex.id,it?{id:'exp:'+ex.id,q:it.q,a:it.o[ex.ans],...(right?{}:{g:it.o[labPred]}),tip:it.tip}:undefined)}catch(e){}}
  const predTxt=ex.opts.find(o=>o[0]===labPred)?.[1]||'';
- $('resultCard').innerHTML=`<div class="lab-head">${ex.ic} ${esc(ex.t)}</div><div class="lab-result">${esc(head)}</div><p class="lab-detail">${esc(detail)}</p>
+ $('resultCard').innerHTML=`<div class="lab-head">${expPic(ex)} ${esc(ex.t)}</div><div class="lab-result">${esc(head)}</div><p class="lab-detail">${esc(detail)}</p>
   <p class="lab-fb ${right?'ok':'new'}">${right?L('🎯 예상이 맞았어요! 과학자처럼 생각했어요.','🎯 Your guess was right! You thought like a scientist.'):L('🔍 예상과 달랐어요! 그래서 실험이 재밌어요. 과학자들도 이렇게 새로 알게 돼요.','🔍 Not what you guessed! That is what makes experiments fun. Scientists learn new things exactly like this.')}<small>${L('내 예상','My guess')}: ${esc(predTxt)}</small></p>
   <div class="lab-why"><b>💡 ${L('왜 그럴까요?','Why?')}</b>${esc(ex.why)}</div><p class="lab-life">🏠 ${esc(ex.life)}</p><button type="button" class="mlx-chip mrl-again" data-act="lesson" data-ls="${LAB_LS[ex.id]}">📖 ${L('개념 다시 보기','See the idea again')}</button>
   ${right?coachHere('clap','예상하고, 지켜보고, 확인까지! 진짜 과학자의 방법이에요 🌙','Predict, watch, check: that is exactly how real scientists work 🌙'):coachHere('idea','예상이 달라도 괜찮아요. 왜 그런지 알게 된 게 더 멋진 일이에요 🌙','A different result is okay. Finding out why is the best part 🌙')}
   <div class="lab-mini"><button class="small-btn" type="button" data-act="peek">👀 ${L('실험 장면 다시 보기','Look at the experiment')}</button><button class="small-btn" type="button" data-act="note">📒 ${L('노트에 적었어요','Saved in my notebook')}</button></div>
   <div class="result-actions three"><button class="control" type="button" data-act="labAgain">🔁 ${L('다시 실험','Run again')}</button><button class="primary" type="button" data-act="labNext">🔬 ${L('다음 실험','Next experiment')}</button><button class="control" type="button" data-act="labExit">🏁 ${L('레이스로','Back to races')}</button></div>`;
- $('resultOverlay').classList.add('lab-ov');$('resultOverlay').classList.remove('hidden');speak(head.replace(/[🤝🏁↕️↔️]/gu,'')+'. '+ex.why,true);setControls();checkBadges()}
+ $('resultOverlay').classList.add('lab-ov');$('resultOverlay').classList.remove('hidden');speak(head.replace(/[🤝🏁↕️↔️]/gu,'')+'. '+ex.why,true);$('labList').innerHTML=labListHTML();setControls();checkBadges()}
 function drawLab(){
  const ex=labExp,lab=course.lab,k=Math.max(1,1/cam.z*.9),F=(w,px)=>`${w} ${Math.round(px*k)}px system-ui`;ctx.textAlign='center';ctx.textBaseline='middle';
  lab.lanes.forEach((L0,l)=>{const cx=L0.off+195,lane=ex.lanes[l],r=labRes[l];
@@ -2439,7 +2456,7 @@ const mrlWell=box=>mrlCv(mrlBox(box),['중력 우물에서 빙글빙글 돌다�
  for(const a of [.45,Math.PI-.45,Math.PI+.45,-.45])mrlArrow(g,cx+Math.cos(a)*(Rw+26),cy+Math.sin(a)*(Rw+26),cx+Math.cos(a)*(Rw+6),cy+Math.sin(a)*(Rw+6),'#e23d9b',3);
  if(u<1){const rad=8+(Rw-18)*(1-u)**.8,th=-1+9*u+7*u*u,sc=u>.92?1-(u-.92)/.08*.6:1;mrlBall(g,cx+Math.cos(th)*rad,cy+Math.sin(th)*rad,10*sc,'glass',th)}else if(k<3.9)mrlText(g,L('쏙!','Plop!'),cx,cy-26,{size:16,w:900,col:'#fff'});
  mrlText(g,L('🕳️ 가운데로 당겨요','🕳️ Pulls toward the middle'),cx,160,{size:13.5,w:900,col:'#3a4690'})},{still:1.4});
-const mrlPP=box=>mrlBox(box,`<div class="mrl-icons"><span><i>➰</i>${L('용수철','Spring')}<b>${L('밀어요 ➡','Pushes ➡')}</b></span><span><i>💨</i>${L('바람','Wind')}<b>${L('밀어요 ➡','Pushes ➡')}</b></span><span><i>🕳️</i>${L('중력 우물','Gravity well')}<b>${L('⬅ 당겨요','⬅ Pulls')}</b></span></div>`);
+const mrlPP=box=>mrlBox(box,`<div class="mrl-icons"><span><i aria-hidden="true">${piecePic('spring')}</i>${L('용수철','Spring')}<b>${L('밀어요 ➡','Pushes ➡')}</b></span><span><i aria-hidden="true">${piecePic('blow')}</i>${L('바람','Wind')}<b>${L('밀어요 ➡','Pushes ➡')}</b></span><span><i aria-hidden="true">${piecePic('well')}</i>${L('중력 우물','Gravity well')}<b>${L('⬅ 당겨요','⬅ Pulls')}</b></span></div>`);
 
 // ⚖️ a fair test and 📏 measuring: the lab's three steps; two lanes alike; fix an unfair pair (try); run it twice; measure a roll (try); read the notebook
 const mrlSteps3=box=>mrlBox(box,`<div class="mrl-steps" role="list"><span role="listitem"><i aria-hidden="true">🤔</i><b>${L('예상하기','Predict')}</b><small>${L('어떻게 될까?','What will happen?')}</small></span><em aria-hidden="true">➜</em><span role="listitem"><i aria-hidden="true">👀</i><b>${L('실험 보기','Watch')}</b><small>${L('두 길을 나란히','Two lanes side by side')}</small></span><em aria-hidden="true">➜</em><span role="listitem"><i aria-hidden="true">💡</i><b>${L('이유 알기','Explain')}</b><small>${L('왜 그럴까?','Why?')}</small></span></div>`);
@@ -2469,7 +2486,7 @@ const mrlRead=box=>mrlBox(box,`<div class="mrl-two"><div class="mrl-card"><b>↔
 // 🛠️ engineers: what they make; a challenge card (plan); build and test; the four steps round and round (try); ⏱️ the time ruler
 const mrlEng=box=>mrlBox(box,`<div class="mrl-icons"><span><i>🌉</i>${L('다리','Bridges')}</span><span><i>🎢</i>${L('놀이기구','Rides')}</span><span><i>🔮</i>${L('구슬 코스','Marble runs')}</span></div>`);
 const mrlStrip=on=>`<div class="mrl-steps4">${STEPS.map(([e,s],i)=>`<span class="${on.includes(i)?'on':''}"><i aria-hidden="true">${e} </i>${esc(s)}</span>`).join('')}</div>`;
-const mrlPlan=box=>{const ch=CHAL_BY.slow;mrlBox(box,`${mrlStrip([0])}<div class="mrl-card"><b>${ch.ic} ${esc(ch.t)}</b><p>🎯 <b>${L('목표','Goal')}</b> · ${esc(ch.g)}</p><p>📐 <b>${L('규칙','Rule')}</b> · ${esc(ch.r)}</p><p>🤔 <b>${L('내 예상','My guess')}</b> · ${L('32초','32 s')}</p></div>`)};
+const mrlPlan=box=>{const ch=CHAL_BY.slow;mrlBox(box,`${mrlStrip([0])}<div class="mrl-card"><b>${chalPic(ch)} ${esc(ch.t)}</b><p>🎯 <b>${L('목표','Goal')}</b> · ${esc(ch.g)}</p><p>📐 <b>${L('규칙','Rule')}</b> · ${esc(ch.r)}</p><p>🤔 <b>${L('내 예상','My guess')}</b> · ${L('32초','32 s')}</p></div>`)};
 const mrlTest=box=>mrlBox(box,`${mrlStrip([1,2])}<div class="mrl-card"><p>🛠️ ${L('조각을 골라 코스를 만들어요','Pick pieces and build the course')}</p><p>🏁 ${L('시험 주행: 응원 없이 코스만으로 달려요','Test run: no cheering, only the course decides')}</p><p class="big">⏱️ ${L('우승 시간','Winning time')} ${sec(26.4)}</p></div>`);
 function mrlCycle(box,api){const d=mrlBox(box,`<div class="mrl-cycle">${STEPS.map(([e,s],i)=>`<button type="button" data-i="${i}" style="grid-area:${'abcd'[i]}"><span aria-hidden="true">${e}</span>${esc(s)}</button>`).join('')}<i class="c1" aria-hidden="true">➜</i><i class="c2" aria-hidden="true">➜</i><i class="c3" aria-hidden="true">➜</i><i class="c4" aria-hidden="true">➜</i></div><p class="mrl-cap" aria-live="polite">${L('📝 계획부터 시작해요','Start with 📝 Plan')}</p>`);
  let n=0;const cap=d.querySelector('.mrl-cap'),bs=[...d.querySelectorAll('[data-i]')];
@@ -2560,7 +2577,7 @@ const CH_LS={one:['fair'],double:['fair'],same:['fair'],team:['pushpull','magnet
 // six pages or fewer): each one's result and its one-line tip
 function mrLesson(id){const d=MRL[id];if(!d)return null;const found=EXPS.filter(e=>LAB_LS[e.id]===id&&stats.labs[e.id]),steps=d.steps(),tip=e=>L(IX[e.id].tip[0],IX[e.id].tip[1]);
  for(let i=0;i<found.length;i+=2){const part=found.slice(i,i+2);steps.push({say:(i?L('실험에서 알아낸 것이 더 있어요. ','There is more from your experiments. '):L('실험에서 알아낸 것이에요. ','Here is what your experiments showed. '))+part.map(tip).join(' '),
-  art:`<div class="mrl"><ul class="mrl-found">${part.map(e=>`<li><b>${e.ic} ${esc(e.t)}</b><span>${esc(labHead(e,e.ans))}</span><small>💡 ${esc(tip(e))}</small></li>`).join('')}</ul></div>`})}
+  art:`<div class="mrl"><ul class="mrl-found">${part.map(e=>`<li><b>${expPic(e)} ${esc(e.t)}</b><span>${esc(labHead(e,e.ans))}</span><small>💡 ${esc(tip(e))}</small></li>`).join('')}</ul></div>`})}
  return {id:'mr:'+id,icon:d.icon,title:d.title,steps,key:d.key.concat(found.map(e=>IX[e.id].tip)).slice(0,3)}}
 const mrSeenN=()=>MRL_IDS.filter(id=>MiniLesson.seen('mr:'+id)).length;
 const mrOffered=new Set();
@@ -2590,7 +2607,7 @@ function renderSkins(){
 function renderBadges(){
  const n=badges.length;
  $('badgeBody').innerHTML=`<p class="badge-sum">${L(`모은 배지 ${n}/${BADGES.length} · 배지마다 구슬 꾸미기가 하나씩 열려요!`,`${n}/${BADGES.length} badges · each badge opens a new marble look!`)}</p><div class="badges">${BADGES.map(b=>{const v=Math.min(b.goal,b.val()),got=badges.includes(b.id);
-  return `<div class="badge${got?' got':''}"><span class="bi">${b.ic}</span><b>${esc(b.n)}</b><small>${esc(b.d)}</small><div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="${b.goal}" aria-valuenow="${v}"><i style="width:${v/b.goal*100}%"></i></div><small class="bp">${got?'✅ '+L('받았어요!','Earned!'):`${v}/${b.goal}`} · ${L('상','Prize')}: ${lookIcon(b.prize)} ${esc(lookName(b.prize))}</small></div>`}).join('')}</div>`}
+  return `<div class="badge${got?' got':''}"><span class="bi" aria-hidden="true">${badgePic(b)}</span><b>${esc(b.n)}</b><small>${esc(b.d)}</small><div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="${b.goal}" aria-valuenow="${v}"><i style="width:${v/b.goal*100}%"></i></div><small class="bp">${got?'✅ '+L('받았어요!','Earned!'):`${v}/${b.goal}`} · ${L('상','Prize')}: ${lookIcon(b.prize)} ${esc(lookName(b.prize))}</small></div>`}).join('')}</div>`}
 function scrollToScene(){if(matchMedia('(max-width:860px)').matches)$('scenePanel').scrollIntoView({behavior:RM?'auto':'smooth',block:'start'})}
 
 // ---------------------------------------------------------------- wiring

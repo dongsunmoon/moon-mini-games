@@ -282,8 +282,13 @@ code{font-family:var(--mono);background:#eef6f3;border-radius:6px;padding:1px 5p
 .py.small .pyhat{font-size:21px;top:-10px}.py.big .pyhat{font-size:44px;top:-22px}.py .pyhat{font-size:24px}.py.mini .pyhat{font-size:18px}
 .py .pyacc{position:absolute;z-index:1;left:50%;top:22%;transform:translateX(-50%);font-style:normal;font-size:24px;line-height:1}.py .pyacc.a-scarf{top:58%}.py .pyacc.a-star{top:62%;left:72%;font-size:16px}
 .py.small .pyacc{font-size:20px}.py.big .pyacc{font-size:44px}.py.big .pyacc.a-star{font-size:28px}
-/* painted hats and extras: sized in % of Py's box, placed from where each pose's head (--hx centre, --ey eye line) is */
-.py.pic{isolation:isolate;--hx:43%;--ey:26%}.py.pic.m-think{--hx:48%}.py.pic.m-oops{--hx:48%;--ey:30%}.py.pic.m-wow{--ey:22%}
+/* painted hats and extras: sized in % of Py's box, placed from where each pose's head (--hx centre) is.
+   Glasses go on the eyes as measured in each pose picture (--gx/--gy midpoint, --gd distance between the eyes, --gr head tilt);
+   the scarf goes on the neck (--nx centre, --ny chin line, --nw neck width) */
+.py.pic{isolation:isolate;--hx:43%;--gx:46.2%;--gy:23%;--gd:29.9;--gr:-10.6deg;--nx:47.8%;--ny:49.5%;--nw:26}
+.py.pic.m-wow{--gx:46.3%;--gy:20.5%;--gd:28.7;--gr:-13.5deg;--nx:46.8%;--ny:45.5%;--nw:23}
+.py.pic.m-think{--hx:48%;--gx:49.8%;--gy:28.2%;--gd:26.9;--gr:-13.6deg;--nx:47.8%;--ny:52%;--nw:20}
+.py.pic.m-oops{--hx:48%;--gx:47.2%;--gy:29.6%;--gd:25.9;--gr:-8.9deg;--nx:49.3%;--ny:51.7%;--nw:21}
 .py .pyhat.im,.py .pyacc.im{font-size:0;line-height:0;width:var(--w,48%);left:calc(var(--hx) + var(--dx,0%));top:var(--y);transform:translateX(-50%) rotate(var(--r,0deg));pointer-events:none}
 .py .pyhat.im img,.py .pyacc.im img{display:block;width:100%;height:auto}
 .py .pyhat.im{--y:-26%;--r:-8deg}
@@ -291,8 +296,12 @@ code{font-family:var(--mono);background:#eef6f3;border-radius:6px;padding:1px 5p
 .py .pyhat.h-crown{--w:42%;--y:-21%}.py .pyhat.h-grad{--w:52%;--y:-24%}.py .pyhat.h-chef{--w:46%;--y:-31%}.py .pyhat.h-tophat{--w:44%;--y:-30%}
 .py .pyhat.h-party{--w:38%;--y:-30%;--dx:2%;--r:8deg}.py .pyhat.h-wizard{--w:50%;--y:-38%;--r:-10deg}
 .py .pyhat.h-bow{--w:38%;--y:-9%;--dx:17%;--r:14deg}.py .pyhat.h-flower{--w:30%;--y:-6%;--dx:19%;--r:10deg}.py .pyhat.h-clover{--w:28%;--y:-6%;--dx:19%;--r:12deg}
-.py .pyacc.a-glasses{--w:46%;--y:calc(var(--ey) - 19%)}.py .pyacc.a-shades{--w:46%;--y:calc(var(--ey) - 21%)}
-.py .pyacc.a-scarf{--w:38%;--y:46%;--dx:3%}.py .pyacc.a-star{--w:22%;--y:62%;left:72%}
+/* lens centres: glasses 46.1% of the picture's width apart and 47.4% down (192×175); sunglasses 47.4% apart and 50.5% down (192×184) */
+.py .pyacc.im.a-glasses{width:calc(var(--gd) * 1% / .461);left:calc(var(--gx) + var(--gd) * .0226%);top:calc(var(--gy) - var(--gd) * .937%);--r:var(--gr)}
+.py .pyacc.im.a-shades{width:calc(var(--gd) * 1% / .474);left:var(--gx);top:calc(var(--gy) - var(--gd) * 1.021%);--r:var(--gr)}
+/* the scarf picture is a whole loop: its back is cut away so the front wrap sits under the chin (the wrap's top is 36% down in the middle) */
+.py .pyacc.im.a-scarf{width:calc(var(--nw) * 1.55%);left:var(--nx);top:calc(var(--ny) - var(--nw) * 1.55% * .354);clip-path:polygon(0 34%,15% 30%,30% 28%,36% 31%,44% 34%,50% 36%,55% 34%,64% 31%,70% 28%,85% 30%,100% 34%,100% 100%,0 100%)}
+.py .pyacc.a-star{--w:22%;--y:62%;left:72%}
 .py .pyacc.a-headphones{--w:82%;--y:-16%;z-index:-1}.py .pyacc.a-butterfly{--w:28%;--y:-6%;--dx:22%;--r:16deg}
 .py .pyacc.a-backpack{--w:32%;--y:36%;left:16%;--r:-10deg;z-index:-1}.py .pyacc.a-medal{--w:28%;--y:46%;--dx:3%}
 .py .pyacc.a-balloon{--w:34%;--y:-4%;left:86%;--r:6deg}

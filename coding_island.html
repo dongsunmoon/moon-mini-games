@@ -273,13 +273,14 @@ code{font-family:var(--mono);background:#eef6f3;border-radius:6px;padding:1px 5p
 .statrow{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;text-align:center}.statrow span{display:flex;flex-direction:column;gap:2px}.statrow b{font-size:20px}.statrow small{color:var(--muted);font-weight:700}
 
 /* ---------------------------------------------------------------- Py */
-.py{position:relative;display:inline-block;width:64px;height:64px;flex:0 0 auto}
+.py{position:relative;display:inline-block;width:64px;height:64px;flex:0 0 auto;isolation:isolate}
 .py svg,.py>img{width:100%;height:100%;display:block;overflow:visible;object-fit:contain}
 .py>img.rainbow{animation:rainbow 4s linear infinite}@keyframes rainbow{to{filter:hue-rotate(360deg)}}
 .py.small{width:56px;height:56px}.py.big{width:120px;height:120px}.py.mini{width:54px;height:54px}
-.py .pyhat{position:absolute;left:50%;top:-14%;transform:translateX(-50%) rotate(-8deg);font-size:calc(.36 * 100%);font-style:normal;line-height:1}
+/* hats and extras sit in front of Py: a tinted or bobbing Py is its own layer and would otherwise paint over them (headphones and backpack go behind) */
+.py .pyhat{position:absolute;z-index:1;left:50%;top:-14%;transform:translateX(-50%) rotate(-8deg);font-size:calc(.36 * 100%);font-style:normal;line-height:1}
 .py.small .pyhat{font-size:21px;top:-10px}.py.big .pyhat{font-size:44px;top:-22px}.py .pyhat{font-size:24px}.py.mini .pyhat{font-size:18px}
-.py .pyacc{position:absolute;left:50%;top:22%;transform:translateX(-50%);font-style:normal;font-size:24px;line-height:1}.py .pyacc.a-scarf{top:58%}.py .pyacc.a-star{top:62%;left:72%;font-size:16px}
+.py .pyacc{position:absolute;z-index:1;left:50%;top:22%;transform:translateX(-50%);font-style:normal;font-size:24px;line-height:1}.py .pyacc.a-scarf{top:58%}.py .pyacc.a-star{top:62%;left:72%;font-size:16px}
 .py.small .pyacc{font-size:20px}.py.big .pyacc{font-size:44px}.py.big .pyacc.a-star{font-size:28px}
 /* painted hats and extras: sized in % of Py's box, placed from where each pose's head (--hx centre, --ey eye line) is */
 .py.pic{isolation:isolate;--hx:43%;--ey:26%}.py.pic.m-think{--hx:48%}.py.pic.m-oops{--hx:48%;--ey:30%}.py.pic.m-wow{--ey:22%}

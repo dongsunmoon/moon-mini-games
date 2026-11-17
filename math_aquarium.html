@@ -9778,7 +9778,8 @@ const GOOD_PIC={'🍦':'aq-good-icecream','🌭':'aq-good-hotdog','🥤':'sci-fo
  '🧸':'aq-good-teddy','🐠':'aq-good-fishplush','🔑':'aq-good-keyring','🧢':'aq-good-cap','📕':'pg-fish-book','🎈':'aq-good-balloon','🐬':'aq-good-dolphin','🖍️':'aq-good-crayons',
  '💧':'aq-good-water','🍙':'aq-good-riceball','🥛':'aq-good-milk','🍫':'aq-good-choco','🍌':'aq-good-banana','🍞':'aq-good-bread','🧻':'aq-good-tissue','🍎':'aq-good-apple','🛍️':'aq-good-bag'};
 const FAC_PIC={ticket:'aq-ticket',snack:'aq-good-icecream',gift:'aq-good-teddy',mart:'aq-good-bag'};
-const ART_HAVE=new Set(['sci-food-drink','pg-fish-book','pg-bucket','pg-fish-rod','sci-chest-gold']);
+const ART_HAVE=new Set(['sci-food-drink','pg-fish-book','pg-bucket','pg-fish-rod','sci-chest-gold',
+ 'aq-ticket','aq-food','aq-prop-broom','aq-prop-flag','aq-prop-mask','aq-good-icecream','aq-good-hotdog','aq-good-popcorn','aq-good-cookie','aq-good-cupcake','aq-good-donut','aq-good-juice','aq-good-teddy','aq-good-fishplush','aq-good-keyring','aq-good-cap','aq-good-balloon','aq-good-dolphin','aq-good-crayons','aq-good-water','aq-good-riceball','aq-good-milk','aq-good-choco','aq-good-banana','aq-good-bread','aq-good-tissue','aq-good-apple','aq-good-bag']);
 const artOf=n=>n&&ART_HAVE.has(n)?n:'';
 // the picture's name for an emoji ('' when there is none yet); goods=true looks in the shop goods too
 const artName=(e,goods)=>artOf(ICON_PIC[e]||(goods?GOOD_PIC[e]:''));

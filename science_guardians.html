@@ -5663,7 +5663,7 @@ $('gearBtn').addEventListener('click',()=>{SFX.click();openSettings()});
 
 // ---------------------------------------------------------------- home
 // home tile pictures (images/sci-tile-<id>.webp): add an id to TILE_HAVE once its file is in images/; until then the emoji shows
-const TILE_HAVE=new Set([]);
+const TILE_HAVE=new Set(['map','cards','trophy']);
 const tileIc=(id,e)=>TILE_HAVE.has(id)?pic(`images/sci-tile-${id}.webp`,e):e;
 function tile(go,cls,ic,name,small,dot=0){return `<button class="tile ${cls}" type="button" data-go="${go}">${dot?`<span class="dot">${dot===true?'!':dot}</span>`:''}<span class="ic">${ic}</span><div><b>${name}</b><small>${small}</small></div></button>`}
 function reviewList(){
@@ -5914,7 +5914,7 @@ const FOOD={burger:'🍔',fries:'🍟',drink:'🥤'};
 // Add a key to SHOP_HAVE once its file is in images/; until then customers and furniture are drawn from emoji and boxes.
 const SHOP_HAVE=new Set(['shop-stand','shop-counter','shop-lab','shop-grill','shop-fries','shop-drink','shop-table',...['bear','squirrel','fox','turtle','owl','bunny','panda','scientist','puppy','farmer','hedgehog','penguin','koala','raccoon','hamster','frog','otter','pig','tiger','monkey',
  'chef','firefighter','crab','octopus','astronaut','cow','giraffe','cat','beaver','chick','whale','artist','rooster','goat','mouse','builder','cheetah','pilot','mechanic','operator','sheep','elephant','swimmer','bee','dragon','caterpillar','ant','snail','teacher','deer','polarbear','parrot','dolphin','horse','badger'].map(k=>'cust-'+k),
- 'shop-sign','shop-plant','shop-balloons','shop-picture','shop-radio','shop-tray','shop-shoes','shop-train','food-burger','food-fries','food-drink']);
+ 'shop-sign','shop-plant','shop-balloons','shop-picture','shop-radio','shop-tray','shop-shoes','shop-train','food-burger','food-fries','food-drink','shop-poster-magnet','shop-poster-earth','shop-poster-micro']);
 const CUST_KEY={'🐻':'bear','🐿️':'squirrel','🦊':'fox','🐢':'turtle','🦉':'owl','🐰':'bunny','🐇':'bunny','🐼':'panda','👩‍🔬':'scientist','🧑‍🔬':'scientist','🐶':'puppy','🧑‍🌾':'farmer','🦔':'hedgehog','🐧':'penguin','🐨':'koala','🦝':'raccoon','🐹':'hamster','🐸':'frog','🦦':'otter','🐷':'pig','🐯':'tiger','🐵':'monkey',
  '👩‍🍳':'chef','🧑‍🍳':'chef','👨‍🍳':'chef','🧑‍🚒':'firefighter','🦀':'crab','🐙':'octopus','🧑‍🚀':'astronaut','👩‍🚀':'astronaut','🐮':'cow','🦒':'giraffe','🐱':'cat','🦫':'beaver','🐥':'chick','🐳':'whale','👩‍🎨':'artist','🧑‍🎨':'artist','🐓':'rooster','🐔':'rooster','🐐':'goat','🐭':'mouse','👷':'builder','🐆':'cheetah','🧑‍✈️':'pilot','🧑‍🔧':'mechanic','🧑‍🏭':'operator','🐑':'sheep','🐘':'elephant','🏊':'swimmer','🐝':'bee','🐲':'dragon','🐛':'caterpillar','🐜':'ant','🐌':'snail','🧑‍🏫':'teacher','🦌':'deer','🐻‍❄️':'polarbear','🦜':'parrot','🐬':'dolphin','🐴':'horse','🦡':'badger'};
 const PICS={};

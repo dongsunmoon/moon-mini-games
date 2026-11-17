@@ -71,8 +71,7 @@ a{color:inherit}
 .co-stamps[hidden]{display:none}
 .cs-row{display:flex;gap:4px}
 .cs{width:26px;height:26px;border-radius:50%;border:2px dashed #cdd5f0;display:grid;place-items:center;font-style:normal;font-size:14px;line-height:1}
-.cs.on{border:2px solid #e8475b;background:#fff1f2;transform:rotate(-12deg);box-shadow:inset 0 0 0 2px #fff}
-.cs.on::after{content:"🌙"}
+.cs.on{border:0;background:url(images/coach-stamp.webp) center/contain no-repeat;transform:rotate(-12deg);filter:drop-shadow(0 1px 1px rgba(0,0,0,.18))}
 .cs.new{animation:stampIn .55s cubic-bezier(.2,1.6,.4,1) both}
 .cs-med{color:#8a5a00;background:#fff0c9;border-radius:999px;padding:3px 8px}
 @keyframes stampIn{0%{transform:scale(2.4) rotate(-40deg);opacity:0}100%{transform:scale(1) rotate(-12deg);opacity:1}}

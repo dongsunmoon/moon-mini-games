@@ -155,6 +155,7 @@ a{color:inherit}
 .tips{margin:22px 0 0;padding:0;list-style:none;display:flex;flex-wrap:wrap;gap:8px}
 .tips li{background:#ffffffc7;border:1px solid var(--line);border-radius:14px;padding:9px 12px;font-size:13.5px;font-weight:700;color:var(--muted)}
 footer{margin-top:22px;text-align:center;color:#8a93b8;font-size:12px}
+.nlink{display:inline-flex;align-items:center;min-height:44px;font-size:13.5px;font-weight:800;color:var(--muted);text-underline-offset:3px}
 /* the person who makes these games */
 .maker{margin-top:22px;display:flex;align-items:center;gap:16px;background:#ffffffd9;border:1px solid var(--line);border-radius:24px;padding:16px 18px;box-shadow:0 10px 30px rgba(60,80,160,.08)}
 .mk-photo{width:84px;height:84px;flex:0 0 84px;border-radius:50%;object-fit:cover;box-shadow:0 0 0 4px #fff,0 0 0 6px #c9d8ff}
@@ -249,6 +250,8 @@ footer{margin-top:22px;text-align:center;color:#8a93b8;font-size:12px}
     <li data-en="🔊 Turn the sound on to hear the voice guide">🔊 소리를 켜면 음성 안내가 나와요</li>
     <li data-en="📱 Works on phones, tablets and computers">📱 휴대폰 · 태블릿 · 컴퓨터 모두 OK</li>
     <li data-en="💾 Progress is saved on this device, separately for each profile">💾 진행 기록은 이 기기에 프로필마다 따로 저장돼요</li>
+    <li data-en="🛡️ Try experiments from the games at home only with a grown-up">🛡️ 게임 속 실험을 집에서 해 볼 때는 꼭 어른과 함께해요</li>
+    <li data-en="🎧 With earbuds or headphones, keep the volume low">🎧 이어폰이나 헤드폰은 작은 소리로 들어요</li>
     <li data-en="📚 Schools may teach things in a different order or in a different way. If something seems different, follow your teacher.">📚 학교마다 배우는 순서와 방법이 조금씩 다를 수 있어요. 헷갈리면 학교 선생님 설명을 따라 주세요.</li>
   </ul>
   <section class="maker" aria-label="만든 사람" data-en-aria-label="About the maker">
@@ -260,7 +263,7 @@ footer{margin-top:22px;text-align:center;color:#8a93b8;font-size:12px}
     <img class="mk-logo" src="images/dm-logo.webp" alt="" aria-hidden="true" width="60" height="60" loading="lazy">
   </section>
   <div id="pm"></div>
-  <footer>Moon Mini Games<br>© 2026 Dongsun Moon. <span data-en="All rights reserved.">모든 권리 보유.</span></footer>
+  <footer><a class="nlink" href="notice.html" data-en="🛡️ For grown-ups: safety, privacy & credits">🛡️ 보호자 안내: 안전 · 개인정보 · 저작권</a><br>Moon Mini Games<br>© 2026 Dongsun Moon. <span data-en="All rights reserved.">모든 권리 보유.</span></footer>
 </div>
 
 <script>
@@ -379,7 +382,7 @@ function picker(){const last=PROF.cur;openP(`<h2>🎮 ${L('누가 놀까요?','W
  <div class="prow3"><button type="button" class="pbtn ghost" data-pa="add">➕ ${L('새 프로필','New profile')}</button></div>`,box=>box.addEventListener('click',onAct))}
 function profileForm(p){const isNew=!p;let av=p?p.av:AV.find(a=>!PROF.list.some(x=>x.av===a))||AV[0];
  openP(`<h2>${isNew?L('새 프로필','New profile'):L('프로필 고치기','Edit profile')}</h2><label class="plab" for="pName">${L('부르는 이름 (별명)','Nickname (what we call you)')}</label><input class="pin" id="pName" maxlength="10" value="${esc(p?p.name:'')}" placeholder="${esc(L('예: 별빛, 콩이','e.g. Star, Bean'))}" autocomplete="off" aria-describedby="pNameHint">
-  <p class="phint" id="pNameHint">${L('진짜 이름 대신 별명도 좋아요. 성은 쓰지 않아요.','A nickname works great. Please don’t use a last name.')}<br>🔒 ${L('이 기기에만 저장되고, 어디로도 보내지 않아요.','Saved only on this device and never sent anywhere.')}</p>
+  <p class="phint" id="pNameHint">${L('진짜 이름 대신 별명도 좋아요. 성은 쓰지 않아요.','A nickname works great. Please don’t use a last name.')}<br>🔒 ${L('이 기기에만 저장되고, 만든 사람에게도 보내지 않아요.','Saved only on this device. It isn’t sent to us.')}</p>
   <div class="avgrid" role="group" aria-label="${esc(L('얼굴 고르기','Choose a face'))}">${AV.map(a=>`<button type="button" data-av="${a}" class="${a===av?'on':''}" aria-label="${esc(avName(a))}" aria-pressed="${a===av}">${avPic(a)}</button>`).join('')}</div>
   <div class="prow3">${isNew?'':`<button type="button" class="pbtn red" data-pa="del" data-pid="${p.id}">🗑️ ${L('지우기','Delete')}</button>`}<button type="button" class="pbtn ghost" data-pa="cancel">${L('취소','Cancel')}</button><button type="button" class="pbtn" data-pa="ok">${L('저장','Save')}</button></div>`,
   box=>{box.querySelector('.avgrid').addEventListener('click',e=>{const b=e.target.closest('[data-av]');if(!b)return;av=b.dataset.av;box.querySelectorAll('[data-av]').forEach(x=>{x.classList.toggle('on',x===b);x.setAttribute('aria-pressed',x===b)})});

@@ -71,6 +71,11 @@ const coachPick=a=>a[Math.random()*a.length|0];
 // the player's face as their game character (images/aq-me-<key>.webp) from the emoji the profile stores; other emoji stay as they are
 const COACH_ME={'🐰':'bunny','🐻':'bear','🦊':'fox','🐼':'panda','🐨':'koala','🐯':'tiger','🦁':'lion','🐸':'frog','🐱':'cat','🐶':'puppy','🐥':'chick','🦄':'unicorn','🐙':'octopus','🐬':'dolphin','🦖':'dino','⭐':'star'};
 const coachMe=(av,cls='')=>{const k=COACH_ME[String(av||'').replace(/\ufe0f/g,'')];return k?`<img class="me-pic ${cls}" src="images/aq-me-${k}.webp" alt="" draggable="false" data-e="${coachEsc(av)}" onerror="this.replaceWith(document.createTextNode(this.dataset.e))">`:coachEsc(av||'')};
+// a short caution or notice line in any window: kind 'safe' (⚠️ real-world safety, e.g. "only with a grown-up") or 'info'
+// (ℹ️ privacy, pretend coins, credits). safeLink() is the settings-window link to notice.html, the page for grown-ups.
+const SAFE_HEAD={safe:['⚠️','안전 주의','Safety first'],info:['ℹ️','알아 두기','Good to know']};
+const safeNote=(kind,ko,en,cls='')=>{const k=SAFE_HEAD[kind]?kind:'info',h=SAFE_HEAD[k];return `<p class="mg-note mg-${k} ${cls}" role="note"><b>${h[0]} ${L(h[1],h[2])}</b> ${coachEsc(en==null?ko:L(ko,en))}</p>`};
+const safeLink=()=>`<a class="mg-notice-link" href="notice.html?lang=${LANG}" target="_blank" rel="noopener">🛡️ ${L('안전 · 개인정보 · 저작권 안내 (보호자용)','Safety, privacy & credits (for grown-ups)')}</a>`;
 const coachSay_=t=>{const nm=coachNm(),ok=t.filter(x=>nm||!/\{nm\}/.test(x[0])),x=coachPick(ok.length?ok:t);return L(x[0],x[1]).replace(/\{nm\}/g,coachEsc(nm))};
 const COACH={
  up:['clap',[['꾸준히 한 덕분이에요. 정말 멋져요!','Your steady practice paid off. Awesome!'],['어제보다 오늘 더 잘하고 있어요!','You’re doing even better than yesterday!'],['계속 도전해서 여기까지 왔어요!','You kept trying, and look how far you’ve come!'],['{nm}의 노력이 반짝반짝 빛나요 ✨','Your hard work is shining, {nm} ✨'],['문 코치가 박수 쳐요! 짝짝짝 👏','Coach Moon is clapping for you! 👏'],['이 기세 그대로 가 봐요! 🌙','Keep this going! 🌙']]],
@@ -123,6 +128,8 @@ function coachStart(hello,tips){const game=(location.pathname.split('/').pop()||
 //   picture with the game's own helpers. On a "try" step the child does the small thing in the picture and the game
 //   calls api.done(); "🤔 알려 줘요" runs show(box,api) (or just api.done()) so not knowing never blocks or costs anything.
 //   after(box,api), if given, runs once the teacher has finished reading the step (for example to play a demo).
+//   warn:[ko,en] on a step (or on the lesson, for the last page) shows a ⚠️ safety line under the picture and the
+//   teacher reads it too: anything a child might copy at home (heat, electricity, magnets...) says how to stay safe.
 //   key holds the 1–3 lines to remember; they close the lesson and stay in the notebook.
 // · MiniLesson.cfg({voice:(text,onEnd)=>…, stop:()=>…, who:{img,name}, pics:{lessonId:{stepIndex:'images/x.webp'}}}) once per game: the game's own read-aloud (it
 //   respects the game's voice switch; onEnd, when the game supports it, runs after the line), what to stop when a page
@@ -151,11 +158,11 @@ const MiniLesson=(()=>{let C={voice:null,who:null},el=null,cur=null,back=null,la
   el.setAttribute('aria-labelledby','mlxT');
   const wImg=/coach-moon-(idea|hi)\.webp$/.test(who.img||'')?'images/coach-moon-teach.webp':who.img;
   el.innerHTML=`<div class="mlx-card"><div class="mlx-top"><span class="mlx-kick">📖 ${L('미니 수업','Mini lesson')}</span><b id="mlxT">${ls.icon?ls.icon+' ':''}${E(ls.title)}</b><button type="button" class="mlx-x" data-m="x" aria-label="${L('닫기','Close')}">✕</button></div>
-   <div class="mlx-dots" aria-hidden="true"></div><div class="mlx-stage"></div>
+   <div class="mlx-dots" aria-hidden="true"></div><div class="mlx-stage"></div><div class="mlx-warn"></div>
    <div class="mlx-talk"><img src="${coachEsc(wImg)}" data-alt="${coachEsc(who.img)}" alt="" onerror="if(this.dataset.alt&&!this.dataset.f){this.dataset.f=1;this.src=this.dataset.alt}else this.remove()"><p aria-live="polite"></p><button type="button" class="mlx-hear" data-m="hear" aria-label="${L('다시 듣기','Hear again')}">🔊</button></div>
    <div class="mlx-nav"></div></div>`;
   el.addEventListener('click',e=>{const b=e.target.closest('[data-m]');if(!b||!cur)return;const m=b.dataset.m;
-   if(m==='x')close();else if(m==='hear')talk(el.querySelector('.mlx-talk p').textContent);else if(m==='prev')go(cur.i-1);else if(m==='next')go(cur.i+1);
+   if(m==='x')close();else if(m==='hear')talk(cur.line||el.querySelector('.mlx-talk p').textContent);else if(m==='prev')go(cur.i-1);else if(m==='next')go(cur.i+1);
    else if(m==='help'){const s=cur.ls.steps[cur.i];try{if(s.show)s.show(el.querySelector('.mlx-stage'),api(cur.i))}catch(e){}api(cur.i).done()}
    else if(m==='again')go(0);else if(m==='end'){const c=cur;close(true);if(back){const b=back;back=null;book(b.spec,b.at)}else if(lastFocus&&lastFocus.isConnected&&lastFocus.focus)try{lastFocus.focus()}catch(e){}if(c.o.onDone)c.o.onDone()}});
   go(0)}
@@ -163,21 +170,22 @@ const MiniLesson=(()=>{let C={voice:null,who:null},el=null,cur=null,back=null,la
  function api(i){return {L,T,done(){if(!cur||cur.i!==i)return;cur.ok[i]=1;const n=el.querySelector('[data-m=next]'),h=el.querySelector('[data-m=help]');if(n){n.disabled=false;n.textContent=L('다음','Next')+' ▶';n.classList.add('ready');n.focus()}if(h)h.remove()},
   next(){if(cur&&cur.i===i)go(i+1)},say(ko,en){if(!cur||cur.i!==i)return;const t=en==null?T(ko):L(ko,en);el.querySelector('.mlx-talk p').textContent=t;talk(t)}}}
  function go(i){if(!cur||!el)return;const ls=cur.ls,n=ls.steps.length;if(i<0)return;hush();cur.i=i;
-  const dots=el.querySelector('.mlx-dots'),stage=el.querySelector('.mlx-stage'),p=el.querySelector('.mlx-talk p'),nav=el.querySelector('.mlx-nav');
+  const dots=el.querySelector('.mlx-dots'),stage=el.querySelector('.mlx-stage'),p=el.querySelector('.mlx-talk p'),nav=el.querySelector('.mlx-nav'),wb=el.querySelector('.mlx-warn');
   dots.innerHTML=Array.from({length:n+1},(_,k)=>`<i class="${k<i?'on':k===i?'now':''}"></i>`).join('');
   if(i>=n){// the last page: what to remember
    if(!cur.done){cur.done=true;try{LR.les(ls.id)}catch(e){}}
    stage.className='mlx-stage sum';stage.innerHTML=`<div class="mlx-key"><b>✨ ${L('핵심 정리','Remember')}</b><ul>${(ls.key||[]).map(k=>`<li>${E(k)}</li>`).join('')}</ul></div><small class="mlx-saved">📒 ${L('개념 노트에 넣어 뒀어요. 언제든 다시 볼 수 있어요.','Saved in your concept notebook. Open it any time.')}</small>`;
-   const t=L('잘 들었어요! 이것만 기억하면 돼요.','Great listening! Just remember this.')+' '+(ls.key||[]).map(T).join(' ');p.textContent=t;talk(t);
+   wb.innerHTML=ls.warn?safeNote('safe',T(ls.warn)):'';
+   const t=L('잘 들었어요! 이것만 기억하면 돼요.','Great listening! Just remember this.')+' '+(ls.key||[]).map(T).join(' ')+(ls.warn?' '+T(ls.warn):'');p.textContent=t;cur.line=t;talk(t);
    nav.innerHTML=`<button type="button" class="mlx-b ghost" data-m="again">🔁 ${L('처음부터','From the start')}</button><button type="button" class="mlx-b go" data-m="end">${ls.cta?E(ls.cta):L('좋아요, 해 볼게요!','Got it, let’s go!')} ▶</button>`;
    nav.querySelector('[data-m=end]').focus();return}
-  const s=ls.steps[i],t=T(s.say);stage.className='mlx-stage';stage.innerHTML='';p.textContent=t;
+  const s=ls.steps[i],t=T(s.say);stage.className='mlx-stage';stage.innerHTML='';p.textContent=t;wb.innerHTML=s.warn?safeNote('safe',T(s.warn)):'';cur.line=t+(s.warn?' '+T(s.warn):'');
   try{if(typeof s.art==='function')s.art(stage,api(i));else if(s.art)stage.innerHTML=s.art}catch(e){stage.textContent=''}
   const pic=(C.pics&&C.pics[ls.id]||{})[i]||s.img;if(pic)stage.insertAdjacentHTML('afterbegin',`<img class="mlx-pic" src="${coachEsc(pic)}" alt="" onerror="this.remove()">`);
   if(!stage.childNodes.length)stage.classList.add('none');
   const wait=s.try&&!cur.ok[i];
   nav.innerHTML=`<button type="button" class="mlx-b ghost" data-m="prev" ${i?'':'disabled'} aria-label="${L('이전','Back')}">◀</button>${wait?`<button type="button" class="mlx-b help" data-m="help">🤔 ${L('알려 줘요','Show me')}</button>`:''}<button type="button" class="mlx-b go" data-m="next" ${wait?'disabled':''}>${wait?L('해 봐요','Your turn'):L('다음','Next')} ▶</button>`;
-  talk(t,()=>{if(cur&&cur.i===i&&el&&s.after)try{s.after(stage,api(i))}catch(e){}});const f=nav.querySelector('[data-m=next]');if(!wait&&f)f.focus()}
+  talk(cur.line,()=>{if(cur&&cur.i===i&&el&&s.after)try{s.after(stage,api(i))}catch(e){}});const f=nav.querySelector('[data-m=next]');if(!wait&&f)f.focus()}
  function before(ls,go_){if(!ls||seen(ls.id)){go_&&go_();return}let went=false;const g=()=>{if(!went){went=true;go_&&go_()}};open(ls,{onDone:g,onClose:g})}
  // the notebook: every topic of the game, the ones already watched ticked; tap one to watch it again
  function book(spec,at){const s=shell('book');back=null;const gs=spec.groups||[],all=gs.reduce((a,g)=>a.concat(g.items),[]),have=all.filter(x=>seen(x.id)).length;
@@ -254,6 +262,8 @@ p{line-height:1.5}
 .muted{color:var(--muted);font-size:14px;font-weight:600}.center{text-align:center}
 main{width:min(780px,100%);margin:0 auto;padding:10px max(12px,env(safe-area-inset-left)) 10px max(12px,env(safe-area-inset-right))}
 .vtitle{margin:4px 2px 10px;font-size:24px}
+/* safety and pretend-money notes (safeNote in the coach block) */
+.mg-note.shopnote{margin:0 0 10px}.seacard .mg-note{margin-top:12px}
 
 /* ---------------------------------------------------------------- HUD and navigation */
 .hud{position:fixed;left:0;right:0;top:0;z-index:30;height:calc(var(--hud) + env(safe-area-inset-top));padding:env(safe-area-inset-top) max(8px,env(safe-area-inset-right)) 0 max(8px,env(safe-area-inset-left));display:flex;align-items:center;gap:6px;
@@ -646,6 +656,12 @@ img.api{display:inline-block;width:auto;height:1.25em;vertical-align:-.28em;obje
 #coachPop p{margin:8px 0 0;background:#fff;border:2px solid #c9d4ff;border-radius:4px 16px 16px 16px;padding:6px 11px;font-size:13.5px;font-weight:700;line-height:1.38;color:#2a3470;box-shadow:0 8px 20px rgba(20,30,80,.22)}
 #coachPop b{display:block;font-size:11px;font-weight:900;color:#5b6cff}
 .me-pic{width:100%;height:100%;object-fit:cover;object-position:50% 18%;border-radius:inherit;display:block}
+/* safeNote(): ⚠️ safety and ℹ️ notice lines, the same look in every game; safeLink() in settings windows */
+.mg-note{margin:8px 0 0;padding:9px 12px;border:1px solid;border-radius:14px;font-size:14px;font-weight:700;line-height:1.45;text-align:left;text-wrap:pretty}
+.mg-note b{font-weight:900;margin-right:3px;white-space:nowrap}
+.mg-safe{background:#fff3e6;border-color:#ffc58f;color:#6e3500}.mg-safe b{color:#c2410c}
+.mg-info{background:#eef5ff;border-color:#c5d9fb;color:#23407a}.mg-info b{color:#2f5fd0}
+.mg-notice-link{display:inline-flex;align-items:center;min-height:44px;padding:0 4px;font-size:13.5px;font-weight:800;color:#4656c8;text-decoration:underline;text-underline-offset:3px}
 @media (prefers-reduced-motion:reduce){#coachPop{transition:opacity .2s;transform:none}}
 /* Mini lessons (.mlx) and the concept notebook (.mlx.book): one window, a picture, the teacher's line, big buttons */
 .mlx{position:fixed;inset:0;z-index:2147483100;display:grid;place-items:center;padding:max(10px,env(safe-area-inset-top)) max(8px,env(safe-area-inset-right)) max(10px,env(safe-area-inset-bottom)) max(8px,env(safe-area-inset-left));background:rgba(18,24,58,.55);font-family:system-ui,-apple-system,'Apple SD Gothic Neo','Noto Sans KR',sans-serif;color:#22305e;animation:mlxIn .2s ease}
@@ -665,6 +681,7 @@ img.api{display:inline-block;width:auto;height:1.25em;vertical-align:-.28em;obje
 .mlx-key ul{margin:0;padding:0;list-style:none;display:grid;gap:8px}
 .mlx-key li{position:relative;padding:10px 12px 10px 38px;background:#fff;border-radius:14px;font-size:16px;font-weight:800;line-height:1.45;box-shadow:0 2px 0 #f0d78a}
 .mlx-key li::before{content:'✔';position:absolute;left:12px;top:9px;width:20px;height:20px;border-radius:50%;background:#2fbf71;color:#fff;font-size:12px;display:grid;place-items:center}
+.mlx-warn:empty{display:none}.mlx-warn .mg-note{margin:0;font-size:15px}
 .mlx-saved{font-size:13px;font-weight:700;color:#8a6a1a;text-align:center}
 .mlx-talk{display:flex;align-items:flex-end;gap:8px}
 .mlx-talk img{width:56px;height:66px;flex:0 0 56px;object-fit:contain;object-position:50% 100%}
@@ -1120,11 +1137,11 @@ const FISH_RAW={
 2:[ // Maple Lakes (Ontario lakes and rivers)
 ['perch','노랑퍼치','Yellow perch','ca',1,'oval|#d9c23a|#fff3b0|#ff8a3d|bars|#4a5a20','','노란 몸에 진한 세로 줄무늬가 있어요. 호수에서 무리 지어 다녀요.','Yellow with dark up-and-down bars. It swims in schools in lakes.'],
 ['pumpkinseed','펌킨시드','Pumpkinseed sunfish','ca',1,'tall|#e8a03a|#ffd27a|#d88a2a|wavy|#3fa0d0','earspot','호박씨처럼 생겼고, 아가미 덮개 끝에 빨간 점이 있어요.','Shaped like a pumpkin seed, with a bright red spot on its “ear” flap.'],
-['bluegill','블루길','Bluegill','ca',1,'tall|#4a6a8a|#ffc56a|#3a5a7a|bars|#2e4560','earspot','온타리오에 원래 사는 물고기예요. 한국에서는 생태계를 어지럽히는 외래종이에요.','It is native to Ontario, but in Korea it is an invasive species that harms local fish.'],
+['bluegill','블루길','Bluegill','ca',1,'tall|#4a6a8a|#ffc56a|#3a5a7a|bars|#2e4560','earspot','온타리오에 원래 사는 물고기예요. 한국에서는 생태계를 어지럽히는 외래종이에요. 기르던 물고기나 거북은 강·호수·바다에 놓아주면 안 돼요.','It is native to Ontario, but in Korea it is an invasive species that harms local fish. Never let pet fish or turtles go in a lake, river or the sea.'],
 ['rockbass','록배스','Rock bass','ca',1,'oval|#8a6a4a|#d8b890|#7a5a3a|dots|#3a2a1a','redeye','눈이 빨개요. 바위가 많은 곳을 좋아해요.','It has bright red eyes and loves rocky places.'],
 ['crayfish','가재','Crayfish','kr ca',1,'emoji|🦞|saturate(.55) brightness(.9)','','깨끗한 개울에 살아요. 위험하면 뒤로 재빨리 헤엄쳐 도망가요. 한국과 캐나다 모두에 살아요.','It lives in clean streams and darts backwards to escape. It lives in both Korea and Canada.'],
 ['smallmouth','작은입배스','Smallmouth bass','ca',2,'oval|#8a7040|#e0d0a0|#7a6030|bars|#5a4520','','힘이 아주 센 물고기예요. 물 위로 높이 뛰어올라요.','A very strong fish that leaps high out of the water.'],
-['largemouth','큰입배스','Largemouth bass','ca',2,'oval|#5a8a4a|#e8efc0|#4a7a3a|hstripe|#2f4a20','bigmouth','입이 눈 뒤까지 닿을 만큼 커요. 한국에서는 ‘배스’라는 외래종으로 알려져 있어요.','Its mouth reaches past its eyes. In Korea it is a well-known invasive species.'],
+['largemouth','큰입배스','Largemouth bass','ca',2,'oval|#5a8a4a|#e8efc0|#4a7a3a|hstripe|#2f4a20','bigmouth','입이 눈 뒤까지 닿을 만큼 커요. 한국에서는 ‘배스’라는 외래종으로 알려져 있어요. 기르던 물고기는 강이나 호수에 놓아주면 안 돼요.','Its mouth reaches past its eyes. In Korea it is a well-known invasive species. Never let pet fish go in a lake or river.'],
 ['walleye','월아이','Walleye','ca',2,'torpedo|#b8a040|#f0e8c0|#a89030|mottled|#6a5a20','shineeye','눈이 빛을 되비춰서 어두운 물속에서도 잘 봐요.','Its eyes reflect light, so it sees well in dark water.'],
 ['brooktrout','브룩송어','Brook trout','ca',2,'torpedo|#3f5f3a|#ff9a5a|#ff7a3a|redspots|#ff4a5a','','몸에 파란 테두리를 두른 빨간 점들이 있어요. 맑고 차가운 개울을 좋아해요.','Red spots with blue rings cover its sides. It loves clear, cold streams.'],
 ['whitefish','레이크화이트피시','Lake whitefish','ca',2,'oval|#a8b8c0|#f4f8fa|#98a8b0|none|','','캐나다 호수에서 아주 오래전부터 사람들의 중요한 먹을거리였어요.','For a very long time it has been an important food fish in Canada’s lakes.'],
@@ -1139,7 +1156,7 @@ const FISH_RAW={
 ['lakesturgeon','호수철갑상어','Lake sturgeon','ca',5,'sturgeon|#6a6a5a|#cfcfc0|#5a5a4a|scutes|#e8e8d8','barbel','공룡 시대부터 살아온 물고기 무리예요. 100년 넘게 살기도 해요.','Its family dates back to the age of dinosaurs, and it can live over 100 years.']],
 3:[ // Blue Jeju Island
 ['chromis','자리돔','Pearl-spot chromis','kr',1,'oval|#5a6a7a|#c8d0d8|#4a5a6a|tailspot|#ffffff','','손바닥보다 작은 제주 바다의 대표 물고기예요. 큰 무리로 다녀요.','A small fish famous in Jeju’s sea. It swims in big groups.'],
-['urchin','성게','Sea urchin','kr',1,'urchin|#4a2a5a|#7a4a8a|#4a2a5a|none|','','온몸이 가시로 덮여 있어요. 가시 사이의 작은 관족으로 걸어요.','It is covered in spines and walks on tiny tube feet between them.'],
+['urchin','성게','Sea urchin','kr',1,'urchin|#4a2a5a|#7a4a8a|#4a2a5a|none|','','온몸이 가시로 덮여 있어요. 가시 사이의 작은 관족으로 걸어요. 가시에 찔리면 아프니 만지지 않아요.','It is covered in spines and walks on tiny tube feet between them. The spines can hurt, so don’t touch it.'],
 ['anemone','말미잘','Sea anemone','kr',1,'anemone|#ff7aa8|#ffd0e0|#ff5a90|none|','','꽃처럼 생겼지만 동물이에요. 촉수로 먹이를 잡아요.','It looks like a flower, but it is an animal that catches food with its tentacles.'],
 ['clownfish','흰동가리','Clark’s anemonefish','kr',2,'oval|#ff8a1a|#ffb04a|#ff7a10|bands|#ffffff','','말미잘 촉수 사이에 숨어 살아요. 제주 바다에서도 볼 수 있어요.','It lives safely among sea anemone tentacles — you can find it in Jeju’s sea too.'],
 ['damsel','파랑돔','Neon damselfish','kr',2,'oval|#2a7aff|#7ab8ff|#ffe24a|none|','yellowtail','형광 파란 몸에 노란 꼬리를 가졌어요. 따뜻한 제주 바다에 살아요.','Neon blue with a yellow tail. It lives in Jeju’s warm waters.'],
@@ -1150,7 +1167,7 @@ const FISH_RAW={
 ['butterflyfish','나비고기','Butterflyfish','kr',2,'tall|#ffe04a|#fff8c0|#ffd020|eyebar|#2a2a2a','','납작하고 동그란 몸에 눈을 가리는 검은 띠가 있어요. 산호와 바위 사이를 나비처럼 다녀요.','A flat, round fish with a dark band over its eye. It flutters around rocks like a butterfly.'],
 ['lionfish','쏠배감펭','Lionfish','kr',3,'lion|#f2e2d0|#ffffff|#e8c8b0|bars|#c0402a','','사자 갈기 같은 지느러미에 독가시가 있어요. 절대 만지면 안 돼요!','Its mane-like fins have venomous spines — never touch it!'],
 ['boxfish','거북복','Boxfish','kr',3,'box|#f2c83a|#fff0a0|#e8b82a|dots|#2a2a2a','','몸이 딱딱한 상자 모양이라 지느러미를 살랑살랑 움직여 헤엄쳐요.','Its body is a hard box, so it swims by fluttering its little fins.'],
-['stingray','노랑가오리','Red stingray','kr',3,'ray|#c88a4a|#f0d8b0|#b87a3a|none|','','납작한 몸을 날개처럼 펄럭이며 바닥 가까이 헤엄쳐요.','It flaps its flat body like wings close to the sea floor.'],
+['stingray','노랑가오리','Red stingray','kr',3,'ray|#c88a4a|#f0d8b0|#b87a3a|none|','','납작한 몸을 날개처럼 펄럭이며 바닥 가까이 헤엄쳐요. 꼬리에 독가시가 있어서 만지면 안 돼요.','It flaps its flat body like wings close to the sea floor. Its tail has a venomous spine, so never touch it.'],
 ['moray','곰치','Moray eel','kr',3,'eel|#8a7a3a|#c8b870|#7a6a2a|mottled|#4a3a1a','','바위 구멍에 숨어 입을 벌렸다 닫았다 하며 숨을 쉬어요.','It hides in rock holes and opens and closes its mouth to breathe.'],
 ['sunfish','개복치','Ocean sunfish','kr',4,'mola|#9aa8b8|#e0e6ec|#8a98a8|none|','','세상에서 가장 무거운 뼈 있는 물고기 중 하나예요. 꼬리가 없는 것처럼 보여요.','One of the heaviest bony fish in the world. It looks as if it has no tail.'],
 ['greenturtle','푸른바다거북','Green sea turtle','kr',5,'emoji|🐢','','해초를 먹고 사는 바다거북이에요. 제주 바다에서도 볼 수 있어요.','A sea turtle that eats seagrass and seaweed. It is sometimes seen around Jeju.'],
@@ -1211,7 +1228,7 @@ const FISH_RAW={
 ['atlhalibut','대서양핼리벗','Atlantic halibut','ca',3,'flat|#6a6a5a|#ececec|#5a5a4a|none|','','바다 밑바닥에 납작하게 누워 지내는 아주 큰 가자미예요.','A very big flatfish that lies flat on the sea floor.'],
 ['wolffish','대서양늑대고기','Atlantic wolffish','ca',3,'long|#7a8a9a|#c8d0d8|#6a7a8a|bars|#3a4a5a','teeth','큰 이빨로 성게와 게를 부숴 먹어요. 피 속에 얼지 않게 하는 성분이 있어요.','It crushes urchins and crabs with big teeth, and its blood has a natural antifreeze.'],
 ['lobster','바닷가재','American lobster','ca',3,'emoji|🦞','','캐나다 대서양의 유명한 바닷가재예요. 아주 드물게 파란 가재도 있어요.','Atlantic Canada’s famous lobster — very rarely, a blue one is found!'],
-['lionsmane','사자갈기해파리','Lion’s mane jellyfish','ca',3,'jelly|#ff8a4a|#ffc08a|#ff6a2a|none|','long','세상에서 가장 큰 해파리 중 하나예요. 촉수가 아주 길어요.','One of the world’s biggest jellyfish, with extremely long tentacles.'],
+['lionsmane','사자갈기해파리','Lion’s mane jellyfish','ca',3,'jelly|#ff8a4a|#ffc08a|#ff6a2a|none|','long','세상에서 가장 큰 해파리 중 하나예요. 촉수가 아주 길고 쏘기 때문에 가까이 가지 않아요.','One of the world’s biggest jellyfish. Its very long tentacles sting, so stay away.'],
 ['bluefin','대서양참다랑어','Atlantic bluefin tuna','ca',4,'torpedo|#1a3a6a|#e8eef4|#ffd23f|finlets|#ffd23f','big','바다에서 가장 빠른 물고기 중 하나예요. 몸무게가 수백 킬로그램까지 나가요.','One of the fastest fish in the sea. It can weigh hundreds of kilograms.'],
 ['harpseal','하프물범','Harp seal','ca',4,'seal|#c8ccd0|#eef0f2|#b8bcc0|harp|#4a4a50','','아기 때는 털이 새하얘요. 바다 얼음 위에서 태어나요.','Its pups are born on the sea ice with fluffy white fur.'],
 ['puffin','퍼핀','Atlantic puffin','ca',4,'puffin|#1e2028|#ffffff|#ff8a2a|none|','','날개로 물속을 날듯이 헤엄쳐 물고기를 잡아요. 뉴펀들랜드 래브라도를 상징하는 새예요.','It “flies” underwater with its wings to catch fish. It is the provincial bird of Newfoundland and Labrador.'],
@@ -7584,7 +7601,8 @@ const CSS=`.drv{position:absolute;inset:0;overflow:hidden;background:#9fd8ff;fon
 .drv-toast{position:absolute;left:50%;top:40%;z-index:5;transform:translate(-50%,-50%) scale(.6);opacity:0;pointer-events:none;padding:10px 22px;border-radius:999px;font-size:clamp(20px,5.2vmin,36px);font-weight:900;white-space:nowrap;color:#fff;text-shadow:0 2px 0 rgba(0,0,0,.15);box-shadow:0 6px 18px rgba(28,48,110,.25);max-width:94%;overflow:hidden;text-overflow:ellipsis}
 .drv-toast.good{background:linear-gradient(#62e595,#22b462)}.drv-toast.bad{background:linear-gradient(#ffbe78,#ff8a4a)}.drv-toast.info{background:linear-gradient(#78d0ff,#3c8dff)}.drv-toast.soft{background:rgba(255,255,255,.94);color:#24305e;text-shadow:none}
 @keyframes drvBump{0%{transform:scale(1)}40%{transform:scale(1.2)}100%{transform:scale(1)}}
-.drv-hint{position:absolute;left:50%;top:60%;transform:translateX(-50%);z-index:3;padding:9px 16px;border-radius:16px;background:rgba(36,48,94,.6);color:#fff;font-size:15px;white-space:nowrap;pointer-events:none;transition:opacity .6s;opacity:0}
+.drv-hint{position:absolute;left:50%;top:60%;transform:translateX(-50%);z-index:3;width:max-content;max-width:min(92vw,380px);padding:9px 16px;border-radius:16px;background:rgba(36,48,94,.66);color:#fff;font-size:15px;line-height:1.35;text-align:center;pointer-events:none;transition:opacity .6s;opacity:0}
+.drv-hint small{display:block;margin-top:4px;font-size:13px;font-weight:700;opacity:.95}
 .drv-hint.on{opacity:1}
 .drv-arr{position:absolute;top:70%;width:58px;height:58px;margin-top:-29px;border-radius:50%;display:grid;place-items:center;font-size:36px;line-height:1;color:#fff;background:rgba(36,48,94,.16);border:3px solid rgba(255,255,255,.6);pointer-events:none;z-index:2;opacity:.6;transition:opacity .25s,transform .25s,background .25s;padding-bottom:4px}
 .drv-al{left:max(12px,env(safe-area-inset-left))}.drv-ar{right:max(12px,env(safe-area-inset-right))}
@@ -7621,7 +7639,8 @@ function start(host,o={}){
  cv.addEventListener('pointerdown',s.onDown);cv.addEventListener('pointermove',s.onMove);cv.addEventListener('pointerup',s.onUp);cv.addEventListener('pointercancel',s.onUp);
  s.onCtx=e=>e.preventDefault();s.root.addEventListener('contextmenu',s.onCtx);
  sfx('start');toast(T('출발해요! 🐟','Let’s go! 🐟'),'info',1.3);
- s.el.hint.textContent=T('화면 왼쪽·오른쪽을 눌러 길을 바꿔요','Tap left or right to change lanes');s.el.hint.classList.add('on');later(3.6,()=>s.el.hint.classList.remove('on'));
+ // the lane tip, and that real cars are for grown-ups (the result window says it again)
+ s.el.hint.innerHTML=`${H_(T('화면 왼쪽·오른쪽을 눌러 길을 바꿔요','Tap left or right to change lanes'))}<small>🚗 ${H_(T('게임 속 운전이에요. 진짜 차는 어른만 운전하고, 탈 때는 안전벨트를 매요.','Pretend driving! Only grown-ups drive real cars. Always buckle up when you ride.'))}</small>`;placeHint();s.el.hint.classList.add('on');later(5,()=>s.el.hint.classList.remove('on'));
  s.raf=requestAnimationFrame(frame);
 }
 function stop(){
@@ -7683,6 +7702,8 @@ function buildDom(){
  s.el.quit.addEventListener('click',e=>{e.stopPropagation();if(!S||S.ended)return;sfx('tap');endRound(true)});
  s.el.qa.forEach(b=>b.addEventListener('pointerdown',e=>{e.stopPropagation();e.preventDefault();if(S&&S.phase==='drive')setLane(+b.dataset.l-1)}));
 }
+// the hint sits just above the car, however many lines it has (a one-line hint is about 40px: the old place)
+function placeHint(){const s=S;if(!s||!s.el)return;s.el.hint.style.top=Math.max(s.hor+20,s.yCar-s.carH-24-(s.el.hint.offsetHeight||40))+'px'}
 function layout(){
  const s=S;s.needLayout=false;
  const W=Math.max(200,s.host.clientWidth||window.innerWidth),H=Math.max(200,s.host.clientHeight||window.innerHeight);
@@ -7699,7 +7720,7 @@ function layout(){
  s.dzNear=Math.max(.6,s.span*CD/(H+24-s.hor));
  s.carW=s.LW*.74;s.carS=s.carW/240;s.carH=s.carS*290;
  s.el.toast.style.top=(s.hor+Math.min(s.span*.16,90)+20)+'px';
- s.el.hint.style.top=Math.max(s.hor+20,s.yCar-s.carH-64)+'px';
+ placeHint();
  for(const a of [s.el.al,s.el.ar])a.style.top=(s.yCar-s.carH*.45)+'px';
  const cc=s.el.cc.getBoundingClientRect(),rr_=s.root.getBoundingClientRect();s.coinTo=[cc.left-rr_.left+20,cc.top-rr_.top+20];
  buildBg();buildCar();
@@ -11682,9 +11703,15 @@ MiniLesson.cfg({voice:(t,cb)=>say(t,{raw:true,onend:cb}),stop:()=>hush(),who:{im
 const moreOf=sk=>MORE[sk.id]||{};
 function slidesOf(sk,part){const m=moreOf(sk),f=x=>{try{return x?x()||[]:[]}catch(e){return []}};
  return part===1?f(sk.learn):part===2?f(m.l2):part===3?f(m.l3):[...f(sk.learn),...f(m.l2),...f(m.l3)]}
-function mathLesson(sk,part=0){const m=moreOf(sk),steps=slidesOf(sk,part).map(s=>({say:speechOf(s.t),art:s.vis?`<div class="qvis">${s.vis}</div>`:''}));
+// money skills end with a real-money line (lesson-level warn: shown and read on the last page); MORE[id].warn or a
+// slide's own warn would be used the same way
+const MATH_WARN={'g1-20':['동전은 입에 넣지 않아요. 진짜 돈으로 살 때는 어른과 함께해요.','Never put coins in your mouth, and shop with real money only with a grown-up.'],
+ 'g2-19':['진짜 돈으로 살 때는 어른과 함께해요.','Shop with real money only with a grown-up.'],'g4-20':['진짜 돈으로 살 때는 어른과 함께해요.','Shop with real money only with a grown-up.'],
+ 'g5-20':['진짜 돈으로 살 때는 어른과 함께해요.','Shop with real money only with a grown-up.'],
+ 'g6-20':['진짜 돈으로 살 때는 어른과 함께해요. 진짜 은행 이자는 이 예시와 달라요.','Shop with real money only with a grown-up. Real bank interest works differently from these examples.']};
+function mathLesson(sk,part=0){const m=moreOf(sk),steps=slidesOf(sk,part).map(s=>({say:speechOf(s.t),art:s.vis?`<div class="qvis">${s.vis}</div>`:'',warn:s.warn}));
  return {id:part>1?sk.id+':'+part:sk.id,icon:sk.icon,title:part===2?L(`${sk.name} · 새로 나오는 문제`,`${sk.name} · new kinds of questions`):part===3?L(`${sk.name} · 도전 문제`,`${sk.name} · challenge questions`):sk.name,
-  steps,key:m.key&&m.key.length?m.key:sk.goals.slice(0,2),cta:part>1?L('좋아요, 풀어 볼게요!','Got it, let’s solve!'):L('문제 풀어 보기','Try it')}}
+  steps,key:m.key&&m.key.length?m.key:sk.goals.slice(0,2),warn:part<2?m.warn||MATH_WARN[sk.id]:null,cta:part>1?L('좋아요, 풀어 볼게요!','Got it, let’s solve!'):L('문제 풀어 보기','Try it')}}
 function showSlides(){const sk=LES.sk,ls=mathLesson(sk,1);$('lProg').innerHTML=`<span>📖 ${L('무니 선생님과 배워요','Learn with Mooni')}</span>`;
  if(!ls.steps.length){nextProblem();return}let went=false;const go_=()=>{if(went)return;went=true;if(LES&&LES.sk===sk)nextProblem()};
  MiniLesson.open(ls,{onDone:go_,onClose:go_})}
@@ -11861,6 +11888,7 @@ function openTank_(k){const {g,i,d,a}=here(),id=d.tanks[k];sfx('tap');
  const html=()=>`<h2>${k+1}. ${esc(fishName(id))} ${L('수조','tank')}</h2>
   <div class="tankbig"><div class="water" style="--w1:${REGIONS[g].water[0]};--w2:${REGIONS[g].water[1]}">${swimmersHTML(a.fish[k])}<div class="decor">${a.decor[k].map(x=>`<span>${decoPic(x)}</span>`).join('')}</div></div></div>
   <div class="tstats"><span>🐟 ${a.fish[k].length}/${cap}</span><span>⭐ ${L('인기','Popularity')} ${Math.round(tankPower(a,k))}</span><span>Lv.${a.lv[k]}</span>${hung?`<span class="warn">${artPic('🍤')} ${L('배고파요!','Hungry!')}</span>`:''}</div>
+  ${UNLOCK.feed()?safeNote('info','진짜 물고기는 먹이를 너무 많이 주면 아파요. 얼마나 줄지 어른과 정해요.','Too much food can make real fish sick. Ask a grown-up how much to feed.','tanknote'):''}
   <div class="row wrap">${UNLOCK.feed()?`<button class="btn ${hung?'':'ghost'}" data-act="feed">${artPic('🍤')} ${L('먹이 주기','Feed')}</button>`:''}<button class="btn ghost" data-act="buy">🐠 ${L('물고기 더 넣기','Add fish')}</button><button class="btn ghost" data-act="decor">🪸 ${L('꾸미기','Decorate')}</button>${a.lv[k]<5?`<button class="btn ghost" data-act="up">⬆️ ${L('수조 넓히기','Bigger tank')} ${COIN}${short(tankUpCost(k,a))}</button>`:''}</div>
   <div class="fishlist">${Object.entries(counts).map(([x,n])=>`<button type="button" class="fl" data-act="info" data-id="${x}">${fishImgTag(x)}<b>${esc(fishName(x))}</b><small>×${n} ${flagsOf(FISH_BY[x])}</small></button>`).join('')}</div>`;
  modal(html(),{cls:'tankm',onOpen:box=>sizeScene(box),acts:{
@@ -11880,7 +11908,7 @@ function decorModal(k){const {a}=here();modal(`<h2>🪸 ${L(`${k+1}번 수조 �
   ${a.decor[k].length?`<p>${L('지금 장식','Now')}: ${a.decor[k].map((x,j)=>`<button class="chip" data-act="rm" data-j="${j}">${decoPic(x)} ✕</button>`).join(' ')}</p>`:''}`,{acts:{
   d:b=>{if(a.decor[k].length>=3){toast(L('장식은 3개까지예요. ✕를 눌러 빼고 바꿔요.','Up to 3. Tap ✕ to swap one.'));return false}if(!spend(+b.dataset.c))return false;a.decor[k].push(b.dataset.id);sfx('coin');save();renderHome();return ()=>decorModal(k)},
   rm:b=>{a.decor[k].splice(+b.dataset.j,1);save();renderHome();return ()=>decorModal(k)}}})}
-function fishInfo(id,back){const f=FISH_BY[id];modal(`<div class="fishcard">${fishImgTag(id,'big')}</div><h2>${esc(fishName(id))}</h2><p class="muted">${flagsOf(f)} ${f.where==='legend'?L('전설','Legend'):f.where.split(' ').map(w=>w==='kr'?L('한국','Korea'):L('캐나다','Canada')).join(' · ')} · <span style="color:${RARITY[f.r].c}">${'★'.repeat(f.r)} ${L(RARITY[f.r].ko,RARITY[f.r].en)}</span></p><p class="fact">🦦 ${esc(fishFact(id))}</p><button class="btn ghost wide" data-act="say">🔊 ${L('읽어 주기','Read aloud')}</button>`,{acts:{say:()=>{say(fishName(id)+'. '+fishFact(id),{raw:false});return false}},onClose:back?()=>{}:null})}
+function fishInfo(id,back){const f=FISH_BY[id];modal(`<div class="fishcard">${fishImgTag(id,'big')}</div><h2>${esc(fishName(id))}</h2><p class="muted">${flagsOf(f)} ${f.where==='legend'?L('전설','Legend'):f.where.split(' ').map(w=>w==='kr'?L('한국','Korea'):L('캐나다','Canada')).join(' · ')} · <span style="color:${RARITY[f.r].c}">${'★'.repeat(f.r)} ${L(RARITY[f.r].ko,RARITY[f.r].en)}</span></p><p class="fact">🦦 ${esc(fishFact(id))}</p>${/천연기념물|멸종위기/.test(f.fko||'')?safeNote('info','게임에서는 놀이지만, 진짜 이 동물은 법으로 보호받아요. 눈으로만 봐요.','In the game it’s pretend. In real life this animal is protected by law, so we only look.'):''}<button class="btn ghost wide" data-act="say">🔊 ${L('읽어 주기','Read aloud')}</button>`,{acts:{say:()=>{say(fishName(id)+'. '+fishFact(id),{raw:false});return false}},onClose:back?()=>{}:null})}
 
 // ---------------------------------------------------------------- facilities: build, upgrade, clean
 function facModal(k,o={}){const f=FAC[k],lv=S.fac[k],{g,i,a}=here();sfx('tap');if(!o.noReq&&REQ&&REQ.f===k){openRequest();return}
@@ -11942,7 +11970,7 @@ function startClaw(from){if(typeof Claw==='undefined')return;if(!UNLOCK.claw()){
  const play=()=>{if(free)clawDay().used++;else if(!spend(c))return;save(true);audio();sfx('start');const st=openStage();st.className='stage game claw';
   try{QA={r:0,w:0};Claw.start(st,{pool:seaPool(here().g),ask:clawAsk,ans:quickAns,rounds:3,sfx,say:t=>say(t),onEnd:res=>{try{Claw.stop()}catch(e){}closeStage();finishClaw(res,from)}})}catch(e){console.warn(e);closeStage()}};
  if(free){play();return}
- modal(`<div class="big">🕹️</div><h2>${L('인형뽑기 한 판 더?','One more claw game?')}</h2><p>${L(`오늘 무료 판은 다 했어요. 한 판에 ${COIN} ${short(c)}${josa(short(c),'이에요','예요')}. 문제 3개, 정답 인형을 뽑으면 내 것!`,`Today’s free games are used. One game costs ${COIN} ${short(c)}: 3 questions, and every right plush is yours!`)}</p>
+ modal(`<div class="big">🕹️</div><h2>${L('인형뽑기 한 판 더?','One more claw game?')}</h2><p>${L(`오늘 무료 판은 다 했어요. 한 판에 ${COIN} ${short(c)}${josa(short(c),'이에요','예요')}. 문제 3개, 정답 인형을 뽑으면 내 것!`,`Today’s free games are used. One game costs ${COIN} ${short(c)}: 3 questions, and every right plush is yours!`)}</p>${safeNote('info','진짜 인형뽑기는 진짜 돈이 들어요. 하기 전에 어른에게 먼저 물어봐요.','Real claw machines cost real money, so ask a grown-up first.')}
   <div class="row"><button class="btn" data-act="go">🕹️ ${L('하기','Play')} · ${COIN}${short(c)}</button><button class="btn ghost" data-act="close">${L('내일 할래요','Tomorrow')}</button></div>`,{acts:{go:()=>()=>play()}})}
 function finishClaw(res,from){const news=[];res.prizes.forEach(id=>{if(!S.plush[id])news.push(id);S.plush[id]=(S.plush[id]||0)+1});
  lrRest(res);S.stats.correct+=res.right;S.stats.wrong+=res.wrong;S.stats.solved+=res.right+res.wrong;S.stats.plush=(S.stats.plush||0)+res.prizes.length;if(res.prizes.length)mission('claw',res.prizes.length);
@@ -11952,7 +11980,7 @@ function finishClaw(res,from){const news=[];res.prizes.forEach(id=>{if(!S.plush[
  const n=res.prizes.length;modal(`<div class="big">🧸</div><h2>${n?L(`인형 ${n}개를 뽑았어요!`,`You won ${n} plush${n>1?'ies':''}!`):L('아쉬워요, 다음엔 꼭 뽑아요!','So close! Next time for sure!')}</h2>
   ${n?`<div class="shopgrid">${res.prizes.map(id=>`<div class="sitem ${news.includes(id)?'new':''}">${fishImgTag(id)}<b>${esc(fishName(id))}</b><small>${news.includes(id)?'✨ '+L('새 인형!','New!'):'×'+S.plush[id]}</small></div>`).join('')}</div>`:''}
   <div class="rew"><span>✅ ${res.right}/${res.right+res.wrong}</span>${c?`<span>${COIN} +${short(c)}</span>`:''}</div>
-  <p class="muted">🧸 ${L(`인형 진열장 ${plushKinds()}종 · 기프트샵 판매 +${plushBonusPct()}%`,`Plush shelf: ${plushKinds()} kinds · gift shop sales +${plushBonusPct()}%`)}</p>
+  <p class="muted">🧸 ${L(`인형 진열장 ${plushKinds()}종 · 기프트샵 판매 +${plushBonusPct()}%`,`Plush shelf: ${plushKinds()} kinds · gift shop sales +${plushBonusPct()}%`)}</p>${safeNote('info','진짜 인형뽑기는 진짜 돈이 들어요. 하기 전에 어른에게 먼저 물어봐요.','Real claw machines cost real money, so ask a grown-up first.')}
   <div class="row wrap"><button class="btn" data-act="again">🕹️ ${L('한 판 더','Play again')} ${clawFreeLeft()?`(${L('무료','free')} ${clawFreeLeft()})`:`· ${COIN}${short(clawCost())}`}</button><button class="btn ghost" data-act="shelf">🧸 ${L('진열장','Shelf')}</button><button class="btn ghost" data-act="close">${L('그만','Done')}</button></div>`,
   {acts:{again:()=>{again=true;return ()=>startClaw(from)},shelf:()=>{again=true;return ()=>plushShelf(()=>{again=false;back()},from)}},onClose:()=>back(),onOpen:()=>{if(n)say(L(`인형 ${n}개를 뽑았어요! 수학 실력 최고!`,`You won ${n}! Great math!`),{raw:true})}})}
 // the plush shelf: every kind won so far, and shadows of the ones still in this sea
@@ -12005,7 +12033,7 @@ function finishDrive(o,res){if(res.quit&&o.kind!=='move'){go(VIEW);return}const 
  if(o.kind==='delivery'){const d=S.deliveries.day===dayKey()?S.deliveries:{day:dayKey(),n:0};if(d.n>=3)coins=Math.round(coins*.25);d.n++;S.deliveries=d}
  S.stats.drives++;mission('drive');lrRest(res);S.stats.correct+=res.right||0;S.stats.solved+=(res.right||0)+(res.wrong||0);
  earn(coins,{pop:false});if((res.stars||0)>=3)S.pearls++;checkAch();save();
- modal(`<div class="big">${carPic('','hero')}</div><h2>${o.kind==='move'?L('도착했어요!','We made it!'):L('배달 완료!','Delivery done!')}</h2><div class="stars3">${[1,2,3].map(k=>`<span class="${k<=(res.stars||1)?'on':''}">⭐</span>`).join('')}</div><div class="rew"><span>✅ ${res.right||0}</span><span>${COIN} +${short(coins)}</span>${(res.stars||0)>=3?`<span>${PEARL} +1</span>`:''}</div><p>${(res.right||0)>=(res.right||0)+(res.wrong||0)-1?L('수학 표지판을 척척 맞혔어요! 운전 실력도 수학 실력도 최고!','You aced the math signs! Great driving and great math!'):L('안전 운전 최고! 다음엔 표지판을 더 많이 맞혀 봐요.','Safe driving! Try to get more signs next time.')}</p><button class="btn wide" data-act="close">${L('좋아요!','Great!')}</button>`,{onClose:()=>{o.after&&o.after()}})}
+ modal(`<div class="big">${carPic('','hero')}</div><h2>${o.kind==='move'?L('도착했어요!','We made it!'):L('배달 완료!','Delivery done!')}</h2><div class="stars3">${[1,2,3].map(k=>`<span class="${k<=(res.stars||1)?'on':''}">⭐</span>`).join('')}</div><div class="rew"><span>✅ ${res.right||0}</span><span>${COIN} +${short(coins)}</span>${(res.stars||0)>=3?`<span>${PEARL} +1</span>`:''}</div><p>${(res.right||0)>=(res.right||0)+(res.wrong||0)-1?L('수학 표지판을 척척 맞혔어요! 운전 실력도 수학 실력도 최고!','You aced the math signs! Great driving and great math!'):L('끝까지 왔어요! 다음엔 표지판을 더 많이 맞혀 봐요.','You made it! Try to get more signs next time.')}</p>${safeNote('safe','운전은 놀이예요. 진짜 차는 어른만 운전해요. 차를 타면 꼭 안전벨트를 매요.','Driving here is pretend. Only grown-ups drive real cars. Always buckle up when you ride.')}<button class="btn wide" data-act="close">${L('좋아요!','Great!')}</button>`,{onClose:()=>{o.after&&o.after()}})}
 
 // ---------------------------------------------------------------- the sea: fishing and diving
 const SEA_W=[0,10,6,3,1.3,.45];
@@ -12016,6 +12044,7 @@ function renderSea(){const el=$('v-sea');if(!UNLOCK.sea()){el.innerHTML=`<div cl
  <div class="spots">${[1,2,3,4,5,6].map(x=>`<button type="button" class="spot ${x===g?'on':''} ${x>mg?'lock':''}" data-a="spot" data-g="${x}" style="--w1:${REGIONS[x].water[0]};--w2:${REGIONS[x].water[1]}"><b>${REGIONS[x].flag} ${regionName(x)}</b><small>${x>mg?L(`${x}학년에 열려요`,`Opens in Grade ${x}`):`📖 ${FISH.filter(f=>f.reg===x&&S.dex[f.id]).length}/${FISH.filter(f=>f.reg===x).length}`}</small></button>`).join('')}</div>
  <div class="seacard" style="--w1:${R_.water[0]};--w2:${R_.water[1]}"><div class="seafish">${FISH.filter(f=>f.reg===g).slice(0,8).map(f=>S.dex[f.id]?fishImgTag(f.id):fishImgTag(f.id,'shadow')).join('')}</div><p>${L(`이 바다 친구 ${got}/${all}마리를 만났어요.`,`You’ve met ${got}/${all} animals here.`)}</p>
  <div class="row"><button type="button" class="bigbtn half" data-a="fish"><span class="bb-ic">${artPic('🎣')}</span><span class="bb-t"><b>${L('낚시','Fishing')}</b><small>${TICKET} 1${S.items.bait?` · 🪱×${S.items.bait}`:''}</small></span></button><button type="button" class="bigbtn half" data-a="dive"><span class="bb-ic">${artPic('🤿')}</span><span class="bb-t"><b>${L('다이빙','Diving')}</b><small>${TICKET} 1${S.items.air?` · 🧯×${S.items.air}`:''}</small></span></button></div>
+ ${safeNote('safe','진짜 바다와 물가에는 어른과 함께 가고 구명조끼를 입어요. 바다 동물은 만지거나 데려오지 않아요. 쏘는 동물도 있고, 법으로 보호받는 동물도 많아요.','Go to the sea or near water only with a grown-up, and wear a life jacket. Don’t touch or take home sea animals: some sting, and many are protected by law.','seasafe')}
  </div>
  <div class="card tkbox"><div class="tkrow"><b>${TICKET} ${L(`바다 티켓 ${S.tickets}장`,`${S.tickets} sea ticket${S.tickets===1?'':'s'}`)}</b><span id="tkClock">${tkLine()}</span></div>
   <div class="tkmath"><span>🧮 ${L(`정답 ${rightToward()}/${TK_RIGHT} · ${TK_RIGHT}개 맞힐 때마다 ${TICKET} +1`,`${rightToward()}/${TK_RIGHT} right answers → ${TICKET} +1`)}</span><i class="tkbar"><b style="width:${rightToward()/TK_RIGHT*100}%"></b></i></div>
@@ -12060,7 +12089,7 @@ function renderShop(){const el=$('v-shop'),t=TAB.shop;
  else if(t==='car'){body=`<div class="carshow" style="--c:${S.car.color}">${carPic()}</div><h3>${L('자동차','Cars')}</h3><div class="shopgrid">${CARS.map(([id,ic,ko,en,c])=>{const own=S.car.owned.includes(id);return `<button type="button" class="sitem ${S.car.model===id?'sel':''}" data-a="car" data-id="${id}">${carPic(id)}<b>${L(ko,en)}</b><small>${own?(S.car.model===id?L('타는 중','Driving'):L('고르기','Choose')):`${COIN} ${short(c)}`}</small></button>`}).join('')}</div>
   <h3>${L('색깔','Colour')}</h3><div class="row wrap">${CAR_COLORS.map(c=>`<button type="button" class="swatch ${S.car.color===c?'on':''}" style="background:${c}" data-a="color" data-c="${c}"></button>`).join('')}</div>
   <h3>${L('업그레이드','Upgrades')}</h3><div class="shopgrid">${[['speed','💨','속도','Speed'],['magnet','🧲','코인 자석','Coin magnet'],['shield','🛡️','범퍼 방패','Bumper shields']].map(([k,ic,ko,en])=>`<button type="button" class="sitem" data-a="carup" data-k="${k}"><span class="sic">${ic}</span><b>${L(ko,en)}</b><small>${'●'.repeat(S.car[k])}${'○'.repeat(5-S.car[k])}</small><small class="price">${S.car[k]>=5?'MAX':`${COIN} ${short(carUpCost(k))}`}</small></button>`).join('')}</div>`}
- el.innerHTML=`<h2 class="vtitle">🏪 ${L('상점','Shop')}</h2>${tabsHTML('shop',[['items','🛍️','아이템','Items'],['decor','🪸','장식','Decor'],['fish','🐠','물고기','Fish'],['car','🚗','자동차','Car']])}${body}`}
+ el.innerHTML=`<h2 class="vtitle">🏪 ${L('상점','Shop')}</h2>${safeNote('info','코인과 진주는 게임 속 놀이 돈이라 진짜 돈으로 사거나 바꿀 수 없어요.','Coins and pearls are pretend. They can’t be bought with or traded for real money.','shopnote')}${tabsHTML('shop',[['items','🛍️','아이템','Items'],['decor','🪸','장식','Decor'],['fish','🐠','물고기','Fish'],['car','🚗','자동차','Car']])}${body}`}
 const itemCost=x=>Math.round(x.cost*Math.pow(tier(S.at.g,S.at.i),.45));
 const carUpCost=k=>Math.round(150*Math.pow(2.2,S.car[k]));
 function buyItem(id){const x=ITEM_BY[id];if(x.pearl){if(!spend(x.pearl,'pearls'))return}else if(!spend(itemCost(x)))return;sfx('coin');
@@ -12157,11 +12186,11 @@ function settings(){const g=S.grade||1;
   <div class="setrow"><span>🔊 ${L('효과음','Sounds')}</span><button class="tog ${S.opt.sound?'on':''}" data-act="t" data-k="sound"></button></div>
   <div class="setrow"><span>🦦 ${L('무니 목소리','Mooni’s voice')}</span><button class="tog ${S.opt.voice?'on':''}" data-act="t" data-k="voice"></button></div>
   <div class="setrow"><span>📖 ${L('문제 읽어 주기','Read questions aloud')}</span><button class="tog ${S.opt.readQ?'on':''}" data-act="t" data-k="readQ"></button></div>
-  <div class="setrow"><span>💵 ${L('돈 문제 단위','Money in problems')}</span><span class="seg"><button class="${S.opt.money==='krw'?'on':''}" data-act="money" data-v="krw">🇰🇷 ${L('원','Won')}</button><button class="${S.opt.money==='cad'?'on':''}" data-act="money" data-v="cad">🇨🇦 ${L('달러','Dollars')}</button></span></div>
+  <div class="setrow" style="flex-wrap:wrap"><span>💵 ${L('돈 문제 단위','Money in problems')}</span><span class="seg"><button class="${S.opt.money==='krw'?'on':''}" data-act="money" data-v="krw">🇰🇷 ${L('원','Won')}</button><button class="${S.opt.money==='cad'?'on':''}" data-act="money" data-v="cad">🇨🇦 ${L('달러','Dollars')}</button></span><small class="muted" style="flex-basis:100%;font-weight:700">${L('달러 문제는 캐나다 돈이에요. 미국 돈은 조금 달라요.','Dollar problems use Canadian money; US coins and bills differ a little.')}</small></div>
   <div class="setrow col"><span>🎒 ${L('지금 공부하는 학년','Grade I’m working on')}</span><span class="seg six">${[1,2,3,4,5,6].map(x=>`<button class="${x===g?'on':''}" data-act="grade" data-g="${x}">${x}</button>`).join('')}</span><small class="muted">${L('학년을 바꾸면 그 학년의 아쿠아리움으로 가요. 다른 학년 기록은 그대로 남아요.','Switching takes you to that grade’s aquariums. Other grades keep their progress.')}</small></div>
   <div class="setrow"><span>🌐 ${L('언어','Language')}</span><span class="seg"><button class="${LANG==='ko'?'on':''}" data-act="lang" data-v="ko">한국어</button><button class="${LANG==='en'?'on':''}" data-act="lang" data-v="en">English</button></span></div>
   <p class="muted">${MGP.me?L(`${esc(S.av)} ${esc(S.name)}의 기록이에요. 플레이어는 첫 화면에서 바꿔요.`,`This is ${esc(S.name)}’s progress. Switch players on the main page.`):L('첫 화면에서 프로필을 만들면 형제자매가 따로 기록할 수 있어요.','Make profiles on the main page so siblings keep separate progress.')}</p>
-  <button class="btn ghost wide danger" data-act="reset">🗑️ ${L('이 게임 기록 지우기','Reset this game')}</button><p class="muted">📚 ${L('학교마다 배우는 순서와 방법이 조금씩 다를 수 있어요. 헷갈리면 학교 선생님 설명을 따라 주세요.','Schools may teach things in a different order or in a different way. If something seems different, follow your teacher.')}</p>${COPYRIGHT()}`,{acts:{
+  <button class="btn ghost wide danger" data-act="reset">🗑️ ${L('이 게임 기록 지우기','Reset this game')}</button><p class="muted">📚 ${L('학교마다 배우는 순서와 방법이 조금씩 다를 수 있어요. 헷갈리면 학교 선생님 설명을 따라 주세요.','Schools may teach things in a different order or in a different way. If something seems different, follow your teacher.')}</p><p style="margin:4px 0 0;text-align:center">${safeLink()}</p>${COPYRIGHT()}`,{acts:{
   t:b=>{const k=b.dataset.k;S.opt[k]=!S.opt[k];if(!S.opt.voice)hush();save();b.classList.toggle('on',S.opt[k]);return false},
   money:b=>{S.opt.money=b.dataset.v;MONEY.kind=S.opt.money;save();return ()=>settings()},
   grade:b=>{const x=+b.dataset.g;S.grade=x;arrive(x,curIndex(x));toast(L(`${x}학년 아쿠아리움으로 왔어요!`,`Welcome to the Grade ${x} aquariums!`))},
@@ -12174,7 +12203,7 @@ const mooniBig=()=>ART.mooni?`<img class="mooni-big" src="images/aq-mooni.webp" 
 function welcome(){modal(`<div class="big">${mooniBig()}</div><h2>${L('꼬마 수학 아쿠아리움에 온 걸 환영해요!','Welcome to Little Math Aquarium!')}</h2><p>${L('나는 수달 선생님 <b>무니</b>예요. 수학을 풀면 수조가 열리고, 물고기가 이사 오고, 손님이 찾아와요. 아쿠아리움 20곳을 완성하면 그 학년의 수학 단원 20개를 모두 마스터해요!','I’m <b>Mooni</b> the otter, your teacher. Solve math to open tanks, welcome fish and bring in visitors. Finish 20 aquariums and you master 20 math skills for your grade!')}</p>
  <h3>🎒 ${L('몇 학년이에요?','What grade are you in?')}</h3><div class="gradepick">${[1,2,3,4,5,6].map(x=>`<button class="gp" data-act="g" data-g="${x}"><b>${x}</b><small>${L('학년','Grade')}</small><span>${REGIONS[x].flag}</span></button>`).join('')}</div>
  <p class="muted">${L('쉬운 학년부터 차근차근 해도 좋아요. 학년은 나중에 설정에서 바꿀 수 있어요.','You can also start with an easier grade. Change it any time in settings.')}</p>
- <div class="setrow"><span>💵 ${L('돈 문제 단위','Money in problems')}</span><span class="seg"><button class="${S.opt.money==='krw'?'on':''}" data-act="money" data-v="krw">🇰🇷 ${L('원','Won')}</button><button class="${S.opt.money==='cad'?'on':''}" data-act="money" data-v="cad">🇨🇦 ${L('달러','Dollars')}</button></span></div>`,{closable:false,cls:'wide',
+ <div class="setrow" style="flex-wrap:wrap"><span>💵 ${L('돈 문제 단위','Money in problems')}</span><span class="seg"><button class="${S.opt.money==='krw'?'on':''}" data-act="money" data-v="krw">🇰🇷 ${L('원','Won')}</button><button class="${S.opt.money==='cad'?'on':''}" data-act="money" data-v="cad">🇨🇦 ${L('달러','Dollars')}</button></span><small class="muted" style="flex-basis:100%;font-weight:700">${L('달러 문제는 캐나다 돈이에요. 미국 돈은 조금 달라요.','Dollar problems use Canadian money; US coins and bills differ a little.')}</small></div>`,{closable:false,cls:'wide',
  onOpen:()=>say(L('꼬마 수학 아쿠아리움에 온 걸 환영해요! 몇 학년이에요?','Welcome to Little Math Aquarium! What grade are you in?'),{raw:true}),
  acts:{money:b=>{S.opt.money=b.dataset.v;MONEY.kind=S.opt.money;b.parentNode.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));return false},
   g:b=>{const x=+b.dataset.g;S.grade=x;S.start=x;S.at={g:x,i:0};gradeData(x);S.tut.hello=1;save();go('home');setTimeout(()=>say(L(`좋아요! ${x}학년 바다의 첫 아쿠아리움이에요. 큰 버튼을 눌러 첫 수조를 열어 봐요!`,`Great! This is the first aquarium of the Grade ${x} sea. Tap the big button to open the first tank!`),{raw:true}),500)}}})}

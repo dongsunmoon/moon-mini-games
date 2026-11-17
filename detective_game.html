@@ -70,6 +70,11 @@ const coachPick=a=>a[Math.random()*a.length|0];
 // the player's face as their game character (images/aq-me-<key>.webp) from the emoji the profile stores; other emoji stay as they are
 const COACH_ME={'🐰':'bunny','🐻':'bear','🦊':'fox','🐼':'panda','🐨':'koala','🐯':'tiger','🦁':'lion','🐸':'frog','🐱':'cat','🐶':'puppy','🐥':'chick','🦄':'unicorn','🐙':'octopus','🐬':'dolphin','🦖':'dino','⭐':'star'};
 const coachMe=(av,cls='')=>{const k=COACH_ME[String(av||'').replace(/\ufe0f/g,'')];return k?`<img class="me-pic ${cls}" src="images/aq-me-${k}.webp" alt="" draggable="false" data-e="${coachEsc(av)}" onerror="this.replaceWith(document.createTextNode(this.dataset.e))">`:coachEsc(av||'')};
+// a short caution or notice line in any window: kind 'safe' (⚠️ real-world safety, e.g. "only with a grown-up") or 'info'
+// (ℹ️ privacy, pretend coins, credits). safeLink() is the settings-window link to notice.html, the page for grown-ups.
+const SAFE_HEAD={safe:['⚠️','안전 주의','Safety first'],info:['ℹ️','알아 두기','Good to know']};
+const safeNote=(kind,ko,en,cls='')=>{const k=SAFE_HEAD[kind]?kind:'info',h=SAFE_HEAD[k];return `<p class="mg-note mg-${k} ${cls}" role="note"><b>${h[0]} ${L(h[1],h[2])}</b> ${coachEsc(en==null?ko:L(ko,en))}</p>`};
+const safeLink=()=>`<a class="mg-notice-link" href="notice.html?lang=${LANG}" target="_blank" rel="noopener">🛡️ ${L('안전 · 개인정보 · 저작권 안내 (보호자용)','Safety, privacy & credits (for grown-ups)')}</a>`;
 const coachSay_=t=>{const nm=coachNm(),ok=t.filter(x=>nm||!/\{nm\}/.test(x[0])),x=coachPick(ok.length?ok:t);return L(x[0],x[1]).replace(/\{nm\}/g,coachEsc(nm))};
 const COACH={
  up:['clap',[['꾸준히 한 덕분이에요. 정말 멋져요!','Your steady practice paid off. Awesome!'],['어제보다 오늘 더 잘하고 있어요!','You’re doing even better than yesterday!'],['계속 도전해서 여기까지 왔어요!','You kept trying, and look how far you’ve come!'],['{nm}의 노력이 반짝반짝 빛나요 ✨','Your hard work is shining, {nm} ✨'],['문 코치가 박수 쳐요! 짝짝짝 👏','Coach Moon is clapping for you! 👏'],['이 기세 그대로 가 봐요! 🌙','Keep this going! 🌙']]],
@@ -122,6 +127,8 @@ function coachStart(hello,tips){const game=(location.pathname.split('/').pop()||
 //   picture with the game's own helpers. On a "try" step the child does the small thing in the picture and the game
 //   calls api.done(); "🤔 알려 줘요" runs show(box,api) (or just api.done()) so not knowing never blocks or costs anything.
 //   after(box,api), if given, runs once the teacher has finished reading the step (for example to play a demo).
+//   warn:[ko,en] on a step (or on the lesson, for the last page) shows a ⚠️ safety line under the picture and the
+//   teacher reads it too: anything a child might copy at home (heat, electricity, magnets...) says how to stay safe.
 //   key holds the 1–3 lines to remember; they close the lesson and stay in the notebook.
 // · MiniLesson.cfg({voice:(text,onEnd)=>…, stop:()=>…, who:{img,name}, pics:{lessonId:{stepIndex:'images/x.webp'}}}) once per game: the game's own read-aloud (it
 //   respects the game's voice switch; onEnd, when the game supports it, runs after the line), what to stop when a page
@@ -150,11 +157,11 @@ const MiniLesson=(()=>{let C={voice:null,who:null},el=null,cur=null,back=null,la
   el.setAttribute('aria-labelledby','mlxT');
   const wImg=/coach-moon-(idea|hi)\.webp$/.test(who.img||'')?'images/coach-moon-teach.webp':who.img;
   el.innerHTML=`<div class="mlx-card"><div class="mlx-top"><span class="mlx-kick">📖 ${L('미니 수업','Mini lesson')}</span><b id="mlxT">${ls.icon?ls.icon+' ':''}${E(ls.title)}</b><button type="button" class="mlx-x" data-m="x" aria-label="${L('닫기','Close')}">✕</button></div>
-   <div class="mlx-dots" aria-hidden="true"></div><div class="mlx-stage"></div>
+   <div class="mlx-dots" aria-hidden="true"></div><div class="mlx-stage"></div><div class="mlx-warn"></div>
    <div class="mlx-talk"><img src="${coachEsc(wImg)}" data-alt="${coachEsc(who.img)}" alt="" onerror="if(this.dataset.alt&&!this.dataset.f){this.dataset.f=1;this.src=this.dataset.alt}else this.remove()"><p aria-live="polite"></p><button type="button" class="mlx-hear" data-m="hear" aria-label="${L('다시 듣기','Hear again')}">🔊</button></div>
    <div class="mlx-nav"></div></div>`;
   el.addEventListener('click',e=>{const b=e.target.closest('[data-m]');if(!b||!cur)return;const m=b.dataset.m;
-   if(m==='x')close();else if(m==='hear')talk(el.querySelector('.mlx-talk p').textContent);else if(m==='prev')go(cur.i-1);else if(m==='next')go(cur.i+1);
+   if(m==='x')close();else if(m==='hear')talk(cur.line||el.querySelector('.mlx-talk p').textContent);else if(m==='prev')go(cur.i-1);else if(m==='next')go(cur.i+1);
    else if(m==='help'){const s=cur.ls.steps[cur.i];try{if(s.show)s.show(el.querySelector('.mlx-stage'),api(cur.i))}catch(e){}api(cur.i).done()}
    else if(m==='again')go(0);else if(m==='end'){const c=cur;close(true);if(back){const b=back;back=null;book(b.spec,b.at)}else if(lastFocus&&lastFocus.isConnected&&lastFocus.focus)try{lastFocus.focus()}catch(e){}if(c.o.onDone)c.o.onDone()}});
   go(0)}
@@ -162,21 +169,22 @@ const MiniLesson=(()=>{let C={voice:null,who:null},el=null,cur=null,back=null,la
  function api(i){return {L,T,done(){if(!cur||cur.i!==i)return;cur.ok[i]=1;const n=el.querySelector('[data-m=next]'),h=el.querySelector('[data-m=help]');if(n){n.disabled=false;n.textContent=L('다음','Next')+' ▶';n.classList.add('ready');n.focus()}if(h)h.remove()},
   next(){if(cur&&cur.i===i)go(i+1)},say(ko,en){if(!cur||cur.i!==i)return;const t=en==null?T(ko):L(ko,en);el.querySelector('.mlx-talk p').textContent=t;talk(t)}}}
  function go(i){if(!cur||!el)return;const ls=cur.ls,n=ls.steps.length;if(i<0)return;hush();cur.i=i;
-  const dots=el.querySelector('.mlx-dots'),stage=el.querySelector('.mlx-stage'),p=el.querySelector('.mlx-talk p'),nav=el.querySelector('.mlx-nav');
+  const dots=el.querySelector('.mlx-dots'),stage=el.querySelector('.mlx-stage'),p=el.querySelector('.mlx-talk p'),nav=el.querySelector('.mlx-nav'),wb=el.querySelector('.mlx-warn');
   dots.innerHTML=Array.from({length:n+1},(_,k)=>`<i class="${k<i?'on':k===i?'now':''}"></i>`).join('');
   if(i>=n){// the last page: what to remember
    if(!cur.done){cur.done=true;try{LR.les(ls.id)}catch(e){}}
    stage.className='mlx-stage sum';stage.innerHTML=`<div class="mlx-key"><b>✨ ${L('핵심 정리','Remember')}</b><ul>${(ls.key||[]).map(k=>`<li>${E(k)}</li>`).join('')}</ul></div><small class="mlx-saved">📒 ${L('개념 노트에 넣어 뒀어요. 언제든 다시 볼 수 있어요.','Saved in your concept notebook. Open it any time.')}</small>`;
-   const t=L('잘 들었어요! 이것만 기억하면 돼요.','Great listening! Just remember this.')+' '+(ls.key||[]).map(T).join(' ');p.textContent=t;talk(t);
+   wb.innerHTML=ls.warn?safeNote('safe',T(ls.warn)):'';
+   const t=L('잘 들었어요! 이것만 기억하면 돼요.','Great listening! Just remember this.')+' '+(ls.key||[]).map(T).join(' ')+(ls.warn?' '+T(ls.warn):'');p.textContent=t;cur.line=t;talk(t);
    nav.innerHTML=`<button type="button" class="mlx-b ghost" data-m="again">🔁 ${L('처음부터','From the start')}</button><button type="button" class="mlx-b go" data-m="end">${ls.cta?E(ls.cta):L('좋아요, 해 볼게요!','Got it, let’s go!')} ▶</button>`;
    nav.querySelector('[data-m=end]').focus();return}
-  const s=ls.steps[i],t=T(s.say);stage.className='mlx-stage';stage.innerHTML='';p.textContent=t;
+  const s=ls.steps[i],t=T(s.say);stage.className='mlx-stage';stage.innerHTML='';p.textContent=t;wb.innerHTML=s.warn?safeNote('safe',T(s.warn)):'';cur.line=t+(s.warn?' '+T(s.warn):'');
   try{if(typeof s.art==='function')s.art(stage,api(i));else if(s.art)stage.innerHTML=s.art}catch(e){stage.textContent=''}
   const pic=(C.pics&&C.pics[ls.id]||{})[i]||s.img;if(pic)stage.insertAdjacentHTML('afterbegin',`<img class="mlx-pic" src="${coachEsc(pic)}" alt="" onerror="this.remove()">`);
   if(!stage.childNodes.length)stage.classList.add('none');
   const wait=s.try&&!cur.ok[i];
   nav.innerHTML=`<button type="button" class="mlx-b ghost" data-m="prev" ${i?'':'disabled'} aria-label="${L('이전','Back')}">◀</button>${wait?`<button type="button" class="mlx-b help" data-m="help">🤔 ${L('알려 줘요','Show me')}</button>`:''}<button type="button" class="mlx-b go" data-m="next" ${wait?'disabled':''}>${wait?L('해 봐요','Your turn'):L('다음','Next')} ▶</button>`;
-  talk(t,()=>{if(cur&&cur.i===i&&el&&s.after)try{s.after(stage,api(i))}catch(e){}});const f=nav.querySelector('[data-m=next]');if(!wait&&f)f.focus()}
+  talk(cur.line,()=>{if(cur&&cur.i===i&&el&&s.after)try{s.after(stage,api(i))}catch(e){}});const f=nav.querySelector('[data-m=next]');if(!wait&&f)f.focus()}
  function before(ls,go_){if(!ls||seen(ls.id)){go_&&go_();return}let went=false;const g=()=>{if(!went){went=true;go_&&go_()}};open(ls,{onDone:g,onClose:g})}
  // the notebook: every topic of the game, the ones already watched ticked; tap one to watch it again
  function book(spec,at){const s=shell('book');back=null;const gs=spec.groups||[],all=gs.reduce((a,g)=>a.concat(g.items),[]),have=all.filter(x=>seen(x.id)).length;
@@ -510,6 +518,7 @@ body.mgOpen{overflow:hidden}
 .seg button.on{background:#456bdd;color:#fff;border-color:#456bdd;box-shadow:0 3px #2d4eab}
 .seg2 button{min-width:84px}
 @media(max-width:430px){.seg4{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.dtSafe{margin:8px 0 6px;font-size:13.5px}
 .setNote{margin:2px 0 12px;padding:10px 12px;border-radius:12px;background:#f2f5ff;color:#45568a;font-size:14px;font-weight:750;line-height:1.45}
 .dangerBtn{display:block;width:100%;min-height:48px;border:2px solid #efc4c4;border-radius:14px;background:#fff4f4;color:#a83440;font-size:16px;font-weight:950}
 .dangerBtn:hover{background:#ffeaea}
@@ -608,6 +617,12 @@ body.mgOpen{overflow:hidden}
 #coachPop p{margin:8px 0 0;background:#fff;border:2px solid #c9d4ff;border-radius:4px 16px 16px 16px;padding:6px 11px;font-size:13.5px;font-weight:700;line-height:1.38;color:#2a3470;box-shadow:0 8px 20px rgba(20,30,80,.22)}
 #coachPop b{display:block;font-size:11px;font-weight:900;color:#5b6cff}
 .me-pic{width:100%;height:100%;object-fit:cover;object-position:50% 18%;border-radius:inherit;display:block}
+/* safeNote(): ⚠️ safety and ℹ️ notice lines, the same look in every game; safeLink() in settings windows */
+.mg-note{margin:8px 0 0;padding:9px 12px;border:1px solid;border-radius:14px;font-size:14px;font-weight:700;line-height:1.45;text-align:left;text-wrap:pretty}
+.mg-note b{font-weight:900;margin-right:3px;white-space:nowrap}
+.mg-safe{background:#fff3e6;border-color:#ffc58f;color:#6e3500}.mg-safe b{color:#c2410c}
+.mg-info{background:#eef5ff;border-color:#c5d9fb;color:#23407a}.mg-info b{color:#2f5fd0}
+.mg-notice-link{display:inline-flex;align-items:center;min-height:44px;padding:0 4px;font-size:13.5px;font-weight:800;color:#4656c8;text-decoration:underline;text-underline-offset:3px}
 @media (prefers-reduced-motion:reduce){#coachPop{transition:opacity .2s;transform:none}}
 /* Mini lessons (.mlx) and the concept notebook (.mlx.book): one window, a picture, the teacher's line, big buttons */
 .mlx{position:fixed;inset:0;z-index:2147483100;display:grid;place-items:center;padding:max(10px,env(safe-area-inset-top)) max(8px,env(safe-area-inset-right)) max(10px,env(safe-area-inset-bottom)) max(8px,env(safe-area-inset-left));background:rgba(18,24,58,.55);font-family:system-ui,-apple-system,'Apple SD Gothic Neo','Noto Sans KR',sans-serif;color:#22305e;animation:mlxIn .2s ease}
@@ -627,6 +642,7 @@ body.mgOpen{overflow:hidden}
 .mlx-key ul{margin:0;padding:0;list-style:none;display:grid;gap:8px}
 .mlx-key li{position:relative;padding:10px 12px 10px 38px;background:#fff;border-radius:14px;font-size:16px;font-weight:800;line-height:1.45;box-shadow:0 2px 0 #f0d78a}
 .mlx-key li::before{content:'✔';position:absolute;left:12px;top:9px;width:20px;height:20px;border-radius:50%;background:#2fbf71;color:#fff;font-size:12px;display:grid;place-items:center}
+.mlx-warn:empty{display:none}.mlx-warn .mg-note{margin:0;font-size:15px}
 .mlx-saved{font-size:13px;font-weight:700;color:#8a6a1a;text-align:center}
 .mlx-talk{display:flex;align-items:flex-end;gap:8px}
 .mlx-talk img{width:56px;height:66px;flex:0 0 56px;object-fit:contain;object-position:50% 100%}
@@ -816,6 +832,7 @@ button.dtl-card{cursor:pointer}
    <span class="mapEyebrow" data-en="DETECTIVE PATROL · BIG CITY">탐정 순찰 · 큰 마을</span>
    <h2 data-en="🗺️ Let&#x27;s go! The big detective town">🗺️ 출동! 커다란 탐정 마을</h2>
    <p data-en="Follow footprints, remember the CCTV, and find the statement that doesn&#x27;t add up!">직접 발자국을 따라가고, CCTV를 기억하고, 진술의 모순을 풀어요!</p>
+   <p class="mg-note mg-safe dtSafe" role="note" data-en-html="&lt;b&gt;⚠️ Safety first&lt;/b&gt; Real patrols are a job for police and grown-ups. Outside, stay with a grown-up you trust."><b>⚠️ 안전 주의</b> 진짜 동네 순찰은 경찰과 어른이 해요. 밖에서는 믿을 수 있는 어른과 함께 다녀요.</p>
    <div class="patrolStats"><label for="patrolRegion"><span data-en="📍 Area">📍 지역</span> <select id="patrolRegion"></select></label></div>
    <div class="v11MissionStrip"><b id="patrolProgress" data-en="🔎 Solved 0 / 7">🔎 해결 0 / 7</b><span id="patrolTierHint" data-en="Don&#x27;t just pick answers: move, remember and figure it out!">정답 고르기 대신 직접 움직이고 기억하고 추리해요!</span><button type="button" id="patrolSpeak" class="patrolVoiceBtn" data-en="📻 Hear radio">📻 무전 듣기</button></div>
    <div class="patrolMissionTrack"><i id="patrolFill"></i></div>
@@ -846,14 +863,14 @@ button.dtl-card{cursor:pointer}
  </section>
  <section class="brief" aria-label="사건의 단서" data-en-aria-label="Case clues"><div class="missionTop"><div class="sceneArt" id="sceneArt" aria-hidden="true">🌳</div><div class="missionInfo"><span class="missionLabel" data-en="📍 Today&#x27;s crime scene">📍 오늘의 수사 현장</span><strong id="sceneName" data-en="City Park">도시 공원</strong><small id="chapterMission" data-en="Mission 1 / 5">임무 1 / 5</small></div><div class="casePill"><span data-en="Case file">사건 파일</span> <span id="caseFileNumber">#001</span></div></div><div class="briefHead"><span class="casechip" id="caseLabel" data-en="🔍 Case #1">🔍 사건 1호</span><span class="chapter" id="chapterLabel" data-en="First detective mission">첫 번째 탐정 임무</span></div><h2 data-en="🚨 Emergency! Witness clues">🚨 긴급 수사! 목격자 단서</h2><p id="story" data-en="Find the thief who ran away from the park. Look closely at everyone!">공원에서 달아난 도둑을 찾아주세요. 인물들의 모습을 자세히 관찰하세요!</p><div class="radio" aria-live="polite"><div class="radio-icon">👮</div><div class="radio-main"><span class="radio-head"><span class="live-dot"></span> <span data-en="Detective HQ · Emergency radio">탐정 본부 · 긴급 무전</span></span><strong id="radioLine" data-en="Agent! Ready for action?">탐정 요원! 출동 준비됐나요?</strong></div></div><div class="stage"><i id="stageFill"></i></div><div class="clues" id="clues"></div>
  <div class="witness"><div class="witnessTitle"><span class="witnessFace">👵</span><div><strong data-en="Ask the witness">목격자에게 질문하기</strong><small data-en="Pick 1 free question to get an extra clue!">무료로 질문 1개를 골라 추가 단서를 얻어요!</small></div></div><div class="witnessOptions" id="witnessOptions"><button type="button" data-ask="clothes" data-en="👕 Clothes">👕 옷차림</button><button type="button" data-ask="accessory" data-en="🎒 Belongings">🎒 소지품</button><button type="button" data-ask="face" data-en="👀 Looks">👀 외모</button></div><div id="witnessAnswer" class="witnessAnswer" role="status" aria-live="polite" data-en="Pick a question.">질문을 골라보세요.</div></div><div class="controls"><button class="btn speak" id="speak" data-en="🎙️ Hear police radio">🎙️ 경찰 무전 듣기</button><button class="btn stopvoice" id="stopVoice" type="button" data-en="⏹️ Stop voice">⏹️ 목소리 중지</button><button class="btn help" id="hint" data-en="💡 Show hint">💡 힌트 보기</button><button class="btn" id="shuffle" data-en="🔀 New case">🔀 새로운 사건</button><button class="btn" id="v15RepeatGuide" type="button" data-en="🔁 Hear again">🔁 다시 듣기</button></div></section>
- <section class="board" id="boardSection"><div class="cluePeek" id="cluePeek"><div class="peekRow"><button type="button" id="peekToggle" aria-expanded="true"><span data-en="📋 Review clues">📋 단서 다시 보기</span> <span id="peekMini" data-en="Check the witness report">목격자 진술 확인</span> <span id="peekChevron">▴</span></button><button type="button" class="dtBookBtn" id="dtBookCase" aria-haspopup="dialog" data-en="📖 Concept notebook">📖 개념 노트</button></div><div id="peekBody" class="peekBody"></div></div><div class="boardHead"><div><h2 data-en="👀 Who is the thief?">👀 누가 도둑일까요?</h2><p data-en="Check the clues, look closely at everyone, and make the arrest!">단서를 확인하고, 인물을 자세히 살펴서 체포하세요!</p></div><span class="count" id="count" data-en="4 suspects">용의자 4명</span></div><div class="boardTip" data-en-html="💡 Use the &lt;b&gt;notebook&lt;/b&gt; to mark people who aren&#x27;t the thief. Mistakes are okay!">💡 <b>수사 노트</b>로 아닌 사람을 표시해 보세요. 실수해도 괜찮아요!</div><div class="suspects" id="suspects"></div><div class="feedback" id="feedback" role="status" aria-live="polite" data-en="🔍 Only one person matches every clue!">🔍 단서를 모두 만족하는 사람은 딱 한 명이에요!</div></section>
+ <section class="board" id="boardSection"><div class="cluePeek" id="cluePeek"><div class="peekRow"><button type="button" id="peekToggle" aria-expanded="true"><span data-en="📋 Review clues">📋 단서 다시 보기</span> <span id="peekMini" data-en="Check the witness report">목격자 진술 확인</span> <span id="peekChevron">▴</span></button><button type="button" class="dtBookBtn" id="dtBookCase" aria-haspopup="dialog" data-en="📖 Concept notebook">📖 개념 노트</button></div><div id="peekBody" class="peekBody"></div></div><div class="boardHead"><div><h2 data-en="👀 Who is the thief?">👀 누가 도둑일까요?</h2><p data-en="Check the clues, look closely at everyone, and make the arrest!">단서를 확인하고, 인물을 자세히 살펴서 체포하세요!</p></div><span class="count" id="count" data-en="4 suspects">용의자 4명</span></div><div class="boardTip" data-en-html="💡 Use the &lt;b&gt;notebook&lt;/b&gt; to mark people who aren&#x27;t the thief. Mistakes are okay!">💡 <b>수사 노트</b>로 아닌 사람을 표시해 보세요. 실수해도 괜찮아요!</div><p class="mg-note mg-safe dtSafe" role="note" data-en-html="&lt;b&gt;⚠️ Safety first&lt;/b&gt; Everyone here is made up. In real life, never follow anyone; tell a trusted grown-up."><b>⚠️ 안전 주의</b> 여기 인물은 모두 지어낸 사람이에요. 진짜로는 아무도 따라가지 말고 믿을 수 있는 어른에게 알려요.</p><div class="suspects" id="suspects"></div><div class="feedback" id="feedback" role="status" aria-live="polite" data-en="🔍 Only one person matches every clue!">🔍 단서를 모두 만족하는 사람은 딱 한 명이에요!</div></section>
  </div> <!-- gameArea -->
  <section class="store" id="storeSection"><div class="storeIntro"><div><div class="storeEyebrow" data-en="DETECTIVE SUPPLY SHOP">탐정 장비 상점</div><h2 data-en="🛍️ Secret Detective Shop">🛍️ 탐정 비밀 상점</h2><p data-en="Spend the coins you earn catching thieves on detective gear!">도둑을 잡고 번 코인으로 탐정 장비를 구입하세요!</p></div><div class="wallet"><img class="ei coin" src="images/coin.webp" data-emoji="🪙" alt="" draggable="false" onerror="this.replaceWith('🪙')"> <strong id="shopCoins">0</strong><small data-en="My coins">내 코인</small></div></div><div class="items" id="shopItems"></div><div class="inventory" id="inventory"></div><div class="shopNote" id="shopNote" role="status" aria-live="polite" data-en="🕵️ Buy some gear and use it on your cases!">🕵️ 장비를 구입해서 수사에 활용해 보세요!</div></section>
  <section class="awards" id="awardsSection"><div class="awardsHeader"><div><div class="storeEyebrow" data-en="DETECTIVE COLLECTION">탐정 컬렉션</div><h2 data-en="🏆 My Detective Collection">🏆 나의 탐정 도감</h2><p data-en="Solve more cases to unlock cool badges.">사건을 해결할수록 멋진 배지가 열려요.</p></div><div class="badgeMedal">🕵️</div></div><div class="awardsProgress"><div class="awardsProgressHead"><strong id="nextBadgeName" data-en="Until the first badge">첫 배지까지</strong><span id="nextBadgeCount">0 / 1</span></div><div class="awardsBar"><i id="awardsFill"></i></div></div><div class="badgeGrid" id="badgeGrid"></div>
  <section class="thiefShelf"><div class="shelfTitle"><h3 data-en="🎴 Thief card album">🎴 괴도 도감</h3><span id="thiefCount">0 / 30</span></div><p data-en="Every thief you catch becomes a card. Fill each gang's 5 cards, then keep catching for ✨ shiny cards!">잡은 도둑은 카드가 돼요. 괴도단마다 5장을 모으고, 더 잡으면 ✨반짝 카드로 바뀌어요!</p><div class="medalShelf" id="medalShelf"></div><div class="thiefBook" id="thiefBook"></div></section>
  <section class="stickerShelf"><div class="shelfTitle"><h3 data-en="🎨 Neighborhood sticker album">🎨 동네 스티커 앨범</h3><span id="stickerCount">0 / 6</span></div><p data-en="Catch the thief in a new neighborhood to get a sticker!">새 동네의 도둑을 잡으면 스티커가 생겨요!</p><div id="stickerAlbum" class="stickerAlbum"></div></section>
  <div class="historyTools"><h3 class="logTitle" data-en="📖 Recent cases">📖 최근 수사 기록</h3><div class="historyButtons"><button id="clearHistory" class="historyBtn" type="button" data-en="🧹 Clear history only">🧹 기록만 지우기</button></div></div><p class="historyExplain" data-en="Clearing the history keeps your coins, level and stickers. To start the whole game over, use ⚙️ Settings.">기록만 지우면 코인·레벨·스티커는 그대로예요. 게임을 처음부터 다시 하려면 ⚙️ 설정을 눌러요.</p><div class="caseLog" id="caseLog"></div><div class="historyStatus" id="historyStatus" role="status" aria-live="polite"></div></section>
- <footer class="footer"><p data-en="Original characters and city map · Unlocked areas, shop items, your detective name and progress are saved in this browser. · The voice uses the English voices installed on your device, so it sounds different on each device.">오리지널 캐릭터·도시 지도 · 지역 해금, 상점 아이템·탐정 이름과 진행 상황은 이 브라우저에 저장됩니다. · 음성은 기기에 설치된 한국어 목소리를 사용하며 품질은 기기에 따라 달라집니다.</p><p class="copy">© 2026 Dongsun Moon. <span data-en="All rights reserved.">모든 권리 보유.</span></p></footer>
+ <footer class="footer"><p data-en="Original characters and city map · Everyone in the game is made up, and we never judge real people by how they look. · Unlocked areas, shop items, your detective nickname and progress are saved in this browser. · The voice uses the English voices installed on your device, so it sounds different on each device.">오리지널 캐릭터·도시 지도 · 게임 속 인물은 모두 지어낸 사람이며, 생김새만 보고 진짜 사람을 의심하지 않아요. · 지역 해금, 상점 아이템·탐정 별명과 진행 상황은 이 브라우저에 저장됩니다. · 음성은 기기에 설치된 한국어 목소리를 사용하며 품질은 기기에 따라 달라집니다.</p><p class="copy">© 2026 Dongsun Moon. <span data-en="All rights reserved.">모든 권리 보유.</span></p></footer>
 </main>
 <div class="layer" id="layer" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="popTitle"><div class="popup"><button id="close" class="close" aria-label="닫기" data-en-aria-label="Close">✕</button><div class="popIcon" id="popIcon">🎉</div><h2 id="popTitle" data-en="Correct!">정답!</h2><p id="popDesc"></p><div class="stars" id="popStars">⭐⭐⭐</div><div id="popCoach"></div><div class="reward" id="rewards"></div><div class="large" id="large"></div><div class="giftArea" id="giftArea" hidden><strong data-en="🎁 A surprise gift!">🎁 깜짝 선물 등장!</strong><p id="giftTip" data-en="Pick any gift box. All three have a present inside!">원하는 선물상자를 하나 골라 보세요. 세 상자 모두 선물이 들어 있어요!</p><div id="giftChoices" class="giftChoices"></div><p id="giftWin" aria-live="polite"></p></div><button class="advance" id="advance" data-en="Next case ➜">다음 사건 ➜</button></div></div>
 <div id="patrolWalletFloat" aria-live="off"><img class="ei coin" src="images/coin.webp" data-emoji="🪙" alt="" draggable="false" onerror="this.replaceWith('🪙')"> <b id="patrolWalletNum">0</b></div>
@@ -882,8 +899,8 @@ button.dtl-card{cursor:pointer}
   <div class="setRow"><div class="setLabel"><b data-en="🌐 Language">🌐 언어</b></div><div class="seg seg2" id="langSeg" role="group" aria-label="언어" data-en-aria-label="Language"><button type="button" data-lang="ko" lang="ko">한국어</button><button type="button" data-lang="en" lang="en">English</button></div></div>
   <p class="setNote" id="setPlayerNote"></p>
   <button type="button" class="dangerBtn" id="resetGame" data-en="🗑️ Reset this game">🗑️ 이 게임 기록 지우기</button>
-  <p class="setNote" data-en="🛡️ This is a make-believe game. In real life, never follow or confront anyone you think did something wrong. Tell a trusted grown-up, or call 911 in an emergency.">🛡️ 이 게임은 상상 놀이예요. 실제로 수상한 사람을 보면 따라가거나 맞서지 말고, 믿을 수 있는 어른에게 알리거나 위급할 때는 112(경찰)·119에 신고해요.</p>
-  <p class="copy">© 2026 Dongsun Moon. <span data-en="All rights reserved.">모든 권리 보유.</span></p>
+  <p class="setNote" data-en="🛡️ This is a make-believe game. In real life, never follow or confront anyone you think did something wrong. Tell a trusted grown-up. In an emergency, call 911 in Canada or the US (112 or 119 in Korea).">🛡️ 이 게임은 상상 놀이예요. 실제로 수상한 사람을 보면 따라가거나 맞서지 말고, 믿을 수 있는 어른에게 알려요. 위급할 때는 한국은 112(경찰)·119(소방·구급), 캐나다·미국은 911에 전화해요.</p>
+  <p class="copy">© 2026 Dongsun Moon. <span data-en="All rights reserved.">모든 권리 보유.</span><br><a class="mg-notice-link" id="setNotice" href="notice.html" target="_blank" rel="noopener" data-en="🛡️ Safety, privacy &amp; credits (for grown-ups)">🛡️ 안전 · 개인정보 · 저작권 안내 (보호자용)</a></p>
  </div>
 </div>
 <div class="mgLayer" id="confirmLayer" role="alertdialog" aria-modal="true" aria-labelledby="cfTitle" aria-describedby="cfDesc" hidden>
@@ -898,7 +915,7 @@ button.dtl-card{cursor:pointer}
 
 <script>
 (()=>{'use strict';
-applyLang();wireLangTools();
+applyLang();wireLangTools();try{document.getElementById('setNotice').href='notice.html?lang='+LANG}catch(e){}
 const cap=s=>String(s).charAt(0).toUpperCase()+String(s).slice(1);
 // Illustrations stand in for emoji; if a picture fails to load, its emoji is put back.
 const BUDDY_IMG={puppy:'images/buddy-puppy.webp',fox:'images/buddy-fox.webp',cat:'images/buddy-cat.webp',bunny:'images/buddy-bunny.webp'};
@@ -2214,7 +2231,7 @@ function learnSummary(){
   memory:['같은 그림 찾기에서 짝을 빨리 찾는 방법은 뭐야?','In Picture Match, what helps you find the pairs faster?','한 번 본 카드가 어디 있었는지 기억해 두어요.','Remembering where I already saw each card.'],
   alibi:['‘바로 옆’은 무슨 뜻이야? 2번과 4번은 바로 옆일까?','What does “right next to” mean? Are spots #2 and #4 right next to each other?','번호 차이가 1이면 바로 옆이에요. 2번과 4번 사이에는 3번이 있어서 아니에요.','The spot numbers differ by 1. No, because #3 is between them.'],
   footprints:['진짜 발자국과 가짜 발자국은 어떻게 구별했어?','How did you tell real footprints from fakes?','무늬와 뒤꿈치, 두 가지가 모두 경찰 기록과 같아야 진짜예요.','Both the pattern and the heel had to match the police description.'],
-  safety:['진짜로 수상한 사람을 보면 탐정처럼 따라가도 될까?','In real life, should you follow someone who seems suspicious, like a detective?','아니요. 따라가거나 맞서지 말고, 그 자리를 떠나 믿을 수 있는 어른에게 알려요. 위급할 때는 112(경찰)나 119에 신고해요.','No. Never follow or confront anyone. Move away and tell a trusted grown-up, or call 911 in an emergency.']};
+  safety:['진짜로 수상한 사람을 보면 탐정처럼 따라가도 될까?','In real life, should you follow someone who seems suspicious, like a detective?','아니요. 따라가거나 맞서지 말고, 그 자리를 떠나 믿을 수 있는 어른에게 알려요. 위급할 때는 한국은 112(경찰)·119(소방·구급), 캐나다·미국은 911에 전화해요.','No. Never follow or confront anyone. Move away and tell a trusted grown-up. In an emergency, call 911 in Canada or the US (112 or 119 in Korea).']};
  const played=Object.keys(MINI).filter(hoods).sort((a,b)=>(recent[b]-recent[a])||(hoods(b)-hoods(a)));
  const talk=caught?[T.case]:[];for(const id of played){if(talk.length>=3)break;talk.push(T[id])}if(talk.length)talk.push(T.safety);
  const H={
@@ -2418,6 +2435,7 @@ function dtLostSteps(){
      api.say(L(`${d.join(', ')}${v17Final(d[d.length-1])?'이':'가'} 달라요. 하나라도 다르면 다른 물건이에요!`,`${cap(d.map(w=>'the '+w).join(' and '))} ${d.length>1?'are':'is'} different. If even one detail is different, it’s a different item!`))})},
    show:box=>{box.dataset.done=1;const b=box.querySelector(`[data-w="${six.indexOf(B)}"]`);if(b)b.classList.add('glow','dtl-hint')}},
   {say:L('신고서는 모두 세 장이에요. 하나를 찾으면 다음 신고서가 나와요. 비슷해 보여도 하나라도 다르면 다른 물건이에요!','There are three reports in all. Find one, and the next report comes. Even if it looks close, one different detail means a different item!'),
+   warn:['진짜로 물건을 주우면 갖지 말고 어른이나 분실물 센터에 맡겨요.','If you find something in real life, don’t keep it. Give it to a grown-up or the lost and found.'],
    art:`<div class="dtl"><div class="dtl-row">${item(B,'glow')}${item({t:'📘',c:'yellow',m:'⚡'},'dim')}</div><p class="dtl-note">✅ ${L('세 가지 모두 같아요','All three match')} · ❌ ${L('표시가 달라요','The mark is different')}</p></div>`}]}
 
 // ---- patrol: CCTV 기억 수사 (remember the order: say it, make a story, watch again if needed)
@@ -2493,6 +2511,7 @@ function dtMemorySteps(){
 const dtPk=id=>patrolKinds.find(m=>m.id===id);
 const DT_LES=[
  {id:'dt:case',g:0,icon:'🔎',title:L('사건을 해결하는 법','How to solve a case'),steps:dtCaseSteps,cta:L('좋아요, 수사 시작!','Got it, let’s investigate!'),
+  warn:['탐정 놀이는 게임에서만 해요. 진짜 사람을 몰래 따라가거나 지켜보거나 사진 찍지 않아요. 이상한 일은 믿을 수 있는 어른에게 알려요.','Detective play stays in the game. Never follow, secretly watch or take photos of real people. If something seems wrong, tell a trusted grown-up.'],
   key:[['단서를 모두 듣고, 맞지 않는 사람을 하나씩 지워요.','Hear every clue, then rule out anyone who doesn’t match, one clue at a time.'],['모든 단서와 맞는 사람은 딱 한 명, 그 사람이 범인이에요.','Only one person matches every clue: that’s the thief.'],['질문하고, 확대하고, 확실할 때 체포해요.','Ask, zoom in, and arrest only when you’re sure.']]},
  {id:'dt:listen',g:0,icon:'👂',title:L('귀 기울여 듣기','Careful listening'),steps:dtListenSteps,
   key:[['색깔과 물건은 짝으로 들어요. ‘파란 모자’는 모자가 파란색.','Hear color + thing as a pair: “blue hat” means the hat is blue.'],['‘않았어요’, ‘없어요’는 뜻을 뒤집어요. 끝까지 들어요.','“Not” and “no” flip the meaning, so listen for them.'],['‘바로 옆’, ‘왼쪽’ 같은 자리 낱말도 듣고, 놓치면 다시 들어요.','Catch place words like “next to” and “left”. Missed one? Listen again.']]},
@@ -2515,7 +2534,7 @@ const DT_LES=[
   key:[['한 줄씩 나눠서 기억해요.','Remember one row at a time.'],['그림과 자리를 소리 내어 말해요.','Say each picture and its spot out loud.'],['새 카드를 먼저 뒤집고, 짝을 봤다면 그 자리로!','Flip a new card first; if you saw its partner, go there!']]}];
 // a patrol lesson's title names its station, and the station picture is its icon
 DT_LES.forEach(m=>{const k=m.id.startsWith('dt:p:')&&dtPk(m.id.slice(5));if(k){m.icon=pic(k.img,k.icon);m.title=k.label+' · '+m.title}});
-function dtLesson(id){const m=DT_LES.find(x=>x.id===id);if(!m)return null;return {id:m.id,icon:m.icon,title:m.title,who:dtWho(),key:m.key,cta:m.cta,steps:m.steps()}}
+function dtLesson(id){const m=DT_LES.find(x=>x.id===id);if(!m)return null;return {id:m.id,icon:m.icon,title:m.title,who:dtWho(),key:m.key,cta:m.cta,warn:m.warn,steps:m.steps()}}
 // before the first case, the first case of a harder level, and (from the second case) careful listening: one per case start
 function dtCaseGate(){if(view!=='play'||solved||traveling||MiniLesson.on)return;
  const ids=['dt:case',...(difficulty!=='easy'?['dt:level:'+difficulty]:[]),...(state.caught>=1?['dt:listen']:[])],id=ids.find(x=>!MiniLesson.seen(x));

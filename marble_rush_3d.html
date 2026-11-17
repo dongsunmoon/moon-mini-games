@@ -69,6 +69,11 @@ const coachPick=a=>a[Math.random()*a.length|0];
 // the player's face as their game character (images/aq-me-<key>.webp) from the emoji the profile stores; other emoji stay as they are
 const COACH_ME={'🐰':'bunny','🐻':'bear','🦊':'fox','🐼':'panda','🐨':'koala','🐯':'tiger','🦁':'lion','🐸':'frog','🐱':'cat','🐶':'puppy','🐥':'chick','🦄':'unicorn','🐙':'octopus','🐬':'dolphin','🦖':'dino','⭐':'star'};
 const coachMe=(av,cls='')=>{const k=COACH_ME[String(av||'').replace(/\ufe0f/g,'')];return k?`<img class="me-pic ${cls}" src="images/aq-me-${k}.webp" alt="" draggable="false" data-e="${coachEsc(av)}" onerror="this.replaceWith(document.createTextNode(this.dataset.e))">`:coachEsc(av||'')};
+// a short caution or notice line in any window: kind 'safe' (⚠️ real-world safety, e.g. "only with a grown-up") or 'info'
+// (ℹ️ privacy, pretend coins, credits). safeLink() is the settings-window link to notice.html, the page for grown-ups.
+const SAFE_HEAD={safe:['⚠️','안전 주의','Safety first'],info:['ℹ️','알아 두기','Good to know']};
+const safeNote=(kind,ko,en,cls='')=>{const k=SAFE_HEAD[kind]?kind:'info',h=SAFE_HEAD[k];return `<p class="mg-note mg-${k} ${cls}" role="note"><b>${h[0]} ${L(h[1],h[2])}</b> ${coachEsc(en==null?ko:L(ko,en))}</p>`};
+const safeLink=()=>`<a class="mg-notice-link" href="notice.html?lang=${LANG}" target="_blank" rel="noopener">🛡️ ${L('안전 · 개인정보 · 저작권 안내 (보호자용)','Safety, privacy & credits (for grown-ups)')}</a>`;
 const coachSay_=t=>{const nm=coachNm(),ok=t.filter(x=>nm||!/\{nm\}/.test(x[0])),x=coachPick(ok.length?ok:t);return L(x[0],x[1]).replace(/\{nm\}/g,coachEsc(nm))};
 const COACH={
  up:['clap',[['꾸준히 한 덕분이에요. 정말 멋져요!','Your steady practice paid off. Awesome!'],['어제보다 오늘 더 잘하고 있어요!','You’re doing even better than yesterday!'],['계속 도전해서 여기까지 왔어요!','You kept trying, and look how far you’ve come!'],['{nm}의 노력이 반짝반짝 빛나요 ✨','Your hard work is shining, {nm} ✨'],['문 코치가 박수 쳐요! 짝짝짝 👏','Coach Moon is clapping for you! 👏'],['이 기세 그대로 가 봐요! 🌙','Keep this going! 🌙']]],
@@ -121,6 +126,8 @@ function coachStart(hello,tips){const game=(location.pathname.split('/').pop()||
 //   picture with the game's own helpers. On a "try" step the child does the small thing in the picture and the game
 //   calls api.done(); "🤔 알려 줘요" runs show(box,api) (or just api.done()) so not knowing never blocks or costs anything.
 //   after(box,api), if given, runs once the teacher has finished reading the step (for example to play a demo).
+//   warn:[ko,en] on a step (or on the lesson, for the last page) shows a ⚠️ safety line under the picture and the
+//   teacher reads it too: anything a child might copy at home (heat, electricity, magnets...) says how to stay safe.
 //   key holds the 1–3 lines to remember; they close the lesson and stay in the notebook.
 // · MiniLesson.cfg({voice:(text,onEnd)=>…, stop:()=>…, who:{img,name}, pics:{lessonId:{stepIndex:'images/x.webp'}}}) once per game: the game's own read-aloud (it
 //   respects the game's voice switch; onEnd, when the game supports it, runs after the line), what to stop when a page
@@ -149,11 +156,11 @@ const MiniLesson=(()=>{let C={voice:null,who:null},el=null,cur=null,back=null,la
   el.setAttribute('aria-labelledby','mlxT');
   const wImg=/coach-moon-(idea|hi)\.webp$/.test(who.img||'')?'images/coach-moon-teach.webp':who.img;
   el.innerHTML=`<div class="mlx-card"><div class="mlx-top"><span class="mlx-kick">📖 ${L('미니 수업','Mini lesson')}</span><b id="mlxT">${ls.icon?ls.icon+' ':''}${E(ls.title)}</b><button type="button" class="mlx-x" data-m="x" aria-label="${L('닫기','Close')}">✕</button></div>
-   <div class="mlx-dots" aria-hidden="true"></div><div class="mlx-stage"></div>
+   <div class="mlx-dots" aria-hidden="true"></div><div class="mlx-stage"></div><div class="mlx-warn"></div>
    <div class="mlx-talk"><img src="${coachEsc(wImg)}" data-alt="${coachEsc(who.img)}" alt="" onerror="if(this.dataset.alt&&!this.dataset.f){this.dataset.f=1;this.src=this.dataset.alt}else this.remove()"><p aria-live="polite"></p><button type="button" class="mlx-hear" data-m="hear" aria-label="${L('다시 듣기','Hear again')}">🔊</button></div>
    <div class="mlx-nav"></div></div>`;
   el.addEventListener('click',e=>{const b=e.target.closest('[data-m]');if(!b||!cur)return;const m=b.dataset.m;
-   if(m==='x')close();else if(m==='hear')talk(el.querySelector('.mlx-talk p').textContent);else if(m==='prev')go(cur.i-1);else if(m==='next')go(cur.i+1);
+   if(m==='x')close();else if(m==='hear')talk(cur.line||el.querySelector('.mlx-talk p').textContent);else if(m==='prev')go(cur.i-1);else if(m==='next')go(cur.i+1);
    else if(m==='help'){const s=cur.ls.steps[cur.i];try{if(s.show)s.show(el.querySelector('.mlx-stage'),api(cur.i))}catch(e){}api(cur.i).done()}
    else if(m==='again')go(0);else if(m==='end'){const c=cur;close(true);if(back){const b=back;back=null;book(b.spec,b.at)}else if(lastFocus&&lastFocus.isConnected&&lastFocus.focus)try{lastFocus.focus()}catch(e){}if(c.o.onDone)c.o.onDone()}});
   go(0)}
@@ -161,21 +168,22 @@ const MiniLesson=(()=>{let C={voice:null,who:null},el=null,cur=null,back=null,la
  function api(i){return {L,T,done(){if(!cur||cur.i!==i)return;cur.ok[i]=1;const n=el.querySelector('[data-m=next]'),h=el.querySelector('[data-m=help]');if(n){n.disabled=false;n.textContent=L('다음','Next')+' ▶';n.classList.add('ready');n.focus()}if(h)h.remove()},
   next(){if(cur&&cur.i===i)go(i+1)},say(ko,en){if(!cur||cur.i!==i)return;const t=en==null?T(ko):L(ko,en);el.querySelector('.mlx-talk p').textContent=t;talk(t)}}}
  function go(i){if(!cur||!el)return;const ls=cur.ls,n=ls.steps.length;if(i<0)return;hush();cur.i=i;
-  const dots=el.querySelector('.mlx-dots'),stage=el.querySelector('.mlx-stage'),p=el.querySelector('.mlx-talk p'),nav=el.querySelector('.mlx-nav');
+  const dots=el.querySelector('.mlx-dots'),stage=el.querySelector('.mlx-stage'),p=el.querySelector('.mlx-talk p'),nav=el.querySelector('.mlx-nav'),wb=el.querySelector('.mlx-warn');
   dots.innerHTML=Array.from({length:n+1},(_,k)=>`<i class="${k<i?'on':k===i?'now':''}"></i>`).join('');
   if(i>=n){// the last page: what to remember
    if(!cur.done){cur.done=true;try{LR.les(ls.id)}catch(e){}}
    stage.className='mlx-stage sum';stage.innerHTML=`<div class="mlx-key"><b>✨ ${L('핵심 정리','Remember')}</b><ul>${(ls.key||[]).map(k=>`<li>${E(k)}</li>`).join('')}</ul></div><small class="mlx-saved">📒 ${L('개념 노트에 넣어 뒀어요. 언제든 다시 볼 수 있어요.','Saved in your concept notebook. Open it any time.')}</small>`;
-   const t=L('잘 들었어요! 이것만 기억하면 돼요.','Great listening! Just remember this.')+' '+(ls.key||[]).map(T).join(' ');p.textContent=t;talk(t);
+   wb.innerHTML=ls.warn?safeNote('safe',T(ls.warn)):'';
+   const t=L('잘 들었어요! 이것만 기억하면 돼요.','Great listening! Just remember this.')+' '+(ls.key||[]).map(T).join(' ')+(ls.warn?' '+T(ls.warn):'');p.textContent=t;cur.line=t;talk(t);
    nav.innerHTML=`<button type="button" class="mlx-b ghost" data-m="again">🔁 ${L('처음부터','From the start')}</button><button type="button" class="mlx-b go" data-m="end">${ls.cta?E(ls.cta):L('좋아요, 해 볼게요!','Got it, let’s go!')} ▶</button>`;
    nav.querySelector('[data-m=end]').focus();return}
-  const s=ls.steps[i],t=T(s.say);stage.className='mlx-stage';stage.innerHTML='';p.textContent=t;
+  const s=ls.steps[i],t=T(s.say);stage.className='mlx-stage';stage.innerHTML='';p.textContent=t;wb.innerHTML=s.warn?safeNote('safe',T(s.warn)):'';cur.line=t+(s.warn?' '+T(s.warn):'');
   try{if(typeof s.art==='function')s.art(stage,api(i));else if(s.art)stage.innerHTML=s.art}catch(e){stage.textContent=''}
   const pic=(C.pics&&C.pics[ls.id]||{})[i]||s.img;if(pic)stage.insertAdjacentHTML('afterbegin',`<img class="mlx-pic" src="${coachEsc(pic)}" alt="" onerror="this.remove()">`);
   if(!stage.childNodes.length)stage.classList.add('none');
   const wait=s.try&&!cur.ok[i];
   nav.innerHTML=`<button type="button" class="mlx-b ghost" data-m="prev" ${i?'':'disabled'} aria-label="${L('이전','Back')}">◀</button>${wait?`<button type="button" class="mlx-b help" data-m="help">🤔 ${L('알려 줘요','Show me')}</button>`:''}<button type="button" class="mlx-b go" data-m="next" ${wait?'disabled':''}>${wait?L('해 봐요','Your turn'):L('다음','Next')} ▶</button>`;
-  talk(t,()=>{if(cur&&cur.i===i&&el&&s.after)try{s.after(stage,api(i))}catch(e){}});const f=nav.querySelector('[data-m=next]');if(!wait&&f)f.focus()}
+  talk(cur.line,()=>{if(cur&&cur.i===i&&el&&s.after)try{s.after(stage,api(i))}catch(e){}});const f=nav.querySelector('[data-m=next]');if(!wait&&f)f.focus()}
  function before(ls,go_){if(!ls||seen(ls.id)){go_&&go_();return}let went=false;const g=()=>{if(!went){went=true;go_&&go_()}};open(ls,{onDone:g,onClose:g})}
  // the notebook: every topic of the game, the ones already watched ticked; tap one to watch it again
  function book(spec,at){const s=shell('book');back=null;const gs=spec.groups||[],all=gs.reduce((a,g)=>a.concat(g.items),[]),have=all.filter(x=>seen(x.id)).length;
@@ -334,6 +342,8 @@ button,input,select{font:inherit}button{cursor:pointer;touch-action:manipulation
 .set-note{font-size:15px;color:#c4d1e6;line-height:1.5;margin:4px 0 12px;padding:10px 12px;background:#0c172bcc;border:1px solid #283957;border-radius:12px}
 .danger-btn{width:100%;min-height:48px;border:1px solid #ff6b7d88;background:#3a1424;color:#ffd0d6;border-radius:14px;font-size:16px;font-weight:900;padding:10px;box-shadow:0 3px 0 #050a16}
 .modal-card .copy{margin-top:14px}
+#settingsModal .mg-note{margin:12px 0 0}#settingsModal .mg-notice-link{color:#9fd3ff}
+.names-panel .mg-note{margin:0 0 4px;font-size:13.5px}
 .modal-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .modal-actions .primary.danger{background:linear-gradient(110deg,#ff8a7a,#ff5f8a);color:#3a0611;box-shadow:0 4px 0 #8f2440}
 /* tablets and phones: race view first, Start right under it, race options below */
@@ -390,6 +400,7 @@ button,input,select{font:inherit}button{cursor:pointer;touch-action:manipulation
 .lab-steps{list-style:none;padding:0;margin:0 0 10px;display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
 .lab-steps li{background:#0f1d36;border:1px solid #2b3d61;border-radius:12px;padding:8px;font-size:14px;text-align:center;line-height:1.35}.lab-steps b{display:block}.lab-steps span{font-size:12.5px;color:#a9bbd8}
 .lab-ok{font-size:14px;color:#cfe0ff;margin:0 0 10px;line-height:1.5}
+.mg-note.lab-safe{margin:0 0 12px}
 .lab-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}.lab-grid.compact{grid-template-columns:1fr}
 .lab-card{display:flex;align-items:center;gap:9px;text-align:left;min-height:60px;border:1px solid #33486e;background:#132240;color:#fff;border-radius:14px;padding:8px 10px;box-shadow:0 2px 0 #050a16}
 .lab-card.on{border-color:#ffd84a;background:#2a2a18}.lc-ic{font-size:28px;flex:0 0 auto}.lc-tx{flex:1;min-width:0}.lc-tx b{display:block;font-size:15px}.lc-tx small{display:block;font-size:12.5px;color:#a9bbd8;line-height:1.3;margin-top:2px}
@@ -566,6 +577,12 @@ button,input,select{font:inherit}button{cursor:pointer;touch-action:manipulation
 #coachPop p{margin:8px 0 0;background:#fff;border:2px solid #c9d4ff;border-radius:4px 16px 16px 16px;padding:6px 11px;font-size:13.5px;font-weight:700;line-height:1.38;color:#2a3470;box-shadow:0 8px 20px rgba(20,30,80,.22)}
 #coachPop b{display:block;font-size:11px;font-weight:900;color:#5b6cff}
 .me-pic{width:100%;height:100%;object-fit:cover;object-position:50% 18%;border-radius:inherit;display:block}
+/* safeNote(): ⚠️ safety and ℹ️ notice lines, the same look in every game; safeLink() in settings windows */
+.mg-note{margin:8px 0 0;padding:9px 12px;border:1px solid;border-radius:14px;font-size:14px;font-weight:700;line-height:1.45;text-align:left;text-wrap:pretty}
+.mg-note b{font-weight:900;margin-right:3px;white-space:nowrap}
+.mg-safe{background:#fff3e6;border-color:#ffc58f;color:#6e3500}.mg-safe b{color:#c2410c}
+.mg-info{background:#eef5ff;border-color:#c5d9fb;color:#23407a}.mg-info b{color:#2f5fd0}
+.mg-notice-link{display:inline-flex;align-items:center;min-height:44px;padding:0 4px;font-size:13.5px;font-weight:800;color:#4656c8;text-decoration:underline;text-underline-offset:3px}
 @media (prefers-reduced-motion:reduce){#coachPop{transition:opacity .2s;transform:none}}
 /* Mini lessons (.mlx) and the concept notebook (.mlx.book): one window, a picture, the teacher's line, big buttons */
 .mlx{position:fixed;inset:0;z-index:2147483100;display:grid;place-items:center;padding:max(10px,env(safe-area-inset-top)) max(8px,env(safe-area-inset-right)) max(10px,env(safe-area-inset-bottom)) max(8px,env(safe-area-inset-left));background:rgba(18,24,58,.55);font-family:system-ui,-apple-system,'Apple SD Gothic Neo','Noto Sans KR',sans-serif;color:#22305e;animation:mlxIn .2s ease}
@@ -585,6 +602,7 @@ button,input,select{font:inherit}button{cursor:pointer;touch-action:manipulation
 .mlx-key ul{margin:0;padding:0;list-style:none;display:grid;gap:8px}
 .mlx-key li{position:relative;padding:10px 12px 10px 38px;background:#fff;border-radius:14px;font-size:16px;font-weight:800;line-height:1.45;box-shadow:0 2px 0 #f0d78a}
 .mlx-key li::before{content:'✔';position:absolute;left:12px;top:9px;width:20px;height:20px;border-radius:50%;background:#2fbf71;color:#fff;font-size:12px;display:grid;place-items:center}
+.mlx-warn:empty{display:none}.mlx-warn .mg-note{margin:0;font-size:15px}
 .mlx-saved{font-size:13px;font-weight:700;color:#8a6a1a;text-align:center}
 .mlx-talk{display:flex;align-items:flex-end;gap:8px}
 .mlx-talk img{width:56px;height:66px;flex:0 0 56px;object-fit:contain;object-position:50% 100%}
@@ -696,8 +714,9 @@ button,input,select{font:inherit}button{cursor:pointer;touch-action:manipulation
   <div class="set-row"><span id="lblLang" data-en="🌐 Language">🌐 언어</span><div class="seg lang-seg" role="group" aria-labelledby="lblLang"><button type="button" data-lang="ko">한국어</button><button type="button" data-lang="en">English</button></div></div>
   <p class="set-note" id="playerNote"></p>
   <button class="danger-btn" id="resetDataBtn" type="button" data-en="🗑️ Erase this game's records">🗑️ 이 게임 기록 지우기</button>
+  <p class="mg-note mg-safe" role="note" data-en-html="<b>⚠️ Safety first</b> Real marbles and small balls can cause choking. Keep them away from babies and children under 3. Never put magnets in your mouth.""><b>⚠️ 안전 주의</b> 진짜 구슬과 작은 공은 목에 걸릴 수 있어요. 아기와 3살이 안 된 어린이 손이 닿지 않게 해요. 자석은 절대 입에 넣지 않아요.</p>
   <p class="set-note" style="margin:12px 0 10px" data-en="📚 Schools may teach things in a different order or in a different way. If something seems different, follow your teacher.">📚 학교마다 배우는 순서와 방법이 조금씩 다를 수 있어요. 헷갈리면 학교 선생님 설명을 따라 주세요.</p>
-  <p class="copy">© 2026 Dongsun Moon. <span data-en="All rights reserved.">모든 권리 보유.</span></p>
+  <p class="copy">© 2026 Dongsun Moon. <span data-en="All rights reserved.">모든 권리 보유.</span><br><a class="mg-notice-link" id="noticeLink" href="notice.html" target="_blank" rel="noopener" data-en="🛡️ Safety, privacy & credits (for grown-ups)">🛡️ 안전 · 개인정보 · 저작권 안내 (보호자용)</a></p>
  </div>
 </div>
 <div class="modal top hidden" id="confirmModal" role="alertdialog" aria-modal="true" aria-labelledby="confirmTitle" aria-describedby="confirmText">
@@ -1201,7 +1220,7 @@ const PIECES=[
  ['fan','🌬️',L('바람 터널','Wind tunnel'),L('바람이 받쳐서 둥실둥실','The air holds them up')],
  // added 2026-11: forces you can see at work. A course with a magnet drum brings out the ⚙️ steel team (every even number).
  ['spring','➰',L('용수철 발사대','Spring launcher'),L('눌린 용수철이 펴지며 휙!','A squashed spring flings it')],
- ['magnet','🧲',L('자석 드럼','Magnet drum'),L('쇠구슬만 끌어당겨요','Pulls only steel marbles')],
+ ['magnet','🧲',L('자석 드럼','Magnet drum'),L('구슬 중에서 쇠구슬만 끌어당겨요','Of all the marbles, pulls only the steel ones')],
  ['well','🕳️',L('중력 우물','Gravity well'),L('가운데로 갈수록 세게 끌어요','Pulls harder near the middle')],
  ['blow','💨',L('선풍기','Fan'),L('가까울수록 바람이 세요','Stronger wind up close')]];
 const PIECE_IDS=PIECES.map(p=>p[0]),PIECE_BY=Object.fromEntries(PIECES.map(p=>[p[0],p])),MAX_PIECES=8,MAX_CUSTOMS=6;
@@ -1229,21 +1248,21 @@ const EXPS=[
   lanes:[{mat:'glass',drop:210,name:L('⛰️ 가파른 길','⛰️ Steep slide')},{mat:'glass',drop:60,name:L('🌄 완만한 길','🌄 Gentle slide')}],
   opts:[['A',L('가파른 길','The steep slide')],['B',L('완만한 길','The gentle slide')],['same',L('거의 동시에','About the same time')]],ans:'A',
   why:L('경사가 가파를수록 비탈을 따라 구슬을 끌어내리는 힘이 커서 더 빨리 내려와요.','The steeper the slope, the harder gravity pulls the marble down it, so it goes faster.'),
-  life:L('그래서 가파른 미끄럼틀이 더 짜릿해요!','That is why steep slides feel more exciting!')},
+  life:L('그래서 가파른 미끄럼틀이 더 짜릿해요! 진짜 미끄럼틀은 앉아서 발부터 내려가요.','That is why steep slides feel more exciting! On a real slide, sit down and go feet first.')},
  {id:'height',ic:'🛷',kind:'roll',measure:'far',t:L('높은 출발, 낮은 출발','High start, low start'),
   q:L('똑같은 비탈의 높은 곳과 낮은 곳에서 구슬이 출발해요. 비탈을 내려온 뒤 카펫에서 어느 구슬이 더 멀리 굴러갈까요?','Two marbles start on the same ramp, one high up and one low down. After the ramp, which one rolls farther on the carpet?'),
   diff:L('다른 점은 딱 하나: 출발하는 높이예요 (비탈과 카펫은 똑같아요)','Only one thing is different: how high the marble starts (the ramp and the carpet are the same)'),
   lanes:[{mat:'glass',gx:72,name:L('⬆️ 높은 출발','⬆️ High start')},{mat:'glass',gx:116,name:L('⬇️ 낮은 출발','⬇️ Low start')}],
   opts:[['A',L('높은 곳에서 출발한 구슬','The one that starts high')],['B',L('낮은 곳에서 출발한 구슬','The one that starts low')],['same',L('똑같이 굴러가요','The same distance')]],ans:'A',
   why:L('높은 곳에서 출발한 구슬은 내려오는 동안 더 빨라져서 더 멀리 굴러가요. 높은 곳에 있을수록 움직일 수 있는 에너지를 더 많이 가지고 있어요.','The marble that starts higher speeds up more on the way down, so it rolls farther. The higher something starts, the more energy it has for moving.'),
-  life:L('미끄럼틀도 꼭대기에서 출발해야 가장 빨라져요.','On a slide, too, you go fastest when you start from the very top.')},
+  life:L('미끄럼틀도 꼭대기에서 출발해야 가장 빨라져요. 꼭대기에서는 밀지 않고 차례를 지켜요.','On a slide, too, you go fastest when you start from the very top. Up there, take turns and never push.')},
  {id:'friction',ic:'🧊',kind:'race',measure:'time',t:L('얼음길과 카펫길','Ice or carpet'),
   q:L('매끈한 얼음길과 보송보송한 카펫길이 있어요. 누가 먼저 도착할까요?','One slide is smooth ice and one is fuzzy carpet. Which marble gets there first?'),
   diff:L('다른 점은 딱 하나: 길의 표면이에요','Only one thing is different: the surface of the slide'),
   lanes:[{mat:'glass',drop:120,style:'ice',k:.02,name:L('🧊 얼음길','🧊 Ice slide')},{mat:'glass',drop:120,style:'carpet',k:3,name:L('🧶 카펫길','🧶 Carpet slide')}],
   opts:[['A',L('얼음길','The ice slide')],['B',L('카펫길','The carpet slide')],['same',L('거의 동시에','About the same time')]],ans:'A',
   why:L('카펫은 마찰력이 커서 구슬을 붙잡아요. 매끈한 얼음은 마찰력이 작아서 쌩쌩 달려요.','Carpet has lots of friction, which holds the marble back. Smooth ice has very little, so the marble zooms.'),
-  life:L('겨울 빙판길이 미끄러운 것도 마찰력이 작기 때문이에요.','Icy sidewalks are slippery in winter for the same reason: very little friction.')},
+  life:L('겨울 빙판길이 미끄러운 것도 마찰력이 작기 때문이에요. 빙판길에서는 천천히 걸어요.','Icy sidewalks are slippery in winter for the same reason: very little friction. On ice, walk slowly.')},
  {id:'bounce',ic:'🏀',kind:'bounce',measure:'up',t:L('통통 튀기','Bounce test'),
   q:L('고무공과 찰흙공을 같은 높이에서 떨어뜨려요. 누가 더 높이 튀어 오를까요?','A rubber ball and a clay ball drop from the same height. Which one bounces higher?'),
   diff:L('다른 점은 딱 하나: 공의 재료예요','Only one thing is different: what the ball is made of'),
@@ -1286,7 +1305,8 @@ const EXPS=[
   lanes:[{mat:'steel',name:L('⚙️ 쇠구슬','⚙️ Steel ball')},{mat:'glass',name:L('🔮 유리구슬','🔮 Glass marble')}],
   opts:[['A',L('쇠구슬','The steel ball')],['B',L('유리구슬','The glass marble')],['same',L('둘 다 똑같이','Both the same')]],ans:'A',
   why:L('자석은 쇠(철)로 된 물체를 끌어당겨요. 유리는 끌어당기지 않아서 유리구슬은 곧장 떨어졌어요. 자석에 가까울수록 끌어당기는 힘이 훨씬 세져요.','A magnet pulls things made of iron or steel. It does not pull glass, so the glass marble fell straight down. The closer something is to a magnet, the harder the pull.'),
-  life:L('냉장고 문은 대부분 쇠로 되어 있어서 자석이 붙어요. 알루미늄 캔처럼 자석에 붙지 않는 금속도 있어요.','Most fridge doors are steel, so magnets stick to them. Some metals, like aluminum cans, are not pulled by magnets.')},
+  life:L('냉장고 문은 대부분 쇠로 되어 있어서 자석이 붙어요. 알루미늄 캔처럼 자석에 붙지 않는 금속도 있어요.','Most fridge doors are steel, so magnets stick to them. Some metals, like aluminum cans, are not pulled by magnets.'),
+  safe:L('작은 자석은 절대 입에 넣지 않아요. 삼키면 아주 위험해요. 진짜 자석 놀이는 어른과 함께해요.','Never put small magnets in your mouth. Swallowing them is very dangerous. Play with real magnets only with a grown-up.')},
  {id:'spring',ic:'➰',kind:'spring',measure:'up',t:L('용수철 발사대','Spring launcher'),
   q:L('같은 용수철을 많이 누른 발사대와 조금 누른 발사대가 구슬을 위로 쏘아요. 어느 구슬이 더 높이 올라갈까요?','Two launchers have the same kind of spring. One is squashed a lot, one only a little. Which marble flies higher?'),
   diff:L('다른 점은 딱 하나: 용수철을 누른 정도예요 (2칸과 1칸)','Only one thing is different: how far the spring is squashed (2 squares or 1)'),
@@ -1307,7 +1327,8 @@ const EXPS=[
   lanes:[{mat:'glass',fd:80,name:L('💨 선풍기 가까이','💨 Close to the fan')},{mat:'glass',fd:200,name:L('💨 선풍기에서 멀리','💨 Far from the fan')}],
   opts:[['A',L('선풍기 가까이','Close to the fan')],['B',L('선풍기에서 멀리','Far from the fan')],['same',L('똑같이 밀려요','The same distance')]],ans:'A',
   why:L('선풍기 바람은 가까울수록 세고 멀어질수록 약해져요. 그래서 선풍기 가까이에서 떨어진 공이 더 멀리 밀려났어요.','A fan’s wind is strongest up close and gets weaker farther away. So the ball that fell close to the fan was pushed farther.'),
-  life:L('선풍기 바로 앞에서는 바람이 세지만 방 끝에서는 약하게 느껴져요.','Right in front of a fan the wind is strong, but across the room it feels gentle.')}];
+  life:L('선풍기 바로 앞에서는 바람이 세지만 방 끝에서는 약하게 느껴져요.','Right in front of a fan the wind is strong, but across the room it feels gentle.'),
+  safe:L('진짜 선풍기의 날개와 덮개 안에는 손가락이나 물건을 넣지 않아요.','Never put fingers or anything else into a real fan’s blades or cover.')}];
 const EXP_IDS=EXPS.map(e=>e.id),UNIT=30;  // distances are counted in "칸" (squares) of 30 px, like a ruler
 // My marble's looks. Each one is earned by a badge for something the child did (never bought, never random).
 const PATTERNS=[['plain','⚪',L('기본','Classic')],['stripe','🦓',L('줄무늬','Stripes')],['face','😊',L('웃는 얼굴','Smiley')],['rainbow','🌈',L('무지개','Rainbow')],['galaxy','🌌',L('은하수','Galaxy')],['fire','🔥',L('불꽃','Flame')],['star','⭐',L('별','Star')],['blueprint','📐',L('설계도','Blueprint')],['planet','🪐',L('행성','Planet')]];
@@ -1431,8 +1452,8 @@ if(ME){T.winMine=L(` ${ME.name}의 구슬이에요!`,` That is ${ME.name}'s marb
 Object.assign(T.sec,L({ice:'얼음 미끄럼틀! 마찰이 작아서 쌩쌩 미끄러져요!',honey:'꿀 언덕이에요! 끈적끈적, 마찰이 커서 느려져요!',jump:'점프 절벽! 빠른 구슬은 하늘을 날아요!',tramp:'트램펄린 구간! 통통 높이 튀어 올라요!',fan:'바람 터널! 바람이 받쳐 줘서 둥실둥실 내려와요!'},
  {ice:'The ice slide! Hardly any friction, so they zoom!',honey:'Honey hill! Sticky and slow: lots of friction!',jump:'The cliff jump! Fast marbles fly through the air!',tramp:'Trampolines! Boing, way up high!',fan:'The wind tunnel! The air holds them up, so they float down!'}));
 // the first time a marble meets a new force piece in a race, the commentary names the force at work (said once per race)
-const FORCE_LINE=L({spring:'➰ 용수철 발사대! 눌린 용수철이 펴지며 구슬을 튕겨요. 탄성의 힘이에요!',magnet:'🧲 자석 드럼! 자석은 쇠구슬만 끌어당겨요. 자석의 힘이에요!',well:'🕳️ 중력 우물이에요! 가운데에 가까울수록 더 세게 끌어당겨요. 중력의 모형이에요!',blow:'💨 선풍기! 바람의 힘이 구슬을 밀어요. 가벼운 구슬일수록 많이 밀려요!'},
- {spring:'Spring launcher! The squashed spring springs back and flings the marble. That is elastic force!',magnet:'Magnet drum! A magnet pulls only the steel marbles. That is magnetic force!',well:'The gravity well! The closer to the middle, the harder it pulls. It is a model of gravity!',blow:'The fan! The wind pushes the marbles along. Lighter marbles get pushed more!'});
+const FORCE_LINE=L({spring:'➰ 용수철 발사대! 눌린 용수철이 펴지며 구슬을 튕겨요. 탄성의 힘이에요!',magnet:'🧲 자석 드럼! 자석은 철로 된 쇠구슬을 끌어당기고 유리구슬은 그냥 보내요. 자석의 힘이에요!',well:'🕳️ 중력 우물이에요! 가운데에 가까울수록 더 세게 끌어당겨요. 중력의 모형이에요!',blow:'💨 선풍기! 바람의 힘이 구슬을 밀어요. 가벼운 구슬일수록 많이 밀려요!'},
+ {spring:'Spring launcher! The squashed spring springs back and flings the marble. That is elastic force!',magnet:'Magnet drum! A magnet pulls the steel marbles, which have iron in them, and lets the glass ones go by. That is magnetic force!',well:'The gravity well! The closer to the middle, the harder it pulls. It is a model of gravity!',blow:'The fan! The wind pushes the marbles along. Lighter marbles get pushed more!'});
 Object.assign(T.sec,FORCE_LINE);
 const FORCE_TAG=L({spring:'➰ 탄성의 힘!',magnet:'🧲 자석의 힘!',well:'🕳️ 중력!',blow:'💨 바람의 힘!'},{spring:'➰ Elastic force!',magnet:'🧲 Magnetic force!',well:'🕳️ Gravity!',blow:'💨 Wind force!'});
 T.general.push(...L(['구슬은 내려갈수록 빨라져요. 중력이 계속 끌어당기거든요!','범퍼에 부딪히면 방향이 확 바뀌어요. 힘을 받으면 움직임이 바뀌어요!','경사가 가파를수록 구슬이 더 빨라져요!'],['Marbles speed up on the way down. Gravity keeps pulling!','Hit a bumper and the direction changes. A push changes how things move!','The steeper the slope, the faster the marble!']));
@@ -1807,7 +1828,7 @@ function renderMaps(){
 function renderMinePicker(){if(mine>=numBalls)mine=numBalls-1;$('minePicker').innerHTML=PALETTE.slice(0,numBalls).map((c,i)=>`<button type="button" class="mine-chip${i===mine?' on':''}" data-mine="${i}" title="${esc(nameOf(i))}" style="background:radial-gradient(circle at 32% 28%,#fff 0 9%,${c[1]} 42%,${SHADE[i].dark})" aria-label="${esc(L(`${nameOf(i)}${isSteel(i)?' (쇠구슬)':''} 응원하기`,`Cheer for ${nameOf(i)}${isSteel(i)?' (steel)':''}`))}" aria-pressed="${i===mine}">${i+1}${isSteel(i)?'<i class="mk-steel matdot steel" aria-hidden="true"></i>':''}</button>`).join('')}
 function renderNames(){
  const p=$('namesPanel');if(p.classList.contains('hidden'))return;
- p.innerHTML=PALETTE.slice(0,numBalls).map((c,i)=>`<label><span class="dot" style="background:${c[1]}"></span>${i+1}<input type="text" maxlength="10" data-name="${i}" value="${esc(names[i])}" placeholder="${esc(c[0])}" aria-label="${esc(L(`${i+1}번 구슬 이름`,`Name for marble ${i+1}`))}"></label>`).join('');
+ p.innerHTML=safeNote('info','구슬 이름은 이 기기에만 저장돼요. 친구의 진짜 이름 대신 별명을 붙여요.','Marble names stay on this device. Use nicknames, not friends’ real names.')+PALETTE.slice(0,numBalls).map((c,i)=>`<label><span class="dot" style="background:${c[1]}"></span>${i+1}<input type="text" maxlength="10" data-name="${i}" value="${esc(names[i])}" placeholder="${esc(c[0])}" aria-label="${esc(L(`${i+1}번 구슬 이름`,`Name for marble ${i+1}`))}"></label>`).join('');
 }
 
 // ---------------------------------------------------------------- results & league
@@ -2111,7 +2132,7 @@ function chalHint(ch,run,j,prev){
  return bumpy?L('핀·범퍼·트램펄린·갈림길·계단길·바람개비에서는 매번 다르게 튕겨서 시간이 들쭉날쭉해요. ❄️ 얼음이나 🍯 꿀 같은 매끈한 길로 바꿔 봐요.','On pegs, bumpers, trampolines, split paths, stairs and spinners, marbles bounce differently every time, so the times jump around. Try smooth tracks like ❄️ ice or 🍯 honey.'):L('같은 코스도 구슬의 출발 순서가 매번 달라서 조금씩 달라져요. 한 번 더 재 봐요.','Even the same course changes a little, because the marbles line up in a new order each time. Measure once more.')}
 // hints for the team and sort challenges: which pieces help heavy or light marbles, and how far to squash the spring
 function chalForceHint(ch,m,j){const o=j.o||{};
- if(!o.mag)return L('🧲 자석 드럼이 있어야 ⚙️ 쇠구슬 팀이 나와요. 자석은 쇠만 끌어당기거든요!','The ⚙️ steel team only comes out with a 🧲 magnet drum, because magnets pull only steel!');
+ if(!o.mag)return L('🧲 자석 드럼이 있어야 ⚙️ 쇠구슬 팀이 나와요. 자석은 철로 된 쇠구슬을 끌어당기거든요!','The ⚙️ steel team only comes out with a 🧲 magnet drum, because magnets pull iron and steel!');
  if(ch.team){const tunnels=m.filter(p=>p==='fan').length,light=m.some(p=>p==='blow'||pieceOf(p)==='spring');
   if(j.ok)return L('🌬️ 바람 터널은 가벼운 구슬을 오래 붙잡아 둬요. 무거운 쇠구슬은 바람에 덜 밀려서 먼저 내려왔어요!','The 🌬️ wind tunnel holds light marbles up for longer. Heavy steel marbles are pushed less by the wind, so they came down first!');
   if(o.glassFirst)return L('🔮 유리구슬 팀이 먼저 왔어요! 💨 선풍기와 ➰ 용수철은 가벼운 구슬을 더 멀리 보내요. 쇠구슬 팀이 먼저 오게 하려면 어떻게 바꿀까요?','The 🔮 glass team came first! 💨 Fans and ➰ springs send light marbles farther. How could you change it so the steel team comes first?');
@@ -2239,7 +2260,7 @@ function openLabPicker(opener){
  if(phase==='countdown'||phase==='running')return;
  const done=Object.keys(stats.labs).length;
  $('labBody').innerHTML=`<ol class="lab-steps"><li>🤔 <b>${L('예상하기','Predict')}</b> <span>${L('어떻게 될까?','What will happen?')}</span></li><li>👀 <b>${L('실험 보기','Watch')}</b> <span>${L('두 길을 나란히 비교해요','Two lanes side by side')}</span></li><li>💡 <b>${L('이유 알기','Explain')}</b> <span>${L('왜 그럴까?','Why did it happen?')}</span></li></ol>
-  <p class="lab-ok">${L('예상이 틀려도 괜찮아요! 틀린 예상에서 더 많이 배워요.','It is fine to guess wrong! Wrong guesses teach us the most.')}</p>
+  <p class="lab-ok">${L('예상이 틀려도 괜찮아요! 틀린 예상에서 더 많이 배워요.','It is fine to guess wrong! Wrong guesses teach us the most.')}</p>${safeNote('safe','진짜로 해 볼 때는 어른에게 먼저 물어봐요. 구슬 코스는 계단이나 높은 곳 말고 바닥이나 책상에서 만들어요.','To try it for real, ask a grown-up first. Build marble runs on the floor or a table, never on stairs or up high.','lab-safe')}
   <div class="lab-grid">${labListHTML()}</div><div class="lab-books"><button type="button" class="small-btn note-side" data-note="1">📒 ${L(`실험 노트 보기 (${done}/${EXPS.length})`,`Open the lab notebook (${done}/${EXPS.length})`)}</button><button type="button" class="small-btn note-side" data-book="1">📖 ${L(`개념 노트 (${mrSeenN()}/${MRL_IDS.length})`,`Concept notebook (${mrSeenN()}/${MRL_IDS.length})`)}</button></div>`;
  openModal('labModal',opener||$('labBtn'))}
 function enterLab0(id){const ex=EXPS.find(e=>e.id===id);if(!ex)return;chalRun=null;labMode=true;labExp=ex;labPred=null;closeModal('labModal');prepare();labPredictCard();scrollToScene()}
@@ -2283,7 +2304,7 @@ function labExplain(){
  const predTxt=ex.opts.find(o=>o[0]===labPred)?.[1]||'';
  $('resultCard').innerHTML=`<div class="lab-head">${expPic(ex)} ${esc(ex.t)}</div><div class="lab-result">${matDots(esc(head))}</div><p class="lab-detail">${esc(detail)}</p>
   <p class="lab-fb ${right?'ok':'new'}">${right?L('🎯 예상이 맞았어요! 과학자처럼 생각했어요.','🎯 Your guess was right! You thought like a scientist.'):L('🔍 예상과 달랐어요! 그래서 실험이 재밌어요. 과학자들도 이렇게 새로 알게 돼요.','🔍 Not what you guessed! That is what makes experiments fun. Scientists learn new things exactly like this.')}<small>${L('내 예상','My guess')}: ${esc(predTxt)}</small></p>
-  <div class="lab-why"><b>💡 ${L('왜 그럴까요?','Why?')}</b>${esc(ex.why)}</div><p class="lab-life">🏠 ${esc(ex.life)}</p><button type="button" class="mlx-chip mrl-again" data-act="lesson" data-ls="${LAB_LS[ex.id]}">📖 ${L('개념 다시 보기','See the idea again')}</button>
+  <div class="lab-why"><b>💡 ${L('왜 그럴까요?','Why?')}</b>${esc(ex.why)}</div><p class="lab-life">🏠 ${esc(ex.life)}</p>${ex.safe?safeNote('safe',ex.safe):''}<button type="button" class="mlx-chip mrl-again" data-act="lesson" data-ls="${LAB_LS[ex.id]}">📖 ${L('개념 다시 보기','See the idea again')}</button>
   ${right?coachHere('clap','예상하고, 지켜보고, 확인까지! 진짜 과학자의 방법이에요 🌙','Predict, watch, check: that is exactly how real scientists work 🌙'):coachHere('idea','예상이 달라도 괜찮아요. 왜 그런지 알게 된 게 더 멋진 일이에요 🌙','A different result is okay. Finding out why is the best part 🌙')}
   <div class="lab-mini"><button class="small-btn" type="button" data-act="peek">👀 ${L('실험 장면 다시 보기','Look at the experiment')}</button><button class="small-btn" type="button" data-act="note">📒 ${L('노트에 적었어요','Saved in my notebook')}</button></div>
   <div class="result-actions three"><button class="control" type="button" data-act="labAgain">🔁 ${L('다시 실험','Run again')}</button><button class="primary" type="button" data-act="labNext">🔬 ${L('다음 실험','Next experiment')}</button><button class="control" type="button" data-act="labExit">🏁 ${L('레이스로','Back to races')}</button></div>`;
@@ -2553,13 +2574,15 @@ const MRL={
   key:[['자석은 닿지 않아도 끌어당기거나 밀어낼 수 있어요.','A magnet can pull or push without touching.'],['다른 극끼리는 끌어당기고, 같은 극끼리는 밀어내요.','Opposite poles pull together; like poles push apart.']],
   steps:()=>[
    {say:['자석은 닿지 않아도 끌어당기거나 밀어내는 힘이 있어요. 자석의 양쪽 끝을 N극과 S극이라고 해요.','A magnet can pull or push things without touching them. The two ends of a magnet are called the N pole and the S pole.'],art:mrlBar},
-   {say:['두 자석을 가까이 가져가 볼까요? 버튼을 눌러 보세요!','Let’s bring two magnets close together. Press the button!'],try:true,art:mrlSnap,show:mrlShow},
+   {say:['두 자석을 가까이 가져가 볼까요? 버튼을 눌러 보세요!','Let’s bring two magnets close together. Press the button!'],try:true,art:mrlSnap,show:mrlShow,
+    warn:['자석은 절대 입에 넣지 않아요. 삼키면 아주 위험해요. 진짜 자석 놀이는 어른과 함께하고, 어린 동생 손이 닿지 않게 해요.','Never put magnets in your mouth. Swallowing them is very dangerous. Play with real magnets only with a grown-up, and keep them away from little kids.']},
    {say:['자석에 끌려가는 물체도 있고, 끌려가지 않는 물체도 있어요. 물체를 만든 재료에 따라 달라요. 실험에 나오는 두 구슬은 무엇으로 만들었는지 눌러서 알아보세요.','Some things are pulled by a magnet and some are not. It depends on what they are made of. Tap to find out what the two balls in the lab are made of.'],try:true,art:mrlMat,show:mrlShow}]},
  pushpull:{icon:'➰',title:['용수철·선풍기·중력 우물','Springs, fans and the gravity well'],
   key:[['눌린 용수철은 펴지면서 밀어요. 이 힘이 탄성력이에요.','A squashed spring pushes as it springs back. That push is elastic force.'],['바람은 물체를 밀고, 중력 우물은 가운데로 당겨요.','Wind pushes things; the gravity well pulls toward its middle.'],['모형은 진짜를 간단하게 흉내 내어 알아보기 쉽게 만든 거예요.','A model is a simple copy of the real thing that makes it easier to study.']],
   steps:()=>[
    {say:['눌린 용수철은 원래 길이로 돌아가려고 해요. 그래서 펴지면서 구슬을 밀어 튕겨 보내요. 이 힘을 탄성력이라고 해요. 용수철을 눌렀다 놓아 보세요!','A squashed spring wants to get back to its own length. As it stretches back, it pushes the marble and flings it. This push is called elastic force. Squash the spring and let go!'],try:true,art:mrlSpring,show:mrlShow},
-   {say:['선풍기는 공기를 밀어서 바람을 만들어요. 그 바람이 떨어지는 구슬을 옆으로 밀어요.','A fan pushes air and makes wind. The wind pushes a falling marble sideways.'],art:mrlFan},
+   {say:['선풍기는 공기를 밀어서 바람을 만들어요. 그 바람이 떨어지는 구슬을 옆으로 밀어요.','A fan pushes air and makes wind. The wind pushes a falling marble sideways.'],art:mrlFan,
+    warn:['진짜 선풍기의 날개와 덮개 안에는 손가락이나 물건을 넣지 않아요.','Never put fingers or anything else into a real fan’s blades or cover.']},
    {say:['중력 우물은 블랙홀을 흉내 낸 모형이에요. 가운데로 끌어당겨서 구슬이 빙글빙글 돌다가 가운데로 쏙 들어가요. 모형은 진짜를 간단하게 흉내 내어 알아보기 쉽게 만든 거예요.','The gravity well is a model of a black hole. It pulls toward the middle, so marbles circle round and round, then drop into the middle. A model is a simple copy of the real thing that makes it easier to study.'],art:mrlWell},
    {say:['용수철과 바람은 구슬을 밀고, 중력 우물은 구슬을 가운데로 당겨요. 실험에서는 용수철을 누른 정도, 선풍기와의 거리, 우물에 들어가는 빠르기를 하나씩 바꾸며 지켜봐요.','Springs and wind push the marble; the gravity well pulls it toward the middle. In the lab you will change how far the spring is squashed, how far the ball is from the fan, or how fast it goes into the well, one at a time, and watch.'],art:mrlPP}]},
  fair:{icon:'⚖️',title:['공정한 시험','A fair test'],
@@ -2578,7 +2601,8 @@ const MRL={
  engineer:{icon:'🛠️',title:['엔지니어의 방법','How engineers work'],
   key:[['계획 → 만들기 → 시험 → 고치기, 그리고 다시!','Plan → build → test → improve, and again!'],['목표와 규칙을 먼저 확인해요.','Check the goal and the rules first.'],['시험 결과를 보고 고치면 설계가 점점 좋아져요.','Each test result shows you how to make the design better.']],
   steps:()=>[
-   {say:['엔지니어는 문제를 해결할 물건을 설계하고 만드는 사람이에요. 다리도, 놀이기구도, 구슬 코스도 엔지니어가 설계해요.','Engineers design and build things that solve problems. Bridges, rides and marble runs are all designed by engineers.'],art:mrlEng},
+   {say:['엔지니어는 문제를 해결할 물건을 설계하고 만드는 사람이에요. 다리도, 놀이기구도, 구슬 코스도 엔지니어가 설계해요.','Engineers design and build things that solve problems. Bridges, rides and marble runs are all designed by engineers.'],art:mrlEng,
+    warn:['진짜 구슬 코스를 만들 때는 어른에게 먼저 물어봐요. 계단이나 높은 곳 말고 바닥이나 책상에서 만들어요.','Ask a grown-up before you build a real marble run. Build it on the floor or a table, never on stairs or up high.']},
    {say:['먼저 📝 계획해요. 목표가 무엇인지, 지켜야 할 규칙이 무엇인지 확인하고 어떤 조각을 쓸지 정해요. 결과를 미리 예상해 봐도 좋아요.','First, 📝 plan. Check the goal and the rules you must follow, then choose your pieces. You can guess the result ahead of time, too.'],art:mrlPlan},
    {say:['그다음 🛠️ 만들고 🏁 시험해요. 시험 주행은 응원 없이 코스만으로 달려서 우승 시간을 진짜로 재요.','Then 🛠️ build it and 🏁 test it. A test run has no cheering, so only the course decides, and it measures the real winning time.'],art:mrlTest},
    {say:['목표에 못 미쳐도 괜찮아요. 🔧 고쳐서 다시 시험하면 돼요. 엔지니어는 이 네 단계를 몇 번이고 돌아요. 네 단계를 차례대로 눌러 보세요!','Missing the goal is okay: 🔧 improve it and test again. Engineers go round these four steps again and again. Tap the four steps in order!'],try:true,art:mrlCycle,show:mrlShow}]},
@@ -2597,7 +2621,7 @@ const CH_LS={one:['fair'],double:['fair'],same:['fair'],team:['pushpull','magnet
 function mrLesson(id){const d=MRL[id];if(!d)return null;const found=EXPS.filter(e=>LAB_LS[e.id]===id&&stats.labs[e.id]),steps=d.steps(),tip=e=>L(IX[e.id].tip[0],IX[e.id].tip[1]);
  for(let i=0;i<found.length;i+=2){const part=found.slice(i,i+2);steps.push({say:(i?L('실험에서 알아낸 것이 더 있어요. ','There is more from your experiments. '):L('실험에서 알아낸 것이에요. ','Here is what your experiments showed. '))+part.map(tip).join(' '),
   art:`<div class="mrl"><ul class="mrl-found">${part.map(e=>`<li><b>${expPic(e)} ${esc(e.t)}</b><span>${matDots(esc(labHead(e,e.ans)))}</span><small>💡 ${esc(tip(e))}</small></li>`).join('')}</ul></div>`})}
- return {id:'mr:'+id,icon:d.icon,title:d.title,steps,key:d.key.concat(found.map(e=>IX[e.id].tip)).slice(0,3)}}
+ return {id:'mr:'+id,icon:d.icon,title:d.title,steps,key:d.key.concat(found.map(e=>IX[e.id].tip)).slice(0,3),warn:d.warn}}
 const mrSeenN=()=>MRL_IDS.filter(id=>MiniLesson.seen('mr:'+id)).length;
 const mrOffered=new Set();
 // play up to two lessons the child has not finished (each offered once per visit), then go on
@@ -2636,6 +2660,7 @@ $('maps').addEventListener('click',e=>{if(e.target.closest('[data-build]')){cons
 $('modeSeg').addEventListener('click',e=>{const b=e.target.closest('[data-mode]');if(!b||b.disabled)return;mode=b.dataset.mode;chalRun=null;if(mode==='league'&&(!league||league.done))startLeague();save();prepare()});
 $('ballCount').addEventListener('change',e=>setCount(e.target.value));$('ballRange').addEventListener('input',e=>setCount(e.target.value));
 $('minePicker').addEventListener('click',e=>{const b=e.target.closest('[data-mine]');if(!b||b.disabled)return;mine=+b.dataset.mine;save();renderMinePicker();updateHud(true);setCaption(L(`💖 ${nameOf(mine)} 구슬을 응원해요! 레이스 중 📣 응원 버튼을 눌러 힘을 주세요.`,`💖 You're cheering for ${nameOf(mine)}! Press 📣 Cheer during the race to give it a push.`));tone(660,80,'triangle',.07);setTimeout(()=>tone(990,110,'triangle',.07),80)});
+try{$('noticeLink').href='notice.html?lang='+LANG}catch(e){}
 $('namesBtn').addEventListener('click',()=>{$('namesPanel').classList.toggle('hidden');renderNames()});
 $('namesPanel').addEventListener('input',e=>{const i=e.target.dataset.name;if(i==null)return;names[+i]=e.target.value.replace(/[<>]/g,'').slice(0,10);save();renderMinePicker();updateHud(true)});
 $('startBtn').addEventListener('click',startRace);$('pauseBtn').addEventListener('click',togglePause);

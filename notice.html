@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#5b6cff">
+<title>보호자 안내 | Moon Mini Games</title>
+<meta name="description" content="문 미니 게임의 안전, 개인정보, 저작권 안내 · Safety, privacy and credits for Moon Mini Games">
+<link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32.png">
+<link rel="icon" type="image/png" sizes="64x64" href="images/favicon-64.png">
+<link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+<script>
+/* Language: ?lang=ko|en, then the saved choice, then the device language. Shared by every page on this site. */
+const LANG=(()=>{let q=null,s=null;try{q=new URLSearchParams(location.search).get('lang')}catch(e){}try{s=localStorage.getItem('moonGames.lang')}catch(e){}const l=q==='ko'||q==='en'?q:s==='ko'||s==='en'?s:/^ko/i.test(navigator.language||'')?'ko':'en';if(q===l){try{localStorage.setItem('moonGames.lang',l)}catch(e){}}document.documentElement.lang=l;return l})();
+const L=(ko,en)=>LANG==='en'?en:ko;
+function setLang(next){try{localStorage.setItem('moonGames.lang',next)}catch(e){}const u=new URL(location.href);u.searchParams.set('lang',next);location.replace(u.href)}
+</script>
+<style>
+:root{color-scheme:light;--bg-top:#e9f0ff;--bg-bottom:#fff6e8;--ink:#24305e;--muted:#5d6894;--card:#fff;--line:#dfe5f7;--brand:#5b6cff;--accent:#ffb84d;
+ --safe-bg:#fff3e6;--safe-line:#ffc58f;--safe-ink:#c2410c;--info-bg:#eef5ff;--info-line:#c5d9fb;--info-ink:#2f5fd0}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{min-height:100vh;min-height:100dvh;color:var(--ink);background:radial-gradient(circle at 85% -10%,#d8dcff 0,transparent 42%),linear-gradient(180deg,var(--bg-top),var(--bg-bottom));
+ font-family:system-ui,-apple-system,'Apple SD Gothic Neo','Noto Sans KR','Malgun Gothic',sans-serif;line-height:1.6;-webkit-tap-highlight-color:transparent}
+.wrap{width:min(760px,100%);margin:0 auto;padding:max(18px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) 40px max(16px,env(safe-area-inset-left))}
+.top{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.home{display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:0 16px;border-radius:999px;background:#fff;border:1px solid var(--line);font-weight:800;color:var(--ink);text-decoration:none}
+.lang{display:inline-flex;padding:4px;border-radius:999px;background:#fff;border:1px solid var(--line)}
+.lang button{font:inherit;font-size:14px;font-weight:800;border:0;border-radius:999px;padding:9px 15px;min-height:40px;background:transparent;color:var(--muted);cursor:pointer}
+.lang button[aria-pressed="true"]{background:var(--brand);color:#fff}
+a:focus-visible,button:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+h1{margin:22px 0 4px;font-size:clamp(25px,5.6vw,34px);line-height:1.2;letter-spacing:-.4px;text-wrap:balance}
+.lead{margin:0 0 6px;color:var(--muted);font-weight:600;max-width:62ch}
+.toc{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0 4px;padding:0;list-style:none}
+.toc a{display:inline-flex;align-items:center;min-height:40px;padding:0 14px;border-radius:999px;background:#ffffffc7;border:1px solid var(--line);font-size:14px;font-weight:800;text-decoration:none}
+section{margin-top:18px;background:var(--card);border:1px solid var(--line);border-radius:22px;padding:18px 20px;box-shadow:0 10px 28px rgba(54,72,160,.08)}
+section h2{margin:0 0 10px;font-size:20px;line-height:1.3;text-wrap:balance}
+section ul{margin:0;padding:0;list-style:none;display:grid;gap:12px}
+section li{display:grid;grid-template-columns:28px 1fr;gap:8px;align-items:start}
+section li .ic{font-size:20px;line-height:1.4}
+section li b{display:block;font-size:16px}
+section li p{margin:2px 0 0;font-size:15px;color:#3b4677;max-width:64ch}
+.safe{background:var(--safe-bg);border-color:var(--safe-line)}.safe h2{color:var(--safe-ink)}
+.call{margin:12px 0 0;padding:10px 14px;border-radius:14px;background:#fff;border:2px solid var(--safe-line);font-weight:800;font-size:15px}
+.info h2{color:var(--info-ink)}
+.credits li p{font-size:14.5px}
+footer{margin-top:24px;text-align:center;color:#8a93b8;font-size:12.5px}
+@media (max-width:480px){section{padding:16px 14px;border-radius:18px}section li p{font-size:14.5px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+ <header class="top">
+  <a class="home" id="home" href="index.html">🏠 <span id="homeT">첫 화면</span></a>
+  <div class="lang" role="group" aria-label="언어 선택 · Language">
+   <button type="button" data-l="ko">한국어</button><button type="button" data-l="en">English</button>
+  </div>
+ </header>
+ <main id="main"></main>
+ <footer id="foot"></footer>
+</div>
+<script>
+// Notices for grown-ups: health and safety, privacy, no ads or purchases, the learning content, copyright and credits.
+// Every game's ⚙️ settings window links here (safeLink() in the coach block), and the main page has it in its footer.
+const UPDATED='2026-11-16';
+const S=[
+ {id:'safety',cls:'safe',h:['🛡️ 건강과 안전','🛡️ Health and safety'],items:[
+  ['🔬','게임 속 실험은 어른과 함께','Try experiments only with a grown-up',
+   '게임에서 배운 실험이나 놀이를 집에서 해 볼 때는 꼭 어른이 곁에 있어 주세요. 불과 뜨거운 것, 전기와 건전지, 자석, 칼과 가위, 세제 같은 화학 물질은 아이 혼자 다루지 않게 해 주세요. 식초나 베이킹 소다도 눈에 들어가면 다칠 수 있으니 보안경을 쓰고, 실험한 것은 맛보지 않아요. 벽 콘센트의 전기는 절대 실험에 쓰지 않아요.',
+   'If your child tries an experiment or activity from the games at home, please stay with them. Children should never handle fire or hot things, electricity or batteries, magnets, knives or scissors, or chemicals such as cleaners on their own. Even vinegar or baking soda can hurt eyes, so wear safety glasses and never taste what you mix. Never use a wall outlet for an experiment.'],
+  ['🧲','삼키기 쉬운 작은 물건','Small things that can be swallowed',
+   '구슬, 작은 자석, 동전 모양 전지(코인 전지·단추 전지)는 어린 동생이 삼키기 쉬워요. 자석 두 개 이상이나 코인 전지를 삼키면 몸속에서 큰 상처를 낼 수 있어요. 아이 손이 닿지 않는 곳에 보관해 주세요.',
+   'Marbles, small magnets and coin (button) batteries are easy for young children to swallow. Swallowing two or more magnets or a coin battery can cause serious injury inside the body. Keep them out of reach of little ones.'],
+  ['🕵️','탐정 놀이는 게임 안에서만','Detective play stays in the game',
+   '꼬마 탐정단은 지어낸 이야기예요. 실제로 모르는 사람을 따라가거나, 몰래 지켜보거나, 사진을 찍지 않도록 이야기해 주세요. 위험한 일을 보면 혼자 해결하지 말고 믿을 수 있는 어른에게 알리고, 급하면 한국은 112(경찰)나 119(소방·구급), 캐나다·미국은 911에 전화해요.',
+   'Little Detectives is make-believe. Please remind your child never to follow, secretly watch or take photos of real people they don’t know. If they see something unsafe, they should tell a trusted grown-up instead of handling it alone, and in an emergency call 911.'],
+  ['🌊','물가와 동물','Water and animals',
+   '게임 속 낚시, 다이빙, 운전은 놀이예요. 진짜 물가나 바다에서는 어른과 함께 구명조끼를 입고, 그곳 낚시 규칙을 지켜요. 해파리·가오리·성게처럼 쏘거나 찌르는 동물이 있으니 바다 동물은 만지지 않아요. 야생 동물은 잡아 오지 않고(법으로 보호받는 동물이 많아요), 기르던 물고기나 거북을 강·호수·바다에 놓아주지 않아요.',
+   'Fishing, diving and driving in the games are pretend. Near real water, stay with a grown-up, wear a life jacket and follow local fishing rules. Some sea animals, like jellyfish, stingrays and sea urchins, can sting, so don’t touch them. Don’t take wild animals home (many are protected by law), and never let pet fish or turtles go in a river, lake or the sea.'],
+  ['⏰','쉬어 가며 놀아요','Take breaks',
+   '화면을 오래 보면 눈과 몸이 피곤해져요. 20분쯤 놀면 잠깐 일어나 몸을 움직이고 먼 곳을 바라보게 해 주세요. 밝은 곳에서, 화면과 조금 떨어져서 하면 좋아요.',
+   'Long screen time can tire eyes and bodies. About every 20 minutes, have your child get up, move around and look at something far away. Play in a well-lit room and sit back a little from the screen.'],
+  ['⚡','빛 깜빡임에 민감한 경우','If flashing lights are a concern',
+   '아주 드물게, 화면의 깜빡이는 빛이나 반복되는 무늬를 볼 때 발작을 일으키는 사람이 있어요. 아이나 가족이 발작이나 뇌전증을 겪은 적이 있다면 하기 전에 의사와 상담해 주세요. 하는 동안 어지러움, 눈앞이 이상하게 보임, 눈이나 근육 떨림, 정신이 흐려지는 느낌이 있으면 바로 멈추고 의사와 상담해 주세요.',
+   'A very small number of people can have a seizure when they see flashing lights or repeating patterns on a screen. If your child or anyone in your family has had seizures or epilepsy, talk to a doctor before playing. Stop right away and see a doctor if your child feels dizzy, has changes in vision, has eye or muscle twitching, or seems confused.'],
+  ['🎧','소리는 알맞게','Keep the volume comfortable',
+   '이어폰이나 헤드폰을 쓸 때는 소리를 작게 맞춰 주세요. 큰 소리를 오래 들으면 귀가 상할 수 있어요.',
+   'With earbuds or headphones, keep the volume low. Loud sound for a long time can damage hearing.']],
+  call:['급한 일이 생기면 한국은 119(소방·구급)나 112(경찰), 캐나다와 미국은 911에 전화해요. 전지나 자석을 삼킨 것 같으면 바로 응급실로 가 주세요.',
+   'In an emergency, call 911 in Canada and the US (119 or 112 in Korea). If you think your child swallowed a battery or magnets, go to the emergency department right away.']},
+ {id:'privacy',cls:'info',h:['🔒 개인정보','🔒 Privacy'],items:[
+  ['🙅','회원 가입이 없어요','No accounts',
+   '이름, 이메일, 사진, 위치를 묻지 않아요. 프로필에는 진짜 이름 대신 별명을 써 주세요.',
+   'We never ask for a name, email, photo or location. Please use a nickname, not a real name, for each profile.'],
+  ['💾','기록은 이 기기에만','Progress stays on this device',
+   '별명과 게임 기록은 지금 쓰는 기기의 브라우저 저장 공간(localStorage)에만 저장돼요. 만든 사람에게 보내지지 않고, 우리는 볼 수 없어요. 광고, 추적·분석 도구, 쿠키, 외부 스크립트도 쓰지 않아요.',
+   'Nicknames and progress are saved only in this browser’s storage (localStorage). Nothing is sent to us, and we can’t see it. There are no ads, tracking or analytics tools, cookies or outside scripts.'],
+  ['🗑️','지우는 방법','How to delete it',
+   '각 게임의 ⚙️ 설정에서 ‘이 게임 기록 지우기’를 누르면 그 게임 기록만 지워져요. 첫 화면에서 프로필을 지우면 그 프로필의 모든 게임 기록이, 브라우저 설정에서 이 사이트의 데이터를 지우면 전부 지워져요.',
+   'In any game, ⚙️ Settings → “Clear this game’s progress” clears just that game. Deleting a profile on the main page removes all of that profile’s progress, and clearing this site’s data in your browser settings removes everything.'],
+  ['🎤','마이크 (꼬마 음악 아카데미)','Microphone (Little Music Academy)',
+   '노래 연습에서만 마이크로 음 높이를 들어요. 소리는 기기 안에서 바로 분석하고 녹음·저장하거나 보내지 않아요. 허락하지 않아도 다른 연습은 모두 할 수 있어요.',
+   'Only the singing practice uses the microphone, to hear the pitch. The sound is analysed right on the device and is never recorded, saved or sent. Every other activity works without it.'],
+  ['🗣️','읽어 주는 목소리','Read-aloud voice',
+   '읽어 주기는 기기와 브라우저에 들어 있는 음성 기능을 써요. 일부 브라우저의 온라인 음성(예: 크롬의 Google 음성)은 읽을 문장을 브라우저 회사의 서버에서 처리할 수 있어요. 문장에 별명이 들어갈 수 있어요. 원하지 않으면 각 게임 설정에서 목소리를 꺼 주세요.',
+   'Read-aloud uses the voices built into the device and browser. Some browsers’ online voices (for example Google voices in Chrome) may process the text on that company’s servers, and the text can include the nickname. You can turn the voice off in each game’s settings.'],
+  ['🌐','사이트 운영','Hosting',
+   '이 사이트는 GitHub Pages에서 제공돼요. GitHub는 서비스 운영과 보안을 위해 접속 기록(IP 주소 등)을 남길 수 있어요. 자세한 내용은 GitHub 개인정보 처리방침을 따라요.',
+   'This site is hosted on GitHub Pages. GitHub may keep access logs (such as IP addresses) to run and secure the service, under GitHub’s own privacy statement.']]},
+ {id:'money',cls:'info',h:['🪙 광고 · 결제 없음','🪙 No ads, no purchases'],items:[
+  ['🎮','게임 속 돈은 놀이용','In-game money is pretend',
+   '현재 모든 게임은 무료이고 광고와 결제가 없어요. 게임 속 동전, 보석, 별, 상점 물건은 놀이용이라 진짜 돈으로 사거나 진짜 돈·물건으로 바꿀 수 없어요. 진짜 돈이 드는 뽑기나 내기는 없어요. 수학 아쿠아리움의 인형뽑기도 게임 속 코인만 써요.',
+   'All games are currently free, with no ads and no purchases. Coins, gems, stars and shop items in the games are pretend: they can’t be bought with real money or traded for money or real things. There are no loot boxes or bets that use real money; the claw machine in Math Aquarium uses only game coins.']]},
+ {id:'learning',cls:'info',h:['📚 학습 내용','📚 About the learning content'],items:[
+  ['🏫','학교와 다를 수 있어요','It may differ from school',
+   '한국 교육과정과 캐나다(온타리오)·미국 학교에서 배우는 내용을 참고해 만들었지만, 캐나다와 미국은 주마다 기준이 달라 배우는 학년과 순서가 다를 수 있고, 학교와 선생님마다 가르치는 방법도 달라요. 헷갈리면 학교 선생님 설명을 따라 주세요. 교육부, 교육청, 학교와 관계없이 개인이 만든 게임이에요.',
+   'The games draw on the Korean national curriculum and on what schools in Ontario and the US teach, but each province and state sets its own standards, so a topic may come in a different grade or order, and teachers may teach it differently. If something seems different, follow your child’s teacher. These games are made independently and aren’t endorsed by any ministry of education, school board or school.'],
+  ['📊','학습 리포트는 참고 자료','The learning report is for reference',
+   '학습 리포트는 이 기기의 게임 기록으로 만든 참고 자료예요. 학교 성적, 공식 평가, 발달이나 학습 진단이 아니에요.',
+   'The learning report is built from game records on this device and is for reference only. It isn’t a school grade, an official assessment, or a developmental or learning diagnosis.'],
+  ['🔎','꼼꼼히 확인했지만','Checked with care',
+   '내용을 여러 번 확인했지만 틀린 부분이 남아 있을 수 있어요. 게임 속 안전 안내는 일반적인 내용이며, 의료나 응급 상황에서는 전문가와 응급 서비스의 안내를 따라 주세요.',
+   'We checked the content many times, but mistakes can remain. Safety tips in the games are general. For medical or emergency situations, follow professionals and emergency services.']]},
+ {id:'credits',cls:'info credits',h:['© 저작권 · 상표 · 출처','© Copyright, trademarks and credits'],items:[
+  ['©','© 2026 Dongsun Moon','© 2026 Dongsun Moon',
+   '게임의 글, 그림, 캐릭터, 소리 효과, 코드는 만든 사람의 저작물이에요. 아래 공개 자료를 빼고는 허락 없이 복사하거나 다시 배포할 수 없어요.',
+   'The text, pictures, characters, sound effects and code are the maker’s work. Apart from the open materials below, please don’t copy or redistribute them without permission.'],
+  ['♟️','체스 퍼즐','Chess puzzles',
+   'Lichess 공개 퍼즐 데이터베이스(CC0)에서 가져왔어요. 꼬마 체스 기사단은 Lichess와 관계가 없는 독립 게임이에요.',
+   'From the Lichess open puzzle database (CC0). Little Chess Knights is an independent game and isn’t affiliated with Lichess.'],
+  ['🎹','악기 소리와 노래','Instrument sounds and songs',
+   '악기 소리는 Versilian Studios VCSL, VSCO 2 Community Edition, Freesound의 bletort가 CC0로 공개한 녹음이에요. 노래는 저작권이 끝난 옛 선율(퍼블릭 도메인)만 쓰고 가사는 쓰지 않아요.',
+   'Instrument sounds are CC0 recordings from Versilian Studios VCSL, VSCO 2 Community Edition and bletort on Freesound. Songs are public-domain melodies only, without lyrics.'],
+  ['🐍','“Python” 상표','“Python” trademark',
+   '“Python”은 Python Software Foundation(PSF)의 등록 상표예요. 꼬마 코딩 섬은 파이썬 언어를 가르치려고 이름을 쓸 뿐이며, PSF와 관계가 없고 PSF의 보증을 받지 않았어요.',
+   '“Python” is a registered trademark of the Python Software Foundation (PSF). Little Coding Island uses the name only to teach the Python language and isn’t affiliated with or endorsed by the PSF.']]}];
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+document.title=L('보호자 안내 | 문 미니 게임','For grown-ups | Moon Mini Games');
+document.getElementById('home').href='index.html?lang='+LANG;
+document.getElementById('homeT').textContent=L('첫 화면','Main page');
+document.querySelectorAll('.lang button').forEach(b=>{b.setAttribute('aria-pressed',b.dataset.l===LANG);b.addEventListener('click',()=>{if(b.dataset.l!==LANG)setLang(b.dataset.l)})});
+document.getElementById('main').innerHTML=`<h1>${L('보호자 안내','For grown-ups')}</h1>
+ <p class="lead">${L('아이와 함께 안전하고 즐겁게 놀 수 있도록, 안전과 개인정보, 저작권에 대해 알려 드려요.','How to keep play safe and fun, and what we do (and don’t do) with your information.')}</p>
+ <ul class="toc">${S.map(x=>`<li><a href="#${x.id}">${esc(L(...x.h))}</a></li>`).join('')}</ul>
+ ${S.map(x=>`<section id="${x.id}" class="${x.cls}" aria-labelledby="${x.id}-h"><h2 id="${x.id}-h">${esc(L(...x.h))}</h2><ul>${x.items.map(i=>`<li><span class="ic" aria-hidden="true">${i[0]}</span><div><b>${esc(L(i[1],i[2]))}</b><p>${esc(L(i[3],i[4]))}</p></div></li>`).join('')}</ul>${x.call?`<p class="call">🚑 ${esc(L(...x.call))}</p>`:''}</section>`).join('')}`;
+document.getElementById('foot').innerHTML=`${L('마지막 수정','Last updated')}: ${UPDATED}<br>Moon Mini Games · © 2026 Dongsun Moon. ${L('모든 권리 보유.','All rights reserved.')}`;
+</script>
+</body>
+</html>

@@ -69,6 +69,11 @@ const coachPick=a=>a[Math.random()*a.length|0];
 // the player's face as their game character (images/aq-me-<key>.webp) from the emoji the profile stores; other emoji stay as they are
 const COACH_ME={'🐰':'bunny','🐻':'bear','🦊':'fox','🐼':'panda','🐨':'koala','🐯':'tiger','🦁':'lion','🐸':'frog','🐱':'cat','🐶':'puppy','🐥':'chick','🦄':'unicorn','🐙':'octopus','🐬':'dolphin','🦖':'dino','⭐':'star'};
 const coachMe=(av,cls='')=>{const k=COACH_ME[String(av||'').replace(/\ufe0f/g,'')];return k?`<img class="me-pic ${cls}" src="images/aq-me-${k}.webp" alt="" draggable="false" data-e="${coachEsc(av)}" onerror="this.replaceWith(document.createTextNode(this.dataset.e))">`:coachEsc(av||'')};
+// a short caution or notice line in any window: kind 'safe' (⚠️ real-world safety, e.g. "only with a grown-up") or 'info'
+// (ℹ️ privacy, pretend coins, credits). safeLink() is the settings-window link to notice.html, the page for grown-ups.
+const SAFE_HEAD={safe:['⚠️','안전 주의','Safety first'],info:['ℹ️','알아 두기','Good to know']};
+const safeNote=(kind,ko,en,cls='')=>{const k=SAFE_HEAD[kind]?kind:'info',h=SAFE_HEAD[k];return `<p class="mg-note mg-${k} ${cls}" role="note"><b>${h[0]} ${L(h[1],h[2])}</b> ${coachEsc(en==null?ko:L(ko,en))}</p>`};
+const safeLink=()=>`<a class="mg-notice-link" href="notice.html?lang=${LANG}" target="_blank" rel="noopener">🛡️ ${L('안전 · 개인정보 · 저작권 안내 (보호자용)','Safety, privacy & credits (for grown-ups)')}</a>`;
 const coachSay_=t=>{const nm=coachNm(),ok=t.filter(x=>nm||!/\{nm\}/.test(x[0])),x=coachPick(ok.length?ok:t);return L(x[0],x[1]).replace(/\{nm\}/g,coachEsc(nm))};
 const COACH={
  up:['clap',[['꾸준히 한 덕분이에요. 정말 멋져요!','Your steady practice paid off. Awesome!'],['어제보다 오늘 더 잘하고 있어요!','You’re doing even better than yesterday!'],['계속 도전해서 여기까지 왔어요!','You kept trying, and look how far you’ve come!'],['{nm}의 노력이 반짝반짝 빛나요 ✨','Your hard work is shining, {nm} ✨'],['문 코치가 박수 쳐요! 짝짝짝 👏','Coach Moon is clapping for you! 👏'],['이 기세 그대로 가 봐요! 🌙','Keep this going! 🌙']]],
@@ -121,6 +126,8 @@ function coachStart(hello,tips){const game=(location.pathname.split('/').pop()||
 //   picture with the game's own helpers. On a "try" step the child does the small thing in the picture and the game
 //   calls api.done(); "🤔 알려 줘요" runs show(box,api) (or just api.done()) so not knowing never blocks or costs anything.
 //   after(box,api), if given, runs once the teacher has finished reading the step (for example to play a demo).
+//   warn:[ko,en] on a step (or on the lesson, for the last page) shows a ⚠️ safety line under the picture and the
+//   teacher reads it too: anything a child might copy at home (heat, electricity, magnets...) says how to stay safe.
 //   key holds the 1–3 lines to remember; they close the lesson and stay in the notebook.
 // · MiniLesson.cfg({voice:(text,onEnd)=>…, stop:()=>…, who:{img,name}, pics:{lessonId:{stepIndex:'images/x.webp'}}}) once per game: the game's own read-aloud (it
 //   respects the game's voice switch; onEnd, when the game supports it, runs after the line), what to stop when a page
@@ -149,11 +156,11 @@ const MiniLesson=(()=>{let C={voice:null,who:null},el=null,cur=null,back=null,la
   el.setAttribute('aria-labelledby','mlxT');
   const wImg=/coach-moon-(idea|hi)\.webp$/.test(who.img||'')?'images/coach-moon-teach.webp':who.img;
   el.innerHTML=`<div class="mlx-card"><div class="mlx-top"><span class="mlx-kick">📖 ${L('미니 수업','Mini lesson')}</span><b id="mlxT">${ls.icon?ls.icon+' ':''}${E(ls.title)}</b><button type="button" class="mlx-x" data-m="x" aria-label="${L('닫기','Close')}">✕</button></div>
-   <div class="mlx-dots" aria-hidden="true"></div><div class="mlx-stage"></div>
+   <div class="mlx-dots" aria-hidden="true"></div><div class="mlx-stage"></div><div class="mlx-warn"></div>
    <div class="mlx-talk"><img src="${coachEsc(wImg)}" data-alt="${coachEsc(who.img)}" alt="" onerror="if(this.dataset.alt&&!this.dataset.f){this.dataset.f=1;this.src=this.dataset.alt}else this.remove()"><p aria-live="polite"></p><button type="button" class="mlx-hear" data-m="hear" aria-label="${L('다시 듣기','Hear again')}">🔊</button></div>
    <div class="mlx-nav"></div></div>`;
   el.addEventListener('click',e=>{const b=e.target.closest('[data-m]');if(!b||!cur)return;const m=b.dataset.m;
-   if(m==='x')close();else if(m==='hear')talk(el.querySelector('.mlx-talk p').textContent);else if(m==='prev')go(cur.i-1);else if(m==='next')go(cur.i+1);
+   if(m==='x')close();else if(m==='hear')talk(cur.line||el.querySelector('.mlx-talk p').textContent);else if(m==='prev')go(cur.i-1);else if(m==='next')go(cur.i+1);
    else if(m==='help'){const s=cur.ls.steps[cur.i];try{if(s.show)s.show(el.querySelector('.mlx-stage'),api(cur.i))}catch(e){}api(cur.i).done()}
    else if(m==='again')go(0);else if(m==='end'){const c=cur;close(true);if(back){const b=back;back=null;book(b.spec,b.at)}else if(lastFocus&&lastFocus.isConnected&&lastFocus.focus)try{lastFocus.focus()}catch(e){}if(c.o.onDone)c.o.onDone()}});
   go(0)}
@@ -161,21 +168,22 @@ const MiniLesson=(()=>{let C={voice:null,who:null},el=null,cur=null,back=null,la
  function api(i){return {L,T,done(){if(!cur||cur.i!==i)return;cur.ok[i]=1;const n=el.querySelector('[data-m=next]'),h=el.querySelector('[data-m=help]');if(n){n.disabled=false;n.textContent=L('다음','Next')+' ▶';n.classList.add('ready');n.focus()}if(h)h.remove()},
   next(){if(cur&&cur.i===i)go(i+1)},say(ko,en){if(!cur||cur.i!==i)return;const t=en==null?T(ko):L(ko,en);el.querySelector('.mlx-talk p').textContent=t;talk(t)}}}
  function go(i){if(!cur||!el)return;const ls=cur.ls,n=ls.steps.length;if(i<0)return;hush();cur.i=i;
-  const dots=el.querySelector('.mlx-dots'),stage=el.querySelector('.mlx-stage'),p=el.querySelector('.mlx-talk p'),nav=el.querySelector('.mlx-nav');
+  const dots=el.querySelector('.mlx-dots'),stage=el.querySelector('.mlx-stage'),p=el.querySelector('.mlx-talk p'),nav=el.querySelector('.mlx-nav'),wb=el.querySelector('.mlx-warn');
   dots.innerHTML=Array.from({length:n+1},(_,k)=>`<i class="${k<i?'on':k===i?'now':''}"></i>`).join('');
   if(i>=n){// the last page: what to remember
    if(!cur.done){cur.done=true;try{LR.les(ls.id)}catch(e){}}
    stage.className='mlx-stage sum';stage.innerHTML=`<div class="mlx-key"><b>✨ ${L('핵심 정리','Remember')}</b><ul>${(ls.key||[]).map(k=>`<li>${E(k)}</li>`).join('')}</ul></div><small class="mlx-saved">📒 ${L('개념 노트에 넣어 뒀어요. 언제든 다시 볼 수 있어요.','Saved in your concept notebook. Open it any time.')}</small>`;
-   const t=L('잘 들었어요! 이것만 기억하면 돼요.','Great listening! Just remember this.')+' '+(ls.key||[]).map(T).join(' ');p.textContent=t;talk(t);
+   wb.innerHTML=ls.warn?safeNote('safe',T(ls.warn)):'';
+   const t=L('잘 들었어요! 이것만 기억하면 돼요.','Great listening! Just remember this.')+' '+(ls.key||[]).map(T).join(' ')+(ls.warn?' '+T(ls.warn):'');p.textContent=t;cur.line=t;talk(t);
    nav.innerHTML=`<button type="button" class="mlx-b ghost" data-m="again">🔁 ${L('처음부터','From the start')}</button><button type="button" class="mlx-b go" data-m="end">${ls.cta?E(ls.cta):L('좋아요, 해 볼게요!','Got it, let’s go!')} ▶</button>`;
    nav.querySelector('[data-m=end]').focus();return}
-  const s=ls.steps[i],t=T(s.say);stage.className='mlx-stage';stage.innerHTML='';p.textContent=t;
+  const s=ls.steps[i],t=T(s.say);stage.className='mlx-stage';stage.innerHTML='';p.textContent=t;wb.innerHTML=s.warn?safeNote('safe',T(s.warn)):'';cur.line=t+(s.warn?' '+T(s.warn):'');
   try{if(typeof s.art==='function')s.art(stage,api(i));else if(s.art)stage.innerHTML=s.art}catch(e){stage.textContent=''}
   const pic=(C.pics&&C.pics[ls.id]||{})[i]||s.img;if(pic)stage.insertAdjacentHTML('afterbegin',`<img class="mlx-pic" src="${coachEsc(pic)}" alt="" onerror="this.remove()">`);
   if(!stage.childNodes.length)stage.classList.add('none');
   const wait=s.try&&!cur.ok[i];
   nav.innerHTML=`<button type="button" class="mlx-b ghost" data-m="prev" ${i?'':'disabled'} aria-label="${L('이전','Back')}">◀</button>${wait?`<button type="button" class="mlx-b help" data-m="help">🤔 ${L('알려 줘요','Show me')}</button>`:''}<button type="button" class="mlx-b go" data-m="next" ${wait?'disabled':''}>${wait?L('해 봐요','Your turn'):L('다음','Next')} ▶</button>`;
-  talk(t,()=>{if(cur&&cur.i===i&&el&&s.after)try{s.after(stage,api(i))}catch(e){}});const f=nav.querySelector('[data-m=next]');if(!wait&&f)f.focus()}
+  talk(cur.line,()=>{if(cur&&cur.i===i&&el&&s.after)try{s.after(stage,api(i))}catch(e){}});const f=nav.querySelector('[data-m=next]');if(!wait&&f)f.focus()}
  function before(ls,go_){if(!ls||seen(ls.id)){go_&&go_();return}let went=false;const g=()=>{if(!went){went=true;go_&&go_()}};open(ls,{onDone:g,onClose:g})}
  // the notebook: every topic of the game, the ones already watched ticked; tap one to watch it again
  function book(spec,at){const s=shell('book');back=null;const gs=spec.groups||[],all=gs.reduce((a,g)=>a.concat(g.items),[]),have=all.filter(x=>seen(x.id)).length;
@@ -510,6 +518,7 @@ main{width:min(1120px,100%);margin:0 auto;padding:14px max(12px,env(safe-area-in
 .trophy .got{font-size:13px;font-weight:900;color:var(--green-d)}
 .section-title{color:#fff;font-size:22px;font-weight:900;margin:4px 0 12px;letter-spacing:-.4px;display:flex;align-items:center;gap:10px}
 .section-title small{font-size:14px;opacity:.85}
+.mg-note.shopnote{margin:0 0 10px}
 .panelhead{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:6px}
 
 /* ---------------------------------------------------------------- modals, toasts, effects */
@@ -648,6 +657,12 @@ main{width:min(1120px,100%);margin:0 auto;padding:14px max(12px,env(safe-area-in
 #coachPop p{margin:8px 0 0;background:#fff;border:2px solid #c9d4ff;border-radius:4px 16px 16px 16px;padding:6px 11px;font-size:13.5px;font-weight:700;line-height:1.38;color:#2a3470;box-shadow:0 8px 20px rgba(20,30,80,.22)}
 #coachPop b{display:block;font-size:11px;font-weight:900;color:#5b6cff}
 .me-pic{width:100%;height:100%;object-fit:cover;object-position:50% 18%;border-radius:inherit;display:block}
+/* safeNote(): ⚠️ safety and ℹ️ notice lines, the same look in every game; safeLink() in settings windows */
+.mg-note{margin:8px 0 0;padding:9px 12px;border:1px solid;border-radius:14px;font-size:14px;font-weight:700;line-height:1.45;text-align:left;text-wrap:pretty}
+.mg-note b{font-weight:900;margin-right:3px;white-space:nowrap}
+.mg-safe{background:#fff3e6;border-color:#ffc58f;color:#6e3500}.mg-safe b{color:#c2410c}
+.mg-info{background:#eef5ff;border-color:#c5d9fb;color:#23407a}.mg-info b{color:#2f5fd0}
+.mg-notice-link{display:inline-flex;align-items:center;min-height:44px;padding:0 4px;font-size:13.5px;font-weight:800;color:#4656c8;text-decoration:underline;text-underline-offset:3px}
 @media (prefers-reduced-motion:reduce){#coachPop{transition:opacity .2s;transform:none}}
 /* Mini lessons (.mlx) and the concept notebook (.mlx.book): one window, a picture, the teacher's line, big buttons */
 .mlx{position:fixed;inset:0;z-index:2147483100;display:grid;place-items:center;padding:max(10px,env(safe-area-inset-top)) max(8px,env(safe-area-inset-right)) max(10px,env(safe-area-inset-bottom)) max(8px,env(safe-area-inset-left));background:rgba(18,24,58,.55);font-family:system-ui,-apple-system,'Apple SD Gothic Neo','Noto Sans KR',sans-serif;color:#22305e;animation:mlxIn .2s ease}
@@ -667,6 +682,7 @@ main{width:min(1120px,100%);margin:0 auto;padding:14px max(12px,env(safe-area-in
 .mlx-key ul{margin:0;padding:0;list-style:none;display:grid;gap:8px}
 .mlx-key li{position:relative;padding:10px 12px 10px 38px;background:#fff;border-radius:14px;font-size:16px;font-weight:800;line-height:1.45;box-shadow:0 2px 0 #f0d78a}
 .mlx-key li::before{content:'✔';position:absolute;left:12px;top:9px;width:20px;height:20px;border-radius:50%;background:#2fbf71;color:#fff;font-size:12px;display:grid;place-items:center}
+.mlx-warn:empty{display:none}.mlx-warn .mg-note{margin:0;font-size:15px}
 .mlx-saved{font-size:13px;font-weight:700;color:#8a6a1a;text-align:center}
 .mlx-talk{display:flex;align-items:flex-end;gap:8px}
 .mlx-talk img{width:56px;height:66px;flex:0 0 56px;object-fit:contain;object-position:50% 100%}
@@ -2895,7 +2911,7 @@ function renderHome(){
   <div class="chest"><span class="big">${S.missions.chest?'📭':pic('images/pg-chest.webp','🎁')}</span><div class="txt" style="flex:1;font-weight:800">${S.missions.chest?L('오늘의 보물상자를 열었어요. 내일 또 만나요!','You opened today’s chest. See you tomorrow!'):L('임무 3개를 모두 끝내면 보물상자를 열 수 있어요!','Finish all 3 missions to open the treasure chest!')}</div>
    ${!S.missions.chest?`<button class="btn small ${allGot?'gold':''}" type="button" data-chest ${allGot?'':'disabled'}>${L('열기','Open')}</button>`:''}</div>
  </div>
- <p class="foot">${L('퍼즐 출처: Lichess 공개 퍼즐 데이터베이스 (CC0)','Puzzles: Lichess open puzzle database (CC0)')}<br>${COPYRIGHT}</p>
+ <p class="foot">${L('퍼즐 출처: Lichess 공개 퍼즐 데이터베이스 (CC0) · Lichess와 관계없는 독립 게임','Puzzles: Lichess open puzzle database (CC0) · Not affiliated with Lichess')}<br>${COPYRIGHT}</p>
  </div>`;
 }
 $('v-home').addEventListener('click',e=>{
@@ -3317,7 +3333,7 @@ function renderShop(){
  else if(shopTab==='pieces')list=PIECESETS.map(p=>{const own=S.owned.pieces.includes(p.id);return `<div class="item">${own?`<span class="own">✓</span>`:''}<div class="pv ps-${p.id}" style="background:#e9ecf8"><div class="mini-pieces">${pieceHTML(2)}${pieceHTML(2|BLACK)}</div></div><b>${esc(p.name)}</b>${buyBtn('pieces',p.id,p.price,own,S.equip.pieces===p.id)}</div>`}).join('');
  else if(shopTab==='fx')list=EFFECTS.map(f=>{const own=S.owned.fx.includes(f.id);return `<div class="item">${own?`<span class="own">✓</span>`:''}<div class="pv">${f.icon}</div><b>${esc(f.name)}</b><button class="btn small ghost" type="button" data-preview="${f.id}">👀 ${L('미리 보기','Preview')}</button>${buyBtn('fx',f.id,f.price,own,S.equip.fx===f.id)}</div>`}).join('');
  else list=Object.entries(COACHES).map(([id,c])=>{const own=S.owned.coach.includes(id);return `<div class="item">${own?`<span class="own">✓</span>`:''}<div class="pv">${pic(c.img,c.icon)}</div><b>${esc(c.name)}</b><small>${esc(c.say)} ${L('퍼즐을 함께 풀어요','Solves puzzles with you')}</small>${buyBtn('coach',id,c.price,own,S.equip.coach===id)}</div>`}).join('');
- $('v-shop').innerHTML=`<h2 class="section-title">🛒 ${L('상점','Shop')} <small>${COIN} ${num(S.coins)}</small></h2><div class="tabs">${tabs.map(([k,t])=>`<button type="button" data-tab="${k}" aria-pressed="${shopTab===k}">${t}</button>`).join('')}</div><div class="items">${list}</div>`;
+ $('v-shop').innerHTML=`<h2 class="section-title">🛒 ${L('상점','Shop')} <small>${COIN} ${num(S.coins)}</small></h2>${safeNote('info','코인은 게임 속 놀이 돈이에요. 진짜 돈은 하나도 쓰지 않아요.','Coins are pretend game money. Nothing here costs real money.','shopnote')}<div class="tabs">${tabs.map(([k,t])=>`<button type="button" data-tab="${k}" aria-pressed="${shopTab===k}">${t}</button>`).join('')}</div><div class="items">${list}</div>`;
 }
 $('v-shop').addEventListener('click',e=>{
  const t=e.target.closest('[data-tab]'),b=e.target.closest('[data-buy]'),q=e.target.closest('[data-equip]'),pv=e.target.closest('[data-preview]');
@@ -3354,8 +3370,8 @@ function openSettings(){
   <div class="row"><span>🌐 ${L('언어','Language')}</span><span class="seg" role="group" aria-label="${L('언어','Language')}">${[['ko','한국어'],['en','English']].map(([v,n])=>`<button type="button" lang="${v}" data-act="lang" data-v="${v}" aria-pressed="${LANG===v}">${n}</button>`).join('')}</span></div>
   ${me?`<p class="note">${esc(me.av)} ${L(`${esc(me.name)}의 기록이에요. 플레이어는 첫 화면에서 바꿔요.`,`This is ${esc(me.name)}’s progress. Switch players on the main page.`)}</p>`:''}
   <button class="row danger" type="button" data-act="reset"><span>🗑️ ${L('이 게임 기록 지우기','Erase this game’s progress')}</span><b aria-hidden="true">›</b></button></div>
-  <p class="credit">${L('체스 퍼즐은 Lichess 공개 퍼즐 데이터베이스(CC0, 자유 이용)에서 골랐어요. 체스판·기물 그림, 캐릭터, 소리, AI는 이 게임을 위해 직접 만들었어요.','Puzzles come from the Lichess open puzzle database (CC0, free to use). The board, pieces, characters, sounds and AI were made for this game.')}</p>
-  <p class="copy">${COPYRIGHT}</p>`,
+  <p class="credit">${L('체스 퍼즐은 Lichess 공개 퍼즐 데이터베이스(CC0, 자유 이용)에서 골랐어요. 이 게임은 Lichess와 관계없는 독립 게임이에요. 체스판·기물 그림, 캐릭터, 소리, 컴퓨터 상대는 이 게임을 위해 새로 만들었어요.','Puzzles come from the Lichess open puzzle database (CC0, free to use). This is an independent game, not affiliated with or endorsed by Lichess. The board, pieces, characters, sounds and computer opponent were made for this game.')}</p>
+  <p class="copy">${COPYRIGHT}<br>${safeLink()}</p>`,
  {acts:{
   snd:b=>{S.sound=!S.sound;flip(b,S.sound);save();if(S.sound)SFX.click();return false},
   voice:b=>{S.voice=!S.voice;flip(b,S.voice);save();if(!S.voice)try{speechSynthesis.cancel()}catch(e){}else speak(L('코치 목소리를 켰어요!','Coach voice is on!'));return false},

@@ -69,6 +69,11 @@ const coachPick=a=>a[Math.random()*a.length|0];
 // the player's face as their game character (images/aq-me-<key>.webp) from the emoji the profile stores; other emoji stay as they are
 const COACH_ME={'🐰':'bunny','🐻':'bear','🦊':'fox','🐼':'panda','🐨':'koala','🐯':'tiger','🦁':'lion','🐸':'frog','🐱':'cat','🐶':'puppy','🐥':'chick','🦄':'unicorn','🐙':'octopus','🐬':'dolphin','🦖':'dino','⭐':'star'};
 const coachMe=(av,cls='')=>{const k=COACH_ME[String(av||'').replace(/\ufe0f/g,'')];return k?`<img class="me-pic ${cls}" src="images/aq-me-${k}.webp" alt="" draggable="false" data-e="${coachEsc(av)}" onerror="this.replaceWith(document.createTextNode(this.dataset.e))">`:coachEsc(av||'')};
+// a short caution or notice line in any window: kind 'safe' (⚠️ real-world safety, e.g. "only with a grown-up") or 'info'
+// (ℹ️ privacy, pretend coins, credits). safeLink() is the settings-window link to notice.html, the page for grown-ups.
+const SAFE_HEAD={safe:['⚠️','안전 주의','Safety first'],info:['ℹ️','알아 두기','Good to know']};
+const safeNote=(kind,ko,en,cls='')=>{const k=SAFE_HEAD[kind]?kind:'info',h=SAFE_HEAD[k];return `<p class="mg-note mg-${k} ${cls}" role="note"><b>${h[0]} ${L(h[1],h[2])}</b> ${coachEsc(en==null?ko:L(ko,en))}</p>`};
+const safeLink=()=>`<a class="mg-notice-link" href="notice.html?lang=${LANG}" target="_blank" rel="noopener">🛡️ ${L('안전 · 개인정보 · 저작권 안내 (보호자용)','Safety, privacy & credits (for grown-ups)')}</a>`;
 const coachSay_=t=>{const nm=coachNm(),ok=t.filter(x=>nm||!/\{nm\}/.test(x[0])),x=coachPick(ok.length?ok:t);return L(x[0],x[1]).replace(/\{nm\}/g,coachEsc(nm))};
 const COACH={
  up:['clap',[['꾸준히 한 덕분이에요. 정말 멋져요!','Your steady practice paid off. Awesome!'],['어제보다 오늘 더 잘하고 있어요!','You’re doing even better than yesterday!'],['계속 도전해서 여기까지 왔어요!','You kept trying, and look how far you’ve come!'],['{nm}의 노력이 반짝반짝 빛나요 ✨','Your hard work is shining, {nm} ✨'],['문 코치가 박수 쳐요! 짝짝짝 👏','Coach Moon is clapping for you! 👏'],['이 기세 그대로 가 봐요! 🌙','Keep this going! 🌙']]],
@@ -121,6 +126,8 @@ function coachStart(hello,tips){const game=(location.pathname.split('/').pop()||
 //   picture with the game's own helpers. On a "try" step the child does the small thing in the picture and the game
 //   calls api.done(); "🤔 알려 줘요" runs show(box,api) (or just api.done()) so not knowing never blocks or costs anything.
 //   after(box,api), if given, runs once the teacher has finished reading the step (for example to play a demo).
+//   warn:[ko,en] on a step (or on the lesson, for the last page) shows a ⚠️ safety line under the picture and the
+//   teacher reads it too: anything a child might copy at home (heat, electricity, magnets...) says how to stay safe.
 //   key holds the 1–3 lines to remember; they close the lesson and stay in the notebook.
 // · MiniLesson.cfg({voice:(text,onEnd)=>…, stop:()=>…, who:{img,name}, pics:{lessonId:{stepIndex:'images/x.webp'}}}) once per game: the game's own read-aloud (it
 //   respects the game's voice switch; onEnd, when the game supports it, runs after the line), what to stop when a page
@@ -149,11 +156,11 @@ const MiniLesson=(()=>{let C={voice:null,who:null},el=null,cur=null,back=null,la
   el.setAttribute('aria-labelledby','mlxT');
   const wImg=/coach-moon-(idea|hi)\.webp$/.test(who.img||'')?'images/coach-moon-teach.webp':who.img;
   el.innerHTML=`<div class="mlx-card"><div class="mlx-top"><span class="mlx-kick">📖 ${L('미니 수업','Mini lesson')}</span><b id="mlxT">${ls.icon?ls.icon+' ':''}${E(ls.title)}</b><button type="button" class="mlx-x" data-m="x" aria-label="${L('닫기','Close')}">✕</button></div>
-   <div class="mlx-dots" aria-hidden="true"></div><div class="mlx-stage"></div>
+   <div class="mlx-dots" aria-hidden="true"></div><div class="mlx-stage"></div><div class="mlx-warn"></div>
    <div class="mlx-talk"><img src="${coachEsc(wImg)}" data-alt="${coachEsc(who.img)}" alt="" onerror="if(this.dataset.alt&&!this.dataset.f){this.dataset.f=1;this.src=this.dataset.alt}else this.remove()"><p aria-live="polite"></p><button type="button" class="mlx-hear" data-m="hear" aria-label="${L('다시 듣기','Hear again')}">🔊</button></div>
    <div class="mlx-nav"></div></div>`;
   el.addEventListener('click',e=>{const b=e.target.closest('[data-m]');if(!b||!cur)return;const m=b.dataset.m;
-   if(m==='x')close();else if(m==='hear')talk(el.querySelector('.mlx-talk p').textContent);else if(m==='prev')go(cur.i-1);else if(m==='next')go(cur.i+1);
+   if(m==='x')close();else if(m==='hear')talk(cur.line||el.querySelector('.mlx-talk p').textContent);else if(m==='prev')go(cur.i-1);else if(m==='next')go(cur.i+1);
    else if(m==='help'){const s=cur.ls.steps[cur.i];try{if(s.show)s.show(el.querySelector('.mlx-stage'),api(cur.i))}catch(e){}api(cur.i).done()}
    else if(m==='again')go(0);else if(m==='end'){const c=cur;close(true);if(back){const b=back;back=null;book(b.spec,b.at)}else if(lastFocus&&lastFocus.isConnected&&lastFocus.focus)try{lastFocus.focus()}catch(e){}if(c.o.onDone)c.o.onDone()}});
   go(0)}
@@ -161,21 +168,22 @@ const MiniLesson=(()=>{let C={voice:null,who:null},el=null,cur=null,back=null,la
  function api(i){return {L,T,done(){if(!cur||cur.i!==i)return;cur.ok[i]=1;const n=el.querySelector('[data-m=next]'),h=el.querySelector('[data-m=help]');if(n){n.disabled=false;n.textContent=L('다음','Next')+' ▶';n.classList.add('ready');n.focus()}if(h)h.remove()},
   next(){if(cur&&cur.i===i)go(i+1)},say(ko,en){if(!cur||cur.i!==i)return;const t=en==null?T(ko):L(ko,en);el.querySelector('.mlx-talk p').textContent=t;talk(t)}}}
  function go(i){if(!cur||!el)return;const ls=cur.ls,n=ls.steps.length;if(i<0)return;hush();cur.i=i;
-  const dots=el.querySelector('.mlx-dots'),stage=el.querySelector('.mlx-stage'),p=el.querySelector('.mlx-talk p'),nav=el.querySelector('.mlx-nav');
+  const dots=el.querySelector('.mlx-dots'),stage=el.querySelector('.mlx-stage'),p=el.querySelector('.mlx-talk p'),nav=el.querySelector('.mlx-nav'),wb=el.querySelector('.mlx-warn');
   dots.innerHTML=Array.from({length:n+1},(_,k)=>`<i class="${k<i?'on':k===i?'now':''}"></i>`).join('');
   if(i>=n){// the last page: what to remember
    if(!cur.done){cur.done=true;try{LR.les(ls.id)}catch(e){}}
    stage.className='mlx-stage sum';stage.innerHTML=`<div class="mlx-key"><b>✨ ${L('핵심 정리','Remember')}</b><ul>${(ls.key||[]).map(k=>`<li>${E(k)}</li>`).join('')}</ul></div><small class="mlx-saved">📒 ${L('개념 노트에 넣어 뒀어요. 언제든 다시 볼 수 있어요.','Saved in your concept notebook. Open it any time.')}</small>`;
-   const t=L('잘 들었어요! 이것만 기억하면 돼요.','Great listening! Just remember this.')+' '+(ls.key||[]).map(T).join(' ');p.textContent=t;talk(t);
+   wb.innerHTML=ls.warn?safeNote('safe',T(ls.warn)):'';
+   const t=L('잘 들었어요! 이것만 기억하면 돼요.','Great listening! Just remember this.')+' '+(ls.key||[]).map(T).join(' ')+(ls.warn?' '+T(ls.warn):'');p.textContent=t;cur.line=t;talk(t);
    nav.innerHTML=`<button type="button" class="mlx-b ghost" data-m="again">🔁 ${L('처음부터','From the start')}</button><button type="button" class="mlx-b go" data-m="end">${ls.cta?E(ls.cta):L('좋아요, 해 볼게요!','Got it, let’s go!')} ▶</button>`;
    nav.querySelector('[data-m=end]').focus();return}
-  const s=ls.steps[i],t=T(s.say);stage.className='mlx-stage';stage.innerHTML='';p.textContent=t;
+  const s=ls.steps[i],t=T(s.say);stage.className='mlx-stage';stage.innerHTML='';p.textContent=t;wb.innerHTML=s.warn?safeNote('safe',T(s.warn)):'';cur.line=t+(s.warn?' '+T(s.warn):'');
   try{if(typeof s.art==='function')s.art(stage,api(i));else if(s.art)stage.innerHTML=s.art}catch(e){stage.textContent=''}
   const pic=(C.pics&&C.pics[ls.id]||{})[i]||s.img;if(pic)stage.insertAdjacentHTML('afterbegin',`<img class="mlx-pic" src="${coachEsc(pic)}" alt="" onerror="this.remove()">`);
   if(!stage.childNodes.length)stage.classList.add('none');
   const wait=s.try&&!cur.ok[i];
   nav.innerHTML=`<button type="button" class="mlx-b ghost" data-m="prev" ${i?'':'disabled'} aria-label="${L('이전','Back')}">◀</button>${wait?`<button type="button" class="mlx-b help" data-m="help">🤔 ${L('알려 줘요','Show me')}</button>`:''}<button type="button" class="mlx-b go" data-m="next" ${wait?'disabled':''}>${wait?L('해 봐요','Your turn'):L('다음','Next')} ▶</button>`;
-  talk(t,()=>{if(cur&&cur.i===i&&el&&s.after)try{s.after(stage,api(i))}catch(e){}});const f=nav.querySelector('[data-m=next]');if(!wait&&f)f.focus()}
+  talk(cur.line,()=>{if(cur&&cur.i===i&&el&&s.after)try{s.after(stage,api(i))}catch(e){}});const f=nav.querySelector('[data-m=next]');if(!wait&&f)f.focus()}
  function before(ls,go_){if(!ls||seen(ls.id)){go_&&go_();return}let went=false;const g=()=>{if(!went){went=true;go_&&go_()}};open(ls,{onDone:g,onClose:g})}
  // the notebook: every topic of the game, the ones already watched ticked; tap one to watch it again
  function book(spec,at){const s=shell('book');back=null;const gs=spec.groups||[],all=gs.reduce((a,g)=>a.concat(g.items),[]),have=all.filter(x=>seen(x.id)).length;
@@ -221,6 +229,7 @@ p{line-height:1.5}
 main{width:min(1100px,100%);margin:0 auto;padding:10px max(12px,env(safe-area-inset-left)) 10px max(12px,env(safe-area-inset-right))}
 #v-school,#v-world,#v-works,#v-dress{max-width:780px;margin:0 auto}
 .vtitle{margin:14px 2px 10px;font-size:23px}
+.mg-note.shopnote{margin:-2px 0 12px}
 code{font-family:var(--mono);background:#eef6f3;border-radius:6px;padding:1px 5px;font-size:.92em;color:#0b5f5a}
 :focus-visible{outline:3px solid #ffb020;outline-offset:2px}
 
@@ -667,6 +676,7 @@ button.vm{border:0;background:none;padding:0;display:flex;flex-direction:column;
 .pg-row{display:flex;gap:10px;margin-top:12px}.pg-row .btn{flex:1}
 .pg-praise{font-weight:800;color:var(--deep,#0b5f5a);margin:4px 0}
 .pg-place{font-weight:800;background:#f1fbf4;border-radius:12px;padding:8px;margin:6px 0}
+.pg-card .mg-note.pg-safe{margin:8px 0 10px;font-size:13.5px}
 .pg-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:8px 0}.pg-stats span{display:flex;flex-direction:column;background:#f4f8f7;border-radius:12px;padding:6px 2px}.pg-stats b{font-size:20px}.pg-stats small{color:var(--muted,#5d6f8c);font-weight:700}
 .pg-apples{font-size:24px;font-weight:900;color:#c2272d;margin:4px 0}
 .pg-lv{font-weight:800;color:#7a3fd1;margin:4px 0}
@@ -977,6 +987,12 @@ button.rbm:hover{border-color:#ffb020}.rbm b{font-size:14px;line-height:1.25}.rb
 #coachPop p{margin:8px 0 0;background:#fff;border:2px solid #c9d4ff;border-radius:4px 16px 16px 16px;padding:6px 11px;font-size:13.5px;font-weight:700;line-height:1.38;color:#2a3470;box-shadow:0 8px 20px rgba(20,30,80,.22)}
 #coachPop b{display:block;font-size:11px;font-weight:900;color:#5b6cff}
 .me-pic{width:100%;height:100%;object-fit:cover;object-position:50% 18%;border-radius:inherit;display:block}
+/* safeNote(): ⚠️ safety and ℹ️ notice lines, the same look in every game; safeLink() in settings windows */
+.mg-note{margin:8px 0 0;padding:9px 12px;border:1px solid;border-radius:14px;font-size:14px;font-weight:700;line-height:1.45;text-align:left;text-wrap:pretty}
+.mg-note b{font-weight:900;margin-right:3px;white-space:nowrap}
+.mg-safe{background:#fff3e6;border-color:#ffc58f;color:#6e3500}.mg-safe b{color:#c2410c}
+.mg-info{background:#eef5ff;border-color:#c5d9fb;color:#23407a}.mg-info b{color:#2f5fd0}
+.mg-notice-link{display:inline-flex;align-items:center;min-height:44px;padding:0 4px;font-size:13.5px;font-weight:800;color:#4656c8;text-decoration:underline;text-underline-offset:3px}
 @media (prefers-reduced-motion:reduce){#coachPop{transition:opacity .2s;transform:none}}
 /* Mini lessons (.mlx) and the concept notebook (.mlx.book): one window, a picture, the teacher's line, big buttons */
 .mlx{position:fixed;inset:0;z-index:2147483100;display:grid;place-items:center;padding:max(10px,env(safe-area-inset-top)) max(8px,env(safe-area-inset-right)) max(10px,env(safe-area-inset-bottom)) max(8px,env(safe-area-inset-left));background:rgba(18,24,58,.55);font-family:system-ui,-apple-system,'Apple SD Gothic Neo','Noto Sans KR',sans-serif;color:#22305e;animation:mlxIn .2s ease}
@@ -996,6 +1012,7 @@ button.rbm:hover{border-color:#ffb020}.rbm b{font-size:14px;line-height:1.25}.rb
 .mlx-key ul{margin:0;padding:0;list-style:none;display:grid;gap:8px}
 .mlx-key li{position:relative;padding:10px 12px 10px 38px;background:#fff;border-radius:14px;font-size:16px;font-weight:800;line-height:1.45;box-shadow:0 2px 0 #f0d78a}
 .mlx-key li::before{content:'✔';position:absolute;left:12px;top:9px;width:20px;height:20px;border-radius:50%;background:#2fbf71;color:#fff;font-size:12px;display:grid;place-items:center}
+.mlx-warn:empty{display:none}.mlx-warn .mg-note{margin:0;font-size:15px}
 .mlx-saved{font-size:13px;font-weight:700;color:#8a6a1a;text-align:center}
 .mlx-talk{display:flex;align-items:flex-end;gap:8px}
 .mlx-talk img{width:56px;height:66px;flex:0 0 56px;object-fit:contain;object-position:50% 100%}
@@ -2242,7 +2259,7 @@ const T=[
  {id:'p-if',need:5,place:'park',ride:'gate',make(r){const lim=pk(r,[100,110,120]),a=ri(r,lim+3,lim+30),b=ri(r,lim-25,lim-3);const mk=h=>[`height = ${h}`];
   return {title:both('키 재는 입구','Height check'),say:both(`키 ${lim}cm 이상만 탈 수 있는 놀이기구예요. 손님 키는 \`height\` 상자에 있어요.\n📏 키가 ${lim}cm 이상이면 → 🎟️ 태워 주기\n↪️ 아니면 → 👋 손 흔들며 다음에 오라고 하기\n키가 다른 손님도 같은 코드로 와요!`,`Only visitors ${lim} cm or taller may ride. The height is in the \`height\` box.\n📏 if height is ${lim} cm or more → 🎟️ let them ride\n↪️ otherwise → 👋 wave: come back next time\nOther visitors use the same code!`),
    start:mk(a),cases:[mk(b)],tiles:[`if height >= ${lim}:`,'else:','ride()','wave()',`if height <= ${lim}:`],body:[`if height >= ${lim}:`,'    ride()','else:','    wave()'],uses:['If'],
-   learn:both('if로 조건을 확인하면 손님마다 알맞게 안내할 수 있어요.','With if, each visitor gets the right answer.'),
+   learn:both('if로 조건을 확인하면 손님마다 알맞게 안내할 수 있어요. 진짜 놀이기구에서는 안내판과 직원 말을 꼭 따라요.','With if, each visitor gets the right answer. On real rides, always follow the signs and the ride staff.'),
    hints:[both(`\`if height >= ${lim}:\` 아래에 \`ride()\` 명령을 들여 써요.`,`Indent \`ride()\` under \`if height >= ${lim}:\`.`),both('`else:` 아래에는 `wave()` 명령이에요. 키가 작은 손님도 같은 코드로 시험해요.','`wave()` goes under `else:`. Shorter visitors get tested with the same code.')]}}},
  {id:'p-list',need:8,place:'park',ride:'gate',make(r){const lim=110,line=()=>Array.from({length:ri(r,3,4)},()=>ri(r,85,140));let a=line(),b=line();if(a.every(h=>h>=lim))a[0]=95;if(b.every(h=>h<lim))b[0]=128;const mk=l=>[`heights = [${l.join(', ')}]`];
   return {title:both('줄 선 손님들','Everyone in line'),say:both(`줄 선 손님들의 키가 \`heights\` 기차에 있어요. 한 명씩 차례로 봐 주세요.\n🔁 줄 선 손님 키를 하나씩 보며 반복 → 그 안에서 📏 키가 ${lim}cm 이상이면 🎟️ 태워 주기, ↪️ 아니면 👋 손 흔들기`,`The heights of everyone in line are in the \`heights\` train. Check them one by one.\n🔁 for each height → inside: 📏 if ${lim} cm or more 🎟️ let them ride, ↪️ otherwise 👋 wave`),
@@ -2474,9 +2491,9 @@ WORLD(3,{icon:'📦',name:'보물 상자|Treasure Boxes',concept:'변수|Variabl
   learn:'상자 하나만 바꿨는데 네 변이 모두 커졌어요. 변수를 쓰면 고치기 쉬워요.|Changing one box made all four sides bigger. Variables make code easy to change.',
   hints:['`forward(size)` 명령은 ✏️ size 상자 속 값만큼 앞으로 그려요. 그 상자는 2번째 줄에 있어요.|`forward(size)` draws forward by the value in the size box. That box is on line 2.','2번째 줄의 50을 지우고 100을 써요. 다른 줄은 그대로 둬요.|On line 2, delete 50 and write 100. Leave the other lines as they are.','2번째 줄을 이렇게 써요: `size = 100`|Write line 2 like this: `size = 100`']},
  {id:'w3-7',kind:'make',stage:'text',title:'나의 소개 카드|My intro card',
-  say:'나를 소개하는 카드를 만들어요! 🎨 먼저 📦 상자 타일로 이름, 나이, 좋아하는 것을 넣고, 🗨️ `print()` 타일로 적어도 세 줄을 보여 줘요.|Let’s make a card about you! 🎨 First put your name, age and favourite things in 📦 box tiles, then show at least three lines with 🗨️ `print()` tiles.',
+  say:'나를 소개하는 카드를 만들어요! 🎨 먼저 📦 상자 타일로 별명, 나이, 좋아하는 것을 넣고, 🗨️ `print()` 타일로 적어도 세 줄을 보여 줘요.|Let’s make a card about you! 🎨 First put your nickname, age and favourite things in 📦 box tiles, then show at least three lines with 🗨️ `print()` tiles.',
   scene:'🏷️📦✨',
-  idea:'상자에 이름, 나이, 좋아하는 것을 넣고, 소개 카드를 세 줄 넘게 보여 줘요!|Put your name, age and favourite things in boxes, and show an intro card of three or more lines!',
+  idea:'상자에 별명, 나이, 좋아하는 것을 넣고, 소개 카드를 세 줄 넘게 보여 줘요!|Put your nickname, age and favourite things in boxes, and show an intro card of three or more lines!',
   inputs:['파이'],
   tiles:['name = input("이름이 뭐예요? ")',
    'age = <<8>>',
@@ -2492,7 +2509,7 @@ WORLD(3,{icon:'📦',name:'보물 상자|Treasure Boxes',concept:'변수|Variabl
   goal:{minOut:3},
   solution:'name = input("이름이 뭐예요? ")\nage = 8\nfood = "딸기"\nprint("⭐ 나의 소개 카드 ⭐")\nprint(f"이름: {name}")\nprint(f"나이: {age}살")\nprint(f"좋아하는 음식: {food}")',
   learn:'글자 앞에 `f` 글자를 붙이면 `{name}` 자리에 상자 값이 들어가요. 멋진 소개 카드예요!|Put `f` before the text, and the box’s value fills the `{name}` spot. What a great intro card!',
-  hints:['📦 상자 타일(`age = 8` 같은 줄)을 먼저 놓고, 그 아래에 `print` 타일을 놓아요. 상자가 먼저 있어야 해요!|Place the 📦 box tiles (like `age = 8`) first, then the `print` tiles below. The boxes must come first!','`print(f"이름: {name}")` 코드처럼 글자 앞에 `f` 글자가 있으면, `{name}` 자리에 name 상자 값이 쏙 들어가요.|In `print(f"이름: {name}")`, the `f` before the text makes the name box’s value pop into the `{name}` spot.','`input()` 함수는 실행할 때 이름을 물어봐요. 내 이름이나 별명을 써 넣어요!|`input()` asks for your name when it runs. Type your name or a nickname!']}
+  hints:['📦 상자 타일(`age = 8` 같은 줄)을 먼저 놓고, 그 아래에 `print` 타일을 놓아요. 상자가 먼저 있어야 해요!|Place the 📦 box tiles (like `age = 8`) first, then the `print` tiles below. The boxes must come first!','`print(f"이름: {name}")` 코드처럼 글자 앞에 `f` 글자가 있으면, `{name}` 자리에 name 상자 값이 쏙 들어가요.|In `print(f"이름: {name}")`, the `f` before the text makes the name box’s value pop into the `{name}` spot.','`input()` 함수는 실행할 때 이름을 물어봐요. 별명을 써 넣어요! 주소, 학교, 전화번호는 쓰지 않아요.|`input()` asks for your name when it runs. Type a nickname! Never type your address, school or phone number.']}
  ]});
 WORLD(4,{icon:'🌀',name:'빙글빙글 풍차|Whirl Windmill',concept:'for 반복|for loops',
  intro:['풍차는 같은 일을 빙글빙글 몇 번이고 해요. 이번에는 반복을 배워요!|The windmill does the same thing round and round. Now let’s learn loops!',
@@ -3199,7 +3216,7 @@ WORLD(12,{icon:'🎪',name:'섬 축제|Island Festival',concept:'모두 함께|E
   solution:'from turtle import *\nbgcolor("black")\n\ndef firework(size):\n    for i in range(12):\n        forward(size)\n        backward(size)\n        right(30)\n\ncolor("gold")\npenup()\ngoto(-90, 60)\npendown()\nfirework(60)\ncolor("pink")\npenup()\ngoto(80, 20)\npendown()\nfirework(45)\ncolor("cyan")\npenup()\ngoto(0, -100)\npendown()\nfirework(35)\npenup()\ngoto(-50, -170)\nwrite("축제 최고!")',
   bonus:{ko:'`def` 레시피 카드로 불꽃을 만들고, `write()` 함수로 축제 인사도 써 봐요!',en:'Make fireworks with a `def` recipe card, and write a festival greeting with `write()`!',uses:['Def','write']},
   bonusSolution:'from turtle import *\nbgcolor("navy")\n\ndef firework(size):\n    for i in range(12):\n        forward(size)\n        backward(size)\n        right(30)\n\ncolor("orange")\nfor n in range(3):\n    penup()\n    goto(-120 + n * 110, 40 - n * 50)\n    pendown()\n    firework(40)\npenup()\ngoto(-60, -170)\nwrite("또 만나요!")',
-  learn:'배운 걸 모두 모아 멋진 작품을 만들었어요! 놀이터에서 친구만의 프로그램을 계속 만들어 봐요.|You put it all together into something great! Keep making your own programs in the playground.',
+  learn:'배운 걸 모두 모아 멋진 작품을 만들었어요! 놀이터에서 계속 만들어 봐요. 진짜 불꽃놀이는 어른만 다뤄요.|You put it all together into something great! Keep making programs in the playground. Only grown-ups handle real fireworks.',
   hints:['먼저 `def firework(size):` 타일을 놓고, 그 안에 🔁 12번 반복을 넣어요. 12번 × 30도면 딱 한 바퀴예요.|First place `def firework(size):` with 🔁 repeat 12 inside it. 12 times 30 degrees is one full turn.',
    '반복 안에는 `forward(size)`, `backward(size)`, `right(30)` 세 줄을 ⇥ 버튼으로 들여 써요.|Inside the loop, indent three lines with ⇥: `forward(size)`, `backward(size)`, `right(30)`.',
    '카드 밖에서 ✋ 펜 들기, `goto()` 타일로 옮기기, ✍️ 펜 내리기, `firework(60)` 타일 순서로 불러요. 밝은 색이 잘 보여요!|Outside the card: ✋ pen up, move with `goto()`, ✍️ pen down, then `firework(60)`. Bright colours show up best!']}
@@ -3222,6 +3239,8 @@ const now=()=>Date.now();
 const T=s=>{const p=String(s).split('|');return LANG==='en'?(p[1]??p[0]):p[0]};
 const rich=s=>esc(s).replace(/`([^`]+)`/g,'<code>$1</code>').replace(/\n/g,'<br>');
 const tx=s=>rich(T(s));
+// a ⚠️ safety ('safe') or ℹ️ notice ('info') box for 'ko|en' text, from the shared coach block (safeNote); empty in the node checks
+const careNote=(kind,s,cls)=>typeof safeNote==='function'?safeNote(kind,T(s),null,cls):'';
 // Korean particle after a word: josa('엉킴이','이') → '엉킴이가', josa('꼬마 기차','을') → '꼬마 기차를'
 const josa=(w,p)=>{w=String(w);const c=w.charCodeAt(w.length-1),b=c>=0xAC00&&c<=0xD7A3&&(c-0xAC00)%28>0;const P={이:['이','가'],가:['이','가'],을:['을','를'],를:['을','를'],은:['은','는'],는:['은','는'],과:['과','와'],와:['과','와']}[p];return w+(b?P[0]:P[1])};
 // the trademark note: under every © footer, and in settings as its own line just above the footer (COPYRIGHT(false) there)
@@ -3414,7 +3433,7 @@ function settings(){
   <div class="setrow"><span>🔠 ${L('큰 코드 글씨','Big code text')}</span><button class="tog ${S.opt.big?'on':''}" type="button" data-act="t" data-k="big" aria-label="${L('큰 코드 글씨','Big code text')}"></button></div>
   <div class="setrow"><span>🌐 ${L('언어','Language')}</span><span class="seg"><button type="button" class="${LANG==='ko'?'on':''}" data-act="lang" data-v="ko">한국어</button><button type="button" class="${LANG==='en'?'on':''}" data-act="lang" data-v="en">English</button></span></div>
   <p class="muted">${MGP.me?L(`${esc(S.av)} ${esc(S.name)}의 기록이에요. 플레이어는 첫 화면에서 바꿔요.`,`This is ${esc(S.name)}’s progress. Switch players on the main page.`):L('첫 화면에서 프로필을 만들면 형제자매가 따로 기록할 수 있어요.','Make profiles on the main page so siblings keep separate progress.')}</p>
-  <button class="btn ghost wide danger" type="button" data-act="reset">🗑️ ${L('이 게임 기록 지우기','Reset this game')}</button><p class="muted">📚 ${L('학교마다 배우는 순서와 방법이 조금씩 다를 수 있어요. 헷갈리면 학교 선생님 설명을 따라 주세요.','Schools may teach things in a different order or in a different way. If something seems different, follow your teacher.')}</p><p class="muted">™ ${TM_NOTE()}</p>${COPYRIGHT(false)}`,{acts:{
+  <button class="btn ghost wide danger" type="button" data-act="reset">🗑️ ${L('이 게임 기록 지우기','Reset this game')}</button><p class="muted">📚 ${L('학교마다 배우는 순서와 방법이 조금씩 다를 수 있어요. 헷갈리면 학교 선생님 설명을 따라 주세요.','Schools may teach things in a different order or in a different way. If something seems different, follow your teacher.')}</p><p class="muted">™ ${TM_NOTE()}</p>${COPYRIGHT(false)}${typeof safeLink==='function'?`<p class="muted" style="text-align:center;margin:4px 0 0">${safeLink()}</p>`:''}`,{acts:{
   t:b=>{const k=b.dataset.k;S.opt[k]=!S.opt[k];if(k==='voice'&&!S.opt.voice)hush();if(k==='big')document.body.classList.toggle('bigcode',S.opt.big);save();b.classList.toggle('on',S.opt[k]);if(k==='voice'&&S.opt.voice)say(L('목소리를 켰어요!','Voice is on!'));return false},
   capt:b=>{S.opt.capt=S.opt.capt===false;save();b.classList.toggle('on',S.opt.capt!==false);if(P&&P.ed&&P.ed.draw)P.ed.draw();return false},
   diff:b=>{S.opt.diff=+b.dataset.v;save();b.parentNode.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));return false},
@@ -3839,8 +3858,9 @@ function overlay(html,acts){const o=G.host.querySelector('.pg-over');o.innerHTML
 const closeOverlay=()=>{const o=G&&G.host.querySelector('.pg-over');if(o){o.classList.add('hidden');o.innerHTML=''}};
 function askLeave(){if(!G||G.ended)return;if(G.done){G.opts.onExit&&finishExit();return}G.paused=true;overlay(`<div class="pg-big">🤔</div><h3>${L('그만할까요?','Stop playing?')}</h3><p>${L('지금 나가면 이번 판 사과는 받지 않아요.','If you leave now, this round’s apples aren’t counted.')}</p><div class="pg-row"><button class="btn ghost" type="button" data-pa="no">▶ ${L('계속하기','Keep playing')}</button><button class="btn" type="button" data-pa="yes">${L('나가기','Leave')}</button></div>`,{no:()=>{closeOverlay();G.paused=false},yes:finishExit})}
 function finishExit(){const g=G,cb=g.opts.onExit;stop();if(cb)cb()}
-function howTo(icon,title,lines,tip,start){const seen=(S.games.seen=S.games.seen||{});G.paused=true;
- overlay(`<div class="pg-big">${icon}</div><h3>${esc(T(title))}</h3><ul class="pg-how">${lines.map(l=>`<li>${tx(l)}</li>`).join('')}</ul><button class="btn wide" type="button" data-pa="go">▶ ${L('시작!','Start!')}</button>`,{go:()=>{closeOverlay();G.paused=false;if(window.coachTalk)coachTalk.hide();hush();start()}});
+// note: an optional 'ko|en' safety line for the real-life version of the ride (sharp hooks, swimming...)
+function howTo(icon,title,lines,tip,start,note){const seen=(S.games.seen=S.games.seen||{});G.paused=true;
+ overlay(`<div class="pg-big">${icon}</div><h3>${esc(T(title))}</h3><ul class="pg-how">${lines.map(l=>`<li>${tx(l)}</li>`).join('')}</ul>${note?careNote('safe',note,'pg-safe'):''}<button class="btn wide" type="button" data-pa="go">▶ ${L('시작!','Start!')}</button>`,{go:()=>{closeOverlay();G.paused=false;if(window.coachTalk)coachTalk.hide();hush();start()}});
  if(!seen[G.id]&&window.coachTalk){seen[G.id]=1;save(true);coachTalk('idea',tip,{ms:6000})}else say(T(lines[0]).replace(/`/g,''))}
 // each ride's hero picture (as on its start card) heads its results card, with 🏆 or 🎉 on it
 const HERO_PIC={fish:'pg-fisher',race:'pg-racer',shoot:'pg-rocket',dive:'pg-diver'};
@@ -3879,8 +3899,16 @@ const FISHES=[['bluegill','블루길','Bluegill',1,'worm',0,10,22,1],['anchovy',
  .map(([id,ko,en,band,bait,big,a,b,rare])=>({id,ko,en,band,bait,big:!!big,a,b,rare}));
 const GOLDFISH={id:'goldmandarin',ko:'황쏘가리',en:'Golden mandarin fish',band:3,bait:'',big:true,a:30,b:50,rare:4,gold:true};
 const ALLFISH=[...FISHES,GOLDFISH];
-// protected in real life (the golden mandarin fish is a Korean natural monument; seahorses are protected worldwide): photographed and let go, never cooked
-const RELEASE=new Set(['goldmandarin','seahorse']);
+// photographed and let go, never cooked: protected in real life (the golden mandarin fish is a Korean natural monument;
+// seahorses are protected worldwide; ocean sunfish are listed as vulnerable), dangerous to eat or handle (pufferfish poison,
+// lionfish venomous spines) or a coral-reef fish (clownfish). Each one's card says why.
+const RELEASE_WHY={goldmandarin:'황금빛 황쏘가리! 천연기념물이라 사진만 찍고 바로 놓아줘요 📸|A golden mandarin fish! It’s protected in Korea, so snap a photo and let it go 📸',
+ seahorse:'해마는 보호가 필요한 바다 생물이에요. 사진만 찍고 놓아줘요 📸|Seahorses need protecting. Snap a photo and let it go 📸',
+ puffer:'복어는 몸속에 강한 독이 있어서 먹으면 위험해요. 사진만 찍고 놓아줘요 📸|Pufferfish have a strong poison inside, so they’re dangerous to eat. Snap a photo and let it go 📸',
+ lionfish:'쏠배감펭은 지느러미 가시에 독이 있어요. 맨손으로 만지지 않고, 사진만 찍고 놓아줘요 📸|Lionfish have venomous spines. Never touch one with bare hands. Snap a photo and let it go 📸',
+ clownfish:'흰동가리는 산호초에 사는 작은 물고기예요. 사진만 찍고 놓아줘요 📸|Clownfish are little coral-reef fish. Snap a photo and let it go 📸',
+ sunfish:'개복치는 수가 줄어서 보호가 필요한 물고기예요. 사진만 찍고 놓아줘요 📸|Ocean sunfish are becoming rare and need protecting. Snap a photo and let it go 📸'};
+const RELEASE=new Set(Object.keys(RELEASE_WHY));
 const fishPic=(id,cls='')=>`<img class="${cls}" src="images/aq-fish-${id}.webp" alt="" draggable="false" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'fe ${cls}',textContent:'🐟'}))">`;
 // the rod's code per tier; <<a|b|c>> is a value the child taps to change, and the first one is the default
 const ROD=[null,
@@ -4050,7 +4078,7 @@ function fishGame(){const play=shell(LIST[0].name,'🎣','fish'),lv=level(),rod=
  function reveal(){const c=st.caught[st.caught.length-1];st.ph='reveal';st.t=0;
   revEl.innerHTML=`<div class="fs-card ${c.gold?'gold':''}" role="dialog" aria-live="polite">${c.first?`<span class="fs-new">NEW!</span>`:''}${c.isW?`<span class="fs-stamp">🎯 ${L('찾던 목표!','Wanted catch!')}</span>`:''}
    <div class="fs-pic">${fishPic(c.id)}</div><b>${c.gold?'✨ ':''}${esc(c.name)}</b><span class="fs-cm">📏 ${c.cm}cm${c.cm>=(book.big[c.id]||0)&&dex[c.id]>1?` · 🏅 ${L('최고 기록!','New record!')}`:''}</span>
-   ${c.gold?`<p>${L('황금빛 황쏘가리! 천연기념물이라 사진만 찍고 바로 놓아줘요 📸','A golden mandarin fish! It’s protected in Korea, so snap a photo and let it go 📸')}</p>`:c.id==='seahorse'?`<p>${L('해마는 보호가 필요한 바다 생물이에요. 사진만 찍고 놓아줘요 📸','Seahorses need protecting. Snap a photo and let it go 📸')}</p>`:''}<small class="fs-tapn">${L('눌러서 계속','Tap to go on')} ▶</small></div>`;
+   ${RELEASE_WHY[c.id]?`<p>${esc(T(RELEASE_WHY[c.id]))}</p>`:''}<small class="fs-tapn">${L('눌러서 계속','Tap to go on')} ▶</small></div>`;
   revEl.classList.remove('hidden');say(L(`${c.name}! ${c.cm}센티!`,`${c.name}! ${c.cm} centimetres!`));
   if(c.gold||c.isW){if(typeof celebrate==='function')celebrate(c.gold?30:18);sfx(c.gold?'fanfare':'win')}else if(c.first)sfx('coin')}
  function closeReveal(){if(st.ph!=='reveal')return;revEl.classList.add('hidden');revEl.innerHTML='';nextCast()}
@@ -4063,7 +4091,7 @@ function fishGame(){const play=shell(LIST[0].name,'🎣','fish'),lv=level(),rod=
   st.ph='ready';meDo('');pyPose('hi');pySay(tries()?'또 던져 볼까요? 꾹… 휙!|Cast again? Hold… and let go!':'꾹 눌렀다가 떼면 휙! 던져요|Hold, then let go to cast!');hud()}
  function endRound(){const haul=st.caught.map(c=>`<span class="fs-hl ${c.gold?'gold':''}">${fishPic(c.id)}<small>${c.cm}cm</small></span>`).join('');
   const w=wanted,bk=BAIT[w.bait];
-  finish(total,`<div class="fs-haul">${haul||'🫧'}</div><p class="pg-place">${st.wantedGot?`🎯 ${L(`찾던 ${josa(w.ko,'을')} 낚았어요!`,`You caught the wanted ${w.en}!`)}`:`🎯 ${L(`${josa(w.ko,'은')} ${bk[0]} ${josa(bk[1],'을')} 좋아하고 ${DEPTHW[w.band][0]}에 살아요. 다음에 낚아 봐요!`,`The ${w.en} likes ${bk[0]} ${bk[2]} and lives in the ${DEPTHW[w.band][1]} water. Next time!`)}`}</p>${st.caught.some(c=>!RELEASE.has(c.id))?`<p class="pg-place">🍔 ${L(`잡은 물고기는 내 가게 냉장고로! 🐟 생선 버거 재료가 돼요 (지금 ${(S.pantry||{}).fish||0}마리).`,`Your catch goes to the shop fridge for 🐟 fish burgers (${(S.pantry||{}).fish||0} now).`)}</p>`:''}`,
+  finish(total,`<div class="fs-haul">${haul||'🫧'}</div><p class="pg-place">${st.wantedGot?`🎯 ${L(`찾던 ${josa(w.ko,'을')} 낚았어요!`,`You caught the wanted ${w.en}!`)}`:`🎯 ${L(`${josa(w.ko,'은')} ${bk[0]} ${josa(bk[1],'을')} 좋아하고 ${DEPTHW[w.band][0]}에 살아요. 다음에 낚아 봐요!`,`The ${w.en} likes ${bk[0]} ${bk[2]} and lives in the ${DEPTHW[w.band][1]} water. Next time!`)}`}</p>${st.caught.some(c=>!RELEASE.has(c.id))?`<p class="pg-place">🍔 ${L(`잡은 물고기는 내 가게 냉장고로! 🐟 생선 버거 재료가 돼요 (지금 ${(S.pantry||{}).fish||0}마리).`,`Your catch goes to the shop fridge for 🐟 fish burgers (${(S.pantry||{}).fish||0} now).`)}</p>`:''}${st.caught.some(c=>RELEASE.has(c.id))?careNote('info','놓아준 물고기는 📖 낚시 도감에 사진으로 남아요. 복어처럼 먹으면 위험한 물고기도 있어요.|Fish you let go stay in the 📖 Catch book as photos. Some fish, like pufferfish, are dangerous to eat.','pg-safe'):''}`,
    {praise:G.right>=total-1?L('낚시 왕이에요! 거의 다 낚았어요!','Fishing champ! You landed nearly all of them!'):G.right>=3?L('멋진 낚시였어요! 손맛이 좋아요.','Great fishing! You’ve got the touch.'):G.right>=1?L('좋아요! 할수록 타이밍이 좋아져요.','Nice! Your timing gets better every time.'):L('끝까지 했어요! 다음엔 ❗를 보고 톡!','You finished! Next time tap when you see ❗'),right:L('낚음','caught')})}
  // ---- the fish book: every fish I have caught, and hints for the ones still hiding
  function openBook(){if(G.paused||G.done)return;sfx('tap');G.paused=true;st.holding=false;if(st.ph==='charge'){st.ph='ready';powEl.classList.remove('on');meDo('')}
@@ -4191,7 +4219,8 @@ function fishGame(){const play=shell(LIST[0].name,'🎣','fish'),lv=level(),rod=
  size();hud();rodRender();if(tier>=2&&(book.seenTier||0)<tier){rodOpen(true);book.seenTier=tier}draw(performance.now()/1000);pySay('꾹 눌렀다가 떼면 휙! 던져요|Hold, then let go to cast!');
  howTo(img('pg-fisher','🎣','pg-hero'),LIST[0].name,['화면을 꾹 누르면 힘이 모여요. 떼면 휙! 던져요.|Hold the screen to build power, then let go to cast!','찌가 톡톡 흔들리면 기다려요. 쏙! 들어가며 ❗가 뜨면 바로 탭!|Wait while the bobber wiggles. When it dips and ❗ pops up, tap!','꾹 눌러서 감아요. 줄이 빨개지면 잠깐 떼요.|Hold to reel. Let go for a moment when the line turns red.',
    tier===1?'🎯 목표는 좋아하는 미끼로 잡아요! 아래 🎣 낚싯대 코드에서 미끼를 바꿔요.|Use the 🎯 wanted catch’s favourite bait. Change it in the 🎣 rod code below!':'🎯 목표는 좋아하는 미끼와 깊이로 잡아요! 아래 🎣 낚싯대 코드에서 바꿔요.|Set the 🎯 wanted catch’s favourite bait and depth in the 🎣 rod code below!'],
-  '꾹 눌렀다 떼서 던지고, 찌가 쏙! 들어가면 톡! 낚싯대 코드를 바꾸면 다른 물고기가 와요.|Hold and let go to cast, then tap when the bobber dips! Change the rod code to call other fish.',()=>{size();frames(tick)})}
+  '꾹 눌렀다 떼서 던지고, 찌가 쏙! 들어가면 톡! 낚싯대 코드를 바꾸면 다른 물고기가 와요.|Hold and let go to cast, then tap when the bobber dips! Change the rod code to call other fish.',()=>{size();frames(tick)},
+  '진짜 낚싯바늘은 날카로워요. 물가에는 꼭 어른과 함께 가고, 낚시 규칙도 어른이 확인해요.|Real fishing hooks are sharp. Go near water only with a grown-up, who also checks the local fishing rules.')}
 
 // ================================================================ 🏎️ Kart Track — steer into the lane with the right value and beat the bug racer
 function raceGame(){const play=shell(LIST[1].name,'🏎️','race'),lv=level(),kart=gear('kart'),gates=lv>=4?10:8,two=['True','False'];
@@ -4316,7 +4345,8 @@ function diveGame(){const play=shell(LIST[3].name,'🤿','dive'),lv=level(),suit
  G.test={answer:ok=>{if(busy||!q)return;const i=ok?q.pos:(q.pos+1)%q.items.length,b=floor.querySelector(`[data-i="${i}"]`);if(b)swim(i,b)},state:()=>({qn,total,q:q&&{kind:q.kind,code:q.code,ask:q.ask,ans:q.ans,pos:q.pos},busy})};
  size();home();
  howTo(img('pg-diver','🤿','pg-hero'),LIST[3].name,['위의 코드는 보물 상자 리스트예요.|The code above is a list of treasure chests.','칸 번호는 0부터 세요! 맞는 상자를 눌러 헤엄쳐 가요.|Positions start at 0! Tap the right chest to swim there.','공기 🫧가 떨어지기 전에 찾아요.|Find it before your air 🫧 runs out.'],
-  '리스트는 기차처럼 0번 칸부터 시작해요. 손가락으로 0, 1, 2 세어 봐요!|A list starts at car 0, like a train. Count 0, 1, 2 with your finger!',()=>{size();next();frames(tick)})}
+  '리스트는 기차처럼 0번 칸부터 시작해요. 손가락으로 0, 1, 2 세어 봐요!|A list starts at car 0, like a train. Count 0, 1, 2 with your finger!',()=>{size();next();frames(tick)},
+  '진짜 물에서는 어른이 곁에서 지켜볼 때만 수영해요.|In real water, swim only when a grown-up is right there watching.')}
 
 // ---------------------------------------------------------------- the ride list and the entry points the app calls
 const LIST=[{id:'fish',icon:'🎣',name:'낚시 부두|Fishing Pier',desc:'내 캐릭터로 낚시해요. 낚싯대 코드로 미끼와 깊이를 정해요|Fish as yourself, and set the bait and depth in the rod’s code',world:2},
@@ -4706,7 +4736,7 @@ RENDER.shop=()=>{const tab=SHOP;let body='';
  else if(tab==='gear')body=`<p class="muted">${L('놀이기구에서 쓰는 장비예요. 단계가 오를수록 쉬워져요.','Gear for the rides. Each level makes the ride a little easier.')}</p><div class="items">${Object.entries(GEAR).map(([id,it])=>{const lv=S.gear[id]||0,max=lv>=3;return `<button type="button" class="item ${max?'own':''}" data-a="buy" data-k="gear" data-id="${id}"><span class="em">${itemPic(id,it[0])}</span><b>${T(it[1])}</b><small class="d">${T(it[3])}</small><span class="lvd">${[1,2,3].map(k=>`<i class="${k<=lv?'on':''}"></i>`).join('')}</span><small>${max?L('최고 단계!','Max level!'):`🍎 ${GEAR_PRICE[lv]}`}</small></button>`}).join('')}</div>`;
  else if(tab==='deco'){const free=PLOTS.length-(S.deco||[]).filter(Boolean).length;body=`<p class="muted">${L(`사면 마을 지도에 바로 놓여요. 빈자리 ${free}곳`,`Placed on the village map right away. ${free} spots left`)}</p><div class="items">${Object.entries(DECOS).map(([id,it])=>{const own=(S.deco||[]).includes(id);return `<button type="button" class="item ${own?'own':''}" data-a="buy" data-k="deco" data-id="${id}"><span class="em">${decoPic(id)}</span><b>${T(it[1])}</b><small>${own?L('마을에 있어요','In the village'):`🍎 ${it[2]}`}</small></button>`}).join('')}</div>`}
  else body=wardrobeHTML(true);
- $('v-shop').innerHTML=`<h2 class="vtitle">🛍️ ${L('파이 상점','Py’s Shop')} <span class="have">🍎 ${S.apples}</span></h2>
+ $('v-shop').innerHTML=`<h2 class="vtitle">🛍️ ${L('파이 상점','Py’s Shop')} <span class="have">🍎 ${S.apples}</span></h2>${careNote('info','사과, 동전, 티켓은 게임 속 놀이 돈이에요. 진짜 돈은 하나도 쓰지 않아요.|Apples, coins and tickets are pretend game money. Nothing here costs real money.','shopnote')}
   <div class="tabs">${[['items','⚡ '+L('아이템','Power-ups')],['gear','🛠️ '+L('장비','Gear')],['deco','🏡 '+L('마을 꾸미기','Village')],['dress','👕 '+L('파이 옷장','Wardrobe')]].map(([k,t])=>`<button type="button" class="${tab===k?'on':''}" data-a="stab" data-v="${k}">${t}</button>`).join('')}</div>${body}${COPYRIGHT()}`};
 function buy(kind,id){
  const pay=c=>{if(S.apples<c){sfx('oops');coachTalk('idea','사과가 조금 모자라요. 미션, 주민 부탁, 놀이기구로 사과를 모아요!|Not quite enough apples. Missions, requests and rides give apples!');return false}S.apples-=c;sfx('coin');updateHud();return true};
@@ -4787,7 +4817,7 @@ const MENU={
  rainbow:{e:'🌈',name:'무지개 버거|Rainbow burger',dish:['bun','lettuce','tomato','cheese','egg','onion','pickle','bun'],price:16,lv:7}};
 // shop levels by diners served: name, and what each level brings
 const LV=[[0,'🌱','꼬마 로봇 버거|Little Robot Burger'],[6,'🍔','동네 로봇 버거|Neighborhood Robot Burger'],[16,'🍟','인기 로봇 버거|Popular Robot Burger'],[30,'🎈','소문난 로봇 버거|Famous Robot Burger'],
- [48,'⭐','별 로봇 버거|Star Robot Burger'],[72,'🌟','반짝 로봇 버거|Sparkle Robot Burger'],[100,'🏆','최고 로봇 버거|Best Robot Burger'],[140,'👑','로봇 버거 왕국|Robot Burger Kingdom']];
+ [48,'⭐','별 로봇 버거|Star Robot Burger'],[72,'🌟','반짝 로봇 버거|Sparkle Robot Burger'],[100,'🏆','최고 로봇 버거|Best Robot Burger'],[140,'👑','로봇 버거 왕국|Robot Burger Empire']];
 // robots stand along the back wall of the kitchen (left half); dishes they make wait on their tray
 const ROBOTS=[[1,1],[3,1],[5,1],[1,4]].map(([x,y],i)=>({i,x,y,zx:x,zy:y+1}));
 const TABLES=[[10,3],[10,6],[10,9],[12,3],[12,6],[12,9]].map(([x,y],i)=>({x,y,i,n:i+1,zx:x-1,zy:y,seats:[[x+.5,y-.4],[x+.5,y+1.4]]}));
@@ -5779,6 +5809,7 @@ function welcome(){modal(`<div class="big">${pySVG('wow',{cls:'big'})}</div><h2>
   ${pyLine('안녕! 나는 아기 뱀 파이예요. 섬에 로봇 버거 가게를 열었는데… 로봇들이 요리를 하나도 몰라요!|Hi! I’m Py, a baby python. I opened a robot burger shop on the island… but the robots can’t cook a thing!','oops')}
   <div class="pyline coachline"><img class="cimg" src="images/coach-moon-hi.webp" alt=""><div class="bubble"><p><b>🌙 ${L('문 코치','Coach Moon')}</b> ${L('로봇은 진짜 파이썬 코드대로만 움직여요. 우리가 코드를 가르치면 로봇이 요리하고, 손님이 오고, 가게가 커져요. 내가 옆에서 같이 할게요!','Robots only follow real Python code. Teach them code and they cook, diners come and the shop grows. I’ll be right beside you!')}</p></div></div>
   <ul class="howlist"><li>🤖 ${L('로봇을 눌러 레시피 코드를 가르쳐요.','Tap a robot and teach it a recipe in code.')}</li><li>🍔 ${L('내 캐릭터로 걸어 다니며 버거를 손님께 가져다줘요.','Walk around as yourself and carry burgers to diners.')}</li><li>🛠️ ${L('사과로 로봇, 테이블, 칩을 늘리고 새 메뉴를 열어요.','Spend apples on robots, tables and chips; open new menu items.')}</li><li>🏫 ${L('학교에서 문 코치와 더 배우고, 🎡 놀이공원에서 놀아요.','Learn more with Coach Moon at 🏫 school and play at the 🎡 funpark.')}</li></ul>
+  ${careNote('safe','진짜 요리는 꼭 어른과 함께해요. 불, 오븐, 뜨거운 기름, 칼은 어른이 다뤄요.|Cook for real only with a grown-up. Stoves, ovens, hot oil and knives are for grown-ups.')}
   <button class="btn wide" type="button" data-act="go">🍔 ${L('가게 문 열기!','Open the shop!')}</button>`,{cls:'wide',closable:false,onOpen:()=>sayLines([L('안녕! 나는 아기 뱀 파이예요. 섬에 로봇 버거 가게를 열었는데, 로봇들이 요리를 하나도 몰라요!','Hi! I’m Py, a baby python. I opened a robot burger shop on the island, but the robots can’t cook a thing!'),L('로봇은 진짜 파이썬 코드대로만 움직여요. 우리가 코드를 가르치면 로봇이 요리하고, 가게가 커져요. 내가 옆에서 같이 할게요!','Robots only follow real Python code. Teach them code and they cook, and the shop grows. I’ll be right beside you!')]),
   acts:{go:()=>{S.tut.hello=1;save();return ()=>{if(VIEW!=='home')go('home');else RENDER.home()}}}})}
 function meCard(){const t=titleOf(S.lvl);modal(`<div class="big">${esc(S.av)}</div><h2>${esc(S.name)}</h2><p><b>${t.icon} ${esc(t.name)}</b> · ${L(`레벨 ${S.lvl}`,`Level ${S.lvl}`)}</p><div class="meter"><i style="width:${Math.min(100,100*S.xp/xpNeed(S.lvl))}%"></i></div><p class="muted">${L(`다음 레벨까지 ${xpNeed(S.lvl)-S.xp} XP`,`${xpNeed(S.lvl)-S.xp} XP to the next level`)}</p>

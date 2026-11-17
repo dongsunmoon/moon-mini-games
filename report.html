@@ -181,6 +181,8 @@ a{color:inherit}
 .how{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:12px}
 .how div{background:var(--soft);border-radius:16px;padding:14px}
 .how b{display:block;font-size:14px;margin-bottom:4px}
+.how .ref{background:#fff6e0;border:1px solid #f3dc92}
+.nlink{display:inline-flex;align-items:center;min-height:44px;font-weight:800;color:inherit;text-underline-offset:3px}
 .how p{margin:0;font-size:13px;color:var(--muted);font-weight:600}
 footer{text-align:center;color:#8a93b8;font-size:12px;margin-top:6px}
 .demo{background:#fff4d6;border:1px solid #f1d27a;color:#6b4c00;border-radius:16px;padding:12px 14px;font-weight:800;font-size:14px;display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}
@@ -537,12 +539,13 @@ function render(){const app=$('app'),R=records(),m=DEMO?{name:L('하늘','Sky'),
  h+=`<div class="panel" role="tabpanel" id="panel-home" aria-labelledby="tab-home" data-panel="home"${TAB==='home'?'':' hidden'}>${homeHTML(A,R,played,dayAll)}${coachNote({active,played,P,tot,acc,streak,nm,nk,shareT,ever})}</div>`;
  // ---- how this report is made
  h+=`<section class="card"><div class="h2"><h2>🔎 ${L('이 리포트는 이렇게 만들어져요','How this report works')}</h2></div><div class="how">
+  <div class="ref"><b>📋 ${L('참고용 기록이에요','For reference only')}</b><p>${L('게임 기록을 정리한 자료예요. 학교 성적, 공식 평가, 학습이나 발달 진단이 아니에요. 걱정되는 점은 담임 선생님이나 전문가와 상의해 주세요. 인쇄하거나 공유하면 아이 별명이 함께 나와요.','A summary of game activity. It isn’t a school grade, an official assessment, or a learning or developmental diagnosis. If you have concerns, talk with your child’s teacher or a qualified professional. Printed or shared copies include your child’s nickname.')}</p></div>
   <div><b>🧠 ${L('분석은 기록에 근거해요','Findings come from the record')}</b><p>${L('강점, 성장, 연습할 것은 아이가 실제로 답한 기록을 정해진 규칙으로 계산해요. AI가 추측해서 지어내지 않아요.','Strengths, growth and things to practise are worked out from your child’s actual answers with fixed rules. Nothing is guessed or made up by AI.')}</p></div>
   <div><b>🔒 ${L('기록은 이 기기에만','Saved on this device only')}</b><p>${L('아이의 기록은 서버로 보내지 않고 이 브라우저에만 저장돼요. 다른 기기에서는 따로 쌓여요.','Your child’s record is not sent anywhere. It stays in this browser, and each device keeps its own.')}</p></div>
   <div><b>⏱️ ${L('집중한 시간만','Only focused time')}</b><p>${L('화면이 켜져 있고 2분 안에 직접 누르거나 입력한 시간만 세요. 틀어 두기만 한 시간은 빠져요.','Time counts only while the page is open and your child tapped or typed in the last 2 minutes.')}</p></div>
   <div><b>🏅 ${L('익힘은 게임의 기준으로','Mastery by each game’s rule')}</b><p>${L('단원 완료, 별 3개처럼 게임마다 정한 기준을 넘으면 ‘익힘’으로 표시해요.','A skill shows as mastered when it passes that game’s own rule, like finishing a unit or earning 3 stars.')}</p></div>
-  <div><b>📚 ${L('학교 교과 연결','Links to school')}</b><p>${L('한국 2022 개정 교육과정과 캐나다 온타리오 교육과정을 기준으로 연결했어요. 학교마다 배우는 순서와 방법이 조금씩 다를 수 있어요.','Links follow Korea’s 2022 national curriculum and the Ontario curriculum. Schools may teach things in a different order or in a different way.')}</p></div></div></section>`;
- h+=`<footer>Moon Mini Games · © 2026 Dongsun Moon. ${L('모든 권리 보유.','All rights reserved.')}</footer>`;
+  <div><b>📚 ${L('학교 교과 연결','Links to school')}</b><p>${L('한국 2022 개정 교육과정과 캐나다 온타리오 교육과정을 기준으로 연결했어요. 캐나다의 다른 주와 미국은 주마다 기준이 달라 배우는 학년과 순서가 다를 수 있고, 학교마다 배우는 방법도 조금씩 달라요.','Links follow Korea’s 2022 national curriculum and the Ontario curriculum. Other provinces and US states have their own standards, so a topic may come in a different grade or order, and schools may teach it in a different way.')}</p></div></div></section>`;
+ h+=`<footer><a class="nlink noprint" href="notice.html?lang=${LANG}">🛡️ ${L('보호자 안내: 안전 · 개인정보 · 저작권','For grown-ups: safety, privacy & credits')}</a><br>Moon Mini Games · © 2026 Dongsun Moon. ${L('모든 권리 보유.','All rights reserved.')}</footer>`;
  app.innerHTML=h;LASTA=A;bindCommon()}
 let LASTA=null;
 function subjectCard(g,rec,p,a,A){const S=rec.sum,sk=allSkills(S),prog=sk.length?sk.reduce((t,k)=>t+(+k.p||0),0)/sk.length:0;
@@ -661,7 +664,7 @@ function emptyPage(R,m){const any=GAMES.some(g=>R[g.id].saved);
   <p class="say">${any?L('예전 게임 기록이 있어요. 아래 게임을 한 번씩 열면 그동안 배운 내용이 리포트로 정리돼요.','There is earlier progress. Open each game below once and everything learned so far is summarised here.'):L('수학, 음악, 과학, 코딩, 체스까지, 아이가 어떤 기술을 익혔고 다음에 무엇을 배우면 좋은지 학교 교과와 연결해서 보여 드려요.','Math, music, science, coding and chess: see which skills your child has mastered and what comes next, linked to what schools teach.')}</p>
   <div class="per noprint"><a class="go" style="background:var(--gold);color:#2a2300" href="report.html?demo=1&lang=${LANG}">👀 ${L('예시 리포트 보기','See a sample report')}</a><a class="go" style="background:#ffffff1f" href="index.html?lang=${LANG}">🎮 ${L('게임 하러 가기','Go to the games')}</a></div></section>
   ${GAMES.filter(g=>R[g.id].saved).map(g=>waitCard(g,true)).join('')}
-  <footer>Moon Mini Games · © 2026 Dongsun Moon. ${L('모든 권리 보유.','All rights reserved.')}</footer>`}
+  <footer><a class="nlink noprint" href="notice.html?lang=${LANG}">🛡️ ${L('보호자 안내: 안전 · 개인정보 · 저작권','For grown-ups: safety, privacy & credits')}</a><br>Moon Mini Games · © 2026 Dongsun Moon. ${L('모든 권리 보유.','All rights reserved.')}</footer>`}
 function showTab(t,focus){TAB=t;try{sessionStorage.setItem('moonGames.reportTab',t)}catch(e){}
  document.querySelectorAll('[data-tab]').forEach(b=>{const on=b.dataset.tab===t;b.setAttribute('aria-selected',on);b.tabIndex=on?0:-1;if(on&&focus)b.focus()});
  document.querySelectorAll('[data-panel]').forEach(p=>p.hidden=p.dataset.panel!==t)}

@@ -78,7 +78,7 @@ a{color:inherit}
 @keyframes coIn{0%{transform:scale(.7) translateY(12px);opacity:.2}100%{transform:none;opacity:1}}
 @media (max-width:480px){.co-pic{flex-basis:88px;width:88px;height:108px}.co-talk{padding:10px 13px 12px}}
 @media (prefers-reduced-motion:reduce){.co-pic.pop img,.cs.new{animation:none}}
-.games{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:18px}
+.games{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,270px),1fr));gap:18px}
 .card{display:flex;flex-direction:column;text-decoration:none;background:var(--card);border-radius:26px;overflow:hidden;border:1px solid var(--line);box-shadow:var(--shadow);transition:transform .18s ease,box-shadow .18s ease}
 .card:hover{transform:translateY(-4px);box-shadow:0 20px 40px rgba(54,72,160,.2)}
 .card:active{transform:scale(.985)}
@@ -210,6 +210,10 @@ footer{margin-top:22px;text-align:center;color:#8a93b8;font-size:12px}
 .pbig .pav{width:84px;height:84px;margin:0 auto;border-radius:50%;overflow:hidden;display:grid;place-items:center;background:#eef3ff}
 .prow2 .pav{width:44px;height:44px;flex:0 0 44px;border-radius:50%;overflow:hidden;display:grid;place-items:center;background:#eef3ff}
 @media (max-width:420px){.avgrid{grid-template-columns:repeat(4,1fr)}}
+/* four or more players: room for four faces in a row, so nobody hides below the fold (phones keep the full width they had) */
+.pmodal.wide{width:min(620px,100%)}
+/* short landscape screens (a phone turned sideways, a split tablet, the keyboard up): tighter dialogs so the buttons stay in view */
+@media (max-height:500px) and (orientation:landscape){.pmask{padding:8px}.pmodal{max-height:calc(100dvh - 16px);padding:14px 18px 12px}.pmodal h2{font-size:21px;margin-bottom:2px}.pmodal p{margin:2px 0 8px}.pgrid{margin:8px 0}.pbig{padding:10px 8px}.pin{padding:8px 14px;margin:2px 0 6px}.phint{margin:0 0 8px!important}.avgrid{margin-bottom:8px}.prow2{margin:4px 0;padding:5px 10px}}
 </style>
 </head>
 <body>
@@ -378,7 +382,7 @@ function openP(html,bind){$('pm').innerHTML=`<div class="pmask"><div class="pmod
 function closeP(){$('pm').innerHTML=''}
 function picker(){const last=PROF.cur;openP(`<h2>🎮 ${L('누가 놀까요?','Who’s playing?')}</h2><p>${L('내 프로필을 누르면 모든 게임이 내 기록으로 열려요.','Tap your profile and every game opens with your own progress.')}</p>
  <div class="pgrid">${PROF.list.map(p=>`<button type="button" class="pbig ${p.id===last?'last':''}" data-pid="${p.id}"><span class="pav">${avPic(p.av)}</span><b>${esc(p.name)}</b></button>`).join('')}</div>
- <div class="prow3"><button type="button" class="pbtn ghost" data-pa="add">➕ ${L('새 프로필','New profile')}</button></div>`,box=>box.addEventListener('click',onAct))}
+ <div class="prow3"><button type="button" class="pbtn ghost" data-pa="add">➕ ${L('새 프로필','New profile')}</button></div>`,box=>{box.classList.toggle('wide',PROF.list.length>3);box.addEventListener('click',onAct)})}
 function profileForm(p){const isNew=!p;let av=p?p.av:AV.find(a=>!PROF.list.some(x=>x.av===a))||AV[0];
  openP(`<h2>${isNew?L('새 프로필','New profile'):L('프로필 고치기','Edit profile')}</h2><label class="plab" for="pName">${L('부르는 이름 (별명)','Nickname (what we call you)')}</label><input class="pin" id="pName" maxlength="10" value="${esc(p?p.name:'')}" placeholder="${esc(L('예: 별빛, 콩이','e.g. Star, Bean'))}" autocomplete="off" aria-describedby="pNameHint">
   <p class="phint" id="pNameHint">${L('진짜 이름 대신 별명도 좋아요. 성은 쓰지 않아요.','A nickname works great. Please don’t use a last name.')}<br>🔒 ${L('이 기기에만 저장되고, 만든 사람에게도 보내지 않아요.','Saved only on this device. It isn’t sent to us.')}</p>

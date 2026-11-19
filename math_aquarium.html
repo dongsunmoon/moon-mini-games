@@ -644,17 +644,67 @@ img.api{display:inline-block;width:auto;height:1.25em;vertical-align:-.28em;obje
 .cl-land .cl-mv[data-c="r"]{position:absolute;left:calc(max(14px,env(safe-area-inset-left)) + 70px);bottom:calc(16px + env(safe-area-inset-bottom))}
 .cl-land .cl-drop{position:absolute;right:max(14px,env(safe-area-inset-right));bottom:calc(16px + env(safe-area-inset-bottom))}
 .lnote{background:#fff3;font-size:20px}
+/* ---------------------------------------------------------------- tablets, sideways phones and split screens (phones held upright match none of these)
+   Sideways (landscape, up to 900px tall): the question and its picture on the left, the answer boxes with a 4-column keypad
+   (or the choices) on the right, so Check is on screen without scrolling. The keypad's children are 7 8 9 4 5 6 1 2 3, then
+   − (or an empty span), 0, . (or an empty span), ⌫ and ✔ (mountProblem in lesson.js), placed as 7 8 9 ⌫ / 4 5 6 − / 1 2 3 . / 0 0 ✔ ✔. */
+@media (orientation:landscape) and (min-width:600px) and (max-height:900px){
+ .lbody{width:min(960px,100%)}
+ .lbody>.result,#lMooni{max-width:696px;margin-left:auto;margin-right:auto}
+ .modal.qmodal{width:min(880px,100%)}
+ .qcard{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(260px,1fr);grid-template-rows:repeat(5,auto) 1fr;column-gap:18px;align-items:start}
+ .qcard>*{grid-column:1;min-width:0}
+ .qcard>.qans{grid-column:2;grid-row:1/span 6;margin-top:0;position:sticky;top:0}
+ .qans .inp{margin-top:0}
+ .keypad{grid-template-columns:repeat(4,1fr)}
+ .keypad>:nth-child(13){grid-area:1/4}.keypad>:nth-child(10){grid-area:2/4}.keypad>:nth-child(12){grid-area:3/4}
+ .keypad>:nth-child(11){grid-area:4/1/5/3}.keypad>:nth-child(14){grid-area:4/3/5/5}
+ .qcard svg.vis{max-height:min(240px,calc(100vh - 200px))}
+}
+/* short and sideways (phones turned over): a slimmer bottom bar with each icon beside its name, and a tighter problem card */
+@media (orientation:landscape) and (max-height:500px){
+ :root{--nav:50px}
+ .nav{padding-top:3px;padding-bottom:calc(3px + env(safe-area-inset-bottom))}
+ .nav button{flex-direction:row;justify-content:center;gap:5px;min-height:44px;padding:0 4px}
+ .nav button span{font-size:21px}.nav button.on span{transform:scale(1.1)}
+ .lprog{min-height:0;padding:3px 10px}
+ .lbody{padding-top:2px}
+ .qcard{padding:10px 12px}
+ .qans .inp{margin:0 0 6px}
+ .abox{height:48px;font-size:26px}.afrac{gap:3px}.afrac .abox{height:38px;font-size:21px}
+ .keypad{gap:6px}.keypad button{height:44px;font-size:22px}.keypad .kok{font-size:18px}
+ .choices{gap:6px}.choice{min-height:50px}.choices.pics .choice{min-height:70px}.choice svg.vis{max-height:84px}
+ .modal.qmodal{padding-top:12px}.modal.qmodal h2{margin:2px 0 6px;font-size:19px}
+ /* the restroom scrub fits under its title (spots sit at % positions, so they follow) */
+ .scrub{height:min(260px,calc(100vh - 140px))}
+}
+/* very short (360–400px tall): a little more room for two-box fraction answers */
+@media (orientation:landscape) and (max-height:400px){
+ .lbar{padding-top:4px;padding-bottom:4px}
+ .qcard{padding-top:8px}.qans .inp{margin-bottom:4px}
+ .afrac{gap:2px}.afrac .abox{height:34px;font-size:19px}
+ .keypad{gap:5px}
+}
+/* tablets held upright: bigger problem text and keys, since there is room to spare under the card */
+@media (orientation:portrait) and (min-width:700px) and (min-height:900px){
+ .qtext{font-size:26px}
+ .choice{font-size:24px;min-height:68px}
+ .abox{height:66px;min-width:90px;font-size:32px}.afrac .abox{height:58px;font-size:28px}
+ .keypad{max-width:460px;gap:9px}.keypad button{height:64px;font-size:28px}.keypad .kok{font-size:23px}
+}
+/* the two-week chart on the growth screen grows with a wide card (its day numbers stay readable) */
+@media (min-width:600px){svg.vis.chart14{width:min(100%,520px);max-height:none}}
 /*COACH:BEGIN*/
 /* Coach Moon: one line inside result windows (.mcoach) and a corner bubble at good moments (#coachPop, never takes taps) */
 .mcoach{display:flex;align-items:flex-end;gap:8px;margin:10px auto 6px;max-width:330px;text-align:left}
 .mcoach img{width:58px;height:70px;object-fit:contain;object-position:50% 100%;flex:0 0 58px}
 .mcoach p{margin:0 0 6px;flex:1;background:#f2f5ff;border:1px solid #dfe5f7;border-radius:14px;padding:7px 11px;font-size:14px;font-weight:700;line-height:1.4;color:#34407a}
-.mcoach b{display:block;font-size:11.5px;font-weight:900;color:#5b6cff}
+.mcoach b{display:block;font-size:12px;font-weight:900;color:#5b6cff}
 #coachPop{position:fixed;left:max(8px,env(safe-area-inset-left));top:calc(var(--coach-top,62px) + env(safe-area-inset-top));z-index:2147483000;display:flex;align-items:flex-start;gap:4px;max-width:min(320px,calc(100vw - 16px));pointer-events:none;opacity:0;transform:translateY(-14px) scale(.92);transform-origin:0 0;transition:opacity .25s ease,transform .4s cubic-bezier(.2,1.5,.4,1);font-family:system-ui,-apple-system,'Apple SD Gothic Neo','Noto Sans KR',sans-serif;text-align:left}
 #coachPop.show{opacity:1;transform:none}
 #coachPop img{width:54px;height:64px;flex:0 0 54px;object-fit:contain;object-position:50% 0;filter:drop-shadow(0 4px 8px rgba(0,0,0,.28))}
 #coachPop p{margin:8px 0 0;background:#fff;border:2px solid #c9d4ff;border-radius:4px 16px 16px 16px;padding:6px 11px;font-size:13.5px;font-weight:700;line-height:1.38;color:#2a3470;box-shadow:0 8px 20px rgba(20,30,80,.22)}
-#coachPop b{display:block;font-size:11px;font-weight:900;color:#5b6cff}
+#coachPop b{display:block;font-size:12px;font-weight:900;color:#5b6cff}
 .me-pic{width:100%;height:100%;object-fit:cover;object-position:50% 18%;border-radius:inherit;display:block}
 /* safeNote(): ⚠️ safety and ℹ️ notice lines, the same look in every game; safeLink() in settings windows */
 .mg-note{margin:8px 0 0;padding:9px 12px;border:1px solid;border-radius:14px;font-size:14px;font-weight:700;line-height:1.45;text-align:left;text-wrap:pretty}
@@ -707,8 +757,19 @@ img.api{display:inline-block;width:auto;height:1.25em;vertical-align:-.28em;obje
 .mlx-item .tx small{font-size:13px;font-weight:700;color:#5d6896;line-height:1.35}
 .mlx-item .st{font-size:18px}.mlx-item.seen{background:#f2fbf5;border-color:#c9ecd6}
 /* a small "📖 개념 다시 보기" chip a game can put next to a question */
-.mlx-chip{display:inline-flex;align-items:center;gap:4px;min-height:40px;padding:0 12px;border:0;border-radius:20px;background:#eef1ff;color:#3a4690;font:inherit;font-size:14px;font-weight:900;cursor:pointer}
+.mlx-chip{display:inline-flex;align-items:center;gap:4px;min-height:44px;padding:0 12px;border:0;border-radius:20px;background:#eef1ff;color:#3a4690;font:inherit;font-size:14px;font-weight:900;cursor:pointer}
 @media (max-width:420px){.mlx-card{padding:10px 12px 12px;border-radius:20px}.mlx-stage{min-height:170px}.mlx-talk p{font-size:16px}}
+/* a phone on its side: the picture (or the thing to try) on the left, the teacher and the buttons on the right, so the
+   title, the picture and Next are all on screen together (the notebook keeps its one column) */
+@media (orientation:landscape) and (max-height:500px){
+ .mlx{padding-top:max(6px,env(safe-area-inset-top));padding-bottom:max(6px,env(safe-area-inset-bottom))}
+ .mlx:not(.book) .mlx-card{width:min(880px,100%);display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);grid-template-rows:auto auto auto minmax(0,1fr) auto;grid-template-areas:"top top" "stage dots" "stage warn" "stage talk" "stage nav";gap:8px 14px;padding:10px 14px 12px}
+ .mlx:not(.book) .mlx-top{grid-area:top}.mlx:not(.book) .mlx-dots{grid-area:dots;align-self:center}
+ .mlx:not(.book) .mlx-stage{grid-area:stage;min-height:0;align-self:stretch;overflow:hidden auto;overscroll-behavior:contain;place-items:safe center}.mlx:not(.book) .mlx-warn{grid-area:warn}
+ .mlx:not(.book) .mlx-talk{grid-area:talk;align-self:start}.mlx:not(.book) .mlx-nav{grid-area:nav;align-self:end}
+ .mlx-top b{font-size:17px}.mlx-pic{max-height:min(150px,36vh)}
+ .mlx-talk img{width:44px;height:52px;flex-basis:44px}.mlx-talk p{font-size:15.5px;padding:8px 10px}
+}
 @media (prefers-reduced-motion:reduce){.mlx{animation:none}.mlx-b.go.ready{animation:none}.mlx-dots i{transition:none}}
 /*COACH:END*/
 </style>
@@ -11839,7 +11900,8 @@ function renderHome(){const {g,i,d,a}=here(),el=$('v-home');const stars=a.done?'
  updateChips();renderDailyMini();if(REQ)showReqBubble();sizeScene()}
 // swimming and walking move with transforms, which need the tank and lobby widths in pixels
 function sizeScene(root=document){root.querySelectorAll('.water').forEach(w=>w.style.setProperty('--tw',w.clientWidth+'px'));const lob=root.querySelector?root.querySelector('#lobby'):null;if(lob)lob.style.setProperty('--lw',lob.clientWidth+'px')}
-let sizeT=0;window.addEventListener('resize',()=>{clearTimeout(sizeT);sizeT=setTimeout(()=>sizeScene(),150)});
+// a turned or resized screen: new widths on the very next frame, so no fish swims past its tank's new edge
+let sizeT=0;window.addEventListener('resize',()=>{cancelAnimationFrame(sizeT);sizeT=requestAnimationFrame(()=>sizeScene())});
 function updateChips(){const el=$('homeChips');if(!el)return;const {g,i,a}=here();if(!a.open){el.innerHTML=`<span>🐟 ${L('첫 수조를 열면 손님이 와요!','Visitors come once the first tank is open!')}</span>`;return}
  const vpm=visitorsPerMin(g,i),ipm=incomePerMin(g,i)+chainPerMin(),h=Math.round(100*happiness(a)*(Array.from({length:a.open}).some((_,k)=>hungry(a,k))?.9:1));
  el.innerHTML=`<span title="${L('손님/분','visitors/min')}">👥 ${vpm.toFixed(1)}${L('명/분','/min')}</span><span>😊 ${h}%</span><span>${COIN} +${short(ipm)}${L('/분','/min')}</span>${Object.keys(S.boosts).filter(boostOn).map(k=>`<span class="boost">${artPic((ITEMS.find(x=>x.boost===k)||{}).icon||'✨')} ${Math.ceil((S.boosts[k]-now())/60000)}${L('분','m')}</span>`).join('')}`}
@@ -12121,7 +12183,7 @@ function renderGrow(){const el=$('v-grow'),t=TAB.grow;let body='';
 function growMe(){const st=S.stats,acc=st.solved?Math.round(100*st.correct/st.solved):0,t=titleOf(S.lvl),days=Object.keys(S.hist).sort(),last14=[];const d0=new Date();
  for(let k=13;k>=0;k--){const d=new Date(d0);d.setDate(d.getDate()-k);const key=dayKey(d),h=S.hist[key]||{n:0,c:0};last14.push({k:key,l:String(d.getDate()),n:h.c,acc:h.n?h.c/h.n:0})}
  const mx=Math.max(5,...last14.map(x=>x.n));const W=330,H=150;
- const chart=`<svg class="vis" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}">${last14.map((x,j)=>{const bw=W/14-6,bx=3+j*(W/14),bh=(H-30)*x.n/mx;return `<rect x="${bx}" y="${H-18-bh}" width="${bw}" height="${Math.max(1,bh)}" rx="4" fill="${j===13?'#ff8a5b':'#4cb4ff'}"/><text x="${bx+bw/2}" y="${H-5}" font-size="10" text-anchor="middle" fill="#7d89b8">${x.l}</text>${x.n?`<text x="${bx+bw/2}" y="${H-22-bh}" font-size="10" text-anchor="middle" fill="#24305e" font-weight="700">${x.n}</text>`:''}`}).join('')}</svg>`;
+ const chart=`<svg class="vis chart14" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}">${last14.map((x,j)=>{const bw=W/14-6,bx=3+j*(W/14),bh=(H-30)*x.n/mx;return `<rect x="${bx}" y="${H-18-bh}" width="${bw}" height="${Math.max(1,bh)}" rx="4" fill="${j===13?'#ff8a5b':'#4cb4ff'}"/><text x="${bx+bw/2}" y="${H-5}" font-size="10" text-anchor="middle" fill="#7d89b8">${x.l}</text>${x.n?`<text x="${bx+bw/2}" y="${H-22-bh}" font-size="10" text-anchor="middle" fill="#24305e" font-weight="700">${x.n}</text>`:''}`}).join('')}</svg>`;
  // which skills got faster, which strands are strong
  const gains=Object.keys(S.sk).map(id=>({id,g:speedGain(id)})).filter(x=>x.g>=1&&SKILL_BY[x.id]).sort((a,b)=>b.g-a.g).slice(0,3);
  const strand={};for(const id in S.sk){const sk=SKILL_BY[id];if(!sk)continue;const s=strand[sk.strand]=strand[sk.strand]||{n:0,c:0};s.n+=S.sk[id].n;s.c+=S.sk[id].c}

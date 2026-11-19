@@ -343,8 +343,14 @@ code{font-family:var(--mono);background:#eef6f3;border-radius:6px;padding:1px 5p
 .pbtn{width:48px;height:48px;flex:0 0 48px;border:0;border-radius:14px;background:#fff;box-shadow:0 3px 0 #d4e6e1;font-size:20px;font-weight:900}
 .pbtn.hintb{background:#fff7d6;box-shadow:0 3px 0 #f0d77a}
 .ptitle{flex:1;min-width:0;display:flex;flex-direction:column}.ptitle small{color:var(--muted);font-weight:800}.ptitle b{font-size:18px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.pmain{display:grid;grid-template-columns:1fr;gap:12px;align-items:start}
-@media (min-width:860px){.pmain{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.pleft{position:sticky;top:calc(var(--hud) + 12px)}}
+.pmain{display:grid;grid-template-columns:minmax(0,1fr);gap:12px;align-items:start}   /* minmax: a long code line scrolls inside the code box instead of widening the page */
+/* stage and code side by side on wide screens and on any landscape screen (a turned phone or tablet, split screen), so the stage stays in view while coding */
+@media (min-width:860px),(orientation:landscape) and (min-width:600px){.pmain{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.pleft{position:sticky;top:calc(var(--hud) + 12px)}}
+/* a short landscape screen (a turned phone): the stage starts right under the title with Py's words above the code,
+   and the stage column scrolls on its own if it is taller than the screen */
+@media (orientation:landscape) and (min-width:600px) and (max-height:560px){.pleft{max-height:calc(100dvh - var(--hud) - 20px);overflow-y:auto;overscroll-behavior:contain;border-radius:20px}
+ #v-play{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-rows:auto auto 1fr;grid-template-areas:"head head" "stage say" "stage code";column-gap:12px;align-items:start}
+ #v-play>.phead{grid-area:head}#v-play>#pySay{grid-area:say;min-width:0}#v-play>.pmain{display:contents}#v-play .pleft{grid-area:stage}#v-play .pright{grid-area:code}#v-play #pySay .pyline{margin-top:0}}
 .stagebox{background:#fff;border-radius:20px;box-shadow:var(--shadow);border:1px solid var(--line);padding:8px;display:flex;flex-direction:column;align-items:center;min-height:120px;overflow:hidden}
 .edbox{background:var(--codebg);border-radius:18px;border:2px solid #e3ecdf;box-shadow:inset 0 2px 0 #fff;padding:6px 0;min-height:110px}
 #ask:empty{display:none}
@@ -382,6 +388,7 @@ body.bigcode .code,body.bigcode .typed textarea,body.bigcode .typed .thl,body.bi
 .cards small{width:100%;color:var(--muted);font-weight:800}
 .tile,.ocard{font-family:var(--mono);font-size:15px;min-height:46px;padding:6px 12px;border-radius:12px;border:0;background:#fff;box-shadow:0 4px 0 #cfdbea,0 1px 6px rgba(0,0,0,.06);text-align:left;white-space:pre}
 .tile:active,.ocard:active{transform:translateY(3px);box-shadow:0 1px 0 #cfdbea}
+.tile{max-width:100%}.tile .tcode{white-space:pre-wrap;overflow-wrap:anywhere}   /* a very long tile wraps inside the column instead of widening the page; shorter tiles look the same */
 .ocard{width:100%;background:#fffdf3}
 .copts{display:grid;gap:8px;margin-bottom:8px}.copt{position:relative;text-align:left;border:3px solid transparent;border-radius:16px;background:var(--codebg);padding:6px 4px 6px 40px;box-shadow:0 3px 0 #dfe8dc}
 .copt>b{position:absolute;left:10px;top:8px;width:24px;height:24px;border-radius:50%;background:var(--deep);color:#fff;display:grid;place-items:center;font-size:13px}
@@ -840,6 +847,8 @@ button.vm{border:0;background:none;padding:0;display:flex;flex-direction:column;
 .dv-crab.show{bottom:46%}
 .dv-sea .qn{position:absolute;right:10px;top:8px;font-weight:900;color:#fff;background:#0b5f5a99;border-radius:10px;padding:2px 8px}
 @media (min-width:860px){.dv-box .chest{width:76px;height:64px}}
+/* big screens (tablets): bigger chests further apart, and the code card no wider than it needs to be */
+@media (min-width:700px) and (min-height:600px){.dv-card{width:calc(100% - 20px);max-width:760px;margin:8px auto 0}.dv-floor{gap:clamp(14px,3vw,40px)}.dv-box .chest{width:100px;height:84px}.dv-box .gem{font-size:38px}.dv-box small{font-size:17px}.dv-box .tag{font-size:28px}}
 @media (prefers-reduced-motion:reduce){.sp-stars,.dv-sea::before,.fs-me,.fs-py,.fs-card .fs-pic::before,.fs-card .fs-pic img{animation:none}}
 .fs-ic.pgi{display:inline-block;width:24px;height:24px;vertical-align:middle}.fs-book .fs-ic.pgi{width:32px;height:32px;margin:auto}.fs-book{display:grid;place-items:center;padding:4px}
 .pg-big .pg-hero.pgi{width:120px;height:120px;margin:0 auto 2px}
@@ -933,11 +942,21 @@ button.vm{border:0;background:none;padding:0;display:flex;flex-direction:column;
 .bb-score{font-weight:800}.bb-praise{font-weight:700;color:#0b5f5a}
 .bb-coachbig img{width:110px;height:110px;object-fit:contain}
 .bb-card .bb-row{justify-content:center}
-@media (min-width:900px){
+/* arena and question panel side by side on wide screens and on any landscape screen (a turned phone, split screen) */
+@media (min-width:900px),(orientation:landscape) and (min-width:600px){
  .bb-main{flex-direction:row}
  .bb-arena{flex:1;height:auto}
  .bb-side{flex:0 0 min(520px,46vw);border-radius:24px 0 0 0}
+}
+@media (min-width:900px) and (min-height:561px){
  .bb-ride{font-size:200px}.bb-sprite{font-size:130px}.bb-py .py.big{width:150px;height:150px}.bb-boss{right:10%;top:12%}.bb-py{left:10%;bottom:10%}
+}
+/* a short landscape screen: a wider panel and a slimmer item bar leave room for the question */
+@media (orientation:landscape) and (min-width:600px) and (max-height:560px){
+ .bb-side{flex-basis:min(520px,54vw)}
+ .bb-top{min-height:48px;padding-top:2px;padding-bottom:2px}
+ .bb-panel{padding:10px 12px 8px}
+ .bb-items{padding-top:4px;padding-bottom:calc(4px + env(safe-area-inset-bottom))}
 }
 @media (prefers-reduced-motion:reduce){.bb-ride.glitch,.bb-sprite,.bb-ride.fixed,.bb-emo.rainbow{animation:none}}
 /* ================================================================ Py's Robot Burger Shop (the home screen) */
@@ -990,12 +1009,12 @@ button.rbm:hover{border-color:#ffb020}.rbm b{font-size:14px;line-height:1.25}.rb
 .mcoach{display:flex;align-items:flex-end;gap:8px;margin:10px auto 6px;max-width:330px;text-align:left}
 .mcoach img{width:58px;height:70px;object-fit:contain;object-position:50% 100%;flex:0 0 58px}
 .mcoach p{margin:0 0 6px;flex:1;background:#f2f5ff;border:1px solid #dfe5f7;border-radius:14px;padding:7px 11px;font-size:14px;font-weight:700;line-height:1.4;color:#34407a}
-.mcoach b{display:block;font-size:11.5px;font-weight:900;color:#5b6cff}
+.mcoach b{display:block;font-size:12px;font-weight:900;color:#5b6cff}
 #coachPop{position:fixed;left:max(8px,env(safe-area-inset-left));top:calc(var(--coach-top,62px) + env(safe-area-inset-top));z-index:2147483000;display:flex;align-items:flex-start;gap:4px;max-width:min(320px,calc(100vw - 16px));pointer-events:none;opacity:0;transform:translateY(-14px) scale(.92);transform-origin:0 0;transition:opacity .25s ease,transform .4s cubic-bezier(.2,1.5,.4,1);font-family:system-ui,-apple-system,'Apple SD Gothic Neo','Noto Sans KR',sans-serif;text-align:left}
 #coachPop.show{opacity:1;transform:none}
 #coachPop img{width:54px;height:64px;flex:0 0 54px;object-fit:contain;object-position:50% 0;filter:drop-shadow(0 4px 8px rgba(0,0,0,.28))}
 #coachPop p{margin:8px 0 0;background:#fff;border:2px solid #c9d4ff;border-radius:4px 16px 16px 16px;padding:6px 11px;font-size:13.5px;font-weight:700;line-height:1.38;color:#2a3470;box-shadow:0 8px 20px rgba(20,30,80,.22)}
-#coachPop b{display:block;font-size:11px;font-weight:900;color:#5b6cff}
+#coachPop b{display:block;font-size:12px;font-weight:900;color:#5b6cff}
 .me-pic{width:100%;height:100%;object-fit:cover;object-position:50% 18%;border-radius:inherit;display:block}
 /* safeNote(): ⚠️ safety and ℹ️ notice lines, the same look in every game; safeLink() in settings windows */
 .mg-note{margin:8px 0 0;padding:9px 12px;border:1px solid;border-radius:14px;font-size:14px;font-weight:700;line-height:1.45;text-align:left;text-wrap:pretty}
@@ -1048,8 +1067,19 @@ button.rbm:hover{border-color:#ffb020}.rbm b{font-size:14px;line-height:1.25}.rb
 .mlx-item .tx small{font-size:13px;font-weight:700;color:#5d6896;line-height:1.35}
 .mlx-item .st{font-size:18px}.mlx-item.seen{background:#f2fbf5;border-color:#c9ecd6}
 /* a small "📖 개념 다시 보기" chip a game can put next to a question */
-.mlx-chip{display:inline-flex;align-items:center;gap:4px;min-height:40px;padding:0 12px;border:0;border-radius:20px;background:#eef1ff;color:#3a4690;font:inherit;font-size:14px;font-weight:900;cursor:pointer}
+.mlx-chip{display:inline-flex;align-items:center;gap:4px;min-height:44px;padding:0 12px;border:0;border-radius:20px;background:#eef1ff;color:#3a4690;font:inherit;font-size:14px;font-weight:900;cursor:pointer}
 @media (max-width:420px){.mlx-card{padding:10px 12px 12px;border-radius:20px}.mlx-stage{min-height:170px}.mlx-talk p{font-size:16px}}
+/* a phone on its side: the picture (or the thing to try) on the left, the teacher and the buttons on the right, so the
+   title, the picture and Next are all on screen together (the notebook keeps its one column) */
+@media (orientation:landscape) and (max-height:500px){
+ .mlx{padding-top:max(6px,env(safe-area-inset-top));padding-bottom:max(6px,env(safe-area-inset-bottom))}
+ .mlx:not(.book) .mlx-card{width:min(880px,100%);display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);grid-template-rows:auto auto auto minmax(0,1fr) auto;grid-template-areas:"top top" "stage dots" "stage warn" "stage talk" "stage nav";gap:8px 14px;padding:10px 14px 12px}
+ .mlx:not(.book) .mlx-top{grid-area:top}.mlx:not(.book) .mlx-dots{grid-area:dots;align-self:center}
+ .mlx:not(.book) .mlx-stage{grid-area:stage;min-height:0;align-self:stretch;overflow:hidden auto;overscroll-behavior:contain;place-items:safe center}.mlx:not(.book) .mlx-warn{grid-area:warn}
+ .mlx:not(.book) .mlx-talk{grid-area:talk;align-self:start}.mlx:not(.book) .mlx-nav{grid-area:nav;align-self:end}
+ .mlx-top b{font-size:17px}.mlx-pic{max-height:min(150px,36vh)}
+ .mlx-talk img{width:44px;height:52px;flex-basis:44px}.mlx-talk p{font-size:15.5px;padding:8px 10px}
+}
 @media (prefers-reduced-motion:reduce){.mlx{animation:none}.mlx-b.go.ready{animation:none}.mlx-dots i{transition:none}}
 /*COACH:END*/
 </style>
@@ -3484,9 +3514,13 @@ const gridHead=()=>{const col=S.wear.color;return tryPic(['py-grid-head'],pyHead
 const DIRANG={E:0,S:90,W:180,N:-90};
 function pyHeadSVG(){const c=COLORS[S.wear.color]||COLORS.leaf,main=c[0].startsWith('url')?(S.wear.color==='gold'?'#ffc53d':'#4fb6ff'):c[0];
  return `<svg viewBox="0 0 40 40"><ellipse cx="20" cy="20" rx="17" ry="14" fill="${main}" stroke="${c[1]}" stroke-width="2"/><circle cx="27" cy="13" r="4.2" fill="#fff"/><circle cx="27" cy="27" r="4.2" fill="#fff"/><circle cx="28.4" cy="13" r="2.4" fill="#1f2b55"/><circle cx="28.4" cy="27" r="2.4" fill="#1f2b55"/><circle cx="12" cy="20" r="2" fill="${c[1]}" opacity=".5"/><path class="tongue" d="M37 20 h5 l2 -2 M42 20 l2 2" stroke="#ff4f6d" stroke-width="2" fill="none" stroke-linecap="round"/></svg>`}
-function GridView(host,cfg){const g=STAGE.parseGrid(cfg);let cs=48;
+// o.fit: the mission stage. On a landscape screen it may use most of the screen height (stage and code sit side by side there),
+// and refit() sizes it again after the screen turns or a split screen changes size
+function GridView(host,cfg,o={}){const g=STAGE.parseGrid(cfg);let cs=48;
  const st={x:g.px,y:g.py,d:g.dir,ang:DIRANG[g.dir],trail:[],grow:0,food:{...g.food}};
- function size(){const w=Math.max(200,(host.clientWidth||340)-8);cs=Math.floor(Math.min(56,w/g.w,(innerHeight*.42)/g.h));host.style.setProperty('--cs',cs+'px')}
+ function size(){const w=Math.max(200,(host.clientWidth||340)-8),hb=o.fit&&innerWidth>innerHeight&&innerWidth>=600?Math.max(innerHeight*.42,innerHeight-190):innerHeight*.42;cs=Math.floor(Math.min(56,w/g.w,hb/g.h));host.style.setProperty('--cs',cs+'px')}
+ // measure without the old grid, which can hold its column wider than the new screen
+ function refit(){const kids=[...host.children];kids.forEach(k=>k.style.display='none');const old=cs;size();kids.forEach(k=>k.style.display='');if(cs!==old)draw()}
  function cellHTML(x,y){const c=(g.rows[y]&&g.rows[y][x])||'.',k=x+','+y,n=st.food[k]||0;
   return `<div class="gc ${c==='~'?'water':c==='#'||c==='T'?'block':''} ${(x+y)%2?'odd':''}" data-k="${k}">${cellPic(c)}${n?`<span class="apple">${tryPic(['py-grid-apple'],'🍎','gim')}${n>1?`<b>${n}</b>`:''}</span>`:''}</div>`}
  function draw(){size();let h='';for(let y=0;y<g.h;y++)for(let x=0;x<g.w;x++)h+=cellHTML(x,y);
@@ -3509,7 +3543,7 @@ function GridView(host,cfg){const g=STAGE.parseGrid(cfg);let cs=48;
    case 'say':bubble(ev.s);sfx('print');return dur*1.5}
   return 0}
  draw();
- return {apply,reset:()=>{Object.assign(st,{x:g.px,y:g.py,d:g.dir,ang:DIRANG[g.dir],trail:[],grow:0,food:{...g.food}});draw()},redraw:draw,el:host}}
+ return {apply,reset:()=>{Object.assign(st,{x:g.px,y:g.py,d:g.dir,ang:DIRANG[g.dir],trail:[],grow:0,food:{...g.food}});draw()},redraw:draw,refit,el:host}}
 
 // ---------------------------------------------------------------- the turtle board (three stacked canvases: paper+target, ink, turtle)
 function TurtleView(host,o={}){const W=400;let px=340,scale=1,dpr=Math.min(2,window.devicePixelRatio||1);
@@ -3517,7 +3551,13 @@ function TurtleView(host,o={}){const W=400;let px=340,scale=1,dpr=Math.min(2,win
  const [c0,c1,c2]=host.querySelectorAll('canvas');const x0=c0.getContext('2d'),x1=c1.getContext('2d'),x2=c2.getContext('2d');
  let target=o.target||null,bg=null,turtles=[{x:0,y:0,h:0,show:true,c:'black'}],anim=null,view=200;
  function fit(extra){let m=200;const look=d=>{if(!d)return;for(const s of d.segs)m=Math.max(m,Math.abs(s.x1),Math.abs(s.y1),Math.abs(s.x2),Math.abs(s.y2));for(const p of d.dots)m=Math.max(m,Math.abs(p.x)+p.s/2);for(const t of d.texts)m=Math.max(m,Math.abs(t.x)+20,Math.abs(t.y)+10)};look(target);look(extra);view=Math.min(2000,m*1.05)}
- function size(){px=Math.min(Math.max(220,(host.clientWidth||340)-4),420);for(const c of [c0,c1,c2]){c.width=px*dpr;c.height=px*dpr;c.style.width=c.style.height=px+'px'}host.querySelector('.tboard').style.width=host.querySelector('.tboard').style.height=px+'px';scale=px/(2*view)}
+ // the board fits inside the box's padding (with its 3px frame); o.fit: the mission stage (see GridView), which on a landscape screen also fits the screen height
+ function want(){const cs=getComputedStyle(host),pad=parseFloat(cs.paddingLeft)+parseFloat(cs.paddingRight)||0,p=Math.min(Math.max(220,host.clientWidth?host.clientWidth-(pad?pad+6:4):336),420);return o.fit&&innerWidth>innerHeight&&innerWidth>=600?Math.min(p,Math.max(200,innerHeight-150)):p}
+ function size(){px=want();for(const c of [c0,c1,c2]){c.width=px*dpr;c.height=px*dpr;c.style.width=c.style.height=px+'px'}host.querySelector('.tboard').style.width=host.querySelector('.tboard').style.height=px+'px';scale=px/(2*view)}
+ // after the screen turns: measure without the old board, then redraw the paper and scale the ink already drawn
+ function refit(){const tb=host.querySelector('.tboard');if(!tb)return;tb.style.display='none';const p=want();tb.style.display='';if(p===px)return;
+  const keep=document.createElement('canvas');keep.width=c1.width;keep.height=c1.height;keep.getContext('2d').drawImage(c1,0,0);
+  size();paper();x1.setTransform(1,0,0,1,0,0);x1.clearRect(0,0,c1.width,c1.height);x1.drawImage(keep,0,0,c1.width,c1.height);sprite()}
  const P=(x,y)=>[(x+view)*scale*dpr,(view-y)*scale*dpr];
  function paper(){x0.setTransform(1,0,0,1,0,0);x0.fillStyle=bg||'#fffdf6';x0.fillRect(0,0,c0.width,c0.height);
   x0.strokeStyle='rgba(80,110,170,.09)';x0.lineWidth=1;const step=50;for(let v=-Math.floor(view/step)*step;v<=view;v+=step){const [a]=P(v,0),[,b]=P(0,v);x0.beginPath();x0.moveTo(a,0);x0.lineTo(a,c0.height);x0.stroke();x0.beginPath();x0.moveTo(0,b);x0.lineTo(c0.width,b);x0.stroke()}
@@ -3557,7 +3597,7 @@ function TurtleView(host,o={}){const W=400;let px=340,scale=1,dpr=Math.min(2,win
  // draw a whole drawing at once (gallery thumbnails, fast-forward)
  function drawAll(dr){for(const f of dr.fills)inkFill(f);for(const s of dr.segs)line(x1,s);for(const p of dr.dots)inkDot(p);for(const t of dr.texts)inkText(t);if(dr.bg){bg=dr.bg;paper()}turtles=dr.turtles.map(t=>({...t}));sprite()}
  reset();
- return {apply,reset,drawAll,setTarget:d=>{target=d;reset()},el:host}}
+ return {apply,reset,drawAll,refit,setTarget:d=>{target=d;reset()},el:host}}
 const wait=ms=>new Promise(r=>setTimeout(r,Math.max(0,ms)));
 
 // ---------------------------------------------------------------- Py's message board (console)
@@ -4909,7 +4949,10 @@ function greet(){setTimeout(()=>{if(!Y||VIEW!=='home'||modalOpen())return;const 
  else if(!s.tut.walk){s.tut.walk=1;save(true);caption('👆',L('화면을 끌면 걸어요. 로봇 앞 주황색 바닥에서 버거를 받아, 손님 테이블로 가져다줘요!','Drag to walk. Pick up burgers on the orange floor by a robot and carry them to the diners!'),null,true)}},600)}
 function stop(){if(!Y)return;cancelAnimationFrame(Y.raf);for(const [t,ev,fn,o] of Y.on)t.removeEventListener(ev,fn,o);Y=null}
 // measure the canvas itself: the shop box is centred and capped in width, so it is often narrower than its section
-function resize(){if(!Y)return;const r=Y.el.cv.getBoundingClientRect(),cw=Math.max(1,r.width),ch=Math.max(1,r.height);Y.cw=cw;Y.ch=ch;Y.k=cl(Math.min(cw/330,ch/600),.8,1.35);
+// zoom: phones see part of the room and the camera follows the child; a screen 600px or wider (a tablet, even upright)
+// zooms out until the whole room, its sign and the tables fit the width (about 930 room pixels), but never below .8;
+// there the name tags grow so they still show at 12px or more
+function resize(){if(!Y)return;const r=Y.el.cv.getBoundingClientRect(),cw=Math.max(1,r.width),ch=Math.max(1,r.height);Y.cw=cw;Y.ch=ch;Y.k=cl(Math.min(cw/330,ch/600),.8,1.35);if(cw>=600)Y.k=Math.max(.8,Math.min(Y.k,cw/930));Y.big=cw>=600;
  const dpr=Math.min(window.devicePixelRatio||1,2);Y.dpr=dpr;Y.el.cv.width=Math.round(cw*dpr);Y.el.cv.height=Math.round(ch*dpr)}
 const iso=(x,y)=>[(x-y)*TW/2,(x+y)*TH/2];
 
@@ -5206,11 +5249,11 @@ function poly(c,pts,fill,stroke){c.beginPath();pts.forEach(([x,y],i)=>i?c.lineTo
 function box(c,x,y,w,d,h,top,left,right){const A=iso(x,y),B=iso(x+w,y),C=iso(x+w,y+d),D=iso(x,y+d),u=p=>[p[0],p[1]-h];poly(c,[D,C,u(C),u(D)],left);poly(c,[B,C,u(C),u(B)],right);poly(c,[u(A),u(B),u(C),u(D)],top)}
 const quad=(x0,y0,x1,y1)=>[iso(x0,y0),iso(x1,y0),iso(x1,y1),iso(x0,y1)];
 function emo(c,e,x,y,size){const fs=c.fillStyle;c.fillStyle='#000';c.font=`${size}px ${EF}`;c.textAlign='center';c.textBaseline='middle';c.fillText(e,x,y);c.fillStyle=fs}
-function label(c,t,x,y,bg,fg='#24304a',pic){c.font=`800 13px ${TF}`;const p=pic?20:0,w=Math.min(120,c.measureText(t).width+12+p);c.fillStyle=bg;c.beginPath();c.roundRect(x-w/2,y-10,w,20,9);c.fill();c.strokeStyle='rgba(0,0,0,.08)';c.stroke();
+function label(c,t,x,y,bg,fg='#24304a',pic){c.font=`800 ${Y.big?Math.max(13,12/Y.k):13}px ${TF}`;const p=pic?20:0,w=Math.min(120,c.measureText(t).width+12+p);c.fillStyle=bg;c.beginPath();c.roundRect(x-w/2,y-10,w,20,9);c.fill();c.strokeStyle='rgba(0,0,0,.08)';c.stroke();
  if(pic){const h=22,iw=h*pic.naturalWidth/pic.naturalHeight;c.drawImage(pic,x-w/2+2+(20-iw)/2,y-h/2-1,iw,h)}
  c.fillStyle=fg;c.textAlign='center';c.textBaseline='middle';c.fillText(t,x+p/2,y+.5,w-8-p)}
 function wallQuad(c,x0,y0,x1,y1,h0,h1,fill){const a=iso(x0,y0),b=iso(x1,y1);poly(c,[[a[0],a[1]-h0],[b[0],b[1]-h0],[b[0],b[1]-h1],[a[0],a[1]-h1]],fill)}
-function bubble(c,x,ty,m,w){c.font=`900 14px ${TF}`;w=w||Math.max(34,c.measureText(m).width+16);c.fillStyle='#ffffff';c.beginPath();c.roundRect(x-w/2,ty-24,w,24,12);c.fill();c.beginPath();c.moveTo(x-5,ty);c.lineTo(x+5,ty);c.lineTo(x,ty+6);c.fill();emo(c,m,x,ty-12,16)}
+function bubble(c,x,ty,m,w){c.font=`900 ${Y.big?Math.max(14,12/Y.k):14}px ${TF}`;w=w||Math.max(34,c.measureText(m).width+16);c.fillStyle='#ffffff';c.beginPath();c.roundRect(x-w/2,ty-24,w,24,12);c.fill();c.beginPath();c.moveTo(x-5,ty);c.lineTo(x+5,ty);c.lineTo(x,ty+6);c.fill();emo(c,m,x,ty-12,16)}
 // a burger built from its layer pictures (bottom at y), slices overlapping by their thickness; emoji for a missing one
 function miniDish(c,d,x,y,s=11){const w=s*2.6;let cy=y,pt=0;
  d.forEach((k,i)=>{const n=layerName(k,i),f=LAYER_FIT[n]||[.2,.33],m=LAYER_FIT[n]&&img(`images/rb-layer-${n}.webp`);cy-=(pt+f[0])/2*w;pt=f[0];
@@ -5608,10 +5651,12 @@ function renderPlay(){const m=P.m,k=KIND[m.kind];
  setupStage();setupEditor();runbar();say(T(m.say))}
 function setupStage(){const m=P.m,box=$('stagebox');
  if(m.stage==='kitchen')P.view=KitchenView(box,m);else if(m.stage==='park')P.view=ParkView(box,m);
- else if(m.stage==='grid')P.view=GridView(box,m.grid);
- else if(m.stage==='turtle')P.view=TurtleView(box,{target:m.kind==='make'?null:MISSION.ref(m).stage.drawing()});
+ else if(m.stage==='grid')P.view=GridView(box,m.grid,{fit:true});
+ else if(m.stage==='turtle')P.view=TurtleView(box,{target:m.kind==='make'?null:MISSION.ref(m).stage.drawing(),fit:true});
  else P.view=TextView(box,{scene:m.scene});
  P.mem=MemView($('mem'))}
+// a turned tablet or phone, or a split screen that changes size: fit the garden or the drawing board again (it keeps what is drawn)
+let refitT=0;window.addEventListener('resize',()=>{clearTimeout(refitT);refitT=setTimeout(()=>{if(P&&P.view&&P.view.refit&&(VIEW==='play'||VIEW==='lab'))P.view.refit()},150)});
 const pySays=(html,mood='happy')=>{const b=$('pySay');if(b)b.innerHTML=`<div class="pyline">${pySVG(mood,{cls:'small'})}<div class="bubble">${html}</div></div>`};
 function setupEditor(){const m=P.m,ed=$('edbox'),ask=$('ask'),draft=m.rb?null:S.drafts[m.id],onChange=()=>{if(!m.rb&&['tiles','type','make'].includes(m.kind)&&P.ed&&P.ed.raw){S.drafts[m.id]=P.ed.raw();save(true)}};
  ask.innerHTML='';
@@ -5793,6 +5838,7 @@ const EXAMPLES={
  grid:[['🍎 사과 사냥','🍎 Apple hunt','for i in range(3):\n    move()\neat()\nturn_right()\nmove()\nmove()\nturn_right()\nmove()\nmove()\nmove()\neat()\nturn_left()\nturn_left()\nmove()\nmove()\nmove()\nturn_left()\nmove()\nmove()\nturn_left()\nmove()\nmove()\nmove()\nturn_right()\nmove()\nmove()\neat()']]};
 let LAB={stage:'turtle',code:{}};
 RENDER.lab=()=>{const st=LAB.stage,m={id:'lab-'+st,stage:st,kind:'make',grid:LABGRID};LAB.m=m;
+ $('v-play').innerHTML='';   // the last mission's #stagebox, #edbox and #runbar come first in the page and would take the playground's place
  const code=LAB.code[st]??S.drafts['lab-'+st]??(st==='turtle'?'from turtle import *\n':st==='grid'?'move()\n':'print("안녕!")\n');
  $('v-lab').innerHTML=`<div class="phead"><button class="pbtn" type="button" data-a="back" aria-label="${L('돌아가기','Back')}">←</button><div class="ptitle"><small>🎨 ${L('놀이터','Playground')}</small><b>${L('마음대로 코딩하기','Code anything')}</b></div><button class="pbtn" type="button" data-a="examples" aria-label="${L('예제','Examples')}">📚</button></div>
   <div class="seg labseg">${[['turtle','🐢 '+L('그림판','Drawing')],['text','💬 '+L('게시판','Messages')],['grid','🐍 '+L('정원','Garden')]].map(([k,t])=>`<button type="button" class="${st===k?'on':''}" data-a="labst" data-v="${k}">${t}</button>`).join('')}</div>

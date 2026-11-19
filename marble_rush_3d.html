@@ -276,7 +276,7 @@ button,input,select{font:inherit}button{cursor:pointer;touch-action:manipulation
 .primary:active:not(:disabled){transform:translateY(3px);box-shadow:0 1px 0 #1d5f86,0 4px 12px #31b9fa33}
 .mine-chip:active:not(:disabled){transform:scale(.92)}
 /* race view */
-.scene-panel{grid-area:scene;position:sticky;top:calc(var(--top) + var(--sat) + 12px);scroll-margin-top:calc(var(--top) + var(--sat) + 8px);min-width:0;overflow:hidden;border-radius:20px;border:1px solid #354462;height:min(76vh,860px);min-height:560px;background:#0e2046;box-shadow:0 16px 60px #0008;touch-action:manipulation}
+.scene-panel{grid-area:scene;position:sticky;top:calc(var(--top) + var(--sat) + 12px);scroll-margin-top:calc(var(--top) + var(--sat) + 8px);min-width:0;overflow:hidden;border-radius:20px;border:1px solid #354462;height:min(76vh,860px);height:min(860px,calc(100dvh - var(--top) - var(--sat) - 30px));min-height:420px;background:#0e2046;box-shadow:0 16px 60px #0008;touch-action:manipulation}
 .scene-panel canvas#scene{position:absolute;inset:0;display:block}
 .rank-board{position:absolute;left:10px;top:10px;width:min(220px,46%);background:#07142cd9;border:1px solid #7284a657;border-radius:12px;padding:8px;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);pointer-events:none}
 .rank-board h3{margin:0 0 5px;font-size:12px;color:#c1daf8;display:flex;justify-content:space-between;gap:6px;white-space:nowrap}
@@ -289,7 +289,7 @@ button,input,select{font:inherit}button{cursor:pointer;touch-action:manipulation
 .mini-btn{min-height:44px;min-width:44px;border:1px solid #99b4d16c;border-radius:12px;color:#fff;background:#102542e6;padding:8px 12px;font-size:14px;font-weight:800;white-space:nowrap;box-shadow:0 3px 0 #050a16aa}
 .race-dots{position:absolute;left:50%;top:10px;transform:translateX(-50%);display:flex;align-items:center;gap:5px;background:#07142cd9;border:1px solid #7284a657;border-radius:999px;padding:5px 10px;font-weight:900;font-size:13px;white-space:nowrap;pointer-events:none}
 .race-dots i{font-style:normal;width:24px;height:24px;border-radius:50%;display:grid;place-items:center;border:2px solid #9fb6d8;color:#9fb6d8;font-size:12px}
-.race-dots i.done{background:#9fb6d8;color:#07142c}.race-dots i.now{background:#fff;border-color:#fff;color:#07142c;box-shadow:0 0 10px #fff}
+.race-dots.low{top:auto;left:10px;transform:none;bottom:92px}.race-dots i.done{background:#9fb6d8;color:#07142c}.race-dots i.now{background:#fff;border-color:#fff;color:#07142c;box-shadow:0 0 10px #fff}
 .section-chip{position:absolute;left:50%;top:58px;transform:translateX(-50%);padding:6px 12px;border:1px solid #a4f9ff80;background:#091d3dd9;border-radius:999px;color:#d9faff;font-size:13px;font-weight:900;white-space:nowrap;pointer-events:none}
 .event-flash{position:absolute;top:30%;left:50%;transform:translate(-50%,-50%) scale(.85);font-size:clamp(20px,3.6vw,38px);white-space:nowrap;font-weight:1000;color:#fff;text-shadow:0 3px 4px #071029,0 0 22px #2cf9ef;opacity:0;pointer-events:none;transition:transform .2s,opacity .2s;z-index:3}
 .event-flash.show{opacity:1;transform:translate(-50%,-50%) scale(1)}
@@ -378,7 +378,7 @@ button,input,select{font:inherit}button{cursor:pointer;touch-action:manipulation
 .map.custom{border-color:#ffd84a66}.map.add{border-style:dashed;background:#101a2e}
 .lab-only{display:none}.lab-on .lab-only{display:block}.lab-on .race-only{display:none}
 .lab-scene .minimap,.lab-scene .rank-board,.lab-scene .hud-tools,.lab-scene .race-dots,.lab-scene .section-chip{display:none}
-.replay-skip{position:absolute;right:10px;bottom:92px;z-index:5}
+.replay-skip{position:absolute;right:74px;bottom:92px;z-index:5}
 .modal-card.wide{width:min(640px,100%)}
 .modal-card h3{font-size:16px;margin:16px 0 8px;color:#cfe0ff}.modal-card h3 small{color:#9fb6d8;font-weight:800;margin-left:6px}
 .chip{min-height:44px;border:1px solid #3b5073;background:#1a2a47;color:#e6efff;border-radius:999px;padding:8px 14px;font-size:14px;font-weight:800;display:inline-flex;align-items:center;gap:6px;box-shadow:0 2px 0 #050a16}
@@ -424,7 +424,7 @@ button,input,select{font:inherit}button{cursor:pointer;touch-action:manipulation
 .skin-top p{margin:0;font-size:14px;color:#cfe0ff;text-align:center;line-height:1.45}
 .opts{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:7px}
 .opt{display:flex;flex-direction:column;align-items:center;gap:2px;min-height:76px;border:1px solid #33486e;background:#132240;color:#fff;border-radius:14px;padding:7px 4px;font-size:13px;box-shadow:0 2px 0 #050a16}
-.opt .oi{font-size:26px;line-height:1.1}.opt b{font-size:13px}.opt small{font-size:11.5px;color:#a9bbd8;line-height:1.2;text-align:center}
+.opt .oi{font-size:26px;line-height:1.1}.opt b{font-size:13px}.opt small{font-size:12px;color:#a9bbd8;line-height:1.2;text-align:center}
 .opt.on{border-color:#ffd84a;box-shadow:0 0 0 2px #ffd84a,0 2px 0 #050a16}.opt[aria-disabled="true"]{opacity:.7;background:#0e1830}
 .badge-sum{font-size:14px;color:#cfe0ff;margin:0 0 10px}
 .badges{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:8px}
@@ -514,11 +514,25 @@ button,input,select{font:inherit}button{cursor:pointer;touch-action:manipulation
 @media(max-width:520px){.ch-grid{grid-template-columns:1fr}.ch-card{min-height:0}.ch-steps li{font-size:12px;padding:6px 2px}.bars .bl{max-width:120px}.ch-time{font-size:20px}.guess>span:first-child{flex:1 1 100%}.ch-card small,.guess small{font-size:14px}}
 @media(max-width:400px){.ch-steps .se{display:none}}
 @media(max-width:520px){.lab-ov .lab-lanes,.lab-ov .lab-note{display:none}.lab-ov .lab-opts{grid-template-columns:repeat(3,1fr);gap:6px}.lab-ov .lab-opt{font-size:14px;padding:8px 5px;min-height:58px;line-height:1.25}.lab-ov .lab-diff{font-size:13px;padding:6px 9px}.lab-ov .lab-ask{margin:6px 0}.lab-ov .result-card{padding:12px}
- .lab-grid{grid-template-columns:1fr}.lab-steps{grid-template-columns:1fr}.lab-steps li{display:flex;gap:6px;align-items:baseline;text-align:left}.result-actions.three{grid-template-columns:1fr}.replay-skip{bottom:150px}.lab-q{font-size:16px}}
+ .lab-grid{grid-template-columns:1fr}.lab-steps{grid-template-columns:1fr}.lab-steps li{display:flex;gap:6px;align-items:baseline;text-align:left}.result-actions.three{grid-template-columns:1fr}.replay-skip{right:10px;bottom:150px}.lab-q{font-size:16px}}
+/* phones held sideways (short landscape): the Pause button sits in the race view (the one under it is off-screen), and the
+   finish and lab cards get wider and tighter so the guesses and the next-step buttons are in view without hunting for them */
+.hud-pause{display:none}
+/* tablets: the lab result card leaves the bench in view above it, so its last row of buttons stays on the card's bottom edge while the explanation scrolls */
+@media(min-width:521px){.lab-ov .result-card>.result-actions.three:last-child{position:sticky;bottom:-16px;z-index:1;margin:0 -18px -16px;padding:10px 18px 16px;background:linear-gradient(#11203a00,#11203a 12px)}}
+@media(max-height:520px) and (orientation:landscape){
+ .hud-pause{display:grid;place-items:center;width:44px;padding:0;font-size:18px}
+ .result-overlay{padding:8px}.result-card{width:min(760px,100%);padding:12px 16px}
+ .trophy{font-size:38px}.champ{width:52px;height:52px;margin:6px auto;font-size:18px}
+ .result-card>.result-actions:last-child{position:sticky;bottom:-12px;z-index:1;margin:0 -16px -12px;padding:10px 16px 12px;background:linear-gradient(#11203a00,#11203a 12px)}
+ .lab-ov .result-card{max-height:100%;padding:10px 16px 12px}.lab-ov .result-card>.result-actions.three:last-child{bottom:-12px;margin:0 -16px -12px;padding:10px 16px 12px}.lab-ov .result-card>.result-actions:not(.three):last-child{position:static;margin:0;padding:0;background:none}.lab-ov .lab-lanes,.lab-ov .lab-note{display:none}
+ .lab-ov .lab-q{font-size:16px;margin:2px 0 6px}.lab-ov .lab-diff{font-size:13px;padding:6px 9px}.lab-ov .lab-ask{margin:4px 0 6px}
+ .lab-ov .lab-opts{grid-template-columns:repeat(3,1fr);gap:6px}.lab-ov .lab-opt{font-size:14px;padding:8px 5px;min-height:52px;line-height:1.25}
+}
 /* mini lessons (MiniLesson): pictures and small tries on a lesson page (a white card), and the 📖 concept notebook buttons */
 .lab-books{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}.lab-books .note-side{margin-top:0}
 .nb-book{width:100%;margin:0 0 12px}.ch-books{display:flex;justify-content:flex-end;margin:-2px 0 10px}
-.mrl-again{display:flex;width:fit-content;margin:0 auto 10px}
+.mrl-again{display:flex;width:fit-content;margin:0 auto 10px}.mlx-chip.mrl-again{min-height:44px}
 .mrl{width:100%;display:grid;gap:8px;justify-items:center;color:#22305e;font-size:15px;line-height:1.45}
 .mrl-cv{display:block;width:100%;max-width:430px;height:auto}
 .mrl-row{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;width:100%}.mrl-row.two{display:grid;grid-template-columns:1fr 1fr;max-width:430px}
@@ -570,12 +584,12 @@ button,input,select{font:inherit}button{cursor:pointer;touch-action:manipulation
 .mcoach{display:flex;align-items:flex-end;gap:8px;margin:10px auto 6px;max-width:330px;text-align:left}
 .mcoach img{width:58px;height:70px;object-fit:contain;object-position:50% 100%;flex:0 0 58px}
 .mcoach p{margin:0 0 6px;flex:1;background:#f2f5ff;border:1px solid #dfe5f7;border-radius:14px;padding:7px 11px;font-size:14px;font-weight:700;line-height:1.4;color:#34407a}
-.mcoach b{display:block;font-size:11.5px;font-weight:900;color:#5b6cff}
+.mcoach b{display:block;font-size:12px;font-weight:900;color:#5b6cff}
 #coachPop{position:fixed;left:max(8px,env(safe-area-inset-left));top:calc(var(--coach-top,62px) + env(safe-area-inset-top));z-index:2147483000;display:flex;align-items:flex-start;gap:4px;max-width:min(320px,calc(100vw - 16px));pointer-events:none;opacity:0;transform:translateY(-14px) scale(.92);transform-origin:0 0;transition:opacity .25s ease,transform .4s cubic-bezier(.2,1.5,.4,1);font-family:system-ui,-apple-system,'Apple SD Gothic Neo','Noto Sans KR',sans-serif;text-align:left}
 #coachPop.show{opacity:1;transform:none}
 #coachPop img{width:54px;height:64px;flex:0 0 54px;object-fit:contain;object-position:50% 0;filter:drop-shadow(0 4px 8px rgba(0,0,0,.28))}
 #coachPop p{margin:8px 0 0;background:#fff;border:2px solid #c9d4ff;border-radius:4px 16px 16px 16px;padding:6px 11px;font-size:13.5px;font-weight:700;line-height:1.38;color:#2a3470;box-shadow:0 8px 20px rgba(20,30,80,.22)}
-#coachPop b{display:block;font-size:11px;font-weight:900;color:#5b6cff}
+#coachPop b{display:block;font-size:12px;font-weight:900;color:#5b6cff}
 .me-pic{width:100%;height:100%;object-fit:cover;object-position:50% 18%;border-radius:inherit;display:block}
 /* safeNote(): ⚠️ safety and ℹ️ notice lines, the same look in every game; safeLink() in settings windows */
 .mg-note{margin:8px 0 0;padding:9px 12px;border:1px solid;border-radius:14px;font-size:14px;font-weight:700;line-height:1.45;text-align:left;text-wrap:pretty}
@@ -628,8 +642,19 @@ button,input,select{font:inherit}button{cursor:pointer;touch-action:manipulation
 .mlx-item .tx small{font-size:13px;font-weight:700;color:#5d6896;line-height:1.35}
 .mlx-item .st{font-size:18px}.mlx-item.seen{background:#f2fbf5;border-color:#c9ecd6}
 /* a small "📖 개념 다시 보기" chip a game can put next to a question */
-.mlx-chip{display:inline-flex;align-items:center;gap:4px;min-height:40px;padding:0 12px;border:0;border-radius:20px;background:#eef1ff;color:#3a4690;font:inherit;font-size:14px;font-weight:900;cursor:pointer}
+.mlx-chip{display:inline-flex;align-items:center;gap:4px;min-height:44px;padding:0 12px;border:0;border-radius:20px;background:#eef1ff;color:#3a4690;font:inherit;font-size:14px;font-weight:900;cursor:pointer}
 @media (max-width:420px){.mlx-card{padding:10px 12px 12px;border-radius:20px}.mlx-stage{min-height:170px}.mlx-talk p{font-size:16px}}
+/* a phone on its side: the picture (or the thing to try) on the left, the teacher and the buttons on the right, so the
+   title, the picture and Next are all on screen together (the notebook keeps its one column) */
+@media (orientation:landscape) and (max-height:500px){
+ .mlx{padding-top:max(6px,env(safe-area-inset-top));padding-bottom:max(6px,env(safe-area-inset-bottom))}
+ .mlx:not(.book) .mlx-card{width:min(880px,100%);display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);grid-template-rows:auto auto auto minmax(0,1fr) auto;grid-template-areas:"top top" "stage dots" "stage warn" "stage talk" "stage nav";gap:8px 14px;padding:10px 14px 12px}
+ .mlx:not(.book) .mlx-top{grid-area:top}.mlx:not(.book) .mlx-dots{grid-area:dots;align-self:center}
+ .mlx:not(.book) .mlx-stage{grid-area:stage;min-height:0;align-self:stretch;overflow:hidden auto;overscroll-behavior:contain;place-items:safe center}.mlx:not(.book) .mlx-warn{grid-area:warn}
+ .mlx:not(.book) .mlx-talk{grid-area:talk;align-self:start}.mlx:not(.book) .mlx-nav{grid-area:nav;align-self:end}
+ .mlx-top b{font-size:17px}.mlx-pic{max-height:min(150px,36vh)}
+ .mlx-talk img{width:44px;height:52px;flex-basis:44px}.mlx-talk p{font-size:15.5px;padding:8px 10px}
+}
 @media (prefers-reduced-motion:reduce){.mlx{animation:none}.mlx-b.go.ready{animation:none}.mlx-dots i{transition:none}}
 /*COACH:END*/
 </style>
@@ -649,7 +674,7 @@ button,input,select{font:inherit}button{cursor:pointer;touch-action:manipulation
    <canvas id="scene" aria-label="마블 레이스 경기장" data-en-aria-label="Marble race track"></canvas>
    <div class="rank-board" id="rankBoard"></div>
    <canvas id="minimap" class="minimap" aria-label="전체 코스 지도" data-en-aria-label="Course map"></canvas>
-   <div class="hud-tools"><button class="mini-btn" id="cameraBtn" type="button">🎥</button><button class="mini-btn" id="speedBtn" type="button">⚡ 1×</button></div>
+   <div class="hud-tools"><button class="mini-btn hud-pause hidden" id="hudPause" type="button" aria-label="일시정지" data-en-aria-label="Pause">⏸</button><button class="mini-btn" id="cameraBtn" type="button">🎥</button><button class="mini-btn" id="speedBtn" type="button">⚡ 1×</button></div>
    <div class="race-dots hidden" id="raceDots"></div>
    <div class="section-chip" id="sectionChip"></div>
    <div class="slowmo hidden" id="slowmo" data-en="🎬 SLOW MOTION">🎬 슬로모션</div>
@@ -1788,8 +1813,15 @@ function updateHud(force){
  const title=phase==='ready'||phase==='countdown'?L('🚦 출발 순서','🚦 Lineup'):L('🏆 실시간 순위','🏆 Live ranking');
  $('rankBoard').innerHTML=`<h3><span>${title}</span><span style="color:#56f7da">${leadChanges?L(`역전 ${leadChanges}회`,`${leadChanges} lead change${leadChanges===1?'':'s'}`):''}</span></h3>${rows}`;
  const s=course.sections[Math.max(0,secIdx)]||course.sections[0],[em,lab]=SECTION[s.type];
- $('sectionChip').textContent=`${theme.name} · ${em} ${lab} · ${Math.max(1,secIdx+1)}/${course.sections.length}`;
- $('sectionChip').classList.toggle('hidden',vw<640);
+ const chip=$('sectionChip');chip.textContent=`${theme.name} · ${em} ${lab} · ${Math.max(1,secIdx+1)}/${course.sections.length}`;
+ // centred over the track, unless that runs into the ranking board (tablets held sideways): then just right of the board, or hidden when there is no room
+ chip.style.left='';chip.classList.toggle('hidden',vw<640);
+ if(vw>=640){const rb=$('rankBoard'),w=chip.offsetWidth,lo=rb.offsetLeft+rb.offsetWidth+8+w/2,hi=MM.offsetLeft-8-w/2;
+  if(panelEl.clientWidth/2<lo){if(lo<=hi)chip.style.left=Math.round(lo)+'px';else chip.classList.add('hidden')}}
+ // the league's race dots sit top centre; on a narrow race view (split screen) that runs into the ranking board or the buttons, so they go bottom left as on phones
+ const dots=$('raceDots');dots.classList.remove('low');
+ if(!dots.classList.contains('hidden')&&innerWidth>520){const rb=$('rankBoard'),tools=document.querySelector('.hud-tools'),w=dots.offsetWidth,c=panelEl.clientWidth/2;
+  if(c-w/2<rb.offsetLeft+rb.offsetWidth+8||c+w/2>tools.offsetLeft-8)dots.classList.add('low')}
 }
 function updateLeagueUI(){
  const dots=$('raceDots'),info=$('leagueInfo');
@@ -1802,6 +1834,8 @@ function setControls(){
  const running=phase==='running'||phase==='countdown';
  $('startBtn').textContent=labMode?(running?L('🔬 실험 다시 시작','🔬 Restart experiment'):phase==='finished'?L('🔁 다시 실험','🔁 Run it again'):L('🔬 예상하고 실험 시작!','🔬 Guess, then run it!')):chalRun?(running?L('🎯 시험 다시 시작','🎯 Restart the test'):phase==='finished'?L('🔁 그대로 다시 시험','🔁 Test it again'):L('🎯 시험 주행 시작!','🎯 Start the test run!')):mode==='league'&&league&&!league.done&&phase!=='running'?L(`🏁 ${league.race}경기 시작!`,`🏁 Start race ${league.race}!`):running?L('🏁 새 레이스','🏁 New race'):L('🏁 레이스 시작!','🏁 Start race!');
  $('pauseBtn').disabled=phase!=='running';$('pauseBtn').textContent=paused?L('▶ 이어하기','▶ Resume'):L('⏸ 일시정지','⏸ Pause');
+ // the same Pause inside the race view, shown only on phones held sideways (CSS), where the one under the view is off-screen
+ const hp=$('hudPause');hp.classList.toggle('hidden',phase!=='running');hp.textContent=paused?'▶':'⏸';hp.setAttribute('aria-label',paused?L('이어하기','Resume'):L('일시정지','Pause'));hp.setAttribute('aria-pressed',String(paused));
  for(const [id,on] of [['voiceToggle',voiceOn],['sfxToggle',sfxOn]]){$(id).classList.toggle('on',on);$(id).setAttribute('aria-checked',String(on))}
  $('voiceSelect').disabled=!voiceOn||!langVoices().length;
  $('ballCount').value=numBalls;$('ballRange').value=numBalls;$('ballRange').style.setProperty('--p',((numBalls-2)/14*100).toFixed(1)+'%');
@@ -1868,7 +1902,10 @@ function showResults(){
 function confetti(){const root=$('confettiLayer');root.innerHTML='';for(let i=0;i<80;i++){const el=document.createElement('div');el.className='confetti';el.style.left=rand(1,99)+'%';el.style.background=PALETTE[i%16][1];el.style.setProperty('--d',rand(2,4)+'s');el.style.setProperty('--dl',rand(0,.8)+'s');el.style.setProperty('--sx',rand(-140,140)+'px');root.appendChild(el)}setTimeout(()=>root.innerHTML='',5200)}
 
 // ---------------------------------------------------------------- loop
-function resize(){const r=panelEl.getBoundingClientRect();vw=Math.max(1,r.width);vh=Math.max(1,r.height);dpr=Math.min(window.devicePixelRatio||1,2);C.width=Math.round(vw*dpr);C.height=Math.round(vh*dpr);C.style.width=vw+'px';C.style.height=vh+'px';if(course)buildMinimap()}
+let oneColumn=null;
+function resize(){const r=panelEl.getBoundingClientRect();vw=Math.max(1,r.width);vh=Math.max(1,r.height);dpr=Math.min(window.devicePixelRatio||1,2);C.width=Math.round(vw*dpr);C.height=Math.round(vh*dpr);C.style.width=vw+'px';C.style.height=vh+'px';if(course)buildMinimap();
+ // a tablet turned to portrait mid-race stacks the race view on top again: bring it back in view if the page was scrolled down the side panel
+ const one=matchMedia('(max-width:860px)').matches;if(one&&oneColumn===false&&['countdown','running','replay'].includes(phase))try{panelEl.scrollIntoView({block:'start'})}catch(e){}oneColumn=one}
 let lastFrame=0;
 function frame(now){
  const dt=Math.min(.05,(now-(lastFrame||now))/1000);lastFrame=now;clock+=dt;
@@ -2663,7 +2700,7 @@ $('minePicker').addEventListener('click',e=>{const b=e.target.closest('[data-min
 try{$('noticeLink').href='notice.html?lang='+LANG}catch(e){}
 $('namesBtn').addEventListener('click',()=>{$('namesPanel').classList.toggle('hidden');renderNames()});
 $('namesPanel').addEventListener('input',e=>{const i=e.target.dataset.name;if(i==null)return;names[+i]=e.target.value.replace(/[<>]/g,'').slice(0,10);save();renderMinePicker();updateHud(true)});
-$('startBtn').addEventListener('click',startRace);$('pauseBtn').addEventListener('click',togglePause);
+$('startBtn').addEventListener('click',startRace);$('pauseBtn').addEventListener('click',togglePause);$('hudPause').addEventListener('click',togglePause);
 $('resetBtn').addEventListener('click',()=>{prepare();if(labMode){labPred=null;labPredictCard();return}setCaption(L('↻ 다시 준비했어요. 출발 버튼을 눌러 주세요!','↻ Reset. Press Start when you are ready!'))});
 $('cheerBtn').addEventListener('click',cheer);
 // during design challenge tests the build button improves the challenge course (the builder's 🛠️ Free build leaves the challenge)
@@ -2736,6 +2773,8 @@ $('resetDataBtn').addEventListener('click',e=>askConfirm({title:L('🗑️ 정�
 if(ME){$('meAv').textContent=ME.av;$('meName').textContent=ME.name;$('meChip').title=L(`플레이어: ${ME.name}`,`Player: ${ME.name}`);$('meChip').classList.remove('hidden');$('mineLabel').textContent=L(`${ME.av} ${ME.name}의 응원 구슬`,`${ME.av} ${ME.name}'s marble`)}
 window.addEventListener('keydown',e=>{if(modalStack.length||MiniLesson.on||['INPUT','SELECT','TEXTAREA'].includes(e.target.tagName))return;if(e.code==='Space'){e.preventDefault();togglePause()}else if(e.code==='KeyC')cheer();else if(e.code==='KeyV'){cam.mode=(cam.mode+1)%3;setControls()}});
 window.addEventListener('resize',resize);
+// the race view can change size without a window resize (rotation settling, split screen, the address bar), so watch it too
+if(window.ResizeObserver)try{new ResizeObserver(()=>{const r=panelEl.getBoundingClientRect();if(Math.abs(r.width-vw)>.5||Math.abs(r.height-vh)>.5){resize();if(st)updateHud(true)}}).observe(panelEl)}catch(e){}
 if('speechSynthesis' in window){speechSynthesis.getVoices();speechSynthesis.addEventListener?.('voiceschanged',fillVoiceSelect)}
 fillVoiceSelect();setTimeout(fillVoiceSelect,600);
 checkBadges(true);resize();prepare();setCaption(L('환영합니다! 응원할 구슬을 고르고 출발 버튼을 눌러요!','Welcome! Pick your marble and press Start!'));

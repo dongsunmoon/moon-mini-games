@@ -816,7 +816,7 @@ main{width:min(980px,100%);margin:0 auto;padding:14px max(12px,env(safe-area-ins
  .tiles{grid-template-columns:repeat(4,1fr);gap:8px}
  .tile{min-height:108px;padding:10px 4px 8px;border-radius:18px}
  .tile .ic{font-size:34px;height:44px}.tile .ic .ei{width:44px;height:44px}
- .tile b{font-size:13.5px}.tile small{font-size:11px}
+ .tile b{font-size:13.5px}.tile small{font-size:12px}
 }
 @media (max-width:560px){
  main{padding-top:10px}
@@ -846,6 +846,69 @@ main{width:min(980px,100%);margin:0 auto;padding:14px max(12px,env(safe-area-ins
 @media (max-width:370px){
  .opts.n4{grid-template-columns:1fr}
  .bins.n3 b{font-size:12.5px}
+}
+/* small switches and speaker buttons get an invisible 44px touch area (they look the same) */
+.switch::before,.sayb.sm::before{content:"";position:absolute;inset:-6px -2px}.sayb.sm{position:relative}.sayb.sm::before{inset:-6px}
+/* landscape (tablets, rotated phones, split screen): the battle fits the screen side by side. The fighters and the
+   items stay on the left; the question card on the right scrolls on its own when it is taller than the screen,
+   and lab pictures shrink to the height that is left so the check button stays in view */
+@media (orientation:landscape) and (min-width:640px){
+ main:has(>#v-play:not(.hidden)){padding-bottom:12px}
+ #v-play{display:grid;grid-template-columns:clamp(220px,28%,300px) minmax(0,1fr);grid-template-rows:auto minmax(0,1fr);column-gap:14px;max-width:1080px;margin:0 auto;
+  height:calc(100dvh - max(8px,env(safe-area-inset-top)) - 78px - env(safe-area-inset-bottom));min-height:240px;--simh:clamp(140px,calc(100dvh - 330px),440px)}
+ #v-play>.arena{grid-area:1/1;align-self:start;max-width:none;margin:0}
+ #v-play>.itembar{grid-area:2/1;align-self:start;position:static;max-width:none;margin:12px 0 0;grid-template-columns:1fr 1fr;padding:6px 0 0;background:none}
+ #v-play>.chal{grid-area:1/2/3/3;align-self:start;max-width:none;margin:0;max-height:100%;overflow-y:auto;overscroll-behavior:contain}
+ #v-play .fighters{flex-direction:column;align-items:stretch;gap:4px}
+ #v-play .fighters .vs{align-self:center;font-size:13px;line-height:1}
+ #v-play .simsvg{width:auto;max-width:100%;max-height:var(--simh);margin-left:auto;margin-right:auto}
+ #v-play .simwrap{max-width:none;background:none;box-shadow:none;border-radius:0;overflow:visible}
+ #v-play .simwrap .simsvg{max-width:min(100%,520px);background:#eaf4ff;box-shadow:0 0 0 3px #dbe7f7;border-radius:18px}
+ #v-play .simwrap.sq .simsvg{max-width:min(100%,340px)}
+ #v-play .opts.n3{grid-template-columns:repeat(3,1fr)}
+ #v-play .labhead{flex-wrap:wrap;row-gap:4px}#v-play .labhead div{order:2;flex:1 1 100%}#v-play .labhead .score{margin-left:auto}
+ #v-play .gridwrap{max-width:min(360px,max(300px,calc(var(--simh) + 12px)))}
+ #v-play .ins svg{width:auto;max-width:100%;max-height:calc(var(--simh) - 40px);margin:0 auto}
+ #v-play .silwall{height:min(170px,var(--simh))}#v-play .sil{font-size:min(120px,calc(var(--simh) * .7))}
+ #v-play .hands{height:min(170px,var(--simh));font-size:min(120px,calc(var(--simh) * .7))}
+ #v-play .beaker{height:min(118px,calc(var(--simh) * .75))}
+ #v-play .cycsteps{grid-template-columns:1fr 1fr;column-gap:12px}
+ #v-play .cbody:has(.simsvg,.silwall) .opts.n4{grid-template-columns:repeat(4,1fr)}
+}
+/* short landscape (phones on their side): a smaller arena so the fighters and the items fit beside the question */
+@media (orientation:landscape) and (min-width:640px) and (max-height:520px){
+ #v-play{column-gap:10px;grid-template-rows:minmax(0,1fr) auto}
+ #v-play>.arena{padding:6px 10px 8px;border-radius:20px;max-height:100%;overflow-y:auto}
+ #v-play>.itembar{align-self:end}
+ #v-play .ptitle{font-size:12px;margin-bottom:2px}
+ #v-play .avw .ava{width:44px;height:44px;font-size:26px}
+ #v-play .fimg{width:50px;height:50px;font-size:34px;border-radius:16px}#v-play .fimg .ei{width:46px;height:46px}
+ #v-play .fighters b{font-size:13px}#v-play .hearts{font-size:15px}#v-play .combo{min-height:0}
+ #v-play .fighters .vs{display:none}
+ #v-play .foesay{margin-top:6px;padding:5px 10px;font-size:13px;line-height:1.35}
+ #v-play>.itembar{margin-top:8px;gap:6px}
+ #v-play .tool{min-height:50px}
+ #v-play{--simh:clamp(110px,calc(100dvh - 240px),220px)}
+ #v-play .cbody:has(.simsafe){--simh:clamp(100px,calc(100dvh - 280px),200px)}
+ #v-play>.chal{padding:8px 12px 10px}
+ #v-play .chead{float:right;margin:0 0 4px 10px;position:relative;z-index:1}
+ #v-play .cbody>:not(.qtext),#v-play .chal>.ls-cuebox{clear:both}
+ #v-play .mg-note.simsafe{margin:2px 0 6px;padding:4px 8px;font-size:12px}
+ #v-play .qtext{font-size:18px;margin:2px 2px 8px}
+ #v-play .qart{font-size:34px;margin:0 0 6px}
+ #v-play .opt{min-height:48px}
+ #v-play .picks{grid-template-columns:repeat(auto-fit,minmax(86px,1fr));gap:8px}#v-play .pk{min-height:70px}#v-play .pk .ic{font-size:28px}
+ #v-play .oxb{min-height:76px}
+ #v-play .speedcard .oxb{min-height:80px}#v-play .claim.big .says{min-height:64px}
+ #v-play .sortcard{margin:2px auto 8px;padding:8px}#v-play .sortcard .ic{font-size:44px}
+ #v-play .bin{min-height:80px}
+ #v-play .lane{min-height:52px;padding:5px 10px}
+}
+/* the smallest phones on their side: the four items in one row of pictures (the names stay for screen readers) */
+@media (orientation:landscape) and (min-width:640px) and (max-height:380px){
+ #v-play>.itembar{grid-template-columns:repeat(4,1fr);margin-top:6px;padding-top:4px}
+ #v-play .tool{min-height:46px}#v-play .tool .ic .ei{width:28px;height:28px}
+ #v-play .tool .tlb{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
 }
 /* indicator lab */
 .indi{display:flex;gap:16px;align-items:center;justify-content:center;background:#f6f2ff;border-radius:18px;padding:12px;margin-bottom:8px}
@@ -1159,6 +1222,33 @@ button.ty-prog:active{transform:translateY(2px)}
 .ty-pvneed{flex:1;min-height:58px;border-radius:16px;background:#fff3e6;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-weight:900;color:#b45f00;text-align:center;padding:4px 8px}
 .ty-pvneed small{font-size:13px;font-weight:800}
 @media (prefers-reduced-motion:reduce){.ty-pvgo{animation:none}}
+/* landscape (tablets, rotated phones, split screen): the shop fills the screen without a page scroll. On a short
+   screen the order sits top left, the steps and hand-over buttons bottom right, so the middle of the shop stays in view */
+@media (orientation:landscape) and (min-width:640px){
+ main:has(>#v-learn:not(.hidden)){padding-bottom:14px}
+ .ty-board .ty-labin{max-width:720px}
+}
+@media (orientation:landscape) and (min-width:640px) and (max-height:560px){
+ main:has(>#v-learn:not(.hidden)){padding-bottom:8px}
+ .ty{height:calc(100dvh - max(8px,env(safe-area-inset-top)) - 74px - env(safe-area-inset-bottom));min-height:260px;border-radius:20px}
+ .ty-top{left:8px;right:8px;top:8px;justify-content:space-between}
+ .ty-order{flex:0 1 auto;max-width:min(56%,520px);min-height:48px;padding:6px 10px;font-size:14.5px}
+ .ty-bot{left:auto;right:8px;bottom:8px;width:min(44%,400px)}
+ .ty-hand{align-self:flex-end}
+ .ty-cap{padding:8px 10px;font-size:14.5px;line-height:1.4;min-height:44px}
+ .ty-give{min-height:52px;padding:6px 10px}
+ .ty-ban{top:64px}
+ .ty-lab{padding:6px}
+ .ty-labin{max-width:760px;padding:8px 12px 12px}
+ .ty-labh{margin-bottom:4px}
+ .ls-ask{font-size:16px;margin-bottom:6px}
+ .ls-opt{min-height:74px;padding:6px}.ls-opt .e{font-size:30px}
+ .ls-theater{margin-top:8px;padding:8px 10px}.ls-sc{font-size:40px;min-height:50px}
+ .ls-scene{height:110px}
+ .ls-fb{margin-top:8px;min-height:40px;padding:8px 10px;font-size:14.5px}
+ .ls-serve{margin-top:8px}
+ .ty-pv{padding:6px}.ty-pvin{max-width:560px;padding:10px 12px 12px;max-height:100%;overflow:auto}
+}
 /*SHOPCSS:END*/
 .mlx .svgi{width:1.25em;height:1.25em;display:inline-block;vertical-align:-.25em}.mlx .sgl .sic .svgi{width:64px;height:64px}
 .sgl{display:grid;justify-items:center;gap:6px;text-align:center;width:100%}.sgl .sic{font-size:56px;line-height:1}.sgl .sic .svgi,.sgl .sic img{width:64px;height:64px}
@@ -1170,12 +1260,12 @@ button.ty-prog:active{transform:translateY(2px)}
 .mcoach{display:flex;align-items:flex-end;gap:8px;margin:10px auto 6px;max-width:330px;text-align:left}
 .mcoach img{width:58px;height:70px;object-fit:contain;object-position:50% 100%;flex:0 0 58px}
 .mcoach p{margin:0 0 6px;flex:1;background:#f2f5ff;border:1px solid #dfe5f7;border-radius:14px;padding:7px 11px;font-size:14px;font-weight:700;line-height:1.4;color:#34407a}
-.mcoach b{display:block;font-size:11.5px;font-weight:900;color:#5b6cff}
+.mcoach b{display:block;font-size:12px;font-weight:900;color:#5b6cff}
 #coachPop{position:fixed;left:max(8px,env(safe-area-inset-left));top:calc(var(--coach-top,62px) + env(safe-area-inset-top));z-index:2147483000;display:flex;align-items:flex-start;gap:4px;max-width:min(320px,calc(100vw - 16px));pointer-events:none;opacity:0;transform:translateY(-14px) scale(.92);transform-origin:0 0;transition:opacity .25s ease,transform .4s cubic-bezier(.2,1.5,.4,1);font-family:system-ui,-apple-system,'Apple SD Gothic Neo','Noto Sans KR',sans-serif;text-align:left}
 #coachPop.show{opacity:1;transform:none}
 #coachPop img{width:54px;height:64px;flex:0 0 54px;object-fit:contain;object-position:50% 0;filter:drop-shadow(0 4px 8px rgba(0,0,0,.28))}
 #coachPop p{margin:8px 0 0;background:#fff;border:2px solid #c9d4ff;border-radius:4px 16px 16px 16px;padding:6px 11px;font-size:13.5px;font-weight:700;line-height:1.38;color:#2a3470;box-shadow:0 8px 20px rgba(20,30,80,.22)}
-#coachPop b{display:block;font-size:11px;font-weight:900;color:#5b6cff}
+#coachPop b{display:block;font-size:12px;font-weight:900;color:#5b6cff}
 .me-pic{width:100%;height:100%;object-fit:cover;object-position:50% 18%;border-radius:inherit;display:block}
 /* safeNote(): ⚠️ safety and ℹ️ notice lines, the same look in every game; safeLink() in settings windows */
 .mg-note{margin:8px 0 0;padding:9px 12px;border:1px solid;border-radius:14px;font-size:14px;font-weight:700;line-height:1.45;text-align:left;text-wrap:pretty}
@@ -1228,8 +1318,19 @@ button.ty-prog:active{transform:translateY(2px)}
 .mlx-item .tx small{font-size:13px;font-weight:700;color:#5d6896;line-height:1.35}
 .mlx-item .st{font-size:18px}.mlx-item.seen{background:#f2fbf5;border-color:#c9ecd6}
 /* a small "📖 개념 다시 보기" chip a game can put next to a question */
-.mlx-chip{display:inline-flex;align-items:center;gap:4px;min-height:40px;padding:0 12px;border:0;border-radius:20px;background:#eef1ff;color:#3a4690;font:inherit;font-size:14px;font-weight:900;cursor:pointer}
+.mlx-chip{display:inline-flex;align-items:center;gap:4px;min-height:44px;padding:0 12px;border:0;border-radius:20px;background:#eef1ff;color:#3a4690;font:inherit;font-size:14px;font-weight:900;cursor:pointer}
 @media (max-width:420px){.mlx-card{padding:10px 12px 12px;border-radius:20px}.mlx-stage{min-height:170px}.mlx-talk p{font-size:16px}}
+/* a phone on its side: the picture (or the thing to try) on the left, the teacher and the buttons on the right, so the
+   title, the picture and Next are all on screen together (the notebook keeps its one column) */
+@media (orientation:landscape) and (max-height:500px){
+ .mlx{padding-top:max(6px,env(safe-area-inset-top));padding-bottom:max(6px,env(safe-area-inset-bottom))}
+ .mlx:not(.book) .mlx-card{width:min(880px,100%);display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);grid-template-rows:auto auto auto minmax(0,1fr) auto;grid-template-areas:"top top" "stage dots" "stage warn" "stage talk" "stage nav";gap:8px 14px;padding:10px 14px 12px}
+ .mlx:not(.book) .mlx-top{grid-area:top}.mlx:not(.book) .mlx-dots{grid-area:dots;align-self:center}
+ .mlx:not(.book) .mlx-stage{grid-area:stage;min-height:0;align-self:stretch;overflow:hidden auto;overscroll-behavior:contain;place-items:safe center}.mlx:not(.book) .mlx-warn{grid-area:warn}
+ .mlx:not(.book) .mlx-talk{grid-area:talk;align-self:start}.mlx:not(.book) .mlx-nav{grid-area:nav;align-self:end}
+ .mlx-top b{font-size:17px}.mlx-pic{max-height:min(150px,36vh)}
+ .mlx-talk img{width:44px;height:52px;flex-basis:44px}.mlx-talk p{font-size:15.5px;padding:8px 10px}
+}
 @media (prefers-reduced-motion:reduce){.mlx{animation:none}.mlx-b.go.ready{animation:none}.mlx-dots i{transition:none}}
 /*COACH:END*/
 </style>
@@ -5975,7 +6076,7 @@ function dom(){
  Y.ctx=Y.el.cv.getContext('2d');hud();handUI();
 }
 function resize(){if(!Y)return;const r=Y.el.ty.getBoundingClientRect(),cw=Math.max(1,r.width),ch=Math.max(1,r.height);
- Y.cw=cw;Y.ch=ch;Y.k=cl(Math.min(cw/330,ch/600),.8,1.35);
+ Y.cw=cw;Y.ch=ch;Y.k=cl(Math.min(cw/330,ch/600),ch<480?.62:.8,1.35);// a phone on its side (short and wide) zooms out further to see more of the shop
  const dpr=Math.min(window.devicePixelRatio||1,2);Y.dpr=dpr;Y.el.cv.width=Math.round(cw*dpr);Y.el.cv.height=Math.round(ch*dpr)}
 const iso=(x,y)=>[(x-y)*TW/2,(x+y)*TH/2];
 // a tap on a picture means that thing: a table, seated diner, machine, stand with goods or the lab.

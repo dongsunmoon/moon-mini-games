@@ -105,6 +105,40 @@ function coachStart(hello,tips){const game=(location.pathname.split('/').pop()||
  if((st.hello||{})[game]!==d)setTimeout(()=>coachLater(()=>setTimeout(()=>{if(coachPop('hi',`${hello[0]} ${nm?`문 코치는 언제나 ${nm} 편이에요 🌙`:'문 코치가 응원해요 🌙'}`,`${hello[1]} ${nm?`Coach Moon is always on your side, ${nm} 🌙`:'Coach Moon is cheering for you 🌙'}`,{force:true,ms:6000}))notes(st=>{(st.hello=st.hello||{})[game]=d})},900)),2500);
  if(tips&&tips.length)setTimeout(()=>{const t=coachPick(tips);coachPop('idea',t[0],t[1],{ms:6000})},4*60000);
  setTimeout(()=>coachLater(()=>coachPop('go','벌써 20분이나 열심히 했어요! 눈이 피곤하면 잠깐 쉬어도 좋아요 🌙','20 minutes of hard work already! Rest your eyes for a bit if they’re tired 🌙',{force:true,ms:7000})),20*60000)}
+/*SAYABLE:BEGIN*/
+// What the voice says. Symbols a voice reads badly become words: ÷ × + − = between numbers, fractions like 3/4, % ² ³,
+// jamo point names (선분 ㄱㄴ → 기역 니은), a lone ? or □ blank, Python's __name__, HTML quotes (&quot;) and Lv.2.
+// The screen keeps the symbols. Every game's read-aloud passes through here (the voice guard below), and
+// _src/voice/tools/apply-sayable.js runs this same function over the voice line lists so pre-made clips match.
+// No lookbehind in these patterns: older iPad Safari can't parse it, and one bad pattern would stop the whole block.
+function mgSayable(t,lang){t=String(t==null?'':t);const ko=lang!=='en',o=t;
+ const JAMO={'ㄱ':'기역','ㄴ':'니은','ㄷ':'디귿','ㄹ':'리을','ㅁ':'미음','ㅂ':'비읍','ㅅ':'시옷','ㅇ':'이응','ㅈ':'지읒','ㅊ':'치읓','ㅋ':'키읔','ㅌ':'티읕','ㅍ':'피읖','ㅎ':'히읗'};
+ const ORD=['','','half','third','fourth','fifth','sixth','seventh','eighth','ninth','tenth','eleventh','twelfth'];
+ const UNIT={km:['킬로미터','kilometres'],cm:['센티미터','centimetres'],mm:['밀리미터','millimetres'],m:['미터','metres']};
+ // 은/는 after a number or a Hangul syllable, by whether it ends in a consonant sound (0 영, 1 일, 3 삼, 6 육, 7 칠, 8 팔)
+ const topic=c=>/[013678]/.test(c)?'은':/[2459]/.test(c)?'는':/[가-힣]/.test(c)?((c.charCodeAt(0)-0xAC00)%28?'은':'는'):'는';
+ t=t.replace(/&quot;/g,'"').replace(/&#39;|&apos;/g,"'").replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&amp;/g,'&');
+ t=t.replace(/__([A-Za-z][A-Za-z0-9_]*?)__/g,'$1');
+ t=t.replace(/\bLv\.\s?(\d)/g,(m,d)=>(ko?'레벨 ':'level ')+d);
+ t=t.replace(/(^|[^A-Za-z])(km|cm|mm|m)([²³])/g,(m,a,u,p)=>a+(/\d$/.test(a)?' ':'')+(ko?(p==='²'?'제곱':'세제곱')+UNIT[u][0]:(p==='²'?'square ':'cubic ')+UNIT[u][1]));
+ if(!ko)t=t.replace(/(^|[^\d.,])1 (square|cubic) (kilo|centi|milli)?metres\b/g,'$11 $2 $3metre');
+ t=t.replace(/²/g,ko?'의 제곱':' squared').replace(/³/g,ko?'의 세제곱':' cubed');
+ t=t.replace(/(^|[^\d\/])(\d+)\/(\d+)(?![\d\/])/g,(m,a,n,d)=>{const N=+n,D=+d;if(!D)return m;
+  if(ko)return a+d+'분의 '+n;
+  const w=ORD[D];return a+(!w?n+' over '+d:N===1?(D===2?'one half':'one '+w):n+' '+(D===2?'halves':w+'s'))});
+ t=t.replace(/\s*÷\s*/g,ko?' 나누기 ':' divided by ').replace(/\s*×\s*/g,ko?' 곱하기 ':' times ');
+ t=t.replace(/([\d□)\]])\s*\+\s*(?=[\d□(\[])/g,'$1'+(ko?' 더하기 ':' plus '));
+ t=t.replace(/([\d□)\]])\s*−\s*(?=[\d□(\[])/g,'$1'+(ko?' 빼기 ':' minus ')).replace(/(\d) - (?=\d)/g,'$1'+(ko?' 빼기 ':' minus '));
+ t=t.replace(/(^|[\s,(])\+(\d)/g,'$1'+(ko?'플러스 ':'plus ')+'$2').replace(/(^|[\s,(])−(\d)/g,'$1'+(ko?'마이너스 ':'minus ')+'$2');
+ // = only between two things (3 = 3, apples = 3), never when the sign itself is being talked about (“= 는 넣기”, “after =,”)
+ t=t.replace(/([\w가-힣)\]□"'])\s*=(?!=)\s*(?=[\w가-힣(□"'−-])/g,(m,c)=>c+(ko?topic(c)+' ':' equals '));
+ t=t.replace(/(\d)\s*%/g,'$1'+(ko?' 퍼센트':' percent'));
+ t=t.replace(/(^|[\s,(])\?(?=[\s,).]|$)/g,'$1'+(ko?'빈칸':'blank'));
+ t=t.replace(/\bthe what number\b/gi,'the box').replace(/□/g,ko?' 빈칸 ':' the box ');
+ if(ko)t=t.replace(/[ㄱ-ㅎ]+/g,r=>[...r].map(j=>JAMO[j]).join(' '));
+ if(t===o)return o; // nothing to change: leave the line exactly as the game wrote it
+ return t.replace(/\s+([,.!?])/g,'$1').replace(/\s+/g,' ').trim()}
+/*SAYABLE:END*/
 // Chrome's read-aloud voice can freeze: it says it is speaking, but no sentence ever starts and every later one waits behind it.
 // Starting a sentence the instant after cancel() is a common trigger, so a sentence that follows a cancel waits a moment.
 // A sentence that has not started after 3 seconds is cancelled and tried once more; if that try is stuck too,
@@ -118,7 +152,8 @@ function coachStart(hello,tips){const game=(location.pathname.split('/').pop()||
   setTimeout(()=>{if(started||my!==gen||!live.has(u))return;live.delete(u);cancel0();
    if(!retry){const c=new SpeechSynthesisUtterance(u.text);['lang','voice','rate','pitch','volume'].forEach(k=>{try{c[k]=u[k]}catch(e){}});setTimeout(()=>send(c,my,true),200)}
    else if(!told){told=true;if(typeof coachPop==='function')coachPop('idea','목소리가 잠깐 멈췄어요. 브라우저를 완전히 껐다 켜면 다시 들려요 🌙','The voice got stuck. Close the browser fully and open it again to hear it 🌙',{force:true,ms:8000})}},3000)};
- ss.speak=u=>{const my=gen,wait=cutAt+150-performance.now();if(wait>0)setTimeout(()=>send(u,my,false),wait);else send(u,my,false)}})();
+ ss.speak=u=>{try{const lg=String(u.lang||'').slice(0,2)||(typeof LANG==='string'?LANG:'ko');u.text=mgSayable(u.text,lg==='en'?'en':'ko')}catch(e){}
+  const my=gen,wait=cutAt+150-performance.now();if(wait>0)setTimeout(()=>send(u,my,false),wait);else send(u,my,false)}})();
 // Mini lessons (미니 수업) and the concept notebook (개념 노트), shared by every game. Kids asked for time to learn
 // before solving, so a teacher talks the child through a few short pages first: see, hear, then do one small thing.
 // · A lesson: {id, title:[ko,en], icon, who?:{img,name:[ko,en]}, steps:[...], key:[[ko,en],...], cta?:[ko,en]}

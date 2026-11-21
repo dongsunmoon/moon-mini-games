@@ -126,13 +126,16 @@ function mgSayable(t,lang){t=String(t==null?'':t);const ko=lang!=='en',o=t;
  t=t.replace(/(^|[^\d\/])(\d+)\/(\d+)(?![\d\/])/g,(m,a,n,d)=>{const N=+n,D=+d;if(!D)return m;
   if(ko)return a+d+'분의 '+n;
   const w=ORD[D];return a+(!w?n+' over '+d:N===1?(D===2?'one half':'one '+w):n+' '+(D===2?'halves':w+'s'))});
+ // units after a number become words (single-letter units only after a space, so 1990s stays 1990s)
+ const UW={km:['킬로미터','kilometre'],cm:['센티미터','centimetre'],mm:['밀리미터','millimetre'],kg:['킬로그램','kilogram'],mL:['밀리리터','millilitre'],min:['분','minute'],m:['미터','metre'],g:['그램','gram'],L:['리터','litre'],h:['시간','hour'],s:['초','second'],t:['톤','tonne']};
+ t=t.replace(/(\d[\d,.]*)(?:\s?(km|cm|mm|kg|mL|min)|\s(m|g|L|h|s|t))(?![A-Za-z가-힣²³])/g,(m,n,a,b)=>{const u=UW[a||b];return n+' '+(ko?u[0]:u[1]+(n==='1'?'':'s'))});
+ t=t.replace(/(\d)\s*%/g,'$1'+(ko?' 퍼센트':' percent'));
  t=t.replace(/\s*÷\s*/g,ko?' 나누기 ':' divided by ').replace(/\s*×\s*/g,ko?' 곱하기 ':' times ');
  t=t.replace(/([\d□)\]])\s*\+\s*(?=[\d□(\[])/g,'$1'+(ko?' 더하기 ':' plus '));
  t=t.replace(/([\d□)\]])\s*−\s*(?=[\d□(\[])/g,'$1'+(ko?' 빼기 ':' minus ')).replace(/(\d) - (?=\d)/g,'$1'+(ko?' 빼기 ':' minus '));
  t=t.replace(/(^|[\s,(])\+(\d)/g,'$1'+(ko?'플러스 ':'plus ')+'$2').replace(/(^|[\s,(])−(\d)/g,'$1'+(ko?'마이너스 ':'minus ')+'$2');
  // = only between two things (3 = 3, apples = 3), never when the sign itself is being talked about (“= 는 넣기”, “after =,”)
  t=t.replace(/([\w가-힣)\]□"'])\s*=(?!=)\s*(?=[\w가-힣(□"'−-])/g,(m,c)=>c+(ko?topic(c)+' ':' equals '));
- t=t.replace(/(\d)\s*%/g,'$1'+(ko?' 퍼센트':' percent'));
  t=t.replace(/(^|[\s,(])\?(?=[\s,).]|$)/g,'$1'+(ko?'빈칸':'blank'));
  t=t.replace(/\bthe what number\b/gi,'the box').replace(/□/g,ko?' 빈칸 ':' the box ');
  if(ko)t=t.replace(/[ㄱ-ㅎ]+/g,r=>[...r].map(j=>JAMO[j]).join(' '));

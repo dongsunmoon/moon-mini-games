@@ -621,6 +621,9 @@ button.vm{border:0;background:none;padding:0;display:flex;flex-direction:column;
 .gchest .gcpic{width:48px;height:48px;object-fit:contain;display:block;margin:auto}
 .chestopen img{width:124px;height:124px;object-fit:contain;display:block;margin:0 auto}
 .rew span img{width:30px;height:30px;object-fit:contain;vertical-align:middle}
+/* a gift or chest picture standing in for an inline emoji (reward chips, gift line, coach buttons), and a trophy picture */
+img.gico,.rew span img.gico,.gift img.gico{width:1.3em;height:1.3em;object-fit:contain;vertical-align:-.3em;margin:0;display:inline-block}.btn img.gico{flex:0 0 auto}
+.items .item .em img.tem{width:48px;height:48px;display:block;margin:2px auto}
 .gift img{width:60px;height:60px;object-fit:contain;margin:0 auto}
 .big .bb-img{width:110px;margin:0 auto}.gift .bb-img{width:72px;height:72px}
 /* coach in dialogues and the play header */
@@ -3454,8 +3457,9 @@ function addTickets(n,el){S.tickets=Math.min(TICKET_CAP,(S.tickets||0)+n);if(n>0
 function openStage(cls=''){const st=$('stage');st.className='stage '+cls;st.innerHTML='';st.setAttribute('role','dialog');st.setAttribute('aria-modal','true');document.body.classList.add('staged');hush();return st}   // a dialog, so the shared coach bubble waits
 function closeStage(){const st=$('stage');st.className='stage hidden';st.innerHTML='';st.removeAttribute('role');st.removeAttribute('aria-modal');document.body.classList.remove('staged')}
 // Coach Moon learns alongside the child: a bubble with his picture at the bottom of the screen, with optional buttons
+// (acts: [{t:'ko|en', f, ic}] — ic is an optional picture (HTML) shown before the button text)
 function coachTalk(pose,text,o={}){let d=$('coachDock');if(!d){d=document.createElement('div');d.id='coachDock';d.setAttribute('role','status');document.body.appendChild(d)}
- const acts=o.acts||[];d.innerHTML=`<img src="images/coach-moon-${pose||'hi'}.webp" alt="" onerror="this.style.display='none'"><div class="cdb"><b>🌙 ${L('문 코치','Coach Moon')}</b><p>${tx(text)}</p>${acts.length?`<div class="cda">${acts.map((a,i)=>`<button type="button" class="btn small ${i?'ghost':''}" data-ci="${i}">${tx(a.t)}</button>`).join('')}</div>`:''}</div><button type="button" class="cdx" aria-label="${L('닫기','Close')}">✕</button>`;
+ const acts=o.acts||[];d.innerHTML=`<img src="images/coach-moon-${pose||'hi'}.webp" alt="" onerror="this.style.display='none'"><div class="cdb"><b>🌙 ${L('문 코치','Coach Moon')}</b><p>${tx(text)}</p>${acts.length?`<div class="cda">${acts.map((a,i)=>`<button type="button" class="btn small ${i?'ghost':''}" data-ci="${i}">${a.ic||''}${tx(a.t)}</button>`).join('')}</div>`:''}</div><button type="button" class="cdx" aria-label="${L('닫기','Close')}">✕</button>`;
  d.className='show'+(acts.length?' acts':'');d.querySelector('.cdx').onclick=()=>{sfx('tap');coachTalk.hide()};
  d.querySelectorAll('[data-ci]').forEach(b=>b.onclick=()=>{sfx('tap');const a=acts[+b.dataset.ci];coachTalk.hide();a.f&&a.f()});
  clearTimeout(coachTalk.t);const ms=o.ms??(acts.length?0:6500);if(ms)coachTalk.t=setTimeout(()=>coachTalk.hide(),ms);
@@ -4649,7 +4653,7 @@ const kingReady=()=>bossOn()&&BOSSES.some(b=>b.n===13)&&LIVE().every(w=>S.boss.w
 function daily(){const t=dayKey();if(!S.daily||S.daily.day!==t)S.daily={day:t,lesson:0,job:0,serve:0,ride:0,got:false};return S.daily}
 const GOALS=[['lesson',1,'📚','배우기|Learn'],['serve',5,'🍔','손님 대접|Serve'],['ride',1,'🎢','놀이기구|Ride']];
 const dailyDone=()=>{const d=daily();return GOALS.every(([k,n])=>(d[k]||0)>=n)};
-function bumpDaily(k){const d=daily();d[k]=(d[k]||0)+1;save(true);if(dailyDone()&&!d.got&&!d.told){d.told=1;setTimeout(()=>coachTalk('medal','오늘 목표를 다 했어요! 🏫 학교 지도에서 🎁 상자를 열어요!|You hit today’s goals! Open the 🎁 chest on the 🏫 school map!',{acts:[{t:'🎁 열러 가기|🎁 Go open it',f:()=>{go('school');setTimeout(openDailyChest,400)}},{t:'나중에|Later'}]}),1600)}}
+function bumpDaily(k){const d=daily();d[k]=(d[k]||0)+1;save(true);if(dailyDone()&&!d.got&&!d.told){d.told=1;setTimeout(()=>coachTalk('medal','오늘 목표를 다 했어요! 🏫 학교 지도에서 🎁 상자를 열어요!|You hit today’s goals! Open the 🎁 chest on the 🏫 school map!',{acts:[{t:'열러 가기|Go open it',ic:tryPic(['pg-chest'],'🎁','gico'),f:()=>{go('school');setTimeout(openDailyChest,400)}},{t:'나중에|Later'}]}),1600)}}
 
 // ---------------------------------------------------------------- villager requests (kept in the save so they wait for the child)
 const reqCap=()=>2+(maxWorld()>=4?1:0);
@@ -4700,7 +4704,7 @@ let VILLAGE_SCROLLED=false,VC_AT=0;
 // Coach Moon suggests the next step when the child comes back to the map (at most once a minute)
 function villageCoach(){if(now()-VC_AT<60000||modalOpen())return;VC_AT=now();const d=daily(),nm=nextMission();
  setTimeout(()=>{if(VIEW!=='school'||modalOpen()||document.body.classList.contains('staged'))return;
-  if(dailyDone()&&!d.got)return coachTalk('medal','오늘 목표를 다 했어요! 🎁 상자를 열어 봐요!|Today’s goals are done! Open the 🎁 chest!',{acts:[{t:'🎁 열기|🎁 Open',f:openDailyChest},{t:'나중에|Later'}]});
+  if(dailyDone()&&!d.got)return coachTalk('medal','오늘 목표를 다 했어요! 🎁 상자를 열어 봐요!|Today’s goals are done! Open the 🎁 chest!',{acts:[{t:'열기|Open',ic:tryPic(['pg-chest'],'🎁','gico'),f:openDailyChest},{t:'나중에|Later'}]});
   const b=LIVE().find(w=>bossReady(w.n));if(b)return coachTalk('go',`⚔️ ${T(b.name)}에 버그 보스가 나타났어요! 배운 코드로 같이 물리쳐요!|⚔️ A bug boss appeared at ${T(b.name)}! Let’s beat it with code!`,{acts:[{t:'⚔️ 도전!|⚔️ Fight!',f:()=>startBossFlow(b.n)},{t:'나중에|Later'}]});
   if(!S.tut.req&&(S.reqs||[]).length){S.tut.req=1;save(true);return coachTalk('idea','주민들이 부탁하러 왔어요! 머리 위 ❗를 누르면 코드로 도와줄 수 있어요.|Villagers came with requests! Tap the ❗ to help them with code.')}
   if(nm)return coachTalk('hi',`다음은 ${T(worldOf(nm).name)}에서 ‘${T(nm.title)}’ 미션이에요. 같이 해 봐요!|Next: “${T(nm.title)}” at ${T(worldOf(nm).name)}. Let’s do it together!`,{acts:[{t:'▶ 같이 하기|▶ Let’s go',f:()=>openMission(nm.id)},{t:'둘러볼래요|Look around'}]})},700)}
@@ -4750,10 +4754,11 @@ function bossResult(n,res){const b=BOSSES.find(x=>x.n===n);
  if(first)trophy(n===13?'king':'boss'+n);save();sfx('fanfare');celebrate(70);go('school');
  modal(`<div class="big">${ridePic(b)}</div><h2>${n===13?L('버그 대왕을 고쳤어요!','King Buggle is debugged!'):L(`${T(WORLDS[n-1].name)} 복구!`,`${T(WORLDS[n-1].name)} restored!`)}</h2>
   <p>${tx(b.defeat||'버그가 무당벌레 친구가 됐어요!|The bug became a ladybug friend!')}</p>${b.friend?`<div class="gift">${friendPic(b)}<b>${tx(b.friend.name)}</b><small>${tx(b.friend.job||'')}</small></div>`:''}
-  <div class="rew"><span>+${apples} 🍎</span><span>+${tk} 🎟️</span>${gift?`<span>🎁 ${gift}</span>`:''}</div>${typeof coachLine==='function'?coachLine('big'):''}<button class="btn wide" type="button" data-act="close">${L('마을 보기','See the village')}</button>`,{cls:'wide'})}
+  <div class="rew"><span>+${apples} 🍎</span><span>+${tk} 🎟️</span>${gift?`<span>${tryPic(['dt-gift-red'],'🎁','gico')} ${gift}</span>`:''}</div>${typeof coachLine==='function'?coachLine('big'):''}<button class="btn wide" type="button" data-act="close">${L('마을 보기','See the village')}</button>`,{cls:'wide'})}
 // ---------------------------------------------------------------- trophies (recognition for things done, never for speed)
+// [emoji, 'ko|en', picture?]: the trophy tab shows images/<picture>.webp when one is named (the emoji if it fails); toasts keep the emoji
 const TROPHIES={first:['🌱','첫 미션|First mission'],job1:['🙋','첫 부탁 해결|First request'],job10:['🍔','주민 도우미 10번|10 requests'],job30:['🏅','마을 영웅|Village hero (30 requests)'],bug1:['🐞','첫 버그 고치기|First bug fixed'],bug10:['🔎','버그 탐정|Bug detective (10)'],
- make1:['🎨','첫 작품|First creation'],ride1:['🎢','첫 놀이기구|First ride'],chest7:['🎁','상자 7개|7 daily chests'],deco5:['🏡','마을 꾸미기 5개|5 decorations'],king:['👑','버그 대왕 고치기|King Buggle debugged'],
+ make1:['🎨','첫 작품|First creation'],ride1:['🎢','첫 놀이기구|First ride'],chest7:['🎁','상자 7개|7 daily chests','pg-chest'],deco5:['🏡','마을 꾸미기 5개|5 decorations'],king:['👑','버그 대왕 고치기|King Buggle debugged'],
  ...Object.fromEntries([...Array(12)].map((_,i)=>['boss'+(i+1),['⚔️',`${i+1}번 보스|Boss ${i+1}`]]))};
 function trophy(id){if(!TROPHIES[id]||(S.trophies||[]).includes(id))return;S.trophies.push(id);save(true);setTimeout(()=>toast(`🏆 ${L('트로피','Trophy')}: ${TROPHIES[id][0]} ${T(TROPHIES[id][1])}`,3200),900)}
 function checkTrophies(){const st=S.stats;if(Object.keys(S.done).length)trophy('first');if((st.jobs||0)>=1)trophy('job1');if((st.jobs||0)>=10)trophy('job10');if((st.jobs||0)>=30)trophy('job30');if(st.fixed>=1)trophy('bug1');if(st.fixed>=10)trophy('bug10');if(S.works.length)trophy('make1');if((st.rides||0)>=1)trophy('ride1');if((st.chests||0)>=7)trophy('chest7');if((S.deco||[]).filter(Boolean).length>=5)trophy('deco5')}
@@ -4830,7 +4835,7 @@ let ME='dress';
 RENDER.me=()=>{let body='';
  if(ME==='dress')body=wardrobeHTML(false)+`<p class="muted center">${L('새 옷과 색깔은 🛍️ 상점에서 사요.','Buy new looks in the 🛍️ shop.')}</p>`;
  else if(ME==='friends'){const bs=bossOn()?BOSSES:[];body=bs.length?`<p class="muted">${L('보스를 물리치면 버그가 무당벌레 친구가 되어 마을에서 일해요.','Beaten bosses become ladybug friends who work in the village.')}</p><div class="items">${bs.map(b=>{const got=S.friends.includes(b.n);return `<div class="item ${got?'own':''}"><span class="em">${got?(typeof friendPic==='function'?friendPic(b):'🐞'):'❔'}</span><b>${got&&b.friend?tx(b.friend.name):'???'}</b><small>${got&&b.friend?tx(b.friend.job||''):b.n===13?L('버그 대왕','King Buggle'):L(`${b.n}번 장소 보스`,`Boss of place ${b.n}`)}</small></div>`}).join('')}</div>`:`<p class="muted">${L('보스전이 곧 열려요!','Boss battles are coming!')}</p>`}
- else if(ME==='trophy')body=`<div class="items">${Object.entries(TROPHIES).map(([id,t])=>{const got=(S.trophies||[]).includes(id);return `<div class="item ${got?'own':''}"><span class="em">${got?t[0]:'🔒'}</span><b>${T(t[1])}</b></div>`}).join('')}</div>`;
+ else if(ME==='trophy')body=`<div class="items">${Object.entries(TROPHIES).map(([id,t])=>{const got=(S.trophies||[]).includes(id);return `<div class="item ${got?'own':''}"><span class="em">${got?(t[2]?tryPic([t[2]],t[0],'tem'):t[0]):'🔒'}</span><b>${T(t[1])}</b></div>`}).join('')}</div>`;
  else if(ME==='works')body=worksHTML();
  $('v-me').innerHTML=`<h2 class="vtitle">🎒 ${L('내 파이','My Py')}</h2><div class="card statrow"><span><b>${Object.keys(S.done).length}</b><small>📚 ${L('미션','missions')}</small></span><span><b>${S.stats.jobs||0}</b><small>🙋 ${L('부탁','requests')}</small></span><span><b>${S.stats.fixed}</b><small>🐞 ${L('고친 버그','bugs fixed')}</small></span><span><b>${(S.friends||[]).length}</b><small>🐞 ${L('친구','friends')}</small></span></div>
   <div class="tabs">${[['dress','👕 '+L('옷장','Wardrobe')],['friends','🐞 '+L('무당벌레 친구','Ladybug friends')],['trophy','🏆 '+L('트로피','Trophies')],['works','🖼️ '+L('작품','Works')]].map(([k,t])=>`<button type="button" class="${ME===k?'on':''}" data-a="mtab" data-v="${k}">${t}</button>`).join('')}</div>${body}${COPYRIGHT()}`;
@@ -5798,7 +5803,7 @@ function worldComplete(w){if(bossOn()&&!S.boss.won[w.n]){const prize=WORLD_PRIZE
   modal(`<div class="big">${BOSS_BY[w.n]?bossPic(BOSS_BY[w.n]):'⚔️🐛'}</div><h2>${L('버그 보스가 나타났어요!','A bug boss appears!')}</h2>${pyLine(`${T(w.name)}의 미션을 다 했더니 심술쟁이 버그 보스가 나왔어요! 배운 코드로 고쳐 줘요!|You finished every mission at ${T(w.name)} and the grumpy boss bug came out! Let’s debug it with what we learned!`,'wow')}
    <div class="row"><button class="btn ghost" type="button" data-act="later">${L('나중에','Later')}</button><button class="btn" type="button" data-act="fight">⚔️ ${L('지금 도전!','Fight now!')}</button></div>`,{closable:false,acts:{later:()=>()=>go('school'),fight:()=>()=>startBossFlow(w.n)}});return}
  const prize=WORLD_PRIZE[w.n];let gift='';
- if(prize){const [kind,id]=prize,own=S.owned[kind];if(!own.includes(id)){own.push(id);const item=kind==='color'?COLORS[id]:kind==='hat'?HATS[id]:ACCS[id];gift=`<div class="gift">🎁 ${L('선물','Gift')}: ${kind==='color'?'':wearPic(kind,id,item[0])} <b>${T(kind==='color'?item[3]:item[1])}</b><small>${L('꾸미기에서 입혀 봐요','Try it on in the wardrobe')}</small></div>`}}
+ if(prize){const [kind,id]=prize,own=S.owned[kind];if(!own.includes(id)){own.push(id);const item=kind==='color'?COLORS[id]:kind==='hat'?HATS[id]:ACCS[id];gift=`<div class="gift"><span>${tryPic(['dt-gift-red'],'🎁','gico')} ${L('선물','Gift')}:</span> ${kind==='color'?'':wearPic(kind,id,item[0])} <b>${T(kind==='color'?item[3]:item[1])}</b><small>${L('꾸미기에서 입혀 봐요','Try it on in the wardrobe')}</small></div>`}}
  addApples(10);save();sfx('fanfare');celebrate(60);
  modal(`<div class="big">${placePic(w)}</div><h2>🏝️ ${L(`${tx(w.name)} 완성!`,`${tx(w.name)} complete!`)}</h2>${pyLine(`${josa(T(w.concept),'을')} 모두 배웠어요! 마을에 불이 하나 더 켜졌어요.|${T(w.concept)}: learned! Another light is on in the village.`)}
   <div class="rew"><span>+10 🍎</span></div>${gift}${typeof coachLine==='function'?coachLine('big'):''}<button class="btn wide" type="button" data-act="go">${L('학교 지도 보기','See the school map')} ▶</button>`,{cls:'wide',acts:{go:()=>()=>go('school')},onOpen:()=>say(L(`${T(w.name)} 완성! 정말 멋져요!`,`${T(w.name)} complete! Amazing!`))})}

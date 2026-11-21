@@ -331,6 +331,10 @@ main{width:min(980px,100%);margin:0 auto;padding:14px max(12px,env(safe-area-ins
 .foot a{color:#fff}
 
 /* ---------------------------------------------------------------- adventure map */
+.gtabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin:2px 0 10px}
+.gtabs button{border:0;border-radius:14px;min-height:56px;padding:6px 2px;background:rgba(255,255,255,.12);color:#fff;font:inherit;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;cursor:pointer}
+.gtabs button.on{background:#fff;color:#1d2a4a;box-shadow:0 3px 0 rgba(0,0,0,.18)}
+.gtabs span{font-size:20px;line-height:1.1}.gtabs b{font-size:12.5px;font-weight:900;white-space:nowrap}.gtabs small{font-size:12px;font-weight:800;opacity:.85}
 .chapters{display:flex;gap:10px;overflow-x:auto;padding:4px 2px 10px;scroll-snap-type:x mandatory;scrollbar-width:none}
 .chapters::-webkit-scrollbar{display:none}
 .chap{flex:0 0 auto;scroll-snap-align:start;width:122px;border:0;border-radius:18px;padding:10px 8px;background:rgba(255,255,255,.14);color:#fff;display:flex;flex-direction:column;align-items:center;gap:2px;box-shadow:inset 0 0 0 2px rgba(255,255,255,.15)}
@@ -1562,7 +1566,7 @@ const CARD_RAW=[
  ['igneous',8,2,'⚫','화산이 만든 돌|Rocks made by volcanoes','마그마가 식어서 굳은 돌을 화성암이라고 해요. 땅 위에서 빨리 식은 현무암은 어둡고 알갱이가 작으며 구멍이 송송 난 것이 많아요. 땅속에서 천천히 식은 화강암은 밝고 알갱이가 커요.|Rock made when magma cools and hardens is igneous rock. Basalt cools fast at the surface: dark, fine-grained and often full of holes. Granite cools slowly underground: light-colored with big crystals.','제주도 돌하르방은 현무암, 많은 건물 계단은 화강암으로 만들어요.|Jeju’s stone grandfather statues are basalt; many building steps are granite.'],
  ['sea',8,2,'🌊','지구와 바다|Earth’s land and sea','지구 표면은 육지보다 바다가 훨씬 넓어요(약 70%). 바닷물은 짜서 그냥 마실 수 없어요. 바닷물은 하루에 두 번쯤 높아졌다(밀물) 낮아졌다(썰물) 해요. 지구는 공기(대기)로 둘러싸여 있어요.|Oceans cover much more of Earth than land does (about 70%). Seawater is salty, so we can’t drink it. About twice a day the sea rises (high tide) and falls (low tide). Earth is wrapped in a layer of air (the atmosphere).','갯벌 체험을 할 때는 물때를 확인하고 밀물이 들어오기 전에 나와요.|On a mudflat trip, check the tide times and get out before the tide comes in.'],
  ['mineral',8,2,'💎','광물|Minerals','돌은 여러 가지 광물이 모여 이루어져 있어요. 연필심의 흑연, 음식에 넣는 소금, 유리를 만드는 석영도 광물이에요. 광물은 색깔과 단단한 정도가 저마다 달라요.|Rocks are made of minerals. Pencil graphite, table salt and quartz (used to make glass) are all minerals. Minerals differ in color and hardness.','캐나다는 니켈과 금 같은 광물이 많이 나는 나라예요.|Canada produces lots of minerals, such as nickel and gold.'],
- ['strata',8,3,'🍰','지층|Rock layers','강이나 바다 밑에 자갈, 모래, 진흙이 층층이 쌓이고 오랜 시간 눌려 굳으면 지층이 돼요. 보통 아래에 있는 층이 먼저 쌓여서 더 오래됐어요. 알갱이 크기에 따라 역암(자갈), 사암(모래), 이암(진흙)으로 나눠요.|Gravel, sand and mud pile up in layers under rivers and seas, then get pressed into rock over a long time. Usually the bottom layer formed first, so it’s the oldest. By grain size, these rocks are conglomerate (gravel), sandstone (sand) and mudstone (mud).','바닷가 절벽의 줄무늬는 지층이에요. 무너질 수 있으니 가까이 가지 마요.|The stripes in seaside cliffs are rock layers. Keep away from the edge; they can crumble.'],
+ ['strata',8,3,'@strata','지층|Rock layers','강이나 바다 밑에 자갈, 모래, 진흙이 층층이 쌓이고 오랜 시간 눌려 굳으면 지층이 돼요. 보통 아래에 있는 층이 먼저 쌓여서 더 오래됐어요. 알갱이 크기에 따라 역암(자갈), 사암(모래), 이암(진흙)으로 나눠요.|Gravel, sand and mud pile up in layers under rivers and seas, then get pressed into rock over a long time. Usually the bottom layer formed first, so it’s the oldest. By grain size, these rocks are conglomerate (gravel), sandstone (sand) and mudstone (mud).','바닷가 절벽의 줄무늬는 지층이에요. 무너질 수 있으니 가까이 가지 마요.|The stripes in seaside cliffs are rock layers. Keep away from the edge; they can crumble.'],
  ['fossil2',8,3,'🐚','화석이 알려 주는 것|What fossils tell us','생물이 죽은 뒤 진흙이나 모래에 빨리 묻히고 그 위에 계속 흙이 쌓여 굳으면 화석이 돼요. 산에서 조개 화석이 나오면 그곳이 옛날에 바다였다는 걸 알 수 있어요. 석탄도 아주 옛날 식물이 땅속에 묻혀 만들어졌어요.|When a living thing dies and is quickly buried in mud or sand, and more layers pile on and harden, it can become a fossil. Seashell fossils on a mountain tell us the place was once under the sea. Coal formed from ancient plants buried underground.','박물관에서 화석을 보면 어떤 환경에서 살았을지 상상해 봐요.|At a museum, look at a fossil and imagine where that creature lived.'],
  ['rocktypes',8,2,'🪨','돌의 세 가지 무리|Three kinds of rock','돌은 만들어진 방법에 따라 세 무리로 나눠요. 마그마가 식어 굳은 화성암(현무암, 화강암), 알갱이가 쌓여 굳은 퇴적암(사암, 이암, 석회암), 높은 열과 압력으로 모습이 바뀐 변성암(대리암, 편마암)이에요.|Rocks come in three groups depending on how they formed: igneous rock from cooled magma (basalt, granite), sedimentary rock from layers of grains pressed together (sandstone, mudstone, limestone), and metamorphic rock changed by great heat and pressure (marble, gneiss).','돌은 아주 오랜 시간 동안 깎이고 쌓이고 녹으며 다른 무리로 바뀌어요(암석의 순환).|Over a very long time, rocks wear away, pile up and melt, changing from one kind to another (the rock cycle).'],
  ['quakewhy',8,2,'💥','지진은 왜 일어날까?|Why do earthquakes happen?','지구의 겉은 커다란 조각(판) 여러 개로 나뉘어 있고, 판은 1년에 몇 cm씩 아주 천천히 움직여요. 판끼리 밀거나 어긋나면 땅속 바위에 힘이 조금씩 쌓여요. 오랫동안 쌓인 힘을 견디지 못한 바위가 갑자기 끊어지거나 미끄러지면, 그 떨림이 사방으로 퍼져 땅이 흔들려요. 이것이 지진이에요.|Earth’s outer shell is broken into giant pieces called plates, which creep along a few centimetres a year. Where plates push or grind past each other, pressure slowly builds up in the rock underground. When the rock can’t take it any more, it suddenly breaks or slips, and the shaking spreads out in every direction. That’s an earthquake.','나무젓가락을 양 끝에서 밀면 휘다가 “딱!” 부러지면서 손에 떨림이 느껴져요. 지진도 이렇게 생겨요.|Push a chopstick from both ends: it bends, then snaps, and you feel a jolt in your hands. Earthquakes work the same way.','부러진 젓가락 끝은 날카로워요. 찔리지 않게 조심해요.|Snapped chopstick ends are sharp. Watch out for splinters.'],
@@ -2309,19 +2313,19 @@ const QS=[
  {c:'mineral',l:2,t:'ox',s:'대부분의 돌은 여러 가지 광물이 모여서 이루어져 있다.|Most rocks are made of several different minerals.',v:1},
  {c:'mineral',l:2,t:'mc',q:'유리를 긁어 흠집을 낼 만큼 아주 단단한 광물은?|Which mineral is hard enough to scratch glass?',art:'💎',a:'💎 다이아몬드|💎 Diamond',o:['✏️ 흑연|✏️ Graphite','🧂 암염(소금)|🧂 Rock salt','🧽 활석|🧽 Talc']},
  {c:'mineral',l:2,t:'ox',s:'음식에 넣는 소금도 땅에서 캐거나 바닷물에서 얻는 광물이다.|The salt we eat is a mineral, mined from the ground or taken from seawater.',v:1},
- {c:'strata',l:3,t:'order',q:'지층이 만들어지는 순서대로 눌러요.|Tap how rock layers form, in order.',items:[['🌊','물이 자갈, 모래, 진흙을 실어 와요|Water carries gravel, sand and mud'],['🍰','층층이 쌓여요|They pile up in layers'],['⬇️','위에 쌓인 것이 꾹 눌러요|The layers above press down'],['🪨','오랜 시간이 지나 돌이 돼요|Over a long time they turn to rock']]},
- {c:'strata',l:3,t:'mc',q:'지층에서 보통 가장 오래된 층은?|In rock layers, which layer is usually the oldest?',art:'🍰',a:'맨 아래층|The bottom layer',o:['맨 위층|The top layer','가운데 층|The middle layer','가장 두꺼운 층|The thickest layer']},
+ {c:'strata',l:3,t:'order',q:'지층이 만들어지는 순서대로 눌러요.|Tap how rock layers form, in order.',items:[['🌊','물이 자갈, 모래, 진흙을 실어 와요|Water carries gravel, sand and mud'],['@strata','층층이 쌓여요|They pile up in layers'],['⬇️','위에 쌓인 것이 꾹 눌러요|The layers above press down'],['🪨','오랜 시간이 지나 돌이 돼요|Over a long time they turn to rock']]},
+ {c:'strata',l:3,t:'mc',q:'지층에서 보통 가장 오래된 층은?|In rock layers, which layer is usually the oldest?',art:'@strata',a:'맨 아래층|The bottom layer',o:['맨 위층|The top layer','가운데 층|The middle layer','가장 두꺼운 층|The thickest layer']},
  {c:'strata',l:3,t:'sort',q:'알갱이 크기로 퇴적암을 나눠요.|Sort the rocks by grain size.',bins:[['🪨','역암(자갈)|Conglomerate (gravel)'],['🏖️','사암(모래)|Sandstone (sand)'],['🟤','이암(진흙)|Mudstone (mud)']],items:[['🪨','자갈이 박혀 있어요|Pebbles stuck in it',0],['⚪','동글동글 큰 알갱이|Big round lumps',0],['🏖️','모래처럼 까끌까끌해요|Gritty like sand',1],['🟡','모래 알갱이가 보여요|You can see sand grains',1],['🟤','아주 고와서 매끈해요|So fine it feels smooth',2],['🫖','진흙이 굳은 것 같아요|Like hardened mud',2]]},
  {c:'strata',l:3,t:'ox',s:'지층의 줄무늬는 알갱이 크기나 색깔이 다른 층이 번갈아 쌓여서 생긴다.|The stripes in rock layers come from layers with different grain sizes or colors.',v:1},
- {c:'fossil2',l:3,t:'order',q:'화석이 만들어지는 순서대로 눌러요.|Tap how a fossil forms, in order.',items:[['🐟','생물이 죽어요|A living thing dies'],['🟤','진흙이나 모래에 빨리 묻혀요|It’s quickly buried in mud or sand'],['🍰','그 위에 흙이 계속 쌓여요|More layers pile on top'],['🦴','오랜 시간이 지나 돌처럼 굳어요|Over ages it turns to stone']]},
+ {c:'fossil2',l:3,t:'order',q:'화석이 만들어지는 순서대로 눌러요.|Tap how a fossil forms, in order.',items:[['🐟','생물이 죽어요|A living thing dies'],['🟤','진흙이나 모래에 빨리 묻혀요|It’s quickly buried in mud or sand'],['@strata','그 위에 흙이 계속 쌓여요|More layers pile on top'],['🦴','오랜 시간이 지나 돌처럼 굳어요|Over ages it turns to stone']]},
  {c:'fossil2',l:3,t:'mc',q:'높은 산에서 조개 화석이 나왔어요. 이것으로 알 수 있는 것은?|Clam fossils are found high on a mountain. What does that tell us?',art:'⛰️🐚',a:'그곳이 옛날에는 바다였어요|The place was once under the sea',o:['조개가 산을 기어 올라갔어요|The clams climbed the mountain','누가 조개를 버렸어요|Someone dumped clams there','산에도 조개가 살아요|Clams live on mountains']},
  {c:'fossil2',l:3,t:'ox',s:'생물이 죽은 뒤 묻히지 않고 땅 위에 오래 있어야 화석이 잘 만들어진다.|Fossils form best when a dead creature lies out in the open for a long time.',v:0,why:'땅 위에 있으면 썩거나 동물이 먹어 버려요. 진흙이나 모래에 빨리 묻혀야 화석이 될 수 있어요.|Out in the open it rots or gets eaten. It has to be buried quickly in mud or sand to become a fossil.'},
  {c:'fossil2',l:3,t:'mc',q:'석탄은 무엇이 땅속에 묻혀서 만들어졌을까요?|What was coal made from, buried underground long ago?',art:'⚫',a:'🌿 아주 옛날 식물|🌿 Ancient plants',o:['🦖 공룡 똥|🦖 Dinosaur poop','🧊 얼음|🧊 Ice','🧂 바닷소금|🧂 Sea salt']},
- {c:'rocktypes',l:2,t:'sort',q:'어떤 무리의 돌일까요? 알맞은 곳에 넣어요.|Which kind of rock is it? Sort them.',bins:[['🌋','화성암|Igneous'],['🍰','퇴적암|Sedimentary'],['💎','변성암|Metamorphic']],items:[['⚫','현무암|Basalt',0],['⚪','화강암|Granite',0],['🏖️','사암|Sandstone',1],['🟤','이암|Mudstone',1],['🐚','석회암|Limestone',1],['🏛️','대리암|Marble',2],['〰️','편마암|Gneiss',2]]},
+ {c:'rocktypes',l:2,t:'sort',q:'어떤 무리의 돌일까요? 알맞은 곳에 넣어요.|Which kind of rock is it? Sort them.',bins:[['🌋','화성암|Igneous'],['@strata','퇴적암|Sedimentary'],['@metarock','변성암|Metamorphic']],items:[['⚫','현무암|Basalt',0],['⚪','화강암|Granite',0],['🏖️','사암|Sandstone',1],['🟤','이암|Mudstone',1],['🐚','석회암|Limestone',1],['🏛️','대리암|Marble',2],['〰️','편마암|Gneiss',2]]},
  {c:'rocktypes',l:2,t:'mc',q:'높은 열과 누르는 힘을 받아 모습이 바뀐 돌을 무엇이라고 할까요?|What do we call rock changed by great heat and pressure?',art:'🔥⬇️',a:'변성암|Metamorphic rock',o:['화성암|Igneous rock','퇴적암|Sedimentary rock','운석|A meteorite']},
  {c:'rocktypes',l:2,t:'ox',s:'대리암은 석회암이 높은 열과 압력을 받아 바뀐 변성암이다.|Marble is metamorphic rock that forms when limestone gets great heat and pressure.',v:1},
  {c:'rocktypes',l:3,t:'mc',q:'석회암이나 대리암에 묽은 염산(또는 식초)을 떨어뜨리면?|What happens when you drip dilute acid (or vinegar) on limestone or marble?',art:'🪨🧪',a:'거품이 생겨요|It fizzes',o:['무지개색으로 변해요|It turns rainbow-colored','자석이 돼요|It becomes magnetic','더 단단해져요|It gets harder']},
- {c:'rocktypes',l:3,t:'order',q:'화강암이 사암으로 바뀌는 순서대로 눌러요.|Tap how granite can become sandstone, in order.',items:[['⚪','화강암이 비바람에 깎여요|Granite is worn down by wind and rain'],['🏞️','부서진 모래가 강을 따라 옮겨져요|The sand is carried down rivers'],['🍰','바다 밑에 층층이 쌓여요|It piles up in layers under the sea'],['🪨','눌려 굳어서 사암이 돼요|It’s pressed into sandstone']]},
+ {c:'rocktypes',l:3,t:'order',q:'화강암이 사암으로 바뀌는 순서대로 눌러요.|Tap how granite can become sandstone, in order.',items:[['⚪','화강암이 비바람에 깎여요|Granite is worn down by wind and rain'],['🏞️','부서진 모래가 강을 따라 옮겨져요|The sand is carried down rivers'],['@strata','바다 밑에 층층이 쌓여요|It piles up in layers under the sea'],['🪨','눌려 굳어서 사암이 돼요|It’s pressed into sandstone']]},
  {c:'quakewhy',l:2,t:'sim',sim:'fault'},
  {c:'quakewhy',l:2,t:'mc',q:'지진이 일어나는 까닭으로 알맞은 것은?|What causes an earthquake?',art:'💥',a:'땅속 바위가 쌓인 힘을 못 견디고 갑자기 끊어지거나 미끄러져서|Rock underground suddenly breaks or slips after pressure builds up',o:['땅속 거인이 발을 굴러서|A giant stomps underground','큰 트럭이 많이 지나가서|Lots of big trucks drive by','달이 땅을 세게 끌어당겨서|The Moon yanks on the ground']},
  {c:'quakewhy',l:2,t:'ox',s:'지구의 겉은 여러 개의 판으로 나뉘어 있고, 판은 아주 천천히 움직인다.|Earth’s outer shell is split into plates that move very slowly.',v:1},
@@ -2363,12 +2367,15 @@ const ICON_SVG={
  chrysalis:'<svg viewBox="0 0 64 64"><path d="M32 3v9" stroke="#7a5230" stroke-width="3" stroke-linecap="round"/><path d="M32 11c11 6 13 19 10 31-2 9-6 16-10 19-4-3-8-10-10-19-3-12-1-25 10-31z" fill="#8ccf63" stroke="#3f7d2c" stroke-width="2.5"/><path d="M25 25q7 4 14 0M24 34q8 4 16 0M26 43q6 3 12 0" stroke="#3f7d2c" stroke-width="2" fill="none" stroke-linecap="round"/><circle cx="29" cy="18" r="2" fill="#e8c43a"/></svg>',
  frogspawn:'<svg viewBox="0 0 64 64">'+[[20,22],[34,18],[46,26],[16,36],[30,32],[44,40],[24,48],[38,50],[50,14]].map(([x,y])=>`<circle cx="${x}" cy="${y}" r="8" fill="#d8f0ff" stroke="#9cc8e0" stroke-width="1.5"/><circle cx="${x}" cy="${y}" r="3" fill="#222"/>`).join('')+'</svg>',
  tadpole:'<svg viewBox="0 0 64 64"><path d="M30 34q14 -2 22 6q-6 -2 -10 2q-4 4 -12 -2z" fill="#3a4a3a"/><ellipse cx="22" cy="32" rx="13" ry="10" fill="#3a4a3a"/><circle cx="17" cy="29" r="2.4" fill="#fff"/><circle cx="16.5" cy="29" r="1.2" fill="#000"/></svg>',
+ strata:'<svg viewBox="0 0 64 64"><defs><clipPath id="stc"><path d="M7 22q1-10 12-11h27q10 1 11 11l1 24q0 10-10 11H17q-10-1-10-11z"/></clipPath></defs><g clip-path="url(#stc)"><rect width="64" height="64" fill="#a3a7ad"/><path d="M0 0h64v21q-16 3-32 0t-32 1z" fill="#f1e6c8"/><path d="M0 22q16-1 32 1t32-1v7q-16 2-32 0t-32 1z" fill="#6e6966"/><path d="M0 30q16-1 32 1t32-1v10q-16 2-32 0t-32 1z" fill="#b9663c"/><path d="M0 41q16-1 32 1t32-1v8q-16 2-32 0t-32 1z" fill="#e3bb7a"/><circle cx="15" cy="54" r="3.2" fill="#7d838a"/><circle cx="25" cy="56" r="2.4" fill="#c9ccd0"/><circle cx="34" cy="53.5" r="3" fill="#868c93"/><circle cx="44" cy="56" r="2.6" fill="#cfd2d6"/><circle cx="52" cy="53" r="2.2" fill="#7d838a"/><path d="M41 35.5a3 3 0 1 1-3-3m0 0a1.6 1.6 0 1 1 1.6 1.6" stroke="#f6e3c5" stroke-width="1.4" fill="none" stroke-linecap="round"/></g><path d="M7 22q1-10 12-11h27q10 1 11 11l1 24q0 10-10 11H17q-10-1-10-11z" fill="none" stroke="#4d3b2b" stroke-width="2.2"/><path d="M14 15q4-2 9-2" stroke="#fff" stroke-width="2" stroke-linecap="round" opacity=".6"/></svg>',
+ metarock:'<svg viewBox="0 0 64 64"><defs><clipPath id="mrc"><path d="M9 26q2-14 17-15l17 1q13 2 13 15l-1 15q-2 14-16 15H22q-13-1-14-14z"/></clipPath></defs><g clip-path="url(#mrc)"><rect width="64" height="64" fill="#5c6068"/><path d="M0 21q10-7 20-1t22-1 22 1v6q-12-5-22 1t-22 1-20 1z" fill="#eef0f2"/><path d="M0 31q10-6 20 0t22-2 22 2v4q-12-4-22 2t-22-1-20 1z" fill="#9097a0"/><path d="M0 40q10-8 20-1t22-1 22 1v6q-12-6-22 1t-22 1-20 1z" fill="#eef0f2"/><circle cx="18" cy="34" r="1.1" fill="#fff8d0"/><circle cx="38" cy="27" r="1" fill="#fff8d0"/><circle cx="47" cy="45" r="1.2" fill="#fff8d0"/></g><path d="M9 26q2-14 17-15l17 1q13 2 13 15l-1 15q-2 14-16 15H22q-13-1-14-14z" fill="none" stroke="#33363b" stroke-width="2.2"/><path d="M16 18q4-3 10-3" stroke="#fff" stroke-width="2" stroke-linecap="round" opacity=".5"/></svg>',
  froglet:'<svg viewBox="0 0 64 64"><path d="M34 32q12 -1 20 6q-6 -2 -9 2q-4 3 -11 -3z" fill="#4c7a3a"/><path d="M22 40l-6 10m0 0l-5 1m5-1l1 5M30 40l5 9m0 0l5 0m-5 0l-1 5" stroke="#4c7a3a" stroke-width="3" fill="none" stroke-linecap="round"/><ellipse cx="25" cy="32" rx="14" ry="11" fill="#5f9a46"/><circle cx="20" cy="27" r="3.4" fill="#fff"/><circle cx="20" cy="27" r="1.6" fill="#000"/><circle cx="30" cy="27" r="3.4" fill="#fff"/><circle cx="30" cy="27" r="1.6" fill="#000"/></svg>',
 };
 const ICO_HAVE=new Set(['seed','frogspawn','tadpole','froglet','chrysalis']);
-const icon=(s,cls='')=>s&&s[0]==='@'?(ICO_HAVE.has(s.slice(1))?`<img class="svgi ${cls}" src="images/sci-ico-${s.slice(1)}.webp" alt="" draggable="false">`:`<span class="svgi ${cls}">${ICON_SVG[s.slice(1)]||''}</span>`):esc(s);
+const ICO_SRC={gift:'images/dt-gift-red.webp'}; // @names drawn with a picture from another set
+const icon=(s,cls='')=>s&&s[0]==='@'?(ICO_SRC[s.slice(1)]||ICO_HAVE.has(s.slice(1))?`<img class="svgi ${cls}" src="${ICO_SRC[s.slice(1)]||`images/sci-ico-${s.slice(1)}.webp`}" alt="" draggable="false">`:`<span class="svgi ${cls}">${ICON_SVG[s.slice(1)]||''}</span>`):esc(s);
 // a run of emoji that may hold @name pictures, e.g. '💧@tadpole'
-const richE=s=>esc(s).replace(/@([a-z]+)/g,(m,n)=>ICON_SVG[n]||ICO_HAVE.has(n)?icon('@'+n):m);
+const richE=s=>esc(s).replace(/@([a-z]+)/g,(m,n)=>ICON_SVG[n]||ICO_HAVE.has(n)||ICO_SRC[n]?icon('@'+n):m);
 const svgPt=(svg,e)=>{const p=svg.createSVGPoint();p.x=e.clientX;p.y=e.clientY;const m=svg.getScreenCTM();return m?p.matrixTransform(m.inverse()):{x:0,y:0}};
 // pointer drag over an element; cb(point in svg units, phase)
 function onDrag(el,svg,cb){
@@ -2429,7 +2436,7 @@ CH.sort=(q,ctx)=>{
  return {tag:['🗂️',T('분류하기|Sorting')],say:T(q.q)+' … '+T(list[0][1]),answer:'',
   mount(box,done){B=box;
    const stage=q.fx==='tank'?`<div class="tank"><div class="water"></div><span class="drop"></span></div>`:q.fx==='magnet'?`<div class="magstage"><span class="bigmag">🧲</span><span class="drop"></span></div>`:'';
-   box.innerHTML=qText(T(q.q))+stage+`<div class="sortcard"><span class="cnt"></span><span class="ic"></span><b></b></div><div class="bins n${q.bins.length}">${q.bins.map((b,i)=>`<button class="bin" type="button" data-b="${i}"><span class="bi">${esc(b[0])}</span><b>${esc(T(b[1]))}</b><span class="tray"></span></button>`).join('')}</div>`;
+   box.innerHTML=qText(T(q.q))+stage+`<div class="sortcard"><span class="cnt"></span><span class="ic"></span><b></b></div><div class="bins n${q.bins.length}">${q.bins.map((b,i)=>`<button class="bin" type="button" data-b="${i}"><span class="bi">${icon(b[0])}</span><b>${esc(T(b[1]))}</b><span class="tray"></span></button>`).join('')}</div>`;
    const card=box.querySelector('.sortcard');
    const show=()=>{const it=list[k];card.querySelector('.cnt').textContent=`${k+1}/${list.length}`;card.querySelector('.ic').innerHTML=icon(it[0]);card.querySelector('b').textContent=T(it[1]);card.classList.remove('in');void card.offsetWidth;card.classList.add('in');hintOn=false;box.querySelectorAll('.bin').forEach(x=>x.classList.remove('hinted'));if(k)speak(T(it[1]))};
    const observe=it=>{const d=box.querySelector('.drop');if(!d)return;d.innerHTML=icon(it[0]);d.className='drop';void d.offsetWidth;d.classList.add(q.fx==='tank'?(it[2]===0?'float':'sink'):(it[2]===0?'stick':'fall'));if(q.fx==='tank')SFX.splash();else if(it[2]===0)SFX.snap()};
@@ -4979,7 +4986,7 @@ Object.assign(LEARN,{
 
  volcano:{who:'🐴',hook:'한라산과 백두산도 화산이래요! 화산이 주는 것들을 나눠 담아 주세요.|Hallasan and Baekdusan are volcanoes! Help me sort what volcanoes bring.',
   play:{t:'sort',ask:'화산이 주는 좋은 점과 조심할 점을 나눠 담아요.|Sort what volcanoes bring: good things and things to watch out for.',
-   bins:[['🎁','좋은 점|Good things'],['⚠️','조심해요|Watch out']],
+   bins:[['@gift','좋은 점|Good things'],['⚠️','조심해요|Watch out']],
    items:[
    ['🌾','기름진 밭|Rich farmland',0,'화산재가 쌓인 땅은 영양분이 많아 농사가 잘돼요.|Soil from volcanic ash is rich, so crops grow well.'],
    ['♨️','온천|Hot springs',0,'땅속 마그마의 열이 물을 데워 온천이 생겨요.|Magma’s heat warms water underground into hot springs.'],
@@ -5043,7 +5050,7 @@ Object.assign(LEARN,{
    show:[['🪣💧','물통에 자갈, 모래, 진흙을 섞어 부어요.|Pour mixed gravel, sand and mud into a bucket of water.'],
     ['🪨⬇️','무겁고 굵은 자갈이 먼저 가라앉아요.|The heavy gravel sinks first.'],
     ['🏖️','그 위에 모래가 쌓여요.|Sand settles on top of it.'],
-    ['🟤🍰','고운 진흙은 맨 나중에, 맨 위에 쌓여요.|Fine mud settles last, at the very top.']],
+    ['🟤@strata','고운 진흙은 맨 나중에, 맨 위에 쌓여요.|Fine mud settles last, at the very top.']],
    why:'먼저 쌓인 아래층이 가장 오래됐어요. 눌려 굳으면 역암, 사암, 이암이 돼요.|The bottom layer came first, so it’s oldest. Pressed hard, the layers become conglomerate, sandstone and mudstone.'},
   thanks:'지층은 아래부터 차례로 쌓여서, 보통 맨 아래층이 가장 오래됐어요!|Rock layers pile up from the bottom, so the bottom layer is usually the oldest!'},
 
@@ -5052,7 +5059,7 @@ Object.assign(LEARN,{
    opts:[['🟤','진흙에 빨리 묻혀요|It’s buried fast in mud',1],['☀️','바닥에 오래 놓여 있어요|It lies out for ages',0],['🌊','파도에 둥둥 떠다녀요|It floats on the waves',0]],
    show:[['🐟🌊','물고기가 죽어서 바다 밑바닥에 가라앉아요.|A fish dies and sinks to the sea floor.'],
     ['🐟🟤','진흙에 빨리 묻혀 썩거나 먹히지 않고 남아요.|Mud buries it fast, so it isn’t eaten or rotted away.'],
-    ['🍰🦴','그 위에 층이 계속 쌓이고 굳어 화석이 돼요.|Layers pile on top and harden: it’s a fossil!'],
+    ['@strata🦴','그 위에 층이 계속 쌓이고 굳어 화석이 돼요.|Layers pile on top and harden: it’s a fossil!'],
     ['⛰️🦴','땅이 솟아올라 산이 되면 화석이 드러나요.|The land rises into a mountain, and the fossil shows up.']],
    why:'빨리 묻혀야 화석이 돼요. 산에서 바다 생물 화석이 나오면 그곳은 옛날에 바다였어요.|It must be buried fast. Sea fossils on a mountain mean the place was once under the sea.'},
   thanks:'화석을 보면 옛날 환경을 알 수 있어요. 석탄도 옛날 식물이 묻혀 생겼어요!|Fossils tell us about the past. Even coal formed from ancient plants buried underground!'},
@@ -5060,7 +5067,7 @@ Object.assign(LEARN,{
  rocktypes:{who:'🐿️',hook:'돌 박물관에 이름표를 붙여야 해요! 돌마다 어느 무리인지 짝지어 주세요.|I need labels for my rock museum! Match each rock to its group.',
   play:{t:'pair',ask:'돌과 그 돌의 무리를 짝지어요.|Match each rock to its group.',pairs:[
    ['⚫','현무암|Basalt','🌋','화성암|Igneous rock','마그마가 식어서 굳은 돌이라 화성암이에요.|It formed from cooled magma, so it’s igneous.'],
-   ['🏖️','사암|Sandstone','🍰','퇴적암|Sedimentary rock','모래가 쌓이고 눌려 굳어서 퇴적암이에요.|Sand piled up and got pressed into rock, so it’s sedimentary.'],
+   ['🏖️','사암|Sandstone','@strata','퇴적암|Sedimentary rock','모래가 쌓이고 눌려 굳어서 퇴적암이에요.|Sand piled up and got pressed into rock, so it’s sedimentary.'],
    ['🏛️','대리암|Marble','🔥','변성암|Metamorphic rock','석회암이 높은 열과 압력을 받아 바뀐 변성암이에요.|Limestone changed by great heat and pressure, so it’s metamorphic.']]},
   thanks:'돌은 만들어진 방법에 따라 화성암, 퇴적암, 변성암으로 나눠요!|Rocks are grouped by how they formed: igneous, sedimentary and metamorphic!'},
 
@@ -5846,8 +5853,10 @@ function renderMap(){
   const st=S.stars[w+'-'+k]||0,ok=stageOpen(w,k),isCur=cur.w===w&&cur.s===k&&!cur.boss&&!cur.final;
   return `<button class="node ${st?'done':''} ${ok?'':'locked'} ${isCur?'cur':''}" type="button" data-stage="${k}" style="left:${x}%;top:${y}px"><span class="ball">${ok?pic(W.mon.img,W.mon.icon):'🔒'}<em>${k+1}</em></span><span class="stars">${ok?[0,1,2].map(i=>`<span class="${i<st?'':'off'}">⭐</span>`).join(''):''}</span>${isCur?`<span class="me">${me}</span>`:''}</button>`;
  }).join('');
- const fin=finalOpen();
- $('v-map').innerHTML=`<div class="chapters">${WORLDS.map((x,i)=>`<button class="chap ${i===w?'on':''} ${worldOpen(i)?'':'locked'}" type="button" data-world="${i}"><span class="ic">${worldOpen(i)?pic(x.img,x.icon):'🔒'}</span><b>${esc(x.name)}</b><small>⭐ ${worldStars(i)}/${STAGES*3}${S.bossWins.includes(i)?' 👑':''}</small></button>`).join('')}
+ const fin=finalOpen(),gk=gradeOf(S.diff,!!S.gentle),gm=k=>k===gk?S:(S.mapBy&&S.mapBy[k])||{};
+ const tabs=`<div class="gtabs" role="tablist" aria-label="${esc(L('학년별 지도','Map for each grade'))}">${DIFF_LIST().map(d=>{const k=String(d.id),m=gm(k);
+  return `<button type="button" role="tab" aria-selected="${k===gk}" class="${k===gk?'on':''}" data-grade="${k}"><span>${d.icon}</span><b>${esc(d.name)}</b><small>${m.finalWin?'👑':`🏆 ${(m.bossWins||[]).length}/${WORLDS.length}`}</small></button>`}).join('')}</div>`;
+ $('v-map').innerHTML=tabs+`<div class="chapters">${WORLDS.map((x,i)=>`<button class="chap ${i===w?'on':''} ${worldOpen(i)?'':'locked'}" type="button" data-world="${i}"><span class="ic">${worldOpen(i)?pic(x.img,x.icon):'🔒'}</span><b>${esc(x.name)}</b><small>⭐ ${worldStars(i)}/${STAGES*3}${S.bossWins.includes(i)?' 👑':''}</small></button>`).join('')}
   <button class="chap final ${fin?'':'locked'}" type="button" data-final><span class="ic">${fin?pic(FINAL.img,FINAL.icon):'🔒'}</span><b>${esc(FINAL.name)}</b><small>${S.finalWin?'👑':L('최종 보스','Final boss')}</small></button></div>
  <div class="banner" style="background:${W.grad}"><div class="art">${pic(W.img,W.icon)}</div><div><h2>${w+1}. ${esc(W.name)}</h2><span class="skill">🔬 ${esc(W.topic)}</span>
   <div class="prog">⭐ ${worldStars(w)}/${STAGES*3} · ${S.bossWins.includes(w)?L('👑 보스 격파!','👑 Boss defeated!'):open?L(`보스: ${W.boss.name}`,`Boss: ${W.boss.name}`):L('🔒 이전 지역의 보스를 이기면 열려요','🔒 Beat the previous boss to open')}</div>
@@ -5857,6 +5866,8 @@ function renderMap(){
 }
 let cardsFrom='home',cardsWorld=0;
 $('v-map').addEventListener('click',e=>{
+ const gt=e.target.closest('[data-grade]');
+ if(gt){const k=gt.dataset.grade;if(k!==gradeOf(S.diff,!!S.gentle)){SFX.click();setDiff(k==='g'?'g':+k)}return}
  const cp=e.target.closest('[data-world]'),st=e.target.closest('[data-stage]'),bs=e.target.closest('[data-boss]'),cd=e.target.closest('[data-cards]'),fn=e.target.closest('[data-final]');
  if(cp){SFX.click();const i=+cp.dataset.world;if(!worldOpen(i)){toast('🔒 '+L('이전 지역의 보스를 이기면 열려요!','Beat the previous boss to open this world!'));return}mapWorld=i;S.lastWorld=i;save();renderMap();return}
  if(fn){if(!finalOpen()){toast('🔒 '+L(`${WORLDS.length}개 지역의 보스를 모두 이기면 나타나요!`,`Appears after you beat all ${WORLDS.length} bosses!`));return}SFX.click();finalIntro();return}
@@ -6780,8 +6791,12 @@ function openSciBook(){MiniLesson.book({title:['과학 개념 노트','Science c
 let PS=null;
 const foeFace=()=>PS&&PS.foe?pic(PS.foe.img,PS.foe.icon):pic(FINAL.img,FINAL.icon);
 // Each stage teaches a quarter of every level's cards, so harder cards show up from the first stage
+// each grade's map teaches that grade's own cards stage by stage (grade 3 and grade 4 split the middle band by G4);
+// the cards of the grades below come back as review, and a world with no cards of its own reviews them all
+const ownCard=c=>{const k=gradeOf(S.diff,!!S.gentle);return k==='1'?c.lv===1:k==='g'?c.lv===2&&!G4.has(c.id):k==='2'?c.lv===2&&G4.has(c.id):c.lv===3};
 function stageFocus(w,s){
- const cs=availCards(w),A=cs.map(c=>c.id),chunk=i=>[1,2,3].flatMap(lv=>{const g=cs.filter(c=>c.lv===lv).map(c=>c.id),n=g.length;return g.slice(Math.round(i*n/4),Math.round((i+1)*n/4))});
+ const cs=availCards(w),A=cs.map(c=>c.id),own=cs.filter(ownCard).map(c=>c.id),
+  chunk=own.length?i=>own.slice(Math.round(i*own.length/4),Math.round((i+1)*own.length/4)):i=>[1,2,3].flatMap(lv=>{const g=cs.filter(c=>c.lv===lv).map(c=>c.id),n=g.length;return g.slice(Math.round(i*n/4),Math.round((i+1)*n/4))});
  if(s>=4)return {focus:A,fresh:[]};
  const nw=chunk(s),prev=s>0?chunk(s-1):[];return {focus:[...nw,...prev].length?[...nw,...prev]:A,fresh:nw};
 }
@@ -7105,7 +7120,7 @@ function finish(){
  {closable:false,acts:{relearn:()=>()=>chestThen(P,stars,()=>shopOpen(missedCards(P),()=>go(backView2(P)),{mode:'review',grad:P.grad})),next:()=>()=>chestThen(P,stars,()=>next.fn()),out:()=>()=>chestThen(P,stars,()=>go(backView2(P))),again:()=>()=>chestThen(P,stars,()=>retry(P)),up:b=>{setDiff('g');S.easyRun=0;save();b.closest('.gentle').innerHTML=`<p>🍀 ${L('3학년으로 바꿨어요! 다음 판부터 새 문제가 나와요.','Switched to Grade 3! New questions from the next battle.')}</p>`;return false}},onOpen:b=>{if(P.mode==='stage')b.querySelectorAll('.bigstars span').forEach((s,i)=>{if(i<stars)setTimeout(()=>{s.classList.add('in');SFX.star(i)},300+i*260)});if(r.coins)setTimeout(()=>flyCoins(b.querySelector('.rewards'),r.coins),500);speak(title+' '+(P.foe.lose||''))}});
  if(P.firstFinal)modal(`<div class="cert"><div class="ct">🏅 ${L('과학 수호대 수료증','Science Guardian Certificate')}</div><div class="cn">${avatarHTML()}<b>${esc(S.name)}</b></div>
   <p>${L(`위 대원은 진짜 과학으로 헷갈 박사를 막고 ${WORLDS.length}개 지역을 모두 지켜 냈기에 이 수료증을 드립니다.`,`For stopping Dr. Mix-Up with real science and protecting all ${WORLDS.length} worlds, this certificate is proudly given to the guardian above.`)}</p>
-  <div class="cd">${dayKey()} · ${D().icon} ${esc(D().name)}</div></div>${coachLine('big')}<p>${S.diff===3?L('이제 모든 카드를 골드로 만들어 보세요!','Next, turn every card gold!'):L('이제 다음 학년 단계에도 도전해 보세요!','Next, try the next grade up!')}</p><div class="row"><button class="btn gold" type="button" data-act="close">🎉 ${L('만세!','Hooray!')}</button></div>`,{onOpen:()=>{celebrate('fireworks');speak(L(`${S.name} 대원, 축하해요! 진짜 과학 수호대가 되었어요!`,`Congratulations, ${S.name}! You are a true Science Guardian!`))}});
+  <div class="cd">${dayKey()} · ${D().icon} ${esc(D().name)}</div></div>${coachLine('big')}<p>${S.diff===3?L('이제 모든 카드를 골드로 만들어 보세요!','Next, turn every card gold!'):L('이제 다음 학년 단계에도 도전해 보세요!','Next, try the next grade up!')}</p><div class="row"><button class="btn gold" type="button" data-act="close">🎉 ${L('만세!','Hooray!')}</button></div>`,{onOpen:()=>{celebrate('fireworks');speak(L('축하해요! 진짜 과학 수호대가 되었어요!','Congratulations! You are a true Science Guardian!'))}});
  levelModals(r.levels);checkTrophies();save();
 }
 const backView2=P=>P.mode==='stage'||P.mode==='boss'||P.mode==='final'?'map':P.mode==='card'?'cards':'home';
@@ -7254,10 +7269,24 @@ function openAlbum(w,then){if(w!=null)albumW=w;const ws=openWorldIds();
 // ---------------------------------------------------------------- players, difficulty, settings
 function diffButtons(cur){return `<div class="diffs four">${DIFF_LIST().map(d=>`<button type="button" data-act="d${d.id}" class="${d.id===cur?'on':''}"><span>${d.icon}</span><b>${esc(d.name)}</b><small>${esc(d.sub)}</small></button>`).join('')}</div>`}
 const diffKey=p=>isGentle(p)?'g':p.diff;
-function setDiff(k){S.diff=k==='g'?2:k;S.gentle=k==='g';S.gentleOffered=S.gradeSplit=true;save();const d=D();toast(`${d.icon} ${d.name}`);updateHud();if(VIEW==='home')renderHome();else if(VIEW==='map')renderMap();else if(VIEW==='cards')renderCards()}
+// map progress (stars, bosses beaten, the final, the world last opened) belongs to one school grade: changing grade
+// puts the old grade's map away in S.mapBy and brings back the new grade's (empty the first time). carry keeps the
+// current map for the new grade (the one-time "pick your grade" question for saves made before grades were split).
+const gradeOf=(diff,gentle)=>gentle&&diff===2?'g':String(diff);
+function moveMap(diff,gentle,carry){
+ const from=gradeOf(S.diff,!!S.gentle),to=gradeOf(diff,gentle);
+ if(from===to)return;
+ if(carry){if(S.mapBy)delete S.mapBy[to];return}
+ S.mapBy=S.mapBy||{};
+ S.mapBy[from]={stars:S.stars,bossWins:S.bossWins,finalWin:S.finalWin,lastWorld:S.lastWorld};
+ const m=S.mapBy[to]||{};delete S.mapBy[to];
+ S.stars=m.stars||{};S.bossWins=m.bossWins||[];S.finalWin=!!m.finalWin;S.lastWorld=m.lastWorld||0;
+ mapWorld=S.lastWorld;
+}
+function setDiff(k,carry){moveMap(k==='g'?2:k,k==='g',carry);S.diff=k==='g'?2:k;S.gentle=k==='g';S.gentleOffered=S.gradeSplit=true;save();const d=D();toast(`${d.icon} ${d.name}`);updateHud();if(VIEW==='home')renderHome();else if(VIEW==='map')renderMap();else if(VIEW==='cards')renderCards()}
 function openDifficulty(){
  modal(`<h2>🎚️ ${L('난이도','Difficulty')}</h2><p>${L('학년에 맞춰 문제와 실험이 달라져요. 언제든 바꿀 수 있어요.','Questions and labs change to fit your grade. You can switch any time.')}</p>${diffButtons(diffKey(S))}
-  <p class="sub">${L('🌱 1~2학년: 생활 속 과학 기초, 보기 3개·하트 4개<br>🍀 3학년: 힘, 동물과 식물의 생활과 한살이, 물체와 물질, 지구와 바다, 소리 + 1~2학년 복습, 보기 3개·하트 4개<br>🌿 4학년: 자석, 물의 상태 변화, 화산과 지진, 작은 생물, 달과 별, 생태계, 기체, 기후변화 + 3학년 복습, 보기 4개·하트 3개<br>🌳 5~6학년: 5~6학년 내용, 실험 기회 1번<br>3·4학년 단원은 2022 개정 교육과정을 따라요.','🌱 Grades 1–2: everyday science basics, 3 choices, 4 hearts<br>🍀 Grade 3: forces, how animals and plants live and grow, materials, Earth and the sea, sound, plus grade 1–2 review, 3 choices, 4 hearts<br>🌿 Grade 4: magnets, changes of water, volcanoes and earthquakes, tiny living things, the Moon and stars, ecosystems, gases, climate change, plus grade 3 review, 4 choices, 3 hearts<br>🌳 Grades 5–6: grade 5–6 ideas, one try in labs<br>Grade 3 and 4 topics follow the Korean national curriculum.')}</p>
+  <p class="sub">${L('🌱 1~2학년: 생활 속 과학 기초, 보기 3개·하트 4개<br>🍀 3학년: 힘, 동물과 식물의 생활과 한살이, 물체와 물질, 지구와 바다, 소리 + 1~2학년 복습, 보기 3개·하트 4개<br>🌿 4학년: 자석, 물의 상태 변화, 화산과 지진, 작은 생물, 달과 별, 생태계, 기체, 기후변화 + 3학년 복습, 보기 4개·하트 3개<br>🌳 5~6학년: 5~6학년 내용, 실험 기회 1번<br>3·4학년 단원은 2022 개정 교육과정을 따라요.<br>🗺️ 학년마다 지도가 따로 있어요. 지도 위의 학년 탭으로도 바꿀 수 있어요.','🌱 Grades 1–2: everyday science basics, 3 choices, 4 hearts<br>🍀 Grade 3: forces, how animals and plants live and grow, materials, Earth and the sea, sound, plus grade 1–2 review, 3 choices, 4 hearts<br>🌿 Grade 4: magnets, changes of water, volcanoes and earthquakes, tiny living things, the Moon and stars, ecosystems, gases, climate change, plus grade 3 review, 4 choices, 3 hearts<br>🌳 Grades 5–6: grade 5–6 ideas, one try in labs<br>Grade 3 and 4 topics follow the Korean national curriculum.<br>🗺️ Each grade has its own map. You can also switch with the grade tabs on the map.')}</p>
   <p class="sub">${L('틀린 문제가 두 번 이어지면 다음 문제는 조금 쉬워져요.','After two misses in a row, the next question gets a little easier.')}</p>`,
  {acts:Object.fromEntries(['1','g','2','3'].map(k=>['d'+k,()=>{setDiff(k==='g'?'g':+k)}]))});
 }
@@ -7274,7 +7303,7 @@ function playerForm(p,{isNew}){
   del:b=>{if(!b.dataset.arm){b.dataset.arm=1;b.textContent=L('정말요? 한 번 더','Really? Tap again');return false}const id=ROOT.cur;delete ROOT.P[id];ROOT.order=ROOT.order.filter(x=>x!==id);ROOT.cur=ROOT.order[0];S=merge(ROOT.P[ROOT.cur]);save();go('home');return},
   ok:()=>{const name=MGP.me?MGP.me.name:($('pName').value||'').trim()||p.name;if(MGP.me)av=MGP.me.av;
    if(isNew&&p!==S){save();const id='p'+Date.now().toString(36);ROOT.order.push(id);ROOT.cur=id;S=fresh();}
-   S.name=name;S.av=av;S.diff=diff==='g'?2:diff;S.gentle=diff==='g';S.gentleOffered=S.gradeSplit=S.shopIntro=true;save();updateHud();
+   S.name=name;S.av=av;moveMap(diff==='g'?2:diff,diff==='g');S.diff=diff==='g'?2:diff;S.gentle=diff==='g';S.gentleOffered=S.gradeSplit=S.shopIntro=true;save();updateHud();
    if(VIEW==='home')renderHome();
    if(!S.intro)return ()=>introStory();go('home')}}});
 }
@@ -7319,7 +7348,7 @@ function dailyLogin(){
  S.login.streak=S.login.last===dayKey(y)?S.login.streak+1:1;S.login.last=d;S.login.best=Math.max(S.login.best,S.login.streak);save();
  const idx=(S.login.streak-1)%7,coins=LOGIN[idx];
  modal(`<h2>📅 ${L('출석 보상','Daily reward')}</h2><p>${L(`${S.login.streak}일 연속 출석! 매일 오면 선물이 커져요.`,`${S.login.streak}-day streak! Come every day for bigger gifts.`)}</p>
-  <div class="calendar">${LOGIN.map((c,i)=>`<div class="${i<idx?'got':i===idx?'today':''}">${L(`${i+1}일`,`Day ${i+1}`)}<b>${i===6?'🎁':i<idx?'✅':'🪙'}</b>${c}</div>`).join('')}</div>
+  <div class="calendar">${LOGIN.map((c,i)=>`<div class="${i<idx?'got':i===idx?'today':''}">${L(`${i+1}일`,`Day ${i+1}`)}<b>${i===6?pic('images/dt-gift-red.webp','🎁'):i<idx?'✅':'🪙'}</b>${c}</div>`).join('')}</div>
   <div class="row"><button class="btn gold" type="button" data-act="take">${COIN} +${coins} ${L('받기','Collect')}</button></div>`,
  {closable:false,acts:{take:b=>{const r=grant({coins,xp:10,items:idx===6?{hint:2,shield:1,potion:1}:{}});flyCoins(b,r.coins);if(VIEW==='home')renderHome()}}});
 }
@@ -7330,14 +7359,14 @@ function introStory(){
  modal(`<div class="bossart" style="background:${FINAL.grad}">${pic(FINAL.img,FINAL.icon)}</div><h2>${esc(FINAL.name)}</h2><div class="speech">“${esc(FINAL.hi)}”</div>`,
   {closable:false,acts:{},onOpen:box=>{speak(FINAL.hi);box.insertAdjacentHTML('beforeend',`<div class="row"><button class="btn red" type="button" data-act="next">${L('큰일이다! ▶','Oh no! ▶')}</button></div>`);CUR.acts={next:()=>()=>{
    modal(`<div style="font-size:72px">${pic(b.img,b.icon)}</div><h2>${L(`${S.name} 대원, 도와줘요!`,`${S.name}, we need you!`)}</h2><p>${L('헷갈 박사의 몬스터들이 마을에 엉터리 상식을 퍼뜨리고 있어요. 먼저 과학 가게에서 손님을 도우며 진짜 과학을 배워요. 손님을 도우면 코인도 벌어요! 그다음 배운 걸로 몬스터와 싸워요. 맞히면 공격, 틀리면 하트가 줄지만 괜찮아요. 설명을 보면 더 강해져요!','Dr. Mix-Up’s monsters are spreading silly myths around town. First, learn real science by helping customers in your science shop, and earn coins too! Then use what you learned to fight the monsters. Right answers attack; wrong ones cost a heart, and that’s okay: read the explanation and you get stronger!')}</p>
-    <div class="row"><button class="btn green" type="button" data-act="go">▶ ${L('출동!','Let’s go!')}</button></div>`,{closable:false,acts:{go:()=>{S.intro=true;save();return ()=>{dailyLogin();startStage(0,0)}}},onOpen:()=>speak(L(`${S.name} 대원, 도와줘요! 먼저 과학 가게에서 손님을 도우며 배우고, 배운 걸로 몬스터를 물리쳐요!`,`${S.name}, we need you! First learn by helping customers in your science shop, then beat the monsters with what you learned!`))})}}}});
+    <div class="row"><button class="btn green" type="button" data-act="go">▶ ${L('출동!','Let’s go!')}</button></div>`,{closable:false,acts:{go:()=>{S.intro=true;save();return ()=>{dailyLogin();startStage(0,0)}}},onOpen:()=>speak(L('과학 대원, 도와줘요! 먼저 과학 가게에서 손님을 도우며 배우고, 배운 걸로 몬스터를 물리쳐요!','Guardian, we need you! First learn by helping customers in your science shop, then beat the monsters with what you learned!'))})}}}});
 }
 // No title screen: open straight onto the home screen with the last player
 applyLang();updateHud();ensureMissions();quietTrophies();$('homeLink').href='index.html?lang='+LANG;
 go('home');
 if(!S.intro)playerForm(S,{isNew:true});
 else if(S.diff<=2&&!isGentle(S)&&!S.gradeSplit){S.gentleOffered=S.gradeSplit=true;save();modal(`<div style="font-size:56px">🎒</div><h2>${L('이제 학년별로 골라요','Pick your school grade')}</h2><p>${L('3학년과 4학년 문제가 따로 나뉘었어요. 학교에서 배우는 내용에 꼭 맞게 나와요. 몇 학년이에요?','Grade 3 and grade 4 questions are now separate, so they match what you learn at school. Which grade are you in?')}</p>${diffButtons(diffKey(S))}
-  <div class="row"><button class="btn green" type="button" data-act="close">${L('이대로 할래요','Keep this one')}</button></div>`,{acts:Object.fromEntries(['1','g','2','3'].map(k=>['d'+k,()=>{setDiff(k==='g'?'g':+k)}]))})}
+  <div class="row"><button class="btn green" type="button" data-act="close">${L('이대로 할래요','Keep this one')}</button></div>`,{acts:Object.fromEntries(['1','g','2','3'].map(k=>['d'+k,()=>{setDiff(k==='g'?'g':+k,true)}]))})}
 else{if(ROOT.order.length>1)toast(`${esc(S.av)} ${esc(L(`${S.name} 대원으로 시작해요. 얼굴을 누르면 바꿀 수 있어요`,`Playing as ${S.name}. Tap the face to switch`))}`);dailyLogin()}
 if(S.intro&&!S.shopIntro){S.shopIntro=true;save();modal(`<div style="font-size:64px">🏪</div><h2>${L('과학 가게를 열었어요!','You opened a science store!')}</h2><p>${L('이제 하루하루 가게를 열어요. 손님 주문을 보고 알맞은 선반에서 물건을 골라 계산대에서 건네요. 손님을 도우며 과학을 배우고 동전도 벌어요! 문 닫을 시간이 되면 몬스터가 쳐들어오니, 배운 걸로 물리쳐요.','Open your store day by day. Read each order, pick the right things from the shelves and hand them over at the counter. Learn science while you earn coins! At closing time a monster bursts in, so beat it with what you learned.')}</p>
   <div class="row"><button class="btn ghost" type="button" data-act="close">${L('나중에','Later')}</button><button class="btn gold" type="button" data-act="store">🏪 ${L('가게 열기','Open the store')}</button></div>`,{acts:{store:()=>()=>goNext()}})}

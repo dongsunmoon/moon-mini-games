@@ -436,7 +436,7 @@ body:not([data-view="patrol"]) #patrolScreen{display:none!important}
 .v12-cctvOptions .plc{font-size:27px;margin-right:6px;flex:none}.v12-cctvOptions .plc .ei{width:38px;height:38px;margin:-6px 0}
 .v12-sequence .plc{font-size:18px}.v12-sequence .plc .ei{width:24px;height:24px;margin:-4px 0}
 .v16-place .plc{display:block;font-size:27px;margin:0 auto 3px}.v16-place .plc .ei{width:36px;height:36px;margin:0 auto}.dtl-spot .pl .ei{width:1.45em;height:1.45em;display:block}
-.giftChoices button{font-size:34px;line-height:1.2}.giftChoices button .ei{width:48px;height:48px;display:block;margin:-6px auto}
+.dailyChest .ei{width:1.45em;height:1.45em;vertical-align:-.38em;margin:-4px 2px -4px 0}.giftArea>strong .ei{width:1.4em;height:1.4em;vertical-align:-.32em;margin:-4px 2px -4px 0}.giftChoices button{font-size:34px;line-height:1.2}.giftChoices button .ei{width:48px;height:48px;display:block;margin:-6px auto}
 /* clue icons: grey when the clue is a colour, a red "no" sign over "none" */
 .clue .ico{position:relative;flex:none;display:inline-grid;place-items:center;min-width:1.3em;line-height:1}.clue .ico svg{display:block}
 .clue .ico.grey .e{filter:grayscale(1)}.clue .ico.no .e{filter:grayscale(1);opacity:.55}
@@ -881,7 +881,7 @@ button.dtl-card{cursor:pointer}
  <div class="buddyTools"><button id="buddyAsk" type="button" aria-label="탐정 친구의 도움 받기" data-en-aria-label="Get help from your buddy" data-en="💡 Help!">💡 도움!</button><button id="buddySwitch" type="button" aria-expanded="false" aria-controls="buddyPicker" data-en="🐾 Switch">🐾 교체</button></div>
 </section>
 <div class="buddyPicker" id="buddyPicker" hidden><p data-en="Pick a detective buddy for your adventure!">함께 모험할 탐정 친구를 골라요!</p><button data-buddy="puppy" data-en="🐶 Detective Woof">🐶 멍멍 탐정</button><button data-buddy="fox" data-en="🦊 Clever Fox">🦊 똑똑 여우</button><button data-buddy="cat" data-en="🐱 Detective Meow">🐱 냥냥 탐정</button><button data-buddy="bunny" data-en="🐰 Detective Bunny">🐰 토끼 탐정</button></div>
- <section class="dailyCard" id="dailyCard" aria-label="오늘의 임무" data-en-aria-label="Daily missions"><div class="dailyHead"><b data-en="📅 Daily missions">📅 오늘의 임무</b><span id="dailyDone">0 / 3</span><span class="dailyStreak" id="dailyStreak"></span></div><div class="dailyList" id="dailyList"></div><button type="button" class="dailyChest" id="dailyChest" hidden data-en="🎁 Open the treasure chest!">🎁 보물상자 열기!</button></section>
+ <section class="dailyCard" id="dailyCard" aria-label="오늘의 임무" data-en-aria-label="Daily missions"><div class="dailyHead"><b data-en="📅 Daily missions">📅 오늘의 임무</b><span id="dailyDone">0 / 3</span><span class="dailyStreak" id="dailyStreak"></span></div><div class="dailyList" id="dailyList"></div><button type="button" class="dailyChest" id="dailyChest" hidden><img class="ei" src="images/pg-chest.webp" data-emoji="🎁" alt="" draggable="false"> <span data-en="Open the treasure chest!">보물상자 열기!</span></button></section>
  <section id="mapScreen" class="mapScreen" aria-label="탐정 도시 지도" data-en-aria-label="Detective city map">
   <div class="mapHeading"><div><span class="mapEyebrow" data-en="LITTLE DETECTIVES · CITY ADVENTURE">꼬마 탐정단 · 도시 모험</span><h2 data-en="🗺️ Sparkle Detective City">🗺️ 반짝 탐정 도시</h2><p data-en="🚓 Ride the police car and solve a case in every neighborhood!">🚓 경찰차를 타고 이동하며 각 동네의 사건을 해결해요!</p></div><span class="seasonChip" id="seasonChip" data-en="🏅 Expedition 1">🏅 1번째 탐험</span></div>
   <div class="journeyMeter"><div><b id="mapCounter" data-en="0 / 6 areas solved">0 / 6 지역 해결</b><span id="mapMilestone" data-en="Off to the first neighborhood!">첫 번째 동네로 출발!</span></div><div class="journeyTrack"><i id="mapBar"></i></div></div>
@@ -931,7 +931,7 @@ button.dtl-card{cursor:pointer}
  </section>
 <div id="gameArea">
   <section class="questPanel" aria-label="오늘의 탐정 미션" data-en-aria-label="Today&#x27;s detective mission">
-  <div class="questHeading"><div><span class="questMini" data-en="✨ SPECIAL MISSION">✨ 특별 미션</span><h2 id="questTitle" data-en="A sparkly secret case!">반짝반짝 비밀 사건!</h2><p id="questIntro" data-en="Let&#x27;s solve today&#x27;s case together.">오늘의 사건을 함께 해결해 보세요.</p></div><span class="questGift" id="questEmblem">🎁</span></div>
+  <div class="questHeading"><div><span class="questMini" data-en="✨ SPECIAL MISSION">✨ 특별 미션</span><h2 id="questTitle" data-en="A sparkly secret case!">반짝반짝 비밀 사건!</h2><p id="questIntro" data-en="Let&#x27;s solve today&#x27;s case together.">오늘의 사건을 함께 해결해 보세요.</p></div><span class="questGift" id="questEmblem"><img class="ei" src="images/dt-gift-red.webp" data-emoji="🎁" alt="" draggable="false"></span></div>
   <div class="questChecklist" id="questChecklist"><span id="taskAsk" data-en="① Ask the witness">① 목격자에게 질문</span><span id="taskZoom" data-en="② Zoom in on a suspect">② 용의자 확대</span><span id="taskCatch" data-en="③ Catch the thief">③ 범인 체포</span></div>
   <div class="questFoot" data-en-html="🌈 Ask + zoom, then make the arrest for &lt;b&gt;bonus coins +10&lt;/b&gt;!">🌈 질문 + 확대 후 체포하면 <b>보너스 코인 +10</b>!</div>
  </section>
@@ -946,7 +946,7 @@ button.dtl-card{cursor:pointer}
  <div class="historyTools"><h3 class="logTitle" data-en="📖 Recent cases">📖 최근 수사 기록</h3><div class="historyButtons"><button id="clearHistory" class="historyBtn" type="button" data-en="🧹 Clear history only">🧹 기록만 지우기</button></div></div><p class="historyExplain" data-en="Clearing the history keeps your coins, level and stickers. To start the whole game over, use ⚙️ Settings.">기록만 지우면 코인·레벨·스티커는 그대로예요. 게임을 처음부터 다시 하려면 ⚙️ 설정을 눌러요.</p><div class="caseLog" id="caseLog"></div><div class="historyStatus" id="historyStatus" role="status" aria-live="polite"></div></section>
  <footer class="footer"><p data-en="Original characters and city map · Everyone in the game is made up, and we never judge real people by how they look. · Unlocked areas, shop items, your detective nickname and progress are saved in this browser. · The voice uses the English voices installed on your device, so it sounds different on each device.">오리지널 캐릭터·도시 지도 · 게임 속 인물은 모두 지어낸 사람이며, 생김새만 보고 진짜 사람을 의심하지 않아요. · 지역 해금, 상점 아이템·탐정 별명과 진행 상황은 이 브라우저에 저장됩니다. · 음성은 기기에 설치된 한국어 목소리를 사용하며 품질은 기기에 따라 달라집니다.</p><p class="copy">© 2026 Dongsun Moon. <span data-en="All rights reserved.">모든 권리 보유.</span></p></footer>
 </main>
-<div class="layer" id="layer" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="popTitle"><div class="popup"><button id="close" class="close" aria-label="닫기" data-en-aria-label="Close">✕</button><div class="popIcon" id="popIcon">🎉</div><h2 id="popTitle" data-en="Correct!">정답!</h2><p id="popDesc"></p><div class="stars" id="popStars">⭐⭐⭐</div><div id="popCoach"></div><div class="reward" id="rewards"></div><div class="large" id="large"></div><div class="giftArea" id="giftArea" hidden><strong data-en="🎁 A surprise gift!">🎁 깜짝 선물 등장!</strong><p id="giftTip" data-en="Pick any gift box. All three have a present inside!">원하는 선물상자를 하나 골라 보세요. 세 상자 모두 선물이 들어 있어요!</p><div id="giftChoices" class="giftChoices"></div><p id="giftWin" aria-live="polite"></p></div><button class="advance" id="advance" data-en="Next case ➜">다음 사건 ➜</button></div></div>
+<div class="layer" id="layer" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="popTitle"><div class="popup"><button id="close" class="close" aria-label="닫기" data-en-aria-label="Close">✕</button><div class="popIcon" id="popIcon">🎉</div><h2 id="popTitle" data-en="Correct!">정답!</h2><p id="popDesc"></p><div class="stars" id="popStars">⭐⭐⭐</div><div id="popCoach"></div><div class="reward" id="rewards"></div><div class="large" id="large"></div><div class="giftArea" id="giftArea" hidden><strong><img class="ei" src="images/dt-gift-red.webp" data-emoji="🎁" alt="" draggable="false"> <span data-en="A surprise gift!">깜짝 선물 등장!</span></strong><p id="giftTip" data-en="Pick any gift box. All three have a present inside!">원하는 선물상자를 하나 골라 보세요. 세 상자 모두 선물이 들어 있어요!</p><div id="giftChoices" class="giftChoices"></div><p id="giftWin" aria-live="polite"></p></div><button class="advance" id="advance" data-en="Next case ➜">다음 사건 ➜</button></div></div>
 <div id="patrolWalletFloat" aria-live="off"><img class="ei coin" src="images/coin.webp" data-emoji="🪙" alt="" draggable="false" onerror="this.replaceWith('🪙')"> <b id="patrolWalletNum">0</b></div>
 <div class="patrolMiniOverlay" id="patrolMiniOverlay" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="miniTitle">
  <div class="patrolMiniCard"><button type="button" class="miniClose" id="miniClose" aria-label="미니 게임 닫기" data-en-aria-label="Close mini-game">✕</button>
@@ -1035,6 +1035,9 @@ state.detectiveName=cleanDetectiveName(state.detectiveName);
 // A player profile picked on the main page supplies the name; the in-game name form is only for players without one.
 const PROFILE_NAME=MGP.me?cleanDetectiveName(MGP.me.name):'';
 const detectiveName=()=>PROFILE_NAME||state.detectiveName||'';
+// the voice never says the player's name (shown text still does), so every line can be a pre-made clip and no name leaves the device
+const unnamed=text=>[PROFILE_NAME,state.detectiveName].filter(Boolean).reduce((t,n)=>{const e=n.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+ return t.replace(new RegExp(e+' 탐정[,!]?\\s*','g'),'').replace(new RegExp('Detective '+e+'[,!]?\\s*','g'),'')},String(text)).trim();
 const namedText=text=>detectiveName()?L(`${detectiveName()} 탐정, ${String(text).replace(/탐정 요원[!,]?\s*/g,'')}`,`Detective ${detectiveName()}! ${String(text).replace(/Agent[!,]?\s*/g,'')}`):text;
 let nameEditing=false;
 function showDetectiveName(){
@@ -1407,7 +1410,7 @@ refreshVoices();
 if(!langVoices.length){stopSpeaking();$('voiceMsg').textContent=L('⚠️ 영어 목소리로 한국어를 읽지 않도록 막았어요. Android 설정 → 텍스트 음성 변환 → 한국어 음성을 추가하세요.','⚠️ No English voice is available. On Android: Settings → Text-to-speech → add an English voice.');return}
 stopSpeaking();const token=voiceToken;
 // One fluent short Korean sentence per segment; avoid saying '치직' or excessive radio punctuation.
-utteranceQueue=lines.filter(Boolean).map(x=>String(x).replace(/[\p{Extended_Pictographic}\u{1F1E6}-\u{1F1FF}\uFE0F\u200D\u20E3←↑→↓]/gu,'').replace(/\s*·\s*/g,', ').replace(/\s+/g,' ').trim()).filter(Boolean);if(utteranceQueue.length&&!plain)utteranceQueue[0]=namedText(utteranceQueue[0]);
+utteranceQueue=lines.filter(Boolean).map(x=>String(x).replace(/[\p{Extended_Pictographic}\u{1F1E6}-\u{1F1FF}\uFE0F\u200D\u20E3←↑→↓]/gu,'').replace(/\s*·\s*/g,', ').replace(/\s+/g,' ').trim()).filter(Boolean);utteranceQueue=utteranceQueue.map(unnamed).filter(Boolean);
 const voice=langVoices.find(v=>v.voiceURI===$('voices').value)||langVoices[0];
 $('stopVoice').disabled=false;$('speak').textContent=L('🔊 무전 재생 중','🔊 Radio playing');$('voiceMsg').textContent=L('📡 한국어 목소리 연결 중…','📡 Connecting the voice…');
 const go=()=>{

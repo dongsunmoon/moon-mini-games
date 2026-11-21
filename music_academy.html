@@ -3323,7 +3323,7 @@ RENDER.home=()=>{ensureDaily();const nl=nextLesson(),t=nl?TEACHERS[teacherOf(nl)
   <div class="card daily"><div class="dhead"><b>📅 ${L('오늘의 연습','Today’s practice')}</b><span class="sub">${doneN}/3</span></div>
    <div class="week">${week.map(w=>`<span class="${w.on?'on':''} ${w.today?'today':''}"><i>${w.on?'🔥':''}</i><small>${esc(w.lab)}</small></span>`).join('')}</div>
    <div class="dtasks">${d.tasks.map((x,i)=>`<button class="dtask ${d.done[i]?'done':''}" data-daily="${i}" type="button"><span class="di">${d.done[i]?'✅':x.icon}</span><b>${esc(T(x.t))}</b><small>${d.done[i]?L('완료!','Done!'):L('약 1분','~1 min')}</small></button>`).join('')}</div>
-   ${doneN===3&&!d.chest?`<button class="btn gold cta" id="chestBtn" type="button">🎁 ${L('오늘의 상자 열기!','Open today’s chest!')}</button>`:''}
+   ${doneN===3&&!d.chest?`<button class="btn gold cta" id="chestBtn" type="button">${pic('images/pg-chest.webp','🎁')} ${L('오늘의 상자 열기!','Open today’s chest!')}</button>`:''}
    ${doneN===3&&d.chest?`<p class="center sub">🎉 ${L('오늘 연습 끝! 내일 또 만나요!','All done today! See you tomorrow!')}</p>`:''}</div>
   ${nl?`<button class="cta next" id="nextBtn" type="button" style="background:${t.bg}"><span class="tface big">${pic(t.img,t.icon)}</span><span class="ct"><small>${L('이어서 배우기','Continue learning')} · ${esc(T(unitOf(nl).t))}</small><b>${esc(T(nl.t))}</b></span><span class="go">▶</span></button>`
    :`<div class="card center"><div class="big">🎓</div><b>${L('모든 레슨을 마쳤어요! 대회와 연습실에서 실력을 뽐내요!','You finished every lesson! Show off in contests and practice rooms!')}</b></div>`}
@@ -3673,9 +3673,9 @@ function makeDaily(){const D=lessonDone,n=doneCount();const tasks=[];
 function startDaily(i){const tk=S.daily.tasks[i];if(!tk)return;RUN={kind:'daily',i};const host=playView('📅 '+T(tk.t));
  withHowTo(tk.spec,host,()=>runActivity(tk.spec,host,{teacher:tk.teacher,tier:1,done:r=>{const was=S.daily.done[i];S.daily.done[i]=true;trackStats(r);if(tk.spec.type==='song')recordSong(tk.spec.song,r);if(tk.spec.type==='drum')recordDrum(tk.spec.pattern,r);save();
   const left=S.daily.done.filter(x=>!x).length;
-  showResult(r,{teacher:tk.teacher,title:T(tk.t),xp:was?5:15,coins:was?5:20,again:()=>startDaily(i),next:left?()=>startDaily(S.daily.done.findIndex(x=>!x)):null,nextLabel:L('다음 연습 ▶','Next task ▶'),done:()=>go('home'),doneLabel:left?L('홈으로','Home'):'🎁 '+L('상자 열러 가기','Go open the chest')})}}))}
+  showResult(r,{teacher:tk.teacher,title:T(tk.t),xp:was?5:15,coins:was?5:20,again:()=>startDaily(i),next:left?()=>startDaily(S.daily.done.findIndex(x=>!x)):null,nextLabel:L('다음 연습 ▶','Next task ▶'),done:()=>go('home'),doneLabel:left?L('홈으로','Home'):`<span>${pic('images/pg-chest.webp','🎁')} ${L('상자 열러 가기','Go open the chest')}</span>`})}}))}
 function openDailyChest(){if(S.daily.chest)return;S.daily.chest=true;const st=giveSticker();save();grant({coins:60,xp:30});
- modal(`<div class="chest"><div class="big">🎁</div><h2>${L('오늘의 연습 완료!','Practice complete!')}</h2><p>${L('매일 조금씩, 이게 바로 음악가가 되는 길이에요!','A little every day: that’s how musicians are made!')}</p><div class="rewards"><span>${COIN} +60</span><span>⭐ +30 XP</span>${st?`<span class="stk">${st}</span>`:''}</div></div><div class="row"><button class="btn gold" data-act="close" type="button">${L('야호!','Yay!')}</button></div>`,{cls:'pop',onOpen:()=>{SFX.win();celebrate();speak(L('오늘의 연습 완료! 정말 잘했어요!','Practice complete! Great job!'))},onClose:()=>RENDER.home()})}
+ modal(`<div class="chest"><div class="big">${pic('images/sci-chest-gold.webp','🎁')}</div><h2>${L('오늘의 연습 완료!','Practice complete!')}</h2><p>${L('매일 조금씩, 이게 바로 음악가가 되는 길이에요!','A little every day: that’s how musicians are made!')}</p><div class="rewards"><span>${COIN} +60</span><span>⭐ +30 XP</span>${st?`<span class="stk">${st}</span>`:''}</div></div><div class="row"><button class="btn gold" data-act="close" type="button">${L('야호!','Yay!')}</button></div>`,{cls:'pop',onOpen:()=>{SFX.win();celebrate();speak(L('오늘의 연습 완료! 정말 잘했어요!','Practice complete! Great job!'))},onClose:()=>RENDER.home()})}
 
 // ---------------------------------------------------------------- note town: the page with every note friend, and how a round ends
 const nrIcon=lv=>NR_ICON[nrBucket(lv)];
@@ -3864,7 +3864,7 @@ RENDER.who=()=>{const today=dayKey();
  $('whoAdd').addEventListener('click',()=>playerForm(true));$('whoEdit').addEventListener('click',manageProfiles);
  speak(L('누가 연습할까요? 내 이름을 눌러요!','Who’s practicing? Tap your name!'))};
 function selectPlayer(i){save();ROOT.cur=i;S=ROOT.P[i];save();applyOpts();SFX.open();toast(`${esc(S.av)} ${L(`${esc(S.name)} 차례예요!`,`${esc(S.name)}’s turn!`)}`);go('home',false);
- if(!S.intro)welcome();else{speak(L(`${S.name}, 안녕! 오늘도 같이 연습해요!`,`Hi ${S.name}! Let’s practice together!`));returnGreeting()}}
+ if(!S.intro)welcome();else{speak(L('안녕! 오늘도 같이 연습해요!','Hi! Let’s practice together!'));returnGreeting()}}
 function manageProfiles(){modal(`<h2>✏️ ${L('별명·얼굴 바꾸기','Edit players')}</h2><div class="plist">${ROOT.P.map((p,i)=>`<div class="prow"><span class="ava mini">${esc(p.av)}</span><b>${esc(p.name)}</b><button type="button" class="btn ghost small" data-act="ed" data-i="${i}" aria-label="${esc(L('바꾸기','Edit'))}">✏️</button>${ROOT.P.length>1?`<button type="button" class="btn ghost small" data-act="del" data-i="${i}" aria-label="${esc(L('지우기','Delete'))}">🗑️</button>`:''}</div>`).join('')}</div>`,
  {acts:{ed:b=>()=>playerForm(false,+b.dataset.i),del:b=>()=>confirmDelete(+b.dataset.i)}})}
 function confirmDelete(i){const p=ROOT.P[i];modal(`<div class="center"><span class="ava big">${esc(p.av)}</span><h2>${L(`${esc(p.name)} 기록을 지울까요?`,`Delete ${esc(p.name)}?`)}</h2><p>${L('별, 스티커, 코인, 메달이 모두 사라지고 되돌릴 수 없어요.','All stars, stickers, coins and medals will be gone for good.')}</p></div>
@@ -3926,7 +3926,7 @@ function calibrate(){let taps=[],clk=null,t0=0,b=null,spb=60/90,N=12;
 function welcome(){const ts=Object.values(TEACHERS);
  modal(`<div class="welcome"><div class="tparade">${ts.map(t=>`<span class="tface" style="background:${t.bg}">${pic(t.img,t.icon)}</span>`).join('')}</div><h2>${L(`${esc(S.name)}, 꼬마 음악 아카데미에 온 걸 환영해요!`,`${esc(S.name)}, welcome to Little Music Academy!`)}</h2>
   <p>${L('여섯 선생님과 함께 박자, 건반, 악보, 노래, 드럼, 악기를 하나씩 배워요. 매일 조금씩 연습하고, 대회에 나가 메달도 따 봐요!','Learn beat, keys, reading music, singing, drums and instruments with six teachers. Practice a little every day and win medals in contests!')}</p></div>
-  <div class="row"><button class="btn green cta" data-act="go" type="button">🎵 ${L('시작하기','Let’s start')}</button></div>`,{closable:false,onOpen:()=>{SFX.open();speak(L(`${S.name}, 꼬마 음악 아카데미에 온 걸 환영해요! 여섯 선생님과 함께 음악을 배워 봐요!`,`${S.name}, welcome to Little Music Academy! Let’s learn music with six teachers!`))},
+  <div class="row"><button class="btn green cta" data-act="go" type="button">🎵 ${L('시작하기','Let’s start')}</button></div>`,{closable:false,onOpen:()=>{SFX.open();speak(L('꼬마 음악 아카데미에 온 걸 환영해요! 여섯 선생님과 함께 음악을 배워 봐요!','Welcome to Little Music Academy! Let’s learn music with six teachers!'))},
   acts:{go:()=>()=>{S.intro=true;save();if(!S.faceSet)playerForm(false)}}})}
 
 // ---------------------------------------------------------------- parents' report: the summary LR keeps for report.html (see _src/report/SPEC.md)

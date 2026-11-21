@@ -506,8 +506,11 @@ function nextTip(){const st=CN||{};st.tip=((st.tip|0)+1)%CTIPS.length;if(CN&&me(
 function coachTip(){coachSay('idea',nextTip(),CN&&me()?coachRec(CN):null)}
 // read aloud with a natural voice (never the macOS novelty voices)
 const NOVELTY=/albert|bad news|bahh|bells|boing|bubbles|cellos|good news|jester|organ|superstar|trinoids|whisper|wobble|zarvox|deranged|hysterical|grandma|grandpa|eddy|flo\b|reed|rocko|sandy|shelley/i;
+// the voice never says the player's name (the bubble still shows it), so every line can be a pre-made clip and no name leaves the device
+function unname(t){const p=me(),n=p&&p.name;if(!n)return t;const e=n.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+ t=t.replace(new RegExp('^'+e+', '),'').replace(new RegExp('Hi '+e+'! '),'Hi! ').replace(new RegExp('언제나 '+e+' 편이에요'),'언제나 응원해요');return t.charAt(0).toUpperCase()+t.slice(1)}
 function coachSpeak(){if(!('speechSynthesis' in window)||!CMSG)return;try{speechSynthesis.cancel();const vs=speechSynthesis.getVoices().filter(v=>(v.lang||'').toLowerCase().startsWith(LANG)&&!NOVELTY.test(v.name)),v=vs.find(v=>/google|yuna|sora|samantha|ava|allison|natural|premium|enhanced|siri/i.test(v.name))||vs[0];
- const u=new SpeechSynthesisUtterance(CMSG.replace(/[\u{1F300}-\u{1FAFF}☀-➿]/gu,''));if(v)u.voice=v;u.lang=LANG==='en'?'en-US':'ko-KR';speechSynthesis.speak(u)}catch(e){}}
+ const u=new SpeechSynthesisUtterance(unname(CMSG).replace(/[\u{1F300}-\u{1FAFF}☀-➿]/gu,''));if(v)u.voice=v;u.lang=LANG==='en'?'en-US':'ko-KR';speechSynthesis.speak(u)}catch(e){}}
 $('coSay').addEventListener('click',coachSpeak);
 $('coPic').addEventListener('click',()=>{coachTip();coachSpeak()});
 // remember which game was opened today so the coach can suggest a different one next time

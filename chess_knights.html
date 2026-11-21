@@ -2526,7 +2526,7 @@ const STAGE_SET=new Set(ADV_STAGES.flat());
 const THEMES={
  m1:{icon:'👑',name:L('1수 체크메이트','Mate in 1'),goal:L('한 수 만에 체크메이트!','Checkmate in one move!'),miss:L('체크하는 수를 모두 찾아봐요. 킹이 도망칠 칸이 남아 있나요?','Find every checking move. Can the king still escape?')},
  m2:{icon:'👑',name:L('2수 체크메이트','Mate in 2'),goal:L('두 수 만에 체크메이트!','Checkmate in two moves!'),miss:L('첫 수는 체크나 강한 공격일 때가 많아요!','The first move is often a check or a big threat!')},
- h:{icon:'🎁',name:L('공짜 기물','Free piece'),goal:L('공짜로 잡을 수 있는 기물을 찾아요!','Find a piece you can take for free!'),miss:L('아무도 지키지 않는 상대 기물을 찾아봐요.','Look for an enemy piece nobody is guarding.')},
+ h:{icon:'🎁',img:'images/dt-gift-red.webp',name:L('공짜 기물','Free piece'),goal:L('공짜로 잡을 수 있는 기물을 찾아요!','Find a piece you can take for free!'),miss:L('아무도 지키지 않는 상대 기물을 찾아봐요.','Look for an enemy piece nobody is guarding.')},
  f:{icon:'🍴',name:L('포크','Fork'),goal:L('포크! 한 기물로 두 개를 동시에 공격해요!','Fork! Attack two pieces at once!'),miss:L('한 번에 두 기물을 공격할 수 있는 칸을 찾아봐요.','Find a square that attacks two pieces at once.')},
  p:{icon:'📌',name:L('핀','Pin'),goal:L('핀! 뒤에 숨은 큰 기물을 노려요!','Pin! Aim at the big piece hiding behind!'),miss:L('같은 줄에 나란히 선 상대 기물 두 개를 찾아봐요.','Look for two enemy pieces lined up.')},
  s:{icon:'🍢',name:L('꼬치','Skewer'),goal:L('꼬치 공격! 큰 기물을 비키게 하고 뒤를 잡아요!','Skewer! Chase the big piece and take the one behind!'),miss:L('같은 줄에 나란히 선 상대 기물 두 개를 찾아봐요.','Look for two enemy pieces lined up.')},
@@ -2564,6 +2564,7 @@ const CHAPTERS=[
  {icon:'🐉',name:L('드래곤 탑','Dragon Tower'),skill:'a',boss:6,grad:'linear-gradient(135deg,#ff6a3d,#7a1f3d)'},
 ];
 CHAPTERS.forEach((c,i)=>{c.img=`images/chess-ch${i+1}.webp`});
+const thIc=k=>pic(THEMES[k].img,THEMES[k].icon); // a puzzle theme's picture where there is one, else its emoji
 const SKILL_NAME={h:L('공짜 기물 잡기','Grab free pieces'),m1:L('1수 체크메이트','Mate in one'),f:L('포크 공격','Forks'),p:L('핀과 꼬치','Pins and skewers'),m2:L('2수 체크메이트','Mate in two'),a:L('종합 도전','Grand challenge')};
 // each land's trick: the teaching text of its mini lesson (CH_LS, after the parents' report)
 const LESSONS=[
@@ -3048,7 +3049,7 @@ function renderMap(){
   return `<button class="node ${st?'done':''} ${ok?'':'locked'} ${isCur?'cur':''}" type="button" data-stage="${k}" style="left:${x}%;top:${y}px"><span class="ball">${ok?k+1:'🔒'}</span><span class="stars">${ok?[0,1,2].map(i=>`<span class="${i<st?'':'off'}">⭐</span>`).join(''):''}</span>${isCur?`<span class="me">${pic(COACHES[S.equip.coach].img,COACHES[S.equip.coach].icon)}</span>`:''}</button>`;
  }).join('');
  $('v-map').innerHTML=`<div class="chapters">${CHAPTERS.map((x,i)=>`<button class="chap ${i===c?'on':''} ${chapterUnlocked(i)?'':'locked'}" type="button" data-chap="${i}"><span class="ic">${chapterUnlocked(i)?pic(x.img,x.icon):'🔒'}</span><b>${esc(x.name)}</b><small>⭐ ${chapterStars(i)}/30${S.bossWins.includes(i)?' 👑':''}</small></button>`).join('')}</div>
- <div class="banner" style="background:${ch.grad}"><div class="art">${pic(ch.img,ch.icon)}</div><div><h2>${c+1}. ${esc(ch.name)}</h2><span class="skill">${THEMES[ch.skill==='a'?'d':ch.skill].icon} ${esc(SKILL_NAME[ch.skill])}</span>
+ <div class="banner" style="background:${ch.grad}"><div class="art">${pic(ch.img,ch.icon)}</div><div><h2>${c+1}. ${esc(ch.name)}</h2><span class="skill">${thIc(ch.skill==='a'?'d':ch.skill)} ${esc(SKILL_NAME[ch.skill])}</span>
   <div class="prog">⭐ ${stars}/30 · ${S.bossWins.includes(c)?L('👑 보스 격파!','👑 Boss defeated!'):open?L(`보스: ${BOTS[ch.boss].name}`,`Boss: ${BOTS[ch.boss].name}`):L('🔒 이전 지역의 보스를 이기면 열려요','🔒 Beat the previous boss to open')}</div>
   <button class="btn small ghost learn" type="button" data-lesson="${c}">📖 ${L('기술 배우기','Learn the trick')}</button></div></div>
  <div class="path" style="height:${H}px"><svg viewBox="0 0 100 ${H}" preserveAspectRatio="none"><path vector-effect="non-scaling-stroke" d="${pts.map(([x,y],k)=>(k?'L':'M')+x+' '+y).join(' ')}"/></svg>${nodes}</div>`;
@@ -3128,7 +3129,7 @@ function renderPuzzleBars(){
 }
 function renderPuzzleGoal(){
  const z=PZ,t=THEMES[z.p.theme],ls=z.mode!=='rush'&&z.missed&&TH_LS[z.p.theme];
- $('goalCard').innerHTML=`<span class="ic">${t.icon}</span><div><b>${esc(t.goal)}</b><small>${esc(t.name)} · ${L(`${z.p.moves.length>>1}수 문제`,`${z.p.moves.length>>1}-move puzzle`)}</small>${ls?`<button class="mlx-chip" type="button" data-les="${ls}">📖 ${L('개념 다시 보기','See the idea again')}</button>`:''}</div>`;
+ $('goalCard').innerHTML=`<span class="ic">${pic(t.img,t.icon)}</span><div><b>${esc(t.goal)}</b><small>${esc(t.name)} · ${L(`${z.p.moves.length>>1}수 문제`,`${z.p.moves.length>>1}-move puzzle`)}</small>${ls?`<button class="mlx-chip" type="button" data-les="${ls}">📖 ${L('개념 다시 보기','See the idea again')}</button>`:''}</div>`;
 }
 // after a miss, the theme's mini lesson is one tap away (the puzzle waits underneath)
 $('goalCard').addEventListener('click',e=>{const b=e.target.closest('[data-les]');if(b){SFX.click();MiniLesson.open(chL(b.dataset.les))}});
@@ -3485,7 +3486,7 @@ function dailyLogin(){
  S.login.streak=S.login.last===dayKey(y)?S.login.streak+1:1;S.login.last=d;S.login.best=Math.max(S.login.best,S.login.streak);save();
  const idx=(S.login.streak-1)%7,coins=LOGIN[idx];
  modal(`<h2>📅 ${L('출석 보상','Daily reward')}</h2><p>${L(`${S.login.streak}일 연속 출석! 매일 오면 선물이 커져요.`,`${S.login.streak}-day streak! Come every day for bigger gifts.`)}</p>
-  <div class="calendar">${LOGIN.map((c,i)=>`<div class="${i<idx?'got':i===idx?'today':''}">${L(`${i+1}일`,`Day ${i+1}`)}<b>${i===6?'🎁':i<idx?'✅':'🪙'}</b>${c}</div>`).join('')}</div>
+  <div class="calendar">${LOGIN.map((c,i)=>`<div class="${i<idx?'got':i===idx?'today':''}">${L(`${i+1}일`,`Day ${i+1}`)}<b>${i===6?pic('images/dt-gift-red.webp','🎁'):i<idx?'✅':'🪙'}</b>${c}</div>`).join('')}</div>
   <div class="row"><button class="btn gold" type="button" data-act="take">${COIN} +${coins} ${L('받기','Collect')}</button></div>`,
  {closable:false,acts:{take:b=>{const r=grant({coins,xp:10,items:idx===6?{hint:2,shield:1}:{}});flyCoins(b,r.coins);if(VIEW==='home')renderHome()}}});
 }
@@ -3534,7 +3535,7 @@ function learnSummary(){
  ['gain','promote','discover'].forEach(id=>byId[id]=pool(id));
  const on=id=>byId[id]&&byId[id].st>0;
  const areas=[
-  {id:'basics',icon:'🎁',name:['기본기: 기물 가치와 잡기','Basics: piece value and captures'],skills:[byId.free,byId.gain,byId.promote]},
+  {id:'basics',icon:'⚖️',name:['기본기: 기물 가치와 잡기','Basics: piece value and captures'],skills:[byId.free,byId.gain,byId.promote]},
   {id:'mate',icon:'👑',name:['체크메이트 패턴','Checkmate patterns'],skills:[byId.mate1,byId.mate2]},
   {id:'tactics',icon:'🍴',name:['전술: 포크·핀·숨은 공격','Tactics: forks, pins, discovered attacks'],skills:[byId.fork,byId.pin,byId.discover,byId.mixed]},
   {id:'think',icon:'🧠',name:['수 읽기와 집중력','Thinking ahead and focus'],skills:[
@@ -3755,7 +3756,7 @@ const CH_LS={
   lbStep(['폰이 맨 끝줄에 닿으면 퀸, 룩, 비숍, 나이트 중 하나로 바뀌어요. 이걸 ‘승진’이라고 해요. 보통은 가장 센 퀸을 골라요.','When a pawn reaches the last row, it turns into a queen, rook, bishop or knight. This is called promotion. Most of the time you pick the queen, the strongest.'],{fen:'8/1P5k/8/8/8/8/8/K7 w - - 0 1',demo:['b7b8q'],v:h=>!!h.pos.fromUci('b7b8q')}),
   {say:['승진할 때는 네 기물 중 하나를 골라요. 대결에서는 이렇게 고르는 창이 떠요.','When you promote, you pick one of four pieces. In a battle, a little menu like this pops up.'],art:box=>{box.innerHTML=`<div class="lbw"><div class="lbpro ps-${S.equip.pieces}">${[5,4,3,2].map(t=>pieceHTML(t)).join('')}</div></div>`}},
   lbStep(['해 봐요! 폰 앞이 막혀 있어요. 대각선으로 상대 기물을 잡으면서 끝줄에 가요.','Your turn! The way straight ahead is blocked. Capture diagonally to reach the last row.'],{fen:'2rn3k/3P4/8/8/8/8/8/K7 w - - 0 1',test:(p,m)=>!!m.pr,answer:'d7c8q',ok:['승진! 폰이 퀸이 됐어요.','Promotion! Your pawn became a queen.'],nope:['바로 앞은 나이트가 막고 있어요. 앞쪽 대각선을 봐요!','The knight blocks the way. Look diagonally forward!'],v:h=>!h.pos.fromUci('d7d8')})]},
- free:{icon:'🎁',title:SKILL_NAME.h,key:[['잡은 뒤에 내 기물이 다시 잡히지 않으면 공짜예요.','If nobody can take your piece back, the capture is free.'],thTip('h')],steps:[
+ free:{icon:pic('images/dt-gift-red.webp','🎁'),title:SKILL_NAME.h,key:[['잡은 뒤에 내 기물이 다시 잡히지 않으면 공짜예요.','If nobody can take your piece back, the capture is free.'],thTip('h')],steps:[
   lbStep(LESSONS[0].text,{fen:'6k1/2p5/3n1b2/8/8/8/1B6/3R2K1 w - - 0 1',arrows:[['d1','d6','o'],['c7','d6','r'],['b2','f6','g']],v:h=>!h.after('b2f6').attacked(h.sq('f6'),BLACK)&&h.after('d1d6').attacked(h.sq('d6'),BLACK)}),
   lbStep(['룩으로 나이트를 잡으면 폰이 룩을 다시 잡아요. 비숍은 아무도 지키지 않으니 공짜예요!','If the rook takes the knight, the pawn takes the rook back. Nobody guards the bishop, so it is free!'],{fen:'6k1/2p5/3n1b2/8/8/8/1B6/3R2K1 w - - 0 1',hl:{bad:['d6'],good:['f6']},arrows:[['c7','d6','r']]}),
   {say:LESSONS[0].demo,art:box=>{box.innerHTML=`<div class="lbw">${valuesRow()}<div class="lbcap">${lbPc(4|BLACK)} 5 − ${lbPc(3)} 3 = <b>+2</b></div></div>`}},
@@ -3785,7 +3786,7 @@ const CH_LS={
   lbStep(['해 봐요! 나이트를 비켜서 숨은 공격을 해요. 체크까지 하면 최고!','Your turn! Move the knight to open a discovered attack. Even better with check!'],{fen:'4q1k1/5ppp/8/8/4N3/8/5PPP/4R1K1 w - - 0 1',want:['e4f6'],ok:['최고예요! 체크를 막는 동안 룩이 퀸을 잡아요.','Brilliant! While they deal with the check, your rook takes the queen.'],no:(p,m)=>m.f===Chess.sqOf('e4')?['룩이 퀸을 노리게 됐어요! 그런데 상대 퀸이 먼저 내 룩을 잡을 수 있어요. 체크하면서 비켜 봐요.','Now your rook attacks the queen! But their queen can take your rook first. Move away with check.']:null,miss:thTip('d'),
    v:h=>{const Q=h.after('e4f6');return Q.inCheck()&&h.attacks(Q,'e1','e8')&&h.moves('e4').filter(m=>h.pos.uci(m)!=='e4f6').every(m=>{const R=new Position(h.pos.fen());R.make(m);return !!R.fromUci('e8e1')})}})]},
  mixed:{icon:'🐉',title:SKILL_NAME.a,key:[['문제를 보면 어떤 기술인지 먼저 생각해요.','First think about which trick fits the puzzle.'],thTip('a')],steps:[
-  {say:LESSONS[5].text,art:box=>{box.innerHTML=`<div class="lbw"><div class="lbth">${['h','m1','f','p','d'].map(k=>`<span>${THEMES[k].icon} ${esc(THEMES[k].name)}</span>`).join('')}</div></div>`}},
+  {say:LESSONS[5].text,art:box=>{box.innerHTML=`<div class="lbw"><div class="lbth">${['h','m1','f','p','d'].map(k=>`<span>${thIc(k)} ${esc(THEMES[k].name)}</span>`).join('')}</div></div>`}},
   lbStep(['어떤 기술인지 모르겠으면 체크, 잡기, 공격 순서로 살펴봐요. 먼저 체크! 퀸이 1, 2, 3번 칸으로 가면 모두 체크예요.','Not sure which trick fits? Look at checks, then captures, then attacks. Checks first: the queen gives check on square 1, 2 or 3.'],{fen:'r5k1/6pp/8/8/8/8/5PPP/3Q2K1 w - - 0 1',tags:[['d8','1'],['b3','2'],['d5','3']],v:h=>{const c=h.pos.legal().filter(m=>{h.pos.make(m);const k=h.pos.inCheck();h.pos.undo();return k}).map(m=>h.pos.uci(m)).sort().join();return c==='d1b3,d1d5,d1d8'}}),
   lbStep(['해 봐요! 세 체크 중에서 상대 룩까지 공격하는 수를 골라요.','Your turn! Of the three checks, pick the one that also attacks the rook.'],{fen:'r5k1/6pp/8/8/8/8/5PPP/3Q2K1 w - - 0 1',want:['d1d5'],ok:['맞아요! 퀸 포크예요. 킹이 피하면 룩을 잡아요.','Right! A queen fork. When the king steps away, you take the rook.'],no:(p,m,u)=>u==='d1d8'?['체크지만 상대 룩이 퀸을 잡아 버려요!','That is check, but their rook just takes your queen!']:u==='d1b3'?['체크는 맞아요. 그런데 룩은 공격하지 않아요.','That is check, but it doesn’t attack the rook.']:null,miss:thTip('a'),v:h=>h.attacks(h.after('d1d5'),'d5','a8')&&!h.after('d1d5').attacked(h.sq('d5'),BLACK)})]},
 };

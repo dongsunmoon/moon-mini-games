@@ -227,6 +227,8 @@ svg.vis.clock{max-height:190px}
 .vis.pattern{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;margin:8px auto}
 .vis.pattern span{min-width:46px;height:50px;padding:0 6px;display:grid;place-items:center;border-radius:12px;background:#fff;border:2px solid #c9d3f2;font-size:26px;font-weight:800;color:#24305e}
 .vis.pattern span.q{background:#f1ebff;border:2px dashed #8a6bff;color:#8a6bff}
+/* a painted thing among emoji (visE in lib.js): as tall as the emoji next to it */
+img.vem{display:inline-block;width:auto;height:1.15em;vertical-align:-.2em;object-fit:contain;-webkit-user-drag:none;user-select:none}
 .vis.picto table,.vis.vtable table,.vis.vcal table{border-collapse:collapse;margin:6px auto;background:#fff;border-radius:12px;overflow:hidden;font-weight:700}
 .vis.picto caption,.vis.vcal caption{font-weight:800;padding:4px;color:#24305e}
 .vis.picto th,.vis.picto td{border:1.5px solid #c9d3f2;padding:4px 8px;text-align:left}
@@ -889,10 +891,14 @@ const poly=(pts,fill='none',stroke=C.ink,w=2.5,extra='')=>`<polygon points="${pt
 const DASH=' stroke-dasharray="6 5"';
 const ARROW=id=>`<defs><marker id="${id}" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="${C.coral}"/></marker></defs>`;
 const V={};
+// a few things in the pictures are painted (images/<name>.webp) instead of emoji: the gift box (the shops use it too, ICON_PIC in core.js).
+// visE(e) gives that picture, sized like the emoji around it, or e itself; the emoji comes back if the picture cannot load. Sentences keep the emoji.
+const VIS_PIC=new Map([['🎁','dt-gift-red']]);
+const visE=e=>{const n=VIS_PIC.get(e);return n?`<img class="vem" src="images/${n}.webp" alt="${e}" draggable="false" onerror="this.replaceWith('${e}')">`:e};
 
 // n things in rows (emoji or a list); o.per row length, o.cross crosses out the last ones, o.tens boxes every ten, o.dim fades the last ones
 V.items=(n,em='🐟',o={})=>{const list=Array.isArray(em)?em:Array(n).fill(em),per=o.per||Math.min(5,list.length)||1,cross=o.cross||0,dim=o.dim||0;
- const cell=(e,i)=>`<span class="${i>=list.length-cross?'x':i>=list.length-dim?'dim':''}">${e}</span>`;
+ const cell=(e,i)=>`<span class="${i>=list.length-cross?'x':i>=list.length-dim?'dim':''}">${visE(e)}</span>`;
  if(o.tens){let h='';for(let i=0;i<list.length;i+=10)h+=`<span class="ten">${list.slice(i,i+10).map((e,j)=>cell(e,i+j)).join('')}</span>`;return `<div class="vis items tens">${h}</div>`}
  return `<div class="vis items" style="--per:${per}">${list.map(cell).join('')}</div>`};
 // ten frames; o.a colours the first a dots orange and the rest blue
@@ -1057,7 +1063,7 @@ V.solid=(kind,n=4,o={})=>{const cx=110,by=150,rx=72,ry=24,Ht=104;let s='';
  const ap=[cx,by-Ht-14];let hid='',vis='';for(let i=0;i<n;i++){const j=(i+1)%n,e1=edge(base[i],base[j],seen(i)&&seen(j)),e2=edge(base[i],ap,seen(i));(seen(i)&&seen(j)?(vis+=e1):(hid+=e1));seen(i)?(vis+=e2):(hid+=e2)}
  return svg(220,182,hid+vis)};
 // a repeating pattern with a '?' cell: seq is a list of emoji, numbers or short text
-V.pattern=seq=>`<div class="vis pattern">${seq.map(t=>`<span class="${t==='?'?'q':''}">${t}</span>`).join('')}</div>`;
+V.pattern=seq=>`<div class="vis pattern">${seq.map(t=>`<span class="${t==='?'?'q':''}">${visE(t)}</span>`).join('')}</div>`;
 // r rows of c things (multiplication arrays) and g groups of k things (bubbles)
 V.array=(r,c,em='🐟')=>`<div class="vis items" style="--per:${c}">${Array(r*c).fill(`<span>${em}</span>`).join('')}</div>`;
 V.groups=(g,k,em='🐟')=>`<div class="vis groups">${Array(g).fill(`<span class="grp">${Array(k).fill(em).join('')}</span>`).join('')}</div>`;
@@ -1540,7 +1546,7 @@ const rows2=(a,ea,b,eb)=>{const m=Math.max(a,b),r=(n,e)=>[...Array(n).fill(e),..
 // number bond: whole w split into a and b ('?' allowed); down = parts on top, whole below (putting together)
 const bond=(w,a,b,down)=>{const ty=down?110:30,by=down?30:110,c=(x,y,v,f)=>{const q=v==='?';return `<circle cx="${x}" cy="${y}" r="25" fill="${q?'#f1ebff':f}" stroke="${q?C.grape:C.deep}" stroke-width="3"/>`+tx(x,y,v,{fs:23,c:q?C.grape:C.ink})};
  return lrD(svg(190,140,ln(95,ty,42,by,C.soft,3)+ln(95,ty,148,by,C.soft,3)+c(95,ty,w,C.sand)+c(42,by,a,'#dff1ff')+c(148,by,b,'#dff1ff')),down?L(`모으기: ${a}, ${b} → ${w}`,`number bond: ${a} and ${b} make ${w}`):L(`가르기: ${w} → ${a}, ${b}`,`number bond: ${w} splits into ${a} and ${b}`))};
-const big=e=>lrD(`<div class="vis items" style="--per:1;font-size:64px">${e}</div>`,e);
+const big=e=>lrD(`<div class="vis items" style="--per:1;font-size:64px">${visE(e)}</div>`,e);
 const tank=(inner='')=>lrD(svg(240,140,`<rect x="8" y="14" width="224" height="118" rx="12" fill="#dff1ff" stroke="${C.ink}" stroke-width="3"/><path d="M8 34Q64 24 120 34T232 34" fill="none" stroke="${C.sea}" stroke-width="2.5"/><rect x="10" y="112" width="220" height="18" rx="6" fill="${C.sand}"/>`+inner),L('조개와 수초만 있는 수조','a tank with only shells and plants'));
 // tens rods and ones cubes; x.xt / x.xo cross out the last rods / cubes
 const bl=(t,o,x={})=>{const u=6,xt=x.xt||0,xo=x.xo||0;let s='',X=3;
@@ -9209,7 +9215,7 @@ function emo(ch,size){size=Math.round(size/2)*2;const key='e|'+ch+'|'+size;let s
  const sc=W.k*W.dpr,fs=Math.max(4,size*sc),cv=mk(fs*1.3,fs*1.3),c=cv.getContext('2d');c.font=`${fs}px ${EFONT}`;c.textAlign='center';c.textBaseline='middle';c.fillText(ch,cv.width/2,cv.height/2+fs*.06);
  sp={cv,w:cv.width/sc,h:cv.height/sc};W.spr.set(key,sp);return sp}
 const put=(c,sp,x,y)=>c.drawImage(sp.cv,x-sp.w/2,y-sp.h/2,sp.w,sp.h);
-// a small thing (shop goods, a staff prop, the ticket, fish food, a coin) drawn as its painted picture once that has loaded
+// a small thing (shop goods, a staff prop or badge, the ticket, fish food, a coin) drawn as its painted picture once that has loaded
 // (artName / FAC_PIC in core.js say which pictures exist); until then, or without one, its emoji is drawn as before.
 // rot tilts the picture only (litter lies on the floor); the emoji stays upright.
 function thing(c,name,e,size,x,y,rot){const im=name?picImg(name):null;if(!im){put(c,emo(e,size),x,y);return}
@@ -9608,12 +9614,12 @@ function person(c,p){const s=(p.bust?1:scaleAt(p.y))*(p.s||1),mv=p.moving?1:0,sw
   oval(c,-5+sw*7+dir*2,-3,5.5,3.2,'#3a3f58');oval(c,5-sw*7+dir*2,-3,5.5,3.2,'#3a3f58')}
  const pim=p.pic?staffImg(p.pic):p.vk?picImg('aq-visitor-'+p.vk):null;
  if(pim){const w=p.bust?76:70,h=w*pim.naturalHeight/pim.naturalWidth,by=p.bust?10:-22-bob;c.drawImage(pim,-w/2,by-h,w,h);
-  if(p.held)thing(c,artName(p.held,true),p.held,24,dir*31,by-20);if(p.badge){dot(c,-w*.34,by-16,11,'#ffffff');put(c,emo(p.badge,15),-w*.34,by-16)}c.restore();return}
+  if(p.held)thing(c,artName(p.held,true),p.held,24,dir*31,by-20);if(p.badge){dot(c,-w*.34,by-16,11,'#ffffff');thing(c,artName(p.badge),p.badge,15,-w*.34,by-16)}c.restore();return}
  const ty=(p.bust?0:-26-bob)-38;if(!p.g||p.gb!==!!p.bust){p.gb=!!p.bust;p.g=lg(c,-16,ty,16,ty+40,[[0,shade(p.shirt,.32)],[1,shade(p.shirt,-.18)]])}
  c.lineCap='round';c.strokeStyle=shade(p.shirt,-.08);c.lineWidth=7;c.beginPath();c.moveTo(-14,ty+9);c.lineTo(-17-sw*6,ty+30);c.moveTo(14,ty+9);c.lineTo(17+sw*6,ty+30);c.stroke();
  dot(c,-17-sw*6,ty+31,4.5,'#ffd9b8');dot(c,17+sw*6,ty+31,4.5,'#ffd9b8');
  c.fillStyle=p.g;rr(c,-16,ty,32,40,13);c.fill();c.fillStyle='rgba(255,255,255,.24)';rr(c,-11,ty+4,8,18,4);c.fill();
- if(p.badge)put(c,emo(p.badge,14),7,ty+14);if(p.held)thing(c,artName(p.held,true),p.held,22,dir*21,ty+28);
+ if(p.badge)thing(c,artName(p.badge),p.badge,14,7,ty+14);if(p.held)thing(c,artName(p.held,true),p.held,22,dir*21,ty+28);
  const hd=emo(p.head,48);c.drawImage(hd.cv,-hd.w/2,ty-20-hd.h/2,hd.w,hd.h);c.restore()}
 // the child as a chibi aquarium director: navy cap with a gold fish, teal vest, white sneakers (like the cover)
 function meDraw(c){const p=W.me,s=scaleAt(p.y),mv=p.moving?1:0,sw=Math.sin(p.ph)*mv,bob=mv?Math.abs(Math.cos(p.ph))*2.6:0,dir=p.dir;
@@ -9672,6 +9678,11 @@ function dot(c,x,y,r,f){c.beginPath();c.arc(x,y,Math.max(.01,r),0,TAU);c.fillSty
 const DW=560,DH=820,GL=24,GR=536,GT=96,GB=642,FLOOR=626,RAIL=118,CHUTE_R=124,XMIN=64,XMAX=502,DROP_X=74;
 const SPR={};
 function spr(id){if(SPR[id])return SPR[id];let im=null;try{im=fishImg(id)}catch(e){}if(!im||!im.complete||!im.naturalWidth)return null;const c=document.createElement('canvas');c.width=330;c.height=220;try{c.getContext('2d').drawImage(im,0,0,330,220)}catch(e){return null}return SPR[id]=c}
+// the gift box over the prize chute and on the prize door: its painted picture (artName in core.js) once it has loaded, the emoji until then
+let GIFT_IM=null;
+function gift(c,size,x,y){if(!GIFT_IM){GIFT_IM=new Image();try{const n=artName('🎁');if(n)GIFT_IM.src=`images/${n}.webp`}catch(e){}}
+ if(!GIFT_IM.complete||!GIFT_IM.naturalWidth){c.fillText('🎁',x,y);return}
+ const s=size*1.15,r=GIFT_IM.naturalWidth/GIFT_IM.naturalHeight,w=r>1?s:s*r,h=r>1?s/r:s;c.drawImage(GIFT_IM,x-w/2,y-h/2,w,h)}
 let C=null;
 
 // ---------------------------------------------------------------- start and stop
@@ -9768,7 +9779,7 @@ function draw(){const c=C.ctx,k=C.k,dpr=C.dpr;c.setTransform(dpr,0,0,dpr,0,0);
  for(let j=0;j<7;j++)dot(c,GL+40+j*72,GT+60+(j%3)*40,3,'rgba(255,255,255,.5)');
  // prize chute (left) with its little acrylic wall
  c.fillStyle=lg(c,0,GB-80,0,GB,[[0,'#5a2a7a'],[1,'#2a1040']]);c.fillRect(GL,GB-70,CHUTE_R-GL,70);c.fillStyle='rgba(255,255,255,.4)';c.fillRect(CHUTE_R-4,GB-110,8,110);
- c.font=`900 30px ${FONT}`;c.fillText('🎁',(GL+CHUTE_R)/2,GB-96);
+ c.font=`900 30px ${FONT}`;gift(c,30,(GL+CHUTE_R)/2,GB-96);
  // plushies: the back pile, then the tagged ones from far to near
  for(const p of C.plush)if(p.back)plush(c,p);
  const front=C.plush.filter(p=>!p.back&&p.st!=='gone'&&p!==C.held).sort((a,b)=>a.y-b.y);for(const p of front)plush(c,p);
@@ -9786,7 +9797,7 @@ function draw(){const c=C.ctx,k=C.k,dpr=C.dpr;c.setTransform(dpr,0,0,dpr,0,0);
  c.fillStyle='#c93a72';rr(c,20,GB+14,DW-40,DH-GB-30,22);c.fill();
  c.fillStyle='#2a1040';rr(c,40,GB+30,150,120,16);c.fill();c.fillStyle='rgba(255,255,255,.12)';rr(c,48,GB+36,134,40,12);c.fill();
  if(C.door){const u=Math.min(1,C.door.t/.5),sp=spr(C.door.id);if(sp){const w=110,bob=Math.sin(C.door.t*5)*3*(C.door.t<3?1:0);c.save();rr(c,40,GB+30,150,120,16);c.clip();c.drawImage(sp,115-w/2,GB+146-u*96+bob-w/3,w,w*2/3);c.restore()}}
- c.font=`900 22px ${FONT}`;c.fillStyle='#fff';c.fillText(`${C.prizes.length?'🧸 '+C.prizes.length:'🎁'}`,115,GB+164);
+ c.font=`900 22px ${FONT}`;c.fillStyle='#fff';if(C.prizes.length)c.fillText('🧸 '+C.prizes.length,115,GB+164);else gift(c,22,115,GB+164);
  dot(c,340,GB+90,30,'#3a1a50');c.fillStyle='#5a5a70';c.fillRect(335,GB+40,10,50);dot(c,340,GB+40,22,'#ff3a5a');dot(c,333,GB+33,7,'rgba(255,255,255,.6)');
  dot(c,450,GB+80,32,'#1a6ad8');dot(c,450,GB+74,30,'#3a9aff');dot(c,442,GB+66,9,'rgba(255,255,255,.55)')}
 function plush(c,p){const sp=spr(p.id),w=p.w,h=w*2/3;c.save();c.translate(p.x,p.y);c.rotate(p.rot||0);
@@ -9830,16 +9841,16 @@ const COIN_T='🪙',PEARL_T='🫧',TICKET_T='🎫';
 // coins and pearls show as little pictures in the page (the emoji stands in if one cannot load); canvas and plain text use COIN_T / PEARL_T
 const curPic=(src,e)=>`<img class="cur" src="${src}" alt="${e}" draggable="false" onerror="this.replaceWith('${e}')">`;
 const COIN=curPic('images/coin.webp',COIN_T),PEARL=curPic('images/aq-pearl.webp',PEARL_T);
-// pictures for small things, by emoji: ICON_PIC for icons (the sea ticket, fish food, staff props, fishing, the mission chest),
+// pictures for small things, by emoji: ICON_PIC for icons (the sea ticket, fish food, staff props, fishing, the mission chest, the gift box),
 // GOOD_PIC for what the snack bar, gift shop and mart sell (shelves, what visitors carry, litter), FAC_PIC for the shops' own icon.
-// Pictures in ART_HAVE are in images/ already (some are shared with the science café and Coding Island); the rest are ready
+// Pictures in ART_HAVE are in images/ already (some are shared with the science café, Coding Island and the detective game); the rest are ready
 // for art still to come: add the name to ART_HAVE once images/<name>.webp exists. Until then nothing is requested and the emoji shows.
-const ICON_PIC={'🎫':'aq-ticket','🍤':'aq-food','🧹':'aq-prop-broom','🚩':'aq-prop-flag','🤿':'aq-prop-mask','🪣':'pg-bucket','🎣':'pg-fish-rod','🧰':'sci-chest-gold'};
+const ICON_PIC={'🎫':'aq-ticket','🍤':'aq-food','🧹':'aq-prop-broom','🚩':'aq-prop-flag','🤿':'aq-prop-mask','🪣':'pg-bucket','🎣':'pg-fish-rod','🧰':'sci-chest-gold','🎁':'dt-gift-red'};
 const GOOD_PIC={'🍦':'aq-good-icecream','🌭':'aq-good-hotdog','🥤':'sci-food-drink','🍿':'aq-good-popcorn','🍪':'aq-good-cookie','🧁':'aq-good-cupcake','🍩':'aq-good-donut','🧃':'aq-good-juice',
  '🧸':'aq-good-teddy','🐠':'aq-good-fishplush','🔑':'aq-good-keyring','🧢':'aq-good-cap','📕':'pg-fish-book','🎈':'aq-good-balloon','🐬':'aq-good-dolphin','🖍️':'aq-good-crayons',
  '💧':'aq-good-water','🍙':'aq-good-riceball','🥛':'aq-good-milk','🍫':'aq-good-choco','🍌':'aq-good-banana','🍞':'aq-good-bread','🧻':'aq-good-tissue','🍎':'aq-good-apple','🛍️':'aq-good-bag'};
 const FAC_PIC={ticket:'aq-ticket',snack:'aq-good-icecream',gift:'aq-good-teddy',mart:'aq-good-bag'};
-const ART_HAVE=new Set(['sci-food-drink','pg-fish-book','pg-bucket','pg-fish-rod','sci-chest-gold',
+const ART_HAVE=new Set(['sci-food-drink','pg-fish-book','pg-bucket','pg-fish-rod','sci-chest-gold','dt-gift-red',
  'aq-ticket','aq-food','aq-prop-broom','aq-prop-flag','aq-prop-mask','aq-good-icecream','aq-good-hotdog','aq-good-popcorn','aq-good-cookie','aq-good-cupcake','aq-good-donut','aq-good-juice','aq-good-teddy','aq-good-fishplush','aq-good-keyring','aq-good-cap','aq-good-balloon','aq-good-dolphin','aq-good-crayons','aq-good-water','aq-good-riceball','aq-good-milk','aq-good-choco','aq-good-banana','aq-good-bread','aq-good-tissue','aq-good-apple','aq-good-bag']);
 const artOf=n=>n&&ART_HAVE.has(n)?n:'';
 // the picture's name for an emoji ('' when there is none yet); goods=true looks in the shop goods too
@@ -11697,7 +11708,7 @@ function mountProblem(el,p,o={}){const a=p.a;let vals=a.t==='f'?(a.mixed?['','',
   if(a.t==='m')return `<div class="arow">${a.pre?`<span class="aunit">${esc(a.pre)}</span>`:''}${a.v.map((_,k)=>`${k&&a.sep?`<span class="asep">${esc(a.sep)}</span>`:''}<span class="alab">${a.lab&&a.lab[k]?`<small>${esc(a.lab[k])}</small>`:''}${boxHTML(k)}</span>`).join('')}${a.post?`<span class="aunit">${esc(a.post)}</span>`:''}</div>`;return ''};
  const pad=()=>`<div class="keypad">${['7','8','9','4','5','6','1','2','3'].map(d=>`<button type="button" data-k="${d}">${d}</button>`).join('')}${keysNeg?'<button type="button" data-k="-">−</button>':'<span></span>'}<button type="button" data-k="0">0</button>${keysDot?'<button type="button" data-k=".">.</button>':'<span></span>'}<button type="button" class="kdel" data-k="del">⌫</button><button type="button" class="kok" data-k="ok">${L('확인','Check')} ✔</button></div>`;
  el.innerHTML=`<div class="qcard"><div class="qhead"><button type="button" class="spk" data-x="say" aria-label="${L('읽어 주기','Read aloud')}">🔊</button><div class="qtext">${p.q}</div></div>${p.vis?`<div class="qvis">${p.vis}</div>`:''}
-  <div class="qans">${a.t==='c'?`<div class="choices ${a.o.some(x=>/<svg|class="vis/.test(x))?'pics':''} ${a.o.length===2?'two':''}">${a.o.map((x,k)=>`<button type="button" class="choice" data-c="${k}"><span class="cn">${k+1}</span>${x}</button>`).join('')}</div>`:`<div class="inp">${inputHTML()}</div>${pad()}`}</div>
+  <div class="qans">${a.t==='c'?`<div class="choices ${a.o.some(x=>/<svg|class="vis/.test(x))?'pics':''} ${a.o.length===2?'two':''}">${a.o.map((x,k)=>`<button type="button" class="choice" data-c="${k}"><span class="cn">${k+1}</span>${visE(x)}</button>`).join('')}</div>`:`<div class="inp">${inputHTML()}</div>${pad()}`}</div>
   <div class="qfoot">${o.hints?`<button type="button" class="hintbtn" data-x="hint">💡 ${L('힌트','Hint')}<small></small></button>`:''}</div><div class="qhint hidden"></div><div class="qexp hidden"></div></div>`;
  const card=el.querySelector('.qcard');
  const refresh=()=>{const inp=card.querySelector('.inp');if(inp)inp.innerHTML=inputHTML();const hb=card.querySelector('.hintbtn small');if(hb&&o.hintLabel)hb.textContent=o.hintLabel()};refresh();
@@ -11924,7 +11935,7 @@ const REQ_FAC={snack:'🍦',gift:'🎁',mart:'🛒',ticket:'🎫'};
 function maybeRequest(){if(REQ||!UNLOCK.orders()||VIEW!=='home'||modalOpen()||LES)return;if(Math.random()>1/40)return;const opts=['ticket',...['snack','gift','mart'].filter(k=>S.fac[k])];REQ={f:pick(opts),until:now()+70000};showReqBubble()}
 function showReqBubble(){if(!REQ)return;if(REQ.until<now()){REQ=null;document.querySelectorAll('.reqb').forEach(x=>x.remove());return}const host=document.querySelector(`[data-f="${REQ.f}"]`);if(!host||host.querySelector('.reqb'))return;const b=document.createElement('span');b.className='reqb';b.textContent='🙋❓';host.appendChild(b)}
 function openRequest(){const r=REQ;if(!r)return;REQ=null;document.querySelectorAll('.reqb').forEach(x=>x.remove());const {g}=here(),p=lrTwin(()=>shopProblem(r.f,S.grade||g));if(p.lr)p.lr.k='shop-'+(p.k||r.f);
- modal(`<h2>${REQ_FAC[r.f]} ${L('손님이 물어봐요!','A visitor needs help!')}</h2><div id="reqQ"></div>`,{cls:'qmodal',busy:true,onOpen:box=>{let v=mountProblem(box.querySelector('#reqQ'),p,{g:S.grade||g,autoRead:S.opt.readQ,onAnswer:(ok,secs,card,v)=>{LR.ans(ok,null,lrItem(null,p,v,ok));S.stats.solved++;if(ok){S.stats.correct++;S.stats.orders++;const c=Math.round(6*ticketPrice(S.at.g,S.at.i));earn(c,{at:card.querySelector('.qtext')});sfx('coin');const m=T(pick([['손님이 아주 기뻐해요! 팁을 받았어요.','The visitor is so happy! You got a tip.'],['고마워요, 관장님! 계산 척척!','Thank you, director! Perfect math!'],['손님 만족도 최고!','Five-star service!']]));say(m,{raw:true});card.insertAdjacentHTML('beforeend',`<div class="okmsg">😊 ${m} <b>+${short(c)} ${COIN}</b></div><button class="btn wide" data-act="close">${L('좋아요!','Great!')}</button>`);mission('order');markPractice();addXP(5)}
+ modal(`<h2>${artPic(REQ_FAC[r.f])} ${L('손님이 물어봐요!','A visitor needs help!')}</h2><div id="reqQ"></div>`,{cls:'qmodal',busy:true,onOpen:box=>{let v=mountProblem(box.querySelector('#reqQ'),p,{g:S.grade||g,autoRead:S.opt.readQ,onAnswer:(ok,secs,card,v)=>{LR.ans(ok,null,lrItem(null,p,v,ok));S.stats.solved++;if(ok){S.stats.correct++;S.stats.orders++;const c=Math.round(6*ticketPrice(S.at.g,S.at.i));earn(c,{at:card.querySelector('.qtext')});sfx('coin');const m=T(pick([['손님이 아주 기뻐해요! 팁을 받았어요.','The visitor is so happy! You got a tip.'],['고마워요, 관장님! 계산 척척!','Thank you, director! Perfect math!'],['손님 만족도 최고!','Five-star service!']]));say(m,{raw:true});card.insertAdjacentHTML('beforeend',`<div class="okmsg">😊 ${m} <b>+${short(c)} ${COIN}</b></div><button class="btn wide" data-act="close">${L('좋아요!','Great!')}</button>`);mission('order');markPractice();addXP(5)}
    else{S.stats.wrong++;sfx('bad');card.querySelector('.qexp').insertAdjacentHTML('beforeend',`<button class="btn wide" data-act="close">${L('알겠어요!','Got it!')}</button>`);say(speechOf(p.exp),{raw:true})}checkAch();save(true)}});box._v=v},onClose:()=>{}})}
 // a quick shop problem at the child's grade, in won or dollars
 function shopProblem(f,g){const money_=v=>money(v),krw=MONEY.kind==='krw',ye=v=>money_(v)+josa(money_(v),'이에요','예요'),eul=v=>money_(v)+josa(money_(v),'을','를'),an=w=>(/^[aeiou]/i.test(w)?'an ':'a ')+w,An=w=>{const x=an(w);return x[0].toUpperCase()+x.slice(1)};const ITEMS_={snack:[['🍦','아이스크림','ice cream cone'],['🌭','핫도그','hot dog'],['🥤','주스','juice cup'],['🍪','쿠키','cookie'],['🍿','팝콘','popcorn bucket']],gift:[['🧸','인형','plush toy'],['🔑','열쇠고리','key ring'],['🖍️','색연필','crayon set'],['📕','물고기 책','fish book'],['🧢','모자','cap']],mart:[['💧','생수','water bottle'],['🍙','주먹밥','rice ball'],['🧃','우유','milk carton'],['🍫','초콜릿','chocolate bar'],['🍌','바나나','banana']],ticket:[['🎫','입장권','ticket']]};
@@ -12214,11 +12225,11 @@ function growAch(){return `<div class="achs">${ACH.map(([id,ic,ko,en])=>`<div cl
 function renderDailyMini(){const el=$('dailyMini');if(!el)return;const d=S.daily,allDone=d.tasks.length&&d.tasks.every(x=>x.done),week=S.week.key===weekKey()?S.week.days.length:0;
  el.innerHTML=`<div class="daily ${allDone?'alldone':''}"><div class="dtop"><b>📅 ${L('오늘의 미션','Today’s missions')}</b><span class="dweek" title="${L('이번 주','this week')}">${'🟢'.repeat(Math.min(5,week))}${'⚪'.repeat(Math.max(0,5-week))}</span></div>
  ${d.tasks.map(t=>{const m=MISSIONS.find(x=>x.id===t.id);return `<div class="dt ${t.done?'done':''}"><span>${t.done?'✅':artPic(m.icon)}</span><span class="dtt">${fill(L(m.ko,m.en),{n:t.goal})}</span><small>${Math.min(t.n,t.goal)}/${t.goal}</small></div>`}).join('')}
- <div class="drow">${!d.gift?`<button type="button" class="btn small gold" data-a="gift">🎁 ${L('오늘의 선물','Daily gift')}</button>`:''}${allDone&&!d.chest?`<button type="button" class="btn small gold" data-a="chest">${artPic('🧰')} ${L('미션 보물상자','Mission chest')}</button>`:''}${reviewReady()&&!d.review?`<button type="button" class="btn small" data-a="review">🧠 ${L('오늘의 복습','Daily review')}</button>`:''}</div></div>`}
+ <div class="drow">${!d.gift?`<button type="button" class="btn small gold" data-a="gift">${artPic('🎁')} ${L('오늘의 선물','Daily gift')}</button>`:''}${allDone&&!d.chest?`<button type="button" class="btn small gold" data-a="chest">${artPic('🧰')} ${L('미션 보물상자','Mission chest')}</button>`:''}${reviewReady()&&!d.review?`<button type="button" class="btn small" data-a="review">🧠 ${L('오늘의 복습','Daily review')}</button>`:''}</div></div>`}
 function dailyGift(){if(S.daily.gift)return;S.daily.gift=true;const t=tier(S.at.g,S.at.i);const opts=[{k:'coins',v:Math.round(80*t)},{k:'tickets',v:1},{k:'pearls',v:2},{k:'item',v:pick(['hint','shield','soap','flyer'])}];const r=pick(opts);
  if(r.k==='coins')earn(r.v,{pop:false});else if(r.k==='item')S.items[r.v]=(S.items[r.v]||0)+1;else S[r.k]+=r.v;S.tickets+=2;save();sfx('catch');celebrate('confetti',20);
  const label=r.k==='coins'?`${COIN} ${short(r.v)}`:r.k==='tickets'?`${TICKET} ${r.v}`:r.k==='pearls'?`${PEARL} ${r.v}`:`${ITEM_BY[r.v].icon} ${L(ITEM_BY[r.v].ko,ITEM_BY[r.v].en)}`;
- modal(`<div class="big">🎁</div><h2>${L('오늘의 선물!','Today’s gift!')}</h2><div class="rew"><span>${label}</span><span>${TICKET} +2</span></div><p>${L('매일 오면 선물이 있어요. 오늘도 수학 한 판 해 볼까요?','A gift every day you come. Ready for some math today?')}</p><button class="btn wide" data-act="close">${L('고마워요!','Thanks!')}</button>`);renderDailyMini();updateHud()}
+ modal(`<div class="big">${artPic('🎁')}</div><h2>${L('오늘의 선물!','Today’s gift!')}</h2><div class="rew"><span>${label}</span><span>${TICKET} +2</span></div><p>${L('매일 오면 선물이 있어요. 오늘도 수학 한 판 해 볼까요?','A gift every day you come. Ready for some math today?')}</p><button class="btn wide" data-act="close">${L('고마워요!','Thanks!')}</button>`);renderDailyMini();updateHud()}
 function missionChest(){if(S.daily.chest)return;S.daily.chest=true;const c=Math.round(150*tier(S.at.g,S.at.i));earn(c,{pop:false});S.pearls+=3;const it=pick(['hint','shield','flyer','food','turbo']);S.items[it]=(S.items[it]||0)+1;S.tickets+=2;save();sfx('fanfare');celebrate('confetti',40);
  modal(`<div class="big">${artPic('🧰')}</div><h2>${L('오늘의 미션 완료!','All missions done!')}</h2><div class="rew"><span>${COIN} +${short(c)}</span><span>${PEARL} +3</span><span>${artPic(ITEM_BY[it].icon)} +1</span><span>${TICKET} +2</span></div><p>${L('매일매일 해내는 관장님, 정말 멋져요!','A director who shows up every day — amazing!')}</p><button class="btn wide" data-act="close">${L('최고!','Awesome!')}</button>`);say(L('오늘의 미션을 모두 해냈어요! 정말 대단해요!','You finished all of today’s missions! Amazing!'),{raw:true});renderDailyMini();updateHud()}
 // five problems from skills already mastered: the oldest ones come back first

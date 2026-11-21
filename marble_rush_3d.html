@@ -1472,7 +1472,6 @@ const T=L({
  win:'{N} wins! Congratulations!',winMine:' That is your marble!',mineUp:'{N} moved up to {r}!',
  leagueNext:'Race {k} is done! {N} leads the league!',champ:'{N} is the league champion! Amazing!'
 });
-if(ME){T.winMine=L(` ${ME.name}의 구슬이에요!`,` That is ${ME.name}'s marble!`);T.mineUp=L(`${ME.name}의 {n}이 {r}위까지 올라왔어요!`,T.mineUp)}
 // commentary for the new pieces, plus a few true science facts mixed into the chatter
 Object.assign(T.sec,L({ice:'얼음 미끄럼틀! 마찰이 작아서 쌩쌩 미끄러져요!',honey:'꿀 언덕이에요! 끈적끈적, 마찰이 커서 느려져요!',jump:'점프 절벽! 빠른 구슬은 하늘을 날아요!',tramp:'트램펄린 구간! 통통 높이 튀어 올라요!',fan:'바람 터널! 바람이 받쳐 줘서 둥실둥실 내려와요!'},
  {ice:'The ice slide! Hardly any friction, so they zoom!',honey:'Honey hill! Sticky and slow: lots of friction!',jump:'The cliff jump! Fast marbles fly through the air!',tramp:'Trampolines! Boing, way up high!',fan:'The wind tunnel! The air holds them up, so they float down!'}));

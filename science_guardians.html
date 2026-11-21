@@ -7283,7 +7283,31 @@ function moveMap(diff,gentle,carry){
  S.stars=m.stars||{};S.bossWins=m.bossWins||[];S.finalWin=!!m.finalWin;S.lastWorld=m.lastWorld||0;
  mapWorld=S.lastWorld;
 }
+// One-time question: before maps were split by grade, every save had one shared map, and the first load with split
+// maps gave it to whatever grade happened to be picked then (often not the child's own grade, e.g. after a grown-up
+// tried another grade). If only one grade has a map, ask once which grade it belongs to and move it there. The
+// suggested grade is the highest band this player answered at least 10 questions in (15% or more of all answers).
+function repairMaps(){
+ if(S.mapFix)return;
+ const cur=gradeOf(S.diff,!!S.gentle),maps={...(S.mapBy||{})};maps[cur]={stars:S.stars,bossWins:S.bossWins,finalWin:S.finalWin,lastWorld:S.lastWorld};
+ const full=Object.keys(maps).filter(k=>Object.keys(maps[k].stars||{}).length||(maps[k].bossWins||[]).length);
+ if(full.length!==1){S.mapFix=1;save();return}
+ const from=full[0],old=maps[from],n={'1':0,g:0,'2':0,'3':0};
+ for(const k in S.seenQ||{}){const q=QALL[k];if(q)n[q.l>=3?'3':q.l===2?(G4.has(q.c)?'2':'g'):'1']+=S.seenQ[k]}
+ const tot=n['1']+n.g+n['2']+n['3'],guess=['3','2','g','1'].find(k=>n[k]>=10&&n[k]>=tot*.15)||from;
+ const stars=Object.values(old.stars||{}).reduce((x,y)=>x+y,0),boss=(old.bossWins||[]).length;
+ const to=k=>{S.mapFix=1;
+  if(k!==from){maps[k]=old;maps[from]={};const m=maps[k];delete maps[k];
+   S.stars=m.stars||{};S.bossWins=m.bossWins||[];S.finalWin=!!m.finalWin;S.lastWorld=m.lastWorld||0;S.mapBy=maps;mapWorld=S.lastWorld}
+  else if(from!==cur){const m=maps[from];delete maps[from];S.stars=m.stars||{};S.bossWins=m.bossWins||[];S.finalWin=!!m.finalWin;S.lastWorld=m.lastWorld||0;S.mapBy=maps;mapWorld=S.lastWorld}
+  S.diff=k==='g'?2:+k;S.gentle=k==='g';S.gentleOffered=S.gradeSplit=true;save();updateHud();
+  if(VIEW==='home')renderHome();else if(VIEW==='map')renderMap();toast(`🗺️ ${diffOf(S).icon} ${diffOf(S).name}`)};
+ setTimeout(()=>modal(`<div style="font-size:56px">🗺️</div><h2>${L('학년마다 지도가 따로 생겼어요!','Each grade has its own map now!')}</h2>
+  <p>${L(`지금까지 모은 지도 기록(⭐ ${stars}개, 보스 ${boss}마리)은 몇 학년 때 한 거예요? 고른 학년의 지도로 옮겨요.`,`Which grade did you play your map so far in (⭐ ${stars}, ${boss} boss${boss===1?'':'es'})? It will move to that grade’s map.`)}</p>${diffButtons(guess==='g'?'g':+guess)}`,
+  {closable:false,acts:Object.fromEntries(['1','g','2','3'].map(k=>['d'+k,()=>{to(k)}]))}),900);
+}
 function setDiff(k,carry){moveMap(k==='g'?2:k,k==='g',carry);S.diff=k==='g'?2:k;S.gentle=k==='g';S.gentleOffered=S.gradeSplit=true;save();const d=D();toast(`${d.icon} ${d.name}`);updateHud();if(VIEW==='home')renderHome();else if(VIEW==='map')renderMap();else if(VIEW==='cards')renderCards()}
+repairMaps();
 function openDifficulty(){
  modal(`<h2>🎚️ ${L('난이도','Difficulty')}</h2><p>${L('학년에 맞춰 문제와 실험이 달라져요. 언제든 바꿀 수 있어요.','Questions and labs change to fit your grade. You can switch any time.')}</p>${diffButtons(diffKey(S))}
   <p class="sub">${L('🌱 1~2학년: 생활 속 과학 기초, 보기 3개·하트 4개<br>🍀 3학년: 힘, 동물과 식물의 생활과 한살이, 물체와 물질, 지구와 바다, 소리 + 1~2학년 복습, 보기 3개·하트 4개<br>🌿 4학년: 자석, 물의 상태 변화, 화산과 지진, 작은 생물, 달과 별, 생태계, 기체, 기후변화 + 3학년 복습, 보기 4개·하트 3개<br>🌳 5~6학년: 5~6학년 내용, 실험 기회 1번<br>3·4학년 단원은 2022 개정 교육과정을 따라요.<br>🗺️ 학년마다 지도가 따로 있어요. 지도 위의 학년 탭으로도 바꿀 수 있어요.','🌱 Grades 1–2: everyday science basics, 3 choices, 4 hearts<br>🍀 Grade 3: forces, how animals and plants live and grow, materials, Earth and the sea, sound, plus grade 1–2 review, 3 choices, 4 hearts<br>🌿 Grade 4: magnets, changes of water, volcanoes and earthquakes, tiny living things, the Moon and stars, ecosystems, gases, climate change, plus grade 3 review, 4 choices, 3 hearts<br>🌳 Grades 5–6: grade 5–6 ideas, one try in labs<br>Grade 3 and 4 topics follow the Korean national curriculum.<br>🗺️ Each grade has its own map. You can also switch with the grade tabs on the map.')}</p>

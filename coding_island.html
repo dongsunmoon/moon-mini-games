@@ -1045,6 +1045,40 @@ button.rbm:hover{border-color:#ffb020}.rbm b{font-size:14px;line-height:1.25}.rb
 .rb-cv{cursor:pointer}
 .rbc-img{width:64px;height:64px;object-fit:contain;display:block;margin:0 auto}.rbb-img{width:46px;height:46px;object-fit:contain;display:block}
 .rbb span{display:grid;place-items:center;min-height:46px}
+/* the 🎒 bag button, the event banner and the running boosters (ECONOMY.md) */
+.rb-bag{pointer-events:auto;flex:none;position:relative;border:0;border-radius:18px;background:rgba(255,255,255,.95);box-shadow:0 6px 16px rgba(0,0,0,.15);min-width:50px;min-height:50px;padding:0 8px;font:inherit;font-size:24px;line-height:1;cursor:pointer;display:grid;place-items:center}
+.rb-bag i{position:absolute;right:-3px;top:-3px;min-width:20px;height:20px;padding:0 5px;border-radius:10px;background:#ff7a3d;color:#fff;font-style:normal;font-size:12px;font-weight:900;line-height:20px;text-align:center}.rb-bag i:empty{display:none}
+.rb-bag.hidden{display:none}.rb-bag.can{background:linear-gradient(180deg,#ffe36a,#ffb020);box-shadow:0 4px 0 #d08a00,0 10px 18px rgba(208,138,0,.3);animation:rbGlow 1.4s ease-in-out infinite}
+.rb-mid{position:absolute;left:8px;right:8px;top:68px;display:flex;gap:6px;align-items:flex-start;pointer-events:none}
+.rb-ev{display:flex;align-items:center;gap:8px;min-width:0;max-width:440px;background:#fff8e1;border:2px solid #ffc94d;border-radius:16px;padding:4px 6px 4px 10px;box-shadow:0 6px 16px rgba(0,0,0,.15);animation:rbIn .35s cubic-bezier(.3,1.3,.5,1)}
+.rb-ev.hidden{display:none}.rb-ev .ei{font-size:24px;line-height:1}.rb-ev .et{display:flex;flex-direction:column;min-width:0}.rb-ev .et b{font-size:14px;white-space:nowrap}.rb-ev .et small{font-size:12px;font-weight:800;color:#7a5a00;line-height:1.2;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.rb-ev .tm{font-weight:900;font-size:15px;background:#fff;border-radius:10px;padding:3px 7px;white-space:nowrap}.rb-ev .tm.hurry{color:#e0533d}
+.rb-ev .btn{pointer-events:auto;white-space:nowrap}
+.rb-side{margin-left:auto;flex:none;display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+.rb-run{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:6px;max-width:98px}.rb-run:empty{display:none}
+.rb-ring{position:relative;width:46px;height:46px;border-radius:50%;background:conic-gradient(#33c46b var(--p),#dfe7f3 0);box-shadow:0 4px 10px rgba(0,0,0,.18);display:grid;place-items:center}
+.rb-ring::before{content:'';position:absolute;inset:5px;border-radius:50%;background:#fff}
+.rb-ring i{position:relative;font-style:normal;font-size:19px;line-height:1;margin-top:-6px}.rb-ring small{position:absolute;bottom:4px;left:0;right:0;text-align:center;font-size:12px;font-weight:900;line-height:1;color:#1f9a4f}
+/* cards: a step waiting for school, the booster shelf */
+.rbc-in.wide{max-width:600px}.rbc-sch{background:#f3eeff;border-radius:14px;padding:8px 10px;color:#4b32a8;font-weight:900;display:flex;flex-direction:column;gap:2px}.rbc-sch small{font-size:12.5px;font-weight:800;color:#6d5bb0}
+.rbsh{display:grid;grid-template-columns:repeat(auto-fill,minmax(132px,1fr));gap:6px;margin:4px 0 2px}
+.rbsb{border:2px solid #ffe0b0;background:#fffaf0;border-radius:14px;padding:6px 8px;display:flex;align-items:center;gap:6px;font:inherit;color:var(--ink);cursor:pointer;text-align:left;min-height:56px}
+.rbsb .bic{font-size:24px;line-height:1}.rbsb .t{display:flex;flex-direction:column;min-width:0}.rbsb b{font-size:13.5px;line-height:1.2}.rbsb small{font-size:12px;font-weight:700;color:var(--muted);line-height:1.25}.rbsb em{font-style:normal;font-size:12px;font-weight:900;color:#1f9a4f}
+.rbsb.poor{opacity:.7}.rbsb.poor em{color:var(--muted)}
+/* the board: school note, school-locked steps, boosters */
+.rbsch{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:center;background:#f3eeff;border:2px dashed #c9b8ff;border-radius:14px;padding:8px 10px;margin:4px 0 2px;font-weight:800;color:#4b32a8;font-size:14px}
+.rbb.sch{border-color:#c9b8ff;background:#f7f3ff}.rbb.sch small{color:#5b3fc4}
+.rbh{margin:14px 0 0;font-size:17px}.rbhp{margin:2px 0 0}.rbhave{color:#1f9a4f;white-space:nowrap}
+.rbb.bst .bic{font-size:30px;line-height:1;min-height:36px;display:grid;place-items:center}.rbb.bst small.d{color:var(--muted);font-weight:700;font-size:12px;line-height:1.25}.rbb.poor{opacity:.8}.rbb.poor small:not(.d){color:var(--muted)}
+/* the bag */
+.rbbag{display:flex;flex-direction:column;gap:8px;margin-top:8px;text-align:left}
+.rbbr{display:flex;align-items:center;gap:10px;background:#fffaf0;border:2px solid #ffe0b0;border-radius:16px;padding:8px 10px}.rbbr.on{background:#effff4;border-color:#9be3b5}
+.rbbr .bic{font-size:30px;line-height:1}.rbbr .t{flex:1;display:flex;flex-direction:column;min-width:0}.rbbr b{font-size:15px}.rbbr b i{font-style:normal;color:#e07a00}.rbbr small{font-size:12.5px;font-weight:700;color:var(--muted)}.rbbr .btn{flex:none}
+/* the mission result: the shop gift */
+.rbgift{display:inline-flex;align-items:center;gap:6px;background:#fff4dd;border:2px solid #ffd08a;border-radius:14px;padding:6px 12px;font-weight:900;margin:2px 0 4px}
+@media (max-width:420px){.rb-bag{min-width:46px;font-size:22px}.rb-ev .et b{font-size:13.5px}}
+@media (max-height:500px){.rb-mid{top:64px}.rb-side{flex-direction:row-reverse;align-items:center}.rb-run{max-width:none;flex-wrap:nowrap}.rbc-img{width:40px;height:40px}.rb-card{bottom:8px}.rbc-in.wide>p{display:none}.rbsb small{display:none}.rbsb{min-height:48px}.rbc-in{padding:8px 12px}}
+@media (prefers-reduced-motion:reduce){.rb-bag.can,.rb-ev{animation:none}}
 /*COACH:BEGIN*/
 /* Coach Moon: one line inside result windows (.mcoach) and a corner bubble at good moments (#coachPop, never takes taps) */
 .mcoach{display:flex;align-items:flex-end;gap:8px;margin:10px auto 6px;max-width:330px;text-align:left}
@@ -4689,7 +4723,7 @@ const kingReady=()=>bossOn()&&BOSSES.some(b=>b.n===13)&&LIVE().every(w=>S.boss.w
 
 // ---------------------------------------------------------------- daily goals: learn 1, help 2 villagers, ride 1 → a chest
 function daily(){const t=dayKey();if(!S.daily||S.daily.day!==t)S.daily={day:t,lesson:0,job:0,serve:0,ride:0,got:false};return S.daily}
-const GOALS=[['lesson',1,'📚','배우기|Learn'],['serve',5,'🍔','손님 대접|Serve'],['ride',1,'🎢','놀이기구|Ride']];
+const GOALS=[['lesson',1,'📚','배우기|Learn'],['serve',15,'🍔','손님 대접|Serve'],['ride',1,'🎢','놀이기구|Ride']];
 const dailyDone=()=>{const d=daily();return GOALS.every(([k,n])=>(d[k]||0)>=n)};
 function bumpDaily(k){const d=daily();d[k]=(d[k]||0)+1;save(true);if(dailyDone()&&!d.got&&!d.told){d.told=1;setTimeout(()=>coachTalk('medal','오늘 목표를 다 했어요! 🏫 학교 지도에서 🎁 상자를 열어요!|You hit today’s goals! Open the 🎁 chest on the 🏫 school map!',{acts:[{t:'열러 가기|Go open it',ic:tryPic(['pg-chest'],'🎁','gico'),f:()=>{go('school');setTimeout(openDailyChest,400)}},{t:'나중에|Later'}]}),1600)}}
 
@@ -4908,9 +4942,11 @@ const MENU={
  tower:{e:'🗼',name:'치즈 타워 버거|Cheese tower',dish:['bun','patty','cheese','cheese','cheese','cheese','cheese','bun'],price:14,lv:4,need:'for'},
  double:{e:'💪',name:'더블 버거|Double burger',dish:['bun','patty','cheese','patty','cheese','bun'],price:12,lv:5},
  rainbow:{e:'🌈',name:'무지개 버거|Rainbow burger',dish:['bun','lettuce','tomato','cheese','egg','onion','pickle','bun'],price:16,lv:7}};
-// shop levels by diners served: name, and what each level brings
-const LV=[[0,'🌱','꼬마 로봇 버거|Little Robot Burger'],[6,'🍔','동네 로봇 버거|Neighborhood Robot Burger'],[16,'🍟','인기 로봇 버거|Popular Robot Burger'],[30,'🎈','소문난 로봇 버거|Famous Robot Burger'],
- [48,'⭐','별 로봇 버거|Star Robot Burger'],[72,'🌟','반짝 로봇 버거|Sparkle Robot Burger'],[100,'🏆','최고 로봇 버거|Best Robot Burger'],[140,'👑','로봇 버거 왕국|Robot Burger Empire']];
+// shop levels by diners served: name, and what each level brings (paced for about 3 hours of shop play, ECONOMY.md)
+const LV=[[0,'🌱','꼬마 로봇 버거|Little Robot Burger'],[10,'🍔','동네 로봇 버거|Neighborhood Robot Burger'],[30,'🍟','인기 로봇 버거|Popular Robot Burger'],[60,'🎈','소문난 로봇 버거|Famous Robot Burger'],
+ [110,'⭐','별 로봇 버거|Star Robot Burger'],[180,'🌟','반짝 로봇 버거|Sparkle Robot Burger'],[270,'🏆','최고 로봇 버거|Best Robot Burger'],[400,'👑','로봇 버거 왕국|Robot Burger Empire']];
+// the thresholds before 2026-11-21: a save from then keeps the level it had reached (so no dish leaves its menu)
+const OLD_LV=[0,6,16,30,48,72,100,140];
 // robots stand along the back wall of the kitchen (left half); dishes they make wait on their tray
 const ROBOTS=[[1,1],[3,1],[5,1],[1,4]].map(([x,y],i)=>({i,x,y,zx:x,zy:y+1}));
 const TABLES=[[10,3],[10,6],[10,9],[12,3],[12,6],[12,9]].map(([x,y],i)=>({x,y,i,n:i+1,zx:x-1,zy:y,seats:[[x+.5,y-.4],[x+.5,y+1.4]]}));
@@ -4920,29 +4956,49 @@ const AISLES=[1.6,5,8];
 const CUST_PIC={'🐻':'bear','🦫':'beaver','🐰':'bunny','🐱':'cat','🦌':'deer','🦆':'duck','🦊':'fox','🐸':'frog','🦦':'otter','🦉':'owl','🐧':'penguin','🐶':'puppy','🦝':'raccoon','🦭':'seal','🐿':'squirrel','🐢':'turtle'};
 const PALS=Object.keys(CUST_PIC);
 
-// upgrades bought by walking onto floor pads: [id, icon, ko|en name, prices per step, shop level needed per step, pad tile]
+// upgrades bought by walking onto floor pads: [id, icon, ko|en name, prices per step, shop level needed per step, pad tile,
+// school missions needed per step (first-time mission clears, Object.keys(S.done).length)]
 const UP=[
- ['robot','🤖','요리 로봇|Cook robot',[0,30,70,140],[0,1,2,4],[3,3.2]],
- ['tables','🍽️','손님 테이블|Tables',[0,0,18,30,45,70],[0,0,0,1,2,3],[8.2,8.8]],
- ['motor','⚡','로봇 모터|Robot motor',[25,55,95,150],[0,1,2,3],[5,3.2]],
- ['chip','💾','로봇 칩 칸|Chip slots',[40,90,160],[2,3,5],[2,6.2]],
- ['shoes','👟','빠른 신발|Fast shoes',[20,45],[0,2],[5,6.2]],
- ['tray','🍱','큰 쟁반|Big tray',[25,60],[1,3],[3,9.2]],
- ['buddy','🐍','동전 줍는 파이|Py collects coins',[50],[2],[6.2,9.4]],
- ['decor','🪴','가게 꾸미기|Decorations',[20,40,70],[0,2,4],[1,9.4]],
- ['sign','🌟','반짝 간판|Shiny sign',[30,60],[1,3],[7,10.2]]];
+ ['robot','🤖','요리 로봇|Cook robot',[0,300,900,2000],[0,1,3,5],[3,3.2],[0,4,14,30]],
+ ['tables','🍽️','손님 테이블|Tables',[0,0,150,350,700,1300],[0,0,1,2,3,5],[8.2,8.8],[0,0,0,6,16,30]],
+ ['motor','⚡','로봇 모터|Robot motor',[160,450,1000,1900],[0,2,3,5],[5,3.2],[0,6,18,34]],
+ ['chip','💾','로봇 칩 칸|Chip slots',[350,900,2000],[2,4,6],[2,6.2],[8,20,40]],
+ ['shoes','👟','빠른 신발|Fast shoes',[140,550],[0,3],[5,6.2],[0,10]],
+ ['tray','🍱','큰 쟁반|Big tray',[200,750],[1,4],[3,9.2],[2,14]],
+ ['buddy','🐍','동전 줍는 파이|Py collects coins',[600],[3],[6.2,9.4],[12]],
+ ['decor','🪴','가게 꾸미기|Decorations',[160,500,1100],[0,2,4],[1,9.4],[0,8,24]],
+ ['sign','🌟','반짝 간판|Shiny sign',[250,850],[1,4],[7,10.2],[4,20]]];
 const UPN={};UP.forEach(u=>UPN[u[0]]=u);
+// boosters (the steady apple sink): [icon, ko|en name, ko|en effect, seconds, price]; kept in S.rb.boost, running ones in S.rb.run
+// a booster's price grows with the shop (×1 at level 0, about ×3.5 at the top), so it keeps costing a real share of the takings
+const bPrice=k=>Math.round(BOOST[k][4]*(1+.35*shopLv())/5)*5;
+const BOOST={turbo:['⚡','터보 배터리|Turbo battery','로봇이 2배 빨리 요리해요|Robots cook twice as fast',60,30],
+ flyer:['📣','전단지|Flyers','손님이 2배 자주 와요|Diners come twice as often',60,25],
+ sauce:['🌶️','특제 소스|Special sauce','손님이 50% 더 내요|Diners pay 50% more',60,35],
+ magnet:['🧲','사과 자석|Apple magnet','테이블 사과가 저절로 와요|Table apples come to you',90,15]};
+const BIDS=Object.keys(BOOST);
+const SHELF={x:8.2,y:2.2},DELIV={x:8,y:10};   // the booster shelf pad; the floor spot by the door where the delivery rider waits
 let Y=null;
 
 // ---------------------------------------------------------------- save
-function st(){const f={lv:0,served:0,robots:[{item:null,code:'',smart:false}],up:{robot:1,tables:2,motor:0,chip:0,shoes:0,tray:0,buddy:0,decor:0,sign:0},skills:{},tut:{},bugs:0,bugAt:0,earned:0};
- S.rb=Object.assign(f,S.rb||{});S.rb.up=Object.assign(f.up,S.rb.up||{});S.rb.skills=S.rb.skills||{};S.rb.tut=S.rb.tut||{};
- while(S.rb.robots.length<S.rb.up.robot)S.rb.robots.push({item:null,code:'',smart:false});return S.rb}
+// filled in place (once per object), so a reference kept across calls never goes stale
+function st(){let r=S.rb;if(!r||typeof r!=='object')r=S.rb={};
+ if(!r._ok){const f={lv:0,served:0,robots:[{item:null,code:'',smart:false}],up:{robot:1,tables:2,motor:0,chip:0,shoes:0,tray:0,buddy:0,decor:0,sign:0},skills:{},tut:{},bugs:0,bugAt:0,earned:0};
+  for(const k in f)if(r[k]==null)r[k]=f[k];for(const k in f.up)if(r.up[k]==null)r.up[k]=f.up[k];
+  if(!r.boost)r.boost={};for(const k of BIDS)r.boost[k]=r.boost[k]||0;if(!r.run)r.run={};
+  // a save from before the new pacing keeps the shop level it had (its served count under the old thresholds)
+  if(r.eco!==1){let k=0;OLD_LV.forEach((n,i)=>{if(r.served>=n)k=i});r.lvKeep=r.served>0?k:0;r.eco=1}
+  Object.defineProperty(r,'_ok',{value:1,enumerable:false})}
+ while(r.robots.length<r.up.robot)r.robots.push({item:null,code:'',smart:false});return r}
 const lvOf=id=>st().up[id]||0;
-const shopLv=()=>{let l=0;LV.forEach((x,i)=>{if(st().served>=x[0])l=i});return l};
+const shopLv=()=>{let l=0;const s=st();LV.forEach((x,i)=>{if(s.served>=x[0])l=i});return Math.max(l,s.lvKeep||0)};
 const menuOpen=()=>Object.keys(MENU).filter(k=>MENU[k].lv<=shopLv());
 const slots=()=>6+2*lvOf('chip');
-const cookSec=()=>[4.2,3.4,2.7,2.1,1.6][lvOf('motor')];
+const schoolN=()=>Object.keys(S.done||{}).length;
+const boostOn=k=>(st().run[k]||0)>0;
+const evIs=k=>!!(Y&&Y.ev&&Y.ev.kind===k);
+const cookBase=v=>[4.2,3.4,2.7,2.1,1.6][v];
+const cookSec=()=>cookBase(lvOf('motor'))/(boostOn('turbo')?2:1);
 const walkSp=()=>[2.6,3.2,3.8][lvOf('shoes')];
 const trayN=()=>[2,3,4][lvOf('tray')];
 // skills (code chips) a robot can use: learned in the school, or by a short lesson the moment the shop needs one
@@ -4970,14 +5026,16 @@ function meKey(){const map={'🐰':'bunny','🐻':'bear','🦊':'fox','🐼':'pa
 
 // ---------------------------------------------------------------- open / close
 // the shop keeps running state (diners, dishes on trays) while the child codes a robot; show() brings it back
-function show(host){if(Y&&Y.host===host&&host.contains(Y.el.cv)){resize();hud();acts();Y.last=0;greet();return}open(host)}
+function show(host){if(Y&&Y.host===host&&host.contains(Y.el.cv)){resize();hud();acts();Y.last=0;if(!Y.ev)Y.evNext=Math.max(Y.evNext,15);greet();return}open(host)}
 function open(host){stop();st();
  host.innerHTML=`<div class="rb" id="rb"><canvas class="rb-cv"></canvas>
   <div class="rb-top"><button type="button" class="rb-lv" id="rbLv"></button><button type="button" class="rb-up" id="rbUp">🛠️ <b>${L('업그레이드','Upgrades')}</b></button></div>
+  <div class="rb-mid"><div class="rb-ev hidden" id="rbEv"></div><div class="rb-side"><button type="button" class="rb-bag" id="rbBag" aria-label="${L('내 가방','My bag')}">🎒<i id="rbBagN"></i></button><div class="rb-run" id="rbRun"></div></div></div>
   <div class="rb-bot"><div class="rb-acts" id="rbActs"></div><div class="rb-cap" id="rbCap"></div></div>
   <div class="rb-joy hidden" id="rbJoy"><i></i></div><div class="rb-card hidden" id="rbCard"></div></div>`;
  const q=s=>host.querySelector(s);
- Y={host,el:{cv:q('canvas'),lv:q('#rbLv'),up:q('#rbUp'),acts:q('#rbActs'),cap:q('#rbCap'),joy:q('#rbJoy'),card:q('#rbCard')},on:[],t:0,last:0,cam:[0,0],
+ Y={host,el:{cv:q('canvas'),lv:q('#rbLv'),up:q('#rbUp'),bag:q('#rbBag'),bagN:q('#rbBagN'),ev:q('#rbEv'),run:q('#rbRun'),acts:q('#rbActs'),cap:q('#rbCap'),joy:q('#rbJoy'),card:q('#rbCard')},on:[],t:0,last:0,cam:[0,0],
+  ev:null,evNext:rnd(60,90),evLast:'',runT:0,schN:schoolN(),
   me:{x:8.6,y:7.6,dir:1,ph:0,moving:false,path:null},bd:{x:8,y:8.2,ph:0},hold:[],joy:null,keys:{},
   robots:ROBOTS.map(p=>({...p,n:0,t:0,dish:[],puff:[]})),tables:TABLES.map(t=>({...t,coins:0,coinShow:0})),diners:[],spawnT:2,walkers:[],pops:[],fly:[],confetti:[],
   im:{me:img(`images/aq-me-${meKey()}.webp`),py:img('images/py-hi.webp'),coach:img('images/coach-moon-hi.webp')},nearPad:null,card:null,capT:0,zone:''};
@@ -5001,13 +5059,26 @@ const iso=(x,y)=>[(x-y)*TW/2,(x+y)*TH/2];
 
 // ---------------------------------------------------------------- the top bar and captions
 function hud(){if(!Y)return;const l=shopLv(),nx=LV[l+1],s=st().served;
- Y.el.lv.innerHTML=`<span class="ic">${LV[l][1]}</span><span class="t"><b>${esc(T(LV[l][2]))}</b><span class="bar"><i style="width:${nx?Math.min(100,100*(s-LV[l][0])/(nx[0]-LV[l][0])):100}%"></i></span><small>${nx?L(`손님 ${nx[0]-s}명 더 대접하면 성장!`,`${nx[0]-s} more diners to grow!`):L('최고 단계!','Top level!')}</small></span>`;
- const can=UP.some(u=>canBuy(u[0]));Y.el.up.classList.toggle('can',can)}
+ Y.el.lv.innerHTML=`<span class="ic">${LV[l][1]}</span><span class="t"><b>${esc(T(LV[l][2]))}</b><span class="bar"><i style="width:${nx?cl(100*(s-LV[l][0])/(nx[0]-LV[l][0]),0,100):100}%"></i></span><small>${nx?L(`손님 ${nx[0]-s}명 더 대접하면 성장!`,`${nx[0]-s} more diners to grow!`):L('최고 단계!','Top level!')}</small></span>`;
+ const can=UP.some(u=>canBuy(u[0]));Y.el.up.classList.toggle('can',can);bagHud()}
+// the 🎒 button: how many boosters the child has; it glows during an event when one would help
+function bagHud(){if(!Y)return;const n=BIDS.reduce((a,k)=>a+st().boost[k],0);Y.el.bagN.textContent=n||'';Y.el.bag.classList.toggle('hidden',!(st().tut.taught||n||BIDS.some(boostOn)));Y.el.bag.classList.toggle('can',!!(Y.ev&&n&&evBoost(Y.ev.kind)))}
+// the event banner (icon, name, countdown, progress) and the running boosters with their ring timers
+function evHud(){if(!Y)return;const e=Y.ev,el=Y.el.ev;
+ if(!e){if(!el.classList.contains('hidden')){el.classList.add('hidden');el.innerHTML=''}}
+ else{const [ic,nm]=EVK[e.kind],sec=Math.ceil(e.left),go=e.kind==='newdish'&&e.go;
+  // built once per event (so its button never changes under a finger); the countdown and progress update in place
+  if(el.dataset.k!==e.kind+(go?'+':'')||el.classList.contains('hidden')){el.dataset.k=e.kind+(go?'+':'');
+   el.innerHTML=`<span class="ei">${ic}</span><span class="et"><b>${T(nm)}</b><small></small></span><span class="tm"></span>${go?`<button type="button" class="btn small" data-evgo="1">${go.ic} ${T(go.t)}</button>`:''}`;
+   el.classList.remove('hidden')}
+  const tm=el.querySelector('.tm'),sm=el.querySelector('.et small'),tt=`⏱ ${e.wait?'…':sec}`,pp=evProg(e);
+  if(tm.textContent!==tt){tm.textContent=tt;tm.classList.toggle('hurry',!e.wait&&sec<=10)}if(sm.textContent!==pp)sm.textContent=pp}
+ const run=st().run;Y.el.run.innerHTML=BIDS.filter(k=>run[k]>0).map(k=>{const p=Math.round(100*run[k]/BOOST[k][3]);return `<span class="rb-ring" style="--p:${p}%"><i>${BOOST[k][0]}</i><small>${Math.ceil(run[k])}</small></span>`}).join('')}
 function caption(ic,txt,good,speak){if(!Y)return;Y.capT=Y.t;const c=Y.el.cap;c.className='rb-cap show'+(good===true?' good':'');c.innerHTML=`<span class="ci">${ic}</span><span>${rich(txt)}</span>`;if(speak)say(txt)}
 function acts(){if(!Y)return;const h=Y.hold;let html='';
  if(h.length)html+=`<span class="rb-hold">${L('들고 있음','Carrying')} ${h.map(d=>burgerImg(d)).join(' ')}</span>`;
  const need=Y.diners.filter(d=>d.state==='sit'&&!d.got).length;if(need)html+=`<span class="rb-need">🙋 ${need}</span>`;
- Y.el.acts.innerHTML=html}
+ if(Y.el.acts.dataset.h!==html){Y.el.acts.dataset.h=html;Y.el.acts.innerHTML=html}evHud()}
 
 // ---------------------------------------------------------------- robots: run their code to make a dish
 // the dish a robot's program makes for an order (list of layers), or an error; cached per code+order
@@ -5024,6 +5095,7 @@ function robotMakes(R,item){if(!R||!R.code||R.bug)return R&&R.bug?'mess':null;
  if(R.smart){const ov=R.smart==='list'?pyList(MENU[item].dish):`"${item}"`;const o=cook(R,ov);if(o.err||o.served.length!==1)return null;return dishName(o.served[0])===item?item:null}
  return R.item===item?R.item:null}
 function demand(){const need={};Y.diners.forEach(d=>{if((d.state==='sit'||d.state==='in')&&!d.got)need[d.item]=(need[d.item]||0)+1});
+ if(evIs('deliv')){const e=Y.ev;need[e.dish]=(need[e.dish]||0)+e.need-e.got}
  Y.hold.forEach(h=>{if(need[h])need[h]--});Y.robots.forEach(r=>r.dish.forEach(h=>{if(need[h])need[h]--}));return need}
 function stepRobots(dt){const need=demand(),cs=cookSec();
  Y.robots.forEach((r,i)=>{const R=st().robots[i];if(!R||i>=lvOf('robot'))return;r.puff=r.puff.map(t=>t+dt).filter(t=>t<1.2);
@@ -5043,22 +5115,31 @@ function maybeBug(force){if(!Y)return;const s=st();if(!force)setTimeout(()=>mayb
  Y.robots[i].bugT=0;sfx('oops');caption('🐛',L(`쉿! 버그 한 마리가 ${i+1}번 로봇에 몰래 들어갔어요… 버거가 이상하게 나오면 로봇을 눌러 코드를 고쳐요!`,`Psst! A bug crept into robot ${i+1}… If its burgers look odd, tap the robot and fix the code!`),null,true)}
 
 // ---------------------------------------------------------------- diners
-const arriveSec=()=>Math.max(5,13-shopLv()*1.1-lvOf('decor')*.6-lvOf('sign')*.6);
-function spawnDiner(){const free=[];Y.tables.forEach(t=>{if(t.n>lvOf('tables'))return;t.seats.forEach((s,k)=>{if(!Y.diners.some(d=>d.t===t.i&&d.seat===k&&d.state!=='gone'))free.push([t,k])})});if(!free.length)return;
- const left=p=>((S.pantry||{})[p]||0)-Y.diners.filter(d=>d.state!=='gone'&&!d.ate&&MENU[d.item].pantry===p).length;
- const [t,k]=pk(free),open=menuOpen().filter(m=>!MENU[m].pantry||left(MENU[m].pantry)>0),newest=open.filter(m=>MENU[m].lv===Math.max(...open.map(x=>MENU[x].lv)));
+// seconds between diners: the shop's level and looks, then 📣 flyers (×2), a 🎉 rush (×2.5) or 🎶 street music (×1.5)
+const arriveSec=()=>Math.max(5,13-shopLv()*1.1-lvOf('decor')*.6-lvOf('sign')*.6)/((boostOn('flyer')?2:1)*(evIs('rush')?2.5:evIs('music')?1.5:1));
+// seats nobody holds; dishes on the menu that can be ordered now (fish only while the pantry has some); dishes a robot makes
+function freeSeats(){const free=[];Y.tables.forEach(t=>{if(t.n>lvOf('tables'))return;t.seats.forEach((s,k)=>{if(!Y.diners.some(d=>d.t===t.i&&d.seat===k&&d.state!=='gone'))free.push([t,k])})});return free}
+function orderable(){const left=p=>((S.pantry||{})[p]||0)-Y.diners.filter(d=>d.state!=='gone'&&!d.ate&&MENU[d.item].pantry===p).length;return menuOpen().filter(m=>!MENU[m].pantry||left(MENU[m].pantry)>0)}
+const knownDishes=()=>orderable().filter(m=>st().robots.some((R,i)=>i<lvOf('robot')&&robotMakes(R,m)===m));
+// o: {seat:[table,k], item, ...flags} for event guests (VIP, birthday party, a new-dish order)
+function spawnDiner(o={}){const free=freeSeats();if(!free.length&&!o.seat)return null;
+ const [t,k]=o.seat||pk(free),open=orderable(),newest=open.filter(m=>MENU[m].lv===Math.max(...open.map(x=>MENU[x].lv)));
  // most diners want what the robots already make, some want the newest dish (the reason to teach a robot more)
- const known=open.filter(m=>st().robots.some((R,i)=>i<lvOf('robot')&&robotMakes(R,m)===m));
- const item=known.length&&Math.random()<.65?pk(known):Math.random()<.6?pk(newest):pk(open);
+ const known=knownDishes();
+ const item=o.item||(known.length&&Math.random()<.65?pk(known):Math.random()<.6?pk(newest):pk(open));
  const [sx,sy]=t.seats[k],aisle=AISLES.reduce((a,b)=>Math.abs(b-sy)<Math.abs(a-sy)?b:a);
- Y.diners.push({e:pk(PALS),t:t.i,seat:k,x:DOOR[0],y:DOOR[1],route:[[11.5,DOOR[1]-1],[11.5,aisle],[sx,aisle],[sx,sy]],state:'in',item,got:false,wait:0,ph:rnd(0,6),eat:0,mood:''})}
+ const d={e:pk(PALS),t:t.i,seat:k,x:DOOR[0],y:DOOR[1],route:[[11.5,DOOR[1]-1],[11.5,aisle],[sx,aisle],[sx,sy]],state:'in',item,got:false,wait:0,ph:rnd(0,6),eat:0,mood:'',vip:!!o.vip,bday:!!o.bday,special:!!o.special};
+ Y.diners.push(d);return d}
 function stepDiners(dt){if((Y.spawnT-=dt)<0){Y.spawnT=arriveSec()*rnd(.75,1.25);spawnDiner()}
  for(const d of Y.diners){d.ph+=dt*3;if(d.moodT>0&&(d.moodT-=dt)<=0)d.mood='';
   if(d.state==='in'||d.state==='out'){const p=d.route[0];if(!p){d.state=d.state==='in'?'sit':'gone';continue}const dx=p[0]-d.x,dy=p[1]-d.y,dist=Math.hypot(dx,dy);if(dist<.05){d.route.shift();continue}const v=Math.min(dist,2*dt);d.x+=dx/dist*v;d.y+=dy/dist*v;d.walk=true;continue}
   d.walk=false;
   if(d.state==='sit'&&!d.got){d.wait+=dt;if(d.wait>150){d.mood='😴';d.state='out';d.route=[[11.5,d.y],[11.5,DOOR[1]-1],DOOR]}}
-  if(d.state==='eat'&&(d.eat-=dt)<=0){const t=Y.tables[d.t],m=MENU[d.item],tip=d.wait<25?3:d.wait<60?1:0;d.ate=true;if(m.pantry&&S.pantry&&S.pantry[m.pantry]>0)S.pantry[m.pantry]--;t.coins+=m.price+tip;d.state='out';d.mood='😋';d.moodT=1.5;d.route=[[11.5,d.y],[11.5,DOOR[1]-1],DOOR];
-   const s=st();s.served++;s.earned+=m.price+tip;S.stats.served=(S.stats.served||0)+1;bumpDaily('serve');const before=shopLv();save(true);hud();
+  if(d.state==='eat'&&(d.eat-=dt)<=0){const t=Y.tables[d.t],m=MENU[d.item],tip=d.wait<25?3:d.wait<60?1:0;d.ate=true;if(m.pantry&&S.pantry&&S.pantry[m.pantry]>0)S.pantry[m.pantry]--;
+   // 🎶 street music: every diner tips 2 more; 🌶️ special sauce: diners pay half as much again
+   let pay=m.price+tip;if(evIs('music')){pay+=2;Y.ev.tips+=2;Y.pops.push({x:d.x,y:d.y,txt:'🎵',t:-.2})}if(boostOn('sauce')){pay=Math.round(pay*1.5);Y.pops.push({x:d.x,y:d.y,txt:'🌶️',t:-.4})}
+   t.coins+=pay;d.state='out';d.mood='😋';d.moodT=1.5;d.route=[[11.5,d.y],[11.5,DOOR[1]-1],DOOR];
+   const s=st();s.served++;s.earned+=pay;S.stats.served=(S.stats.served||0)+1;bumpDaily('serve');const before=shopLv();save(true);hud();
    if(shopLv()>before)levelUp()}}
  Y.diners=Y.diners.filter(d=>d.state!=='gone')}
 function levelUp(){const l=shopLv(),news=Object.keys(MENU).filter(k=>MENU[k].lv===l);sfx('fanfare');celebrate(40);
@@ -5071,17 +5152,21 @@ function levelUp(){const l=shopLv(),news=Object.keys(MENU).filter(k=>MENU[k].lv=
 // ---------------------------------------------------------------- carrying: pick up at a robot, put down at a table, scoop coins
 function zoneAt(){const me=Y.me,tx=Math.floor(me.x),ty=Math.floor(me.y);
  const r=Y.robots.find((r,i)=>i<lvOf('robot')&&tx===r.zx&&ty===r.zy);if(r)return {k:'robot',r};
+ if(evIs('deliv')&&tx===DELIV.x&&ty===DELIV.y)return {k:'deliv'};
  const t=Y.tables.find(t=>t.n<=lvOf('tables')&&Math.abs(me.x-(t.x+.5))<1.25&&Math.abs(me.y-(t.y+.5))<1.25);if(t)return {k:'table',t};
  const p=pads().find(p=>tx===Math.floor(p.x)&&ty===Math.floor(p.y));if(p)return {k:'pad',p};
+ if(shelfOn()&&tx===Math.floor(SHELF.x)&&ty===Math.floor(SHELF.y))return {k:'shelf'};
  if(tx===SCHOOL.zx&&ty===SCHOOL.zy)return {k:'school'};return null}
 function inZone(dt){const z=zoneAt(),key=z?z.k+(z.r?z.r.i:z.t?z.t.i:z.p?z.p.id:''):'';Y.nearPad=z&&z.k==='pad'?z.p:null;
- if(key!==Y.zone){Y.zone=key;if(z&&z.k==='pad')openCard(z.p.id);else if(Y.card&&Y.card.from==='pad')closeCard();if(z&&z.k==='school'){sfx('tap');caption('🏫',L('코딩 학교예요! 문 코치와 새 코드를 배우면 로봇이 더 똑똑해져요.','The coding school! Learn new code with Coach Moon and the robots get smarter.'),null,false)}}
+ if(key!==Y.zone){Y.zone=key;if(z&&z.k==='pad')openCard(z.p.id);else if(z&&z.k==='shelf')openShelf();else if(Y.card&&Y.card.from==='pad')closeCard();if(z&&z.k==='school'){sfx('tap');caption('🏫',L('코딩 학교예요! 문 코치와 새 코드를 배우면 로봇이 더 똑똑해져요.','The coding school! Learn new code with Coach Moon and the robots get smarter.'),null,false)}}
  if(!z)return;
+ if(z.k==='deliv'){const e=Y.ev;let i,n=0;while(e.got<e.need&&(i=Y.hold.indexOf(e.dish))>=0){Y.hold.splice(i,1);e.got++;n++;fly(e.dish,'me',[DELIV.x+.6,DELIV.y+1.6])}
+  if(n){sfx('coin');acts();if(e.got>=e.need)endEvent(true);else caption('🛵',L(`${e.need-e.got}개 더 가져다줘요!`,`${e.need-e.got} more to go!`))}return}
  if(z.k==='robot'){const r=z.r;if(r.dish.length&&Y.hold.length<trayN()){const need=demand();// take what diners need, and mess so it can be thrown away
    while(r.dish.length&&Y.hold.length<trayN()){const d=r.dish.shift();Y.hold.push(d);sfx('tile');fly(d,[r.x+.5,r.y+.5],'me')}acts()}}
  if(z.k==='table')serveTable(z.t,true)}
 function serveTable(t,mine){let did=false;
- for(const d of Y.diners.filter(d=>d.state==='sit'&&d.t===t.i&&!d.got)){const i=Y.hold.indexOf(d.item);if(i<0)continue;Y.hold.splice(i,1);d.got=true;d.state='eat';d.eat=4;d.mood='😍';d.moodT=1.4;did=true;sfx('coin');fly(d.item,'me',[d.x,d.y])}
+ for(const d of Y.diners.filter(d=>d.state==='sit'&&d.t===t.i&&!d.got)){const i=Y.hold.indexOf(d.item);if(i<0)continue;Y.hold.splice(i,1);d.got=true;d.state='eat';d.eat=4;d.mood='😍';d.moodT=1.4;did=true;sfx('coin');fly(d.item,'me',[d.x,d.y]);evServed(d)}
  // a wrong burger: the diner shakes their head; the mess goes in the bin
  const mi=Y.hold.indexOf('mess');if(mi>=0&&Y.diners.some(d=>d.state==='sit'&&d.t===t.i&&!d.got)){Y.hold.splice(mi,1);const d=Y.diners.find(d=>d.state==='sit'&&d.t===t.i&&!d.got);d.mood='😕';d.moodT=2;sfx('oops');caption('🐛',L('“이건 제가 주문한 버거가 아니에요!” 버그 걸린 로봇을 고쳐야 해요.','“That’s not the burger I ordered!” Fix the buggy robot.'),null,false)}
  if(t.coins>0){const n=t.coins;t.coins=0;addApples(n);coinFly(t);did=true}
@@ -5091,27 +5176,75 @@ function fly(k,from,to){Y.fly.push({k,from:from==='me'?[Y.me.x,Y.me.y]:from,to,t
 
 // ---------------------------------------------------------------- upgrades: pads on the floor and a board
 const price=id=>{const u=UPN[id],v=lvOf(id);return u[3][v]};
-const canBuy=id=>{const u=UPN[id],v=lvOf(id);return v<u[3].length&&shopLv()>=u[4][v]&&S.apples>=u[3][v]&&u[3][v]>0};
-function pads(){return UP.filter(u=>{const v=lvOf(u[0]);return v<u[3].length&&u[3][v]>0&&shopLv()>=u[4][v]}).map(u=>({id:u[0],x:u[5][0],y:u[5][1],u}))}
+// the next step of an upgrade: its price and what it still waits for (a bigger shop, more school missions)
+function stepOf(id){const u=UPN[id],v=lvOf(id);if(v>=u[3].length)return {max:true,v};const sch=(u[6]||[])[v]||0;
+ return {v,p:u[3][v],lv:u[4][v],sch,needLv:shopLv()<u[4][v],needSch:Math.max(0,sch-schoolN())}}
+const canBuy=id=>{const s=stepOf(id);return !s.max&&s.p>0&&!s.needLv&&!s.needSch&&S.apples>=s.p};
+// a pad shows once the shop is big enough; a step that still waits for school missions shows as a purple 🏫 pad
+function pads(){return UP.map(u=>({u,s:stepOf(u[0])})).filter(({s})=>!s.max&&s.p>0&&!s.needLv).map(({u,s})=>({id:u[0],x:u[5][0],y:u[5][1],u,gated:s.needSch}))}
+// the booster shelf stands in the dining room once the first robot is taught
+const shelfOn=()=>!!st().tut.taught;
+const secTxt=s=>L(`${s>=60?Math.floor(s/60)+'분':''}${s%60?(s>=60?' ':'')+s%60+'초':''}`,s%60?`${s} seconds`:`${s/60} minute${s>60?'s':''}`);
+const misE=n=>`${n} ${n===1?'mission':'missions'}`;
+const schoolMsg=n=>L(`🏫 학교 미션 ${n}개를 더 하면 열려요!`,`🏫 ${n} more school ${n===1?'mission':'missions'} to open this!`);
 function upWhat(id){const v=lvOf(id);switch(id){
  case 'robot':return L(`${v+1}번 요리 로봇이 와요. 다른 버거를 가르칠 수 있어요.`,`Robot ${v+1} joins. Teach it another burger.`);
  case 'tables':return L(`테이블이 ${v+1}개가 돼요. 손님이 더 와요.`,`${v+1} tables. More diners come.`);
- case 'motor':return L(`로봇이 더 빨리 요리해요 (${cookSec().toFixed(1)}초 → ${[4.2,3.4,2.7,2.1,1.6][v+1].toFixed(1)}초).`,`Robots cook faster (${cookSec().toFixed(1)}s → ${[4.2,3.4,2.7,2.1,1.6][v+1].toFixed(1)}s).`);
+ case 'motor':return L(`로봇이 더 빨리 요리해요 (${cookBase(v).toFixed(1)}초 → ${cookBase(v+1).toFixed(1)}초).`,`Robots cook faster (${cookBase(v).toFixed(1)}s → ${cookBase(v+1).toFixed(1)}s).`);
  case 'chip':return L(`로봇 칩이 ${slots()}줄 → ${slots()+2}줄이 돼요. 더 긴 레시피를 넣어요.`,`Chips grow from ${slots()} to ${slots()+2} lines for longer recipes.`);
  case 'shoes':return L('내가 더 빨리 걸어요.','You walk faster.');case 'tray':return L(`버거를 ${trayN()+1}개까지 들어요.`,`Carry up to ${trayN()+1} burgers.`);
  case 'buddy':return L('파이가 테이블의 사과를 주워 와요.','Py picks up the apples from tables.');case 'decor':return L('가게가 예뻐지고 손님이 더 자주 와요.','The shop looks lovelier and diners come more often.');
  case 'sign':return L('반짝 간판으로 손님이 더 자주 와요.','A shiny sign brings diners more often.')}return ''}
-function openCard(id,from='pad'){if(!Y)return;const u=UPN[id],v=lvOf(id),p=u[3][v],can=S.apples>=p;Y.card={id,from};
- Y.el.card.innerHTML=`<div class="rbc-in"><span class="rbc-ic">${padImg(id,'rbc-img')}</span><b>${T(u[2])} ${v>0?L(`${v+1}단계`,`lv ${v+1}`):''}</b><p>${esc(upWhat(id))}</p>
-  <div class="row"><button type="button" class="btn ghost small" data-c="x">${L('나중에','Later')}</button><button type="button" class="btn small" data-c="buy" ${can?'':'disabled'}>🍎 ${p} ${L('사기','Buy')}</button></div>${can?'':`<small class="muted">${L(`사과가 ${p-S.apples}개 더 필요해요`,`${p-S.apples} more apples needed`)}</small>`}</div>`;
+// the card at the bottom when the child stands on a pad (or taps a board row): buy it, or see which school missions it waits for
+function openCard(id,from='pad'){if(!Y)return;const u=UPN[id],s=stepOf(id);if(s.max||s.needLv)return;const p=s.p,can=S.apples>=p;Y.card={id,from};
+ const head=`<span class="rbc-ic">${padImg(id,'rbc-img')}</span><b>${T(u[2])} ${s.v>0?L(`${s.v+1}단계`,`lv ${s.v+1}`):''}</b><p>${esc(upWhat(id))}</p>`;
+ Y.el.card.innerHTML=s.needSch?`<div class="rbc-in sch">${head}<p class="rbc-sch">${schoolMsg(s.needSch)}<small>${L(`학교 미션 ${schoolN()}/${s.sch} · 그다음 🍎 ${p}`,`School missions ${schoolN()}/${s.sch} · then 🍎 ${p}`)}</small></p>
+  <div class="row"><button type="button" class="btn ghost small" data-c="x">${L('나중에','Later')}</button><button type="button" class="btn small" data-c="school">🏫 ${L('학교 가기','Go to school')}</button></div></div>`
+ :`<div class="rbc-in">${head}<div class="row"><button type="button" class="btn ghost small" data-c="x">${L('나중에','Later')}</button><button type="button" class="btn small" data-c="buy" ${can?'':'disabled'}>🍎 ${p} ${L('사기','Buy')}</button></div>${can?'':`<small class="muted">${L(`사과가 ${p-S.apples}개 더 필요해요`,`${p-S.apples} more apples needed`)}</small>`}</div>`;
  Y.el.card.classList.remove('hidden')}
 function closeCard(){if(!Y)return;Y.card=null;Y.el.card.classList.add('hidden');Y.el.card.innerHTML=''}
 function buy(id){const p=price(id);if(!canBuy(id)){sfx('oops');return}S.apples-=p;st().up[id]=lvOf(id)+1;st();save();updateHud();sfx('fanfare');celebrate(24);closeCard();hud();
  caption(UPN[id][1],id==='robot'?L(`${lvOf('robot')}번 로봇이 왔어요! 로봇을 눌러서 버거 만드는 코드를 가르쳐 줘요.`,`Robot ${lvOf('robot')} is here! Tap it and teach it a burger.`):upWhat(id).replace(/ \(.*\)/,'')+' ✨',true,false);checkTrophies()}
-function board(){const rows=UP.map(u=>{const v=lvOf(u[0]),max=v>=u[3].length,need=!max&&shopLv()<u[4][v],p=max?0:u[3][v];
-  return `<button type="button" class="rbb ${max?'max':''} ${need?'lock':''}" data-up="${u[0]}" ${max||need||!p?'disabled':''}><span>${padImg(u[0],'rbb-img')}</span><b>${T(u[2])}</b><small>${max?L('최고!','Max!'):need?L(`🔒 가게 ${u[4][v]+1}단계부터`,`🔒 from shop level ${u[4][v]+1}`):p?`🍎 ${p}`:''}</small></button>`}).join('');
- modal(`<h2>🛠️ ${L('가게 업그레이드','Shop upgrades')}</h2><p class="muted">${L('바닥의 초록 발판에 서도 살 수 있어요.','You can also stand on the green floor pads to buy.')}</p><div class="rbbs">${rows}</div>`,{cls:'wide',acts:{}});
- setTimeout(()=>{const box=document.querySelector('.rbbs');if(box)box.addEventListener('click',e=>{const b=e.target.closest('[data-up]');if(!b)return;closeModal();openCard(b.dataset.up,'board')})},50)}
+// the 🛠️ board: every upgrade's next step (with its shop-level or school lock), then the boosters
+function boardBody(){const rows=UP.map(u=>{const s=stepOf(u[0]),off=s.max||s.needLv||!s.p,sch=!s.max&&!s.needLv&&s.needSch;
+  const why=s.max?L('최고!','Max!'):s.needLv?L(`🔒 가게 ${s.lv+1}단계부터`,`🔒 from shop level ${s.lv+1}`)+(s.needSch?`<br>🏫 ${L(`미션 ${s.needSch}개 더`,`${misE(s.needSch).replace(' ',' more ')}`)}`:''):sch?`🏫 ${L(`학교 미션 ${s.needSch}개 더`,`${s.needSch} more school ${s.needSch===1?'mission':'missions'}`)}`:s.p?`🍎 ${s.p}`:'';
+  return `<button type="button" class="rbb ${s.max?'max':''} ${s.needLv?'lock':''} ${sch?'sch':''}" data-up="${u[0]}" ${off?'disabled':''}><span>${padImg(u[0],'rbb-img')}</span><b>${T(u[2])}</b><small>${why}</small></button>`}).join('');
+ const gated=UP.some(u=>{const s=stepOf(u[0]);return !s.max&&s.needSch}),b=st().boost;
+ const bst=BIDS.map(k=>{const [ic,nm,fx,sec]=BOOST[k],p=bPrice(k);return `<button type="button" class="rbb bst ${S.apples>=p?'':'poor'}" data-bst="${k}"><span class="bic">${ic}</span><b>${T(nm)}</b><small class="d">${T(fx)} · ${secTxt(sec)}</small><small>🍎 ${p} · ${L(`가진 것 ${b[k]}`,`have ${b[k]}`)}</small></button>`}).join('');
+ return `${gated?`<div class="rbsch"><span>🏫 ${L(`학교 미션을 하면 업그레이드가 더 열려요! 지금까지 ${schoolN()}개 했어요.`,`School missions open more upgrades! You’ve done ${schoolN()} so far.`)}</span><button type="button" class="btn small" data-go="school">🏫 ${L('학교 가기','Go to school')}</button></div>`:''}
+  <div class="rbbs">${rows}</div><h3 class="rbh">🎒 ${L('아이템','Boosters')}</h3><p class="muted rbhp">${L('사서 가방에 넣고, 가게 위쪽 🎒 버튼으로 써요.','Buy them for your bag, then use them with the 🎒 button at the top of the shop.')}</p><div class="rbbs">${bst}</div>`}
+function board(){modal(`<h2>🛠️ ${L('가게 업그레이드','Shop upgrades')}</h2><p class="muted">${L('바닥의 초록 발판에 서도 살 수 있어요.','You can also stand on the green floor pads to buy.')} <b class="rbhave">🍎 <span>${S.apples}</span></b></p><div class="rbbody">${boardBody()}</div>`,{cls:'wide',onOpen:box=>box.addEventListener('click',e=>{
+  if(e.target.closest('[data-go]')){sfx('tap');closeModal(()=>go('school'));return}
+  const k=e.target.closest('[data-bst]');if(k){buyBoost(k.dataset.bst);const body=box.querySelector('.rbbody'),h=box.querySelector('.rbhave span');if(body)body.innerHTML=boardBody();if(h)h.textContent=S.apples;return}
+  const b=e.target.closest('[data-up]');if(!b||b.disabled)return;sfx('tap');closeModal();openCard(b.dataset.up,'board')})})}
+
+// ---------------------------------------------------------------- boosters: buy at the 🎒 shelf (or the board), use from the 🎒 button; one of each kind runs at once
+function buyBoost(k){const p=bPrice(k);if(S.apples<p){sfx('oops');toast(`🍎 ${L(`사과가 ${p-S.apples}개 더 필요해요`,`${p-S.apples} more apples needed`)}`);return false}
+ S.apples-=p;st().boost[k]++;save();updateHud();sfx('coin');toast(`${BOOST[k][0]} ${T(BOOST[k][1])} +1 · 🎒 ${st().boost[k]}`);if(Y)hud();return true}
+function useBoost(k){const b=st().boost,run=st().run,[ic,nm,fx,sec]=BOOST[k];
+ if(run[k]>0){toast(`${ic} ${L('벌써 쓰고 있어요!','Already running!')}`);return false}
+ if(!(b[k]>0)){sfx('oops');toast(`${ic} ${L('가방에 없어요. 🎒 선반에서 사요!','None in your bag. Buy one at the 🎒 shelf!')}`);return false}
+ b[k]--;run[k]=sec;save(true);sfx('good');if(Y){if(k==='flyer')Y.spawnT=Math.min(Y.spawnT,1.5);hud();evHud()}
+ caption(ic,L(`${T(nm)}! ${secTxt(sec)} 동안 ${T(fx)}.`,`${T(nm)}! ${T(fx)} for ${secTxt(sec)}.`),true,true);return true}
+function stepBoosts(dt){const run=st().run;
+ const gone=BIDS.filter(k=>run[k]>0&&(run[k]-=dt)<=0);
+ if(gone.length){gone.forEach(k=>delete run[k]);save(true);toast(`${gone.map(k=>BOOST[k][0]).join(' ')} ${L(`${gone.map(k=>T(BOOST[k][1])).join(', ')} 끝!`,`${gone.map(k=>T(BOOST[k][1])).join(', ')} ${gone.length>1?'are':'is'} used up.`)}`);bagHud()}
+ // 🧲 the apple magnet pulls table apples to the child
+ if(run.magnet>0)Y.tables.forEach(t=>{if(t.coins>0){if((t.magT=(t.magT||0)+dt)>.5){const n=t.coins;t.coins=0;t.magT=0;addApples(n);coinFly(t);Y.fly.push({k:'apple',from:[t.x+.5,t.y+.5],to:'me',t:0});sfx('coin')}}else t.magT=0})}
+// the shelf card (standing on the 🎒 pad)
+function openShelf(){if(!Y)return;Y.card={id:'shelf',from:'pad'};const b=st().boost;
+ Y.el.card.innerHTML=`<div class="rbc-in wide"><b>🎒 ${L('아이템 선반','Booster shelf')}</b><p>${L('사서 가방에 넣고, 필요할 때 위쪽 🎒 버튼으로 써요.','Buy for your bag, then use them with the 🎒 button at the top.')}</p>
+  <div class="rbsh">${BIDS.map(k=>{const [ic,nm,fx,sec]=BOOST[k],p=bPrice(k);return `<button type="button" class="rbsb ${S.apples>=p?'':'poor'}" data-bb="${k}"><span class="bic">${ic}</span><span class="t"><b>${T(nm)}</b><small>${T(fx)}</small><em>🍎 ${p} · ${L(`가진 것 ${b[k]}`,`have ${b[k]}`)}</em></span></button>`}).join('')}</div>
+  <div class="row"><button type="button" class="btn ghost small" data-c="x">${L('닫기','Close')}</button><button type="button" class="btn small" data-c="bag">🎒 ${L('가방 열기','Open bag')}</button></div></div>`;
+ Y.el.card.classList.remove('hidden')}
+// the bag (the 🎒 button): use a booster, or buy one when there is none
+function bagBody(){const b=st().boost,run=st().run;return BIDS.map(k=>{const [ic,nm,fx,sec]=BOOST[k],p=bPrice(k),on=run[k]>0;
+ return `<div class="rbbr ${on?'on':''}"><span class="bic">${ic}</span><span class="t"><b>${T(nm)} <i>×${b[k]}</i></b><small>${T(fx)} · ${secTxt(sec)}</small></span>${on?`<button type="button" class="btn small ghost" disabled>⏱ ${Math.ceil(run[k])}${L('초','s')}</button>`:b[k]>0?`<button type="button" class="btn small" data-use="${k}">${L('쓰기','Use')}</button>`:`<button type="button" class="btn small ghost" data-bst="${k}">🍎 ${p} ${L('사기','Buy')}</button>`}</div>`}).join('')}
+function openBag(){modal(`<h2>🎒 ${L('내 가방','My bag')}</h2><p class="muted">${L('아이템을 쓰면 잠깐 동안 가게를 도와줘요. 종류마다 하나씩 함께 쓸 수 있어요.','A booster helps the shop for a little while. One of each kind can run at once.')}</p><div class="rbbag">${bagBody()}</div>`,{cls:'wide',onOpen:box=>box.addEventListener('click',e=>{
+  const u=e.target.closest('[data-use]');if(u){const k=u.dataset.use;sfx('tap');closeModal(()=>useBoost(k));return}
+  const b=e.target.closest('[data-bst]');if(b){buyBoost(b.dataset.bst);const x=box.querySelector('.rbbag');if(x)x.innerHTML=bagBody()}})})}
+// a school mission's gift: one random booster
+function gift(){const k=pk(BIDS);st().boost[k]++;save(true);if(Y)bagHud();return {k,ic:BOOST[k][0],name:T(BOOST[k][1])}}
 
 // ---------------------------------------------------------------- teaching a robot (the coding screen)
 // the shortest program for a dish: with the loop chip, a repeating run of layers becomes a 🔁 loop when that saves lines
@@ -5226,6 +5359,85 @@ function lessonDone(m){const k=m.skill,s=SKILL[k];sfx('win');celebrate(20);addXP
  st().skills[k]=true;CACHE.clear();addApples(5,$('runbar'));bumpDaily('lesson');save();
  setTimeout(()=>modal(`<div class="big">${s.ic}💾</div><h2>${T(s.name)} ${L('장착!','installed!')}</h2><div class="learn">💡 ${tx(m.learn)}</div>${pyLine(k==='for'?'이제 로봇 코드에 🔁 반복 타일이 생겼어요. 긴 레시피도 칩에 쏙!|The 🔁 repeat tile is in the robot code now. Long recipes fit!':k==='if'?'이제 로봇을 누르면 ❓ 주문 보고 골라 만들기를 가르칠 수 있어요!|Tap a robot to teach it to ❓ read the order and choose!':'이제 로봇을 누르면 🚂 주문표대로 뭐든 만들기를 가르칠 수 있어요!|Tap a robot to teach it to make 🚂 anything on the order list!','wow')}
   <div class="rew"><span>+5 🍎</span></div>${typeof coachLine==='function'?coachLine('big'):''}<button class="btn wide" type="button" data-act="go">🍔 ${L('가게로!','To the shop!')}</button>`,{cls:'result',acts:{go:()=>()=>go('home')},onClose:()=>{if(VIEW!=='home')go('home')}}),700)}
+// ---------------------------------------------------------------- events: one at a time, from shop level 1, never during a window, a lesson or the first-visit tutorial
+// [icon, ko|en name, seconds]; the first comes 60–90 s into a visit, then every 90–150 s of shop play (the robot bug keeps its own timer)
+const EVK={rush:['🎉','러시 아워|Rush hour',45],vip:['⭐','VIP 손님|VIP guest',45],bday:['🎂','생일 파티|Birthday party',60],deliv:['📦','배달 주문|Delivery order',75],music:['🎶','거리 공연|Street music',40],newdish:['🧑‍🍳','새 메뉴 주문|New dish order',150]};
+// the booster that helps most in each event: Coach Moon suggests the first one the child has
+const EV_BOOST={rush:['turbo','magnet','sauce'],vip:['turbo'],bday:['turbo','sauce'],deliv:['turbo'],music:['sauce','flyer','magnet'],newdish:[]};
+const evBoost=k=>(EV_BOOST[k]||[]).find(b=>st().boost[b]>0&&!boostOn(b));
+const dishNm=k=>`${MENU[k].e} ${T(MENU[k].name)}`,dishNmO=k=>`${MENU[k].e} ${L(josa(T(MENU[k].name),'을'),T(MENU[k].name))}`;
+const ieyo=w=>{const c=w.charCodeAt(w.length-1);return w+(c>=0xAC00&&c<=0xD7A3&&(c-0xAC00)%28>0?'이에요':'예요')};
+const coachOn=()=>/\bshow\b/.test(($('coachDock')||{}).className||'');
+function evProg(e){switch(e.kind){
+ case 'rush':return L(`대접 ${e.n}/${e.goal}`,`Served ${e.n}/${e.goal}`);
+ case 'vip':return e.wait?L('자리로 가는 중','Finding a seat'):dishNm(e.dish);
+ case 'bday':return `${dishNm(e.dish)} ${e.got}/2`;
+ case 'deliv':return `${dishNm(e.dish)} ${e.got}/${e.need}`;
+ case 'music':return L(`팁 +${e.tips} 🍎`,`Tips +${e.tips} 🍎`);
+ case 'newdish':return dishNm(e.dish)}return ''}
+const fullTable=()=>{const f=freeSeats();return Y.tables.find(t=>f.filter(([x])=>x===t).length===2)||null};
+// a dish on the menu that no robot makes yet (the lowest level first)
+const newDish=()=>{const ks=orderable().filter(m=>!st().robots.some((R,i)=>i<lvOf('robot')&&robotMakes(R,m)===m));return ks.sort((a,b)=>MENU[a].lv-MENU[b].lv)[0]||null};
+const SKILL_LEARN={for:'🔁 반복|🔁 loops',if:'❓ 조건|❓ if',list:'🚂 리스트|🚂 lists'};
+// why no robot makes a dish yet and where that sends the child: school (a skill, or chip slots waiting for missions), the 🛠️ board, or a robot
+function dishFix(k){const w=lockWhy(k),toSchool=n=>()=>go(n&&worldOpen(n)?'world':'school',n);
+ const school=(ko,en,n)=>({line:L(ko,en),go:{ic:'🏫',t:'학교 가기|School',f:toSchool(n)}});
+ if(w&&w.skill){const s=SKILL_LEARN[w.skill];return school(`학교에서 ${josa(T(s),'을')} 배우면 로봇이 만들 수 있어요!`,`Learn ${s.split('|')[1]} at school and a robot can make it!`,SKILL[w.skill].world)}
+ if(w&&w.lines){if(!hasSkill('for')&&dishCode(MENU[k].dish,true).length<=slots())return school('학교에서 🔁 반복을 배우면 코드가 짧아져서 칩에 들어가요!','Learn 🔁 loops at school and the code gets short enough for the chip!',SKILL.for.world);
+  const c=stepOf('chip');if(!c.max&&!c.needLv&&c.needSch)return school(`학교 미션을 ${c.needSch}개 더 하면 💾 칩 칸을 늘릴 수 있어요!`,`${c.needSch} more school missions and you can get more 💾 chip slots!`);
+  if(!c.max&&c.needLv)return {line:L('가게가 더 커지면 💾 칩 칸을 늘릴 수 있어요. 손님을 더 대접해요!','When the shop grows, you can get more 💾 chip slots. Keep serving!'),go:null};
+  return {line:L('🛠️ 업그레이드에서 💾 칩 칸을 늘리면 만들 수 있어요!','Get more 💾 chip slots in 🛠️ Upgrades and a robot can make it!'),go:{ic:'🛠️',t:'업그레이드|Upgrades',f:board}}}
+ const n=lvOf('robot'),i=st().robots.findIndex((R,j)=>j<n&&!R.code),r=i>=0?i:n-1;
+ return {line:L(`${r+1}번 로봇을 눌러 만드는 법을 가르쳐 주면 🍎 사과 30개!`,`Tap robot ${r+1} and teach it this dish for 30 🍎 apples!`),go:{ic:'🤖',t:'가르치기|Teach',f:()=>robotTap(r)}}}
+// may an event start now?
+function evReady(){const s=st();return VIEW==='home'&&!modalOpen()&&!document.body.classList.contains('staged')&&!Y.card&&!coachOn()&&shopLv()>=1&&s.tut.taught&&s.served>=5&&s.robots.some((R,i)=>i<lvOf('robot')&&R.code)}
+function evCan(k){const known=knownDishes().length;switch(k){
+ case 'vip':return known&&freeSeats().length;case 'bday':return known&&fullTable();case 'deliv':return known;case 'newdish':return newDish()&&freeSeats().length;default:return true}}
+function startEvent(want){if(!Y||Y.ev)return false;let k=want;
+ if(!k){const ks=Object.keys(EVK).filter(x=>x!==Y.evLast&&evCan(x));if(!ks.length)return false;k=pk(ks.flatMap(x=>x==='newdish'?[x,x]:[x]))}else if(!evCan(k))return false;
+ const e={kind:k,left:EVK[k][2],dur:EVK[k][2],n:0,got:0,tips:0,wait:false};let line;
+ switch(k){
+  case 'rush':e.goal=Math.max(3,Math.min(6,2*lvOf('tables')));Y.spawnT=Math.min(Y.spawnT,1);line=L(`러시 아워예요! ${e.dur}초 동안 손님이 몰려와요. ${e.goal}명 대접하면 🍎 사과 20개!`,`Rush hour! Diners pour in for ${e.dur} seconds. Serve ${e.goal} for 20 🍎 apples!`);break;
+  case 'vip':e.dish=pk(knownDishes());e.d=spawnDiner({item:e.dish,vip:true});e.wait=true;line=L(`왕관 쓴 VIP 손님이 와요! 앉은 뒤 ${e.dur}초 안에 ${dishNmO(e.dish)} 드리면 🍎 사과 30개!`,`A VIP guest with a crown is coming! Serve the ${dishNm(e.dish)} within ${e.dur} seconds of sitting for 30 🍎 apples!`);break;
+  case 'bday':{const t=fullTable();e.dish=pk(knownDishes());e.ds=[0,1].map(s=>spawnDiner({seat:[t,s],item:e.dish,bday:true}));e.tbl=t.i;e.wait=true;
+   line=L(`생일 파티 손님들이 와요! 둘 다 ${dishNmO(e.dish)} 시켰어요. 두 명 모두 드리면 🍎 사과 25개!`,`A birthday party is coming! Both want the ${dishNm(e.dish)}. Serve both for 25 🍎 apples!`);break}
+  case 'deliv':e.dish=pk(knownDishes());e.need=pk([2,3]);line=L(`배달 주문! 문 앞 🛵 기사님이 ${dishNm(e.dish)} ${e.need}개를 기다려요. ${e.dur}초 안에 문 앞으로 가져가요!`,`Delivery order! The 🛵 rider at the door needs ${e.need} ${dishNm(e.dish)}s. Bring them to the door within ${e.dur} seconds!`);break;
+  case 'music':e.busker=pk(PALS);Y.spawnT=Math.min(Y.spawnT,1.5);line=L(`가게 앞에서 거리 공연이 시작됐어요! ${e.dur}초 동안 손님이 더 오고, 모두 팁을 🍎 사과 2개씩 더 줘요.`,`Street music outside! For ${e.dur} seconds more diners come, and every diner tips 2 more 🍎 apples.`);break;
+  case 'newdish':{e.dish=newDish();e.d=spawnDiner({item:e.dish,special:true});e.wait=true;const f=dishFix(e.dish);e.go=f.go;
+   line=L(`새 메뉴 ${dishNmO(e.dish)} 먹고 싶은 손님이 와요! `,`A diner wants the new ${dishNm(e.dish)}! `)+f.line;break}}
+ Y.ev=e;sfx('fanfare');caption(EVK[k][0],line,null,false);say(line,{onend:()=>setTimeout(()=>suggestBoost(k),300)});evHud();bagHud();return true}
+// Coach Moon: "Rush hour! The ⚡ turbo battery is perfect for this." (only when the child has one)
+function suggestBoost(kind){if(!Y||!evIs(kind)||VIEW!=='home'||modalOpen()||coachOn())return;const b=evBoost(kind);if(!b)return;const [ic,nm]=BOOST[b],[ko,en]=EVK[kind][1].split('|'),[nk,ne]=nm.split('|');
+ coachTalk('idea',`${ieyo(ko)}! ${ic} ${josa(nk,'을')} 쓰면 딱이에요.|${en}! The ${ic} ${ne} is perfect for this.`,{ms:15000,acts:[{t:`${ic} 쓰기|${ic} Use it`,f:()=>useBoost(b)},{t:'괜찮아요|No thanks'}]})}
+function stepEvent(dt){const e=Y.ev;
+ if(e.wait){const ds=e.kind==='bday'?e.ds:[e.d];if(ds.some(d=>!d||!Y.diners.includes(d))){endEvent(false);return}if(!ds.every(d=>d.state!=='in'))return;e.wait=false}
+ if(e.kind==='newdish'){if(e.d.state!=='sit'&&!e.d.got){endEvent(false);return}e.left=Math.max(0,150-e.d.wait);if(e.left<=0)endEvent(false);return}   // the guest waits as long as their patience lasts
+ if((e.left-=dt)<=0)endEvent(e.kind==='rush'?e.n>=e.goal:e.kind==='music')}
+// a burger reached an event guest (or any diner, during a rush)
+function evServed(d){const e=Y.ev;if(!e)return;
+ if(e.kind==='rush'){e.n++;if(e.n===e.goal){sfx('good');caption('🎯',L(`${e.goal}명 달성! 끝날 때까지 계속해요!`,`${e.goal} served! Keep going till the end!`),true)}}
+ else if(e.kind==='vip'&&d===e.d)endEvent(true);
+ else if(e.kind==='bday'&&e.ds.includes(d)){e.got=e.ds.filter(x=>x&&x.got).length;if(e.got>=2)endEvent(true)}
+ else if(e.kind==='newdish'&&d===e.d)endEvent(true)}
+// the end: reward and a small result toast (nothing the child owns is ever taken away)
+function endEvent(win){const e=Y.ev;if(!e)return;Y.ev=null;Y.evLast=e.kind;Y.evNext=rnd(90,150);const [ic,nm]=EVK[e.kind];let msg='',ap=0;
+ switch(e.kind){
+  case 'rush':ap=win?20:0;msg=win?L(`손님 ${e.n}명 대접!`,`${e.n} diners served!`):L(`손님 ${e.n}명 대접했어요. 다음엔 ${e.goal}명!`,`${e.n} served. Try for ${e.goal} next time!`);break;
+  case 'vip':if(win){ap=30;const before=shopLv();st().served+=3;hud();if(shopLv()>before)setTimeout(()=>{if(Y)levelUp()},900)}else if(e.d)e.d.vip=false;
+   msg=win?L('VIP 손님이 아주 좋아해요! 손님 +3','The VIP loved it! Diners +3'):L('VIP 시간이 끝났어요. 버거는 그래도 기다려요!','VIP time is over. They still want their burger!');break;
+  case 'bday':ap=win?25:0;msg=win?L('생일 축하해요! 🎈','Happy birthday! 🎈'):L('파티 시간이 끝났어요. 버거는 그래도 기다려요!','Party time is over. They still want their burgers!');break;
+  case 'deliv':ap=win?40:0;Y.scoot=Y.t;msg=win?L('배달 완료! 🛵💨','Delivered! 🛵💨'):L('기사님이 다음 가게로 갔어요. 다음 배달은 꼭!','The rider moved on. Next time!');break;
+  case 'music':msg=L(`공연 끝! 팁 🍎 ${e.tips}개는 테이블에 있어요.`,`Show’s over! ${e.tips} 🍎 in tips are on the tables.`);break;
+  case 'newdish':ap=win?30:0;msg=win?L('새 메뉴 성공!','New dish served!'):L('손님이 다음에 또 온대요!','The guest will come back another time!');break}
+ if(ap){addApples(ap,$('hudApplePill'));sfx('fanfare');celebrate(18)}save(true);
+ toast(`${ic} <b>${esc(T(nm))}</b> · ${esc(msg)}${ap?` <b>+${ap} 🍎</b>`:''}`,3400);evHud();bagHud()}
+// Coach Moon after ~8 min of shop play without a school mission, when school would open something (at most once per 15 min)
+function schoolNudge(){const s=st();if(now()-(s.nudgeAt||0)<15*60000||modalOpen()||coachOn())return;
+ const g=UP.map(u=>({u,s:stepOf(u[0])})).filter(x=>!x.s.max&&!x.s.needLv&&x.s.needSch).sort((a,b)=>a.s.needSch-b.s.needSch)[0];
+ const sk=menuOpen().some(k=>{const w=lockWhy(k);return w&&w.skill});if(!g&&!sk)return;
+ s.nudgeAt=now();Y.runT=0;save(true);const [nk,ne]=g?g.u[2].split('|'):[];
+ coachTalk('idea',g?`🏫 학교 미션을 ${g.s.needSch}개 더 하면 ${g.u[1]} ${josa(nk,'이')} 열려요! 미션마다 🎁 아이템 선물도 받아요.|🏫 ${g.s.needSch} more school ${g.s.needSch===1?'mission':'missions'} open the ${g.u[1]} ${ne}! Every mission gives a 🎁 booster too.`
+  :'로봇이 새 기술을 배우고 싶대요! 학교 미션 1개 하면 🎁 아이템 선물도 받아요.|The robots want to learn a new skill! One school mission gives a 🎁 booster too.',{acts:[{t:'🏫 학교 가기|🏫 Go to school',f:()=>go('school')},{t:'나중에|Later'}]})}
 // ---------------------------------------------------------------- loop
 function frame(ts){if(!Y)return;Y.raf=requestAnimationFrame(frame);if(document.hidden||modalOpen()||VIEW!=='home'||document.body.classList.contains('staged')){Y.last=0;return}
  const dt=Y.last?Math.min(.05,(ts-Y.last)/1000):1/60;Y.last=ts;Y.t+=dt;update(dt);draw()}
@@ -5241,7 +5453,10 @@ function update(dt){const me=Y.me,sp=walkSp();let vx=0,vy=0;
  const bd=Y.bd,tc=lvOf('buddy')?Y.tables.find(t=>t.coins>0):null;let gx=me.x-.6*me.dir,gy=me.y+.55;if(tc){gx=tc.zx+.5;gy=tc.zy+.5}
  const ddx=gx-bd.x,ddy=gy-bd.y,dd=Math.hypot(ddx,ddy);if(dd>.12){const v=Math.min(dd,(1.6+dd*2.2)*dt);bd.x+=ddx/dd*v;bd.y+=ddy/dd*v;bd.ph+=dt*12}
  if(tc&&dd<.4){const n=tc.coins;tc.coins=0;addApples(n);coinFly(tc)}
- inZone(dt);stepRobots(dt);stepDiners(dt);
+ inZone(dt);stepRobots(dt);stepDiners(dt);stepBoosts(dt);
+ if(Y.ev)stepEvent(dt);else if((Y.evNext-=dt)<=0&&!(evReady()&&startEvent()))Y.evNext=6;
+ // ~8 minutes in the shop without a school mission: Coach Moon may point to school
+ if(schoolN()!==Y.schN){Y.schN=schoolN();Y.runT=0}if((Y.runT+=dt)>=480&&!Y.ev){Y.runT=420;schoolNudge()}
  for(const w of Y.walkers){w.x+=w.dir*w.sp*dt;w.ph+=dt*9;if(w.x>MW+3){w.dir=-1;w.e=pk(PALS)}else if(w.x<-3){w.dir=1;w.e=pk(PALS)}}
  Y.tables.forEach(t=>t.coinShow+=(t.coins-t.coinShow)*Math.min(1,dt*6));
  Y.pops=Y.pops.filter(p=>(p.t+=dt)<1.1);Y.fly=Y.fly.filter(f=>(f.t+=dt*3)<1);
@@ -5325,7 +5540,16 @@ function draw(){const c=Y.ctx,me=Y.me,dec=lvOf('decor'),sg=lvOf('sign');c.lineJo
  // pass-through counter between kitchen and dining room
  box(c,7.1,4.04,.8,3.92,30,'#b4e2d6','#79c3b1','#62ad9c');
  const pulse=.5+.5*Math.sin(Y.t*5);
- pads().forEach(p=>{const [cx,cy]=iso(p.x,p.y),can=S.apples>=price(p.id);c.fillStyle=can?'#eafff0':'#ffffff';c.beginPath();c.ellipse(cx,cy,30,15,0,0,TAU);c.fill();c.strokeStyle=`rgba(51,196,107,${.35+.3*pulse})`;c.lineWidth=2;c.setLineDash([5,4]);c.beginPath();c.ellipse(cx,cy,30,15,0,0,TAU);c.stroke();c.setLineDash([]);c.lineWidth=1;{const m=img(padSrc(p.id));if(ok_(m)){const h=p.id==='robot'?46:36,w=h*m.naturalWidth/m.naturalHeight;c.drawImage(m,cx-w/2,cy-h+8+Math.sin(Y.t*3+p.x)*1.5,w,h)}else emo(c,p.u[1],cx,cy-2,20)}label(c,`🍎${price(p.id)}`,cx,cy+22,can?'#eafff0':'#ffffff',can?'#1f9a4f':'#5f6b8f')});
+ // upgrade pads: green when affordable, purple with 🏫 while the step waits for school missions
+ pads().forEach(p=>{const [cx,cy]=iso(p.x,p.y),g=p.gated,can=!g&&S.apples>=price(p.id);c.fillStyle=g?'#f3eeff':can?'#eafff0':'#ffffff';c.beginPath();c.ellipse(cx,cy,30,15,0,0,TAU);c.fill();c.strokeStyle=g?`rgba(122,91,216,${.35+.3*pulse})`:`rgba(51,196,107,${.35+.3*pulse})`;c.lineWidth=2;c.setLineDash([5,4]);c.beginPath();c.ellipse(cx,cy,30,15,0,0,TAU);c.stroke();c.setLineDash([]);c.lineWidth=1;
+  {const m=img(padSrc(p.id));if(g)c.globalAlpha=.55;if(ok_(m)){const h=p.id==='robot'?46:36,w=h*m.naturalWidth/m.naturalHeight;c.drawImage(m,cx-w/2,cy-h+8+Math.sin(Y.t*3+p.x)*1.5,w,h)}else emo(c,p.u[1],cx,cy-2,20);c.globalAlpha=1}
+  label(c,g?`🏫 ${L(`미션 ${g}개`,misE(g))}`:`🍎${price(p.id)}`,cx,cy+22,g?'#efe8ff':can?'#eafff0':'#ffffff',g?'#5b3fc4':can?'#1f9a4f':'#5f6b8f')});
+ // the 🎒 booster shelf
+ if(shelfOn()){const [cx,cy]=iso(SHELF.x,SHELF.y);c.fillStyle='#fff4dd';c.beginPath();c.ellipse(cx,cy,30,15,0,0,TAU);c.fill();c.strokeStyle=`rgba(240,150,30,${.4+.3*pulse})`;c.lineWidth=2;c.setLineDash([5,4]);c.beginPath();c.ellipse(cx,cy,30,15,0,0,TAU);c.stroke();c.setLineDash([]);c.lineWidth=1;
+  emo(c,'🎒',cx,cy-14+Math.sin(Y.t*3)*1.5,30);label(c,`🎒 ${L('아이템','Boosters')}`,cx,cy+22,'#fff4dd','#a3570b')}
+ // the delivery spot by the door
+ if(evIs('deliv')){const [cx,cy]=iso(DELIV.x+.5,DELIV.y+.5);poly(c,quad(DELIV.x+.08,DELIV.y+.08,DELIV.x+.92,DELIV.y+.92),`rgba(255,196,0,${.3+.25*pulse})`);
+  c.strokeStyle=`rgba(230,140,0,${.5+.4*pulse})`;c.lineWidth=2.5;c.setLineDash([5,4]);c.beginPath();c.ellipse(cx,cy,30,15,0,0,TAU);c.stroke();c.setLineDash([]);c.lineWidth=1;label(c,`🛵 ${L('배달','Delivery')}`,cx,cy+22,'#fff4c2','#8a5a00')}
  if(Y.ripple&&Y.t-Y.ripple.t<.6){const [x,y]=iso(Y.ripple.x,Y.ripple.y),k=(Y.t-Y.ripple.t)/.6;c.strokeStyle=`rgba(58,142,230,${1-k})`;c.lineWidth=2;c.beginPath();c.ellipse(x,y,6+k*26,3+k*13,0,0,TAU);c.stroke();c.lineWidth=1}
  // floor glow where to pick up and serve
  Y.robots.forEach((r,i)=>{if(i<lvOf('robot')&&r.dish.length)poly(c,quad(r.zx+.1,r.zy+.1,r.zx+.9,r.zy+.9),`rgba(255,170,40,${.2+.2*pulse})`)});
@@ -5337,9 +5561,13 @@ function draw(){const c=Y.ctx,me=Y.me,dec=lvOf('decor'),sg=lvOf('sign');c.lineJo
  Y.walkers.forEach(w=>D.push([w.x+MH+.9,()=>{const [x,y]=iso(w.x,MH+1.3+(w.dir>0?0:.9));person(c,x,y,w.e,w.ph,true)}]));
  D.push([me.x+me.y,()=>drawMe(c)]);D.push([Y.bd.x+Y.bd.y,()=>drawPy(c)]);
  D.push([MW+1.05-.45,()=>drawSign(c)]);
+ // event props: the delivery scooter at the door, the street musician outside
+ if(evIs('deliv')||(Y.scoot&&Y.t-Y.scoot<1.6))D.push([DELIV.x+12.4,()=>drawScooter(c)]);
+ if(evIs('music'))D.push([5+MH+1.6,()=>{const [x,y]=iso(5,MH+1.6);person(c,x,y,Y.ev.busker,Y.t*2,false);emo(c,'🎸',x+14,y-26,24);
+  for(let k=0;k<3;k++){const p=(Y.t*.7+k/3)%1;c.globalAlpha=1-p;emo(c,k%2?'🎵':'🎶',x+18+Math.sin((p+k)*6)*8,y-60-p*50,18)}c.globalAlpha=1}]);
  D.sort((a,b)=>a[0]-b[0]).forEach(o=>o[1]());
  {const g=guide();if(g){const [x,y]=iso(g[0],g[1]);emo(c,'⬇️',x,y-g[2]+Math.sin(Y.t*6)*5,26)}}
- for(const f of Y.fly){const [ax,ay]=iso(f.from[0],f.from[1]),to=f.to==='me'?iso(me.x,me.y):iso(f.to[0],f.to[1]),k=f.t,x=ax+(to[0]-ax)*k,y=ay-30+(to[1]-50-ay+30)*k-Math.sin(k*Math.PI)*40;dish(c,f.k,x,y,20)}
+ for(const f of Y.fly){const [ax,ay]=iso(f.from[0],f.from[1]),to=f.to==='me'?iso(me.x,me.y):iso(f.to[0],f.to[1]),k=f.t,x=ax+(to[0]-ax)*k,y=ay-30+(to[1]-50-ay+30)*k-Math.sin(k*Math.PI)*40;if(f.k==='apple')emo(c,'🍎',x,y,20);else dish(c,f.k,x,y,20)}
  for(const p of Y.pops){if(p.t<0)continue;const [x,y]=iso(p.x,p.y),a=1-p.t/1.1;c.globalAlpha=a;emo(c,p.txt,x,y-40-p.t*40,20);c.globalAlpha=1}}
 function drawRobot(c,r,i){const R=st().robots[i],[x,y]=iso(r.x+.5,r.y+.5),[,by]=iso(r.x+1,r.y+1);
  box(c,r.x+.1,r.y+.1,.8,.8,30,R&&R.bug?'#ffd6e0':'#dfe7f3','#b4c2da','#9fb0cc');
@@ -5357,16 +5585,25 @@ function drawTable(c,t){const [x,y]=iso(t.x+.5,t.y+.5),tp=img('images/rb-table.w
  if(ok_(tp)){const w=78,h=w*tp.naturalHeight/tp.naturalWidth;c.drawImage(tp,x-w/2,y+8-h,w,h)}
  else{c.fillStyle='#5ab0e6';c.fillRect(x-3,y-18,6,18);c.fillStyle='#ffffff';c.beginPath();c.ellipse(x,y-20,30,15,0,0,TAU);c.fill();c.strokeStyle='#dfe7f3';c.lineWidth=2;c.stroke();c.lineWidth=1}
  Y.diners.filter(d=>d.t===t.i&&d.state==='eat').forEach((d,k)=>{const px=x-9+k*18;c.fillStyle='#ffffff';c.beginPath();c.ellipse(px,y-24,11,4,0,0,TAU);c.fill();if(dishPic(d.item))dish(c,d.item,px,y-32,15);else miniDish(c,MENU[d.item].dish,px,y-24,8)});
- const n=Math.round(t.coinShow);if(n>0){emo(c,'🍎',x+16,y-34,18);label(c,`${n}`,x+16,y-50,'#fff6d0')}}
+ const n=Math.round(t.coinShow);if(n>0){emo(c,'🍎',x+16,y-34,18);label(c,`${n}`,x+16,y-50,'#fff6d0')}
+ // a birthday party: balloons tied to the table and a cake
+ if(Y.diners.some(d=>d.t===t.i&&d.bday&&(d.state==='sit'||d.state==='eat'))){const b=Math.sin(Y.t*2.2)*3;c.strokeStyle='rgba(90,90,90,.5)';c.beginPath();c.moveTo(x-24,y-16);c.lineTo(x-30,y-62+b);c.moveTo(x+24,y-16);c.lineTo(x+30,y-66-b);c.stroke();
+  emo(c,'🎈',x-30,y-76+b,26);emo(c,'🎈',x+30,y-80-b,26);if(!Y.diners.some(d=>d.t===t.i&&d.state==='eat'))emo(c,'🎂',x,y-30,20)}}
+// the delivery rider waiting at the door (and riding off when it ends)
+function drawScooter(c){const off=!evIs('deliv')&&Y.scoot?(Y.t-Y.scoot)*5:0,[x,y]=iso(DELIV.x+.6+off,DELIV.y+2.3);shadow(c,x,y,18);emo(c,'🛵',x,y-22,44);
+ if(evIs('deliv')){const e=Y.ev,by=y-52;c.fillStyle='#ffffff';c.beginPath();c.roundRect(x-32,by-34,64,34,12);c.fill();c.beginPath();c.moveTo(x-5,by);c.lineTo(x+5,by);c.lineTo(x,by+6);c.fill();
+  dish(c,e.dish,x-13,by-17,20);c.font=`900 14px ${TF}`;c.fillStyle='#24304a';c.textAlign='center';c.textBaseline='middle';c.fillText(`${e.got}/${e.need}`,x+15,by-16)}}
 function drawDiner(c,d){const [x,y]=iso(d.x,d.y);
  if(d.state==='sit'||d.state==='eat'){const bob=Math.sin(d.ph*.4),key=CUST_PIC[d.e],pc=key?img(`images/aq-staff-${key}.webp`):null;let ty=y-58;
   if(ok_(pc)){const h=44,w=h*pc.naturalWidth/pc.naturalHeight;c.drawImage(pc,x-w/2,y-6-h-bob,w,h);ty=y-6-h-bob-2}else emo(c,d.e,x,y-40-bob,28);
+  // event guests: the VIP wears a crown above the order, a new-dish guest has a 🆕 tag
+  if(d.vip)emo(c,'👑',x,ty-(d.got||d.mood?30:46)+Math.sin(Y.t*4)*2,22);if(d.special&&!d.got)emo(c,'🆕',x+26,ty-36,16);
   if(d.mood){bubble(c,x,ty,d.mood);return}
   // the order bubble: the menu picture (the same one on the robot's name tag and the menu board) and a patience ring
   if(d.state==='sit'&&!d.got){const m=MENU[d.item],h=34;c.fillStyle='#ffffff';c.beginPath();c.roundRect(x-19,ty-h,38,h,12);c.fill();c.beginPath();c.moveTo(x-5,ty);c.lineTo(x+5,ty);c.lineTo(x,ty+6);c.fill();
    dish(c,d.item,x,ty-h/2,22);const k=Math.min(1,d.wait/150);c.strokeStyle=k<.6?'#33c46b':'#ffb020';c.lineWidth=3;c.beginPath();c.arc(x+19,ty-h+2,6,-Math.PI/2,-Math.PI/2+TAU*(1-k));c.stroke();c.lineWidth=1}
   return}
- person(c,x,y,d.e,d.ph*3,d.walk);if(d.mood)bubble(c,x,y-70,d.mood)}
+ const top=person(c,x,y,d.e,d.ph*3,d.walk);if(d.vip)emo(c,'👑',x,top-6,22);if(d.mood)bubble(c,x,y-70,d.mood)}
 function drawMe(c){const me=Y.me,[x,y]=iso(me.x,me.y),bob=me.moving?Math.abs(Math.sin(me.ph))*2.5:0;shadow(c,x,y,16);const im=Y.im.me;let top;
  if(ok_(im)){legs(c,x,y,me.ph,me.moving,'#2f3d6b','#ffffff');const h=62,w=h*im.naturalWidth/im.naturalHeight;c.save();c.translate(x,0);if(me.dir<0)c.scale(-1,1);c.drawImage(im,-w/2,y-12-h-bob,w,h);c.restore();top=y-12-h-bob}
  else{emo(c,S.av||'🧒',x,y-26-bob,40);top=y-50-bob}
@@ -5392,13 +5629,24 @@ function listen(){const cv=Y.el.cv,on=(t,ev,fn,o)=>{t.addEventListener(ev,fn,o);
  on(cv,'pointerup',up);on(cv,'pointercancel',up);
  on(Y.el.up,'click',()=>{sfx('tap');board()});
  on(Y.el.lv,'click',()=>{sfx('tap');const l=shopLv(),nx=LV[l+1];modal(`<div class="big">${LV[l][1]}</div><h2>${T(LV[l][2])}</h2><p>${L(`대접한 손님 ${st().served}명`,`${st().served} diners served`)}${nx?L(` · 다음 단계까지 ${nx[0]-st().served}명`,` · ${nx[0]-st().served} to the next level`):''}</p><div class="rbmenu">${menuOpen().map(k=>`<div class="rbm"><span class="dish">${MENU[k].dish.map((x,j)=>layerHTML(x,j)).reverse().join('')}</span><b>${MENU[k].e} ${T(MENU[k].name)}</b><small>🍎 ${MENU[k].price}</small></div>`).join('')}</div>`,{cls:'wide'})});
- on(Y.el.card,'click',e=>{const b=e.target.closest('[data-c]');if(!b||!Y)return;if(b.dataset.c==='buy')buy(Y.card.id);else{sfx('tap');closeCard()}});
+ on(Y.el.card,'click',e=>{if(!Y)return;const bb=e.target.closest('[data-bb]');if(bb){if(buyBoost(bb.dataset.bb))openShelf();return}
+  const b=e.target.closest('[data-c]');if(!b)return;const c=b.dataset.c;if(c==='buy')buy(Y.card.id);else{sfx('tap');closeCard();if(c==='school')go('school');else if(c==='bag')openBag()}});
+ on(Y.el.bag,'click',()=>{sfx('tap');openBag()});
+ on(Y.el.ev,'click',e=>{const b=e.target.closest('[data-evgo]');if(!b||!Y||!Y.ev||!Y.ev.go)return;sfx('tap');Y.ev.go.f()});
  const key=e=>{if(!Y||modalOpen()||VIEW!=='home')return;const m={ArrowLeft:'l',ArrowRight:'r',ArrowUp:'u',ArrowDown:'d',a:'l',d:'r',w:'u',s:'d'}[e.key];if(!m||(e.target&&/INPUT|TEXTAREA/.test(e.target.tagName)))return;Y.keys[m]=e.type==='keydown';e.preventDefault()};
  on(window,'keydown',key);on(window,'keyup',key);on(window,'blur',()=>{if(Y)Y.keys={}});
  let rt=0;on(window,'resize',()=>{clearTimeout(rt);rt=setTimeout(resize,100)});
  if(window.ResizeObserver){const ro=new ResizeObserver(()=>resize());ro.observe(cv);Y.on.push([{removeEventListener:()=>ro.disconnect()},'ro',null])}}
-return {open,show,stop,done,robotTap,offerSkill,learnSkill,lessonTask,robotTask,smartTask,listTask,fixTask,dishCode,hasSkill,MENU,LV,shopLv,st,get _y(){return Y},_route:(x,y,f)=>route(x,y,f),_spawn:()=>spawnDiner(),_bug:()=>maybeBug(true),_thing:(x,y)=>thingAt(x,y),
- _serveAll:()=>{if(!Y)return;Y.tables.forEach(t=>serveTable(t,true))}};
+return {open,show,stop,done,robotTap,offerSkill,learnSkill,lessonTask,robotTask,smartTask,listTask,fixTask,dishCode,hasSkill,MENU,LV,shopLv,st,gift,BOOST,get _y(){return Y},_route:(x,y,f)=>route(x,y,f),_spawn:()=>spawnDiner(),_bug:()=>maybeBug(true),_thing:(x,y)=>thingAt(x,y),
+ _serveAll:()=>{if(!Y)return;Y.tables.forEach(t=>serveTable(t,true))},
+ // headless checks: start an event, run a booster (give=true adds one first), read the state, end the event, skip shop time
+ __test:{event:k=>{if(!Y)return 'no shop';if(Y.ev)endEvent(false);return startEvent(k)?'ok':'cannot'},
+  boost:(k,give)=>{if(give)st().boost[k]++;return useBoost(k)},
+  state:()=>{const s=st(),e=Y&&Y.ev;return {ev:e?{kind:e.kind,left:+e.left.toFixed(1),wait:e.wait,n:e.n,goal:e.goal,got:e.got,need:e.need,dish:e.dish,tips:e.tips,go:!!e.go}:null,evNext:Y?+Y.evNext.toFixed(1):null,
+   boost:{...s.boost},run:Object.fromEntries(Object.entries(s.run).map(([k,v])=>[k,+v.toFixed(1)])),cook:+cookSec().toFixed(2),arrive:+arriveSec().toFixed(2),school:schoolN(),lv:shopLv(),served:s.served,apples:S.apples,price:Object.fromEntries(BIDS.map(k=>[k,bPrice(k)])),
+   pads:Y?pads().map(p=>p.id+(p.gated?'@'+p.gated:'')):[],can:UP.filter(u=>canBuy(u[0])).map(u=>u[0]),runT:Y?Math.round(Y.runT):0}},
+  end:win=>{if(Y&&Y.ev)endEvent(!!win)},
+  time:sec=>{if(!Y)return;const e=Y.ev;if(e&&!e.wait&&e.kind!=='newdish')e.left=Math.max(.01,e.left-sec);const run=st().run;for(const k of BIDS)if(run[k]>0)run[k]=Math.max(.01,run[k]-sec);Y.evNext-=sec;if(!e)Y.runT+=sec}}};
 })();
 RENDER.home=()=>RB.show($('v-home'));
 // ================================================================ Little Coding Island · app
@@ -5808,8 +6056,10 @@ function success(code,o={}){if(P.job)return jobDone(code);
  const bonusNow=m.kind==='predict'||m.kind==='choose'?(o.predicted!=null?o.predicted:P.firstPick!=null&&P.order&&P.firstPick===P.picked&&P.tries===0):MISSION.bonusOk(m,code);
  const hadBonus=!first&&S.done[m.id].b;let apples=0,xp=0,newBonus=false;
  if(P.review){reviewDone(bonusNow);return}
- if(first){S.done[m.id]={t:dayKey(),b:false,tries:P.tries,h:P.hints};apples+=3;xp+=10;S.stats.missions++;if(m.kind==='predict'||m.kind==='choose')S.rev[m.id]={b:0,due:addDays(dayKey(),1)}}else xp+=2;
- if(bonusNow&&!hadBonus&&(m.bonus||m.kind==='predict'||m.kind==='choose')){S.done[m.id].b=true;apples+=2;xp+=5;S.stats.bonus++;newBonus=true}
+ if(first){S.done[m.id]={t:dayKey(),b:false,tries:P.tries,h:P.hints};apples+=15;xp+=10;S.stats.missions++;if(m.kind==='predict'||m.kind==='choose')S.rev[m.id]={b:0,due:addDays(dayKey(),1)}}else xp+=2;
+ if(bonusNow&&!hadBonus&&(m.bonus||m.kind==='predict'||m.kind==='choose')){S.done[m.id].b=true;apples+=5;xp+=5;S.stats.bonus++;newBonus=true}
+ // a first clear also sends one random booster to the robot shop's bag (ECONOMY.md)
+ const gift=first&&typeof RB!=='undefined'&&RB.gift?RB.gift():null;
  delete S.drafts[m.id];S.today.n++;markDay();if(first){bumpDaily('lesson');addTickets(1);checkTrophies()}
  if(m.kind==='make'&&first)saveWork({stage:m.stage,code,title:T(m.title),grid:m.grid});
  const w=worldOf(m),wasAll=first&&worldDone(w)===w.missions.length;if(first)S.lastPlace=m.world;
@@ -5822,10 +6072,11 @@ function success(code,o={}){if(P.job)return jobDone(code);
  setTimeout(()=>{if(!P||P.m!==m)return;say(T(m.learn));
   modal(`<div class="big">${pySVG('wow',{cls:'big'})}</div><h2>🎉 ${L('미션 성공!','Mission complete!')}</h2><p class="praise">${esc(praiseText)}</p><div class="learn">💡 ${tx(m.learn)}</div>
    ${apples||xp?`<div class="rew">${apples?`<span>+${apples} 🍎</span>`:''}${first?'<span>+1 🎟️</span>':''}<span>+${xp} XP</span>${newBonus?`<span class="bn">⭐ ${L('도전 성공!','Challenge done!')}</span>`:''}${up?`<span class="bn">🆙 ${L(`레벨 ${S.lvl}!`,`Level ${S.lvl}!`)}</span>`:''}</div>`:''}
+   ${gift?`<div class="rbgift">🎁 ${L('가게 선물','Shop gift')}: ${gift.ic} ${esc(gift.name)}</div>`:''}
    ${m.bonus&&!S.done[m.id].b?`<div class="bonusbox">⭐ <b>${L('도전 미션','Challenge')}</b> ${esc(LANG==='en'?m.bonus.en:m.bonus.ko)}<button class="btn ghost small" type="button" data-act="close">${L('도전해 볼래요','I’ll try')}</button></div>`:''}
    ${typeof coachLine==='function'?coachLine(k):''}
-   <div class="row"><button class="btn ghost" type="button" data-act="again">🔄 ${L('다시 하기','Again')}</button><button class="btn" type="button" data-act="next">${wasAll&&bossOn()?'⚔️ '+L('보스 등장!','Boss time!'):nx?L('다음 미션','Next mission'):L('학교로','To the school')} ▶</button></div>`,
-   {cls:'result',acts:{again:()=>()=>openMission(m.id),next:()=>()=>{if(wasAll)worldComplete(w);else if(nx&&nx.world===m.world)openMission(nx.id);else go('school')}}})},900)}
+   <div class="row"><button class="btn ghost" type="button" data-act="again">🔄 ${L('다시 하기','Again')}</button><button class="btn ghost" type="button" data-act="shop">🍔 ${L('가게로','To the shop')}</button><button class="btn" type="button" data-act="next">${wasAll&&bossOn()?'⚔️ '+L('보스 등장!','Boss time!'):nx?L('다음 미션','Next mission'):L('학교로','To the school')} ▶</button></div>`,
+   {cls:'result',acts:{again:()=>()=>openMission(m.id),shop:()=>()=>go('home'),next:()=>()=>{if(wasAll)worldComplete(w);else if(nx&&nx.world===m.world)openMission(nx.id);else go('school')}}})},900)}
 // a villager request done: pay, thank, and make room for the next visitor
 function jobDone(code){const m=P.m;S.stats.jobs=(S.stats.jobs||0)+1;S.lastJobs=[m.job,...(S.lastJobs||[])].slice(0,4);
  const idx=(S.reqs||[]).findIndex(x=>x.id===m.id);if(idx>=0)S.reqs.splice(idx,1);S.reqAt=now()-60000;delete S.drafts[m.id];

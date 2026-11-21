@@ -3227,7 +3227,11 @@ function loadVoices(){try{voices=speechSynthesis.getVoices().filter(v=>(v.lang||
 if('speechSynthesis' in window){loadVoices();try{speechSynthesis.addEventListener('voiceschanged',loadVoices)}catch(e){}}
 const bestVoice=()=>voices.find(v=>/google|yuna|sora|samantha|ava|allison|natural|premium|enhanced|siri/i.test(v.name))||voices[0]||null;
 // read music words the way people say them: 4/4 → “4분의 4”, p(피아노) → “피아노”, no emoji or symbols
+// Korean instrument names in English lines are written the usual way (gayageum, buk…), which an English voice reads
+// like English words (“buck”, “kuh-wang…”). The voice gets them spelled the way they sound; the screen keeps the usual spelling.
+const KR_SAY={gayageum:'gah-yah-gum',geomungo:'guh-moon-go',haegeum:'heh-gum',daegeum:'deh-gum',danso:'dahn-so',janggu:'jahng-goo',buk:'book',kkwaenggwari:'kweng-gwah-ree',samulnori:'sah-mool-no-ree',kkaeng:'keng'};
 function speakable(t){t=String(t);
+ if(LANG==='en')t=t.replace(/\b(gayageum|geomungo|haegeum|daegeum|danso|janggu|buk|kkwaenggwari|samulnori|kkaeng)\b/gi,m=>{const r=KR_SAY[m.toLowerCase()];return m[0]===m[0].toUpperCase()?r[0].toUpperCase()+r.slice(1):r});
  t=t.replace(/\b(pp|p|mp|mf|f|ff)\s?\(([^)]+)\)/g,'$2').replace(/\(([A-G][♯♭#b]?)\)/g,'').replace(/(\d)\/(\d)/g,L('$2분의 $1','$1 $2')).replace(/“[<>]”\s?/g,'')
   .replace(/♯/g,L(' 샵',' sharp')).replace(/♭/g,L(' 플랫',' flat')).replace(/[·–]/g,' ').replace(/~+/g,'').replace(/W-W-H-W-W-W-H|W-H-W-W-H-W-W/g,'');
  return t.replace(/\p{Extended_Pictographic}|‍|️|[①②③④⭕❌♩♪♫♬]/gu,'').replace(/\s+/g,' ').trim()}

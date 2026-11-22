@@ -5150,34 +5150,54 @@ WORLDS.forEach((w,i)=>{w.name=T(w.name);w.topic=T(w.topic);w.img=`images/sci-wor
  w.boss={...w.boss,name:T(w.boss.name),hi:T(w.boss.hi),lose:T(w.boss.lose),img:`images/sci-boss-${BOSS_IDS[i]}.webp`};
  w.mon={...w.mon,name:T(w.mon.name),hi:T(w.mon.hi),img:`images/sci-mon-${MON_IDS[i]}.webp`}});
 FINAL.name=T(FINAL.name);FINAL.hi=T(FINAL.hi);FINAL.lose=T(FINAL.lose);FINAL.img='images/sci-boss-mixup.webp';
+// Each card sits in a band of grades: 1 = grades 1–2, 2 = grades 3–4, 3 = grades 5–6 (CARD_RAW, the Korean placement).
+// English follows the Ontario curriculum (2022): a card Ontario teaches in a grade of another band moves to that band in
+// English only (card id → band). Card by card reasons: _src/learn/ONTARIO-SCIENCE.md. Korean keeps every card's own band.
+const LV_EN={shtrans:2,glow:2,friction:2,gravity:2,poles:2,magthrough:2,plantparts:2,plantcycle:2,soil:2,sound:2,pitch:2,loud:2,
+ fizz:3,moon:3,tools:1,metamorph:1,evap:1,condense:1,lens:2,photosyn:2,seeds:2,balance:2,strata:2,fossil2:2,
+ airres:3,pushback:3,gas:3,kitchenchem:3,microbe:3,transform:3,climate:3,static:3,planets:3,moonphase:3};
+const LV_LANG=LANG==='en'?LV_EN:{};
 const CARD={},CARDS=[];
-CARD_RAW.forEach(([id,w,lv,ic,title,text,life,safe])=>{const c={id,w,lv,icon:ic,title:T(title),text:T(text),life:T(life),safe:safe?T(safe):''};CARD[id]=c;CARDS.push(c)});
-const QALL=QS.map((q,k)=>({...q,k,l:Math.max(q.l,CARD[q.c].lv)}));
+CARD_RAW.forEach(([id,w,lv,ic,title,text,life,safe])=>{const c={id,w,lv:LV_LANG[id]||lv,lv0:lv,icon:ic,title:T(title),text:T(text),life:T(life),safe:safe?T(safe):''};CARD[id]=c;CARDS.push(c)});
+// A question's level is its own or its card's, whichever is higher. When a card moves down a band, a question at the card's
+// old band (only that high because of the card) comes down with it; one written for a band above the card keeps its level.
+const qLevel=(q,c)=>Math.max(c.lv,q.l===c.lv0&&c.lv<c.lv0?c.lv:q.l);
+const QALL=QS.map((q,k)=>({...q,k,l:qLevel(q,CARD[q.c])}));
 const STAGES=5;
 const SIM_NAMES={compass:['🧭','나침반|Compass'],grid:['🗺️','지도 길 찾기|Map routes'],shadow:['🔦','그림자 실험|Shadow lab'],silhouette:['👤','그림자 맞히기|Whose shadow?'],bus:['🚌','버스 관성 실험|Bus inertia lab'],seesaw:['⚖️','시소 균형|Seesaw balance'],race:['🏁','예상하고 관찰하기|Predict and watch'],magnet:['🧲','자석 뒤집기|Magnet flip'],thermo:['🌡️','온도계|Thermometers'],earth:['🌍','지구 돌리기|Spin the Earth'],thunder:['⚡','천둥 세기|Count the thunder'],pitch:['🎵','소리 실험|Sound lab'],scrub:['🧼','손 씻기 대작전|Hand-washing mission'],indicator:['🧪','지시약 실험|Indicator lab'],flame:['🔥','불꽃 반응|Flame tests'],season:['🌏','계절 실험|Seasons lab'],circuit:['💡','전기 회로|Circuit lab'],water:['♨️','물의 변신|Water changes'],cycle:['🌧️','물의 여행|Water cycle'],layers:['🥛','액체 층 쌓기|Liquid layers'],prism:['🔺','프리즘 실험|Prism lab'],ruler:['📏','자로 재기|Ruler lab'],neutral:['🤝','중화 실험|Neutralization lab'],buoy:['🥚','부력 실험|Buoyancy lab'],fault:['💥','지진 실험|Earthquake lab'],quakemap:['🗺️','지진 지도|Earthquake map']};
 const LABS=[];
 for(const q of QALL){if(q.t!=='sim')continue;let lab=LABS.find(x=>x.id===q.sim);if(!lab){lab={id:q.sim,icon:SIM_NAMES[q.sim][0],name:T(SIM_NAMES[q.sim][1]),w:CARD[q.c].w,items:[]};LABS.push(lab)}lab.w=Math.min(lab.w,CARD[q.c].w);lab.items.push(q)}
 const DIFFS=[null,
  {id:1,icon:'🌱',name:L('1~2학년','Grades 1–2'),sub:L('기초 다지기','The basics'),hearts:4,mon:4,boss:9,fin:12,mult:1,speed:75},
- {id:2,icon:'🌿',name:L('4학년','Grade 4'),sub:L('자석 · 물 · 화산 · 별','Magnets · water · stars'),hearts:3,mon:5,boss:11,fin:14,mult:1.2,speed:60},
+ {id:2,icon:'🌿',name:L('4학년','Grade 4'),sub:L('자석 · 물 · 화산 · 별','Habitats · light · rocks'),hearts:3,mon:5,boss:11,fin:14,mult:1.2,speed:60},
  {id:3,icon:'🌳',name:L('6학년','Grade 6'),sub:L('전기 · 산과 염기 · 지구의 운동','Circuits · flight · space'),hearts:3,mon:6,boss:13,fin:16,mult:1.4,speed:50}];
-// Questions are written in three bands (grades 1–2, 3–4, 5–6). Grade 3 and grade 4 share the middle band, split by the
-// 2022 Korean science curriculum: G4 lists the cards taught in grade 4 (magnets, changes of water, the changing land,
-// microbes, the night sky, ecosystems, gases, climate change) plus middle-band extras that suit grade 4 better.
+// Questions are written in three bands (grades 1–2, 3–4, 5–6). Grade 3 and grade 4 share the middle band, split by G4:
+// the middle-band cards taught in grade 4, plus middle-band extras that suit grade 4 better. A grade 1–2 card in G4 makes
+// its middle-band (level 2) questions grade 4 ones. Korean follows the 2022 Korean science curriculum (magnets, changes of
+// water, the changing land, microbes, the night sky, ecosystems, gases, climate change); English follows Ontario's grade 4
+// strands (habitats and communities, light and sound, machines, rocks, minerals and fossils; see ONTARIO-SCIENCE.md).
 // Grade 3 keeps those cards locked and drops their middle-band questions, mixes in grade 1–2 review, and keeps
 // the grade 1–2 helpers (3 choices, 4 hearts, slower timers, gentler labs). Stored as diff 2 with gentle set.
-const G4=new Set(['dir8','noonshadow','magnetearth','polaris','shsun','straight','mirror','refract','airres','pushback','inertia3','gears',
- 'magmetal','poles','magthrough','magend','heatcond','structure','static','transform','density','buoy',
- 'freeze','evap','condense','heatflow','gas','microbe','acidlife','kitchenchem','flame','foodchain','decomp',
- 'daynight','moonphase','watercycle','climate','moon','planets','nutrient',
- 'volcano','quake','river','igneous','mineral','rocktypes','quakewhy','quakemap']);
-const DIFF_G={id:'g',icon:'🍀',name:L('3학년','Grade 3'),sub:L('힘 · 동식물 · 소리','Forces · life · sound'),hearts:4,mon:4,boss:10,fin:13,mult:1.1,speed:70};
+// G4, G6, CARD[id].lv and QALL[k].l are all built for the page's language, so everything that reads them (cardOk, qOk,
+// cardDiff, ownCard, the question weights, repairMaps' guess, lessons, the shop and the parents' report) follows it.
+const G4=new Set(LANG==='en'?['dir8','noonshadow','polaris','shsun','straight','mirror','refract','shtrans','glow','lens','inertia3','gears',
+  'heatcond','density','buoy','heatflow','flame','acidlife','foodchain','eaters','decomp','habitat','balance','daynight',
+  'sound','pitch','loud','soundtravel','nutrient','river','igneous','mineral','rocktypes','quakewhy','quakemap','strata','fossil2',
+  'shform','shopp','shnear','shlow','shshape','thunder','rainbow','dino','rocks','volcano','quake']
+ :['dir8','noonshadow','magnetearth','polaris','shsun','straight','mirror','refract','airres','pushback','inertia3','gears',
+  'magmetal','poles','magthrough','magend','heatcond','structure','static','transform','density','buoy',
+  'freeze','evap','condense','heatflow','gas','microbe','acidlife','kitchenchem','flame','foodchain','decomp',
+  'daynight','moonphase','watercycle','climate','moon','planets','nutrient',
+  'volcano','quake','river','igneous','mineral','rocktypes','quakewhy','quakemap']);
+const DIFF_G={id:'g',icon:'🍀',name:L('3학년','Grade 3'),sub:L('힘 · 동식물 · 소리','Plants · forces · soil'),hearts:4,mon:4,boss:10,fin:13,mult:1.1,speed:70};
 // The top band (grades 5–6) is split the same way: G6 lists the cards taught in grade 6. Korean follows the 2022
 // curriculum's grade 6 units (acids and bases, motion, plant structure, Earth's motion, seasons, burning, using
 // electricity) plus the hardest extras; English follows Ontario's grade 6 strands (biodiversity, electricity, flight,
-// space) plus the middle-school extras. Grade 5 keeps those cards locked and drops their top-band questions, with more
-// grade 4 review. Stored as diff 3 with gentle set (the lower grade of the band); grade 1–2 helpers stay off.
-const G6=new Set(LANG==='en'?['balance','vertebrate','biodiv','circuit','emag','generate','flight','startrail','sunalt','orbit','constell','space','stars2',
+// space) plus the extras Ontario leaves to grades 7–8 and high school. Grade 5 keeps those cards locked and drops their
+// top-band questions, with more grade 4 review. Stored as diff 3 with gentle set (the lower grade of the band); grade 1–2
+// helpers stay off.
+const G6=new Set(LANG==='en'?['startrail','sunalt','flight','airres','pushback','circuit','emag','generate','static','microbe',
+  'vertebrate','biodiv','orbit','constell','space','stars2','moon','moonphase','planets',
   'density2','buoy2','cell','acidbase','indicators','neutral','acidpower','ph']
  :['startrail','sunalt','speed','flight','circuit','emag','density2','buoy2','acidbase','indicators','neutral','acidpower','ph',
   'burn','change','photosyn','transpire','seeds','cell','orbit','constell']);
@@ -7361,7 +7381,7 @@ function setDiff(k,carry){k=kId(String(k));moveMap(kDiff(String(k)),kLow(k),carr
 repairMaps();
 function openDifficulty(){
  modal(`<h2>🎚️ ${L('난이도','Difficulty')}</h2><p>${L('학년에 맞춰 문제와 실험이 달라져요. 언제든 바꿀 수 있어요.','Questions and labs change to fit your grade. You can switch any time.')}</p>${diffButtons(diffKey(S))}
-  <p class="sub">${L('🌱 1~2학년: 생활 속 과학 기초, 보기 3개·하트 4개<br>🍀 3학년: 힘, 동물과 식물의 생활과 한살이, 물체와 물질, 지구와 바다, 소리 + 1~2학년 복습, 보기 3개·하트 4개<br>🌿 4학년: 자석, 물의 상태 변화, 화산과 지진, 작은 생물, 달과 별, 생태계, 기체, 기후변화 + 3학년 복습, 보기 4개·하트 3개<br>🪴 5학년: 지층과 화석, 빛과 렌즈, 용해와 용액, 우리 몸, 섞인 것 나누기, 날씨, 열의 이동, 에너지 + 4학년 복습, 실험 기회 1번<br>🌳 6학년: 산과 염기, 물체의 운동, 식물의 구조와 기능, 지구의 운동과 계절, 연소, 전기의 이용 + 5학년 복습과 심화, 실험 기회 1번<br>3~6학년 단원은 2022 개정 교육과정을 따라요.<br>📚 학년은 참고용이에요. 학교 진도와 다르면 학교에서 배우는 내용을 먼저 따라 주세요.<br>🗺️ 학년마다 지도가 따로 있어요. 지도 위의 학년 탭으로도 바꿀 수 있어요.','🌱 Grades 1–2: everyday science basics, 3 choices, 4 hearts<br>🍀 Grade 3: forces, how animals and plants live and grow, materials, Earth and the sea, sound, plus grade 1–2 review, 3 choices, 4 hearts<br>🌿 Grade 4: magnets, changes of water, volcanoes and earthquakes, tiny living things, the Moon and stars, ecosystems, gases, climate change, plus grade 3 review, 4 choices, 3 hearts<br>🪴 Grade 5: human organ systems, matter and how it changes, heat, saving energy, weather, rocks and fossils, plants, plus grade 4 review, one try in labs<br>🌳 Grade 6: biodiversity, electricity, flight, space, plus grade 5 review and extras (cells, density, acids and bases), one try in labs<br>Grade 3 and 4 topics follow the Korean national curriculum; grade 5 and 6 topics follow Ontario’s.<br>📚 Grades are only a guide. If your school’s order is different, go with what your school teaches.<br>🗺️ Each grade has its own map. You can also switch with the grade tabs on the map.')}</p>
+  <p class="sub">${L('🌱 1~2학년: 생활 속 과학 기초, 보기 3개·하트 4개<br>🍀 3학년: 힘, 동물과 식물의 생활과 한살이, 물체와 물질, 지구와 바다, 소리 + 1~2학년 복습, 보기 3개·하트 4개<br>🌿 4학년: 자석, 물의 상태 변화, 화산과 지진, 작은 생물, 달과 별, 생태계, 기체, 기후변화 + 3학년 복습, 보기 4개·하트 3개<br>🪴 5학년: 지층과 화석, 빛과 렌즈, 용해와 용액, 우리 몸, 섞인 것 나누기, 날씨, 열의 이동, 에너지 + 4학년 복습, 실험 기회 1번<br>🌳 6학년: 산과 염기, 물체의 운동, 식물의 구조와 기능, 지구의 운동과 계절, 연소, 전기의 이용 + 5학년 복습과 심화, 실험 기회 1번<br>3~6학년 단원은 2022 개정 교육과정을 따라요.<br>📚 학년은 참고용이에요. 학교 진도와 다르면 학교에서 배우는 내용을 먼저 따라 주세요.<br>🗺️ 학년마다 지도가 따로 있어요. 지도 위의 학년 탭으로도 바꿀 수 있어요.','🌱 Grades 1–2: living things and the body, materials, liquids and solids, water and air, simple machines, day and night and the seasons, 3 choices, 4 hearts<br>🍀 Grade 3: plants, forces and magnets, strong structures, soil, plus grade 1–2 review, 3 choices, 4 hearts<br>🌿 Grade 4: habitats and food chains, light and sound, gears and pulleys, rocks, minerals and fossils, plus grade 3 review, 4 choices, 3 hearts<br>🪴 Grade 5: human organ systems, matter and how it changes, energy and climate change, plus extras (weather, mixtures, inside the Earth) and grade 4 review, one try in labs<br>🌳 Grade 6: biodiversity, electricity, flight, space, plus grade 5 review and extras (cells, density, acids and bases), one try in labs<br>The grades follow Ontario’s science and technology curriculum (2022); a few extra topics, like maps and safety, fill out each world.<br>📚 Grades are only a guide. If your school’s order is different, go with what your school teaches.<br>🗺️ Each grade has its own map. You can also switch with the grade tabs on the map.')}</p>
   <p class="sub">${L('틀린 문제가 두 번 이어지면 다음 문제는 조금 쉬워져요.','After two misses in a row, the next question gets a little easier.')}</p>`,
  {acts:Object.fromEntries(GKEYS.map(k=>['d'+k,()=>{setDiff(kId(k))}]))});
 }

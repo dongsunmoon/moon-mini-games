@@ -52,6 +52,9 @@ a{color:inherit}
 .lang button[aria-pressed="true"]{background:var(--brand);color:var(--brand-ink)}
 .lang button:focus-visible,.card:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
 .hello{margin:0 0 14px;color:var(--muted);font-size:14px;font-weight:700}
+.hellorow{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin:0 0 14px}.hellorow .hello{margin:0}
+.ordbtn{font:inherit;font-size:14px;font-weight:800;min-height:44px;padding:0 14px;border:0;border-radius:14px;background:#fff;color:var(--brand);box-shadow:0 3px 0 rgba(63,79,216,.18);cursor:pointer}
+.ordrow{display:flex;align-items:center;gap:10px;background:#f6f7ff;border-radius:16px;padding:6px 8px;margin:6px 0;text-align:left}.ordrow img{width:52px;height:40px;object-fit:cover;border-radius:10px;flex:none}.ordrow b{flex:1;min-width:0;font-size:15px;word-break:keep-all;line-height:1.3}.ordrow .n{width:22px;text-align:center;font-weight:900;color:var(--muted)}.ordrow button{min-width:44px;min-height:44px;border:0;border-radius:12px;background:#fff;font-size:18px;cursor:pointer;box-shadow:0 2px 0 #dfe3f7}.ordrow button:disabled{opacity:.3}
 /* Coach Moon: the maker's character greets the player and cheers on progress since the last visit */
 .coach{display:flex;align-items:flex-end;gap:10px;margin:16px 0 10px}
 .co-pic{flex:0 0 112px;width:112px;height:136px;padding:0;border:0;background:none;cursor:pointer;-webkit-tap-highlight-color:transparent}
@@ -240,7 +243,7 @@ footer{margin-top:22px;text-align:center;color:#8a93b8;font-size:12px}
       <div class="co-stamps" id="coStamps" hidden></div>
     </div>
   </section>
-  <p class="hello" data-en="Tap a card to start right away.">카드를 누르면 바로 시작해요.</p>
+  <div class="hellorow"><p class="hello" data-en="Tap a card to start right away.">카드를 누르면 바로 시작해요.</p><button type="button" class="ordbtn" id="ordBtn" data-en="↕️ Change order">↕️ 순서 바꾸기</button></div>
 
   <main class="games" id="games" aria-label="게임 목록" data-en-aria-label="Games"></main>
 
@@ -361,7 +364,17 @@ const saveProf=()=>setJ(PKEY,PROF);
 const readSave=key=>{const m=me();return getJ(m?key+'@'+m.id:key)};
 // the parents' report opens for the player chosen here
 function renderParent(){const m=me();$('parentCard').href=`report.html?lang=${LANG}${m?'&p='+encodeURIComponent(m.id):''}`}
-function renderGames(){document.getElementById('games').innerHTML=GAMES.map(g=>`
+// ---- game order: each player can put the games in their own order (saved with the profile, or on the device)
+const OKEY=()=>{const m=me();return 'moonGames.order'+(m?'@'+m.id:'')};
+const orderedGames=()=>{const o=getJ(OKEY(),[]);const at=f=>{const i=Array.isArray(o)?o.indexOf(f):-1;return i<0?999+GAMES.findIndex(g=>g.file===f):i};return GAMES.slice().sort((a,b)=>at(a.file)-at(b.file))};
+function orderForm(){let list=orderedGames().map(g=>g.file);const by=f=>GAMES.find(g=>g.file===f);
+ const cover=g=>{const m=String(g.thumb).match(/images\/cover-[\w-]+\.webp/);return m?`<img src="${m[0]}" alt="" onerror="this.remove()">`:''};
+ const draw=box=>{box.querySelector('.ordlist').innerHTML=list.map((f,i)=>{const g=by(f);return `<div class="ordrow"><span class="n">${i+1}</span>${cover(g)}<b>${esc(pick(g.title))}</b><button type="button" data-mv="-1" data-i="${i}" ${i?'':'disabled'} aria-label="${esc(L('위로','Move up'))}">▲</button><button type="button" data-mv="1" data-i="${i}" ${i<list.length-1?'':'disabled'} aria-label="${esc(L('아래로','Move down'))}">▼</button></div>`}).join('')};
+ openP(`<h2>↕️ ${L('게임 순서 바꾸기','Change the game order')}</h2><p>${L('▲▼를 눌러 좋아하는 게임을 위로 올려요.','Tap ▲▼ to move your favourite games to the top.')}${me()?' '+L(`${esc(me().name)}의 순서로 저장돼요.`,`Saved for ${esc(me().name)}.`):''}</p><div class="ordlist"></div>
+  <div class="prow3"><button type="button" class="pbtn ghost" data-o="reset">${L('처음 순서로','Original order')}</button><button type="button" class="pbtn" data-o="done">${L('완료','Done')}</button></div>`,box=>{draw(box);
+  box.addEventListener('click',e=>{const mv=e.target.closest('[data-mv]');if(mv){const i=+mv.dataset.i,j=i+ +mv.dataset.mv;if(j<0||j>=list.length)return;[list[i],list[j]]=[list[j],list[i]];setJ(OKEY(),list);draw(box);const nb=box.querySelector(`[data-i="${j}"][data-mv="${mv.dataset.mv}"]`);(nb&&!nb.disabled?nb:box.querySelector(`[data-i="${j}"]`)).focus();return}
+   const o=e.target.closest('[data-o]');if(!o)return;if(o.dataset.o==='reset'){list=GAMES.map(g=>g.file);try{localStorage.removeItem(OKEY())}catch(x){}draw(box);return}closeP();renderGames()})})}
+function renderGames(){document.getElementById('games').innerHTML=orderedGames().map(g=>`
   <a class="card" href="${esc(g.file)}?lang=${LANG}">
     ${g.thumb}
     <div class="body">
@@ -521,6 +534,7 @@ let picked=false;try{picked=!!sessionStorage.getItem('moonGames.picked')}catch(e
 let coachWait=!!(PROF.list.length&&(!picked||!me()));
 $('who').addEventListener('click',onAct);
 renderWho();renderGames();
+$('ordBtn').addEventListener('click',orderForm);
 if(coachWait)picker();
 applyLang();
 document.querySelectorAll('[data-lang]').forEach(b=>{

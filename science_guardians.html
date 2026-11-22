@@ -369,7 +369,7 @@ main{width:min(980px,100%);margin:0 auto;padding:14px max(12px,env(safe-area-ins
 .foot a{color:#fff}
 
 /* ---------------------------------------------------------------- adventure map */
-.gtabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin:2px 0 10px}
+.gtabs{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;margin:2px 0 10px}
 .gtabs button{border:0;border-radius:14px;min-height:56px;padding:6px 2px;background:rgba(255,255,255,.12);color:#fff;font:inherit;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;cursor:pointer}
 .gtabs button.on{background:#fff;color:#1d2a4a;box-shadow:0 3px 0 rgba(0,0,0,.18)}
 .gtabs span{font-size:20px;line-height:1.1}.gtabs b{font-size:12.5px;font-weight:900;white-space:nowrap}.gtabs small{font-size:12px;font-weight:800;opacity:.85}
@@ -827,8 +827,8 @@ main{width:min(980px,100%);margin:0 auto;padding:14px max(12px,env(safe-area-ins
 .switch::after{content:"";position:absolute;left:4px;top:4px;width:24px;height:24px;border-radius:50%;background:#fff;transition:left .18s;box-shadow:0 2px 4px rgba(0,0,0,.25)}
 .switch.on{background:var(--green)}
 .switch.on::after{left:30px}
-.diffs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}.diffs.four{grid-template-columns:repeat(2,1fr)}.seg{display:inline-flex;background:#eef2fb;border-radius:14px;padding:3px;gap:3px}.seg button{min-height:44px;min-width:76px;border:0;border-radius:11px;background:none;font-weight:900;font-size:15px;color:var(--muted)}.seg button.on{background:#fff;color:var(--ink);box-shadow:0 2px 6px rgba(0,0,0,.12)}.copy{font-size:12.5px;font-weight:800;color:var(--muted);margin:12px 0 0}
-.gentle{background:#fff8d6;border-radius:16px;padding:10px 12px;margin:10px 0;text-align:center}.gentle p{margin:0 0 8px}@media (min-width:560px){.diffs.four{grid-template-columns:repeat(4,1fr)}}
+.diffs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}.diffs.four{grid-template-columns:repeat(2,1fr)}.diffs.five{grid-template-columns:repeat(6,1fr)}.diffs.five button{grid-column:span 2;min-width:0}.diffs.five button:nth-child(n+4){grid-column:span 3}.seg{display:inline-flex;background:#eef2fb;border-radius:14px;padding:3px;gap:3px}.seg button{min-height:44px;min-width:76px;border:0;border-radius:11px;background:none;font-weight:900;font-size:15px;color:var(--muted)}.seg button.on{background:#fff;color:var(--ink);box-shadow:0 2px 6px rgba(0,0,0,.12)}.copy{font-size:12.5px;font-weight:800;color:var(--muted);margin:12px 0 0}
+.gentle{background:#fff8d6;border-radius:16px;padding:10px 12px;margin:10px 0;text-align:center}.gentle p{margin:0 0 8px}@media (min-width:560px){.diffs.four{grid-template-columns:repeat(4,1fr)}.diffs.five{grid-template-columns:repeat(5,1fr)}.diffs.five button,.diffs.five button:nth-child(n+4){grid-column:auto}}
 .diffs button{border:3px solid transparent;border-radius:18px;background:#f3f6ff;padding:10px 4px;display:flex;flex-direction:column;align-items:center;gap:2px;font-weight:900;box-shadow:0 4px 0 #cfdcf2}
 .diffs button span{font-size:30px}
 .diffs button small{font-size:12px;color:var(--muted);font-weight:800}
@@ -5160,7 +5160,7 @@ for(const q of QALL){if(q.t!=='sim')continue;let lab=LABS.find(x=>x.id===q.sim);
 const DIFFS=[null,
  {id:1,icon:'🌱',name:L('1~2학년','Grades 1–2'),sub:L('기초 다지기','The basics'),hearts:4,mon:4,boss:9,fin:12,mult:1,speed:75},
  {id:2,icon:'🌿',name:L('4학년','Grade 4'),sub:L('자석 · 물 · 화산 · 별','Magnets · water · stars'),hearts:3,mon:5,boss:11,fin:14,mult:1.2,speed:60},
- {id:3,icon:'🌳',name:L('5~6학년','Grades 5–6'),sub:L('전기 · 산과 염기 · 우주','Circuits · acids · space'),hearts:3,mon:6,boss:13,fin:16,mult:1.4,speed:50}];
+ {id:3,icon:'🌳',name:L('6학년','Grade 6'),sub:L('전기 · 산과 염기 · 지구의 운동','Circuits · flight · space'),hearts:3,mon:6,boss:13,fin:16,mult:1.4,speed:50}];
 // Questions are written in three bands (grades 1–2, 3–4, 5–6). Grade 3 and grade 4 share the middle band, split by the
 // 2022 Korean science curriculum: G4 lists the cards taught in grade 4 (magnets, changes of water, the changing land,
 // microbes, the night sky, ecosystems, gases, climate change) plus middle-band extras that suit grade 4 better.
@@ -5172,15 +5172,27 @@ const G4=new Set(['dir8','noonshadow','magnetearth','polaris','shsun','straight'
  'daynight','moonphase','watercycle','climate','moon','planets','nutrient',
  'volcano','quake','river','igneous','mineral','rocktypes','quakewhy','quakemap']);
 const DIFF_G={id:'g',icon:'🍀',name:L('3학년','Grade 3'),sub:L('힘 · 동식물 · 소리','Forces · life · sound'),hearts:4,mon:4,boss:10,fin:13,mult:1.1,speed:70};
-const isGentle=p=>!!(p&&p.gentle&&p.diff===2);
-const cardOk=(c,p=S)=>c.lv<=p.diff&&!(isGentle(p)&&c.lv===2&&G4.has(c.id));
-const qOk=(q,p=S)=>q.l<=p.diff&&!(isGentle(p)&&q.l===2&&G4.has(q.c));
-const cardDiff=c=>c.lv===2&&!G4.has(c.id)?DIFF_G:DIFFS[c.lv];
-const diffOf=p=>isGentle(p)?DIFF_G:DIFFS[p.diff]||DIFFS[2];
-const DIFF_LIST=()=>[DIFFS[1],DIFF_G,DIFFS[2],DIFFS[3]];
+// The top band (grades 5–6) is split the same way: G6 lists the cards taught in grade 6. Korean follows the 2022
+// curriculum's grade 6 units (acids and bases, motion, plant structure, Earth's motion, seasons, burning, using
+// electricity) plus the hardest extras; English follows Ontario's grade 6 strands (biodiversity, electricity, flight,
+// space) plus the middle-school extras. Grade 5 keeps those cards locked and drops their top-band questions, with more
+// grade 4 review. Stored as diff 3 with gentle set (the lower grade of the band); grade 1–2 helpers stay off.
+const G6=new Set(LANG==='en'?['balance','vertebrate','biodiv','circuit','emag','generate','flight','startrail','sunalt','orbit','constell','space','stars2',
+  'density2','buoy2','cell','acidbase','indicators','neutral','acidpower','ph']
+ :['startrail','sunalt','speed','flight','circuit','emag','density2','buoy2','acidbase','indicators','neutral','acidpower','ph',
+  'burn','change','photosyn','transpire','seeds','cell','orbit','constell']);
+const DIFF_5={id:'f',icon:'🪴',name:L('5학년','Grade 5'),sub:L('지층 · 용해 · 우리 몸 · 날씨','Body · matter · energy'),hearts:3,mon:5,boss:12,fin:15,mult:1.3,speed:55};
+const isGentle=p=>!!(p&&p.gentle&&p.diff===2),isFive=p=>!!(p&&p.gentle&&p.diff===3);
+const cardOk=(c,p=S)=>c.lv<=p.diff&&!(isGentle(p)&&c.lv===2&&G4.has(c.id))&&!(isFive(p)&&c.lv===3&&G6.has(c.id));
+const qOk=(q,p=S)=>q.l<=p.diff&&!(isGentle(p)&&q.l===2&&G4.has(q.c))&&!(isFive(p)&&q.l===3&&G6.has(q.c));
+const cardDiff=c=>c.lv===2&&!G4.has(c.id)?DIFF_G:c.lv===3&&!G6.has(c.id)?DIFF_5:DIFFS[c.lv];
+const diffOf=p=>isGentle(p)?DIFF_G:isFive(p)?DIFF_5:DIFFS[p.diff]||DIFFS[2];
+const DIFF_LIST=()=>[DIFFS[1],DIFF_G,DIFFS[2],DIFF_5,DIFFS[3]];
+// grade keys: '1' grades 1–2, 'g' grade 3, '2' grade 4, 'f' grade 5, '3' grade 6
+const GKEYS=['1','g','2','f','3'],kDiff=k=>k==='g'?2:k==='f'?3:+k,kLow=k=>k==='g'||k==='f',kId=k=>kLow(k)?k:+k;
 const D=()=>diffOf(S);
 // How often each question level comes up at each difficulty: mostly your own grade, a little review from below
-const LW=[null,[0,1],[0,.7,1.8],[0,.25,1,3]],LW_G=[0,1,1.3];
+const LW=[null,[0,1],[0,.7,1.8],[0,.25,1,3]],LW_G=[0,1,1.3],LW_5=[0,.3,1.3,2.6];
 const TIER=[{icon:'🆕',name:L('새 카드','New')},{icon:'🥉',name:L('브론즈','Bronze')},{icon:'🥈',name:L('실버','Silver')},{icon:'🥇',name:L('골드','Gold')}];
 const tierOf=m=>m>=9?3:m>=5?2:m>=2?1:0;
 const INTERVAL=[1,1,2,4];
@@ -5571,7 +5583,7 @@ function sgReport(){
    const st=!got?0:gold===ids.length?2:1,k={id:kid,name:two(kn),st,p:st===2?1:Math.round(pts/(9*ids.length)*100)/100};
    if(r||w){k.r=r;k.w=w}if(ksch)k.school=two(ksch);skills.push(k);info.push({k,last,got})}
   if(skills.length){const a={id:aid,name:two(an),icon,skills};if(asch)a.school=two(asch);areas.push(a)}}
- const level=isGentle(S)?['3학년','Grade 3']:S.diff===1?['1~2학년','Grades 1–2']:S.diff===3?['5~6학년','Grades 5–6']:['4학년','Grade 4'];
+ const level=isGentle(S)?['3학년','Grade 3']:isFive(S)?['5학년','Grade 5']:S.diff===1?['1~2학년','Grades 1–2']:S.diff===3?['6학년','Grade 6']:['4학년','Grade 4'];
  const ok=CARDS.filter(c=>cardOk(c)),got=ok.filter(c=>S.cards[c.id]).length,gold=goldCards(),bw=S.bossWins.length,stk=stkCount(),served=S.shopX&&S.shopX.served||0,facts=[];
  if(got)facts.push(['📚',`배운 과학 카드 ${got}장 (이 학년 단계 ${ok.length}장 중)`,`${got} of ${ok.length} science cards learned at this level`]);
  if(gold)facts.push(['🥇',`완전히 익힌 골드 카드 ${gold}장`,`${pl(gold,'card')} mastered (gold)`]);
@@ -5592,7 +5604,7 @@ function sgReport(){
  if(rl.weak.length)next.push([`틀렸던 카드 ${rl.weak.length}장 다시 풀기 (복습 몬스터)`,`Retry ${pl(rl.weak.length,'missed card')} (review monsters)`]);
  if(rl.due.length)next.push([`복습할 때가 된 카드 ${rl.due.length}장`,`${pl(rl.due.length,'card')} due for review`]);
  const low=all.filter(k=>k.st===1).sort((a,b)=>a.p-b.p)[0];
- if(all.length&&all.every(k=>k.st===2)&&S.diff<3)next.push(['설정에서 다음 학년 단계로 올려 보기','Try the next grade level in Settings']);
+ if(all.length&&all.every(k=>k.st===2)&&(S.diff<3||isFive(S)))next.push(['설정에서 다음 학년 단계로 올려 보기','Try the next grade level in Settings']);
  else if(low)next.push([`더 연습하면 좋은 주제: ${low.name[0]}`,`Worth more practice: ${low.name[1]}`]);
  return {v:1,level,
   focus:['빛과 그림자, 힘, 자석과 전기, 물질, 동식물과 우리 몸, 날씨와 우주, 흙과 화석 같은 초등 과학 개념과 생활 안전을 과학 가게 놀이와 카드 설명으로 배우고, 퀴즈 대결과 실험 문제로 확인해요. 틀린 카드는 나중에 다시 나와 복습해요.','Elementary science (light and shadows, forces, magnets and electricity, matter, plants, animals and the body, weather and space, rocks and fossils) and everyday safety, learned through a pretend science shop and short card lessons, then checked with quiz battles and lab puzzles. Missed cards come back later for review.'],
@@ -5905,7 +5917,7 @@ function renderMap(){
 let cardsFrom='home',cardsWorld=0;
 $('v-map').addEventListener('click',e=>{
  const gt=e.target.closest('[data-grade]');
- if(gt){const k=gt.dataset.grade;if(k!==gradeOf(S.diff,!!S.gentle)){SFX.click();setDiff(k==='g'?'g':+k)}return}
+ if(gt){const k=gt.dataset.grade;if(k!==gradeOf(S.diff,!!S.gentle)){SFX.click();setDiff(kId(k))}return}
  const cp=e.target.closest('[data-world]'),st=e.target.closest('[data-stage]'),bs=e.target.closest('[data-boss]'),cd=e.target.closest('[data-cards]'),fn=e.target.closest('[data-final]');
  if(cp){SFX.click();const i=+cp.dataset.world;if(!worldOpen(i)){toast('🔒 '+L('이전 지역의 보스를 이기면 열려요!','Beat the previous boss to open this world!'));return}mapWorld=i;S.lastWorld=i;save();renderMap();return}
  if(fn){if(!finalOpen()){toast('🔒 '+L(`${WORLDS.length}개 지역의 보스를 모두 이기면 나타나요!`,`Appears after you beat all ${WORLDS.length} bosses!`));return}SFX.click();finalIntro();return}
@@ -6831,10 +6843,11 @@ const foeFace=()=>PS&&PS.foe?pic(PS.foe.img,PS.foe.icon):pic(FINAL.img,FINAL.ico
 // Each stage teaches a quarter of every level's cards, so harder cards show up from the first stage
 // each grade's map teaches that grade's own cards stage by stage (grade 3 and grade 4 split the middle band by G4);
 // the cards of the grades below come back as review, and a world with no cards of its own reviews them all
-const ownCard=c=>{const k=gradeOf(S.diff,!!S.gentle);return k==='1'?c.lv===1:k==='g'?c.lv===2&&!G4.has(c.id):k==='2'?c.lv===2&&G4.has(c.id):c.lv===3};
+const ownCard=c=>{const k=gradeOf(S.diff,!!S.gentle);return k==='1'?c.lv===1:k==='g'?c.lv===2&&!G4.has(c.id):k==='2'?c.lv===2&&G4.has(c.id):k==='f'?c.lv===3&&!G6.has(c.id):c.lv===3&&G6.has(c.id)};
 function stageFocus(w,s){
  const cs=availCards(w),A=cs.map(c=>c.id),own=cs.filter(ownCard).map(c=>c.id),
-  chunk=own.length?i=>own.slice(Math.round(i*own.length/4),Math.round((i+1)*own.length/4)):i=>[1,2,3].flatMap(lv=>{const g=cs.filter(c=>c.lv===lv).map(c=>c.id),n=g.length;return g.slice(Math.round(i*n/4),Math.round((i+1)*n/4))});
+  band=own.length?own:S.diff===3?cs.filter(c=>c.lv===3).map(c=>c.id):[],   // grade 6 in a place with no grade-6 card: the place's grade-5 cards
+  chunk=band.length?i=>band.slice(Math.round(i*band.length/4),Math.round((i+1)*band.length/4)):i=>[1,2,3].flatMap(lv=>{const g=cs.filter(c=>c.lv===lv).map(c=>c.id),n=g.length;return g.slice(Math.round(i*n/4),Math.round((i+1)*n/4))});
  if(s>=4)return {focus:A,fresh:[]};
  const nw=chunk(s),prev=s>0?chunk(s-1):[];return {focus:[...nw,...prev].length?[...nw,...prev]:A,fresh:nw};
 }
@@ -6906,10 +6919,10 @@ function pickItem(){
  let pool=PS.pool.filter(q=>!PS.used.has(q.k));
  if(!pool.length){PS.used.clear();pool=PS.pool.slice()}
  const rage=PS.foe&&PS.foe.boss&&PS.hp<=PS.maxHp/2&&!PS.rageDone;
- const lw=isGentle(S)?LW_G:LW[S.diff],low=Math.min(...pool.map(q=>q.l));
- const g4=S.diff===2&&!isGentle(S);
+ const lw=isGentle(S)?LW_G:isFive(S)?LW_5:LW[S.diff],low=Math.min(...pool.map(q=>q.l));
+ const g4=S.diff===2&&!isGentle(S),g6=S.diff===3&&!isFive(S);
  const acc=S.acc==null?.8:S.acc;
- const w=pool.map(q=>{let x=1;x*=lw[q.l]||1;if(acc<.7){x*=q.l===low?1.8:.55;if(q.t==='ox'||q.t==='mc')x*=1.3}else if(acc>.92&&q.l>low)x*=1.3;if(g4&&q.l===2&&G4.has(q.c))x*=1.4;if(q.l>low){if((PS.miss||0)>=2)x*=.3;else if(PS.combo>=4)x*=1.3}if(S.weak[q.c])x*=2.2;if(PS.fresh&&PS.fresh.includes(q.c))x*=1.5;if(q.t==='sim')x*=rage?5:1.5;if(q.t===PS.lastT)x*=.25;if(q.c===PS.lastC)x*=.35;x/=1+.35*(S.seenQ[q.k]||0);if(PS.mode==='review'&&S.weak[q.c])x*=2;return x});
+ const w=pool.map(q=>{let x=1;x*=lw[q.l]||1;if(acc<.7){x*=q.l===low?1.8:.55;if(q.t==='ox'||q.t==='mc')x*=1.3}else if(acc>.92&&q.l>low)x*=1.3;if(g4&&q.l===2&&G4.has(q.c))x*=1.4;if(g6&&q.l===3&&G6.has(q.c))x*=1.4;if(q.l>low){if((PS.miss||0)>=2)x*=.3;else if(PS.combo>=4)x*=1.3}if(S.weak[q.c])x*=2.2;if(PS.fresh&&PS.fresh.includes(q.c))x*=1.5;if(q.t==='sim')x*=rage?5:1.5;if(q.t===PS.lastT)x*=.25;if(q.c===PS.lastC)x*=.35;x/=1+.35*(S.seenQ[q.k]||0);if(PS.mode==='review'&&S.weak[q.c])x*=2;return x});
  let r=Math.random()*w.reduce((a,b)=>a+b,0);for(let i=0;i<pool.length;i++){r-=w[i];if(r<=0){if(rage&&pool[i].t==='sim')PS.rageDone=true;return pool[i]}}return pool[pool.length-1];
 }
 function renderPlay(){
@@ -7158,7 +7171,7 @@ function finish(){
  {closable:false,acts:{relearn:()=>()=>chestThen(P,stars,()=>shopOpen(missedCards(P),()=>go(backView2(P)),{mode:'review',grad:P.grad})),next:()=>()=>chestThen(P,stars,()=>next.fn()),out:()=>()=>chestThen(P,stars,()=>go(backView2(P))),again:()=>()=>chestThen(P,stars,()=>retry(P)),up:b=>{setDiff('g');S.easyRun=0;save();b.closest('.gentle').innerHTML=`<p>🍀 ${L('3학년으로 바꿨어요! 다음 판부터 새 문제가 나와요.','Switched to Grade 3! New questions from the next battle.')}</p>`;return false}},onOpen:b=>{if(P.mode==='stage')b.querySelectorAll('.bigstars span').forEach((s,i)=>{if(i<stars)setTimeout(()=>{s.classList.add('in');SFX.star(i)},300+i*260)});if(r.coins)setTimeout(()=>flyCoins(b.querySelector('.rewards'),r.coins),500);speak(title+' '+(P.foe.lose||''))}});
  if(P.firstFinal)modal(`<div class="cert"><div class="ct">🏅 ${L('과학 수호대 수료증','Science Guardian Certificate')}</div><div class="cn">${avatarHTML()}<b>${esc(S.name)}</b></div>
   <p>${L(`위 대원은 진짜 과학으로 헷갈 박사를 막고 ${WORLDS.length}개 지역을 모두 지켜 냈기에 이 수료증을 드립니다.`,`For stopping Dr. Mix-Up with real science and protecting all ${WORLDS.length} worlds, this certificate is proudly given to the guardian above.`)}</p>
-  <div class="cd">${dayKey()} · ${D().icon} ${esc(D().name)}</div></div>${coachLine('big')}<p>${S.diff===3?L('이제 모든 카드를 골드로 만들어 보세요!','Next, turn every card gold!'):L('이제 다음 학년 단계에도 도전해 보세요!','Next, try the next grade up!')}</p><div class="row"><button class="btn gold" type="button" data-act="close">🎉 ${L('만세!','Hooray!')}</button></div>`,{onOpen:()=>{celebrate('fireworks');speak(L('축하해요! 진짜 과학 수호대가 되었어요!','Congratulations! You are a true Science Guardian!'))}});
+  <div class="cd">${dayKey()} · ${D().icon} ${esc(D().name)}</div></div>${coachLine('big')}<p>${S.diff===3&&!isFive(S)?L('이제 모든 카드를 골드로 만들어 보세요!','Next, turn every card gold!'):L('이제 다음 학년 단계에도 도전해 보세요!','Next, try the next grade up!')}</p><div class="row"><button class="btn gold" type="button" data-act="close">🎉 ${L('만세!','Hooray!')}</button></div>`,{onOpen:()=>{celebrate('fireworks');speak(L('축하해요! 진짜 과학 수호대가 되었어요!','Congratulations! You are a true Science Guardian!'))}});
  levelModals(r.levels);checkTrophies();save();
 }
 const backView2=P=>P.mode==='stage'||P.mode==='boss'||P.mode==='final'?'map':P.mode==='card'?'cards':'home';
@@ -7305,12 +7318,12 @@ function openAlbum(w,then){if(w!=null)albumW=w;const ws=openWorldIds();
 }
 
 // ---------------------------------------------------------------- players, difficulty, settings
-function diffButtons(cur){return `<div class="diffs four">${DIFF_LIST().map(d=>`<button type="button" data-act="d${d.id}" class="${d.id===cur?'on':''}"><span>${d.icon}</span><b>${esc(d.name)}</b><small>${esc(d.sub)}</small></button>`).join('')}</div>`}
-const diffKey=p=>isGentle(p)?'g':p.diff;
+function diffButtons(cur){return `<div class="diffs five">${DIFF_LIST().map(d=>`<button type="button" data-act="d${d.id}" class="${d.id===cur?'on':''}"><span>${d.icon}</span><b>${esc(d.name)}</b><small>${esc(d.sub)}</small></button>`).join('')}</div>`}
+const diffKey=p=>isGentle(p)?'g':isFive(p)?'f':p.diff;
 // map progress (stars, bosses beaten, the final, the world last opened) belongs to one school grade: changing grade
 // puts the old grade's map away in S.mapBy and brings back the new grade's (empty the first time). carry keeps the
 // current map for the new grade (the one-time "pick your grade" question for saves made before grades were split).
-const gradeOf=(diff,gentle)=>gentle&&diff===2?'g':String(diff);
+const gradeOf=(diff,gentle)=>gentle&&diff===2?'g':gentle&&diff===3?'f':String(diff);
 function moveMap(diff,gentle,carry){
  const from=gradeOf(S.diff,!!S.gentle),to=gradeOf(diff,gentle);
  if(from===to)return;
@@ -7330,27 +7343,27 @@ function repairMaps(){
  const cur=gradeOf(S.diff,!!S.gentle),maps={...(S.mapBy||{})};maps[cur]={stars:S.stars,bossWins:S.bossWins,finalWin:S.finalWin,lastWorld:S.lastWorld};
  const full=Object.keys(maps).filter(k=>Object.keys(maps[k].stars||{}).length||(maps[k].bossWins||[]).length);
  if(full.length!==1){S.mapFix=1;save();return}
- const from=full[0],old=maps[from],n={'1':0,g:0,'2':0,'3':0};
- for(const k in S.seenQ||{}){const q=QALL[k];if(q)n[q.l>=3?'3':q.l===2?(G4.has(q.c)?'2':'g'):'1']+=S.seenQ[k]}
- const tot=n['1']+n.g+n['2']+n['3'],guess=['3','2','g','1'].find(k=>n[k]>=10&&n[k]>=tot*.15)||from;
+ const from=full[0],old=maps[from],n={'1':0,g:0,'2':0,f:0,'3':0};
+ for(const k in S.seenQ||{}){const q=QALL[k];if(q)n[q.l>=3?'3':q.l===2?(G4.has(q.c)?'2':'g'):'1']+=S.seenQ[k]}   // an old grade 5–6 map had both, so it suggests the band's top (where it already is)
+ const tot=n['1']+n.g+n['2']+n.f+n['3'],guess=['3','f','2','g','1'].find(k=>n[k]>=10&&n[k]>=tot*.15)||from;
  const stars=Object.values(old.stars||{}).reduce((x,y)=>x+y,0),boss=(old.bossWins||[]).length;
  const to=k=>{S.mapFix=1;
   if(k!==from){maps[k]=old;maps[from]={};const m=maps[k];delete maps[k];
    S.stars=m.stars||{};S.bossWins=m.bossWins||[];S.finalWin=!!m.finalWin;S.lastWorld=m.lastWorld||0;S.mapBy=maps;mapWorld=S.lastWorld}
   else if(from!==cur){const m=maps[from];delete maps[from];S.stars=m.stars||{};S.bossWins=m.bossWins||[];S.finalWin=!!m.finalWin;S.lastWorld=m.lastWorld||0;S.mapBy=maps;mapWorld=S.lastWorld}
-  S.diff=k==='g'?2:+k;S.gentle=k==='g';S.gentleOffered=S.gradeSplit=true;save();updateHud();
+  S.diff=kDiff(k);S.gentle=kLow(k);S.gentleOffered=S.gradeSplit=S.gradeSplit56=true;save();updateHud();
   if(VIEW==='home')renderHome();else if(VIEW==='map')renderMap();toast(`🗺️ ${diffOf(S).icon} ${diffOf(S).name}`)};
  setTimeout(()=>modal(`<div style="font-size:56px">🗺️</div><h2>${L('학년마다 지도가 따로 생겼어요!','Each grade has its own map now!')}</h2>
-  <p>${L(`지금까지 모은 지도 기록(⭐ ${stars}개, 보스 ${boss}마리)은 몇 학년 때 한 거예요? 고른 학년의 지도로 옮겨요.`,`Which grade did you play your map so far in (⭐ ${stars}, ${boss} boss${boss===1?'':'es'})? It will move to that grade’s map.`)}</p>${diffButtons(guess==='g'?'g':+guess)}`,
-  {closable:false,acts:Object.fromEntries(['1','g','2','3'].map(k=>['d'+k,()=>{to(k)}]))}),900);
+  <p>${L(`지금까지 모은 지도 기록(⭐ ${stars}개, 보스 ${boss}마리)은 몇 학년 때 한 거예요? 고른 학년의 지도로 옮겨요.`,`Which grade did you play your map so far in (⭐ ${stars}, ${boss} boss${boss===1?'':'es'})? It will move to that grade’s map.`)}</p>${diffButtons(kId(guess))}`,
+  {closable:false,acts:Object.fromEntries(GKEYS.map(k=>['d'+k,()=>{to(k)}]))}),900);
 }
-function setDiff(k,carry){moveMap(k==='g'?2:k,k==='g',carry);S.diff=k==='g'?2:k;S.gentle=k==='g';S.gentleOffered=S.gradeSplit=true;save();const d=D();toast(`${d.icon} ${d.name}`);updateHud();if(VIEW==='home')renderHome();else if(VIEW==='map')renderMap();else if(VIEW==='cards')renderCards()}
+function setDiff(k,carry){k=kId(String(k));moveMap(kDiff(String(k)),kLow(k),carry);S.diff=kDiff(String(k));S.gentle=kLow(k);S.gentleOffered=S.gradeSplit=S.gradeSplit56=true;save();const d=D();toast(`${d.icon} ${d.name}`);updateHud();if(VIEW==='home')renderHome();else if(VIEW==='map')renderMap();else if(VIEW==='cards')renderCards()}
 repairMaps();
 function openDifficulty(){
  modal(`<h2>🎚️ ${L('난이도','Difficulty')}</h2><p>${L('학년에 맞춰 문제와 실험이 달라져요. 언제든 바꿀 수 있어요.','Questions and labs change to fit your grade. You can switch any time.')}</p>${diffButtons(diffKey(S))}
-  <p class="sub">${L('🌱 1~2학년: 생활 속 과학 기초, 보기 3개·하트 4개<br>🍀 3학년: 힘, 동물과 식물의 생활과 한살이, 물체와 물질, 지구와 바다, 소리 + 1~2학년 복습, 보기 3개·하트 4개<br>🌿 4학년: 자석, 물의 상태 변화, 화산과 지진, 작은 생물, 달과 별, 생태계, 기체, 기후변화 + 3학년 복습, 보기 4개·하트 3개<br>🌳 5~6학년: 5~6학년 내용, 실험 기회 1번<br>3·4학년 단원은 2022 개정 교육과정을 따라요.<br>🗺️ 학년마다 지도가 따로 있어요. 지도 위의 학년 탭으로도 바꿀 수 있어요.','🌱 Grades 1–2: everyday science basics, 3 choices, 4 hearts<br>🍀 Grade 3: forces, how animals and plants live and grow, materials, Earth and the sea, sound, plus grade 1–2 review, 3 choices, 4 hearts<br>🌿 Grade 4: magnets, changes of water, volcanoes and earthquakes, tiny living things, the Moon and stars, ecosystems, gases, climate change, plus grade 3 review, 4 choices, 3 hearts<br>🌳 Grades 5–6: grade 5–6 ideas, one try in labs<br>Grade 3 and 4 topics follow the Korean national curriculum.<br>🗺️ Each grade has its own map. You can also switch with the grade tabs on the map.')}</p>
+  <p class="sub">${L('🌱 1~2학년: 생활 속 과학 기초, 보기 3개·하트 4개<br>🍀 3학년: 힘, 동물과 식물의 생활과 한살이, 물체와 물질, 지구와 바다, 소리 + 1~2학년 복습, 보기 3개·하트 4개<br>🌿 4학년: 자석, 물의 상태 변화, 화산과 지진, 작은 생물, 달과 별, 생태계, 기체, 기후변화 + 3학년 복습, 보기 4개·하트 3개<br>🪴 5학년: 지층과 화석, 빛과 렌즈, 용해와 용액, 우리 몸, 섞인 것 나누기, 날씨, 열의 이동, 에너지 + 4학년 복습, 실험 기회 1번<br>🌳 6학년: 산과 염기, 물체의 운동, 식물의 구조와 기능, 지구의 운동과 계절, 연소, 전기의 이용 + 5학년 복습과 심화, 실험 기회 1번<br>3~6학년 단원은 2022 개정 교육과정을 따라요.<br>🗺️ 학년마다 지도가 따로 있어요. 지도 위의 학년 탭으로도 바꿀 수 있어요.','🌱 Grades 1–2: everyday science basics, 3 choices, 4 hearts<br>🍀 Grade 3: forces, how animals and plants live and grow, materials, Earth and the sea, sound, plus grade 1–2 review, 3 choices, 4 hearts<br>🌿 Grade 4: magnets, changes of water, volcanoes and earthquakes, tiny living things, the Moon and stars, ecosystems, gases, climate change, plus grade 3 review, 4 choices, 3 hearts<br>🪴 Grade 5: human organ systems, matter and how it changes, heat, saving energy, weather, rocks and fossils, plants, plus grade 4 review, one try in labs<br>🌳 Grade 6: biodiversity, electricity, flight, space, plus grade 5 review and extras (cells, density, acids and bases), one try in labs<br>Grade 3 and 4 topics follow the Korean national curriculum; grade 5 and 6 topics follow Ontario’s.<br>🗺️ Each grade has its own map. You can also switch with the grade tabs on the map.')}</p>
   <p class="sub">${L('틀린 문제가 두 번 이어지면 다음 문제는 조금 쉬워져요.','After two misses in a row, the next question gets a little easier.')}</p>`,
- {acts:Object.fromEntries(['1','g','2','3'].map(k=>['d'+k,()=>{setDiff(k==='g'?'g':+k)}]))});
+ {acts:Object.fromEntries(GKEYS.map(k=>['d'+k,()=>{setDiff(kId(k))}]))});
 }
 function playerForm(p,{isNew}){
  let av=p.av,diff=diffKey(p);
@@ -7361,11 +7374,11 @@ function playerForm(p,{isNew}){
   <div class="row">${!isNew&&ROOT.order.length>1&&!MGP.me?`<button class="btn small red" type="button" data-act="del">🗑️ ${L('삭제','Delete')}</button>`:''}<button class="btn green" type="button" data-act="ok">${isNew?L('시작!','Start!'):L('저장','Save')}</button></div>`,
  {closable:!(isNew&&!S.intro&&ROOT.order.length===1),acts:{
   av:b=>{av=b.dataset.a;document.querySelectorAll('.avs button').forEach(x=>x.classList.toggle('on',x===b));return false},
-  ...Object.fromEntries(['1','g','2','3'].map(k=>['d'+k,b=>{diff=k==='g'?'g':+k;b.parentElement.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));return false}])),
+  ...Object.fromEntries(GKEYS.map(k=>['d'+k,b=>{diff=kId(k);b.parentElement.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));return false}])),
   del:b=>{if(!b.dataset.arm){b.dataset.arm=1;b.textContent=L('정말요? 한 번 더','Really? Tap again');return false}const id=ROOT.cur;delete ROOT.P[id];ROOT.order=ROOT.order.filter(x=>x!==id);ROOT.cur=ROOT.order[0];S=merge(ROOT.P[ROOT.cur]);save();go('home');return},
   ok:()=>{const name=MGP.me?MGP.me.name:($('pName').value||'').trim()||p.name;if(MGP.me)av=MGP.me.av;
    if(isNew&&p!==S){save();const id='p'+Date.now().toString(36);ROOT.order.push(id);ROOT.cur=id;S=fresh();}
-   S.name=name;S.av=av;moveMap(diff==='g'?2:diff,diff==='g');S.diff=diff==='g'?2:diff;S.gentle=diff==='g';S.gentleOffered=S.gradeSplit=S.shopIntro=true;save();updateHud();
+   S.name=name;S.av=av;moveMap(kDiff(String(diff)),kLow(diff));S.diff=kDiff(String(diff));S.gentle=kLow(diff);S.gentleOffered=S.gradeSplit=S.gradeSplit56=S.shopIntro=true;save();updateHud();
    if(VIEW==='home')renderHome();
    if(!S.intro)return ()=>introStory();go('home')}}});
 }
@@ -7428,7 +7441,9 @@ applyLang();updateHud();ensureMissions();quietTrophies();$('homeLink').href='ind
 go('home');
 if(!S.intro)playerForm(S,{isNew:true});
 else if(S.diff<=2&&!isGentle(S)&&!S.gradeSplit){S.gentleOffered=S.gradeSplit=true;save();modal(`<div style="font-size:56px">🎒</div><h2>${L('이제 학년별로 골라요','Pick your school grade')}</h2><p>${L('3학년과 4학년 문제가 따로 나뉘었어요. 학교에서 배우는 내용에 꼭 맞게 나와요. 몇 학년이에요?','Grade 3 and grade 4 questions are now separate, so they match what you learn at school. Which grade are you in?')}</p>${diffButtons(diffKey(S))}
-  <div class="row"><button class="btn green" type="button" data-act="close">${L('이대로 할래요','Keep this one')}</button></div>`,{acts:Object.fromEntries(['1','g','2','3'].map(k=>['d'+k,()=>{setDiff(k==='g'?'g':+k,true)}]))})}
+  <div class="row"><button class="btn green" type="button" data-act="close">${L('이대로 할래요','Keep this one')}</button></div>`,{acts:Object.fromEntries(GKEYS.map(k=>['d'+k,()=>{setDiff(kId(k),true)}]))})}
+else if(S.diff===3&&!S.gentle&&!S.gradeSplit56&&S.mapFix){S.gradeSplit56=true;save();modal(`<div style="font-size:56px">🎒</div><h2>${L('5학년과 6학년이 나뉘었어요','Grades 5 and 6 are now separate')}</h2><p>${L('학교에서 배우는 내용에 꼭 맞게 나와요. 몇 학년이에요? 지금까지 모은 지도 기록은 고른 학년으로 옮겨요.','They now match what you learn at school. Which grade are you in? Your map so far moves to the grade you pick.')}</p>${diffButtons(diffKey(S))}
+  <div class="row"><button class="btn green" type="button" data-act="close">${L('이대로 할래요','Keep this one')}</button></div>`,{acts:Object.fromEntries(GKEYS.map(k=>['d'+k,()=>{setDiff(kId(k),true)}]))})}
 else{if(ROOT.order.length>1)toast(`${esc(S.av)} ${esc(L(`${S.name} 대원으로 시작해요. 얼굴을 누르면 바꿀 수 있어요`,`Playing as ${S.name}. Tap the face to switch`))}`);dailyLogin()}
 if(S.intro&&!S.shopIntro){S.shopIntro=true;save();modal(`<div style="font-size:64px">🏪</div><h2>${L('과학 가게를 열었어요!','You opened a science store!')}</h2><p>${L('이제 하루하루 가게를 열어요. 손님 주문을 보고 알맞은 선반에서 물건을 골라 계산대에서 건네요. 손님을 도우며 과학을 배우고 동전도 벌어요! 문 닫을 시간이 되면 몬스터가 쳐들어오니, 배운 걸로 물리쳐요.','Open your store day by day. Read each order, pick the right things from the shelves and hand them over at the counter. Learn science while you earn coins! At closing time a monster bursts in, so beat it with what you learned.')}</p>
   <div class="row"><button class="btn ghost" type="button" data-act="close">${L('나중에','Later')}</button><button class="btn gold" type="button" data-act="store">🏪 ${L('가게 열기','Open the store')}</button></div>`,{acts:{store:()=>()=>goNext()}})}

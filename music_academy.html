@@ -889,7 +889,7 @@ button.setrow{flex-wrap:nowrap}
 .opt.right.glow{animation:optglow 1s 3}
 @keyframes optglow{50%{box-shadow:0 4px 0 #5fc98a,0 0 0 5px #9fe8b9}}
 .qhelp,.kt-help{display:flex;justify-content:center;margin-top:10px}
-.kt-help{margin:4px 0 0}
+.kt-help{margin:4px 0 0;min-height:48px;align-items:center} /* keeps its height when the 🤔 button goes, so the keys below never jump */
 .kt-fb{min-height:24px;line-height:1.4}
 .pk.tried{background:linear-gradient(180deg,#fff,#ffe3ee)!important}
 .pk.b.tried{background:#a05c8a!important}

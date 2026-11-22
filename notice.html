@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#5b6cff">
-<title>보호자 안내 | Moon Mini Games</title>
-<meta name="description" content="문 미니 게임의 안전, 개인정보, 저작권 안내 · Safety, privacy and credits for Moon Mini Games">
+<title>보호자 안내 | 문코치</title>
+<meta name="description" content="문코치의 안전, 개인정보, 저작권 안내 · Safety, privacy and credits for Coach Moon">
 <link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32.png">
 <link rel="icon" type="image/png" sizes="64x64" href="images/favicon-64.png">
 <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
@@ -135,7 +135,7 @@ const S=[
    '“Python”은 Python Software Foundation(PSF)의 등록 상표예요. 꼬마 코딩 섬은 파이썬 언어를 가르치려고 이름을 쓸 뿐이며, PSF와 관계가 없고 PSF의 보증을 받지 않았어요.',
    '“Python” is a registered trademark of the Python Software Foundation (PSF). Little Coding Island uses the name only to teach the Python language and isn’t affiliated with or endorsed by the PSF.']]}];
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-document.title=L('보호자 안내 | 문 미니 게임','For grown-ups | Moon Mini Games');
+document.title=L('보호자 안내 | 문코치','For grown-ups | Coach Moon');
 document.getElementById('home').href='index.html?lang='+LANG;
 document.getElementById('homeT').textContent=L('첫 화면','Main page');
 document.querySelectorAll('.lang button').forEach(b=>{b.setAttribute('aria-pressed',b.dataset.l===LANG);b.addEventListener('click',()=>{if(b.dataset.l!==LANG)setLang(b.dataset.l)})});
@@ -143,7 +143,7 @@ document.getElementById('main').innerHTML=`<h1>${L('보호자 안내','For grown
  <p class="lead">${L('아이와 함께 안전하고 즐겁게 놀 수 있도록, 안전과 개인정보, 저작권에 대해 알려 드려요.','How to keep play safe and fun, and what we do (and don’t do) with your information.')}</p>
  <ul class="toc">${S.map(x=>`<li><a href="#${x.id}">${esc(L(...x.h))}</a></li>`).join('')}</ul>
  ${S.map(x=>`<section id="${x.id}" class="${x.cls}" aria-labelledby="${x.id}-h"><h2 id="${x.id}-h">${esc(L(...x.h))}</h2><ul>${x.items.map(i=>`<li><span class="ic" aria-hidden="true">${i[0]}</span><div><b>${esc(L(i[1],i[2]))}</b><p>${esc(L(i[3],i[4]))}</p></div></li>`).join('')}</ul>${x.call?`<p class="call">🚑 ${esc(L(...x.call))}</p>`:''}</section>`).join('')}`;
-document.getElementById('foot').innerHTML=`${L('마지막 수정','Last updated')}: ${UPDATED}<br>Moon Mini Games · © 2026 Dongsun Moon. ${L('모든 권리 보유.','All rights reserved.')}`;
+document.getElementById('foot').innerHTML=`${L('마지막 수정','Last updated')}: ${UPDATED}<br>${L('문코치','Coach Moon')} · © 2026 Dongsun Moon. ${L('모든 권리 보유.','All rights reserved.')}`;
 </script>
 </body>
 </html>

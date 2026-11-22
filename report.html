@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#17224d">
-<title data-en="Learning Report | Moon Mini Games">학습 리포트 | Moon Mini Games</title>
+<title data-en="Learning Report | Coach Moon">학습 리포트 | 문코치</title>
 <meta name="description" content="우리 아이가 게임에서 무엇을 배웠는지 과목별로 보여 주는 학부모 학습 리포트 · A learning report for parents.">
 <meta name="robots" content="noindex">
 <link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32.png">
@@ -325,7 +325,7 @@ em.up{color:var(--good);font-style:normal;font-weight:900}em.dn{color:#c2410c;fo
 <header class="bar">
   <div class="bar-in">
     <a class="ib" id="home" href="index.html" aria-label="처음 화면" data-en-aria-label="Home">🏠</a>
-    <h1><span data-en="Learning report">학습 리포트</span><small>Moon Mini Games</small></h1>
+    <h1><span data-en="Learning report">학습 리포트</span><small data-en="Coach Moon">문코치</small></h1>
     <button type="button" class="ib noprint" id="print" aria-label="인쇄하거나 PDF로 저장" data-en-aria-label="Print or save as PDF">🖨️</button>
     <div class="seg" role="group" aria-label="언어 · Language"><button type="button" data-lang="ko" lang="ko">한국어</button><button type="button" data-lang="en" lang="en">EN</button></div>
   </div>
@@ -547,7 +547,7 @@ function render(){const app=$('app'),R=records(),m=DEMO?{name:L('하늘','Sky'),
   <div><b>⏱️ ${L('집중한 시간만','Only focused time')}</b><p>${L('화면이 켜져 있고 2분 안에 직접 누르거나 입력한 시간만 세요. 틀어 두기만 한 시간은 빠져요.','Time counts only while the page is open and your child tapped or typed in the last 2 minutes.')}</p></div>
   <div><b>🏅 ${L('익힘은 게임의 기준으로','Mastery by each game’s rule')}</b><p>${L('단원 완료, 별 3개처럼 게임마다 정한 기준을 넘으면 ‘익힘’으로 표시해요.','A skill shows as mastered when it passes that game’s own rule, like finishing a unit or earning 3 stars.')}</p></div>
   <div><b>📚 ${L('학교 교과 연결','Links to school')}</b><p>${L('한국 2022 개정 교육과정과 캐나다 온타리오 교육과정을 기준으로 연결했어요. 캐나다의 다른 주와 미국은 주마다 기준이 달라 배우는 학년과 순서가 다를 수 있고, 학교마다 배우는 방법도 조금씩 달라요. 게임 속 학년과 진도는 참고용이에요. 학교 수업과 다르면 학교 선생님의 설명을 먼저 따라 주세요.','Links follow Korea’s 2022 national curriculum and the Ontario curriculum. Other provinces and US states have their own standards, so a topic may come in a different grade or order, and schools may teach it in a different way. Grades and order in the games are only a guide; if anything differs from school, please go with the teacher.')}</p></div></div></section>`;
- h+=`<footer><a class="nlink noprint" href="notice.html?lang=${LANG}">🛡️ ${L('보호자 안내: 안전 · 개인정보 · 저작권','For grown-ups: safety, privacy & credits')}</a><br>Moon Mini Games · © 2026 Dongsun Moon. ${L('모든 권리 보유.','All rights reserved.')}</footer>`;
+ h+=`<footer><a class="nlink noprint" href="notice.html?lang=${LANG}">🛡️ ${L('보호자 안내: 안전 · 개인정보 · 저작권','For grown-ups: safety, privacy & credits')}</a><br>${L('문코치','Coach Moon')} · © 2026 Dongsun Moon. ${L('모든 권리 보유.','All rights reserved.')}</footer>`;
  app.innerHTML=h;LASTA=A;bindCommon()}
 let LASTA=null;
 function subjectCard(g,rec,p,a,A){const S=rec.sum,sk=allSkills(S),prog=sk.length?sk.reduce((t,k)=>t+(+k.p||0),0)/sk.length:0;
@@ -666,7 +666,7 @@ function emptyPage(R,m){const any=GAMES.some(g=>R[g.id].saved);
   <p class="say">${any?L('예전 게임 기록이 있어요. 아래 게임을 한 번씩 열면 그동안 배운 내용이 리포트로 정리돼요.','There is earlier progress. Open each game below once and everything learned so far is summarised here.'):L('수학, 음악, 과학, 코딩, 체스까지, 아이가 어떤 기술을 익혔고 다음에 무엇을 배우면 좋은지 학교 교과와 연결해서 보여 드려요.','Math, music, science, coding and chess: see which skills your child has mastered and what comes next, linked to what schools teach.')}</p>
   <div class="per noprint"><a class="go" style="background:var(--gold);color:#2a2300" href="report.html?demo=1&lang=${LANG}">👀 ${L('예시 리포트 보기','See a sample report')}</a><a class="go" style="background:#ffffff1f" href="index.html?lang=${LANG}">🎮 ${L('게임 하러 가기','Go to the games')}</a></div></section>
   ${GAMES.filter(g=>R[g.id].saved).map(g=>waitCard(g,true)).join('')}
-  <footer><a class="nlink noprint" href="notice.html?lang=${LANG}">🛡️ ${L('보호자 안내: 안전 · 개인정보 · 저작권','For grown-ups: safety, privacy & credits')}</a><br>Moon Mini Games · © 2026 Dongsun Moon. ${L('모든 권리 보유.','All rights reserved.')}</footer>`}
+  <footer><a class="nlink noprint" href="notice.html?lang=${LANG}">🛡️ ${L('보호자 안내: 안전 · 개인정보 · 저작권','For grown-ups: safety, privacy & credits')}</a><br>${L('문코치','Coach Moon')} · © 2026 Dongsun Moon. ${L('모든 권리 보유.','All rights reserved.')}</footer>`}
 function showTab(t,focus){TAB=t;try{sessionStorage.setItem('moonGames.reportTab',t)}catch(e){}
  document.querySelectorAll('[data-tab]').forEach(b=>{const on=b.dataset.tab===t;b.setAttribute('aria-selected',on);b.tabIndex=on?0:-1;if(on&&focus)b.focus()});
  document.querySelectorAll('[data-panel]').forEach(p=>p.hidden=p.dataset.panel!==t)}

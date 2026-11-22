@@ -4906,7 +4906,9 @@ const SPARS=[
  {id:'junior',icon:'🤖',name:L('체크봇 주니어','CheckBot Junior'),power:1850,reward:40,ai:{depth:5,q:true,noise:24,blunder:.02,ms:1500},
   hi:L('삐빅. 연습 모드 시작. 준비됐나요?','Beep. Practice mode on. Ready?'),win:L('삐빅. 연습 승리. 다시 해요.','Beep. Practice won. Try again.'),lose:L('삐빅! 큰 체크봇도 이길 수 있겠어요!','Beep! You could beat the big CheckBot!'),boss:'robot'},
 ];
-SPARS.forEach((p,k)=>{p.spar=true;p.bi=100+k;p.elo=SPAR_ELO[p.id];p.img=`images/chess-bot-${p.boss}.webp`;p.of=BOTS.findIndex(b=>b.id===p.boss)});
+// a sparring partner opens once the boss before it is beaten (cub after the bear, baby dragon after the lioness, junior after the dragon)
+const SPAR_PRE={cub:'bear',babydragon:'lion',junior:'dragon'};
+SPARS.forEach((p,k)=>{p.spar=true;p.pre=SPAR_PRE[p.id];p.bi=100+k;p.elo=SPAR_ELO[p.id];p.img=`images/chess-bot-${p.boss}.webp`;p.of=BOTS.findIndex(b=>b.id===p.boss)});
 const botOf=bi=>bi>=100?SPARS[bi-100]||SPARS[0]:BOTS[bi]||BOTS[0];
 const CHAPTERS=[
  {icon:'🌱',name:L('새싹 마을','Sprout Village'),skill:'h',boss:1,grad:'linear-gradient(135deg,#5ed27d,#1ea88a)'},
@@ -6131,8 +6133,10 @@ function drillEnd(res){const r=DR;if(!r||r.over)return;r.over=true;r.thinking=fa
   {acts:{back:()=>()=>go(back),next:()=>()=>startDrill(nx.id,back),again:()=>()=>drillBegin(d),les:()=>{MiniLesson.open(chL(d.lesson));return false}}})},res.ok?900:700);
 }
 
-// ---- sparring: a practice game against SPARS[k] (always open; the colour is the battle screen's choice)
-function startSpar(k,back){const sp=SPARS[k];if(!sp)return;const col=S.color===-1?(Math.random()<.5?WHITE:BLACK):S.color;startBattle(sp.bi,col,{back:back||'battle'})}
+// ---- sparring: a practice game against SPARS[k] (open once the boss before it is beaten; the colour is the battle screen's choice)
+const sparOpen=sp=>!sp||!sp.pre||(S.botWins&&S.botWins[sp.pre]>0);
+const sparLockText=sp=>{const b=BOTS.find(x=>x.id===sp.pre);return b?L(`🔒 ${josa(b.name,'을','를')} 이기면 열려요`,`🔒 Opens after you beat ${b.name}`):''};
+function startSpar(k,back){const sp=SPARS[k];if(!sp)return;if(!sparOpen(sp)){SFX.click&&SFX.click();toast(sparLockText(sp));return}const col=S.color===-1?(Math.random()<.5?WHITE:BLACK):S.color;startBattle(sp.bi,col,{back:back||'battle'})}
 
 // ---- the boss courses. Step kinds: ls (lessons watched to the end), pz (puzzles solved in these themes at this rating or
 // more), dr (endgame drills done), my (my puzzles solved on their review day), pow (chess power), sp (sparring wins), boss.
@@ -6191,7 +6195,7 @@ function stepCard(c,s,i,cur){const p=stepProg(c,s),ok=doneAt(c,i),now=i===cur,b=
  else if(s.k==='pz'&&!ok)more=`<p class="cqhook">🧩 ${L(`지금 내 퍼즐 점수는 ${S.rating}점이에요. 내 점수에 맞는 문제부터 나오고, ${s.min}점이 넘는 문제를 풀면 칸이 차요.`,`Your puzzle score is ${S.rating}. Puzzles start near your score; each one rated ${s.min}+ fills the bar.`)}</p>`;
  else if(s.k==='my'&&!ok)more=`<p class="cqhook">📜 ${L(`내 퍼즐 ${S.myPz.length}개 · 오늘 복습 ${myDue().length}개. 대국을 돌아보면 실수가 퍼즐이 돼요.`,`${S.myPz.length} puzzles · ${myDue().length} due today. Review a game and its mistakes become puzzles.`)}</p>`;
  else if(s.k==='pow'&&!ok)more=`<p class="cqhook">💪 ${L('대국에서 이기면 올라요. 강한 상대를 이길수록 많이 올라요.','It goes up when you win games, more for stronger opponents.')}</p>`;
- else if(s.k==='sp'){const sp=c.sp,r=S.spar[sp.id]||{w:0,d:0,l:0};more=`<p class="cqhook">${sp.icon} ${esc(sp.name)} · 💪 ${bossPow(sp)} · ${L(`${r.w}승 ${r.d}무 ${r.l}패`,`${r.w}W ${r.d}D ${r.l}L`)}<br>“${esc(sp.hi)}”</p>`}
+ else if(s.k==='sp'){const sp=c.sp,r=S.spar[sp.id]||{w:0,d:0,l:0};more=`<p class="cqhook">${sp.icon} ${esc(sp.name)} · 💪 ${bossPow(sp)} · ${L(`${r.w}승 ${r.d}무 ${r.l}패`,`${r.w}W ${r.d}D ${r.l}L`)}<br>${sparOpen(sp)?`“${esc(sp.hi)}”`:esc(sparLockText(sp))}</p>`}
  else if(s.k==='boss')more=`<p class="cqhook">${b.icon} 💪 ${bossPow(b)} · “${esc(b.hi)}”</p>`;
  const go_=STEP_GO[s.k],cnt=p.pow?`${num(p.n)} / ${num(p.of)}`:`${Math.min(p.n,p.of)} / ${p.of}`;
  const btn=ok&&s.k!=='boss'&&s.k!=='sp'?`<span class="cqok" aria-label="${L('완료','Done')}">✅</span>`:`<button class="btn small ${s.k==='boss'?'red':now?'green':'ghost'}" type="button" data-cgo="${i}">${go_[0]} ${ok&&s.k==='boss'?L('또 도전','Again'):L(go_[1],go_[2])}</button>`;
@@ -6219,9 +6223,9 @@ function courseGo(c,i){const s=c.steps[i];if(!s)return;
  else if(s.k==='dr')startDrill(s.ids.find(x=>!drOk(x))||s.ids[0],'course');
  else if(s.k==='my'){const due=myDue();if(due.length){startMine(due[0].id,'course');return}
   modal(`<div style="font-size:60px">📜</div><h2>${L('오늘 복습할 퍼즐이 없어요','No puzzles due today')}</h2><p>${L('내 퍼즐은 내 대국에서 생겨요. 대국을 두고 ‘대국 돌아보기’를 하면 실수가 퍼즐이 되고, 다음 날부터 복습할 수 있어요.','Your puzzles come from your own games. Play a game and tap “Review game”: its mistakes become puzzles you can review from the next day.')}</p>
-   <div class="row"><button class="btn ghost" type="button" data-act="pz">🧩 ${L('내 퍼즐','My puzzles')}</button><button class="btn green" type="button" data-act="spar">${c.sp.icon} ${L('연습 대국','Practice game')}</button></div>`,{acts:{pz:()=>()=>{growTab='pz';growBack='course';go('grow')},spar:()=>()=>startSpar(SPARS.indexOf(c.sp),'course')}})}
+   <div class="row"><button class="btn ghost" type="button" data-act="pz">🧩 ${L('내 퍼즐','My puzzles')}</button><button class="btn green" type="button" data-act="spar">${sparOpen(c.sp)?`${c.sp.icon} ${L('연습 대국','Practice game')}`:esc(sparLockText(c.sp))}</button></div>`,{acts:{pz:()=>()=>{growTab='pz';growBack='course';go('grow')},spar:()=>()=>startSpar(SPARS.indexOf(c.sp),'course')}})}
  else if(s.k==='pow')modal(`<div style="font-size:60px">💪</div><h2>${L('체스 힘 키우기','Grow your chess power')}</h2><p>${L(`지금 ${num(powShow(S.grow.r))}이에요. 대국에서 이기면 올라가요. 연습 상대와 보스 모두 돼요.`,`It is ${num(powShow(S.grow.r))} now. Winning games makes it grow: practice partners and bosses both count.`)}</p>
-   <div class="row"><button class="btn ghost" type="button" data-act="grow">📈 ${L('나의 성장','My growth')}</button><button class="btn green" type="button" data-act="spar">${c.sp.icon} ${L('연습 대국','Practice game')}</button></div>`,{acts:{grow:()=>()=>{growTab='power';growBack='course';go('grow')},spar:()=>()=>startSpar(SPARS.indexOf(c.sp),'course')}});
+   <div class="row"><button class="btn ghost" type="button" data-act="grow">📈 ${L('나의 성장','My growth')}</button><button class="btn green" type="button" data-act="spar">${sparOpen(c.sp)?`${c.sp.icon} ${L('연습 대국','Practice game')}`:esc(sparLockText(c.sp))}</button></div>`,{acts:{grow:()=>()=>{growTab='power';growBack='course';go('grow')},spar:()=>()=>startSpar(SPARS.indexOf(c.sp),'course')}});
  else if(s.k==='sp')startSpar(SPARS.indexOf(c.sp),'course');
  else courseBoss(c)}
 // the next puzzle for a puzzle step: the easiest unsolved one in its themes from just under the child's score (so a child
@@ -6238,7 +6242,7 @@ function courseBoss(c){if(!botUnlocked(c.bi)){toast('🔒 '+L(`${josa(BOTS[c.bi-
 // next to the boss on the battle screen: the course and its sparring partner
 function courseCard(c){const n=courseNumD(c),cur=courseCurD(c),s=cur>=0?c.steps[cur]:null,sp=c.sp,b=BOTS[c.bi];
  return `<div class="bot cqcard"><div class="tx"><b>🧭 ${L(`${b.name} 정복 코스`,`Road to ${b.name}`)} <span class="cqcnt">${n}/${c.steps.length}</span></b><small>${s?`${L('다음','Next')}: ${cur+1}. ${esc(tx(s.t))}`:L('준비 끝! 도전해요','All set! Go for it')}</small><span class="cqdots" aria-hidden="true">${c.steps.map((x,i)=>`<i class="${doneAt(c,i)?'on':''}"></i>`).join('')}</span></div>
-  <div class="cqbtns"><button class="btn small green" type="button" data-cq="${c.id}">🧭 ${L('코스','Course')}</button><button class="btn small ghost" type="button" data-spar="${SPARS.indexOf(sp)}">🥊 ${esc(sp.name)} · 💪${bossPow(sp)}</button></div></div>`}
+  <div class="cqbtns"><button class="btn small green" type="button" data-cq="${c.id}">🧭 ${L('코스','Course')}</button><button class="btn small ghost" type="button" data-spar="${SPARS.indexOf(sp)}">${sparOpen(sp)?`🥊 ${esc(sp.name)} · 💪${bossPow(sp)}`:esc(sparLockText(sp))}</button></div></div>`}
 // the home banner: where the child is on the road to the next top boss
 function courseBanner(){const c=courseNow();if(!c)return '';const b=BOTS[c.bi],i=courseCurD(c),s=i>=0?c.steps[i]:null;
  return `<button class="resume cqban" type="button" data-go="course"><span class="ic">${pic(b.img,b.icon)}</span><span class="cqbt"><b>🧭 ${L(`${b.name} 정복 코스`,`Road to ${b.name}`)}</b><small class="sub">${s?`${L('다음','Next')}: ${i+1}. ${esc(tx(s.t))}`:L('준비 끝! 보스에게 도전해요','All set! Challenge the boss')}</small></span><span class="gdot">${courseNumD(c)}/${c.steps.length}</span></button>`}

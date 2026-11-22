@@ -5792,7 +5792,7 @@ const WL={
   tr:()=>mlPick(['네 차례예요! `"🧃": 2` 짝에서 이름표(키)를 눌러 봐요.','Your turn! In the pair `"🧃": 2`, tap the name tag (the key).'],[{h:hl('"🧃"'),ok:true},{h:hl('2')}],{cls:'code',yes:['맞아요! 이름표는 `:` 기호 앞, 값은 뒤에 있어요.','Yes! The key comes before the `:`, and the value after it.'],no:['그건 사물함 속 값이에요. 이름표는 `:` 기호 앞에 있어요.','That’s the value in the locker. The key is before the `:`.']}),
   key:['w9-1','i2']},
  10:{a1:b=>mlPlay(b,wDemo(10),{mem:true}),a2:b=>mlShow(b,'stickers = {"🐶", "🐱"}\nprint(stickers[0])',{mem:true,note:['🫧 세트에는 칸 번호가 없어서 `[0]` 코드를 쓰면 오류가 나요.','🫧 A set has no car numbers, so `[0]` gives an error.']}),
-  tr:()=>mlPick(['네 차례예요! 스티커를 눌러 주머니에 넣어 봐요. 🐶를 또 넣으면 어떻게 될까요?','Your turn! Tap a sticker to put it in the pouch. What happens if you add 🐶 again?'],[['🐶',['🐶는 벌써 있어서 그대로 2장이에요!','🐶 was already there, so there are still 2!']],['🐰',['새 스티커라서 3장이 됐어요!','A new sticker, so now there are 3!']]].map(([f,s])=>({h:f,say:s,code:`stickers = {"🐶", "🐱"}\nstickers.add("${f}")\nprint(len(stickers))`})),{all:true,run:{mem:true}}),
+  tr:()=>mlPick(['네 차례예요! 스티커를 눌러 주머니에 넣어 봐요. 🐶 강아지를 또 넣으면 어떻게 될까요?','Your turn! Tap a sticker to put it in the pouch. What happens if you add the 🐶 puppy again?'],[['🐶',['🐶 강아지는 벌써 있어서 그대로 2장이에요!','🐶 The puppy was already there, so there are still 2!']],['🐰',['새 스티커라서 3장이 됐어요!','A new sticker, so now there are 3!']]].map(([f,s])=>({h:f,say:s,code:`stickers = {"🐶", "🐱"}\nstickers.add("${f}")\nprint(len(stickers))`})),{all:true,run:{mem:true}}),
   key:['w10-1','i2']},
  11:{a1:b=>mlShow(b,wDemo(11),{run:false,mark:{1:'mlin',2:'mlin',3:'mlin'},note:['🍪 1~3번째 줄이 쿠키틀(클래스)이에요. 틀만 있고 아직 쿠키는 없어요.','🍪 Lines 1–3 are the cutter (the class). Just the cutter, no cookies yet.']}),a2:b=>mlPlay(b,wDemo(11),{mem:true}),
   tr:()=>mlTap(['네 차례예요! 쿠키틀로 쿠키(객체)를 찍는 줄을 하나 눌러 봐요.','Your turn! Tap a line that presses out a cookie (an object) with the cutter.'],wDemo(11),[5,6],{yes:['맞아요! 틀 이름 뒤 괄호에 모양을 넣으면 새 쿠키가 생겨요.','Yes! The cutter’s name with a shape in brackets makes a new cookie.'],no0:['그 줄은 쿠키를 찍지 않아요. 틀 이름 뒤에 괄호가 붙은 줄을 찾아봐요.','That line doesn’t press out a cookie. Find a line with brackets right after the cutter’s name.']}),
@@ -5895,7 +5895,7 @@ const PY_SUB={
   return {icon:'🤝',title:['주머니 합치기','Joining two pouches'],steps:[
    {say:['`|` 기호(세로 막대)는 두 세트 주머니를 하나로 합쳐요.','The bar sign `|` joins two set pouches into one.'],art:b=>mlShow(b,pair,{mem:true})},
    {say:['두 주머니에 다 있던 🐱는 합친 주머니에 한 장만 남아요. 그래서 4장이 아니라 3장이에요.','The 🐱 that was in both pouches is kept only once. So there are 3 stickers, not 4.'],art:b=>mlPlay(b,pair+'\nprint(len(both))\nprint("🐰" in both)',{mem:true})},
-   mlPick(['네 차례예요! 친구 주머니에 넣을 스티커를 골라서 합쳐 봐요.','Your turn! Pick a sticker for your friend’s pouch, then join the pouches.'],[['🐶',['🐶는 내 주머니에도 있어서 합치면 3장이에요!','🐶 is in my pouch too, so joined there are 3!']],['🦊',['새 스티커 🦊 덕분에 합치면 4장이에요!','The new 🦊 makes 4 when joined!']]].map(([f,s])=>({h:f,code:code(f),say:s})),{all:true,run:{mem:true}})],
+   mlPick(['네 차례예요! 친구 주머니에 넣을 스티커를 골라서 합쳐 봐요.','Your turn! Pick a sticker for your friend’s pouch, then join the pouches.'],[['🐶',['🐶 강아지는 내 주머니에도 있어서 합치면 3장이에요!','🐶 The puppy is in my pouch too, so joined there are 3!']],['🦊',['새 스티커 🦊 덕분에 합치면 4장이에요!','The new 🦊 makes 4 when joined!']]].map(([f,s])=>({h:f,code:code(f),say:s})),{all:true,run:{mem:true}})],
   key:[mlPair(MBY['w10-5'].learn)]}},
  'w10-6':()=>{const pair='mine = {"🐶", "🐱", "🐰"}\nfriend = {"🐱", "🐼"}',ab='a = {"🍎", "🍌"}\nb = {"🍌", "🍇"}';
   return {icon:'🔍',title:['겹치는 것과 나만 있는 것','Shared, and mine only'],steps:[

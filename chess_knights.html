@@ -4876,8 +4876,8 @@ const BOTS=[
   hi:L('아우우! 숲의 기사가 왔다!','Awooo! The forest knight is here!'),win:L('아우우! 포크는 내 특기지!','Awooo! Forks are my specialty!'),lose:L('크르릉… 인정한다!','Grrr… I admit it!')},
  {id:'bear',icon:'🐻',name:L('곰 성주','Lord Bear'),power:850,reward:210,ai:{depth:3,q:true,noise:40,blunder:.06,ms:800},
   hi:L('으르렁! 내 성은 튼튼하다!','Roar! My castle is strong!'),win:L('으하하! 성을 지켜냈다!','Ha ha! The castle stands!'),lose:L('으으… 성문이 뚫렸다!','Ugh… the gate is broken!')},
- {id:'lion',icon:'🦁',name:L('사자 여왕','Queen Lioness'),power:1000,reward:270,ai:{depth:3,q:true,noise:24,blunder:.03,ms:1000},
-  hi:L('어흥! 여왕의 궁전에 온 걸 환영한다.','Roar! Welcome to the queen’s palace.'),win:L('여왕은 지지 않는단다.','A queen never loses.'),lose:L('어흥… 새로운 챔피언이구나!','Roar… a new champion!')},
+ {id:'lion',icon:'🦁',name:L('사자 대왕','King Leo'),power:1000,reward:270,ai:{depth:3,q:true,noise:24,blunder:.03,ms:1000},
+  hi:L('어흥! 대왕의 궁전에 온 걸 환영한다.','Roar! Welcome to the king’s palace.'),win:L('대왕은 지지 않는단다.','A great king never loses.'),lose:L('어흥… 새로운 챔피언이구나!','Roar… a new champion!')},
  {id:'dragon',icon:'🐉',name:L('드래곤 킹','Dragon King'),power:1200,reward:350,ai:{depth:4,q:true,noise:12,blunder:.012,ms:1300},
   hi:L('크아앙! 탑 꼭대기까지 온 용사여!','ROAR! Brave one, you reached the top!'),win:L('크하하! 용의 불꽃을 보았느냐!','Ha ha! You have seen the dragon’s fire!'),lose:L('크윽… 네가 진정한 체스 기사다!','Argh… you are a true chess knight!')},
  {id:'robot',icon:'🤖',name:L('체크봇 3000','CheckBot 3000'),power:1500,reward:500,ai:{depth:5,q:true,noise:0,blunder:0,ms:2000},
@@ -4900,7 +4900,7 @@ const bossPow=b=>powShow(b.elo!=null?b.elo:b.power);
 const SPAR_ELO={cub:1460,babydragon:1610,junior:1855};
 const SPARS=[
  {id:'cub',icon:'🦁',name:L('아기 사자','Lion Cub'),power:1450,reward:30,ai:{depth:3,q:true,noise:32,blunder:.045,ms:900},
-  hi:L('어흥! 여왕님을 만나기 전에 나랑 연습하자!','Roar! Practice with me before you meet the queen!'),win:L('어흥! 조금만 더 연습해 봐!','Roar! A little more practice!'),lose:L('어흥… 이제 여왕님께 가도 되겠어!','Roar… you are ready for the queen!'),boss:'lion'},
+  hi:L('어흥! 대왕님을 만나기 전에 나랑 연습하자!','Roar! Practice with me before you meet the king!'),win:L('어흥! 조금만 더 연습해 봐!','Roar! A little more practice!'),lose:L('어흥… 이제 대왕님께 가도 되겠어!','Roar… you are ready for the king!'),boss:'lion'},
  {id:'babydragon',icon:'🐲',name:L('아기 드래곤','Baby Dragon'),power:1600,reward:35,ai:{depth:4,q:true,noise:26,blunder:.035,ms:1000},
   hi:L('크앙! 아빠 드래곤처럼 불을 뿜어 볼게!','Rawr! I breathe fire just like my dad!'),win:L('크앙! 내 불꽃이 이겼다!','Rawr! My fire won!'),lose:L('크앙… 너라면 탑 꼭대기도 갈 수 있어!','Rawr… you can make it to the top of the tower!'),boss:'dragon'},
  {id:'junior',icon:'🤖',name:L('체크봇 주니어','CheckBot Junior'),power:1850,reward:40,ai:{depth:5,q:true,noise:24,blunder:.02,ms:1500},
@@ -6148,7 +6148,7 @@ const COURSES=[
   {k:'ls',icon:'🏰',ids:['center','develop','castleEarly','queenEarly','italian'],r:['오프닝 원칙 수업 5개 (센터, 전개, 캐슬링, 이탈리안 게임)','Opening lessons (center, development, castling, the Italian Game)'],t:['오프닝 원칙','Opening rules'],g:['센터, 기물 꺼내기, 캐슬링, 이탈리안 게임 배우기','Learn the center, developing, castling and the Italian Game']},
   {k:'dr',icon:'👑',ids:['q1','q2','r1'],r:['킹+퀸, 킹+룩 체크메이트 연습 3개 성공','Win 3 practice endings: mate with king and queen, king and rook'],t:['메이트 연습','Mate practice'],g:['킹과 퀸, 킹과 룩으로 메이트하는 드릴 3개 성공','Win 3 drills: mate with king and queen, and king and rook']},
   {k:'sp',icon:'🥊',of:2,t:['연습 대국','Practice games'],g:['아기 사자를 2번 이기기','Beat the Lion Cub 2 times']},
-  {k:'boss',icon:'⚔️',t:['보스 대결','Boss battle'],g:['사자 여왕을 이기기!','Beat Queen Lioness!']}]},
+  {k:'boss',icon:'⚔️',t:['보스 대결','Boss battle'],g:['사자 대왕을 이기기!','Beat King Leo!']}]},
  {id:'dragon',boss:'dragon',spar:'babydragon',steps:[
   {k:'pz',icon:'🌪️',th:ADV_TH,min:1500,of:15,r:['난이도 1500 이상 고급 전술 퍼즐 15개 풀기','Solve 15 advanced tactics puzzles rated 1500 or more'],t:['고급 전술 사다리','Advanced tactics ladder'],g:['1500점이 넘는 고급 전술 퍼즐 15개 풀기','Solve 15 advanced puzzles rated 1500 or more']},
   {k:'ls',icon:'🧭',ids:['activity','openFile','outpost','badBishop','pawnShape','kingSafety','plan'],need:5,r:['전략 수업 5개 (기물 활동성, 열린 줄, 약한 칸, 폰 구조, 킹 안전, 계획)','5 strategy lessons (active pieces, open files, weak squares, pawn structure, king safety, plans)'],t:['전략','Strategy'],g:['전략 수업 7개 중 5개 듣기','Finish 5 of the 7 strategy lessons']},
@@ -6175,7 +6175,7 @@ function stepProg(c,s){
 const doneAt=(c,i)=>((S.cdone||{})[c.id]||[]).includes(i)||(()=>{const p=stepProg(c,c.steps[i]);return p.n>=p.of})();
 const courseCurD=c=>c.steps.findIndex((s,i)=>!doneAt(c,i));
 const courseNumD=c=>c.steps.filter((s,i)=>doneAt(c,i)).length;
-// the course on the home screen: the first top boss not beaten yet, once Lord Bear is beaten (Lioness is open)
+// the course on the home screen: the first top boss not beaten yet, once Lord Bear is beaten (King Leo is open)
 const courseNow=()=>botUnlocked(COURSES[0].bi)?COURSES.find(c=>!(S.botWins[c.boss]>0))||null:null;
 const courseFocus=()=>courseNow()||COURSES.find(c=>!(S.botWins[c.boss]>0))||COURSES[COURSES.length-1];
 // a step done for the first time: a toast and a small gift (quiet the first time a save is looked at, so nothing floods)

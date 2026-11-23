@@ -3073,7 +3073,7 @@ function runBreath(spec,host,opt){
   start=performance.now()/1000+.6;
   const loop=()=>{if(stopped)return;const now=performance.now()/1000-start;if(now>total){finish();return}
    const seg=plan.find(p=>now>=p.t&&now<p.t+p.d)||plan[0],f=now<0?0:(now-seg.t)/seg.d;
-   if(seg.k!==lastK){lastK=seg.k;msg.textContent=T(TXT[seg.k]);if(seg.k==='in')speak(T('들이마셔요|Breathe in'));if(seg.k==='out')speak(T('스~|Sss'));const ci=Math.floor(seg.t/(13*spb));cyc.forEach((x,i)=>x.classList.toggle('on',i<=ci))}
+   if(seg.k!==lastK){lastK=seg.k;msg.textContent=T(TXT[seg.k]);if(seg.k==='in')speak(T('들이마셔요|Breathe in'));if(seg.k==='out')speak(T('내쉬어요|Breathe out'));const ci=Math.floor(seg.t/(13*spb));cyc.forEach((x,i)=>x.classList.toggle('on',i<=ci))}
    const sc=seg.k==='in'?.45+.55*f:seg.k==='hold'?1:seg.k==='out'?1-.55*f:.45;ball.style.transform=`scale(${sc.toFixed(3)})`;ball.className='br-ball '+seg.k;
    n.textContent=seg.k==='rest'?'':String(Math.min(Math.floor(f*seg.d/spb)+1,Math.round(seg.d/spb)));
    if(useMic){const r=micRead();const lv=clamp(r.rms/.08,0,1);if(meter)meter.style.width=(lv*100)+'%';if(seg.k==='out'&&now>=seg.t+.5){outT++;if(r.rms>.015)outOn++}}

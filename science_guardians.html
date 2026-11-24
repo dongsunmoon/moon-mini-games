@@ -33,6 +33,7 @@ const L=(ko,en)=>LANG==='en'?en:ko;
 //   item={id,q:[ko,en],a:[ko,en],g?:[ko,en],tip?:[ko,en]}: the latest example, the right answer, the child's answer,
 //   how many misses, and how many right answers in a row since the last miss (so the report can say "fixed now").
 // · ls: the mini lessons (MiniLesson, in lesson.js) the child watched to the end, with the first day.
+// · ct: certificates (LR.cert), dn: units finished from a ?go= link or the daily course (LR.done).
 // A game's reset must call LR.forget() so the report forgets only that game; LR.resume() starts a fresh record.
 const LR=(()=>{const f=(location.pathname.split('/').pop()||'').replace(/\.html$/,'');
  const KEY={math_aquarium:'mathAquarium.learn',science_guardians:'scienceGuardians.learn',music_academy:'musicAcademy.learn',chess_knights:'chessKnights.learn',detective_game:'little-detective-learn',marble_rush_3d:'marbleRush.learn',coding_island:'pythonIsland.learn',python_island:'pythonIsland.learn'}[f];
@@ -61,6 +62,11 @@ const LR=(()=>{const f=(location.pathname.split('/').pop()||'').replace(/\.html$
   stat(id){const x=(load().sk||{})[id];return x?{r:x[0],w:x[1]}:null},
   // mini lessons watched to the end (MiniLesson): lesson id → the first day; les() returns them all
   les(id){const r=load();if(id==null)return r.ls||{};if(!(r.ls||(r.ls={}))[id]){r.ls[id]=day();dirty=true;if(!off)save()}return r.ls},
+  // certificates the child earned (a grade finished, a boss beaten): id → {d: first day, t:[ko,en], i: icon}.
+  // The parents' report shows them (all with Plus, the first one free). Returns true only the first time.
+  cert(id,t,icon){const r=load(),c=r.ct||(r.ct={});id=String(id).slice(0,40);if(c[id])return false;c[id]={d:day(),t:two(t),i:String(icon||'🏅').slice(0,4)};dirty=true;if(!off)save();return true},
+  // a unit a teacher or the daily course asked for was finished (?go=unit): unit → the last day it was done
+  done(unit){const r=load(),d=r.dn||(r.dn={});unit=String(unit).slice(0,40);d[unit]=day();const ks=Object.keys(d);if(ks.length>200)ks.sort((a,b)=>d[a]<d[b]?-1:1).slice(0,ks.length-200).forEach(k=>delete d[k]);dirty=true;if(!off)save()},
   forget(){off=true;R=null;try{localStorage.removeItem(KEY)}catch(e){}},
   resume(){off=!KEY;R=null;dirty=false}}})();
 const coachEsc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -235,6 +241,168 @@ const MiniLesson=(()=>{let C={voice:null,who:null},el=null,cur=null,back=null,la
    close(true);open(ls);back={spec,at:g}});
   const f=s.querySelector('details[open] .mlx-item')||s.querySelector('.mlx-x');if(f)try{f.focus({preventScroll:true})}catch(e){}}
  return {cfg(o){Object.assign(C,o||{})},open,before,book,seen,close:()=>close(),get on(){return !!el}}})();
+/*PLUS:BEGIN*/
+// mgPlus: 문코치 Plus / Coach Moon Plus, the paid part. The same code is in every game (inside the coach block),
+// index.html and report.html. Source: _src/coach/plus.js, copied by _src/coach/inject.py.
+// Who sells Plus:
+//  · In the Android/iOS app, the store (Google Play Billing / StoreKit 2). app-bridge.js gives mgBillingNative
+//    {query,buy,restore,manage}; the native side reports with window.mgPlusUpdate(state), where state is
+//    {active, product, until (ms or null), trial, products:[{id:'yearly'|'monthly', price, period:'year'|'month',
+//    trial:'P7D'|null}], msg, pending}.
+//  · On the web, WEB_SALE says what happens: 'open' = nothing is locked (now: the family's site before launch);
+//    'stores' = the web locks like the app and the parent screen points to the app stores; 'web' = a later web sale
+//    with accounts on a server (not built: it would plug in where mgBillingNative does).
+//  · An organization licence code (hagwon, school, family) opens Plus on one device. LIC holds only hashes of the
+//    codes; the codes themselves live in _src/plus/ (never in the repo).
+// Free for everyone: the front of each game (FREE), this month's free units (MONTHLY, rotating with the school year),
+// daily goals and every parent tool. Plus: everything else, the full parents' report and all certificates.
+// Kids' category rules: the child never sees a price or a buy button. A lock shows a neutral preview card with
+// "keep playing free"; buying happens only on the parent screen behind the grown-up check (mgGate). Locks are only
+// checked when something starts, never in the middle of an activity. Nothing earned or bought is taken away.
+// API: mgPlus.has() · open(game,kind,idx,total) · monthly(game,kind,total) · lock(card) · tease(card) ·
+//      paywall(ctx) · parent(ctx) (grown-up check, then paywall) · gate(cb,kind) (the grown-up check alone; kind picks
+//      its line: 'buy', 'report', 'settings', 'share', 'link') · redeem(code) ·
+//      on(fn) · state() · mode
+// Testing on the web: ?plus=lock (locks like the app, with a pretend store), ?plus=on (Plus on), ?plus=off (back).
+(()=>{if(window.mgPlus)return;
+const WEB_SALE='open';
+const KEY='moonGames.plus',SEEN='moonGames.plusSeen';
+// game → kind → how many from the start are free (idx is 1-based in the game's own order)
+const FREE={math:{tank:5},science:{world:1},coding:{world:2},music:{unit:2},chess:{boss:4,lesson:15,ladder:1},detective:{area:1,case:10},marble:{world:3}};
+// this month's free units, on top of FREE: they rotate through the locked ones from the start of the school year
+// (Korea: March, Ontario: September), so a free family still practises roughly what school is teaching
+const MONTHLY={math:{tank:2},science:{world:1}};
+// licence codes: hash → {org, until 'YYYY-MM-DD'}. Made by _src/plus/licenses.py.
+const LIC={/*LIC*/'ngv2xywrul.1rpbvpeeth8':{org:'family',until:''},'1xohrd8e9hu.19j2nuvroey':{org:'pilot-01',until:'2027-08-31'},'2gffweq8nz4.2a4hqsmddel':{org:'pilot-02',until:'2027-08-31'},'1yw64k0cab.12knbhyfn3l':{org:'pilot-03',until:'2027-08-31'},'ya69p178zq.894eq6vvc6':{org:'pilot-04',until:'2027-08-31'},'19tuegqwc92.j097j8bywo':{org:'pilot-05',until:'2027-08-31'},'29aabny30te.1blphalr06w':{org:'pilot-06',until:'2027-08-31'},'7h0fel1q7r.1421idve94w':{org:'pilot-07',until:'2027-08-31'},'249sj1d4fo9.mw8epkleru':{org:'pilot-08',until:'2027-08-31'},'2d572kc4p4d.19a3chj218t':{org:'pilot-09',until:'2027-08-31'},'d80cygnl2v.2fh1c84wsfm':{org:'pilot-10',until:'2027-08-31'},'lgwu8jc895.21awvpf8uas':{org:'test-expired',until:'2026-01-01'}};
+const lang=()=>{try{if(typeof LANG==='string'&&LANG)return LANG}catch(e){}return 'ko'};
+const T=(ko,en)=>lang()==='en'?en:ko;
+const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const two=x=>Array.isArray(x)?T(x[0],x[1]):x==null?'':String(x);
+const day=()=>new Date().toLocaleDateString('en-CA');
+const get=()=>{try{return JSON.parse(localStorage.getItem(KEY)||'{}')||{}}catch(e){return {}}};
+const put=o=>{try{localStorage.setItem(KEY,JSON.stringify(o))}catch(e){}};
+const inApp=!!window.__mgApp;
+const dev=(()=>{try{const q=new URLSearchParams(location.search).get('plus');if(q==='off')sessionStorage.removeItem('moonGames.plusDev');else if(q==='lock'||q==='on')sessionStorage.setItem('moonGames.plusDev',q);return sessionStorage.getItem('moonGames.plusDev')||''}catch(e){return ''}})();
+const mode=inApp?'app':dev==='lock'?'test':dev==='on'?'on':WEB_SALE;
+const N=()=>window.mgBillingNative||null;
+const cyrb=(s,seed)=>{let h1=0xdeadbeef^seed,h2=0x41c6ce57^seed;for(let i=0,ch;i<s.length;i++){ch=s.charCodeAt(i);h1=Math.imul(h1^ch,2654435761);h2=Math.imul(h2^ch,1597334677)}
+ h1=Math.imul(h1^(h1>>>16),2246822507);h1^=Math.imul(h2^(h2>>>13),3266489909);h2=Math.imul(h2^(h2>>>16),2246822507);h2^=Math.imul(h1^(h1>>>13),3266489909);return (4294967296*(2097151&h2)+(h1>>>0)).toString(36)};
+const licHash=c=>{const s='moon-lic|'+c;return cyrb(s,1)+'.'+cyrb(s,2)};
+const norm=c=>String(c||'').toUpperCase().replace(/[^0-9A-Z]/g,'');
+const lic=()=>{const l=get().lic;return l&&(!l.until||l.until>=day())?l:null};
+const store=()=>{const s=get().store;if(!s||!s.active)return null;if(s.until&&s.until+3*864e5<Date.now())return null;return s};
+const has=()=>mode==='open'||mode==='on'||!!(store()||lic());
+const subs=[];const emit=()=>{subs.slice().forEach(f=>{try{f(has())}catch(e){}});try{dispatchEvent(new CustomEvent('mgplus',{detail:{plus:has()}}))}catch(e){}};
+const schoolMonth=()=>{const m=new Date().getMonth()+1;return lang()==='en'?(m+3)%12:(m+9)%12};
+function monthly(game,kind,total){const f=(FREE[game]||{})[kind]||0,n=(MONTHLY[game]||{})[kind]||0;if(!n||!total||total<=f)return [];
+ const span=total-f,out=[];for(let i=0;i<n;i++){const v=f+1+((schoolMonth()*n+i)%span);if(!out.includes(v))out.push(v)}return out}
+function open(game,kind,idx,total){if(has())return true;const f=(FREE[game]||{})[kind];if(f==null)return false;return idx<=f||monthly(game,kind,total).includes(idx)}
+// pretend store for ?plus=lock on the web, so the whole flow can be tried and tested
+const FAKE=()=>lang()==='en'?[{id:'yearly',price:'$49.99',period:'year',trial:'P7D'},{id:'monthly',price:'$6.99',period:'month',trial:null}]:[{id:'yearly',price:'₩49,000',period:'year',trial:null},{id:'monthly',price:'₩6,900',period:'month',trial:null}];
+// sheet (the open parent screen) is declared up here: a store state can arrive before the rest of this file has run
+let products=null,msg='',pending=false,sheet=null;
+function update(s){try{if(typeof s==='string')s=JSON.parse(s)}catch(e){return}if(!s||typeof s!=='object')return;
+ if(Array.isArray(s.products))products=s.products;msg=s.msg||'';pending=!!s.pending;
+ if('active' in s){const o=get();o.store={active:!!s.active,product:s.product||'',until:s.until||null,trial:!!s.trial,at:Date.now()};put(o)}
+ emit();if(sheet)sheet.render()}
+window.mgPlusUpdate=update;if(window.__mgPlusPending){const p=window.__mgPlusPending;window.__mgPlusPending=null;update(p)}
+if(mode==='app'){try{N()&&N().query()}catch(e){}}
+// ---- shared look (both windows live in a shadow root, so no game's CSS can reach them)
+const CSS=':host{all:initial}*{box-sizing:border-box;font-family:system-ui,-apple-system,"Apple SD Gothic Neo","Noto Sans KR",sans-serif}'+
+ '.bg{position:fixed;inset:0;z-index:2147483600;background:rgba(12,20,40,.7);display:flex;align-items:center;justify-content:center;padding:max(12px,env(safe-area-inset-top)) max(12px,env(safe-area-inset-right)) max(12px,env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left))}'+
+ '.card{position:relative;background:#fff;color:#1d2a4a;border-radius:24px;width:min(400px,100%);max-height:100%;overflow:auto;padding:18px 18px 16px;box-shadow:0 14px 44px rgba(0,0,0,.35);text-align:center}'+
+ '.x{position:absolute;right:10px;top:10px;min-width:44px;min-height:44px;border:0;border-radius:14px;background:#eef2fb;font-size:18px;color:#1d2a4a;cursor:pointer}'+
+ '.pic{width:150px;height:150px;margin:6px auto 4px;border-radius:26px;background:linear-gradient(160deg,#fff4d6,#ffe2b8);display:flex;align-items:center;justify-content:center;font-size:76px;position:relative;overflow:hidden}'+
+ '.pic img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}.star{position:absolute;right:6px;bottom:6px;background:#ffd34d;color:#5a3d00;font-size:13px;font-weight:900;border-radius:999px;padding:3px 9px;box-shadow:0 2px 0 #d9a400}'+
+ 'h2{margin:8px 34px 4px;font-size:21px;line-height:1.3;word-break:keep-all}.t{margin:4px 0;font-size:15.5px;font-weight:700;line-height:1.5;color:#34407a;word-break:keep-all}'+
+ '.free{margin:8px 0 12px;font-size:14px;color:#56607a;line-height:1.5;word-break:keep-all}'+
+ '.go{display:block;width:100%;min-height:54px;border:0;border-radius:16px;background:#2f9e5b;color:#fff;font-size:18px;font-weight:900;box-shadow:0 4px 0 #1f7a43;cursor:pointer}'+
+ '.ask{display:block;width:100%;min-height:44px;margin-top:10px;border:0;background:none;color:#4656c8;font-size:14.5px;font-weight:800;text-decoration:underline;text-underline-offset:3px;cursor:pointer}'+
+ '.wide{width:min(460px,100%);text-align:left}.wide h2{margin:2px 40px 8px 0}.ctx{background:#f3f6ff;border-radius:14px;padding:10px 12px;font-size:14.5px;font-weight:700;color:#34407a;margin:6px 0 10px}'+
+ '.list{margin:6px 0 12px;padding:0;list-style:none;display:grid;gap:6px}.list li{font-size:14.5px;line-height:1.45;padding-left:24px;position:relative}.list li::before{content:"✓";position:absolute;left:4px;color:#2f9e5b;font-weight:900}'+
+ '.plans{display:grid;gap:8px;margin:8px 0}.plan{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;min-height:60px;border:2px solid #d7def0;border-radius:16px;background:#fff;padding:10px 14px;text-align:left;cursor:pointer;font:inherit;color:#1d2a4a}'+
+ '.plan.best{border-color:#4656c8;background:#f5f7ff}.plan b{font-size:16px}.plan span{font-size:13px;color:#56607a;display:block}.plan i{font-style:normal;font-size:17px;font-weight:900;white-space:nowrap}'+
+ '.plan:disabled{opacity:.55;cursor:default}.msg{min-height:20px;font-size:14px;font-weight:700;color:#b4232c;margin:4px 0}.msg.ok{color:#2b8a3e}'+
+ '.row{display:flex;flex-wrap:wrap;gap:4px 14px;margin:6px 0}.row button,.row a{min-height:44px;border:0;background:none;padding:0;color:#4656c8;font-size:14px;font-weight:800;text-decoration:underline;text-underline-offset:3px;cursor:pointer;display:inline-flex;align-items:center}'+
+ '.fine{font-size:12.5px;color:#6b7390;line-height:1.55;margin:8px 0 0}.code{display:flex;gap:8px;margin:6px 0}.code input{flex:1;min-width:0;min-height:48px;border:2px solid #d7def0;border-radius:12px;padding:0 12px;font-size:17px;font-weight:800;letter-spacing:1px;text-transform:uppercase}'+
+ '.code button{min-height:48px;border:0;border-radius:12px;background:#4656c8;color:#fff;font-weight:900;padding:0 16px;font-size:15px;cursor:pointer}'+
+ '.on{background:#e9f8ef;border-radius:14px;padding:12px;font-weight:800;color:#1f6b3e;margin:6px 0}'+
+ '.q{font-size:28px;font-weight:900;margin:8px 0}.gin{width:100%;min-height:52px;font-size:24px;font-weight:900;text-align:center;border:2px solid #d7def0;border-radius:14px}'+
+ 'button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid #ffb703;outline-offset:2px}'+
+ '@media (max-height:560px){.pic{width:96px;height:96px;font-size:48px}.card{padding:12px 14px}}';
+function layer(html,onClose){const host=document.createElement('div');host.setAttribute('data-mg-plus','');const root=host.attachShadow?host.attachShadow({mode:'open'}):host;
+ const st=document.createElement('style');st.textContent=CSS;root.appendChild(st);const bg=document.createElement('div');bg.className='bg';bg.setAttribute('role','dialog');bg.setAttribute('aria-modal','true');bg.innerHTML=html;root.appendChild(bg);(document.body||document.documentElement).appendChild(host);
+ const prev=document.activeElement,close=()=>{try{host.remove()}catch(e){}try{prev&&prev.focus&&prev.focus()}catch(e){}onClose&&onClose()};
+ root.querySelector('.bg').addEventListener('click',e=>{if(e.target.classList.contains('bg'))close()});host.addEventListener('keydown',e=>{if(e.key==='Escape'){e.stopPropagation();close()}});
+ const x=root.querySelector('.x');if(x)x.addEventListener('click',close);setTimeout(()=>{try{(root.querySelector('.go,.x')||{}).focus()}catch(e){}},40);
+ return {root,close,$:s=>root.querySelector(s)}}
+// ---- the child's lock card: a preview and a neutral line, no price
+let lockOpen=false;
+function lock(c){c=c||{};if(lockOpen)return false;lockOpen=true;
+ const pic=c.pic?`<img src="${esc(c.pic)}" alt="" onerror="this.remove()">`:'';
+ const L1=two(c.text)||T('다음 이야기는 문코치 Plus에서 열려요.','The next part opens with Coach Moon Plus.');
+ const F=two(c.free)||T('이달의 단원, 매일 목표, 다른 게임은 지금도 할 수 있어요.','This month’s units, daily goals and other games are open now.');
+ const w=layer(`<div class="card"><button class="x" type="button" aria-label="${T('닫기','Close')}">✕</button>
+  <div class="pic" aria-hidden="true">${esc(c.emoji||'🌙')}${pic}<span class="star">⭐ Plus</span></div>
+  <h2>${esc(two(c.title)||T('새로운 곳이 기다려요','Something new is waiting'))}</h2><p class="t">${esc(L1)}</p><p class="free">${esc(F)}</p>
+  <button class="go" type="button">▶ ${T('무료로 계속하기','Keep playing free')}</button>
+  <button class="ask" type="button">👨‍👩‍👧 ${T('어른에게 보여 주기','Show a grown-up')}</button></div>`,()=>{lockOpen=false;c.onClose&&c.onClose()});
+ w.$('.go').addEventListener('click',()=>{w.close();c.onFree&&c.onFree()});
+ w.$('.ask').addEventListener('click',()=>{w.close();parent(c.ctx)});return true}
+// shown once a day per game at a big moment (a boss beaten, a unit finished), only to players without Plus
+function tease(c){if(has()||!c||!c.game)return false;let s={};try{s=JSON.parse(localStorage.getItem(SEEN)||'{}')||{}}catch(e){}
+ if(s[c.game]===day())return false;s[c.game]=day();try{localStorage.setItem(SEEN,JSON.stringify(s))}catch(e){}return lock(c)}
+// ---- grown-up check: the app's mgGate (app-bridge.js); on the web a simple question
+function gate(cb,kind){if(typeof window.mgGate==='function'){window.mgGate(kind||'buy',ok=>cb(!!ok));return}
+ const a=12+Math.floor(Math.random()*17),b=6+Math.floor(Math.random()*4);
+ const w=layer(`<div class="card"><button class="x" type="button" aria-label="${T('닫기','Close')}">✕</button><h2>🔒 ${T('보호자 확인','Grown-ups only')}</h2>
+  <p class="free">${T('어린이는 보호자에게 보여 주세요. 아래 계산의 답을 입력해 주세요.','Kids: please show this to a grown-up. Type the answer below.')}</p>
+  <p class="q" aria-hidden="true">${a} × ${b} = ?</p><input class="gin" inputmode="numeric" autocomplete="off" aria-label="${T(a+' 곱하기 '+b,a+' times '+b)}"><p class="msg" aria-live="polite"></p>
+  <button class="go" type="button">${T('확인','Continue')}</button></div>`);
+ const go=()=>{if(w.$('.gin').value.trim()===String(a*b)){w.close();cb(true)}else{w.$('.msg').textContent=T('답이 달라요.','Not quite.');w.$('.gin').value=''}};
+ w.$('.go').addEventListener('click',go);w.$('.gin').addEventListener('keydown',e=>{if(e.key==='Enter')go()});setTimeout(()=>{try{w.$('.gin').focus()}catch(e){}},60)}
+function parent(ctx){if(has()&&mode!=='app'&&mode!=='test'){paywall(ctx);return}gate(ok=>{if(ok)paywall(ctx)})}
+// ---- the parent screen: what Plus opens, the store's prices, restore, licence code, the fine print
+const OPENS=()=>[T('수학 아쿠아리움: 1~6학년 수족관 120곳 모두','Math Aquarium: all 120 aquariums, grades 1–6'),T('코딩 섬: 파이썬 미션 84개와 보스 13명','Coding Island: all 84 Python missions and 13 bosses'),
+ T('체스 기사단: 보스 8명, 스파링, 대국 복기, 보스 코스, 레슨 57개','Chess Knights: all 8 bosses, sparring, game review, boss courses, 57 lessons'),T('과학·음악의 모든 세계와 단원, 꼬마 탐정의 모든 사건, 구슬 레이스의 모든 세계','Every science world and music unit, every detective case, every Marble Rush world'),
+ T('부모 리포트 전체: 과목별 분석, 틀린 문제, 집에서 돕기, 인쇄','The full parents’ report: subjects, missed questions, home plan, printing'),T('모든 수료증, 이 기기의 모든 아이 프로필','All certificates, and every child profile on this device')];
+const perLabel=p=>p.period==='month'?T('월간','Monthly'):T('연간','Yearly');
+const trialLabel=t=>{const m=/P(\d+)([DWMY])/.exec(t||'');if(!m)return '';const n=+m[1],u=m[2];if(u==='M'||u==='Y')return u==='M'?T(`${n}개월 무료 체험 뒤 결제`,`${n}-month free trial, then`):T(`${n}년 무료 체험 뒤 결제`,`${n}-year free trial, then`);const d=n*(u==='W'?7:1);return T(`${d}일 무료 체험 뒤 결제`,`${d}-day free trial, then`)};
+// in the app the notice page opens in the same view (a new window would go nowhere); on the web in a new tab
+const tgt=inApp?'':' target="_blank" rel="noopener"';
+function paywall(ctx){if(sheet){sheet.render();return}
+ const w=layer(`<div class="card wide"><button class="x" type="button" aria-label="${T('닫기','Close')}">✕</button><div class="body"></div></div>`,()=>{sheet=null});
+ let codeOpen=false,note='',good=false;
+ const buy=id=>{note='';if(mode==='test'){const o=get();o.store={active:true,product:id,until:Date.now()+(id==='monthly'?31:366)*864e5,trial:false,at:Date.now()};put(o);good=true;note=T('고마워요! Plus가 열렸어요.','Thank you! Plus is on.');emit();sheet&&sheet.render();return}
+  const n=N();if(mode==='app'&&n){pending=true;sheet.render();n.buy(id)}};
+ const render=()=>{const b=w.$('.body'),s=store(),l=lic(),ps=mode==='test'?FAKE():products;let h=`<h2>⭐ ${T('문코치 Plus','Coach Moon Plus')}</h2>`;
+  if(ctx)h+=`<p class="ctx">${esc(two(ctx))}</p>`;
+  if(has()){h+=`<div class="on">✅ ${mode==='open'||mode==='on'?T('이 웹사이트에서는 지금 모든 내용이 열려 있어요.','Everything is open on this website for now.'):l&&!s?T(`기관 코드로 Plus가 열려 있어요 (${l.until?l.until+'까지':'기한 없음'}).`,`Plus is on with an organization code (${l.until?'until '+l.until:'no end date'}).`):T('Plus를 쓰고 있어요. 고마워요!','Plus is on. Thank you!')}</div>`;
+   if(s&&s.until)h+=`<p class="fine">${T('다음 갱신일','Next renewal')}: ${esc(new Date(s.until).toLocaleDateString(lang()==='en'?'en-CA':'ko-KR'))}</p>`}
+  else{h+=`<p class="t" style="text-align:left">${T('Plus로 열리는 것','What Plus opens')}</p><ul class="list">${OPENS().map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`;
+   if(mode==='stores')h+=`<p class="ctx">${T('Plus는 앱에서 시작할 수 있어요. App Store나 Google Play에서 "문코치"를 찾아 주세요.','Plus starts in the app. Look for “Coach Moon” on the App Store or Google Play.')}</p>`;
+   else if(ps&&ps.length){const sorted=ps.slice().sort((a,b)=>(a.period==='year'?0:1)-(b.period==='year'?0:1));
+    h+=`<div class="plans">${sorted.map((p,i)=>`<button class="plan${i?'':' best'}" type="button" data-id="${esc(p.id)}"${pending?' disabled':''}><span><b>${perLabel(p)}${i?'':' · '+T('추천','best value')}</b><span>${esc(trialLabel(p.trial)||(p.period==='month'?T('매달 자동 갱신','Renews every month'):T('매년 자동 갱신','Renews every year')))}</span></span><i>${esc(p.price)}</i></button>`).join('')}</div>`}
+   else if(!msg)h+=`<p class="ctx">${mode==='app'?T('스토어에서 가격을 불러오고 있어요…','Loading prices from the store…'):T('이 웹사이트에서는 아직 Plus를 팔지 않아요.','Plus is not sold on this website yet.')}</p>`}
+  h+=`<p class="msg${good?' ok':''}" aria-live="polite">${esc(note||msg||(pending?T('스토어 화면을 기다리는 중이에요…','Waiting for the store…'):''))}</p>`;
+  h+=`<div class="row">${mode==='app'||mode==='test'?`<button type="button" data-a="restore">${T('구매 복원','Restore purchases')}</button>`:''}${s&&mode==='app'?`<button type="button" data-a="manage">${T('구독 관리·해지','Manage or cancel')}</button>`:''}<button type="button" data-a="code">${T('기관·가족 코드 입력','Enter an organization code')}</button></div>`;
+  if(codeOpen)h+=`<div class="code"><input class="cin" maxlength="24" autocomplete="off" aria-label="${T('코드','Code')}" placeholder="MOON-XXXX-XXXX-XXXX"><button type="button" data-a="redeem">${T('확인','Use')}</button></div>`;
+  h+=`<p class="fine">${T('구독은 선택한 기간(1개월 또는 1년)마다 자동으로 갱신되고, 결제는 App Store 또는 Google Play 계정으로 돼요. 다음 갱신 24시간 전까지 스토어의 구독 설정에서 해지하면 다음 결제가 되지 않아요. 무료 체험이 있는 지역에서는 체험이 끝나면 자동으로 결제돼요. 환불은 각 스토어의 정책을 따라요. Plus가 끝나도 아이가 얻은 기록과 물건은 그대로 남아요.','Subscriptions renew automatically each period (1 month or 1 year) and are charged to your App Store or Google Play account. Cancel in the store’s subscription settings at least 24 hours before renewal to stop the next charge. Where a free trial is offered, it turns into a paid subscription when it ends. Refunds follow each store’s policy. When Plus ends, your child keeps everything they earned.')}</p>
+   <div class="row"><a href="notice.html?lang=${lang()}#terms"${tgt}>${T('이용 조건','Terms of use')}</a><a href="notice.html?lang=${lang()}#privacy"${tgt}>${T('개인정보 처리방침','Privacy policy')}</a></div>`;
+  b.innerHTML=h;
+  b.querySelectorAll('.plan').forEach(x=>x.addEventListener('click',()=>buy(x.dataset.id)));
+  b.querySelectorAll('[data-a]').forEach(x=>x.addEventListener('click',()=>{const a=x.dataset.a,n=N();
+   if(a==='restore'){note='';if(mode==='test'){note=T('복원할 구매가 없어요.','No purchases to restore.');render();return}if(n){pending=true;render();n.restore()}}
+   else if(a==='manage'){n&&n.manage()}
+   else if(a==='code'){codeOpen=!codeOpen;render();setTimeout(()=>{try{w.$('.cin').focus()}catch(e){}},30)}
+   else if(a==='redeem'){const ok=redeem(w.$('.cin').value);good=ok;note=ok?T('코드가 확인됐어요. Plus가 열렸어요.','Code accepted. Plus is on.'):T('코드를 다시 확인해 주세요.','Please check the code.');if(ok)codeOpen=false;render()}}));
+  };
+ sheet={render,close:w.close};render()}
+function redeem(code){const c=norm(code);if(c.length<12)return false;const e=LIC[licHash(c)];if(!e||(e.until&&e.until<day()))return false;
+ const o=get();o.lic={org:e.org,until:e.until||'',at:Date.now()};put(o);emit();return true}
+window.mgPlus={get mode(){return mode},has,open,monthly,lock,tease,paywall,parent,gate,redeem,on(f){subs.push(f)},
+ state(){return {plus:has(),mode,store:store(),lic:lic(),products:mode==='test'?FAKE():products}},free:FREE}})();
+/*PLUS:END*/
 /*COACH:END*/
 function applyLang(){if(LANG!=='en')return;document.querySelectorAll('[data-en]').forEach(el=>{el.textContent=el.dataset.en});document.querySelectorAll('[data-en-html]').forEach(el=>{el.innerHTML=el.dataset.enHtml});for(const a of ['aria-label','placeholder','title'])document.querySelectorAll('[data-en-'+a+']').forEach(el=>el.setAttribute(a,el.getAttribute('data-en-'+a)))}
 function setLang(next){try{localStorage.setItem('moonGames.lang',next)}catch(e){}try{speechSynthesis.cancel()}catch(e){}const u=new URL(location.href);u.searchParams.set('lang',next);location.replace(u.href)}
@@ -383,6 +551,13 @@ main{width:min(980px,100%);margin:0 auto;padding:14px max(12px,env(safe-area-ins
 .chap.on{background:#fff;color:var(--ink);box-shadow:0 6px 16px rgba(0,0,0,.25)}
 .chap.locked{opacity:.55}
 .chap.final:not(.locked){background:linear-gradient(135deg,#8c3fb8,#2a2470)}
+/* Coach Moon Plus badges (only without Plus): ⭐ Plus on locked worlds, 🎁 on this month's free world */
+.plusb{display:inline-block;padding:2px 8px;border-radius:99px;background:#ffd34d;color:#5a3d00;font-size:11.5px;font-weight:900;font-style:normal;line-height:1.3;box-shadow:0 2px 0 #d9a400;white-space:nowrap;vertical-align:middle}
+.plusb.mo{background:#e3fbe9;color:#11673a;box-shadow:0 2px 0 #86d6a4}
+.chap .plusb{margin-top:3px;white-space:normal;text-align:center;max-width:100%}
+.chap.plus{opacity:.9}
+.banner .plusb{margin:0 0 6px 6px}
+.bot .plusb{margin-top:4px}
 .banner{position:relative;overflow:hidden;border-radius:24px;padding:18px;color:#fff;display:flex;gap:14px;align-items:center;box-shadow:0 12px 28px rgba(0,0,0,.25)}
 .banner .art{flex:0 0 auto;width:96px;height:96px;border-radius:20px;display:grid;place-items:center;font-size:62px;background:rgba(255,255,255,.2)}
 .banner .art .ei{width:96px;height:96px;border-radius:20px;object-fit:cover}
@@ -5313,22 +5488,48 @@ const save=()=>{ROOT.P[ROOT.cur]=S;try{localStorage.setItem(SAVE_KEY,JSON.string
 save();
 const totalStars=(s=S)=>Object.values(s.stars).reduce((a,b)=>a+b,0);
 const worldStars=w=>{let n=0;for(let k=0;k<STAGES;k++)n+=S.stars[w+'-'+k]||0;return n};
-const worldOpen=w=>w===0||S.bossWins.includes(w-1);
+// ---------------------------------------------------------------- 문코치 Plus / Coach Moon Plus (_src/plus/GAMES.md)
+// On every grade map the first world is free, and so is this month's world (mgPlus.monthly, idx 1-based on the map):
+// it opens out of order so a free child can go there. The other worlds, their labs, the concept-notebook topics that
+// only they teach, and the map's final boss need Plus. Locks are checked only when something starts (a store day, a
+// boss, a lab), never in the middle of a shop day or a battle. With Plus, or on the open web, nothing here changes.
+const NW=WORLDS.length;
+const wFree=w=>mgPlus.open('science','world',w+1,NW);
+const wMonthly=w=>!mgPlus.has()&&mgPlus.monthly('science','world',NW).includes(w+1);
+// a world the child already has stars in stays open (a month's free world they played, then Plus)
+const worldPlayed=w=>{for(let k=0;k<STAGES;k++)if(S.stars[w+'-'+k])return true;return false};
+const plusB=w=>mgPlus.has()?'':!wFree(w)?'<em class="plusb">⭐ Plus</em>':wMonthly(w)?`<em class="plusb mo">🎁 ${L('이달의 무료','Free this month')}</em>`:'';
+const GLAB={'1':['1~2학년','Grades 1–2'],g:['3학년','Grade 3'],'2':['4학년','Grade 4'],f:['5학년','Grade 5'],'3':['6학년','Grade 6']};
+const sciCert=gk=>{const g=GLAB[gk];if(g)try{LR.cert('sci-'+gk,[`${g[0]} 과학 지도 완주`,`${g[1]} science map complete`],'🔬')}catch(e){}};
+// the lock card for world w (or 'final'): its picture, what it teaches, what stays free, and one line for the parent
+function sciCard(w){const fin=w==='final',W=fin?null:WORLDS[w],g=GLAB[gradeOf(S.diff,!!S.gentle)]||GLAB['2'],n=S.bossWins.length,st=totalStars();
+ const m=mgPlus.monthly('science','world',NW).map(i=>WORLDS[i-1]).filter(Boolean)[0],nm=fin?FINAL.name:W.name;
+ return {game:'science',title:nm,pic:fin?FINAL.img:W.img,emoji:fin?FINAL.icon:W.icon,
+  text:fin?L(`${NW}개 세계의 과학이 모두 나오는 최종 대결은 문코치 Plus에서 열려요.`,`The final battle with every world’s science opens with Coach Moon Plus.`):L(`배울 것: ${W.topic}. 문코치 Plus에서 열려요.`,`You’ll learn: ${W.topic}. Opens with Coach Moon Plus.`),
+  free:L(`첫 세계${m?`와 이달의 세계(${m.name})`:''}, 오늘의 실험, 복습은 지금도 할 수 있어요.`,`The first world${m?` and this month’s world (${m.name})`:''}, the daily experiment and review are open now.`),
+  ctx:L(`${g[0]} 과학 지도: ${n?`보스 ${n}명을 이겼어요`:'첫 세계를 하고 있어요'} (별 ${st}개). 다음: ${fin?nm:`${w+1}번째 세계 ${nm}`}`,`${g[1]} science map: ${n?`beat ${n} boss${n===1?'':'es'}`:'on the first world'} (${st} stars). Next: ${fin?nm:`world ${w+1}, ${nm}`}`),
+  onFree:()=>{mapWorld=nextStage().w;go('map')}}}
+const sciLock=w=>mgPlus.lock(sciCard(w));
+// ?go=<gradeKey>-<worldId> (a teacher's task or the daily course, e.g. g-dir): that grade's map, that world
+const GO=(()=>{try{const v=new URLSearchParams(location.search).get('go')||'',m=/^([1g2f3])-([a-z]+)$/.exec(v),w=m?WORLDS.findIndex(x=>x.id===m[2]):-1;return w<0?null:{id:v,g:m[1],w}}catch(e){return null}})();
+const worldOpen=w=>w===0||S.bossWins.includes(w-1)||wMonthly(w)||worldPlayed(w);
 const stageOpen=(w,k)=>worldOpen(w)&&(k===0||(S.stars[w+'-'+(k-1)]||0)>0);
 const bossOpen=w=>worldOpen(w)&&(S.stars[w+'-'+(STAGES-1)]||0)>0;
 const finalOpen=()=>WORLDS.every((_,i)=>S.bossWins.includes(i));
 const availCards=w=>CARDS.filter(c=>c.w===w&&cardOk(c));
 const unlockedCards=()=>CARDS.filter(c=>S.cards[c.id]);
 const goldCards=()=>CARDS.filter(c=>S.cards[c.id]&&tierOf(S.cards[c.id].m)===3).length;
+// the next thing to play: worlds open in order (without Plus, only the free ones count), then the final, then 3 stars
 function nextStage(){
  for(let w=0;w<WORLDS.length;w++){
-  if(!worldOpen(w))break;
+  if(!worldOpen(w)||!wFree(w))continue;
   for(let k=0;k<STAGES;k++)if(!(S.stars[w+'-'+k]>0))return {w,s:k};
   if(!S.bossWins.includes(w))return {w,boss:true};
  }
- if(finalOpen()&&!S.finalWin)return {w:WORLDS.length-1,final:true};
- for(let w=0;w<WORLDS.length;w++)for(let k=0;k<STAGES;k++)if((S.stars[w+'-'+k]||0)<3)return {w,s:k};
- return {w:WORLDS.length-1,s:STAGES-1,all:true};
+ if(finalOpen()&&!S.finalWin&&mgPlus.has())return {w:WORLDS.length-1,final:true};
+ let last=0;
+ for(let w=0;w<WORLDS.length;w++){if(!worldOpen(w)||!wFree(w))continue;last=w;for(let k=0;k<STAGES;k++)if((S.stars[w+'-'+k]||0)<3)return {w,s:k}}
+ return {w:last,s:STAGES-1,all:true};
 }
 
 // ---------------------------------------------------------------- parents' learning report (report.html reads it through LR; rules in _src/report/SPEC.md)
@@ -5926,9 +6127,9 @@ function renderMap(){
  const fin=finalOpen(),gk=gradeOf(S.diff,!!S.gentle),gm=k=>k===gk?S:(S.mapBy&&S.mapBy[k])||{};
  const tabs=`<div class="gtabs" role="tablist" aria-label="${esc(L('학년별 지도','Map for each grade'))}">${DIFF_LIST().map(d=>{const k=String(d.id),m=gm(k);
   return `<button type="button" role="tab" aria-selected="${k===gk}" class="${k===gk?'on':''}" data-grade="${k}"><span>${d.icon}</span><b>${esc(d.name)}</b><small>${m.finalWin?'👑':`🏆 ${(m.bossWins||[]).length}/${WORLDS.length}`}</small></button>`}).join('')}</div>`;
- $('v-map').innerHTML=tabs+`<div class="chapters">${WORLDS.map((x,i)=>`<button class="chap ${i===w?'on':''} ${worldOpen(i)?'':'locked'}" type="button" data-world="${i}"><span class="ic">${worldOpen(i)?pic(x.img,x.icon):'🔒'}</span><b>${esc(x.name)}</b><small>⭐ ${worldStars(i)}/${STAGES*3}${S.bossWins.includes(i)?' 👑':''}</small></button>`).join('')}
-  <button class="chap final ${fin?'':'locked'}" type="button" data-final><span class="ic">${fin?pic(FINAL.img,FINAL.icon):'🔒'}</span><b>${esc(FINAL.name)}</b><small>${S.finalWin?'👑':L('최종 보스','Final boss')}</small></button></div>
- <div class="banner" style="background:${W.grad}"><div class="art">${pic(W.img,W.icon)}</div><div><h2>${w+1}. ${esc(W.name)}</h2><span class="skill">🔬 ${esc(W.topic)}</span>
+ $('v-map').innerHTML=tabs+`<div class="chapters">${WORLDS.map((x,i)=>{const pl=!wFree(i),op=worldOpen(i);return `<button class="chap ${i===w?'on':''} ${pl?'plus':op?'':'locked'}" type="button" data-world="${i}"><span class="ic">${op||pl?pic(x.img,x.icon):'🔒'}</span><b>${esc(x.name)}</b><small>⭐ ${worldStars(i)}/${STAGES*3}${S.bossWins.includes(i)?' 👑':''}</small>${plusB(i)}</button>`}).join('')}
+  <button class="chap final ${fin?'':'locked'}" type="button" data-final><span class="ic">${fin?pic(FINAL.img,FINAL.icon):'🔒'}</span><b>${esc(FINAL.name)}</b><small>${S.finalWin?'👑':L('최종 보스','Final boss')}</small>${mgPlus.has()?'':'<em class="plusb">⭐ Plus</em>'}</button></div>
+ <div class="banner" style="background:${W.grad}"><div class="art">${pic(W.img,W.icon)}</div><div><h2>${w+1}. ${esc(W.name)}</h2><span class="skill">🔬 ${esc(W.topic)}</span>${plusB(w)}
   <div class="prog">⭐ ${worldStars(w)}/${STAGES*3} · ${S.bossWins.includes(w)?L('👑 보스 격파!','👑 Boss defeated!'):open?L(`보스: ${W.boss.name}`,`Boss: ${W.boss.name}`):L('🔒 이전 지역의 보스를 이기면 열려요','🔒 Beat the previous boss to open')}</div>
   <button class="btn small ghost learn" type="button" data-cards="${w}">📚 ${L('이 지역 과학 카드','This world’s cards')} ${availCards(w).filter(c=>S.cards[c.id]).length}/${availCards(w).length}</button></div></div>
  <div class="path" style="height:${H}px"><svg viewBox="0 0 100 ${H}" preserveAspectRatio="none"><path vector-effect="non-scaling-stroke" d="${pts.map(([x,y],k)=>(k?'L':'M')+x+' '+y).join(' ')}"/></svg>${nodes}</div>`;
@@ -5939,9 +6140,10 @@ $('v-map').addEventListener('click',e=>{
  const gt=e.target.closest('[data-grade]');
  if(gt){const k=gt.dataset.grade;if(k!==gradeOf(S.diff,!!S.gentle)){SFX.click();setDiff(kId(k))}return}
  const cp=e.target.closest('[data-world]'),st=e.target.closest('[data-stage]'),bs=e.target.closest('[data-boss]'),cd=e.target.closest('[data-cards]'),fn=e.target.closest('[data-final]');
- if(cp){SFX.click();const i=+cp.dataset.world;if(!worldOpen(i)){toast('🔒 '+L('이전 지역의 보스를 이기면 열려요!','Beat the previous boss to open this world!'));return}mapWorld=i;S.lastWorld=i;save();renderMap();return}
+ if(cp){SFX.click();const i=+cp.dataset.world;if(!wFree(i)){sciLock(i);return}if(!worldOpen(i)){toast('🔒 '+L('이전 지역의 보스를 이기면 열려요!','Beat the previous boss to open this world!'));return}mapWorld=i;S.lastWorld=i;save();renderMap();return}
  if(fn){if(!finalOpen()){toast('🔒 '+L(`${WORLDS.length}개 지역의 보스를 모두 이기면 나타나요!`,`Appears after you beat all ${WORLDS.length} bosses!`));return}SFX.click();finalIntro();return}
  if(cd){SFX.click();cardsFrom='map';cardsWorld=+cd.dataset.cards;go('cards');return}
+ if((st||bs)&&!wFree(mapWorld)){SFX.click();sciLock(mapWorld);return}
  if(st){const k=+st.dataset.stage;if(!stageOpen(mapWorld,k)){toast('🔒 '+L('앞 스테이지를 먼저 깨요!','Clear the stage before it first!'));return}SFX.click();startStage(mapWorld,k);return}
  if(bs){if(!bossOpen(+bs.dataset.boss)){toast('🔒 '+L(`스테이지 ${STAGES}개를 모두 깨면 보스가 나타나요!`,`Clear all ${STAGES} stages to meet the boss!`));return}SFX.click();bossIntro(+bs.dataset.boss)}
 });
@@ -6855,7 +7057,9 @@ function sciLesson(tp,first=[]){const b=BUDDIES[S.equip.buddy]||BUDDIES.puppy;
 // play the lessons of the new cards' topics (each once, at most two a day), then go on
 function sciLessonsFor(ids,then){const tps=[];ids.forEach(id=>{const tp=topicOfCard(id);if(tp&&!tps.includes(tp)&&!MiniLesson.seen('sg:'+tp.id))tps.push(tp)});
  const list=tps.slice(0,2),step=()=>{const tp=list.shift();if(!tp){then();return}const ls=sciLesson(tp,ids);if(!ls.steps.length){step();return}MiniLesson.before(ls,step)};step()}
-function openSciBook(){MiniLesson.book({title:['과학 개념 노트','Science concept notebook'],groups:SG_AREAS.map(a=>({name:a[1]+' '+T(a[2]),items:SG_TOPICS.filter(tp=>tp.area===a[0]&&tp.cards.some(id=>cardOk(CARD[id]))).map(tp=>({id:'sg:'+tp.id,icon:icon(CARD[tp.cards[0]].icon),title:tp.name,key:LEARN[tp.cards[0]]?[T(LEARN[tp.cards[0]].thanks)]:[],lesson:()=>sciLesson(tp)}))})).filter(g=>g.items.length)})}
+// without Plus, a topic taught only in locked worlds (and not watched yet) shows ⭐ Plus and opens the lock card
+const tpLockW=tp=>{if(mgPlus.has()||MiniLesson.seen('sg:'+tp.id))return -1;const ws=tp.cards.filter(id=>cardOk(CARD[id])).map(id=>CARD[id].w);return ws.length&&!ws.some(wFree)?ws[0]:-1};
+function openSciBook(){MiniLesson.book({title:['과학 개념 노트','Science concept notebook'],groups:SG_AREAS.map(a=>({name:a[1]+' '+T(a[2]),items:SG_TOPICS.filter(tp=>tp.area===a[0]&&tp.cards.some(id=>cardOk(CARD[id]))).map(tp=>{const lw=tpLockW(tp);return {id:'sg:'+tp.id,icon:icon(CARD[tp.cards[0]].icon),title:lw<0?tp.name:tp.name+' ⭐ Plus',key:LEARN[tp.cards[0]]?[T(LEARN[tp.cards[0]].thanks)]:[],lesson:lw<0?()=>sciLesson(tp):()=>{MiniLesson.close();sciLock(lw);return null}}})})).filter(g=>g.items.length)})}
 
 // ---------------------------------------------------------------- play sessions (battles, review, daily, labs)
 let PS=null;
@@ -6877,6 +7081,7 @@ const poolOf=ids=>QALL.filter(q=>ids.includes(q.c)&&qOk(q));
 // with the easiest question on each new card and mixes them with the stage's other learned cards.
 const regulars=(ids,n)=>ids.filter(id=>S.cards[id]&&LEARN[id]).sort((a,b)=>(S.weak[b]?1:0)-(S.weak[a]?1:0)||(S.cards[a].m||0)-(S.cards[b].m||0)).slice(0,n);
 function startStage(w,s){
+ if(!wFree(w)){sciLock(w);return}
  const {focus,fresh}=stageFocus(w,s),W=WORLDS[w];
  mapWorld=w;
  const want=[...fresh,...focus].filter((id,i,a)=>a.indexOf(id)===i&&!S.cards[id]).slice(0,3),foe={icon:W.mon.icon,img:W.mon.img,name:W.mon.name,hi:W.mon.hi,hp:D().mon};
@@ -6884,6 +7089,7 @@ function startStage(w,s){
  sciLessonsFor(want,()=>shopOpen(day,()=>startSession({mode:'stage',w,s,pool:poolOf(learnedOf(focus)),fresh:want,fixed:firstQs(want),grad:W.grad,title:`${W.icon} ${L(`스테이지 ${w+1}-${s+1}`,`Stage ${w+1}-${s+1}`)}`,foe}),{grad:W.grad,foe}));
 }
 function bossIntro(w){
+ if(!wFree(w)){sciLock(w);return}
  const W=WORLDS[w],b=W.boss;
  modal(`<div class="bossart" style="background:${W.grad}">${pic(b.img,b.icon)}</div><h2>${esc(b.name)}</h2><div class="speech">“${esc(b.hi)}”</div>
   <p>${L(`${W.name}에서 배운 과학으로 물리쳐요! 실험 문제도 나와요.`,`Use everything you learned in ${W.name}! Lab challenges are coming too.`)}</p>
@@ -6892,6 +7098,7 @@ function bossIntro(w){
   sciLessonsFor(want,()=>shopOpen([...want,...regulars(ids,want.length>=3?0:want.length?1:2)],()=>startSession({mode:'boss',w,pool:poolOf(learnedOf(ids)),fresh:want,fixed:firstQs(want),grad:W.grad,title:`👑 BOSS`,foe}),{grad:W.grad,foe}))}},onOpen:()=>speak(b.hi)});
 }
 function finalIntro(){
+ if(!mgPlus.has()){sciLock('final');return}
  modal(`<div class="bossart" style="background:${FINAL.grad}">${pic(FINAL.img,FINAL.icon)}</div><h2>${esc(FINAL.name)}</h2><div class="speech">“${esc(FINAL.hi)}”</div>
   <p>${L(`${WORLDS.length}개 지역에서 배운 모든 과학이 나와요. 진짜 과학으로 헷갈 박사를 막아요!`,'Every world’s science comes back. Stop Dr. Mix-Up with real science!')}</p>
   <div class="row"><button class="btn red" type="button" data-act="go">⚔️ ${L('최종 대결!','Final battle!')}</button></div>`,
@@ -6923,7 +7130,7 @@ function startDaily(){
  {acts:{go:()=>()=>startSession({mode:'daily',pool,fixed,grad:WORLDS[w].grad,title:`📅 ${L('오늘의 실험','Daily')}`,practice:done,foe:{icon:WORLDS[w].mon.icon,img:WORLDS[w].mon.img,name:WORLDS[w].mon.name,hi:WORLDS[w].mon.hi,hp:5}})}});
 }
 function startCardPractice(id){const c=CARD[id],W=WORLDS[c.w];startSession({mode:'card',pool:poolOf([id]),cards:[id],grad:W.grad,title:`🎯 ${c.title}`,foe:{icon:W.mon.icon,img:W.mon.img,name:W.mon.name,hi:W.mon.hi,hp:3}})}
-function startLab(id){const lab=LABS.find(x=>x.id===id);startSession({mode:'lab',lab,pool:lab.items.filter(q=>qOk(q)).length?lab.items.filter(q=>qOk(q)):lab.items.filter(q=>q.l===Math.min(...lab.items.map(x=>x.l))),grad:'linear-gradient(135deg,#2a9df4,#12507e)',title:`${lab.icon} ${lab.name}`,foe:null})}
+function startLab(id){const lab=LABS.find(x=>x.id===id);if(lab&&!wFree(lab.w)){sciLock(lab.w);return}startSession({mode:'lab',lab,pool:lab.items.filter(q=>qOk(q)).length?lab.items.filter(q=>qOk(q)):lab.items.filter(q=>q.l===Math.min(...lab.items.map(x=>x.l))),grad:'linear-gradient(135deg,#2a9df4,#12507e)',title:`${lab.icon} ${lab.name}`,foe:null})}
 
 function startSession(cfg){
  const d=D(),buddy=S.equip.buddy;
@@ -7172,12 +7379,16 @@ function finish(){
  }
  S.wins++;track('win');SFX.win();celebrate();
  const mistakes=P.wrong-P.blocked+Math.floor((P.retries||0)/2),stars=mistakes<=0?3:mistakes===1?2:1;S.lossRun=0;S.easyRun=S.diff===1&&stars===3?(S.easyRun||0)+1:0;const goUp=S.diff===1&&S.easyRun>=3;
- let coins=0,xp=20+P.right*5,extra='',title=L('승리!','Victory!'),sub='',next=null;
+ let coins=0,xp=20+P.right*5,extra='',title=L('승리!','Victory!'),sub='',next=null,teaseW=-1,goDone=false;
  if(P.mode==='stage'){const key=P.w+'-'+P.s,prev=S.stars[key]||0;coins=Math.round((15+stars*10)*mult)+(prev?0:30);if(stars>prev)S.stars[key]=stars;if(stars===3)track('star3');
   next=P.s<STAGES-1?{label:L('다음 스테이지 ▶','Next stage ▶'),fn:()=>startStage(P.w,P.s+1)}:{label:L('보스에게 도전! ▶','Fight the boss! ▶'),fn:()=>bossIntro(P.w)};sub=L(`스테이지 ${P.w+1}-${P.s+1} 클리어`,`Stage ${P.w+1}-${P.s+1} cleared`)}
  else if(P.mode==='boss'){const first=!S.bossWins.includes(P.w);coins=Math.round((80+P.w*20)*mult)+(first?150+P.w*50:0);xp+=60;if(first){S.bossWins.push(P.w);extra=P.w<WORLDS.length-1?`<span class="item">🗺️ ${L('새 지역','New world')}: ${esc(WORLDS[P.w+1].name)}</span>`:`<span class="item">🦹 ${L('최종 보스가 나타났어요!','The final boss appears!')}</span>`}
-  title=L('보스 격파!','Boss defeated!');sub=esc(P.foe.lose||'');next=P.w<WORLDS.length-1?{label:L('새 지역으로 ▶','To the new world ▶'),fn:()=>{mapWorld=P.w+1;go('map')}}:{label:L('최종 대결로 ▶','To the final battle ▶'),fn:()=>finalIntro()}}
- else if(P.mode==='final'){const first=!S.finalWin;P.firstFinal=first;S.finalWin=true;coins=Math.round(150*mult)+(first?500:0);xp+=120;title=L('헷갈 박사를 막았어요!','You stopped Dr. Mix-Up!');sub=esc(FINAL.lose)}
+  // Plus: the first time a boss falls and the next world is locked, its preview card comes after the chest (once a day)
+  if(first&&P.w+1<NW&&!wFree(P.w+1))teaseW=P.w+1;
+  // a world opened by ?go= is cleared: tell the report, and offer the way back to the main page
+  if(GO&&GO.w===P.w&&GO.g===gradeOf(S.diff,!!S.gentle)){goDone=true;try{LR.done(GO.id)}catch(e){}}
+  title=L('보스 격파!','Boss defeated!');sub=esc(P.foe.lose||'');next=P.w<WORLDS.length-1?{label:L('새 지역으로 ▶','To the new world ▶'),fn:()=>{mapWorld=P.w+1;go('map');if(teaseW>=0)mgPlus.tease(sciCard(teaseW))}}:{label:L('최종 대결로 ▶','To the final battle ▶'),fn:()=>finalIntro()}}
+ else if(P.mode==='final'){const first=!S.finalWin;P.firstFinal=first;S.finalWin=true;sciCert(gradeOf(S.diff,!!S.gentle));coins=Math.round(150*mult)+(first?500:0);xp+=120;title=L('헷갈 박사를 막았어요!','You stopped Dr. Mix-Up!');sub=esc(FINAL.lose)}
  else if(P.mode==='review'){coins=Math.round(P.right*12*mult);track('review');title=L('복습 완료!','Review complete!')}
  else if(P.mode==='daily'){if(!P.practice){const y=new Date();y.setDate(y.getDate()-1);S.daily.streak=S.daily.last===dayKey(y)?S.daily.streak+1:1;S.daily.last=dayKey();S.daily.day=dayKey();S.daily.done=true;coins=Math.round((80+10*Math.min(10,S.daily.streak))*mult);xp+=30;track('daily');sub=L(`오늘의 실험 성공! 연속 ${S.daily.streak}일`,`Daily experiment won! ${S.daily.streak}-day streak`)}else{coins=0;sub=L('연습 완료!','Practice complete!')}}
  else if(P.mode==='card'){coins=Math.round(P.right*5*mult);title=L('연습 끝!','Practice done!')}
@@ -7187,8 +7398,8 @@ function finish(){
   <p class="sub">${L(`정답 ${P.right} · 오답 ${P.wrong} · 최고 콤보 ${P.maxCombo}`,`${P.right} right · ${P.wrong} wrong · best combo ${P.maxCombo}`)}</p>${coachLine(P.mode==='boss'||P.mode==='final'?'big':'up')}
   ${rewardChips(r,extra)}${goUp?`<div class="gentle"><p>🍀 ${L('1~2학년 단계를 척척 깨고 있어요! 한 단계 위 <b>3학년</b>에 도전해 볼까요?','You’re breezing through grades 1–2! Ready for <b>Grade 3</b>?')}</p><button class="btn gold" type="button" data-act="up">🍀 ${L('3학년으로 올리기','Move up to Grade 3')}</button></div>`:''}${newCards.length&&!learnCheckHTML(P)?`<div class="mons sm">${newCards.slice(0,10).map(id=>`<span>${icon(CARD[id].icon)}</span>`).join('')}</div><p class="sub">${L(`이번에 연습한 과학 카드 ${newCards.length}장`,`${newCards.length} science card${newCards.length===1?'':'s'} practiced`)}</p>`:''}${learnCheckHTML(P)}${mistakesHTML(P.mistakes)}
   ${missedCards(P).length&&P.mode!=='review'?`<button class="btn ghost small ls-again" type="button" data-act="relearn">🏪 ${L('헷갈린 카드 가게에서 다시 배우기','Relearn the tricky cards in the shop')}</button>`:''}
-  <div class="row">${next?`<button class="btn ghost" type="button" data-act="out">${L('지도','Map')}</button><button class="btn green" type="button" data-act="next">${next.label}</button>`:`<button class="btn ghost" type="button" data-act="again">🔁 ${L('다시 하기','Play again')}</button><button class="btn green" type="button" data-act="out">${L('좋아요!','Great!')}</button>`}</div>`,
- {closable:false,acts:{relearn:()=>()=>chestThen(P,stars,()=>shopOpen(missedCards(P),()=>go(backView2(P)),{mode:'review',grad:P.grad})),next:()=>()=>chestThen(P,stars,()=>next.fn()),out:()=>()=>chestThen(P,stars,()=>go(backView2(P))),again:()=>()=>chestThen(P,stars,()=>retry(P)),up:b=>{setDiff('g');S.easyRun=0;save();b.closest('.gentle').innerHTML=`<p>🍀 ${L('3학년으로 바꿨어요! 다음 판부터 새 문제가 나와요.','Switched to Grade 3! New questions from the next battle.')}</p>`;return false}},onOpen:b=>{if(P.mode==='stage')b.querySelectorAll('.bigstars span').forEach((s,i)=>{if(i<stars)setTimeout(()=>{s.classList.add('in');SFX.star(i)},300+i*260)});if(r.coins)setTimeout(()=>flyCoins(b.querySelector('.rewards'),r.coins),500);speak(title+' '+(P.foe.lose||''))}});
+  <div class="row">${goDone?`<button class="btn ghost" type="button" data-act="main">🏠 ${L('메인 화면으로','Main page')}</button>`:''}${next?`<button class="btn ghost" type="button" data-act="out">${L('지도','Map')}</button><button class="btn green" type="button" data-act="next">${next.label}</button>`:`<button class="btn ghost" type="button" data-act="again">🔁 ${L('다시 하기','Play again')}</button><button class="btn green" type="button" data-act="out">${L('좋아요!','Great!')}</button>`}</div>`,
+ {closable:false,acts:{relearn:()=>()=>chestThen(P,stars,()=>shopOpen(missedCards(P),()=>go(backView2(P)),{mode:'review',grad:P.grad})),next:()=>()=>chestThen(P,stars,()=>next.fn()),out:()=>()=>chestThen(P,stars,()=>{if(teaseW<0){go(backView2(P));return}mapWorld=teaseW;go('map');mgPlus.tease(sciCard(teaseW))}),main:()=>()=>chestThen(P,stars,()=>{location.href='index.html?lang='+LANG}),again:()=>()=>chestThen(P,stars,()=>retry(P)),up:b=>{setDiff('g');S.easyRun=0;save();b.closest('.gentle').innerHTML=`<p>🍀 ${L('3학년으로 바꿨어요! 다음 판부터 새 문제가 나와요.','Switched to Grade 3! New questions from the next battle.')}</p>`;return false}},onOpen:b=>{if(P.mode==='stage')b.querySelectorAll('.bigstars span').forEach((s,i)=>{if(i<stars)setTimeout(()=>{s.classList.add('in');SFX.star(i)},300+i*260)});if(r.coins)setTimeout(()=>flyCoins(b.querySelector('.rewards'),r.coins),500);speak(title+' '+(P.foe.lose||''))}});
  if(P.firstFinal)modal(`<div class="cert"><div class="ct">🏅 ${L('과학 수호대 수료증','Science Guardian Certificate')}</div><div class="cn">${avatarHTML()}<b>${esc(S.name)}</b></div>
   <p>${L(`위 대원은 진짜 과학으로 헷갈 박사를 막고 ${WORLDS.length}개 지역을 모두 지켜 냈기에 이 수료증을 드립니다.`,`For stopping Dr. Mix-Up with real science and protecting all ${WORLDS.length} worlds, this certificate is proudly given to the guardian above.`)}</p>
   <div class="cd">${dayKey()} · ${D().icon} ${esc(D().name)}</div></div>${coachLine('big')}<p>${S.diff===3&&!isFive(S)?L('이제 모든 카드를 골드로 만들어 보세요!','Next, turn every card gold!'):L('이제 다음 학년 단계에도 도전해 보세요!','Next, try the next grade up!')}</p><div class="row"><button class="btn gold" type="button" data-act="close">🎉 ${L('만세!','Hooray!')}</button></div>`,{onOpen:()=>{celebrate('fireworks');speak(L('축하해요! 진짜 과학 수호대가 되었어요!','Congratulations! You are a true Science Guardian!'))}});
@@ -7248,9 +7459,9 @@ function speedEnd(){
 // ---------------------------------------------------------------- labs list
 function renderLabs(){
  $('v-labs').innerHTML=`<h2 class="section-title">🔬 ${L('실험실','Science labs')}</h2><p class="hintp">${L('하트 걱정 없이 마음껏 실험해요. 성공할 때마다 코인 +3 (하루 60개까지)','Experiment freely with no hearts to lose. +3 coins per success (up to 60 a day).')}</p>${safeNote('safe',L('여기 실험은 화면 놀이예요. 진짜로 해 볼 때는 꼭 어른과 함께해요.','These labs happen on screen. To try one for real, always do it with a grown-up.'),null,'labsafe')}
- <div class="grid2">${LABS.map(l=>{const open=worldOpen(l.w);return `<button class="bot ${open?'':'locked'}" type="button" data-lab="${l.id}"><span class="pt" style="background:${WORLDS[l.w].grad}">${l.icon}</span><span><b>${esc(l.name)}</b><small>${WORLDS[l.w].icon} ${esc(WORLDS[l.w].name)}</small>${open?'':`<small>🔒 ${L(`${WORLDS[l.w].name}에 가면 열려요`,`Opens in ${WORLDS[l.w].name}`)}</small>`}</span></button>`}).join('')}</div>`;
+ <div class="grid2">${LABS.map(l=>{const open=worldOpen(l.w);return `<button class="bot ${open?'':'locked'}" type="button" data-lab="${l.id}"><span class="pt" style="background:${WORLDS[l.w].grad}">${l.icon}</span><span><b>${esc(l.name)}</b><small>${WORLDS[l.w].icon} ${esc(WORLDS[l.w].name)}</small>${open?'':`<small>🔒 ${L(`${WORLDS[l.w].name}에 가면 열려요`,`Opens in ${WORLDS[l.w].name}`)}</small>`}${wFree(l.w)?'':'<em class="plusb">⭐ Plus</em>'}</span></button>`}).join('')}</div>`;
 }
-$('v-labs').addEventListener('click',e=>{const b=e.target.closest('[data-lab]');if(!b)return;const l=LABS.find(x=>x.id===b.dataset.lab);if(!worldOpen(l.w)){toast('🔒 '+L('그 지역을 먼저 열어요!','Open that world first!'));return}SFX.click();startLab(l.id)});
+$('v-labs').addEventListener('click',e=>{const b=e.target.closest('[data-lab]');if(!b)return;const l=LABS.find(x=>x.id===b.dataset.lab);if(!wFree(l.w)){SFX.click();sciLock(l.w);return}if(!worldOpen(l.w)){toast('🔒 '+L('그 지역을 먼저 열어요!','Open that world first!'));return}SFX.click();startLab(l.id)});
 
 // ---------------------------------------------------------------- shop
 let shopTab='items';
@@ -7469,6 +7680,19 @@ if(S.intro&&!S.shopIntro){S.shopIntro=true;save();modal(`<div style="font-size:6
   <div class="row"><button class="btn ghost" type="button" data-act="close">${L('나중에','Later')}</button><button class="btn gold" type="button" data-act="store">🏪 ${L('가게 열기','Open the store')}</button></div>`,{acts:{store:()=>()=>goNext()}})}
 window.addEventListener('beforeunload',()=>save());
 try{LR.set(sgReport)}catch(e){}
+// Coach Moon Plus: certificates for grade maps finished before, redraw when Plus changes, and the ?go= link
+if(S.finalWin)sciCert(gradeOf(S.diff,!!S.gentle));Object.entries(S.mapBy||{}).forEach(([k,m])=>{if(m&&m.finalWin)sciCert(k)});
+mgPlus.on(()=>{if(VIEW==='home')renderHome();else if(VIEW==='map')renderMap();else if(VIEW==='labs')renderLabs()});
+// the link waits until the start-up windows (new player, daily reward…) are closed; if the child starts something
+// else first, it lets go. A locked world shows its lock card; an open one starts its next store day or its boss.
+if(GO){let n=0;const tm=setInterval(()=>{if(++n>1500){clearInterval(tm);return}if(CUR||!S.intro||MiniLesson.on)return;clearInterval(tm);if(VIEW!=='home'&&VIEW!=='map')return;
+ if(gradeOf(S.diff,!!S.gentle)!==GO.g)setDiff(kId(GO.g));
+ const w=GO.w;mapWorld=w;go('map');
+ if(!wFree(w)){sciLock(w);return}
+ if(!worldOpen(w)){toast('🔒 '+L('이전 지역의 보스를 이기면 열려요!','Beat the previous boss to open this world!'));return}
+ S.lastWorld=w;save();
+ for(let k=0;k<STAGES;k++)if(!(S.stars[w+'-'+k]>0)){startStage(w,k);return}
+ if(!S.bossWins.includes(w))bossIntro(w)},400)}
 
 // For browser verification
 window.__sciTest={get:()=>S,root:()=>ROOT,set:o=>{Object.assign(S,o);save();updateHud()},ps:()=>PS,sp:()=>SP,QALL,CARD,CH,SIMS,LABS,go,startStage,bossIntro,finalIntro,startReview,startDaily,startLab,speedBegin,finish,

@@ -14,6 +14,168 @@
 /* Language: ?lang=ko|en, then the saved choice, then the device language. Shared by every page on this site. */
 const LANG=(()=>{let q=null,s=null;try{q=new URLSearchParams(location.search).get('lang')}catch(e){}try{s=localStorage.getItem('moonGames.lang')}catch(e){}const l=q==='ko'||q==='en'?q:s==='ko'||s==='en'?s:/^ko/i.test(navigator.language||'')?'ko':'en';if(q===l){try{localStorage.setItem('moonGames.lang',l)}catch(e){}}document.documentElement.lang=l;return l})();
 const L=(ko,en)=>LANG==='en'?en:ko;
+/*PLUS:BEGIN*/
+// mgPlus: 문코치 Plus / Coach Moon Plus, the paid part. The same code is in every game (inside the coach block),
+// index.html and report.html. Source: _src/coach/plus.js, copied by _src/coach/inject.py.
+// Who sells Plus:
+//  · In the Android/iOS app, the store (Google Play Billing / StoreKit 2). app-bridge.js gives mgBillingNative
+//    {query,buy,restore,manage}; the native side reports with window.mgPlusUpdate(state), where state is
+//    {active, product, until (ms or null), trial, products:[{id:'yearly'|'monthly', price, period:'year'|'month',
+//    trial:'P7D'|null}], msg, pending}.
+//  · On the web, WEB_SALE says what happens: 'open' = nothing is locked (now: the family's site before launch);
+//    'stores' = the web locks like the app and the parent screen points to the app stores; 'web' = a later web sale
+//    with accounts on a server (not built: it would plug in where mgBillingNative does).
+//  · An organization licence code (hagwon, school, family) opens Plus on one device. LIC holds only hashes of the
+//    codes; the codes themselves live in _src/plus/ (never in the repo).
+// Free for everyone: the front of each game (FREE), this month's free units (MONTHLY, rotating with the school year),
+// daily goals and every parent tool. Plus: everything else, the full parents' report and all certificates.
+// Kids' category rules: the child never sees a price or a buy button. A lock shows a neutral preview card with
+// "keep playing free"; buying happens only on the parent screen behind the grown-up check (mgGate). Locks are only
+// checked when something starts, never in the middle of an activity. Nothing earned or bought is taken away.
+// API: mgPlus.has() · open(game,kind,idx,total) · monthly(game,kind,total) · lock(card) · tease(card) ·
+//      paywall(ctx) · parent(ctx) (grown-up check, then paywall) · gate(cb,kind) (the grown-up check alone; kind picks
+//      its line: 'buy', 'report', 'settings', 'share', 'link') · redeem(code) ·
+//      on(fn) · state() · mode
+// Testing on the web: ?plus=lock (locks like the app, with a pretend store), ?plus=on (Plus on), ?plus=off (back).
+(()=>{if(window.mgPlus)return;
+const WEB_SALE='open';
+const KEY='moonGames.plus',SEEN='moonGames.plusSeen';
+// game → kind → how many from the start are free (idx is 1-based in the game's own order)
+const FREE={math:{tank:5},science:{world:1},coding:{world:2},music:{unit:2},chess:{boss:4,lesson:15,ladder:1},detective:{area:1,case:10},marble:{world:3}};
+// this month's free units, on top of FREE: they rotate through the locked ones from the start of the school year
+// (Korea: March, Ontario: September), so a free family still practises roughly what school is teaching
+const MONTHLY={math:{tank:2},science:{world:1}};
+// licence codes: hash → {org, until 'YYYY-MM-DD'}. Made by _src/plus/licenses.py.
+const LIC={/*LIC*/'ngv2xywrul.1rpbvpeeth8':{org:'family',until:''},'1xohrd8e9hu.19j2nuvroey':{org:'pilot-01',until:'2027-08-31'},'2gffweq8nz4.2a4hqsmddel':{org:'pilot-02',until:'2027-08-31'},'1yw64k0cab.12knbhyfn3l':{org:'pilot-03',until:'2027-08-31'},'ya69p178zq.894eq6vvc6':{org:'pilot-04',until:'2027-08-31'},'19tuegqwc92.j097j8bywo':{org:'pilot-05',until:'2027-08-31'},'29aabny30te.1blphalr06w':{org:'pilot-06',until:'2027-08-31'},'7h0fel1q7r.1421idve94w':{org:'pilot-07',until:'2027-08-31'},'249sj1d4fo9.mw8epkleru':{org:'pilot-08',until:'2027-08-31'},'2d572kc4p4d.19a3chj218t':{org:'pilot-09',until:'2027-08-31'},'d80cygnl2v.2fh1c84wsfm':{org:'pilot-10',until:'2027-08-31'},'lgwu8jc895.21awvpf8uas':{org:'test-expired',until:'2026-01-01'}};
+const lang=()=>{try{if(typeof LANG==='string'&&LANG)return LANG}catch(e){}return 'ko'};
+const T=(ko,en)=>lang()==='en'?en:ko;
+const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const two=x=>Array.isArray(x)?T(x[0],x[1]):x==null?'':String(x);
+const day=()=>new Date().toLocaleDateString('en-CA');
+const get=()=>{try{return JSON.parse(localStorage.getItem(KEY)||'{}')||{}}catch(e){return {}}};
+const put=o=>{try{localStorage.setItem(KEY,JSON.stringify(o))}catch(e){}};
+const inApp=!!window.__mgApp;
+const dev=(()=>{try{const q=new URLSearchParams(location.search).get('plus');if(q==='off')sessionStorage.removeItem('moonGames.plusDev');else if(q==='lock'||q==='on')sessionStorage.setItem('moonGames.plusDev',q);return sessionStorage.getItem('moonGames.plusDev')||''}catch(e){return ''}})();
+const mode=inApp?'app':dev==='lock'?'test':dev==='on'?'on':WEB_SALE;
+const N=()=>window.mgBillingNative||null;
+const cyrb=(s,seed)=>{let h1=0xdeadbeef^seed,h2=0x41c6ce57^seed;for(let i=0,ch;i<s.length;i++){ch=s.charCodeAt(i);h1=Math.imul(h1^ch,2654435761);h2=Math.imul(h2^ch,1597334677)}
+ h1=Math.imul(h1^(h1>>>16),2246822507);h1^=Math.imul(h2^(h2>>>13),3266489909);h2=Math.imul(h2^(h2>>>16),2246822507);h2^=Math.imul(h1^(h1>>>13),3266489909);return (4294967296*(2097151&h2)+(h1>>>0)).toString(36)};
+const licHash=c=>{const s='moon-lic|'+c;return cyrb(s,1)+'.'+cyrb(s,2)};
+const norm=c=>String(c||'').toUpperCase().replace(/[^0-9A-Z]/g,'');
+const lic=()=>{const l=get().lic;return l&&(!l.until||l.until>=day())?l:null};
+const store=()=>{const s=get().store;if(!s||!s.active)return null;if(s.until&&s.until+3*864e5<Date.now())return null;return s};
+const has=()=>mode==='open'||mode==='on'||!!(store()||lic());
+const subs=[];const emit=()=>{subs.slice().forEach(f=>{try{f(has())}catch(e){}});try{dispatchEvent(new CustomEvent('mgplus',{detail:{plus:has()}}))}catch(e){}};
+const schoolMonth=()=>{const m=new Date().getMonth()+1;return lang()==='en'?(m+3)%12:(m+9)%12};
+function monthly(game,kind,total){const f=(FREE[game]||{})[kind]||0,n=(MONTHLY[game]||{})[kind]||0;if(!n||!total||total<=f)return [];
+ const span=total-f,out=[];for(let i=0;i<n;i++){const v=f+1+((schoolMonth()*n+i)%span);if(!out.includes(v))out.push(v)}return out}
+function open(game,kind,idx,total){if(has())return true;const f=(FREE[game]||{})[kind];if(f==null)return false;return idx<=f||monthly(game,kind,total).includes(idx)}
+// pretend store for ?plus=lock on the web, so the whole flow can be tried and tested
+const FAKE=()=>lang()==='en'?[{id:'yearly',price:'$49.99',period:'year',trial:'P7D'},{id:'monthly',price:'$6.99',period:'month',trial:null}]:[{id:'yearly',price:'₩49,000',period:'year',trial:null},{id:'monthly',price:'₩6,900',period:'month',trial:null}];
+// sheet (the open parent screen) is declared up here: a store state can arrive before the rest of this file has run
+let products=null,msg='',pending=false,sheet=null;
+function update(s){try{if(typeof s==='string')s=JSON.parse(s)}catch(e){return}if(!s||typeof s!=='object')return;
+ if(Array.isArray(s.products))products=s.products;msg=s.msg||'';pending=!!s.pending;
+ if('active' in s){const o=get();o.store={active:!!s.active,product:s.product||'',until:s.until||null,trial:!!s.trial,at:Date.now()};put(o)}
+ emit();if(sheet)sheet.render()}
+window.mgPlusUpdate=update;if(window.__mgPlusPending){const p=window.__mgPlusPending;window.__mgPlusPending=null;update(p)}
+if(mode==='app'){try{N()&&N().query()}catch(e){}}
+// ---- shared look (both windows live in a shadow root, so no game's CSS can reach them)
+const CSS=':host{all:initial}*{box-sizing:border-box;font-family:system-ui,-apple-system,"Apple SD Gothic Neo","Noto Sans KR",sans-serif}'+
+ '.bg{position:fixed;inset:0;z-index:2147483600;background:rgba(12,20,40,.7);display:flex;align-items:center;justify-content:center;padding:max(12px,env(safe-area-inset-top)) max(12px,env(safe-area-inset-right)) max(12px,env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left))}'+
+ '.card{position:relative;background:#fff;color:#1d2a4a;border-radius:24px;width:min(400px,100%);max-height:100%;overflow:auto;padding:18px 18px 16px;box-shadow:0 14px 44px rgba(0,0,0,.35);text-align:center}'+
+ '.x{position:absolute;right:10px;top:10px;min-width:44px;min-height:44px;border:0;border-radius:14px;background:#eef2fb;font-size:18px;color:#1d2a4a;cursor:pointer}'+
+ '.pic{width:150px;height:150px;margin:6px auto 4px;border-radius:26px;background:linear-gradient(160deg,#fff4d6,#ffe2b8);display:flex;align-items:center;justify-content:center;font-size:76px;position:relative;overflow:hidden}'+
+ '.pic img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}.star{position:absolute;right:6px;bottom:6px;background:#ffd34d;color:#5a3d00;font-size:13px;font-weight:900;border-radius:999px;padding:3px 9px;box-shadow:0 2px 0 #d9a400}'+
+ 'h2{margin:8px 34px 4px;font-size:21px;line-height:1.3;word-break:keep-all}.t{margin:4px 0;font-size:15.5px;font-weight:700;line-height:1.5;color:#34407a;word-break:keep-all}'+
+ '.free{margin:8px 0 12px;font-size:14px;color:#56607a;line-height:1.5;word-break:keep-all}'+
+ '.go{display:block;width:100%;min-height:54px;border:0;border-radius:16px;background:#2f9e5b;color:#fff;font-size:18px;font-weight:900;box-shadow:0 4px 0 #1f7a43;cursor:pointer}'+
+ '.ask{display:block;width:100%;min-height:44px;margin-top:10px;border:0;background:none;color:#4656c8;font-size:14.5px;font-weight:800;text-decoration:underline;text-underline-offset:3px;cursor:pointer}'+
+ '.wide{width:min(460px,100%);text-align:left}.wide h2{margin:2px 40px 8px 0}.ctx{background:#f3f6ff;border-radius:14px;padding:10px 12px;font-size:14.5px;font-weight:700;color:#34407a;margin:6px 0 10px}'+
+ '.list{margin:6px 0 12px;padding:0;list-style:none;display:grid;gap:6px}.list li{font-size:14.5px;line-height:1.45;padding-left:24px;position:relative}.list li::before{content:"✓";position:absolute;left:4px;color:#2f9e5b;font-weight:900}'+
+ '.plans{display:grid;gap:8px;margin:8px 0}.plan{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;min-height:60px;border:2px solid #d7def0;border-radius:16px;background:#fff;padding:10px 14px;text-align:left;cursor:pointer;font:inherit;color:#1d2a4a}'+
+ '.plan.best{border-color:#4656c8;background:#f5f7ff}.plan b{font-size:16px}.plan span{font-size:13px;color:#56607a;display:block}.plan i{font-style:normal;font-size:17px;font-weight:900;white-space:nowrap}'+
+ '.plan:disabled{opacity:.55;cursor:default}.msg{min-height:20px;font-size:14px;font-weight:700;color:#b4232c;margin:4px 0}.msg.ok{color:#2b8a3e}'+
+ '.row{display:flex;flex-wrap:wrap;gap:4px 14px;margin:6px 0}.row button,.row a{min-height:44px;border:0;background:none;padding:0;color:#4656c8;font-size:14px;font-weight:800;text-decoration:underline;text-underline-offset:3px;cursor:pointer;display:inline-flex;align-items:center}'+
+ '.fine{font-size:12.5px;color:#6b7390;line-height:1.55;margin:8px 0 0}.code{display:flex;gap:8px;margin:6px 0}.code input{flex:1;min-width:0;min-height:48px;border:2px solid #d7def0;border-radius:12px;padding:0 12px;font-size:17px;font-weight:800;letter-spacing:1px;text-transform:uppercase}'+
+ '.code button{min-height:48px;border:0;border-radius:12px;background:#4656c8;color:#fff;font-weight:900;padding:0 16px;font-size:15px;cursor:pointer}'+
+ '.on{background:#e9f8ef;border-radius:14px;padding:12px;font-weight:800;color:#1f6b3e;margin:6px 0}'+
+ '.q{font-size:28px;font-weight:900;margin:8px 0}.gin{width:100%;min-height:52px;font-size:24px;font-weight:900;text-align:center;border:2px solid #d7def0;border-radius:14px}'+
+ 'button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid #ffb703;outline-offset:2px}'+
+ '@media (max-height:560px){.pic{width:96px;height:96px;font-size:48px}.card{padding:12px 14px}}';
+function layer(html,onClose){const host=document.createElement('div');host.setAttribute('data-mg-plus','');const root=host.attachShadow?host.attachShadow({mode:'open'}):host;
+ const st=document.createElement('style');st.textContent=CSS;root.appendChild(st);const bg=document.createElement('div');bg.className='bg';bg.setAttribute('role','dialog');bg.setAttribute('aria-modal','true');bg.innerHTML=html;root.appendChild(bg);(document.body||document.documentElement).appendChild(host);
+ const prev=document.activeElement,close=()=>{try{host.remove()}catch(e){}try{prev&&prev.focus&&prev.focus()}catch(e){}onClose&&onClose()};
+ root.querySelector('.bg').addEventListener('click',e=>{if(e.target.classList.contains('bg'))close()});host.addEventListener('keydown',e=>{if(e.key==='Escape'){e.stopPropagation();close()}});
+ const x=root.querySelector('.x');if(x)x.addEventListener('click',close);setTimeout(()=>{try{(root.querySelector('.go,.x')||{}).focus()}catch(e){}},40);
+ return {root,close,$:s=>root.querySelector(s)}}
+// ---- the child's lock card: a preview and a neutral line, no price
+let lockOpen=false;
+function lock(c){c=c||{};if(lockOpen)return false;lockOpen=true;
+ const pic=c.pic?`<img src="${esc(c.pic)}" alt="" onerror="this.remove()">`:'';
+ const L1=two(c.text)||T('다음 이야기는 문코치 Plus에서 열려요.','The next part opens with Coach Moon Plus.');
+ const F=two(c.free)||T('이달의 단원, 매일 목표, 다른 게임은 지금도 할 수 있어요.','This month’s units, daily goals and other games are open now.');
+ const w=layer(`<div class="card"><button class="x" type="button" aria-label="${T('닫기','Close')}">✕</button>
+  <div class="pic" aria-hidden="true">${esc(c.emoji||'🌙')}${pic}<span class="star">⭐ Plus</span></div>
+  <h2>${esc(two(c.title)||T('새로운 곳이 기다려요','Something new is waiting'))}</h2><p class="t">${esc(L1)}</p><p class="free">${esc(F)}</p>
+  <button class="go" type="button">▶ ${T('무료로 계속하기','Keep playing free')}</button>
+  <button class="ask" type="button">👨‍👩‍👧 ${T('어른에게 보여 주기','Show a grown-up')}</button></div>`,()=>{lockOpen=false;c.onClose&&c.onClose()});
+ w.$('.go').addEventListener('click',()=>{w.close();c.onFree&&c.onFree()});
+ w.$('.ask').addEventListener('click',()=>{w.close();parent(c.ctx)});return true}
+// shown once a day per game at a big moment (a boss beaten, a unit finished), only to players without Plus
+function tease(c){if(has()||!c||!c.game)return false;let s={};try{s=JSON.parse(localStorage.getItem(SEEN)||'{}')||{}}catch(e){}
+ if(s[c.game]===day())return false;s[c.game]=day();try{localStorage.setItem(SEEN,JSON.stringify(s))}catch(e){}return lock(c)}
+// ---- grown-up check: the app's mgGate (app-bridge.js); on the web a simple question
+function gate(cb,kind){if(typeof window.mgGate==='function'){window.mgGate(kind||'buy',ok=>cb(!!ok));return}
+ const a=12+Math.floor(Math.random()*17),b=6+Math.floor(Math.random()*4);
+ const w=layer(`<div class="card"><button class="x" type="button" aria-label="${T('닫기','Close')}">✕</button><h2>🔒 ${T('보호자 확인','Grown-ups only')}</h2>
+  <p class="free">${T('어린이는 보호자에게 보여 주세요. 아래 계산의 답을 입력해 주세요.','Kids: please show this to a grown-up. Type the answer below.')}</p>
+  <p class="q" aria-hidden="true">${a} × ${b} = ?</p><input class="gin" inputmode="numeric" autocomplete="off" aria-label="${T(a+' 곱하기 '+b,a+' times '+b)}"><p class="msg" aria-live="polite"></p>
+  <button class="go" type="button">${T('확인','Continue')}</button></div>`);
+ const go=()=>{if(w.$('.gin').value.trim()===String(a*b)){w.close();cb(true)}else{w.$('.msg').textContent=T('답이 달라요.','Not quite.');w.$('.gin').value=''}};
+ w.$('.go').addEventListener('click',go);w.$('.gin').addEventListener('keydown',e=>{if(e.key==='Enter')go()});setTimeout(()=>{try{w.$('.gin').focus()}catch(e){}},60)}
+function parent(ctx){if(has()&&mode!=='app'&&mode!=='test'){paywall(ctx);return}gate(ok=>{if(ok)paywall(ctx)})}
+// ---- the parent screen: what Plus opens, the store's prices, restore, licence code, the fine print
+const OPENS=()=>[T('수학 아쿠아리움: 1~6학년 수족관 120곳 모두','Math Aquarium: all 120 aquariums, grades 1–6'),T('코딩 섬: 파이썬 미션 84개와 보스 13명','Coding Island: all 84 Python missions and 13 bosses'),
+ T('체스 기사단: 보스 8명, 스파링, 대국 복기, 보스 코스, 레슨 57개','Chess Knights: all 8 bosses, sparring, game review, boss courses, 57 lessons'),T('과학·음악의 모든 세계와 단원, 꼬마 탐정의 모든 사건, 구슬 레이스의 모든 세계','Every science world and music unit, every detective case, every Marble Rush world'),
+ T('부모 리포트 전체: 과목별 분석, 틀린 문제, 집에서 돕기, 인쇄','The full parents’ report: subjects, missed questions, home plan, printing'),T('모든 수료증, 이 기기의 모든 아이 프로필','All certificates, and every child profile on this device')];
+const perLabel=p=>p.period==='month'?T('월간','Monthly'):T('연간','Yearly');
+const trialLabel=t=>{const m=/P(\d+)([DWMY])/.exec(t||'');if(!m)return '';const n=+m[1],u=m[2];if(u==='M'||u==='Y')return u==='M'?T(`${n}개월 무료 체험 뒤 결제`,`${n}-month free trial, then`):T(`${n}년 무료 체험 뒤 결제`,`${n}-year free trial, then`);const d=n*(u==='W'?7:1);return T(`${d}일 무료 체험 뒤 결제`,`${d}-day free trial, then`)};
+// in the app the notice page opens in the same view (a new window would go nowhere); on the web in a new tab
+const tgt=inApp?'':' target="_blank" rel="noopener"';
+function paywall(ctx){if(sheet){sheet.render();return}
+ const w=layer(`<div class="card wide"><button class="x" type="button" aria-label="${T('닫기','Close')}">✕</button><div class="body"></div></div>`,()=>{sheet=null});
+ let codeOpen=false,note='',good=false;
+ const buy=id=>{note='';if(mode==='test'){const o=get();o.store={active:true,product:id,until:Date.now()+(id==='monthly'?31:366)*864e5,trial:false,at:Date.now()};put(o);good=true;note=T('고마워요! Plus가 열렸어요.','Thank you! Plus is on.');emit();sheet&&sheet.render();return}
+  const n=N();if(mode==='app'&&n){pending=true;sheet.render();n.buy(id)}};
+ const render=()=>{const b=w.$('.body'),s=store(),l=lic(),ps=mode==='test'?FAKE():products;let h=`<h2>⭐ ${T('문코치 Plus','Coach Moon Plus')}</h2>`;
+  if(ctx)h+=`<p class="ctx">${esc(two(ctx))}</p>`;
+  if(has()){h+=`<div class="on">✅ ${mode==='open'||mode==='on'?T('이 웹사이트에서는 지금 모든 내용이 열려 있어요.','Everything is open on this website for now.'):l&&!s?T(`기관 코드로 Plus가 열려 있어요 (${l.until?l.until+'까지':'기한 없음'}).`,`Plus is on with an organization code (${l.until?'until '+l.until:'no end date'}).`):T('Plus를 쓰고 있어요. 고마워요!','Plus is on. Thank you!')}</div>`;
+   if(s&&s.until)h+=`<p class="fine">${T('다음 갱신일','Next renewal')}: ${esc(new Date(s.until).toLocaleDateString(lang()==='en'?'en-CA':'ko-KR'))}</p>`}
+  else{h+=`<p class="t" style="text-align:left">${T('Plus로 열리는 것','What Plus opens')}</p><ul class="list">${OPENS().map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`;
+   if(mode==='stores')h+=`<p class="ctx">${T('Plus는 앱에서 시작할 수 있어요. App Store나 Google Play에서 "문코치"를 찾아 주세요.','Plus starts in the app. Look for “Coach Moon” on the App Store or Google Play.')}</p>`;
+   else if(ps&&ps.length){const sorted=ps.slice().sort((a,b)=>(a.period==='year'?0:1)-(b.period==='year'?0:1));
+    h+=`<div class="plans">${sorted.map((p,i)=>`<button class="plan${i?'':' best'}" type="button" data-id="${esc(p.id)}"${pending?' disabled':''}><span><b>${perLabel(p)}${i?'':' · '+T('추천','best value')}</b><span>${esc(trialLabel(p.trial)||(p.period==='month'?T('매달 자동 갱신','Renews every month'):T('매년 자동 갱신','Renews every year')))}</span></span><i>${esc(p.price)}</i></button>`).join('')}</div>`}
+   else if(!msg)h+=`<p class="ctx">${mode==='app'?T('스토어에서 가격을 불러오고 있어요…','Loading prices from the store…'):T('이 웹사이트에서는 아직 Plus를 팔지 않아요.','Plus is not sold on this website yet.')}</p>`}
+  h+=`<p class="msg${good?' ok':''}" aria-live="polite">${esc(note||msg||(pending?T('스토어 화면을 기다리는 중이에요…','Waiting for the store…'):''))}</p>`;
+  h+=`<div class="row">${mode==='app'||mode==='test'?`<button type="button" data-a="restore">${T('구매 복원','Restore purchases')}</button>`:''}${s&&mode==='app'?`<button type="button" data-a="manage">${T('구독 관리·해지','Manage or cancel')}</button>`:''}<button type="button" data-a="code">${T('기관·가족 코드 입력','Enter an organization code')}</button></div>`;
+  if(codeOpen)h+=`<div class="code"><input class="cin" maxlength="24" autocomplete="off" aria-label="${T('코드','Code')}" placeholder="MOON-XXXX-XXXX-XXXX"><button type="button" data-a="redeem">${T('확인','Use')}</button></div>`;
+  h+=`<p class="fine">${T('구독은 선택한 기간(1개월 또는 1년)마다 자동으로 갱신되고, 결제는 App Store 또는 Google Play 계정으로 돼요. 다음 갱신 24시간 전까지 스토어의 구독 설정에서 해지하면 다음 결제가 되지 않아요. 무료 체험이 있는 지역에서는 체험이 끝나면 자동으로 결제돼요. 환불은 각 스토어의 정책을 따라요. Plus가 끝나도 아이가 얻은 기록과 물건은 그대로 남아요.','Subscriptions renew automatically each period (1 month or 1 year) and are charged to your App Store or Google Play account. Cancel in the store’s subscription settings at least 24 hours before renewal to stop the next charge. Where a free trial is offered, it turns into a paid subscription when it ends. Refunds follow each store’s policy. When Plus ends, your child keeps everything they earned.')}</p>
+   <div class="row"><a href="notice.html?lang=${lang()}#terms"${tgt}>${T('이용 조건','Terms of use')}</a><a href="notice.html?lang=${lang()}#privacy"${tgt}>${T('개인정보 처리방침','Privacy policy')}</a></div>`;
+  b.innerHTML=h;
+  b.querySelectorAll('.plan').forEach(x=>x.addEventListener('click',()=>buy(x.dataset.id)));
+  b.querySelectorAll('[data-a]').forEach(x=>x.addEventListener('click',()=>{const a=x.dataset.a,n=N();
+   if(a==='restore'){note='';if(mode==='test'){note=T('복원할 구매가 없어요.','No purchases to restore.');render();return}if(n){pending=true;render();n.restore()}}
+   else if(a==='manage'){n&&n.manage()}
+   else if(a==='code'){codeOpen=!codeOpen;render();setTimeout(()=>{try{w.$('.cin').focus()}catch(e){}},30)}
+   else if(a==='redeem'){const ok=redeem(w.$('.cin').value);good=ok;note=ok?T('코드가 확인됐어요. Plus가 열렸어요.','Code accepted. Plus is on.'):T('코드를 다시 확인해 주세요.','Please check the code.');if(ok)codeOpen=false;render()}}));
+  };
+ sheet={render,close:w.close};render()}
+function redeem(code){const c=norm(code);if(c.length<12)return false;const e=LIC[licHash(c)];if(!e||(e.until&&e.until<day()))return false;
+ const o=get();o.lic={org:e.org,until:e.until||'',at:Date.now()};put(o);emit();return true}
+window.mgPlus={get mode(){return mode},has,open,monthly,lock,tease,paywall,parent,gate,redeem,on(f){subs.push(f)},
+ state(){return {plus:has(),mode,store:store(),lic:lic(),products:mode==='test'?FAKE():products}},free:FREE}})();
+/*PLUS:END*/
 </script>
 <style>
 :root{
@@ -198,6 +360,16 @@ footer{text-align:center;color:#8a93b8;font-size:12px;margin-top:6px}
 .gate-box .row>*{flex:1}
 .btn{min-height:48px;border-radius:14px;border:0;background:var(--navy);color:#fff;font-weight:900;font-size:16px;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center}
 .btn.ghost{background:var(--soft);color:var(--ink)}
+/* ⭐ Plus: locked tabs, certificates, the weekly growth card, the first exploration */
+.plk{display:flex;flex-direction:column;align-items:center;text-align:center;gap:8px;padding:28px 18px}
+.plk h2{margin:0;font-size:21px}.plk p{margin:0;max-width:46ch;color:var(--muted);font-weight:700;line-height:1.5}
+.plk ul{margin:4px 0;padding:0;list-style:none;display:grid;gap:4px;font-weight:700}.plk .btn{padding:0 22px;background:#ffd34d;color:#4a3300}
+.certs{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,210px),1fr));gap:10px}
+.cert{display:flex;gap:10px;align-items:center;border:2px solid var(--line);border-radius:16px;padding:10px 12px;background:var(--card);min-width:0}
+.cert i{font-style:normal;font-size:30px}.cert b{display:block;font-size:15px;line-height:1.3}.cert small{display:block;font-size:12.5px;color:var(--muted);font-weight:700}
+.cert.lk{opacity:.6}.cert button{margin-left:auto;min-height:44px;min-width:44px;border:0;border-radius:12px;background:var(--soft);font-size:18px;cursor:pointer}
+.gcard{display:flex;gap:14px;align-items:center;flex-wrap:wrap}.gcard canvas{width:min(260px,100%);height:auto;border-radius:18px;box-shadow:var(--shadow)}
+.gcard .gtx{flex:1 1 220px;min-width:0}.gcard .gtx p{margin:4px 0 10px;color:var(--muted);font-weight:700;line-height:1.5}
 .shake{animation:shake .4s}
 @keyframes shake{25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
 @media (prefers-reduced-motion:reduce){.shake{animation:none}}
@@ -503,7 +675,10 @@ function render(){const app=$('app'),R=records(),m=DEMO?{name:L('하늘','Sky'),
  h+=insightCards(A,tot,prev,newM);
  // ---- tabs
  const openN=A.mist.filter(x=>x.often).length;
- const tabs=[['overview','📊',L('한눈에','Overview')],['subjects','📚',L('과목별','By subject')],['mistakes','🔁',L('틀린 문제','Missed')],['home','🏠',L('집에서 돕기','At home')]];
+ // ⭐ Plus: the overview, the three findings, the first exploration, the weekly growth card and the first certificate are
+ // free; the subject analysis, missed questions, the at-home plan, printing and every certificate come with Plus.
+ const PL=DEMO||mgPlus.has();
+ const tabs=[['overview','📊',L('한눈에','Overview')],['subjects','📚',L('과목별','By subject')+(PL?'':' ⭐')],['mistakes','🔁',L('틀린 문제','Missed')+(PL?'':' ⭐')],['home','🏠',L('집에서 돕기','At home')+(PL?'':' ⭐')]];
  if(!tabs.some(t=>t[0]===TAB))TAB='overview';
  h+=`<nav class="tabs noprint" role="tablist" aria-label="${esc(L('리포트 보기','Report sections'))}">${tabs.map(([id,ic,t])=>`<button type="button" role="tab" id="tab-${id}" data-tab="${id}" aria-controls="panel-${id}" aria-selected="${TAB===id}" tabindex="${TAB===id?0:-1}"><span>${ic}</span>${esc(t)}${id==='mistakes'&&openN?`<i class="cnt num">${openN}</i>`:''}</button>`).join('')}</nav>`;
  // ---- overview panel
@@ -528,17 +703,18 @@ function render(){const app=$('app'),R=records(),m=DEMO?{name:L('하늘','Sky'),
   <section class="two"><div class="card"><div class="h2"><h2>🧭 ${L('과목별 진도','Progress by subject')}</h2><span>${L('게임 속 기술을 얼마나 익혔는지','How far through each game’s skills')}</span></div>${radarItems.length>=3?radarSVG(radarItems):`<div class="slist">${radarItems.map(it=>`<div class="srow"><i class="dot" style="background:${it.c}"></i><b>${gIc(it.g,'sm')} ${esc(it.label)}</b><span class="num">${pct(it.v)}%</span></div>`).join('')}</div>`}</div>
    <div class="card"><div class="h2"><h2>📈 ${L('주별 정답률','Weekly accuracy')}</h2><span>${L('최근 8주','Last 8 weeks')}</span></div>${trendOK?trendSVG(weeks):`<p class="empty">${L('2주 이상 기록이 쌓이면 정답률 흐름을 보여 드려요.','Once there are two or more weeks of answers, the trend shows up here.')}</p>`}<p class="note">${L('한 주에 5번 이상 답한 주만 표시해요. 새 단원에 들어가면 정답률이 잠깐 내려가는 게 자연스러워요.','Weeks with at least 5 answers are shown. A short dip when a new unit starts is normal.')}</p></div></section>
   ${grow.length?`<section class="card"><div class="h2"><h2>🌱 ${L('최근 성장 기록','Recent milestones')}</h2><span>${L('새로 익힌 기술','Newly mastered skills')}</span></div><ol class="tl">${grow.slice(0,10).map(o=>`<li><time>${esc(ago(o.w))}</time><i class="d" style="background:${o.g.c}"></i><div><b>${esc(T(o.k.name))}</b><small>${gIc(o.g,'sm')} ${esc(T(o.g.subj))}${o.k.school?' · '+esc(T(o.k.school)):''}</small></div></li>`).join('')}</ol></section>`:''}
+ ${extraOverview(R,m,played,PL)}
  </div>`;
  // ---- subjects panel: one subject at a time
  const withSum=GAMES.filter(g=>R[g.id].r&&R[g.id].r.sum),waiting=GAMES.filter(g=>!(R[g.id].r&&R[g.id].r.sum)&&(R[g.id].r||R[g.id].saved));
  if(!withSum.some(g=>g.id===SUBJ))SUBJ=(active.slice().sort((a,b)=>P[b.id].s-P[a.id].s)[0]||withSum[0]||{}).id;
  h+=`<div class="panel" role="tabpanel" id="panel-subjects" aria-labelledby="tab-subjects" data-panel="subjects"${TAB==='subjects'?'':' hidden'}>
   <div class="subnav noprint" role="group" aria-label="${esc(L('과목 고르기','Choose a subject'))}">${withSum.map(g=>`<button type="button" data-subj="${g.id}" aria-pressed="${SUBJ===g.id}" style="--c:${g.c}">${gIc(g,'sm')} ${esc(subjName(g))} <i class="dotlv lv-${A.G[g.id]?A.G[g.id].lv:'ok'}" aria-hidden="true"></i></button>`).join('')}</div>
-  ${withSum.map(g=>subjectCard(g,R[g.id].r,P[g.id],A.G[g.id],A)).join('')}${waiting.map(g=>waitCard(g,!!R[g.id].saved)).join('')}</div>`;
+  ${PL?withSum.map(g=>subjectCard(g,R[g.id].r,P[g.id],A.G[g.id],A)).join('')+waiting.map(g=>waitCard(g,!!R[g.id].saved)).join(''):plusTease('subjects')}</div>`;
  // ---- missed questions panel
- h+=`<div class="panel" role="tabpanel" id="panel-mistakes" aria-labelledby="tab-mistakes" data-panel="mistakes"${TAB==='mistakes'?'':' hidden'}><div id="mxBox">${mistakesHTML(A)}</div></div>`;
+ h+=`<div class="panel" role="tabpanel" id="panel-mistakes" aria-labelledby="tab-mistakes" data-panel="mistakes"${TAB==='mistakes'?'':' hidden'}>${PL?`<div id="mxBox">${mistakesHTML(A)}</div>`:plusTease('mistakes')}</div>`;
  // ---- at-home panel
- h+=`<div class="panel" role="tabpanel" id="panel-home" aria-labelledby="tab-home" data-panel="home"${TAB==='home'?'':' hidden'}>${homeHTML(A,R,played,dayAll)}${coachNote({active,played,P,tot,acc,streak,nm,nk,shareT,ever})}</div>`;
+ h+=`<div class="panel" role="tabpanel" id="panel-home" aria-labelledby="tab-home" data-panel="home"${TAB==='home'?'':' hidden'}>${PL?homeHTML(A,R,played,dayAll)+coachNote({active,played,P,tot,acc,streak,nm,nk,shareT,ever}):plusTease('home')}</div>`;
  // ---- how this report is made
  h+=`<section class="card"><div class="h2"><h2>🔎 ${L('이 리포트는 이렇게 만들어져요','How this report works')}</h2></div><div class="how">
   <div class="ref"><b>📋 ${L('참고용 기록이에요','For reference only')}</b><p>${L('게임 기록을 정리한 자료예요. 학교 성적, 공식 평가, 학습이나 발달 진단이 아니에요. 걱정되는 점은 담임 선생님이나 전문가와 상의해 주세요. 인쇄하거나 공유하면 아이 별명이 함께 나와요.','A summary of game activity. It isn’t a school grade, an official assessment, or a learning or developmental diagnosis. If you have concerns, talk with your child’s teacher or a qualified professional. Printed or shared copies include your child’s nickname.')}</p></div>
@@ -548,7 +724,7 @@ function render(){const app=$('app'),R=records(),m=DEMO?{name:L('하늘','Sky'),
   <div><b>🏅 ${L('익힘은 게임의 기준으로','Mastery by each game’s rule')}</b><p>${L('단원 완료, 별 3개처럼 게임마다 정한 기준을 넘으면 ‘익힘’으로 표시해요.','A skill shows as mastered when it passes that game’s own rule, like finishing a unit or earning 3 stars.')}</p></div>
   <div><b>📚 ${L('학교 교과 연결','Links to school')}</b><p>${L('한국 2022 개정 교육과정과 캐나다 온타리오 교육과정을 기준으로 연결했어요. 캐나다의 다른 주와 미국은 주마다 기준이 달라 배우는 학년과 순서가 다를 수 있고, 학교마다 배우는 방법도 조금씩 달라요. 게임 속 학년과 진도는 참고용이에요. 학교 수업과 다르면 학교 선생님의 설명을 먼저 따라 주세요.','Links follow Korea’s 2022 national curriculum and the Ontario curriculum. Other provinces and US states have their own standards, so a topic may come in a different grade or order, and schools may teach it in a different way. Grades and order in the games are only a guide; if anything differs from school, please go with the teacher.')}</p></div></div></section>`;
  h+=`<footer><a class="nlink noprint" href="notice.html?lang=${LANG}">🛡️ ${L('보호자 안내: 안전 · 개인정보 · 저작권','For grown-ups: safety, privacy & credits')}</a><br>${L('문코치','Coach Moon')} · © 2026 Dongsun Moon. ${L('모든 권리 보유.','All rights reserved.')}</footer>`;
- app.innerHTML=h;LASTA=A;bindCommon()}
+ app.innerHTML=h;LASTA=A;bindCommon();bindPlus(R,m,played,PL)}
 let LASTA=null;
 function subjectCard(g,rec,p,a,A){const S=rec.sum,sk=allSkills(S),prog=sk.length?sk.reduce((t,k)=>t+(+k.p||0),0)/sk.length:0;
  const nM=sk.filter(k=>k.st===2).length,nP=sk.filter(k=>k.st===1).length,nL=Object.keys(rec.ls||{}).length;
@@ -667,6 +843,59 @@ function emptyPage(R,m){const any=GAMES.some(g=>R[g.id].saved);
   <div class="per noprint"><a class="go" style="background:var(--gold);color:#2a2300" href="report.html?demo=1&lang=${LANG}">👀 ${L('예시 리포트 보기','See a sample report')}</a><a class="go" style="background:#ffffff1f" href="index.html?lang=${LANG}">🎮 ${L('게임 하러 가기','Go to the games')}</a></div></section>
   ${GAMES.filter(g=>R[g.id].saved).map(g=>waitCard(g,true)).join('')}
   <footer><a class="nlink noprint" href="notice.html?lang=${LANG}">🛡️ ${L('보호자 안내: 안전 · 개인정보 · 저작권','For grown-ups: safety, privacy & credits')}</a><br>${L('문코치','Coach Moon')} · © 2026 Dongsun Moon. ${L('모든 권리 보유.','All rights reserved.')}</footer>`}
+// ---------------------------------------------------------------- ⭐ Plus pieces of the report
+const PCTX=()=>['학습 리포트: 과목별 분석과 틀린 문제','Learning report: subject analysis and missed questions'];
+function plusTease(tab){const W={subjects:[L('과목별 자세한 분석','Each subject in detail'),L('영역별 진도, 강점과 다음 목표, 학교 교과 연결, 아이에게 물어볼 질문과 집에서 할 활동을 과목마다 보여 드려요.','Progress by area, strengths and next goals, links to school, questions to ask your child and activities at home, for every subject.')],
+  mistakes:[L('틀린 문제 모아 보기','Missed questions'),L('자주 틀리는 문제, 한 번 틀린 문제, 이제 맞히는 문제를 나눠 보고, 답을 가리고 함께 다시 풀어 볼 수 있어요.','See questions missed often, once, and now fixed, and redo them together with the answers hidden.')],
+  home:[L('집에서 돕기 계획','The at-home plan'),L('이번 주에 함께 할 일을 체크리스트로 만들고 목표를 정해요. 문 코치가 부모님께 드리는 말도 있어요.','A weekly checklist and goal to do together, with a note from Coach Moon for parents.')]}[tab];
+ return `<section class="card plk"><div style="font-size:42px">⭐</div><h2>${esc(W[0])}</h2><p>${esc(W[1])}</p><p>${L('문코치 Plus에서 볼 수 있어요. 한눈에 보기, 발견 3가지, 성장 카드는 무료예요.','This is part of Coach Moon Plus. The overview, the three findings and the growth card are free.')}</p>
+  ${mgPlus.mode==='open'?'':`<button type="button" class="btn" data-plus="1">⭐ ${L('Plus 알아보기','About Plus')}</button>`}<a class="btn ghost" href="report.html?demo=1&lang=${LANG}">${L('예시 리포트 보기','See a sample report')}</a></section>`}
+function certList(R){const out=[];GAMES.forEach(g=>{const ct=R[g.id]&&R[g.id].r&&R[g.id].r.ct;if(ct)for(const id in ct)out.push({id,g,...ct[id]})});return out.sort((a,b)=>a.d<b.d?-1:a.d>b.d?1:0)}
+// the growth card counts the last 7 days, whatever period the page shows
+function weekStats(R,played){let s=0,r=0,w=0;const on=new Set(),newk=[];const from=dkey(daysAgo(6));
+ played.forEach(g=>{const rec=R[g.id].r;if(!rec)return;for(const k in rec.days||{}){if(k>=from){const x=rec.days[k];s+=x.s;r+=x.r;w+=x.w;if(x.s>=30||x.r+x.w>0)on.add(k)}}
+  const names={};allSkills(rec.sum).forEach(k=>names[k.id]=k.name);for(const id in rec.when||{}){const d=rec.when[id];if(d&&d>=from&&names[id])newk.push({n:names[id],g})}});
+ return {s,r,w,on:on.size,newk}}
+function extraOverview(R,m,played,PL){let h='';
+ const fr=DEMO?null:getJ('moonGames.first'+sfx());
+ if(fr)h+=`<section class="card"><div class="h2"><h2>🧭 ${L('첫 탐험','First exploration')}</h2><span>${esc(fr.at||'')}</span></div><p style="margin:0;font-weight:800">${fr.grade?L(`수학: ${fr.grade}학년${fr.half?' '+fr.half+'학기':''} 수준으로 보였어요`,`Math: looked like about Grade ${fr.grade}`):L('수학: 판단하기에 문제가 적었어요','Math: too few questions to tell')}</p><p class="note">${L(`${fr.asked|0}문제를 풀어 본 시작점이에요. 시험 결과가 아니에요.`,`A starting point from ${fr.asked|0} questions, not a test result.`)}</p></section>`;
+ if(played.length)h+=`<section class="card"><div class="h2"><h2>📮 ${L('이번 주 성장 카드','This week’s growth card')}</h2><span>${L('최근 7일','Last 7 days')}</span></div>
+  <div class="gcard"><canvas id="gCan" width="1080" height="1080" role="img" aria-label="${esc(L('이번 주 성장 카드','This week’s growth card'))}"></canvas><div class="gtx"><p>${L('가족에게 보내거나 사진으로 저장해 보세요. 카드에는 별명만 들어가요.','Send it to family or save it as a picture. Only the nickname is on the card.')}</p><button type="button" class="btn" data-share="growth">📤 ${L('이미지로 보내기·저장','Share or save the picture')}</button></div></div></section>`;
+ const cs=certList(R);
+ h+=`<section class="card"><div class="h2"><h2>🏅 ${L('수료증','Certificates')}</h2><span>${cs.length?L(`${cs.length}장`,`${cs.length}`):''}</span></div>${cs.length?`<div class="certs">${cs.map((c,i)=>{const open=PL||i===0;return `<div class="cert${open?'':' lk'}"><i aria-hidden="true">${esc(c.i||'🏅')}</i><span><b>${esc(T(c.t))}</b><small>${esc(T(c.g.subj))} · ${esc(c.d)}</small></span>${open?`<button type="button" data-cert="${esc(c.g.id+'|'+c.id)}" aria-label="${esc(L('수료증 이미지로 보내기','Share the certificate'))}">📤</button>`:`<button type="button" data-plus="1" aria-label="${esc(L('Plus에서 열려요','Opens with Plus'))}">⭐</button>`}</div>`}).join('')}</div>${PL?'':`<p class="note">${L('첫 수료증은 무료로 볼 수 있어요. 나머지는 Plus에서 열려요.','The first certificate is free. The rest open with Plus.')}</p>`}`:`<p class="empty">${L('학년 졸업, 보스 격파, 단원 수료처럼 큰 걸음을 마치면 여기에 수료증이 생겨요.','Certificates appear here when your child finishes a big step, like a grade, a boss or a unit.')}</p>`}</section>`;
+ return h}
+const nick=m=>DEMO?L('하늘','Sky'):(m&&m.name)||'';
+function drawGrowth(c,R,m,played){const x=c.getContext('2d');if(!x.roundRect)x.roundRect=function(a,b,w,h){this.rect(a,b,w,h)};const W=1080,H=1080,st=weekStats(R,played),F='system-ui,-apple-system,"Apple SD Gothic Neo","Noto Sans KR",sans-serif';
+ const g=x.createLinearGradient(0,0,W,H);g.addColorStop(0,'#3b4bd8');g.addColorStop(1,'#7a5cff');x.fillStyle=g;x.fillRect(0,0,W,H);
+ x.fillStyle='rgba(255,255,255,.12)';x.beginPath();x.arc(930,150,120,0,7);x.fill();x.fillStyle='#ffd34d';x.beginPath();x.arc(930,150,70,0,7);x.fill();x.fillStyle='#5a4bd8';x.beginPath();x.arc(955,130,62,0,7);x.fill();
+ x.fillStyle='#fff';x.font=`900 64px ${F}`;x.fillText(L('이번 주 성장 카드','This week’s growth'),80,170);x.font=`800 44px ${F}`;x.fillStyle='#e6e8ff';x.fillText(nick(m),80,240);
+ const box=(i,big,lab)=>{const bx=80+i*320,by=320;x.fillStyle='rgba(255,255,255,.95)';x.beginPath();x.roundRect(bx,by,280,220,36);x.fill();x.fillStyle='#2a3470';x.font=`900 76px ${F}`;x.fillText(big,bx+34,by+120);x.font=`800 32px ${F}`;x.fillStyle='#56607a';x.fillText(lab,bx+34,by+178)};
+ box(0,String(Math.round(st.s/60)),L('분 배웠어요','minutes'));box(1,String(st.on),L('일 배웠어요','days'));box(2,String(st.newk.length),L('개 새로 익힘','new skills'));
+ x.fillStyle='#fff';x.font=`900 40px ${F}`;x.fillText(st.newk.length?L('새로 익힌 것','Newly mastered'):L('꾸준히 연습했어요','Practised steadily'),80,650);
+ x.font=`800 36px ${F}`;x.fillStyle='#eef0ff';st.newk.slice(0,4).forEach((k,i)=>{let t='• '+T(k.n);while(x.measureText(t).width>900&&t.length>4)t=t.slice(0,-2);if(t!=='• '+T(k.n))t+='…';x.fillText(t,80,720+i*60)});
+ if(!st.newk.length){x.fillText(L(`${played.length}개 게임에서 배우는 중이에요`,`Learning in ${played.length} game${played.length>1?'s':''}`),80,720)}
+ x.fillStyle='rgba(255,255,255,.18)';x.fillRect(0,H-120,W,120);x.fillStyle='#fff';x.font=`900 38px ${F}`;x.fillText(L('🌙 문코치 · Coach Moon','🌙 Coach Moon'),80,H-48);x.font=`700 28px ${F}`;x.textAlign='right';x.fillText(new Date().toLocaleDateString(LANG==='en'?'en-CA':'ko-KR'),W-80,H-50);x.textAlign='left'}
+function drawCert(c,cert,m){c.width=1080;c.height=760;const x=c.getContext('2d'),F='system-ui,-apple-system,"Apple SD Gothic Neo","Noto Sans KR",sans-serif';
+ x.fillStyle='#fffaf0';x.fillRect(0,0,1080,760);x.strokeStyle='#e9b949';x.lineWidth=18;x.strokeRect(30,30,1020,700);x.strokeStyle='#4656c8';x.lineWidth=4;x.strokeRect(62,62,956,636);
+ x.textAlign='center';x.font=`120px ${F}`;x.fillText(cert.i||'🏅',540,210);x.fillStyle='#2a3470';x.font=`900 58px ${F}`;x.fillText(T(cert.t),540,320);
+ x.font=`800 44px ${F}`;x.fillStyle='#4656c8';x.fillText(nick(m),540,400);x.font=`700 32px ${F}`;x.fillStyle='#56607a';
+ x.fillText(L('끝까지 해낸 것을 축하해요!','Congratulations on seeing it through!'),540,470);x.fillText(`${T(cert.g.subj)} · ${cert.d}`,540,525);
+ x.font=`900 36px ${F}`;x.fillStyle='#2a3470';x.fillText(L('🌙 문코치','🌙 Coach Moon'),540,630);x.textAlign='left'}
+// app: the phone's share sheet (mgShare in app-bridge.js); web: the browser's share with a file, else a download
+function shareCanvas(c,name){const url=c.toDataURL('image/png');
+ // the share sheet can send the picture out of the app (messages, mail), so in the app a grown-up confirms first
+ if(typeof window.mgShare==='function'&&window.__mgApp){mgPlus.gate(ok=>{if(ok)window.mgShare(url,name)},'share');return}
+ c.toBlob(b=>{if(!b)return;const f=new File([b],name+'.png',{type:'image/png'});
+  if(navigator.canShare&&navigator.canShare({files:[f]})){navigator.share({files:[f],title:name}).catch(()=>{});return}
+  const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=name+'.png';document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},500)},'image/png')}
+let PLX=null,PLB=false;
+function bindPlus(R,m,played,PL){PLX={R,m,played};const c=document.getElementById('gCan');if(c)try{drawGrowth(c,R,m,played)}catch(e){}
+ if(PLB)return;PLB=true;
+ $('app').addEventListener('click',e=>{const b=e.target.closest('[data-plus],[data-share],[data-cert]');if(!b)return;const {R,m}=PLX;
+  if(b.dataset.plus){mgPlus.paywall(PCTX());return}
+  if(b.dataset.share){shareCanvas(document.getElementById('gCan'),L('문코치 성장 카드','Coach Moon growth card'));return}
+  if(b.dataset.cert){const [gid,id]=b.dataset.cert.split('|'),cert=certList(R).find(x=>x.g.id===gid&&x.id===id);if(!cert)return;const cv=document.createElement('canvas');drawCert(cv,cert,m);shareCanvas(cv,L('문코치 수료증','Coach Moon certificate'))}})}
+mgPlus.on(()=>{if($('app').childElementCount)render()});
 function showTab(t,focus){TAB=t;try{sessionStorage.setItem('moonGames.reportTab',t)}catch(e){}
  document.querySelectorAll('[data-tab]').forEach(b=>{const on=b.dataset.tab===t;b.setAttribute('aria-selected',on);b.tabIndex=on?0:-1;if(on&&focus)b.focus()});
  document.querySelectorAll('[data-panel]').forEach(p=>p.hidden=p.dataset.panel!==t)}
@@ -746,6 +975,8 @@ const DEMO_SUM={
   facts:[['🏆','내 구슬 우승 6번','Your marble won 6 times']]}};
 // ---------------------------------------------------------------- parent check: a quick sum that young children can't do yet
 function gate(){if(DEMO){render();return}let ok=false;try{ok=sessionStorage.getItem('moonGames.parentOK')==='1'}catch(e){}if(ok){render();return}
+ // in the app: the app's stronger grown-up check (numbers as words, optional PIN)
+ if(typeof window.mgGate==='function'){window.mgGate('report',g=>{if(g){try{sessionStorage.setItem('moonGames.parentOK','1')}catch(e){}render()}else location.href=`index.html?lang=${LANG}`});return}
  const a=12+Math.floor(Math.random()*8),b=6+Math.floor(Math.random()*4);
  $('gate').innerHTML=`<div class="gate"><div class="gate-box" role="dialog" aria-modal="true" aria-labelledby="gT"><h2 id="gT">👨‍👩‍👧 ${L('보호자 확인','Grown-ups only')}</h2><p>${L('학부모님을 위한 화면이에요. 아래 계산의 답을 입력해 주세요.','This page is for parents. Please type the answer below.')}</p>
   <div class="gate-q num" aria-hidden="true">${a} × ${b} = ?</div><input id="gA" inputmode="numeric" autocomplete="off" aria-label="${esc(L(`${a} 곱하기 ${b}의 답`,`${a} times ${b}`))}">
@@ -755,7 +986,7 @@ function gate(){if(DEMO){render();return}let ok=false;try{ok=sessionStorage.getI
 // ---------------------------------------------------------------- start
 document.querySelectorAll('[data-lang]').forEach(b=>{b.setAttribute('aria-pressed',b.dataset.lang===LANG);b.onclick=()=>{try{localStorage.setItem('moonGames.lang',b.dataset.lang)}catch(e){}const u=new URL(location.href);u.searchParams.set('lang',b.dataset.lang);location.replace(u.href)}});
 if(LANG==='en'){document.querySelectorAll('[data-en]').forEach(el=>{el.textContent=el.dataset.en});document.querySelectorAll('[data-en-aria-label]').forEach(el=>el.setAttribute('aria-label',el.dataset.enAriaLabel));document.title=document.querySelector('title').dataset.en}
-$('home').href=`index.html?lang=${LANG}`;$('print').onclick=()=>{document.querySelectorAll('details').forEach(d=>d.open=true);window.print()};
+$('home').href=`index.html?lang=${LANG}`;$('print').onclick=()=>{if(!(DEMO||mgPlus.has())){mgPlus.paywall(PCTX());return}document.querySelectorAll('details').forEach(d=>d.open=true);window.print()};
 loadProfiles();gate();
 </script>
 </body>

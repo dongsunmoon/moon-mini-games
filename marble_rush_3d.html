@@ -33,6 +33,7 @@ const L=(ko,en)=>LANG==='en'?en:ko;
 //   item={id,q:[ko,en],a:[ko,en],g?:[ko,en],tip?:[ko,en]}: the latest example, the right answer, the child's answer,
 //   how many misses, and how many right answers in a row since the last miss (so the report can say "fixed now").
 // · ls: the mini lessons (MiniLesson, in lesson.js) the child watched to the end, with the first day.
+// · ct: certificates (LR.cert), dn: units finished from a ?go= link or the daily course (LR.done).
 // A game's reset must call LR.forget() so the report forgets only that game; LR.resume() starts a fresh record.
 const LR=(()=>{const f=(location.pathname.split('/').pop()||'').replace(/\.html$/,'');
  const KEY={math_aquarium:'mathAquarium.learn',science_guardians:'scienceGuardians.learn',music_academy:'musicAcademy.learn',chess_knights:'chessKnights.learn',detective_game:'little-detective-learn',marble_rush_3d:'marbleRush.learn',coding_island:'pythonIsland.learn',python_island:'pythonIsland.learn'}[f];
@@ -61,6 +62,11 @@ const LR=(()=>{const f=(location.pathname.split('/').pop()||'').replace(/\.html$
   stat(id){const x=(load().sk||{})[id];return x?{r:x[0],w:x[1]}:null},
   // mini lessons watched to the end (MiniLesson): lesson id → the first day; les() returns them all
   les(id){const r=load();if(id==null)return r.ls||{};if(!(r.ls||(r.ls={}))[id]){r.ls[id]=day();dirty=true;if(!off)save()}return r.ls},
+  // certificates the child earned (a grade finished, a boss beaten): id → {d: first day, t:[ko,en], i: icon}.
+  // The parents' report shows them (all with Plus, the first one free). Returns true only the first time.
+  cert(id,t,icon){const r=load(),c=r.ct||(r.ct={});id=String(id).slice(0,40);if(c[id])return false;c[id]={d:day(),t:two(t),i:String(icon||'🏅').slice(0,4)};dirty=true;if(!off)save();return true},
+  // a unit a teacher or the daily course asked for was finished (?go=unit): unit → the last day it was done
+  done(unit){const r=load(),d=r.dn||(r.dn={});unit=String(unit).slice(0,40);d[unit]=day();const ks=Object.keys(d);if(ks.length>200)ks.sort((a,b)=>d[a]<d[b]?-1:1).slice(0,ks.length-200).forEach(k=>delete d[k]);dirty=true;if(!off)save()},
   forget(){off=true;R=null;try{localStorage.removeItem(KEY)}catch(e){}},
   resume(){off=!KEY;R=null;dirty=false}}})();
 const coachEsc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -235,6 +241,168 @@ const MiniLesson=(()=>{let C={voice:null,who:null},el=null,cur=null,back=null,la
    close(true);open(ls);back={spec,at:g}});
   const f=s.querySelector('details[open] .mlx-item')||s.querySelector('.mlx-x');if(f)try{f.focus({preventScroll:true})}catch(e){}}
  return {cfg(o){Object.assign(C,o||{})},open,before,book,seen,close:()=>close(),get on(){return !!el}}})();
+/*PLUS:BEGIN*/
+// mgPlus: 문코치 Plus / Coach Moon Plus, the paid part. The same code is in every game (inside the coach block),
+// index.html and report.html. Source: _src/coach/plus.js, copied by _src/coach/inject.py.
+// Who sells Plus:
+//  · In the Android/iOS app, the store (Google Play Billing / StoreKit 2). app-bridge.js gives mgBillingNative
+//    {query,buy,restore,manage}; the native side reports with window.mgPlusUpdate(state), where state is
+//    {active, product, until (ms or null), trial, products:[{id:'yearly'|'monthly', price, period:'year'|'month',
+//    trial:'P7D'|null}], msg, pending}.
+//  · On the web, WEB_SALE says what happens: 'open' = nothing is locked (now: the family's site before launch);
+//    'stores' = the web locks like the app and the parent screen points to the app stores; 'web' = a later web sale
+//    with accounts on a server (not built: it would plug in where mgBillingNative does).
+//  · An organization licence code (hagwon, school, family) opens Plus on one device. LIC holds only hashes of the
+//    codes; the codes themselves live in _src/plus/ (never in the repo).
+// Free for everyone: the front of each game (FREE), this month's free units (MONTHLY, rotating with the school year),
+// daily goals and every parent tool. Plus: everything else, the full parents' report and all certificates.
+// Kids' category rules: the child never sees a price or a buy button. A lock shows a neutral preview card with
+// "keep playing free"; buying happens only on the parent screen behind the grown-up check (mgGate). Locks are only
+// checked when something starts, never in the middle of an activity. Nothing earned or bought is taken away.
+// API: mgPlus.has() · open(game,kind,idx,total) · monthly(game,kind,total) · lock(card) · tease(card) ·
+//      paywall(ctx) · parent(ctx) (grown-up check, then paywall) · gate(cb,kind) (the grown-up check alone; kind picks
+//      its line: 'buy', 'report', 'settings', 'share', 'link') · redeem(code) ·
+//      on(fn) · state() · mode
+// Testing on the web: ?plus=lock (locks like the app, with a pretend store), ?plus=on (Plus on), ?plus=off (back).
+(()=>{if(window.mgPlus)return;
+const WEB_SALE='open';
+const KEY='moonGames.plus',SEEN='moonGames.plusSeen';
+// game → kind → how many from the start are free (idx is 1-based in the game's own order)
+const FREE={math:{tank:5},science:{world:1},coding:{world:2},music:{unit:2},chess:{boss:4,lesson:15,ladder:1},detective:{area:1,case:10},marble:{world:3}};
+// this month's free units, on top of FREE: they rotate through the locked ones from the start of the school year
+// (Korea: March, Ontario: September), so a free family still practises roughly what school is teaching
+const MONTHLY={math:{tank:2},science:{world:1}};
+// licence codes: hash → {org, until 'YYYY-MM-DD'}. Made by _src/plus/licenses.py.
+const LIC={/*LIC*/'ngv2xywrul.1rpbvpeeth8':{org:'family',until:''},'1xohrd8e9hu.19j2nuvroey':{org:'pilot-01',until:'2027-08-31'},'2gffweq8nz4.2a4hqsmddel':{org:'pilot-02',until:'2027-08-31'},'1yw64k0cab.12knbhyfn3l':{org:'pilot-03',until:'2027-08-31'},'ya69p178zq.894eq6vvc6':{org:'pilot-04',until:'2027-08-31'},'19tuegqwc92.j097j8bywo':{org:'pilot-05',until:'2027-08-31'},'29aabny30te.1blphalr06w':{org:'pilot-06',until:'2027-08-31'},'7h0fel1q7r.1421idve94w':{org:'pilot-07',until:'2027-08-31'},'249sj1d4fo9.mw8epkleru':{org:'pilot-08',until:'2027-08-31'},'2d572kc4p4d.19a3chj218t':{org:'pilot-09',until:'2027-08-31'},'d80cygnl2v.2fh1c84wsfm':{org:'pilot-10',until:'2027-08-31'},'lgwu8jc895.21awvpf8uas':{org:'test-expired',until:'2026-01-01'}};
+const lang=()=>{try{if(typeof LANG==='string'&&LANG)return LANG}catch(e){}return 'ko'};
+const T=(ko,en)=>lang()==='en'?en:ko;
+const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const two=x=>Array.isArray(x)?T(x[0],x[1]):x==null?'':String(x);
+const day=()=>new Date().toLocaleDateString('en-CA');
+const get=()=>{try{return JSON.parse(localStorage.getItem(KEY)||'{}')||{}}catch(e){return {}}};
+const put=o=>{try{localStorage.setItem(KEY,JSON.stringify(o))}catch(e){}};
+const inApp=!!window.__mgApp;
+const dev=(()=>{try{const q=new URLSearchParams(location.search).get('plus');if(q==='off')sessionStorage.removeItem('moonGames.plusDev');else if(q==='lock'||q==='on')sessionStorage.setItem('moonGames.plusDev',q);return sessionStorage.getItem('moonGames.plusDev')||''}catch(e){return ''}})();
+const mode=inApp?'app':dev==='lock'?'test':dev==='on'?'on':WEB_SALE;
+const N=()=>window.mgBillingNative||null;
+const cyrb=(s,seed)=>{let h1=0xdeadbeef^seed,h2=0x41c6ce57^seed;for(let i=0,ch;i<s.length;i++){ch=s.charCodeAt(i);h1=Math.imul(h1^ch,2654435761);h2=Math.imul(h2^ch,1597334677)}
+ h1=Math.imul(h1^(h1>>>16),2246822507);h1^=Math.imul(h2^(h2>>>13),3266489909);h2=Math.imul(h2^(h2>>>16),2246822507);h2^=Math.imul(h1^(h1>>>13),3266489909);return (4294967296*(2097151&h2)+(h1>>>0)).toString(36)};
+const licHash=c=>{const s='moon-lic|'+c;return cyrb(s,1)+'.'+cyrb(s,2)};
+const norm=c=>String(c||'').toUpperCase().replace(/[^0-9A-Z]/g,'');
+const lic=()=>{const l=get().lic;return l&&(!l.until||l.until>=day())?l:null};
+const store=()=>{const s=get().store;if(!s||!s.active)return null;if(s.until&&s.until+3*864e5<Date.now())return null;return s};
+const has=()=>mode==='open'||mode==='on'||!!(store()||lic());
+const subs=[];const emit=()=>{subs.slice().forEach(f=>{try{f(has())}catch(e){}});try{dispatchEvent(new CustomEvent('mgplus',{detail:{plus:has()}}))}catch(e){}};
+const schoolMonth=()=>{const m=new Date().getMonth()+1;return lang()==='en'?(m+3)%12:(m+9)%12};
+function monthly(game,kind,total){const f=(FREE[game]||{})[kind]||0,n=(MONTHLY[game]||{})[kind]||0;if(!n||!total||total<=f)return [];
+ const span=total-f,out=[];for(let i=0;i<n;i++){const v=f+1+((schoolMonth()*n+i)%span);if(!out.includes(v))out.push(v)}return out}
+function open(game,kind,idx,total){if(has())return true;const f=(FREE[game]||{})[kind];if(f==null)return false;return idx<=f||monthly(game,kind,total).includes(idx)}
+// pretend store for ?plus=lock on the web, so the whole flow can be tried and tested
+const FAKE=()=>lang()==='en'?[{id:'yearly',price:'$49.99',period:'year',trial:'P7D'},{id:'monthly',price:'$6.99',period:'month',trial:null}]:[{id:'yearly',price:'₩49,000',period:'year',trial:null},{id:'monthly',price:'₩6,900',period:'month',trial:null}];
+// sheet (the open parent screen) is declared up here: a store state can arrive before the rest of this file has run
+let products=null,msg='',pending=false,sheet=null;
+function update(s){try{if(typeof s==='string')s=JSON.parse(s)}catch(e){return}if(!s||typeof s!=='object')return;
+ if(Array.isArray(s.products))products=s.products;msg=s.msg||'';pending=!!s.pending;
+ if('active' in s){const o=get();o.store={active:!!s.active,product:s.product||'',until:s.until||null,trial:!!s.trial,at:Date.now()};put(o)}
+ emit();if(sheet)sheet.render()}
+window.mgPlusUpdate=update;if(window.__mgPlusPending){const p=window.__mgPlusPending;window.__mgPlusPending=null;update(p)}
+if(mode==='app'){try{N()&&N().query()}catch(e){}}
+// ---- shared look (both windows live in a shadow root, so no game's CSS can reach them)
+const CSS=':host{all:initial}*{box-sizing:border-box;font-family:system-ui,-apple-system,"Apple SD Gothic Neo","Noto Sans KR",sans-serif}'+
+ '.bg{position:fixed;inset:0;z-index:2147483600;background:rgba(12,20,40,.7);display:flex;align-items:center;justify-content:center;padding:max(12px,env(safe-area-inset-top)) max(12px,env(safe-area-inset-right)) max(12px,env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left))}'+
+ '.card{position:relative;background:#fff;color:#1d2a4a;border-radius:24px;width:min(400px,100%);max-height:100%;overflow:auto;padding:18px 18px 16px;box-shadow:0 14px 44px rgba(0,0,0,.35);text-align:center}'+
+ '.x{position:absolute;right:10px;top:10px;min-width:44px;min-height:44px;border:0;border-radius:14px;background:#eef2fb;font-size:18px;color:#1d2a4a;cursor:pointer}'+
+ '.pic{width:150px;height:150px;margin:6px auto 4px;border-radius:26px;background:linear-gradient(160deg,#fff4d6,#ffe2b8);display:flex;align-items:center;justify-content:center;font-size:76px;position:relative;overflow:hidden}'+
+ '.pic img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}.star{position:absolute;right:6px;bottom:6px;background:#ffd34d;color:#5a3d00;font-size:13px;font-weight:900;border-radius:999px;padding:3px 9px;box-shadow:0 2px 0 #d9a400}'+
+ 'h2{margin:8px 34px 4px;font-size:21px;line-height:1.3;word-break:keep-all}.t{margin:4px 0;font-size:15.5px;font-weight:700;line-height:1.5;color:#34407a;word-break:keep-all}'+
+ '.free{margin:8px 0 12px;font-size:14px;color:#56607a;line-height:1.5;word-break:keep-all}'+
+ '.go{display:block;width:100%;min-height:54px;border:0;border-radius:16px;background:#2f9e5b;color:#fff;font-size:18px;font-weight:900;box-shadow:0 4px 0 #1f7a43;cursor:pointer}'+
+ '.ask{display:block;width:100%;min-height:44px;margin-top:10px;border:0;background:none;color:#4656c8;font-size:14.5px;font-weight:800;text-decoration:underline;text-underline-offset:3px;cursor:pointer}'+
+ '.wide{width:min(460px,100%);text-align:left}.wide h2{margin:2px 40px 8px 0}.ctx{background:#f3f6ff;border-radius:14px;padding:10px 12px;font-size:14.5px;font-weight:700;color:#34407a;margin:6px 0 10px}'+
+ '.list{margin:6px 0 12px;padding:0;list-style:none;display:grid;gap:6px}.list li{font-size:14.5px;line-height:1.45;padding-left:24px;position:relative}.list li::before{content:"✓";position:absolute;left:4px;color:#2f9e5b;font-weight:900}'+
+ '.plans{display:grid;gap:8px;margin:8px 0}.plan{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;min-height:60px;border:2px solid #d7def0;border-radius:16px;background:#fff;padding:10px 14px;text-align:left;cursor:pointer;font:inherit;color:#1d2a4a}'+
+ '.plan.best{border-color:#4656c8;background:#f5f7ff}.plan b{font-size:16px}.plan span{font-size:13px;color:#56607a;display:block}.plan i{font-style:normal;font-size:17px;font-weight:900;white-space:nowrap}'+
+ '.plan:disabled{opacity:.55;cursor:default}.msg{min-height:20px;font-size:14px;font-weight:700;color:#b4232c;margin:4px 0}.msg.ok{color:#2b8a3e}'+
+ '.row{display:flex;flex-wrap:wrap;gap:4px 14px;margin:6px 0}.row button,.row a{min-height:44px;border:0;background:none;padding:0;color:#4656c8;font-size:14px;font-weight:800;text-decoration:underline;text-underline-offset:3px;cursor:pointer;display:inline-flex;align-items:center}'+
+ '.fine{font-size:12.5px;color:#6b7390;line-height:1.55;margin:8px 0 0}.code{display:flex;gap:8px;margin:6px 0}.code input{flex:1;min-width:0;min-height:48px;border:2px solid #d7def0;border-radius:12px;padding:0 12px;font-size:17px;font-weight:800;letter-spacing:1px;text-transform:uppercase}'+
+ '.code button{min-height:48px;border:0;border-radius:12px;background:#4656c8;color:#fff;font-weight:900;padding:0 16px;font-size:15px;cursor:pointer}'+
+ '.on{background:#e9f8ef;border-radius:14px;padding:12px;font-weight:800;color:#1f6b3e;margin:6px 0}'+
+ '.q{font-size:28px;font-weight:900;margin:8px 0}.gin{width:100%;min-height:52px;font-size:24px;font-weight:900;text-align:center;border:2px solid #d7def0;border-radius:14px}'+
+ 'button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid #ffb703;outline-offset:2px}'+
+ '@media (max-height:560px){.pic{width:96px;height:96px;font-size:48px}.card{padding:12px 14px}}';
+function layer(html,onClose){const host=document.createElement('div');host.setAttribute('data-mg-plus','');const root=host.attachShadow?host.attachShadow({mode:'open'}):host;
+ const st=document.createElement('style');st.textContent=CSS;root.appendChild(st);const bg=document.createElement('div');bg.className='bg';bg.setAttribute('role','dialog');bg.setAttribute('aria-modal','true');bg.innerHTML=html;root.appendChild(bg);(document.body||document.documentElement).appendChild(host);
+ const prev=document.activeElement,close=()=>{try{host.remove()}catch(e){}try{prev&&prev.focus&&prev.focus()}catch(e){}onClose&&onClose()};
+ root.querySelector('.bg').addEventListener('click',e=>{if(e.target.classList.contains('bg'))close()});host.addEventListener('keydown',e=>{if(e.key==='Escape'){e.stopPropagation();close()}});
+ const x=root.querySelector('.x');if(x)x.addEventListener('click',close);setTimeout(()=>{try{(root.querySelector('.go,.x')||{}).focus()}catch(e){}},40);
+ return {root,close,$:s=>root.querySelector(s)}}
+// ---- the child's lock card: a preview and a neutral line, no price
+let lockOpen=false;
+function lock(c){c=c||{};if(lockOpen)return false;lockOpen=true;
+ const pic=c.pic?`<img src="${esc(c.pic)}" alt="" onerror="this.remove()">`:'';
+ const L1=two(c.text)||T('다음 이야기는 문코치 Plus에서 열려요.','The next part opens with Coach Moon Plus.');
+ const F=two(c.free)||T('이달의 단원, 매일 목표, 다른 게임은 지금도 할 수 있어요.','This month’s units, daily goals and other games are open now.');
+ const w=layer(`<div class="card"><button class="x" type="button" aria-label="${T('닫기','Close')}">✕</button>
+  <div class="pic" aria-hidden="true">${esc(c.emoji||'🌙')}${pic}<span class="star">⭐ Plus</span></div>
+  <h2>${esc(two(c.title)||T('새로운 곳이 기다려요','Something new is waiting'))}</h2><p class="t">${esc(L1)}</p><p class="free">${esc(F)}</p>
+  <button class="go" type="button">▶ ${T('무료로 계속하기','Keep playing free')}</button>
+  <button class="ask" type="button">👨‍👩‍👧 ${T('어른에게 보여 주기','Show a grown-up')}</button></div>`,()=>{lockOpen=false;c.onClose&&c.onClose()});
+ w.$('.go').addEventListener('click',()=>{w.close();c.onFree&&c.onFree()});
+ w.$('.ask').addEventListener('click',()=>{w.close();parent(c.ctx)});return true}
+// shown once a day per game at a big moment (a boss beaten, a unit finished), only to players without Plus
+function tease(c){if(has()||!c||!c.game)return false;let s={};try{s=JSON.parse(localStorage.getItem(SEEN)||'{}')||{}}catch(e){}
+ if(s[c.game]===day())return false;s[c.game]=day();try{localStorage.setItem(SEEN,JSON.stringify(s))}catch(e){}return lock(c)}
+// ---- grown-up check: the app's mgGate (app-bridge.js); on the web a simple question
+function gate(cb,kind){if(typeof window.mgGate==='function'){window.mgGate(kind||'buy',ok=>cb(!!ok));return}
+ const a=12+Math.floor(Math.random()*17),b=6+Math.floor(Math.random()*4);
+ const w=layer(`<div class="card"><button class="x" type="button" aria-label="${T('닫기','Close')}">✕</button><h2>🔒 ${T('보호자 확인','Grown-ups only')}</h2>
+  <p class="free">${T('어린이는 보호자에게 보여 주세요. 아래 계산의 답을 입력해 주세요.','Kids: please show this to a grown-up. Type the answer below.')}</p>
+  <p class="q" aria-hidden="true">${a} × ${b} = ?</p><input class="gin" inputmode="numeric" autocomplete="off" aria-label="${T(a+' 곱하기 '+b,a+' times '+b)}"><p class="msg" aria-live="polite"></p>
+  <button class="go" type="button">${T('확인','Continue')}</button></div>`);
+ const go=()=>{if(w.$('.gin').value.trim()===String(a*b)){w.close();cb(true)}else{w.$('.msg').textContent=T('답이 달라요.','Not quite.');w.$('.gin').value=''}};
+ w.$('.go').addEventListener('click',go);w.$('.gin').addEventListener('keydown',e=>{if(e.key==='Enter')go()});setTimeout(()=>{try{w.$('.gin').focus()}catch(e){}},60)}
+function parent(ctx){if(has()&&mode!=='app'&&mode!=='test'){paywall(ctx);return}gate(ok=>{if(ok)paywall(ctx)})}
+// ---- the parent screen: what Plus opens, the store's prices, restore, licence code, the fine print
+const OPENS=()=>[T('수학 아쿠아리움: 1~6학년 수족관 120곳 모두','Math Aquarium: all 120 aquariums, grades 1–6'),T('코딩 섬: 파이썬 미션 84개와 보스 13명','Coding Island: all 84 Python missions and 13 bosses'),
+ T('체스 기사단: 보스 8명, 스파링, 대국 복기, 보스 코스, 레슨 57개','Chess Knights: all 8 bosses, sparring, game review, boss courses, 57 lessons'),T('과학·음악의 모든 세계와 단원, 꼬마 탐정의 모든 사건, 구슬 레이스의 모든 세계','Every science world and music unit, every detective case, every Marble Rush world'),
+ T('부모 리포트 전체: 과목별 분석, 틀린 문제, 집에서 돕기, 인쇄','The full parents’ report: subjects, missed questions, home plan, printing'),T('모든 수료증, 이 기기의 모든 아이 프로필','All certificates, and every child profile on this device')];
+const perLabel=p=>p.period==='month'?T('월간','Monthly'):T('연간','Yearly');
+const trialLabel=t=>{const m=/P(\d+)([DWMY])/.exec(t||'');if(!m)return '';const n=+m[1],u=m[2];if(u==='M'||u==='Y')return u==='M'?T(`${n}개월 무료 체험 뒤 결제`,`${n}-month free trial, then`):T(`${n}년 무료 체험 뒤 결제`,`${n}-year free trial, then`);const d=n*(u==='W'?7:1);return T(`${d}일 무료 체험 뒤 결제`,`${d}-day free trial, then`)};
+// in the app the notice page opens in the same view (a new window would go nowhere); on the web in a new tab
+const tgt=inApp?'':' target="_blank" rel="noopener"';
+function paywall(ctx){if(sheet){sheet.render();return}
+ const w=layer(`<div class="card wide"><button class="x" type="button" aria-label="${T('닫기','Close')}">✕</button><div class="body"></div></div>`,()=>{sheet=null});
+ let codeOpen=false,note='',good=false;
+ const buy=id=>{note='';if(mode==='test'){const o=get();o.store={active:true,product:id,until:Date.now()+(id==='monthly'?31:366)*864e5,trial:false,at:Date.now()};put(o);good=true;note=T('고마워요! Plus가 열렸어요.','Thank you! Plus is on.');emit();sheet&&sheet.render();return}
+  const n=N();if(mode==='app'&&n){pending=true;sheet.render();n.buy(id)}};
+ const render=()=>{const b=w.$('.body'),s=store(),l=lic(),ps=mode==='test'?FAKE():products;let h=`<h2>⭐ ${T('문코치 Plus','Coach Moon Plus')}</h2>`;
+  if(ctx)h+=`<p class="ctx">${esc(two(ctx))}</p>`;
+  if(has()){h+=`<div class="on">✅ ${mode==='open'||mode==='on'?T('이 웹사이트에서는 지금 모든 내용이 열려 있어요.','Everything is open on this website for now.'):l&&!s?T(`기관 코드로 Plus가 열려 있어요 (${l.until?l.until+'까지':'기한 없음'}).`,`Plus is on with an organization code (${l.until?'until '+l.until:'no end date'}).`):T('Plus를 쓰고 있어요. 고마워요!','Plus is on. Thank you!')}</div>`;
+   if(s&&s.until)h+=`<p class="fine">${T('다음 갱신일','Next renewal')}: ${esc(new Date(s.until).toLocaleDateString(lang()==='en'?'en-CA':'ko-KR'))}</p>`}
+  else{h+=`<p class="t" style="text-align:left">${T('Plus로 열리는 것','What Plus opens')}</p><ul class="list">${OPENS().map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`;
+   if(mode==='stores')h+=`<p class="ctx">${T('Plus는 앱에서 시작할 수 있어요. App Store나 Google Play에서 "문코치"를 찾아 주세요.','Plus starts in the app. Look for “Coach Moon” on the App Store or Google Play.')}</p>`;
+   else if(ps&&ps.length){const sorted=ps.slice().sort((a,b)=>(a.period==='year'?0:1)-(b.period==='year'?0:1));
+    h+=`<div class="plans">${sorted.map((p,i)=>`<button class="plan${i?'':' best'}" type="button" data-id="${esc(p.id)}"${pending?' disabled':''}><span><b>${perLabel(p)}${i?'':' · '+T('추천','best value')}</b><span>${esc(trialLabel(p.trial)||(p.period==='month'?T('매달 자동 갱신','Renews every month'):T('매년 자동 갱신','Renews every year')))}</span></span><i>${esc(p.price)}</i></button>`).join('')}</div>`}
+   else if(!msg)h+=`<p class="ctx">${mode==='app'?T('스토어에서 가격을 불러오고 있어요…','Loading prices from the store…'):T('이 웹사이트에서는 아직 Plus를 팔지 않아요.','Plus is not sold on this website yet.')}</p>`}
+  h+=`<p class="msg${good?' ok':''}" aria-live="polite">${esc(note||msg||(pending?T('스토어 화면을 기다리는 중이에요…','Waiting for the store…'):''))}</p>`;
+  h+=`<div class="row">${mode==='app'||mode==='test'?`<button type="button" data-a="restore">${T('구매 복원','Restore purchases')}</button>`:''}${s&&mode==='app'?`<button type="button" data-a="manage">${T('구독 관리·해지','Manage or cancel')}</button>`:''}<button type="button" data-a="code">${T('기관·가족 코드 입력','Enter an organization code')}</button></div>`;
+  if(codeOpen)h+=`<div class="code"><input class="cin" maxlength="24" autocomplete="off" aria-label="${T('코드','Code')}" placeholder="MOON-XXXX-XXXX-XXXX"><button type="button" data-a="redeem">${T('확인','Use')}</button></div>`;
+  h+=`<p class="fine">${T('구독은 선택한 기간(1개월 또는 1년)마다 자동으로 갱신되고, 결제는 App Store 또는 Google Play 계정으로 돼요. 다음 갱신 24시간 전까지 스토어의 구독 설정에서 해지하면 다음 결제가 되지 않아요. 무료 체험이 있는 지역에서는 체험이 끝나면 자동으로 결제돼요. 환불은 각 스토어의 정책을 따라요. Plus가 끝나도 아이가 얻은 기록과 물건은 그대로 남아요.','Subscriptions renew automatically each period (1 month or 1 year) and are charged to your App Store or Google Play account. Cancel in the store’s subscription settings at least 24 hours before renewal to stop the next charge. Where a free trial is offered, it turns into a paid subscription when it ends. Refunds follow each store’s policy. When Plus ends, your child keeps everything they earned.')}</p>
+   <div class="row"><a href="notice.html?lang=${lang()}#terms"${tgt}>${T('이용 조건','Terms of use')}</a><a href="notice.html?lang=${lang()}#privacy"${tgt}>${T('개인정보 처리방침','Privacy policy')}</a></div>`;
+  b.innerHTML=h;
+  b.querySelectorAll('.plan').forEach(x=>x.addEventListener('click',()=>buy(x.dataset.id)));
+  b.querySelectorAll('[data-a]').forEach(x=>x.addEventListener('click',()=>{const a=x.dataset.a,n=N();
+   if(a==='restore'){note='';if(mode==='test'){note=T('복원할 구매가 없어요.','No purchases to restore.');render();return}if(n){pending=true;render();n.restore()}}
+   else if(a==='manage'){n&&n.manage()}
+   else if(a==='code'){codeOpen=!codeOpen;render();setTimeout(()=>{try{w.$('.cin').focus()}catch(e){}},30)}
+   else if(a==='redeem'){const ok=redeem(w.$('.cin').value);good=ok;note=ok?T('코드가 확인됐어요. Plus가 열렸어요.','Code accepted. Plus is on.'):T('코드를 다시 확인해 주세요.','Please check the code.');if(ok)codeOpen=false;render()}}));
+  };
+ sheet={render,close:w.close};render()}
+function redeem(code){const c=norm(code);if(c.length<12)return false;const e=LIC[licHash(c)];if(!e||(e.until&&e.until<day()))return false;
+ const o=get();o.lic={org:e.org,until:e.until||'',at:Date.now()};put(o);emit();return true}
+window.mgPlus={get mode(){return mode},has,open,monthly,lock,tease,paywall,parent,gate,redeem,on(f){subs.push(f)},
+ state(){return {plus:has(),mode,store:store(),lic:lic(),products:mode==='test'?FAKE():products}},free:FREE}})();
+/*PLUS:END*/
 /*COACH:END*/
 function applyLang(){if(LANG!=='en')return;document.querySelectorAll('[data-en]').forEach(el=>{el.textContent=el.dataset.en});document.querySelectorAll('[data-en-html]').forEach(el=>{el.innerHTML=el.dataset.enHtml});for(const a of ['aria-label','placeholder','title'])document.querySelectorAll('[data-en-'+a+']').forEach(el=>el.setAttribute(a,el.getAttribute('data-en-'+a)))}
 function setLang(next){try{localStorage.setItem('moonGames.lang',next)}catch(e){}try{speechSynthesis.cancel()}catch(e){}const u=new URL(location.href);u.searchParams.set('lang',next);location.replace(u.href)}
@@ -414,6 +582,20 @@ button,input,select{font:inherit}button{cursor:pointer;touch-action:manipulation
 .fun-btn span{font-size:24px;line-height:1;flex:0 0 auto}.fun-btn:active:not(:disabled){transform:translateY(2px);box-shadow:0 1px 0 #050a16}
 .map-em{width:48px;height:48px;flex:0 0 48px;border-radius:10px;display:grid;place-items:center;font-size:28px;background:#20304e}
 .map.custom{border-color:#ffd84a66}.map.add{border-style:dashed;background:#101a2e}
+/* Coach Moon Plus: the gold ⭐ Plus badge on a locked world's picture */
+.map-pic{position:relative;flex:0 0 48px;width:48px;height:48px;display:block}.map-pic img,.map-pic .map-em{display:grid;width:48px;height:48px}
+.mr-plus{position:absolute;left:50%;bottom:-7px;transform:translateX(-50%);background:#ffd34d;color:#5a3d00;font-size:12px;font-weight:900;line-height:1.25;border-radius:999px;padding:1px 6px;box-shadow:0 2px 0 #d9a400;white-space:nowrap;pointer-events:none}
+.map.plus{padding-bottom:8px}
+/* today's challenge (one a day, from the date) and its win banner on the result card */
+.day-card{display:flex;align-items:center;gap:10px;width:100%;min-height:64px;margin-top:10px;border:1px solid #ffd84a8c;border-radius:14px;background:linear-gradient(160deg,#2b2a55,#1a2746);color:#fff;padding:8px 10px;text-align:left;box-shadow:0 3px 0 #050a16;font:inherit;cursor:pointer;transition:transform .08s,box-shadow .08s}
+.day-card:active:not(:disabled){transform:translateY(2px);box-shadow:0 1px 0 #050a16}.day-card:disabled{opacity:.55;cursor:default}
+.day-card.done{border-color:#6be3a18c;background:linear-gradient(160deg,#1c3a3e,#172743)}
+.dc-pic{flex:0 0 46px;width:46px;height:46px;border-radius:10px;overflow:hidden;display:grid;place-items:center;font-size:26px;background:#20304e}.dc-pic img{width:100%;height:100%;object-fit:cover}
+.dc-txt{flex:1;min-width:0;display:block}.dc-k{display:block;font-size:12px;font-weight:900;color:#ffd84a}.day-card.done .dc-k{color:#7ff0b2}
+.dc-txt b{display:block;font-size:15px;line-height:1.25;margin:1px 0}.dc-sub{display:block;font-size:12.5px;font-weight:700;color:#b3c0d9;line-height:1.3}
+.dc-st{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;font-size:20px;line-height:1}.dc-st b{font-size:13px;margin-top:3px;color:#ffd84a}
+.day-win{margin:10px 0 4px;padding:8px 10px;border-radius:12px;background:#2e2a10;border:1px solid #ffd84a99;color:#fff3c4;font-size:14px;font-weight:800;display:grid;gap:3px;text-align:center}.day-win b{color:#ffd84a;font-size:15px}
+.go-done{margin:10px 0 2px;text-align:center}.go-done a{display:inline-flex;align-items:center;justify-content:center;min-height:46px;padding:0 18px;border-radius:14px;background:#1f3357;border:1px solid #55d5ff88;color:#fff;font-weight:900;font-size:15px;text-decoration:none}
 .lab-only{display:none}.lab-on .lab-only{display:block}.lab-on .race-only{display:none}
 .lab-scene .minimap,.lab-scene .rank-board,.lab-scene .hud-tools,.lab-scene .race-dots,.lab-scene .section-chip{display:none}
 .replay-skip{position:absolute;right:74px;bottom:92px;z-index:5}
@@ -727,6 +909,7 @@ button,input,select{font:inherit}button{cursor:pointer;touch-action:manipulation
   </main>
   <section class="panel action-panel" aria-label="경기 진행" data-en-aria-label="Race controls"><button class="primary" id="startBtn" type="button">🏁 레이스 시작!</button><div class="controls"><button class="control" id="pauseBtn" type="button" disabled>⏸ 일시정지</button><button class="control" id="resetBtn" type="button" data-en="↻ Reset">↻ 다시 준비</button></div>
    <div class="fun-row"><button class="fun-btn" id="buildBtn" type="button" data-en-html="<span>🛠️</span>Build a course"><span>🛠️</span>코스 만들기</button><button class="fun-btn" id="chalBtn" type="button" aria-haspopup="dialog" data-en-html="<span>🎯</span>Design challenges"><span>🎯</span>설계 도전</button><button class="fun-btn" id="labBtn" type="button"><span>🔬</span>구슬 실험실</button><button class="fun-btn" id="noteBtn" type="button" aria-haspopup="dialog" data-en-html="<span>📒</span>Lab notebook"><span>📒</span>실험 노트</button><button class="fun-btn" id="skinBtn" type="button" data-en-html="<span>🎨</span>Decorate"><span>🎨</span>구슬 꾸미기</button><button class="fun-btn" id="badgeBtn" type="button"><span>🏅</span>배지</button></div>
+   <button type="button" class="day-card" id="dayCard"></button>
    <p class="hint keys-hint" data-en="Keys: Space = pause · C = cheer · V = camera">단축키: 스페이스 = 일시정지 · C = 응원 · V = 카메라</p></section>
   <aside class="panel sidebar">
    <section class="lab-only"><h2 class="label" data-en="🔬 Experiments">🔬 실험 고르기</h2><div class="lab-grid compact" id="labList"></div><p class="hint" data-en="Pick an experiment. Guess first, then watch!">실험을 골라요. 먼저 예상하고, 그다음 지켜봐요!</p><button type="button" class="small-btn note-side" id="noteSide" data-en="📒 Open the lab notebook">📒 실험 노트 보기</button></section>
@@ -1394,7 +1577,8 @@ const EXPS=[
   safe:L('진짜 선풍기의 날개와 덮개 안에는 손가락이나 물건을 넣지 않아요.','Never put fingers or anything else into a real fan’s blades or cover.')}];
 const EXP_IDS=EXPS.map(e=>e.id),UNIT=30;  // distances are counted in "칸" (squares) of 30 px, like a ruler
 // My marble's looks. Each one is earned by a badge for something the child did (never bought, never random).
-const PATTERNS=[['plain','⚪',L('기본','Classic')],['stripe','🦓',L('줄무늬','Stripes')],['face','😊',L('웃는 얼굴','Smiley')],['rainbow','🌈',L('무지개','Rainbow')],['galaxy','🌌',L('은하수','Galaxy')],['fire','🔥',L('불꽃','Flame')],['star','⭐',L('별','Star')],['blueprint','📐',L('설계도','Blueprint')],['planet','🪐',L('행성','Planet')]];
+const PATTERNS=[['plain','⚪',L('기본','Classic')],['stripe','🦓',L('줄무늬','Stripes')],['face','😊',L('웃는 얼굴','Smiley')],['rainbow','🌈',L('무지개','Rainbow')],['galaxy','🌌',L('은하수','Galaxy')],['fire','🔥',L('불꽃','Flame')],['star','⭐',L('별','Star')],['blueprint','📐',L('설계도','Blueprint')],['planet','🪐',L('행성','Planet')],['gold','🥇',L('황금','Gold')]];
+const MR_GOLD=3;  // today's-challenge stamps that open the 🥇 gold look
 const TRAILS=[['none','✖️',L('없음','None')],['sparkle','✨',L('반짝이','Sparkles')],['bubbles','💧',L('비눗방울','Bubbles')],['rainbow','🌈',L('무지개 꼬리','Rainbow tail')],['stars','🌟',L('별똥별','Shooting stars')],['fire','🔥',L('불꽃 꼬리','Flame tail')],['gears','⚙️',L('톱니 꼬리','Gear trail')]];
 
 // Design challenges (plan → build → test → improve). Every goal is measured by the real race on the child's own course:
@@ -1455,8 +1639,11 @@ const freshStats=()=>({cheers:0,worlds:[],builds:0,customRaces:0,labs:{},leagues
 // mods/theme = the challenge course, prev = the last test {m: pieces, t: winner's seconds}, hist = recent test times,
 // dirs = one-change wins that went slower (1) / faster (2), imp = goal met after an earlier test missed it, key = last run counted in the report
 let customs=[],skin={pat:'plain',trail:'none'},stats=freshStats(),badges=[],chal={};
+// mrDay (added 2026-11): today's challenge. n = challenge stamps won (one a day), streak = days in a row, last = the last day
+// one was won (YYYY-MM-DD, local). mrLed: my marble was in front during this race; mrGo: the world a ?go= link opened.
+let mrDay={n:0,streak:0,last:''},mrLed=false,mrGo=null;
 // wv: how many built-in worlds there were when this was saved (my own courses are listed after them, so their index moves when a world is added)
-function save(){try{localStorage.setItem('marbleRush.v2',JSON.stringify({worldIdx,numBalls,voiceOn,sfxOn,mine,mineStats,voicePick,names,mode,league,customs,skin,stats,badges,chal,wv:WORLDS.length}))}catch(e){}}
+function save(){try{localStorage.setItem('marbleRush.v2',JSON.stringify({worldIdx,numBalls,voiceOn,sfxOn,mine,mineStats,voicePick,names,mode,league,customs,skin,stats,badges,chal,dly:mrDay,wv:WORLDS.length}))}catch(e){}}
 (function load(){try{const d=JSON.parse(localStorage.getItem('marbleRush.v2')||'null')||JSON.parse(localStorage.getItem('marble3dsettings')||'{}');
  const nn=(v,max=1e6)=>Math.max(0,Math.min(max,Math.floor(Number(v)||0)));
  if(Array.isArray(d.customs))customs=d.customs.filter(c=>c&&Array.isArray(c.mods)).slice(0,6).map(c=>({name:String(c.name||'').replace(/[<>]/g,'').slice(0,12)||L('나의 코스','My course'),theme:clamp(nn(c.theme),0,WORLDS.length-1),mods:c.mods.filter(okMod).slice(0,8)})).filter(c=>c.mods.length);
@@ -1468,6 +1655,7 @@ function save(){try{localStorage.setItem('marbleRush.v2',JSON.stringify({worldId
   const pv=x.prev&&typeof x.prev==='object'&&Number.isFinite(+x.prev.t)&&mods(x.prev.m).length?{m:mods(x.prev.m),t:clamp(+x.prev.t,0,999)}:null;
   chal[c.id]={s:nn(x.s,7),n:nn(x.n),met:nn(x.met),dirs:nn(x.dirs,3),imp:x.imp?1:0,mods:mods(x.mods),theme:clamp(nn(x.theme),0,WORLDS.length-1),prev:pv,hist:Array.isArray(x.hist)?x.hist.map(Number).filter(Number.isFinite).map(t=>clamp(t,0,999)).slice(-5):[],key:String(x.key||'').slice(0,240)}}
  if(Array.isArray(d.badges))badges=d.badges.filter(b=>typeof b==='string');
+ if(d.dly&&typeof d.dly==='object'){const x=d.dly;mrDay={n:nn(x.n),streak:nn(x.streak),last:/^\d{4}-\d{2}-\d{2}$/.test(x.last)?x.last:''}}
  const wv=nn(d.wv)||7;worldIdx=Number(d.worldIdx??d.mapIndex)||0;if(wv<WORLDS.length&&worldIdx>=wv)worldIdx+=WORLDS.length-wv;
  worldIdx=clamp(worldIdx,0,WORLDS.length+customs.length-1);numBalls=clamp(Number(d.numBalls)||8,2,16);voiceOn=d.voiceOn!==false;sfxOn=d.sfxOn!==false;mine=clamp(Number(d.mine)||0,0,numBalls-1);
  mineStats={races:Math.max(0,Number(d.mineStats?.races)||0),wins:Math.max(0,Number(d.mineStats?.wins)||0)};voicePick=d.voicePick&&typeof d.voicePick==='object'?d.voicePick:{};
@@ -1540,7 +1728,7 @@ function prepare(){
   st=Sim.createState(course,numBalls,shuffle([...Array(numBalls).keys()]));steelTeam();
   for(let i=0;i<40;i++)Sim.step(st,1/60)}
  forceSaid={};chalAt=null;
- phase='ready';paused=false;timeScale=1;slowTarget=1;cheersLeft=CHEERS;leaderId=-1;leadChanges=0;secIdx=-1;winnerT=null;photo=false;sparks=[];rings=[];mineBestRank=99;slowShown=false;
+ phase='ready';paused=false;mrLed=false;timeScale=1;slowTarget=1;cheersLeft=CHEERS;leaderId=-1;leadChanges=0;secIdx=-1;winnerT=null;photo=false;sparks=[];rings=[];mineBestRank=99;slowShown=false;
  $('resultOverlay').classList.add('hidden');$('confettiLayer').innerHTML='';$('slowmo').classList.add('hidden');$('slowmo').textContent=L('🎬 슬로모션','🎬 SLOW MOTION');$('replaySkip').classList.add('hidden');$('peekBack').classList.add('hidden');
  $('startBanner').innerHTML=labMode?`<h2>🔬</h2><p>${esc(L('예상을 고르면 실험이 시작돼요!','Pick your guess to start the experiment!'))}</p>`:chalRun?`<h2>🎯</h2><p>${esc(CHAL_BY[chalRun.id].team?L('시험 주행! 어느 팀이 먼저 들어올지 지켜봐요.','Test run! Watch which team arrives first.'):CHAL_BY[chalRun.id].sort?L('시험 주행! 누가 점프를 건너는지 지켜봐요.','Test run! Watch who makes it across the jump.'):L('시험 주행! 출발 버튼을 누르면 우승 시간을 재요.','Test run! Press Start to time the winner.'))}</p>`:`<h2>${esc(L('준비됐나요?','READY?'))}</h2><p>${esc(L('출발 버튼을 누르면 문이 열려요!','Press Start to open the gate!'))}</p>`;
  if(hasSteel())$('startBanner').insertAdjacentHTML('beforeend',`<p class="steel-note">${matDots(esc(L('🧲 자석이 있는 코스예요! 짝수 번호 ⚙️ 쇠구슬 팀도 달려요.','🧲 This course has a magnet! The even-numbered ⚙️ steel team races too.')))}</p>`);
@@ -1555,6 +1743,7 @@ const hasSteel=()=>!!(course&&!course.lab&&course.magnets.length),isSteel=i=>has
 function steelTeam(){if(!hasSteel())return;for(const m of st.marbles)if(m.id%2){m.mass=3;m.mag=1}}
 function startRace(){
  if(labMode){if(phase!=='ready')prepare();if(!labPred){labPredictCard();return}$('resultOverlay').classList.add('hidden');phase='countdown';countdownT=0;shownCount=-1;setControls();speak(L('실험 준비! 두 구슬을 잘 지켜봐요.','Get ready! Watch both lanes closely.'),true);tone(400,140);scrollToScene();return}
+ if(!chalRun&&mode!=='league'&&!mrOpen(worldIdx)){mrLock(worldIdx);return}
  if(phase==='countdown'||phase==='running'){prepare()}
  if(mode==='league'&&(!league||league.done)){startLeague();prepare()}
  else if(phase!=='ready')prepare();
@@ -1608,6 +1797,7 @@ function raceLogic(){
  const myRank=rank.findIndex(m=>m.id===mine)+1;
  if(phase==='running'&&!winnerT&&myRank<mineBestRank&&myRank<=3&&clock-mineTalk>6&&clock-st.raceT0>4){mineTalk=clock;if(clock-lastTalk>2)speak(fill(T.mineUp,mine,{r:L(String(myRank),ord(myRank))}))}
  mineBestRank=Math.min(mineBestRank,myRank);
+ if(phase==='running'&&!winnerT&&myRank===1&&st.t-st.raceT0>3)mrLed=true;
  if(!winnerT&&clock-lastTalk>12)speak(pick(T.general));
  // slow motion when the front two are close at the finish
  slowTarget=1;const a=rank[0],b=rank[1];
@@ -1886,15 +2076,16 @@ function setControls(){
  document.querySelectorAll('#maps .map').forEach(b=>b.disabled=running||mode==='league');
  document.querySelectorAll('#modeSeg button').forEach(b=>b.disabled=running);
  // builder, lab, workshop and badge buttons
- $('buildBtn').disabled=running;$('chalBtn').disabled=running;$('labBtn').disabled=running&&!labMode;
+ $('buildBtn').disabled=running;$('chalBtn').disabled=running;if($('dayCard'))$('dayCard').disabled=running;$('labBtn').disabled=running&&!labMode;
  $('labBtn').innerHTML=labMode?`<span>🏁</span>${L('레이스로','Races')}`:`<span>🔬</span>${L('구슬 실험실','Marble lab')}`;
  $('badgeBtn').innerHTML=`<span>🏅</span>${L('배지','Badges')} ${badges.length}/${BADGES.length}`;
 }
 function renderMaps(){
  const all=[...WORLDS.map((w,i)=>[w,i]),...customs.map((c,k)=>[customTheme(c),WORLDS.length+k])];
  // a world without a picture yet shows its emoji (the image takes over once images/world-<id>.webp exists)
- $('maps').innerHTML=all.map(([w,i])=>`<button type="button" class="map${i===raceWorld&&!labMode?' active':''}${w.custom?' custom':''}" data-world="${i}">${w.custom?`<img src="images/world-custom.webp" alt="" onerror="this.outerHTML='<span class=&quot;map-em&quot; aria-hidden=&quot;true&quot;>🛠️</span>'">`:`<img src="images/world-${w.id}.webp" alt="" onerror="${w.em?`this.outerHTML='<span class=&quot;map-em&quot; aria-hidden=&quot;true&quot;>${w.em}</span>'`:"this.style.visibility='hidden'"}">`}<span><b>${esc(w.name)}</b><small>${esc(w.desc)}</small></span></button>`).join('')
+ $('maps').innerHTML=all.map(([w,i])=>`<button type="button" class="map${i===raceWorld&&!labMode?' active':''}${w.custom?' custom':''}${mrPlus(i)?' plus':''}" data-world="${i}">${mrPlus(i)?'<span class="map-pic">':''}${w.custom?`<img src="images/world-custom.webp" alt="" onerror="this.outerHTML='<span class=&quot;map-em&quot; aria-hidden=&quot;true&quot;>🛠️</span>'">`:`<img src="images/world-${w.id}.webp" alt="" onerror="${w.em?`this.outerHTML='<span class=&quot;map-em&quot; aria-hidden=&quot;true&quot;>${w.em}</span>'`:"this.style.visibility='hidden'"}">`}${mrPlus(i)?'<span class="mr-plus">⭐ Plus</span></span>':''}<span><b>${esc(w.name)}</b><small>${esc(w.desc)}</small></span></button>`).join('')
   +`<button type="button" class="map add" data-build="1"><span class="map-em" aria-hidden="true">➕</span><span><b>${L('코스 만들기','Build a course')}</b><small>${L('조각을 쌓아 나만의 코스를!','Stack pieces into your own course!')}</small></span></button>`;
+ renderDaily();
 }
 function renderMinePicker(){if(mine>=numBalls)mine=numBalls-1;$('minePicker').innerHTML=PALETTE.slice(0,numBalls).map((c,i)=>`<button type="button" class="mine-chip${i===mine?' on':''}" data-mine="${i}" title="${esc(nameOf(i))}" style="background:radial-gradient(circle at 32% 28%,#fff 0 9%,${c[1]} 42%,${SHADE[i].dark})" aria-label="${esc(L(`${nameOf(i)}${isSteel(i)?' (쇠구슬)':''} 응원하기`,`Cheer for ${nameOf(i)}${isSteel(i)?' (steel)':''}`))}" aria-pressed="${i===mine}">${i+1}${isSteel(i)?'<i class="mk-steel matdot steel" aria-hidden="true"></i>':''}</button>`).join('')}
 function renderNames(){
@@ -1903,13 +2094,13 @@ function renderNames(){
 }
 
 // ---------------------------------------------------------------- results & league
-function startLeague(){const order=shuffle([...Array(WORLDS.length).keys()]);league={race:1,n:numBalls,worlds:order.slice(0,LEAGUE_RACES),total:Array(numBalls).fill(0),last:[],done:false};save()}
+function startLeague(){const order=mgPlus.has()?shuffle([...Array(WORLDS.length).keys()]):mrLeagueWorlds();league={race:1,n:numBalls,worlds:order.slice(0,LEAGUE_RACES),total:Array(numBalls).fill(0),last:[],done:false};save()}
 function showResults(){
  phase='finished';$('slowmo').classList.add('hidden');slowTarget=1;$('resultOverlay').classList.remove('lab-ov');
  const rank=Sim.ranking(st),champ=rank[0],me=st.marbles[mine],myRank=rank.findIndex(m=>m.id===mine)+1,won=champ.id===mine;
  const myKo=ME?esc(ME.name)+'의 구슬':'내 구슬',myEn=ME?esc(ME.name)+"'s marble":'Your marble';
  mineStats.races++;if(won)mineStats.wins++;
- const wId=theme.custom?null:WORLDS[raceWorld]?.id;if(wId&&!stats.worlds.includes(wId))stats.worlds.push(wId);if(theme.custom)stats.customRaces++;
+ const wId=theme.custom?null:WORLDS[raceWorld]?.id;if(wId&&!stats.worlds.includes(wId))stats.worlds.push(wId);if(wId)mrCert(wId);if(theme.custom)stats.customRaces++;
  for(const f of FORCE_IDS)if(!stats.forces.includes(f)&&course.sections.some(s=>s.type===f))stats.forces.push(f);
  if(chalRun){chalShow(rank);return}
  const fmt=t=>{const s=Math.max(0,t);return `${Math.floor(s/60)}:${(s%60).toFixed(1).padStart(4,'0')}`};
@@ -1933,6 +2124,7 @@ function showResults(){
   <div class="win-text" style="color:${PALETTE[hero][1]}">${esc(heroText)}</div><p class="win-sub">${heroSub?esc(heroSub)+' · ':''}${esc(theme.name)} · ${fmt((champ.finishTime||st.t)-st.raceT0)} · ${L(`역전 ${leadChanges}회`,`${leadChanges} lead change${leadChanges===1?'':'s'}`)}</p>
   <p class="mine-result">${mineLine}<span class="mine-stats">${ME?esc(MY)+' '+L(esc(ME.name)+' · ',''):''}${L(`응원한 구슬 우승 ${mineStats.wins}번 / ${mineStats.races}경기`,`${myEn} won ${mineStats.wins} of ${mineStats.races} race${mineStats.races===1?'':'s'}`)}</span></p>${coachHtml}${table}${rec.length>20?`<button class="small-btn replay-btn" type="button" data-act="replay">📺 ${L('결승 장면 다시 보기 (슬로모션)','Watch the finish again (slow motion)')}</button>`:''}${actions}`;
  $('resultOverlay').classList.remove('hidden');confetti();if(won)setTimeout(jingle,600);
+ mrAfterRace(myRank,wId);
  save();setControls();updateLeagueUI();
  setCaption(L(`🏆 ${nameOf(champ.id)} 우승! 축하해요!`,`🏆 ${nameOf(champ.id)} wins! Congratulations!`));checkBadges();
 }
@@ -1982,7 +2174,7 @@ const BADGES=[
 const lookName=([k,id])=>((k==='pat'?PATTERNS:TRAILS).find(x=>x[0]===id)||['','',''])[2];
 const lookIcon=([k,id])=>((k==='pat'?PATTERNS:TRAILS).find(x=>x[0]===id)||['','',''])[1];
 const badgeFor=(k,id)=>BADGES.find(b=>b.prize[0]===k&&b.prize[1]===id);
-const unlocked=(k,id)=>(k==='pat'&&id==='plain')||(k==='trail'&&id==='none')||badges.includes(badgeFor(k,id)?.id);
+const unlocked=(k,id)=>(k==='pat'&&id==='plain')||(k==='trail'&&id==='none')||(k==='pat'&&id==='gold'&&mrDay.n>=MR_GOLD)||badges.includes(badgeFor(k,id)?.id);
 function checkBadges(quiet){
  const got=[];for(const b of BADGES)if(!badges.includes(b.id)&&b.val()>=b.goal){badges.push(b.id);got.push(b)}
  if(got.length){save();if(!quiet){const b=got[0],pr=lookIcon(b.prize)+' '+lookName(b.prize);tone(988,120,'triangle',.08);setTimeout(()=>tone(1319,180,'triangle',.08),120);
@@ -1992,7 +2184,7 @@ const skinOk=()=>unlocked('pat',skin.pat)&&unlocked('trail',skin.trail);
 
 // ---------------------------------------------------------------- marble painting (patterns) and my marble's trail
 function paintBall(g,x,y,r,c,sh,ang,pat,time){
- const base=pat==='steel'?[mix(c,'#ffffff',.6),mix(c,'#b8c3d4',.35),mix(c,'#262c38',.45)]:pat==='blueprint'?['#cfe6ff','#2a6fd6','#0f3474']:pat==='galaxy'?['#d9ccff','#5a3fc0','#120c3a']:pat==='fire'?['#fff6c0','#ffb347','#d8341a']:pat==='metal'?['#ffffff','#eef2f7','#7d8798']:[sh.lite,c,sh.dark];
+ const base=pat==='steel'?[mix(c,'#ffffff',.6),mix(c,'#b8c3d4',.35),mix(c,'#262c38',.45)]:pat==='blueprint'?['#cfe6ff','#2a6fd6','#0f3474']:pat==='galaxy'?['#d9ccff','#5a3fc0','#120c3a']:pat==='fire'?['#fff6c0','#ffb347','#d8341a']:pat==='metal'?['#ffffff','#eef2f7','#7d8798']:pat==='gold'?['#fff6c4','#ffc21a','#9a5c00']:[sh.lite,c,sh.dark];
  const gr=g.createRadialGradient(x-r*.38,y-r*.42,r*.1,x,y,r*1.05);gr.addColorStop(0,pat==='matte'?sh.lite:'#ffffff');gr.addColorStop(.28,base[0]);gr.addColorStop(.72,base[1]);gr.addColorStop(1,base[2]);
  g.fillStyle=gr;g.beginPath();g.arc(x,y,r,0,TAU);g.fill();
  g.save();g.beginPath();g.arc(x,y,r*.93,0,TAU);g.clip();g.translate(x,y);
@@ -2006,7 +2198,7 @@ function paintBall(g,x,y,r,c,sh,ang,pat,time){
   else if(pat==='fire'){g.fillStyle='rgba(255,240,150,.8)';for(let k=0;k<3;k++){g.rotate(TAU/3);g.beginPath();g.moveTo(0,r*.1);g.quadraticCurveTo(r*.45,-r*.2,0,-r*.85);g.quadraticCurveTo(-r*.2,-r*.3,0,r*.1);g.fill()}}
   else if(pat==='blueprint'){g.strokeStyle='rgba(255,255,255,.6)';g.lineWidth=Math.max(1,r*.06);for(let k=-2;k<=2;k++){g.beginPath();g.moveTo(-r,k*r*.42);g.lineTo(r,k*r*.42);g.moveTo(k*r*.42,-r);g.lineTo(k*r*.42,r);g.stroke()}g.lineWidth=Math.max(1,r*.1);g.beginPath();g.arc(0,0,r*.5,0,TAU);g.stroke()}
   else if(pat==='planet'){g.fillStyle='rgba(255,255,255,.3)';for(const k of [-.5,0,.48])g.fillRect(-r,k*r-r*.08,2*r,r*.16);g.strokeStyle='rgba(255,236,190,.9)';g.lineWidth=Math.max(1,r*.13);g.beginPath();g.ellipse(0,0,r*.98,r*.3,-.35,0,TAU);g.stroke()}
-  else if(pat==='plain'||pat==='metal'||pat==='steel'){g.fillStyle=pat==='plain'?'rgba(255,255,255,.32)':'rgba(255,255,255,.55)';g.beginPath();g.ellipse(0,0,r,r*.3,0,0,TAU);g.fill()}}
+  else if(pat==='plain'||pat==='metal'||pat==='steel'||pat==='gold'){g.fillStyle=pat==='plain'?'rgba(255,255,255,.32)':'rgba(255,255,255,.55)';g.beginPath();g.ellipse(0,0,r,r*.3,0,0,TAU);g.fill()}}
  g.restore();
  if(pat!=='matte'){g.fillStyle='rgba(255,255,255,.9)';g.beginPath();g.ellipse(x-r*.36,y-r*.42,r*.28,r*.17,-.6,0,TAU);g.fill()}
 }
@@ -2256,7 +2448,7 @@ function chalShow(rank){
  const top=rank.slice(0,3).filter(m=>m.done).map((m,i)=>`<span>${['🥇','🥈','🥉'][i]} ${esc(nameOf(m.id))} ${sec(m.finishTime-st.raceT0)}</span>`).join('');
  const hint=chalHint(ch,run,j,prev);
  $('resultCard').innerHTML=`<div class="ch-res"><div class="lab-head">🎯 ${L('설계 도전','Design challenge')} · ${chalPic(ch)} ${esc(ch.t)}</div>${stepsHTML([2])}
-  <div class="ch-time">⏱️ ${L('우승 시간','Winning time')} ${sec(t)}</div>${force?chalForceView(ch,j.o):gaugeHTML({zones,now:t,base,old:(base!=null?old.slice(0,-1):old).slice(-4),guess,label,near:ch.id==='same'&&base!=null})}${chalMsg(ch,j,prev,starN(gained))}
+  <div class="ch-time">⏱️ ${L('우승 시간','Winning time')} ${sec(t)}</div>${force?chalForceView(ch,j.o):gaugeHTML({zones,now:t,base,old:(base!=null?old.slice(0,-1):old).slice(-4),guess,label,near:ch.id==='same'&&base!=null})}${chalMsg(ch,j,prev,starN(gained))}${j.ok?mrDesignWin(ch.id):''}
   ${guess!=null?`<p class="ch-guess">🤔 ${L(`내 예상 ${guess}초 → 실제 ${sec(t)} (${sec(Math.abs(t-guess))} 차이)`,`My guess ${guess} s → actual ${sec(t)} (${sec(Math.abs(t-guess))} off)`)}</p>`:''}
   ${coachHere(j.ok?'clap':'idea',hint,hint)}<button type="button" class="mlx-chip mrl-again" data-act="lesson" data-ls="${(CH_LS[ch.id]||['gauge'])[0]}">📖 ${L('개념 다시 보기','See the idea again')}</button>
   <div class="result-actions"><button class="control" type="button" data-act="chAgain">🔁 ${L('그대로 다시 시험','Test it again')}</button><button class="primary" type="button" data-act="chFix">🔧 ${L('코스 고치기','Improve the course')}</button></div>
@@ -2718,7 +2910,7 @@ function openSkins(opener){renderSkins();openModal('skinModal',opener||$('skinBt
   trailDraw(g,pts,skin.trail,tt,s*1.6);const c=PALETTE[mine][1];paintBall(g,x,y,26*s,c,SHADE[mine],tt*3,skin.pat,tt);skinRaf=requestAnimationFrame(loop)};skinRaf=requestAnimationFrame(loop)}
 function renderSkins(){
  const grid=(k,list)=>list.map(([id,ic,n])=>{const ok=unlocked(k,id),b=badgeFor(k,id),on=(k==='pat'?skin.pat:skin.trail)===id;
-  return `<button type="button" class="opt${on?' on':''}" data-look="${k}" data-id="${id}" ${ok?'':'aria-disabled="true"'} aria-pressed="${on}"><span class="oi">${ok?ic:'🔒'}</span><b>${esc(n)}</b>${ok?'':`<small>${b?badgePic(b)+' '+esc(b.n):''}</small>`}</button>`}).join('');
+  return `<button type="button" class="opt${on?' on':''}" data-look="${k}" data-id="${id}" ${ok?'':'aria-disabled="true"'} aria-pressed="${on}"><span class="oi">${ok?ic:'🔒'}</span><b>${esc(n)}</b>${ok?'':`<small>${b?badgePic(b)+' '+esc(b.n):id==='gold'?'📅 '+esc(L(`오늘의 도전 ${MR_GOLD}번`,`${MR_GOLD} daily challenges`)):''}</small>`}</button>`}).join('');
  $('skinBody').innerHTML=`<div class="skin-top"><canvas id="skinPreview" width="300" height="180" aria-label="${L('내 구슬 미리 보기','Preview of my marble')}"></canvas><p>${esc(MY)} ${esc(nameOf(mine))} · ${L('배지를 모으면 새 꾸미기가 열려요!','Collect badges to open new looks!')}</p></div>
   <h3>🎨 ${L('무늬','Pattern')}</h3><div class="opts">${grid('pat',PATTERNS)}</div><h3>💫 ${L('꼬리','Trail')}</h3><div class="opts">${grid('trail',TRAILS)}</div>`}
 function renderBadges(){
@@ -2727,10 +2919,67 @@ function renderBadges(){
   return `<div class="badge${got?' got':''}"><span class="bi" aria-hidden="true">${badgePic(b)}</span><b>${esc(b.n)}</b><small>${esc(b.d)}</small><div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="${b.goal}" aria-valuenow="${v}"><i style="width:${v/b.goal*100}%"></i></div><small class="bp">${got?'✅ '+L('받았어요!','Earned!'):`${v}/${b.goal}`} · ${L('상','Prize')}: ${lookIcon(b.prize)} ${esc(lookName(b.prize))}</small></div>`}).join('')}</div>`}
 function scrollToScene(){if(matchMedia('(max-width:860px)').matches)$('scenePanel').scrollIntoView({behavior:RM?'auto':'smooth',block:'start'})}
 
+// ---------------------------------------------------------------- Coach Moon Plus (_src/plus/GAMES.md) and today's challenge
+// A world's unit number is its place in WORLDS (1–8); worlds 1–3 are free, my own courses are always open. Locks are checked when
+// a world is picked or started (never during a race or a league already under way); the preview shows once after world 3.
+const MR_WN={sky:['무지개 스카이','Rainbow Sky'],neon:['네온 시티','Neon City'],jungle:['정글 어드벤처','Jungle Adventure'],lava:['용암 캐니언','Lava Canyon'],
+ space:['우주 스피드웨이','Space Speedway'],chaos:['카오스 랜덤','Chaos Random'],park:['과학 놀이공원','Science Park'],force:['힘의 탐험 기지','Force Base']};
+const mrFree=()=>{try{return mgPlus.free.marble.world||3}catch(e){return 3}};
+function mrOpen(i){return i>=WORLDS.length||mgPlus.open('marble','world',i+1,WORLDS.length)}
+function mrPlus(i){return i<WORLDS.length&&!mrOpen(i)}
+function mrCert(id){const n=MR_WN[id];if(n)try{LR.cert('marble-'+id,[n[0]+' 완주',n[1]+' complete'],'🔮')}catch(e){}}
+// "keep playing free": back to the world list (a finished race is reset first)
+function mrToWorlds(){if(phase==='finished')prepare();const m=$('maps'),b=m.querySelector('.map.active')||m.querySelector('.map');
+ try{m.closest('section').scrollIntoView({behavior:RM?'auto':'smooth',block:'center'})}catch(e){}try{b&&b.focus({preventScroll:true})}catch(e){}}
+function mrCard(i){const w=WORLDS[i],n=MR_WN[w.id]||[w.name,w.name],f=mrFree(),done=WORLDS.slice(0,f).filter(x=>stats.worlds.includes(x.id)).length;
+ return {game:'marble',title:n,text:['이 월드는 문코치 Plus에서 열려요.','This world opens with Coach Moon Plus.'],
+  free:[`월드 1~${f}, 코스 만들기, 구슬 실험실, 오늘의 도전은 지금도 할 수 있어요.`,`Worlds 1–${f}, course building, the marble lab and today’s challenge are open now.`],
+  pic:'images/world-'+w.id+'.webp',emoji:w.em||'🔮',
+  ctx:[`무료 월드 ${f}곳 중 ${done}곳을 완주했어요. ${n[0]}${jo(n[0],'을','를')} 열어 보려고 했어요.`,`Finished ${done} of ${f} free worlds. Tried to open ${n[1]}.`],onFree:mrToWorlds}}
+function mrLock(i){try{speechSynthesis.cancel()}catch(e){}return mgPlus.lock(mrCard(i))}
+// a new league without Plus: 5 races from the open worlds (shuffled, repeating)
+function mrLeagueWorlds(){const open=WORLDS.map((w,i)=>i).filter(mrOpen),out=[];while(out.length<LEAGUE_RACES)out.push(...shuffle(open.slice()));return out.slice(0,LEAGUE_RACES)}
+// today's challenge, the same all day (from the local date): race kinds in an open world, or an easy design challenge
+const MR_DAY_CH=['slow','fast','window'];
+function mrToday(){const day=new Date().toLocaleDateString('en-CA');let h=7;for(const c of 'mr|'+day)h=Math.imul(h^c.charCodeAt(0),2654435761)>>>0;h=Math.imul(h^h>>>16,2246822507)>>>0;h=(h^h>>>13)>>>0;
+ const dn=Math.round(Date.parse(day+'T00:00:00Z')/864e5),kind=['podium','design','lead'][dn%3];
+ if(kind==='design')return {day,kind,ch:MR_DAY_CH[h%MR_DAY_CH.length]};
+ const open=WORLDS.map((w,i)=>i).filter(mrOpen);return {day,kind,w:open[(h>>>8)%open.length]}}
+function mrDayText(t){if(t.kind==='design'){const ch=CHAL_BY[t.ch];return [L(`설계 도전: ${ch.t}`,`Design challenge: ${ch.t}`),ch.g]}
+ const w=WORLDS[t.w];return t.kind==='podium'?[L(`${w.name}에서 3등 안에!`,`Top 3 in ${w.name}!`),L('내 구슬을 응원해서 3등 안에 들어오게 해요.','Cheer your marble into the top 3.')]
+  :[L(`${w.name}에서 1등으로 달리기!`,`Take the lead in ${w.name}!`),L('레이스 중에 내 구슬이 한 번이라도 맨 앞에 서게 응원해요.','Cheer until your marble is out in front, even once.')]}
+function renderDaily(){const b=$('dayCard');if(!b)return;const t=mrToday(),done=mrDay.last===t.day,[title,sub]=mrDayText(t);
+ const pic=t.kind==='design'?chalPic(CHAL_BY[t.ch]):`<img src="images/world-${WORLDS[t.w].id}.webp" alt="" onerror="this.style.visibility='hidden'">`;
+ b.classList.toggle('done',done);
+ b.innerHTML=`<span class="dc-pic" aria-hidden="true">${pic}</span><span class="dc-txt"><small class="dc-k">📅 ${L('오늘의 도전','Today’s challenge')}${done?' · ✅ '+L('성공!','Done!'):''}</small><b>${esc(title)}</b><small class="dc-sub">${done?esc(L('내일 새 도전이 열려요. 또 해 봐도 좋아요!','A new one opens tomorrow. Play it again if you like!')):matDots(esc(sub))}</small></span><span class="dc-st" role="img" aria-label="${esc(L(`도전 도장 ${mrDay.n}개`,`${mrDay.n} challenge stamps`))}">🏅<b>${mrDay.n}</b></span>`}
+function mrDayGo(){if(phase==='countdown'||phase==='running')return;const t=mrToday();
+ if(t.kind==='design'){startChallenge(t.ch,$('dayCard'));return}
+ if(!mrOpen(t.w)){mrLock(t.w);return}
+ if(numBalls<4)setCount(4);if(mode==='league')mode='single';worldIdx=t.w;if(labMode){labMode=false;labExp=null}chalRun=null;save();prepare();scrollToScene();
+ const w=WORLDS[t.w];speak(t.kind==='podium'?L(`오늘의 도전! ${w.name}에서 내 구슬을 응원해서 3등 안에 들어오게 해요!`,`Today’s challenge! In ${w.name}, cheer your marble into the top 3!`):L(`오늘의 도전! ${w.name}에서 내 구슬이 한 번이라도 맨 앞에서 달리게 응원해요!`,`Today’s challenge! In ${w.name}, cheer your marble to the front, even once!`),true)}
+// won today's challenge: a stamp (and the gold look at MR_GOLD stamps); returns the banner for the result card
+function mrDayWin(){const t=mrToday();if(mrDay.last===t.day)return '';const y=new Date();y.setDate(y.getDate()-1);
+ mrDay.streak=mrDay.last===y.toLocaleDateString('en-CA')?mrDay.streak+1:1;mrDay.last=t.day;mrDay.n++;save();renderDaily();const gold=mrDay.n===MR_GOLD;
+ setTimeout(()=>speak(L('오늘의 도전 성공! 도전 도장을 받았어요!','Today’s challenge done! You got a challenge stamp!'),false),1500);
+ if(gold)setTimeout(()=>coachTell('medal',`도전 도장 ${MR_GOLD}개! 🥇 황금 구슬 무늬가 열렸어요. 🎨 구슬 꾸미기에서 골라 봐요 🌙`,`${MR_GOLD} challenge stamps! 🥇 The gold marble look is open. Pick it in 🎨 Decorate 🌙`,{gap:4000,ms:6500}),2400);
+ return `<div class="day-win" role="status"><b>📅 ${L('오늘의 도전 성공!','Today’s challenge done!')}</b><span>🏅 ${L('도전 도장','Challenge stamp')} +1 · ${L(`모두 ${mrDay.n}개`,`${mrDay.n} in all`)}${mrDay.streak>1?' · 🔥 '+L(`${mrDay.streak}일 연속`,`${mrDay.streak} days in a row`):''}</span>${gold?`<span>🥇 ${L('황금 구슬 무늬가 열렸어요!','The gold marble look is open!')}</span>`:''}</div>`}
+function mrDesignWin(id){const t=mrToday();return t.kind==='design'&&t.ch===id&&mrDay.last!==t.day?mrDayWin():''}
+// after a race's result card: today's challenge, a finished ?go world, and the Plus preview right after the last free world
+function mrAfterRace(myRank,wId){const t=mrToday();let html='';
+ if(mrDay.last!==t.day&&t.kind!=='design'&&raceWorld===t.w&&!theme.custom&&numBalls>=4&&(t.kind==='podium'?myRank<=3:mrLed||myRank===1))html+=mrDayWin();
+ if(mrGo&&!mrGo.done&&wId===mrGo.id){mrGo.done=true;try{LR.done(mrGo.id)}catch(e){}html+=`<p class="go-done"><a href="index.html">🏠 ${L('다 했어요! 메인 화면으로','All done! Back to the main page')}</a></p>`}
+ if(html){const a=$('resultCard').querySelector('.result-actions');if(a)a.insertAdjacentHTML('beforebegin',html);else $('resultCard').insertAdjacentHTML('beforeend',html)}
+ const f=mrFree();if(!mgPlus.has()&&!theme.custom&&raceWorld===f-1&&f<WORLDS.length)setTimeout(()=>{if(phase==='finished'&&!$('resultOverlay').classList.contains('hidden')&&!modalStack.length&&!MiniLesson.on&&!mgPlus.has())mgPlus.tease(mrCard(f))},3500)}
+// ?go=<worldId>: pick that world (through the lock check), ready to start
+function mrGoStart(){let q='';try{q=new URLSearchParams(location.search).get('go')||''}catch(e){}const i=WORLDS.findIndex(w=>w.id===q);if(i<0)return;
+ if(!mrOpen(i)){mrLock(i);return}
+ mrGo={id:q,done:false};if(mode==='league')mode='single';worldIdx=i;labMode=false;labExp=null;chalRun=null;save();prepare();
+ speak(L(`${WORLDS[i].name} 코스예요! 출발대에 구슬들이 줄을 섰어요.`,`Welcome to ${WORLDS[i].name}! The marbles are lined up at the gate.`),true)}
 // ---------------------------------------------------------------- wiring
+$('dayCard').addEventListener('click',mrDayGo);
 function togglePause(){if(phase!=='running')return;paused=!paused;setControls();try{paused?speechSynthesis.pause():speechSynthesis.resume()}catch(e){}setCaption(paused?L('⏸ 일시정지! 이어하기를 눌러 주세요.','⏸ Paused. Press Resume to keep going.'):L('▶ 다시 출발!','▶ Back to the race!'))}
 function setCount(v){const n=clamp(parseInt(v,10)||8,2,16);if(n===numBalls)return;numBalls=n;if(league&&!league.done){league=null;setCaption(L('구슬 수가 바뀌어서 리그를 새로 시작해요.','The number of marbles changed, so the league starts over.'))}save();prepare()}
-$('maps').addEventListener('click',e=>{if(e.target.closest('[data-build]')){const b=e.target.closest('[data-build]');if(!b.disabled)openBuilder(null,b);return}const b=e.target.closest('[data-world]');if(!b||b.disabled)return;worldIdx=+b.dataset.world;if(labMode){labMode=false;labExp=null}chalRun=null;save();prepare();const w=worldAt(worldIdx);speak(L(`${w.name} 코스예요! 출발대에 구슬들이 줄을 섰어요.`,`Welcome to ${w.name}! The marbles are lined up at the gate.`),true)});
+$('maps').addEventListener('click',e=>{if(e.target.closest('[data-build]')){const b=e.target.closest('[data-build]');if(!b.disabled)openBuilder(null,b);return}const b=e.target.closest('[data-world]');if(!b||b.disabled)return;if(!mrOpen(+b.dataset.world)){mrLock(+b.dataset.world);return}worldIdx=+b.dataset.world;if(labMode){labMode=false;labExp=null}chalRun=null;save();prepare();const w=worldAt(worldIdx);speak(L(`${w.name} 코스예요! 출발대에 구슬들이 줄을 섰어요.`,`Welcome to ${w.name}! The marbles are lined up at the gate.`),true)});
 $('modeSeg').addEventListener('click',e=>{const b=e.target.closest('[data-mode]');if(!b||b.disabled)return;mode=b.dataset.mode;chalRun=null;if(mode==='league'&&(!league||league.done))startLeague();save();prepare()});
 $('ballCount').addEventListener('change',e=>setCount(e.target.value));$('ballRange').addEventListener('input',e=>setCount(e.target.value));
 $('minePicker').addEventListener('click',e=>{const b=e.target.closest('[data-mine]');if(!b||b.disabled)return;mine=+b.dataset.mine;save();renderMinePicker();updateHud(true);setCaption(L(`💖 ${nameOf(mine)} 구슬을 응원해요! 레이스 중 📣 응원 버튼을 눌러 힘을 주세요.`,`💖 You're cheering for ${nameOf(mine)}! Press 📣 Cheer during the race to give it a push.`));tone(660,80,'triangle',.07);setTimeout(()=>tone(990,110,'triangle',.07),80)});
@@ -2755,7 +3004,7 @@ $('buildBody').addEventListener('click',e=>{const b=e.target.closest('[data-b]')
 $('labBody').addEventListener('click',e=>{if(e.target.closest('[data-note]')){openNotebook(e.target.closest('[data-note]'));return}if(e.target.closest('[data-book]')){openMrBook();return}const b=e.target.closest('[data-exp]');if(b)enterLab(b.dataset.exp)});
 $('labList').addEventListener('click',e=>{const b=e.target.closest('[data-exp]');if(b&&phase!=='running'&&phase!=='countdown')enterLab(b.dataset.exp)});
 $('skinBody').addEventListener('click',e=>{const b=e.target.closest('[data-look]');if(!b)return;const k=b.dataset.look,id=b.dataset.id;
- if(!unlocked(k,id)){const bd=badgeFor(k,id);setCaption(L(`🔒 ${bd?bd.ic+' '+bd.n+' 배지('+bd.d+')를 받으면 열려요!':'아직 잠겨 있어요.'}`,`🔒 ${bd?'Earn the '+bd.ic+' '+bd.n+' badge ('+bd.d+') to open it!':'Still locked.'}`));const sb=$('skinBody').querySelector('.skin-top p');if(sb)sb.textContent=$('caption').textContent;tone(260,90);return}
+ if(!unlocked(k,id)){const bd=badgeFor(k,id);setCaption(L(`🔒 ${bd?bd.ic+' '+bd.n+' 배지('+bd.d+')를 받으면 열려요!':id==='gold'?`📅 오늘의 도전을 ${MR_GOLD}번 성공하면 열려요! (지금 ${mrDay.n}번)`:'아직 잠겨 있어요.'}`,`🔒 ${bd?'Earn the '+bd.ic+' '+bd.n+' badge ('+bd.d+') to open it!':id==='gold'?`📅 Win ${MR_GOLD} daily challenges to open it! (${mrDay.n} so far)`:'Still locked.'}`));const sb=$('skinBody').querySelector('.skin-top p');if(sb)sb.textContent=$('caption').textContent;tone(260,90);return}
  if(k==='pat')skin.pat=id;else skin.trail=id;save();tone(880,70,'triangle',.07);renderSkins();const f=$('skinBody').querySelector(`[data-look="${k}"][data-id="${id}"]`);if(f)f.focus({preventScroll:true})});
 $('cameraBtn').addEventListener('click',()=>{cam.mode=(cam.mode+1)%3;setControls()});
 $('speedBtn').addEventListener('click',()=>{raceRate=raceRate===1?1.5:raceRate===1.5?2:1;setControls()});
@@ -2764,7 +3013,7 @@ $('sfxToggle').addEventListener('click',()=>{sfxOn=!sfxOn;save();setControls();i
 $('stopVoice').addEventListener('click',()=>{try{speechSynthesis.cancel()}catch(e){}setCaption(L('🔇 음성을 멈췄어요.','🔇 Voice stopped.'))});
 $('voiceSelect').addEventListener('change',e=>{voicePick[LANG]=e.target.value;save();speak(L('안녕하세요! 오늘 구슬 레이스 중계를 맡았습니다.','Hello! I am your marble race announcer today.'),true)});
 $('resultCard').addEventListener('click',e=>{const a=e.target.closest('[data-act]')?.dataset.act;if(!a)return;
- if(a==='again'){prepare();startRace()}else if(a==='nextWorld'){worldIdx=(worldIdx+1)%WORLDS.length;save();prepare();startRace()}
+ if(a==='again'){prepare();startRace()}else if(a==='nextWorld'){const nx=(worldIdx+1)%WORLDS.length;if(!mrOpen(nx)){mrLock(nx);return}worldIdx=nx;save();prepare();startRace()}
  else if(a==='replay')startReplay();else if(a==='peek'){$('resultOverlay').classList.add('hidden');$('peekBack').classList.remove('hidden');try{$('peekBack').focus({preventScroll:true})}catch(e){}}else if(a==='edit')openBuilder(worldIdx-WORLDS.length,e.target.closest('[data-act]'));
  else if(a==='pred'){labPred=e.target.closest('[data-k]').dataset.k;labFresh=true;tone(700,80,'triangle',.07);coachTell('idea','좋은 예상이에요! 이제 실험으로 확인해 봐요 🌙','Great guess! Now let’s test it 🌙',{gap:45000,ms:3500});startRace()}
  else if(a==='labAgain'){prepare();startRace()}else if(a==='labList')openLabPicker(e.target.closest('[data-act]'));else if(a==='labExit')exitLab();
@@ -2800,7 +3049,7 @@ function resetGame(){
  try{localStorage.removeItem('marbleRush.v2');localStorage.removeItem('marble3dsettings')}catch(e){}
  try{LR.forget()}catch(e){}  // the parents' report forgets this game too (no save can run until LR.resume below)
  worldIdx=0;numBalls=8;voiceOn=true;sfxOn=true;mine=0;mineStats={races:0,wins:0};voicePick={};names=Array(16).fill('');mode='single';league=null;
- customs=[];skin={pat:'plain',trail:'none'};stats=freshStats();badges=[];chal={};chalRun=null;draft=null;labMode=false;labExp=null;labPred=null;labFresh=false;mrOffered.clear();
+ customs=[];skin={pat:'plain',trail:'none'};stats=freshStats();badges=[];chal={};mrDay={n:0,streak:0,last:''};chalRun=null;draft=null;labMode=false;labExp=null;labPred=null;labFresh=false;mrOffered.clear();
  try{LR.resume()}catch(e){}  // a fresh record from the fresh state above
  $('namesPanel').classList.add('hidden');fillVoiceSelect();prepare();closeModal('settingsModal');
  setCaption(L('🗑️ 마블 레이스 기록을 지웠어요. 처음부터 다시 시작해요!','🗑️ Marble Rush records erased. A fresh start!'))}
@@ -2814,7 +3063,8 @@ window.addEventListener('resize',resize);
 if(window.ResizeObserver)try{new ResizeObserver(()=>{const r=panelEl.getBoundingClientRect();if(Math.abs(r.width-vw)>.5||Math.abs(r.height-vh)>.5){resize();if(st)updateHud(true)}}).observe(panelEl)}catch(e){}
 if('speechSynthesis' in window){speechSynthesis.getVoices();speechSynthesis.addEventListener?.('voiceschanged',fillVoiceSelect)}
 fillVoiceSelect();setTimeout(fillVoiceSelect,600);
-checkBadges(true);resize();prepare();setCaption(L('환영합니다! 응원할 구슬을 고르고 출발 버튼을 눌러요!','Welcome! Pick your marble and press Start!'));
+if(!mgPlus.has()&&!mrOpen(worldIdx))worldIdx=0;stats.worlds.forEach(mrCert);try{mgPlus.on(()=>{renderMaps();setControls()})}catch(e){}
+checkBadges(true);resize();prepare();setCaption(L('환영합니다! 응원할 구슬을 고르고 출발 버튼을 눌러요!','Welcome! Pick your marble and press Start!'));mrGoStart();
 // ---------------------------------------------------------------- parents' report (report.html, see _src/report/SPEC.md)
 // each experiment as a short question in both languages, for the report's list of predictions that missed: q, the guesses, one tip
 const IX={weight:{q:['무거운 쇠구슬과 가벼운 유리구슬이 같은 비탈을 내려가면 누가 먼저 도착할까?','A heavy steel ball and a light glass marble roll down one slide. Which arrives first?'],o:{A:['쇠구슬이 먼저','Steel first'],B:['유리구슬이 먼저','Glass first'],same:['거의 동시에','About the same time']},tip:['무게가 달라도 굴러 내려오는 빠르기는 거의 같아요.','Heavy or light, they roll down at almost the same speed.']},
@@ -2937,7 +3187,7 @@ function learnSummary(){
   focus:['구슬 레이스를 즐기면서, 실험실에서는 결과를 먼저 예상하고 한 가지만 다른 두 길을 비교해 비탈·높이·마찰·무게·튀기와 자석·용수철·바람·중력 모형을 알아보고 실험 노트의 막대그래프로 결과를 비교해요. 설계 도전에서는 목표에 맞는 코스를 계획하고, 만들고, 시험하고, 고쳐요.','Mostly a marble race to watch and cheer. In the lab, children predict first, compare two lanes that differ in one thing (slope, height, surface, weight, bounce, and magnets, springs, wind and a gravity model) and compare the results on bar graphs in a lab notebook. In design challenges they plan, build, test and improve a course to meet a goal.'],
   unit:['실험 예상·설계 시험','predictions and design tests'],areas,facts:facts.slice(0,6),talk,home,next:next.slice(0,3)}}
 try{LR.set(learnSummary)}catch(e){}
-window.__marble={get:()=>({phase,st,course,cam,league,mode,timeScale,labMode,lab:labExp&&labExp.id,labPred,labRes,stats,badges,skin,customs,worldIdx,rec:rec.length,chal,chalRun,draft}),start:startRace,prepare,cheer,showResults,setMine:i=>{mine=i},setDraft:m=>{if(draft){draft.mods=m.slice();renderBuilder()}}};
+window.__marble={day:()=>({t:mrToday(),d:mrDay,led:mrLed,go:mrGo}),dayGo:mrDayGo,get:()=>({phase,st,course,cam,league,mode,timeScale,labMode,lab:labExp&&labExp.id,labPred,labRes,stats,badges,skin,customs,worldIdx,rec:rec.length,chal,chalRun,draft}),start:startRace,prepare,cheer,showResults,setMine:i=>{mine=i},setDraft:m=>{if(draft){draft.mods=m.slice();renderBuilder()}}};
 requestAnimationFrame(frame);
 })();
 </script>

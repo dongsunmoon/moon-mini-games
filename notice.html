@@ -62,7 +62,9 @@ footer{margin-top:24px;text-align:center;color:#8a93b8;font-size:12.5px}
 <script>
 // Notices for grown-ups: health and safety, privacy, no ads or purchases, the learning content, copyright and credits.
 // Every game's ⚙️ settings window links here (safeLink() in the coach block), and the main page has it in its footer.
-const UPDATED='2026-11-22';
+const UPDATED='2026-11-23';
+// in the Android/iPhone app (app-bridge.js sets __mgApp) Plus can be bought; on this website everything is free for now
+const APP=!!window.__mgApp;
 const S=[
  {id:'safety',cls:'safe',h:['🛡️ 건강과 안전','🛡️ Health and safety'],items:[
   ['🔬','게임 속 실험은 어른과 함께','Try experiments only with a grown-up',
@@ -101,16 +103,41 @@ const S=[
   ['🎤','마이크 (꼬마 음악 아카데미)','Microphone (Little Music Academy)',
    '노래 연습에서만 마이크로 음 높이를 들어요. 소리는 기기 안에서 바로 분석하고 녹음·저장하거나 보내지 않아요. 허락하지 않아도 다른 연습은 모두 할 수 있어요.',
    'Only the singing practice uses the microphone, to hear the pitch. The sound is analysed right on the device and is never recorded, saved or sent. Every other activity works without it.'],
+  ...(APP?[['💳','구독 결제','Subscription payments',
+   '결제와 구독 관리는 App Store·Google Play가 맡아요. 우리는 카드 번호, 이름, 스토어 계정 정보를 받지 않아요. 앱은 Plus가 켜져 있는지만 스토어에 물어보고, 그 결과를 기기 안에 저장해요.',
+   'Payments and subscriptions are handled by the App Store or Google Play. We never receive card numbers, names or store account details. The app only asks the store whether Plus is on and keeps that answer on the device.']]:[]),
   ['🗣️','읽어 주는 목소리','Read-aloud voice',
    '읽어 주기는 기기와 브라우저에 들어 있는 음성 기능을 써요. 일부 브라우저의 온라인 음성(예: 크롬의 Google 음성)은 읽을 문장을 브라우저 회사의 서버에서 처리할 수 있어요. 문장에 별명이 들어갈 수 있어요. 원하지 않으면 각 게임 설정에서 목소리를 꺼 주세요.',
    'Read-aloud uses the voices built into the device and browser. Some browsers’ online voices (for example Google voices in Chrome) may process the text on that company’s servers, and the text can include the nickname. You can turn the voice off in each game’s settings.'],
   ['🌐','사이트 운영','Hosting',
    '이 사이트는 GitHub Pages에서 제공돼요. GitHub는 서비스 운영과 보안을 위해 접속 기록(IP 주소 등)을 남길 수 있어요. 자세한 내용은 GitHub 개인정보 처리방침을 따라요.',
    'This site is hosted on GitHub Pages. GitHub may keep access logs (such as IP addresses) to run and secure the service, under GitHub’s own privacy statement.']]},
- {id:'money',cls:'info',h:['🪙 광고 · 결제 없음','🪙 No ads, no purchases'],items:[
+ {id:'money',cls:'info',h:APP?['🪙 광고 없음 · 결제는 보호자만','🪙 No ads · only grown-ups can buy']:['🪙 광고 · 결제 없음','🪙 No ads, no purchases'],items:[
+  ...(APP?[['⭐','문코치 Plus','Coach Moon Plus',
+   '각 게임의 앞부분, 이달의 무료 단원, 매일 목표, 부모 도구는 무료예요. 나머지 내용과 부모 리포트 전체는 문코치 Plus(월간·연간 구독)로 열 수 있어요. 아이 화면에는 가격이나 구매 버튼이 없고, 결제는 보호자 확인을 거친 부모 화면에서 App Store·Google Play 계정으로만 해요. 자세한 조건은 아래 ‘이용 조건’에 있어요.',
+   'The start of every game, this month’s free units, daily goals and parent tools are free. Everything else and the full parents’ report open with Coach Moon Plus (a monthly or yearly subscription). Children never see prices or buy buttons: buying happens only on the parent screen, behind the grown-up check, through your App Store or Google Play account. See “Terms of use” below.']]:[]),
   ['🎮','게임 속 돈은 놀이용','In-game money is pretend',
-   '현재 모든 게임은 무료이고 광고와 결제가 없어요. 게임 속 동전, 보석, 별, 상점 물건은 놀이용이라 진짜 돈으로 사거나 진짜 돈·물건으로 바꿀 수 없어요. 진짜 돈이 드는 뽑기나 내기는 없어요. 수학 아쿠아리움의 인형뽑기도 게임 속 코인만 써요.',
-   'All games are currently free, with no ads and no purchases. Coins, gems, stars and shop items in the games are pretend: they can’t be bought with real money or traded for money or real things. There are no loot boxes or bets that use real money; the claw machine in Math Aquarium uses only game coins.']]},
+   (APP?'광고가 없어요. ':'현재 모든 게임은 무료이고 광고와 결제가 없어요. ')+'게임 속 동전, 보석, 별, 상점 물건은 놀이용이라 진짜 돈으로 사거나 진짜 돈·물건으로 바꿀 수 없어요. 진짜 돈이 드는 뽑기나 내기는 없어요. 수학 아쿠아리움의 인형뽑기도 게임 속 코인만 써요.',
+   (APP?'There are no ads. ':'All games are currently free, with no ads and no purchases. ')+'Coins, gems, stars and shop items in the games are pretend: they can’t be bought with real money or traded for money or real things. There are no loot boxes or bets that use real money; the claw machine in Math Aquarium uses only game coins.']]},
+ ...(APP?[{id:'terms',cls:'info',h:['📄 이용 조건','📄 Terms of use'],items:[
+  ['🔁','자동 갱신 구독','Auto-renewing subscription',
+   '문코치 Plus는 월간 또는 연간 자동 갱신 구독이에요. 가격은 구매 화면에 스토어가 보여 주는 금액이고, 결제는 구매를 확인할 때 App Store 또는 Google Play 계정으로 돼요. 다음 갱신 24시간 전까지 해지하지 않으면 같은 기간과 가격으로 자동 갱신돼요. 가격이 바뀌면 스토어가 미리 알리고 필요한 동의를 받아요.',
+   'Coach Moon Plus is a monthly or yearly auto-renewing subscription. The price is the amount the store shows on the purchase screen, charged to your App Store or Google Play account when you confirm. It renews automatically for the same period and price unless cancelled at least 24 hours before the renewal. If the price changes, the store tells you first and asks for consent where required.'],
+  ['🎁','무료 체험','Free trial',
+   '무료 체험이 있는 지역에서는 체험이 끝나는 날 자동으로 유료 구독이 시작돼요. 체험 중에 해지하면 결제되지 않아요.',
+   'Where a free trial is offered, the paid subscription starts automatically when the trial ends. Cancel during the trial and you won’t be charged.'],
+  ['✋','해지와 환불','Cancelling and refunds',
+   'iPhone·iPad는 설정 › 이름 › 구독에서, Android는 Play 스토어 › 프로필 › 결제 및 정기 결제 › 정기 결제에서 해지할 수 있어요. 해지해도 이미 결제한 기간이 끝날 때까지 Plus를 쓸 수 있어요. 환불은 App Store·Google Play의 환불 정책과 관련 법에 따라 각 스토어에 요청해 주세요.',
+   'On iPhone and iPad, cancel in Settings › your name › Subscriptions; on Android, in the Play Store › profile › Payments & subscriptions › Subscriptions. After cancelling, Plus stays on until the paid period ends. For refunds, ask the store under its refund policy and the law that applies to you.'],
+  ['🏫','기관·가족 코드','Organization and family codes',
+   '학원, 학교 같은 기관이 받은 코드는 그 기관과 정한 기간과 기기에서만 써요. 코드로 연 Plus는 기관과의 약속을 따르고, 스토어 구독과는 따로예요.',
+   'A code given to an organization such as a learning centre or school is used only for the period and devices agreed with it. Plus opened with a code follows that agreement and is separate from store subscriptions.'],
+  ['📱','Apple 표준 약관','Apple’s standard terms',
+   'App Store에서 받은 앱에는 Apple의 표준 사용권 계약(Licensed Application End User License Agreement)이 함께 적용돼요.',
+   'For the app from the App Store, Apple’s standard Licensed Application End User License Agreement also applies.'],
+  ['🧸','Plus가 끝나면','When Plus ends',
+   'Plus가 끝나도 아이가 얻은 기록, 동전, 물건은 그대로 남아요. Plus 내용만 다시 잠기고, 다시 시작하면 이어서 할 수 있어요.',
+   'When Plus ends, your child keeps their progress, coins and items. Only the Plus content locks again, and it picks up where it left off if Plus starts again.']]}]:[]),
  {id:'learning',cls:'info',h:['📚 학습 내용','📚 About the learning content'],items:[
   ['🏫','학교 수업이 우선이에요','School comes first',
    '이 게임들은 놀면서 익히고 복습하는 학습 보조 도구이고, 학교 수업과 교과서를 대신하지 않아요. 게임 속 학년과 진도는 참고용이에요. 한국어는 한국 2022 개정 교육과정을, 영어는 캐나다 온타리오 교육과정을 참고해 학년을 나눴지만, 나라·주·학교·선생님마다 배우는 시기와 순서, 가르치는 방법이 다를 수 있어요. 게임 내용이 학교에서 배운 것과 다르면 학교 선생님의 설명과 교과서를 먼저 따라 주세요. 교육부, 교육청, 학교와 관계없이 개인이 만든 게임이에요.',
@@ -144,6 +171,8 @@ document.getElementById('main').innerHTML=`<h1>${L('보호자 안내','For grown
  <ul class="toc">${S.map(x=>`<li><a href="#${x.id}">${esc(L(...x.h))}</a></li>`).join('')}</ul>
  ${S.map(x=>`<section id="${x.id}" class="${x.cls}" aria-labelledby="${x.id}-h"><h2 id="${x.id}-h">${esc(L(...x.h))}</h2><ul>${x.items.map(i=>`<li><span class="ic" aria-hidden="true">${i[0]}</span><div><b>${esc(L(i[1],i[2]))}</b><p>${esc(L(i[3],i[4]))}</p></div></li>`).join('')}</ul>${x.call?`<p class="call">🚑 ${esc(L(...x.call))}</p>`:''}</section>`).join('')}`;
 document.getElementById('foot').innerHTML=`${L('마지막 수정','Last updated')}: ${UPDATED}<br>${L('문코치','Coach Moon')} · © 2026 Dongsun Moon. ${L('모든 권리 보유.','All rights reserved.')}`;
+// the sections are drawn by script, so jump to #terms / #privacy once they exist
+if(location.hash){const t=document.getElementById(location.hash.slice(1));if(t)setTimeout(()=>t.scrollIntoView(),0)}
 </script>
 </body>
 </html>

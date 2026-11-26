@@ -264,7 +264,8 @@ const MiniLesson=(()=>{let C={voice:null,who:null},el=null,cur=null,back=null,la
 //      paywall(ctx) · parent(ctx) (grown-up check, then paywall) · gate(cb,kind) (the grown-up check alone; kind picks
 //      its line: 'buy', 'report', 'settings', 'share', 'link') · redeem(code) ·
 //      on(fn) · state() · mode
-// Testing on the web: ?plus=lock (locks like the app, with a pretend store), ?plus=on (Plus on), ?plus=off (back).
+// Testing on the web: ?plus=lock (locks like the app, with a pretend store), ?plus=on (Plus on), ?plus=reset (forget a
+// pretend purchase, a code and today's previews, then lock), ?plus=off (back). A 🧪 bar in the corner switches them.
 (()=>{if(window.mgPlus)return;
 const WEB_SALE='open';
 const KEY='moonGames.plus',SEEN='moonGames.plusSeen';
@@ -283,7 +284,10 @@ const day=()=>new Date().toLocaleDateString('en-CA');
 const get=()=>{try{return JSON.parse(localStorage.getItem(KEY)||'{}')||{}}catch(e){return {}}};
 const put=o=>{try{localStorage.setItem(KEY,JSON.stringify(o))}catch(e){}};
 const inApp=!!window.__mgApp;
-const dev=(()=>{try{const q=new URLSearchParams(location.search).get('plus');if(q==='off')sessionStorage.removeItem('moonGames.plusDev');else if(q==='lock'||q==='on')sessionStorage.setItem('moonGames.plusDev',q);return sessionStorage.getItem('moonGames.plusDev')||''}catch(e){return ''}})();
+// ?plus=reset also forgets a pretend purchase, a licence code and today's previews, then locks again
+const dev=(()=>{try{const q=new URLSearchParams(location.search).get('plus');if(q==='off')sessionStorage.removeItem('moonGames.plusDev');
+ else if(q==='reset'){localStorage.removeItem(KEY);localStorage.removeItem(SEEN);sessionStorage.setItem('moonGames.plusDev','lock')}
+ else if(q==='lock'||q==='on')sessionStorage.setItem('moonGames.plusDev',q);return sessionStorage.getItem('moonGames.plusDev')||''}catch(e){return ''}})();
 const mode=inApp?'app':dev==='lock'?'test':dev==='on'?'on':WEB_SALE;
 const N=()=>window.mgBillingNative||null;
 const cyrb=(s,seed)=>{let h1=0xdeadbeef^seed,h2=0x41c6ce57^seed;for(let i=0,ch;i<s.length;i++){ch=s.charCodeAt(i);h1=Math.imul(h1^ch,2654435761);h2=Math.imul(h2^ch,1597334677)}
@@ -401,6 +405,14 @@ function paywall(ctx){if(sheet){sheet.render();return}
  sheet={render,close:w.close};render()}
 function redeem(code){const c=norm(code);if(c.length<12)return false;const e=LIC[licHash(c)];if(!e||(e.until&&e.until<day()))return false;
  const o=get();o.lic={org:e.org,until:e.until||'',at:Date.now()};put(o);emit();return true}
+// 🧪 while testing (?plus=lock / on), a small bar in the corner switches the mode without typing addresses.
+// It never shows for normal players (no ?plus= in this tab) or inside the app.
+if(dev&&!inApp){const bar=()=>{if(document.querySelector('[data-mg-plustest]'))return;const host=document.createElement('div');host.setAttribute('data-mg-plustest','');
+ const r=host.attachShadow?host.attachShadow({mode:'open'}):host,go=v=>{const u=new URL(location.href);u.searchParams.set('plus',v);location.replace(u.toString())};
+ const st=document.createElement('style');st.textContent=':host{all:initial}.b{position:fixed;left:max(6px,env(safe-area-inset-left));bottom:max(6px,env(safe-area-inset-bottom));z-index:2147483500;display:flex;gap:4px;align-items:center;background:rgba(20,24,48,.88);color:#fff;border-radius:14px;padding:4px 6px;font:700 12px system-ui,-apple-system,"Apple SD Gothic Neo",sans-serif;box-shadow:0 4px 14px rgba(0,0,0,.3)}button{min-height:32px;border:0;border-radius:10px;padding:0 8px;font:inherit;cursor:pointer;background:#3a4170;color:#fff}button.on{background:#ffd34d;color:#3a2a00}';
+ const b=document.createElement('div');b.className='b';b.innerHTML=`<span>🧪 ${T('Plus 테스트','Plus test')}</span><button data-v="lock" class="${mode==='test'?'on':''}">🔒 ${T('잠금','Locked')}</button><button data-v="on" class="${mode==='on'?'on':''}">⭐ Plus</button><button data-v="reset">↺ ${T('처음부터','Reset')}</button><button data-v="off">✕</button>`;
+ b.addEventListener('click',e=>{const x=e.target.closest('[data-v]');if(x)go(x.dataset.v)});r.appendChild(st);r.appendChild(b);(document.body||document.documentElement).appendChild(host)};
+ if(document.body)bar();else addEventListener('DOMContentLoaded',bar)}
 window.mgPlus={get mode(){return mode},has,open,monthly,lock,tease,paywall,parent,gate,redeem,on(f){subs.push(f)},
  state(){return {plus:has(),mode,store:store(),lic:lic(),products:mode==='test'?FAKE():products}},free:FREE}})();
 /*PLUS:END*/

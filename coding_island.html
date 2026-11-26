@@ -148,7 +148,7 @@ function mgSayable(t,lang){t=String(t==null?'':t);const ko=lang!=='en',o=t;
  t=t.replace(/([\d□)\]])\s*−\s*(?=[\d□(\[])/g,'$1'+(ko?' 빼기 ':' minus ')).replace(/(\d) - (?=\d)/g,'$1'+(ko?' 빼기 ':' minus '));
  t=t.replace(/(^|[\s,(])\+(\d)/g,'$1'+(ko?'플러스 ':'plus ')+'$2').replace(/(^|[\s,(])−(\d)/g,'$1'+(ko?'마이너스 ':'minus ')+'$2');
  // = only between two things (3 = 3, apples = 3), never when the sign itself is being talked about (“= 는 넣기”, “after =,”)
- t=t.replace(/([\w가-힣)\]□"'])\s*=(?!=)\s*(?=[\w가-힣(□"'−-])/g,(m,c)=>c+(ko?topic(c)+' ':' equals '));
+ t=t.replace(/([\w가-힣)\]□"'])\s*=(?!=)\s*(?![가는를이은을와과도만의로](?:\s|$|[,.!?]))(?=[\w가-힣(□"'−-])/g,(m,c)=>c+(ko?topic(c)+' ':' equals ')); // …nor when a particle follows (“= 가 아니라”: the sign is the subject)
  t=t.replace(/(^|[\s,(])\?(?=[\s,).]|$)/g,'$1'+(ko?'빈칸':'blank'));
  t=t.replace(/\bthe what number\b/gi,'the box').replace(/□/g,ko?' 빈칸 ':' the box ');
  if(ko)t=t.replace(/[ㄱ-ㅎ]+/g,r=>[...r].map(j=>JAMO[j]).join(' '));
@@ -3731,7 +3731,7 @@ function loadVoices(){try{voices=speechSynthesis.getVoices().filter(v=>(v.lang||
 if('speechSynthesis' in window){loadVoices();try{speechSynthesis.addEventListener('voiceschanged',loadVoices)}catch(e){}}
 const bestVoice=()=>voices.find(v=>/google|yuna|sora|samantha|ava|allison|natural|premium|enhanced|siri/i.test(v.name))||voices[0]||null;
 // read code names plainly: `move()` → "move", symbols and emoji dropped. A symbol that is itself the topic
-// (“`==` 기호는 ‘같아요?’예요”, “Use `+` to add”) is said by its name, once (“밑줄 `_`” stays one “밑줄”)
+// (“`==` 기호는 ‘같아요?’예요”, “Use `+` to add”) is said by its name, once (“밑줄 `_`” stays one “밑줄”); a lone _ or () left by HTML is named too
 const SYM_SAY={'==':['등호 두 개','double equals'],'!=':['같지 않다','not-equals sign'],'>=':['크거나 같다','greater-or-equal sign'],'<=':['작거나 같다','less-or-equal sign'],
  '>':['크다','greater-than sign'],'<':['작다','less-than sign'],'=':['등호','equals sign'],'+':['플러스','plus'],'-':['마이너스','minus'],'*':['별표','star'],'/':['슬래시','slash'],
  '%':['퍼센트','percent sign'],'#':['샵','hash'],'&':['앤드','and sign'],'_':['밑줄','underscore'],'()':['괄호','brackets'],':':['콜론','colon']};
@@ -3739,7 +3739,7 @@ function speakable(t){t=String(t).replace(/<[^>]+>/g,' ');
  t=t.replace(/(\S*)(\s*)`([^`]*)`(\s*)(\S*)/g,(m,a,s1,c,s2,b)=>{const n=SYM_SAY[c.trim()];if(!n)return m;let w=L(n[0],n[1]);const bare=x=>x.replace(/[^\p{L}\p{N}]/gu,'');if(/ 두 개$/.test(w)&&/^둘/.test(b))w=w.slice(0,-4);
   const last=w.split(' ').pop();if(w.includes(' ')&&bare(b).toLowerCase()===last)w=w.slice(0,-last.length-1);   // “the `=` sign” → “the equals sign”
   return a+s1+(bare(a)===bare(w)||bare(b).startsWith(bare(w))&&bare(w)?'':w)+s2+b});
- t=t.replace(/`([^`]*)`/g,(m,c)=>' '+c.replace(/[()[\]{}:"'#=<>.,_*+\-/%]/g,' ').replace(/\s+/g,' ').trim()+' ');
+ t=t.replace(/`([^`]*)`/g,(m,c)=>' '+c.replace(/[()[\]{}:"'#=<>.,_*+\-/%]/g,' ').replace(/\s+/g,' ').trim()+' ');t=t.replace(/(^|\s)_(?=\s|$)/g,(m,a)=>a+L('밑줄','underscore')).replace(/(^|\s)\(\)(?=\s|$)/g,(m,a)=>a+L('괄호','brackets')).replace(/(밑줄|underscore|괄호|brackets)\s+\1/g,'$1');
  t=t.replace(/[→➡]/g,' ').replace(/\p{Extended_Pictographic}|‍|️/gu,' ').replace(/[▶⏹👣💡]/g,' ');
  return t.replace(/[()…·•"“”]/g,' ').replace(/\s+/g,' ').trim()}
 let pendingSay=null,saySeq=0;

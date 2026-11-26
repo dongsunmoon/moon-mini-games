@@ -93,11 +93,16 @@ function coachLine(k){const [pose,ls]=COACH[k];return `<div class="mcoach"><img 
 let coachAt=0,coachRun=0,coachMiss=0;
 // true while a game window (dialog) is open, so the bubble never covers one
 const coachBusy=()=>[...document.querySelectorAll('[role="dialog"],[aria-modal="true"]')].some(e=>e.getAttribute('aria-hidden')!=='true'&&e.getClientRects().length&&getComputedStyle(e).visibility!=='hidden');
-function coachLater(fn,left=180){if(!coachBusy()){fn();return}if(left>0)setTimeout(()=>coachLater(fn,left-1),1000)}
+// the hello and the break line also wait while a play area marked data-coach-quiet (the chess board) is on screen;
+// quick praise during play still shows
+const coachQuiet=()=>coachBusy()||[...document.querySelectorAll('[data-coach-quiet]')].some(e=>e.getClientRects().length&&getComputedStyle(e).visibility!=='hidden');
+function coachLater(fn,left=180){if(!coachQuiet()){fn();return}if(left>0)setTimeout(()=>coachLater(fn,left-1),1000)}
 function coachPop(pose,ko,en,o={}){const now=Date.now();if(!o.force&&now-coachAt<(o.gap||60000))return false;if(!o.force&&coachBusy())return false;coachAt=now;
  let el=document.getElementById('coachPop');if(!el){el=document.createElement('div');el.id='coachPop';el.setAttribute('role','status');document.body.appendChild(el)}
  el.innerHTML=`<img src="images/coach-moon-${pose}.webp" alt="" onerror="this.remove()"><p><b>${L('문 코치','Coach Moon')}</b>${L(ko,en)}</p>`;
- el.classList.remove('show');void el.offsetWidth;el.classList.add('show');clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove('show'),o.ms||4500);return true}
+ el.classList.remove('show');void el.offsetWidth;el.classList.add('show');clearTimeout(el._t);clearInterval(el._w);
+ // a window that opens while the bubble shows wins: the bubble steps aside instead of covering its title and ✕
+ el._w=setInterval(()=>{if(coachBusy()){el.classList.remove('show');clearInterval(el._w)}},300);el._t=setTimeout(()=>{el.classList.remove('show');clearInterval(el._w)},o.ms||4500);return true}
 // call with every final answer: praise runs of right answers, and help after two misses in a row.
 // The optional skill id (one of the skill ids in the game's LR summary) counts the answer for that skill in the report,
 // and the optional item (see LR above) lets the report list the kinds of questions the child often gets wrong.
@@ -109,8 +114,10 @@ function coachAnswer(ok,skill,item){try{LR.ans(ok,skill,item)}catch(e){}
 function coachStart(hello,tips){const game=(location.pathname.split('/').pop()||'index').replace(/\.html$/,''),k='moonGames.coach'+(MGP.me?'@'+MGP.me.id:''),d=new Date().toLocaleDateString('en-CA');
  const notes=f=>{let st={};try{st=JSON.parse(localStorage.getItem(k)||'{}')||{}}catch(e){}f(st);try{localStorage.setItem(k,JSON.stringify(st))}catch(e){}return st};
  const st=notes(st=>{st.played=(st.played||[]).filter(x=>x!==d).concat(d).slice(-14)}),nm=coachEsc(coachNm());
+ // the very first visit to a game belongs to the game's own welcome: Coach Moon says hello from the next day on
+ if(!st.hello||!(game in st.hello)){notes(st=>{(st.hello=st.hello||{})[game]=d})}
  // the hello counts as said only once it has really been shown
- if((st.hello||{})[game]!==d)setTimeout(()=>coachLater(()=>setTimeout(()=>{if(coachPop('hi',`${hello[0]} ${nm?`문 코치는 언제나 ${nm} 편이에요 🌙`:'문 코치가 응원해요 🌙'}`,`${hello[1]} ${nm?`Coach Moon is always on your side, ${nm} 🌙`:'Coach Moon is cheering for you 🌙'}`,{force:true,ms:6000}))notes(st=>{(st.hello=st.hello||{})[game]=d})},900)),2500);
+ else if(st.hello[game]!==d)setTimeout(()=>coachLater(()=>setTimeout(()=>coachLater(()=>{if(coachPop('hi',`${hello[0]} ${nm?`문 코치는 언제나 ${nm} 편이에요 🌙`:'문 코치가 응원해요 🌙'}`,`${hello[1]} ${nm?`Coach Moon is always on your side, ${nm} 🌙`:'Coach Moon is cheering for you 🌙'}`,{force:true,ms:6000}))notes(st=>{(st.hello=st.hello||{})[game]=d})}),900)),2500); // checks again just before it shows: a lesson may have opened meanwhile
  if(tips&&tips.length)setTimeout(()=>{const t=coachPick(tips);coachPop('idea',t[0],t[1],{ms:6000})},4*60000);
  setTimeout(()=>coachLater(()=>coachPop('go','벌써 20분이나 열심히 했어요! 눈이 피곤하면 잠깐 쉬어도 좋아요 🌙','20 minutes of hard work already! Rest your eyes for a bit if they’re tired 🌙',{force:true,ms:7000})),20*60000)}
 /*SAYABLE:BEGIN*/
@@ -333,9 +340,12 @@ const CSS=':host{all:initial}*{box-sizing:border-box;font-family:system-ui,-appl
  '.fine{font-size:12.5px;color:#6b7390;line-height:1.55;margin:8px 0 0}.code{display:flex;gap:8px;margin:6px 0}.code input{flex:1;min-width:0;min-height:48px;border:2px solid #d7def0;border-radius:12px;padding:0 12px;font-size:17px;font-weight:800;letter-spacing:1px;text-transform:uppercase}'+
  '.code button{min-height:48px;border:0;border-radius:12px;background:#4656c8;color:#fff;font-weight:900;padding:0 16px;font-size:15px;cursor:pointer}'+
  '.on{background:#e9f8ef;border-radius:14px;padding:12px;font-weight:800;color:#1f6b3e;margin:6px 0}'+
- '.q{font-size:28px;font-weight:900;margin:8px 0}.gin{width:100%;min-height:52px;font-size:24px;font-weight:900;text-align:center;border:2px solid #d7def0;border-radius:14px}'+
+ '.q{font-size:22px;font-weight:900;margin:8px 0;line-height:1.35;word-break:keep-all}.gin{width:100%;min-height:52px;font-size:24px;font-weight:900;text-align:center;border:2px solid #d7def0;border-radius:14px}'+
+ '.plan i small{font-size:13px;font-weight:800;color:#56607a}.keep{background:#f6f7fb;border-radius:14px;padding:9px 12px;font-size:13.5px;line-height:1.5;color:#3b4677;margin:0 0 10px}'+
  'button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid #ffb703;outline-offset:2px}'+
- '@media (max-height:560px){.pic{width:96px;height:96px;font-size:48px}.card{padding:12px 14px}}';
+ '@media (max-height:560px){.pic{width:96px;height:96px;font-size:48px}.card{padding:12px 14px}}'+
+ // a phone turned sideways: a wider parent screen with the list in two columns, so the prices are not far below
+ '@media (max-height:560px) and (min-width:700px){.wide{width:min(760px,100%)}.wide .list{grid-template-columns:1fr 1fr;column-gap:16px}}';
 function layer(html,onClose){const host=document.createElement('div');host.setAttribute('data-mg-plus','');const root=host.attachShadow?host.attachShadow({mode:'open'}):host;
  const st=document.createElement('style');st.textContent=CSS;root.appendChild(st);const bg=document.createElement('div');bg.className='bg';bg.setAttribute('role','dialog');bg.setAttribute('aria-modal','true');bg.innerHTML=html;root.appendChild(bg);(document.body||document.documentElement).appendChild(host);
  const prev=document.activeElement,close=()=>{try{host.remove()}catch(e){}try{prev&&prev.focus&&prev.focus()}catch(e){}onClose&&onClose()};
@@ -345,13 +355,15 @@ function layer(html,onClose){const host=document.createElement('div');host.setAt
 // ---- the child's lock card: a preview and a neutral line, no price
 let lockOpen=false;
 function lock(c){c=c||{};if(lockOpen)return false;lockOpen=true;
+ // say:true → the card reads its title and line aloud (games that speak their own lock line leave it off)
+ if(c.say)setTimeout(()=>{try{if(!('speechSynthesis' in window))return;speechSynthesis.cancel();const u=new SpeechSynthesisUtterance((two(c.title)?two(c.title)+'. ':'')+(two(c.text)||T('다음 이야기는 문코치 Plus에서 열려요.','The next part opens with Coach Moon Plus.')));u.lang=lang()==='en'?'en-US':'ko-KR';speechSynthesis.speak(u)}catch(e){}},250);
  const pic=c.pic?`<img src="${esc(c.pic)}" alt="" onerror="this.remove()">`:'';
  const L1=two(c.text)||T('다음 이야기는 문코치 Plus에서 열려요.','The next part opens with Coach Moon Plus.');
  const F=two(c.free)||T('이달의 단원, 매일 목표, 다른 게임은 지금도 할 수 있어요.','This month’s units, daily goals and other games are open now.');
  const w=layer(`<div class="card"><button class="x" type="button" aria-label="${T('닫기','Close')}">✕</button>
   <div class="pic" aria-hidden="true">${esc(c.emoji||'🌙')}${pic}<span class="star">⭐ Plus</span></div>
   <h2>${esc(two(c.title)||T('새로운 곳이 기다려요','Something new is waiting'))}</h2><p class="t">${esc(L1)}</p><p class="free">${esc(F)}</p>
-  <button class="go" type="button">▶ ${T('무료로 계속하기','Keep playing free')}</button>
+  <button class="go" type="button">▶ ${T('계속 놀기','Keep playing')}</button>
   <button class="ask" type="button">👨‍👩‍👧 ${T('어른에게 보여 주기','Show a grown-up')}</button></div>`,()=>{lockOpen=false;c.onClose&&c.onClose()});
  w.$('.go').addEventListener('click',()=>{w.close();c.onFree&&c.onFree()});
  w.$('.ask').addEventListener('click',()=>{w.close();parent(c.ctx)});return true}
@@ -359,23 +371,32 @@ function lock(c){c=c||{};if(lockOpen)return false;lockOpen=true;
 function tease(c){if(has()||!c||!c.game)return false;let s={};try{s=JSON.parse(localStorage.getItem(SEEN)||'{}')||{}}catch(e){}
  if(s[c.game]===day())return false;s[c.game]=day();try{localStorage.setItem(SEEN,JSON.stringify(s))}catch(e){}return lock(c)}
 // ---- grown-up check: the app's mgGate (app-bridge.js); on the web a simple question
+// numbers written as words, like the app's check: a child who can multiply still has to read 이십육 / twenty-six
+const KD=['','일','이','삼','사','오','육','칠','팔','구'],koN=n=>{const t=Math.floor(n/10),o=n%10;return (t?(t>1?KD[t]:'')+'십':'')+KD[o]};
+const EO=['zero','one','two','three','four','five','six','seven','eight','nine','ten','eleven','twelve','thirteen','fourteen','fifteen','sixteen','seventeen','eighteen','nineteen'],enN=n=>n<20?EO[n]:['','','twenty','thirty'][Math.floor(n/10)]+(n%10?'-'+EO[n%10]:'');
+const gq=(a,b)=>{const w=koN(b),c=w.charCodeAt(w.length-1)-0xAC00;return T(`${koN(a)} 곱하기 ${w}${c%28?'은':'는'}?`,`What is ${enN(a)} times ${enN(b)}?`)};
 function gate(cb,kind){if(typeof window.mgGate==='function'){window.mgGate(kind||'buy',ok=>cb(!!ok));return}
- const a=12+Math.floor(Math.random()*17),b=6+Math.floor(Math.random()*4);
+ let a=13+Math.floor(Math.random()*17),b=3+Math.floor(Math.random()*7);if(a===20)a=23;
  const w=layer(`<div class="card"><button class="x" type="button" aria-label="${T('닫기','Close')}">✕</button><h2>🔒 ${T('보호자 확인','Grown-ups only')}</h2>
   <p class="free">${T('어린이는 보호자에게 보여 주세요. 아래 계산의 답을 입력해 주세요.','Kids: please show this to a grown-up. Type the answer below.')}</p>
-  <p class="q" aria-hidden="true">${a} × ${b} = ?</p><input class="gin" inputmode="numeric" autocomplete="off" aria-label="${T(a+' 곱하기 '+b,a+' times '+b)}"><p class="msg" aria-live="polite"></p>
+  <p class="q">${gq(a,b)}</p><input class="gin" inputmode="numeric" autocomplete="off" aria-label="${T('숫자로 답해 주세요','Answer with numbers')}" placeholder="${T('숫자로','numbers')}"><p class="msg" aria-live="polite"></p>
   <button class="go" type="button">${T('확인','Continue')}</button></div>`);
- const go=()=>{if(w.$('.gin').value.trim()===String(a*b)){w.close();cb(true)}else{w.$('.msg').textContent=T('답이 달라요.','Not quite.');w.$('.gin').value=''}};
+ const go=()=>{if(w.$('.gin').value.trim()===String(a*b)){w.close();cb(true)}else{a=13+Math.floor(Math.random()*17);if(a===20)a=23;b=3+Math.floor(Math.random()*7);w.$('.q').textContent=gq(a,b);w.$('.msg').textContent=T('답이 달라요. 새 문제예요.','Not quite. Here’s a new one.');w.$('.gin').value=''}};
  w.$('.go').addEventListener('click',go);w.$('.gin').addEventListener('keydown',e=>{if(e.key==='Enter')go()});setTimeout(()=>{try{w.$('.gin').focus()}catch(e){}},60)}
 function parent(ctx){if(has()&&mode!=='app'&&mode!=='test'){paywall(ctx);return}gate(ok=>{if(ok)paywall(ctx)})}
 // ---- the parent screen: what Plus opens, the store's prices, restore, licence code, the fine print
 const OPENS=()=>[T('수학 아쿠아리움: 1~6학년 수족관 120곳 모두','Math Aquarium: all 120 aquariums, grades 1–6'),T('코딩 섬: 파이썬 미션 84개와 보스 13명','Coding Island: all 84 Python missions and 13 bosses'),
- T('체스 기사단: 보스 8명, 스파링, 대국 복기, 보스 코스, 레슨 57개','Chess Knights: all 8 bosses, sparring, game review, boss courses, 57 lessons'),T('과학·음악의 모든 세계와 단원, 꼬마 탐정의 모든 사건, 구슬 레이스의 모든 세계','Every science world and music unit, every detective case, every Marble Rush world'),
- T('부모 리포트 전체: 과목별 분석, 틀린 문제, 집에서 돕기, 인쇄','The full parents’ report: subjects, missed questions, home plan, printing'),T('모든 수료증, 이 기기의 모든 아이 프로필','All certificates, and every child profile on this device')];
+ T('꼬마 체스 기사단: 보스 8명, 연습 상대, 대국 복기, 보스 코스, 레슨 57개','Little Chess Knights: all 8 bosses, practice partners, game review, boss courses, 57 lessons'),T('과학·음악의 모든 세계와 단원, 꼬마 탐정의 모든 사건, 구슬 레이스의 모든 세계','Every science world and music unit, every detective case, every Marble Rush world'),
+ T('부모 리포트 전체: 과목별 분석, 틀린 문제, 집에서 돕기, 인쇄','The full parents’ report: subjects, missed questions, home plan, printing'),T('모든 수료증','Every certificate')];
+// what stays free without Plus (the same as FREE/MONTHLY and the report's free part), and that one Plus covers the family
+const KEEP=()=>T('Plus가 없어도 각 게임의 앞부분, 이달의 무료 단원, 매일 목표, 리포트의 ‘한눈에’ 화면, 보호자 도구는 계속 무료예요. Plus 하나면 이 기기의 모든 아이 프로필에 적용돼요.','Free without Plus: the first part of every game, this month’s free units, daily goals, the report overview and the grown-up tools. One Plus covers every child profile on this device.');
 const perLabel=p=>p.period==='month'?T('월간','Monthly'):T('연간','Yearly');
+const perUnit=p=>p.period==='month'?T('월','mo'):T('년','yr');
 const trialLabel=t=>{const m=/P(\d+)([DWMY])/.exec(t||'');if(!m)return '';const n=+m[1],u=m[2];if(u==='M'||u==='Y')return u==='M'?T(`${n}개월 무료 체험 뒤 결제`,`${n}-month free trial, then`):T(`${n}년 무료 체험 뒤 결제`,`${n}-year free trial, then`);const d=n*(u==='W'?7:1);return T(`${d}일 무료 체험 뒤 결제`,`${d}-day free trial, then`)};
 // in the app the notice page opens in the same view (a new window would go nowhere); on the web in a new tab
 const tgt=inApp?'':' target="_blank" rel="noopener"';
+// where Plus is on sale (the app, a store-locked web, ?plus= tests) the notice page shows its Plus and terms sections
+const nq=()=>`?lang=${lang()}${mode==='open'?'':'&sale=1'}`;
 function paywall(ctx){if(sheet){sheet.render();return}
  const w=layer(`<div class="card wide"><button class="x" type="button" aria-label="${T('닫기','Close')}">✕</button><div class="body"></div></div>`,()=>{sheet=null});
  let codeOpen=false,note='',good=false;
@@ -385,16 +406,16 @@ function paywall(ctx){if(sheet){sheet.render();return}
   if(ctx)h+=`<p class="ctx">${esc(two(ctx))}</p>`;
   if(has()){h+=`<div class="on">✅ ${mode==='open'||mode==='on'?T('이 웹사이트에서는 지금 모든 내용이 열려 있어요.','Everything is open on this website for now.'):l&&!s?T(`기관 코드로 Plus가 열려 있어요 (${l.until?l.until+'까지':'기한 없음'}).`,`Plus is on with an organization code (${l.until?'until '+l.until:'no end date'}).`):T('Plus를 쓰고 있어요. 고마워요!','Plus is on. Thank you!')}</div>`;
    if(s&&s.until)h+=`<p class="fine">${T('다음 갱신일','Next renewal')}: ${esc(new Date(s.until).toLocaleDateString(lang()==='en'?'en-CA':'ko-KR'))}</p>`}
-  else{h+=`<p class="t" style="text-align:left">${T('Plus로 열리는 것','What Plus opens')}</p><ul class="list">${OPENS().map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`;
+  else{h+=`<p class="t" style="text-align:left">${T('Plus로 열리는 것','What Plus opens')}</p><ul class="list">${OPENS().map(x=>`<li>${esc(x)}</li>`).join('')}</ul><p class="keep">${esc(KEEP())}</p>`;
    if(mode==='stores')h+=`<p class="ctx">${T('Plus는 앱에서 시작할 수 있어요. App Store나 Google Play에서 "문코치"를 찾아 주세요.','Plus starts in the app. Look for “Coach Moon” on the App Store or Google Play.')}</p>`;
    else if(ps&&ps.length){const sorted=ps.slice().sort((a,b)=>(a.period==='year'?0:1)-(b.period==='year'?0:1));
-    h+=`<div class="plans">${sorted.map((p,i)=>`<button class="plan${i?'':' best'}" type="button" data-id="${esc(p.id)}"${pending?' disabled':''}><span><b>${perLabel(p)}${i?'':' · '+T('추천','best value')}</b><span>${esc(trialLabel(p.trial)||(p.period==='month'?T('매달 자동 갱신','Renews every month'):T('매년 자동 갱신','Renews every year')))}</span></span><i>${esc(p.price)}</i></button>`).join('')}</div>`}
+    h+=`<div class="plans">${sorted.map((p,i)=>`<button class="plan${i?'':' best'}" type="button" data-id="${esc(p.id)}"${pending?' disabled':''}><span><b>${perLabel(p)}${i?'':' · '+T('추천','best value')}</b><span>${esc(trialLabel(p.trial)||(p.period==='month'?T('매달 자동 갱신','Renews every month'):T('매년 자동 갱신','Renews every year')))}</span></span><i>${esc(p.price)}<small>/${perUnit(p)}</small></i></button>`).join('')}</div>`}
    else if(!msg)h+=`<p class="ctx">${mode==='app'?T('스토어에서 가격을 불러오고 있어요…','Loading prices from the store…'):T('이 웹사이트에서는 아직 Plus를 팔지 않아요.','Plus is not sold on this website yet.')}</p>`}
   h+=`<p class="msg${good?' ok':''}" aria-live="polite">${esc(note||msg||(pending?T('스토어 화면을 기다리는 중이에요…','Waiting for the store…'):''))}</p>`;
-  h+=`<div class="row">${mode==='app'||mode==='test'?`<button type="button" data-a="restore">${T('구매 복원','Restore purchases')}</button>`:''}${s&&mode==='app'?`<button type="button" data-a="manage">${T('구독 관리·해지','Manage or cancel')}</button>`:''}<button type="button" data-a="code">${T('기관·가족 코드 입력','Enter an organization code')}</button></div>`;
+  h+=`<div class="row">${mode==='app'||mode==='test'?`<button type="button" data-a="restore">${T('구매 복원','Restore purchases')}</button>`:''}${s&&mode==='app'?`<button type="button" data-a="manage">${T('구독 관리·해지','Manage or cancel')}</button>`:''}<button type="button" data-a="code">${T('기관·가족 코드 입력','Enter an organization or family code')}</button></div>`;
   if(codeOpen)h+=`<div class="code"><input class="cin" maxlength="24" autocomplete="off" aria-label="${T('코드','Code')}" placeholder="MOON-XXXX-XXXX-XXXX"><button type="button" data-a="redeem">${T('확인','Use')}</button></div>`;
   h+=`<p class="fine">${T('구독은 선택한 기간(1개월 또는 1년)마다 자동으로 갱신되고, 결제는 App Store 또는 Google Play 계정으로 돼요. 다음 갱신 24시간 전까지 스토어의 구독 설정에서 해지하면 다음 결제가 되지 않아요. 무료 체험이 있는 지역에서는 체험이 끝나면 자동으로 결제돼요. 환불은 각 스토어의 정책을 따라요. Plus가 끝나도 아이가 얻은 기록과 물건은 그대로 남아요.','Subscriptions renew automatically each period (1 month or 1 year) and are charged to your App Store or Google Play account. Cancel in the store’s subscription settings at least 24 hours before renewal to stop the next charge. Where a free trial is offered, it turns into a paid subscription when it ends. Refunds follow each store’s policy. When Plus ends, your child keeps everything they earned.')}</p>
-   <div class="row"><a href="notice.html?lang=${lang()}#terms"${tgt}>${T('이용 조건','Terms of use')}</a><a href="notice.html?lang=${lang()}#privacy"${tgt}>${T('개인정보 처리방침','Privacy policy')}</a></div>`;
+   <div class="row"><a href="notice.html${nq()}#terms"${tgt}>${T('이용 조건','Terms of use')}</a><a href="notice.html${nq()}#privacy"${tgt}>${T('개인정보 처리방침','Privacy policy')}</a></div>`;
   b.innerHTML=h;
   b.querySelectorAll('.plan').forEach(x=>x.addEventListener('click',()=>buy(x.dataset.id)));
   b.querySelectorAll('[data-a]').forEach(x=>x.addEventListener('click',()=>{const a=x.dataset.a,n=N();
@@ -941,6 +962,27 @@ img.api{display:inline-block;width:auto;height:1.25em;vertical-align:-.28em;obje
 .fend .mooni{text-align:left;justify-content:center}
 @media (orientation:landscape) and (min-width:600px) and (max-height:900px){.qcard.showme.noans{display:block}}
 @media (orientation:landscape) and (max-height:500px){.stage.first .ftank{display:none}.fend .fsticker{width:96px;height:96px;font-size:60px}.fend .fsticker span{font-size:32px}}
+/* review 2026-11-26 ---------------------------------------------------------------- */
+/* Mooni's bubble on the aquarium screen and in the first exploration: a tap reads it aloud (the 🔊 shows that it can) */
+.cta .mooni,.fintro .mooni{cursor:pointer}
+.cta .mooni .bub,.fintro .mooni .bub{padding-right:46px;min-height:44px}
+.cta .mooni .bub::after,.fintro .mooni .bub::after{content:"🔊";position:absolute;right:7px;bottom:7px;width:32px;height:32px;border-radius:50%;background:#eef4ff;display:flex;align-items:center;justify-content:center;font-size:16px;line-height:1}
+.cta .mooni:active .bub::after,.fintro .mooni:active .bub::after{background:#d6e6ff}
+/* ⭐ Plus / 🎁 badges sit on the lower part of their own map spot (above it they looked like the label of the spot above) */
+.node .pbadge{top:auto;bottom:16px}
+/* a failed mastery show: "learn it again" above the two buttons */
+.result .relearn{margin:10px 0 2px}
+/* sideways phones: the building and Mooni's big button side by side, so the button is on screen without scrolling */
+@media (orientation:landscape) and (max-height:500px){
+ #v-home:not(.hidden){display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);column-gap:12px;align-items:start}
+ #v-home>*{grid-column:1/-1;min-width:0}
+ #v-home>.aqhead{grid-column:1;grid-row:1/span 2}
+ #v-home>.chips{grid-column:2;grid-row:1;margin-top:0}
+ #v-home>.cta{grid-column:2;grid-row:2;margin-top:6px}
+ #v-home .bld{max-height:120px}
+}
+/* the next aquarium's five tank friends (shadows until met), so a child sees what is waiting there */
+.nextfish{display:flex;justify-content:center;flex-wrap:wrap;gap:4px;margin:6px 0 0}.nextfish .fishpic{width:58px}
 /*COACH:BEGIN*/
 /* Coach Moon: one line inside result windows (.mcoach) and a corner bubble at good moments (#coachPop, never takes taps) */
 .mcoach{display:flex;align-items:flex-end;gap:8px;margin:10px auto 6px;max-width:330px;text-align:left}
@@ -11708,9 +11750,14 @@ const UNLOCK_HINT={toilet:['수조 1개를 열면 생겨요','Opens with your fi
 const xpNeed=l=>50+l*35;
 const TITLES=[[1,'🐣','견습 사육사','Trainee keeper'],[3,'🐟','사육사','Keeper'],[6,'🐠','수석 사육사','Head keeper'],[10,'🎫','부관장','Deputy director'],[15,'🏛️','관장','Director'],[22,'🧮','수학 관장','Math director'],[30,'🌊','바다 박사','Ocean doctor'],[40,'👑','전설의 관장','Legendary director']];
 const titleOf=l=>{let t=TITLES[0];for(const x of TITLES)if(l>=x[0])t=x;return {icon:t[1],name:L(t[2],t[3])}};
+// a level-up window never opens in the middle of a lesson or mini-game (it covered the next question and cut off its reading):
+// it waits until the stage closes (closeStage calls flushLevelUp)
+let LVUP=0;
 function addXP(n){S.xp+=n;let up=false;while(S.xp>=xpNeed(S.lvl)){S.xp-=xpNeed(S.lvl);S.lvl++;S.sp++;up=true}
- if(up){const t=titleOf(S.lvl);sfx('level');modal(`<div class="big">🎉</div><h2>${L(`관장 레벨 ${S.lvl}!`,`Director level ${S.lvl}!`)}</h2><p>${t.icon} ${esc(t.name)}</p><p>${L('스킬 포인트 1개를 받았어요. 본부에서 스킬을 올려 보세요!','You got 1 skill point. Level up a skill at headquarters!')}</p>${coachLine(S.lvl%5===0?'big':'up')}`,{acts:{}});say(L(`레벨 ${S.lvl}! 정말 잘 크고 있어요!`,`Level ${S.lvl}! You are growing so fast!`));logEvent('🎉',`관장 레벨 ${S.lvl}`,`Director level ${S.lvl}`)}
+ if(up){logEvent('🎉',`관장 레벨 ${S.lvl}`,`Director level ${S.lvl}`);if(document.body.classList.contains('staged'))LVUP=S.lvl;else levelUpWin()}
  updateHud()}
+function levelUpWin(){const t=titleOf(S.lvl);sfx('level');modal(`<div class="big">🎉</div><h2>${L(`관장 레벨 ${S.lvl}!`,`Director level ${S.lvl}!`)}</h2><p>${t.icon} ${esc(t.name)}</p><p>${L('스킬 포인트 1개를 받았어요. 본부에서 스킬을 올려 보세요!','You got 1 skill point. Level up a skill at headquarters!')}</p>${coachLine(S.lvl%5===0?'big':'up')}`,{acts:{}});say(L(`레벨 ${S.lvl}! 정말 잘 크고 있어요!`,`Level ${S.lvl}! You are growing so fast!`))}
+function flushLevelUp(){if(LVUP&&!document.body.classList.contains('staged')){LVUP=0;levelUpWin()}}
 function earn(c,o={}){c=Math.round(c);if(!c)return;S.coins+=c;S.stats.earned+=c;if(o.pop!==false)popAt(o.at,`+${short(c)} ${COIN}`);updateHud()}
 const spend=(c,kind='coins')=>{if((S[kind]||0)<c){toast(kind==='coins'?L(`${COIN} 코인이 조금 모자라요`,`Not quite enough ${COIN} coins`):L(`${PEARL} 진주가 모자라요`,`Not enough ${PEARL} pearls`));sfx('bad');return false}S[kind]-=c;updateHud();save(true);return true};
 const logEvent=(icon,ko,en)=>{S.log.unshift({d:dayKey(),icon,ko,en});S.log=S.log.slice(0,80)};
@@ -11912,14 +11959,19 @@ if('speechSynthesis' in window){loadVoices();try{speechSynthesis.addEventListene
 const bestVoice=()=>voices.find(v=>/google|yuna|sora|samantha|ava|allison|natural|premium|enhanced|siri/i.test(v.name))||voices[0]||null;
 // turn math text into words the voice reads correctly: units, operators, blanks, fractions, money
 function speakable(t){t=String(t);const ko=LANG!=='en';
+ if(!/[←↑↓⬅⬆⬇]|[→➡]\s*[→➡]|[\[(]\s*[→➡]|[→➡]\s*[\])]/.test(t))t=t.replace(/\s*[→➡]\s*/g,', ');
  t=t.replace(/[→➡]/g,ko?' 오른쪽 ':' right ').replace(/[←⬅]/g,ko?' 왼쪽 ':' left ').replace(/[↑⬆]/g,ko?' 위 ':' up ').replace(/[↓⬇]/g,ko?' 아래 ':' down ').replace(/[\[\]]/g,' ');
  t=t.replace(/\p{Extended_Pictographic}|‍|️|[①②③④]/gu,' ');
+ // brackets that group a calculation are read out, or (8 + 3) × 4 and 8 + 3 × 4 would sound the same; brackets around a unit,
+ // a note or a point such as (5, −1) are not
+ for(let k=0;k<2;k++)t=t.replace(/\(([^()]*\d\s*[+−×÷]\s*[\d□(][^()]*)\)/g,(m,x)=>ko?` 괄호 열고 ${x} 괄호 닫고 `:` open bracket ${x} close bracket `);
+ if(ko)t=t.replace(/괄호 닫고\s*=\s*\?/g,'괄호 닫고, 답은 얼마일까요?').replace(/괄호 닫고\s*=\s*/g,'괄호 닫고, 답은 ');
  const U=ko?[['km/h',' 킬로미터'],['cm³','세제곱센티미터'],['m³','세제곱미터'],['cm²','제곱센티미터'],['m²','제곱미터'],['km²','제곱킬로미터'],['mm²','제곱밀리미터'],['°C','도'],['mm','밀리미터'],['cm','센티미터'],['km','킬로미터'],['mL','밀리리터'],['kg','킬로그램'],['m','미터'],['L','리터'],['g','그램'],['t','톤'],['°','도'],['%','퍼센트'],['¢','센트']]
   :[['km/h',' kilometres per hour'],['cm³',' cubic centimetres'],['m³',' cubic metres'],['cm²',' square centimetres'],['m²',' square metres'],['km²',' square kilometres'],['mm²',' square millimetres'],['°C',' degrees Celsius'],['mm',' millimetres'],['cm',' centimetres'],['km',' kilometres'],['mL',' millilitres'],['kg',' kilograms'],['m',' metres'],['L',' litres'],['g',' grams'],['t',' tonnes'],['°',' degrees'],['%',' percent'],['¢',' cents'],['min',' minutes'],['h',' hours']];
  for(const [u,w] of U){const re=new RegExp('(\\d)\\s?'+u.replace(/[.*+?^${}()|[\]\\/]/g,'\\$&')+(/^[a-zA-Z]+$/.test(u)?'(?![a-zA-Z])':''),'g');t=t.replace(re,'$1'+(ko?' ':'')+w)}
  if(!ko)t=t.replace(/\$(\d[\d,]*)\.(\d\d)/g,(m,d,c)=>`${d.replace(/,/g,'')} dollar${d==='1'?'':'s'} and ${+c} cents`).replace(/\$(\d[\d,]*)/g,(m,d)=>`${d.replace(/,/g,'')} dollar${d==='1'?'':'s'}`);
  t=t.replace(/(\d+)\/(\d+)/g,(m,n,d)=>frSay(+n,+d));
- t=t.replace(/([\d)%¢]|원|센트|cents?|dollars?)\s*−\s*(?=[\d(□$₩])/g,'$1'+(ko?' 빼기 ':' minus ')).replace(/□\s*−\s*/g,ko?'네모 빼기 ':'what number minus ').replace(/−(?=\d)/g,ko?'마이너스 ':'negative ');
+ t=t.replace(/([\d)%¢]|원|센트|cents?|dollars?|괄호 닫고|close bracket)\s*−\s*(?=[\d(□$₩]|괄호 열고|open bracket)/g,'$1'+(ko?' 빼기 ':' minus ')).replace(/□\s*−\s*/g,ko?'네모 빼기 ':'what number minus ').replace(/−(?=\d)/g,ko?'마이너스 ':'negative ');
  t=t.replace(/\s*×\s*/g,ko?' 곱하기 ':' times ').replace(/\s*÷\s*/g,ko?' 나누기 ':' divided by ').replace(/\s*\+\s*/g,ko?' 더하기 ':' plus ');
  t=t.replace(/([\d□])\s+:\s+(?=[\d□])/g,ko?'$1 대 ':'$1 to ');
  if(ko){t=t.replace(/(\S+)\s*=\s*\?/g,(m,w)=>`${w}${josa(w,'은','는')} 얼마일까요?`).replace(/(\S+)\s*=\s*/g,(m,w)=>`${w}${josa(w,'은','는')} `).replace(/□/g,'네모')}
@@ -11941,7 +11993,9 @@ const PRAISE={
  retry:[['다시 해서 맞혔어요! 그게 진짜 실력이에요.','You tried again and got it — that’s real skill!'],['포기하지 않았네요. 멋져요!','You didn’t give up. Great!'],['이번엔 딱 맞혔어요!','Nailed it this time!']],
  wrong:[['괜찮아요, 같이 볼까요?','That’s okay — let’s look together.'],['아깝다! 방법을 알려 줄게요.','So close! Here’s how.'],['틀려도 괜찮아요. 틀리면서 배우는 거예요.','Mistakes help us learn.'],['거의 다 왔어요! 한 번 더 봐요.','Almost there! Let’s look again.']],
  combo:[['{n}연속 정답! 불타오른다!','{n} in a row! You’re on fire!'],['{n}연속! 멈출 수가 없네요!','{n} in a row! Unstoppable!'],['{n}연속 정답! 수학 고수!','{n} in a row! Math master!']]};
-const praise=k=>T(pick(PRAISE[k]));
+const PRAISE_LITTLE=new Set(['물고기들이 박수 쳐요!','머리가 반짝반짝!','역시 관장님!','최고예요!','딩동댕!']);
+const praiseBig=()=>{try{if(typeof FX!=='undefined'&&FX&&FX.age)return FX.age>=9;if(typeof LES!=='undefined'&&LES)return LES.g>=4;return (S.grade||1)>=4}catch(e){return false}};
+const praise=k=>{let ls=PRAISE[k];if(k==='right'&&praiseBig())ls=ls.filter(x=>!PRAISE_LITTLE.has(x[0]));return T(pick(ls))};
 
 // ---------------------------------------------------------------- small UI services used everywhere
 function updateHud(){if(!$('hudCoins'))return;const t=titleOf(S.lvl);$('hudLvl').textContent=S.lvl;{const h=$('hudAv'),k=meKey(S.av)+S.av;if(h.dataset.k!==k){h.dataset.k=k;h.innerHTML=mePic()}}$('hudName').textContent=S.name;$('hudTitle').textContent=t.icon+' '+t.name;$('hudXp').style.width=Math.min(100,100*S.xp/xpNeed(S.lvl))+'%';
@@ -11984,7 +12038,7 @@ const stageName=s=>L(STAGES[s].ko,STAGES[s].en);
 const initialFish=r=>r<=2?3:r===3?2:1;
 
 // ---------------------------------------------------------------- answers: show, read and check
-const ansText=a=>a.t==='n'?`${a.pre||''}${N(a.v)}${a.u?' '+a.u:''}`:a.t==='c'?a.o[a.v]:a.t==='f'?(a.v.length===3?mixed(...a.v):fr(a.v[0],a.v[1])):a.v.map((x,k)=>`${a.lab&&a.lab[k]?a.lab[k]+' ':''}${N(x)}`).join(a.sep?` ${a.sep} `:', ');
+const ansText=a=>a.t==='n'?`${a.pre?a.pre+(/[가-힣A-Za-z]$/.test(a.pre)?' ':''):''}${N(a.v)}${a.u?' '+a.u:''}`:a.t==='c'?a.o[a.v]:a.t==='f'?(a.v.length===3?mixed(...a.v):fr(a.v[0],a.v[1])):a.v.map((x,k)=>`${a.lab&&a.lab[k]?a.lab[k]+' ':''}${N(x)}`).join(a.sep?` ${a.sep} `:', ');
 const parseNum=s=>{s=String(s).replace(/−/g,'-').trim();if(!/^-?\d*\.?\d+$|^-?\d+\.$/.test(s))return null;return parseFloat(s)};
 function checkAnswer(a,val){if(a.t==='c')return val===a.v;
  if(a.t==='n'){const x=parseNum(val);return x!=null&&Math.abs(x-a.v)<1e-9}
@@ -12074,7 +12128,7 @@ function mountProblem(el,p,o={}){const a=p.a;let vals=a.t==='f'?(a.mixed?['','',
   if(/^\d$/.test(k)){if(vals[focus].replace(/[-.]/g,"").length<15)vals[focus]+=k;refresh()}else if(k==='.'&&keysDot&&!vals[focus].includes('.')){vals[focus]+='.';refresh()}else if(k==='-'&&keysNeg){vals[focus]=vals[focus].startsWith('-')?vals[focus].slice(1):'-'+vals[focus];refresh()}
   else if(k==='Backspace'){vals[focus]=vals[focus].slice(0,-1);refresh();e.preventDefault()}else if(k==='Enter'){submit();e.preventDefault()}else if(k==='Tab'||k==='ArrowRight'){if(vals.length>1){focus=(focus+1)%vals.length;refresh();e.preventDefault()}}else if(k==='ArrowLeft'){if(vals.length>1){focus=(focus+vals.length-1)%vals.length;refresh();e.preventDefault()}}};
  document.addEventListener('keydown',onKey);
- if(o.autoRead)setTimeout(readQ,250);
+ if(o.autoRead)setTimeout(()=>{if(!locked&&document.body.contains(card))readQ()},250);
  return {destroy(){document.removeEventListener('keydown',onKey)},card,showHint(){const h=card.querySelector('.qhint');h.innerHTML=`💡 ${p.hint||''}`;h.classList.remove('hidden')}}}
 
 // ---------------------------------------------------------------- problems for a stage
@@ -12084,13 +12138,15 @@ function reviewSkill(exceptId){const ids=Object.keys(S.sk).filter(id=>S.sk[id].m
 
 // ---------------------------------------------------------------- the lesson screen
 let LES=null;
-function openStage(){const st=$('stage');st.classList.remove('hidden');document.body.classList.add('staged');return st}
-function closeStage(){const st=$('stage');if(LES&&LES.view)LES.view.destroy();LES=null;hush();st.innerHTML='';st.className='stage hidden';document.body.classList.remove('staged')}
+// a lesson or mini-game fills the screen like a window (role=dialog): screen readers treat it as one, and Coach Moon's corner
+// bubble (coachBusy in the coach block) waits until the child is back home instead of covering the question or the game's top bar
+function openStage(label){const st=$('stage');st.classList.remove('hidden');st.setAttribute('role','dialog');st.setAttribute('aria-modal','true');st.setAttribute('aria-label',label||L('놀이 화면','Play screen'));document.body.classList.add('staged');return st}
+function closeStage(){const st=$('stage');if(LES&&LES.view)LES.view.destroy();LES=null;hush();st.innerHTML='';st.className='stage hidden';['role','aria-modal','aria-label'].forEach(a=>st.removeAttribute(a));document.body.classList.remove('staged');setTimeout(flushLevelUp,350)}
 function startLesson(g,i,stage,mode='stage'){audio();const sk=skillOf(g,i);if(!sk){toast(L('이 수업은 준비 중이에요.','This lesson is coming soon.'));return}
  if(!aqPlay(g,i)){plusLock(g,i);return}   // a Plus aquarium shows its lock card instead of starting (lessons, the skip-ahead test)
  const a=aqState(g,i),spec=mode==='test'?STAGES[4]:STAGES[stage];
  LES={g,i,sk,stage,mode,spec,right:0,asked:0,first:0,wrong:0,combo:0,max:0,miss:0,hintsLeft:stage===0?99:1+skl('hint'),shield:false,coins:0,qn:0,reviewDone:0,t0:now(),wasRetry:false};
- const st=openStage();st.className='stage lesson';
+ const st=openStage(aqDef(g,i).name);st.className='stage lesson';
  st.innerHTML=`<div class="lbar"><button type="button" class="lx" data-l="quit" aria-label="${L('그만하기','Quit')}">✕</button><div class="ltitle"><b>${esc(aqDef(g,i).name)}</b><small>${mode==='test'?'🚀 '+L('바로 마스터 도전','Skip-ahead challenge'):STAGES[stage].icon+' '+L(`${stage+1}번 수조 · ${STAGES[stage].ko}`,`Tank ${stage+1} · ${STAGES[stage].en}`)} · ${esc(sk.name)}</small></div><div class="lcombo" id="lCombo"></div>${mode==='test'?'':`<button type="button" class="lx lnote" data-l="note" aria-label="${L('개념 다시 보기','See the idea again')}">📒</button>`}</div>
   <div class="lprog" id="lProg"></div><div class="lbody" id="lBody"></div>`;
  st.querySelector('[data-l=quit]').addEventListener('click',()=>{sfx('tap');modal(`<h2>${L('수업을 그만할까요?','Stop this lesson?')}</h2><p>${L('지금까지 푼 문제는 기록돼요. 수조는 수업을 끝까지 하면 열려요.','Your answers so far are saved. The tank opens when you finish the lesson.')}</p><div class="row"><button class="btn ghost" data-act="close">${L('계속하기','Keep going')}</button><button class="btn" data-act="quit">${L('그만하기','Stop')}</button></div>`,{acts:{quit:()=>()=>{closeStage();go('home')}}})});
@@ -12166,9 +12222,10 @@ function finishStage(){const L_=LES,{g,i,sk,stage,mode,spec}=L_,a=aqState(g,i),d
  const body=$('lBody');$('lProg').innerHTML='';
  if(!passed){a.tries++;save();const need=mode==='test'?7:spec.pass;
   body.innerHTML=`<div class="result"><div class="big">💪</div><h2>${L(`${L_.mr}개 맞혔어요!`,`You got ${L_.mr} right!`)}</h2><p>${mode==='test'?L(`바로 마스터하려면 ${need}개가 필요해요. 하나씩 수조를 열면서 배우면 금방 할 수 있어요!`,`You need ${need} to skip ahead. Open the tanks one by one and you’ll get there fast!`):L(`${need}개 이상이면 통과예요. 조금만 더 연습하면 꼭 할 수 있어요! 틀린 문제의 풀이를 다시 떠올려 봐요.`,`${need} right passes. A little more practice and you’ll do it! Think back to the explanations.`)}</p>${coachLine('try')}
+   ${slidesOf(sk,0).length?`<button type="button" class="btn ghost wide relearn" data-r="learn">📖 ${L('무니 선생님과 다시 배우기','Learn it again with Mooni')}</button>`:''}
    <div class="row"><button class="btn ghost" data-r="home">${L('아쿠아리움으로','Back to aquarium')}</button><button class="btn" data-r="again">${L('다시 도전','Try again')} 🔁</button></div></div>`;
   say(L('정말 잘했어요. 조금만 더 하면 돼요! 다시 도전해 볼까요?','You did really well. Just a little more! Want to try again?'));
-  body.onclick=e=>{const b=e.target.closest('[data-r]');if(!b)return;sfx('tap');const r=b.dataset.r;if(r==='again'){startLesson(g,i,stage,mode)}else{closeStage();go('home')}};return}
+  body.onclick=e=>{const b=e.target.closest('[data-r]');if(!b)return;sfx('tap');const r=b.dataset.r;if(r==='learn'){hush();MiniLesson.open(mathLesson(sk,0));return}if(r==='again'){startLesson(g,i,stage,mode)}else{closeStage();go('home')}};return}
  // rewards
  const firstTime=mode==='test'?!a.done:a.st[stage]===0;let coins=Math.round((30+12*(mode==='test'?4:stage))*Math.pow(tier(g,i),.8)*(1+.1*stars)*(firstTime?1:.5));const xp=firstTime?20+6*(mode==='test'?4:stage):10;
  if(stars===3){S.stats.stars3++;mission('star3')}mission('stage');
@@ -12340,7 +12397,7 @@ function cleanGame(){const {a}=here();const spots=Array.from({length:5+Math.roun
   sc.addEventListener('pointerdown',e=>{down=true;sc.setPointerCapture&&sc.setPointerCapture(e.pointerId);rub(e)});sc.addEventListener('pointermove',e=>{if(down)rub(e)});sc.addEventListener('pointerup',()=>down=false);sc.addEventListener('pointercancel',()=>down=false)}})}
 
 // ---------------------------------------------------------------- walking around inside (walk.js draws it; this is the game side)
-function startWalk(spot){if(typeof Walk==='undefined')return;audio();if(!spot)sfx('open');const st=openStage();st.className='stage game walk';
+function startWalk(spot){if(typeof Walk==='undefined')return;audio();if(!spot)sfx('open');const st=openStage(L('아쿠아리움 안','Inside the aquarium'));st.className='stage game walk';
  const exit=()=>{try{Walk.stop()}catch(e){}closeStage();go('home')};
  try{Walk.start(st,{act:walkAct,exit,spot})}catch(e){console.warn(e);exit()}}
 function walkAct(kind,v){const {g,i,a}=here();
@@ -12378,7 +12435,7 @@ function clawAsk(){for(let k=0;k<8;k++){const p=askQuick(),all=[p.a,...p.w];if(!
  const a=R(3,9),b=R(2,9);return quickSelf({q:`${a} × ${b}`,a:String(a*b),w:near(a*b,{n:4}).map(String)},'quick-times')}
 function startClaw(from){if(typeof Claw==='undefined')return;if(!UNLOCK.claw()){toast(T(UNLOCK_HINT.claw));return}
  const free=clawFreeLeft()>0,c=clawCost();
- const play=()=>{if(free)clawDay().used++;else if(!spend(c))return;save(true);audio();sfx('start');const st=openStage();st.className='stage game claw';
+ const play=()=>{if(free)clawDay().used++;else if(!spend(c))return;save(true);audio();sfx('start');const st=openStage(L('인형뽑기','Claw machine'));st.className='stage game claw';
   try{QA={r:0,w:0};Claw.start(st,{pool:seaPool(here().g),ask:clawAsk,ans:quickAns,rounds:3,sfx,say:t=>say(t),onEnd:res=>{try{Claw.stop()}catch(e){}closeStage();finishClaw(res,from)}})}catch(e){console.warn(e);closeStage()}};
  if(free){play();return}
  modal(`<div class="big">🕹️</div><h2>${L('인형뽑기 한 판 더?','One more claw game?')}</h2><p>${L(`오늘 무료 판은 다 했어요. 한 판에 ${COIN} ${short(c)}${josa(short(c),'이에요','예요')}. 문제 3개, 정답 인형을 뽑으면 내 것!`,`Today’s free games are used. One game costs ${COIN} ${short(c)}: 3 questions, and every right plush is yours!`)}</p>${safeNote('info','진짜 인형뽑기는 진짜 돈이 들어요. 하기 전에 어른에게 먼저 물어봐요.','Real claw machines cost real money, so ask a grown-up first.')}
@@ -12416,7 +12473,7 @@ function renderMap(){const g=TAB.map||S.at.g||S.grade||1;TAB.map=g;const n=grade
  ${UNLOCK.drive()?`<div class="card"><b>🚚 ${L('배달 미션','Delivery missions')}</b><p class="muted">${L('완성한 아쿠아리움을 누르면 물고기 배달 운전을 할 수 있어요. (하루 3번 보상)','Tap a finished aquarium to deliver fish by car. (Rewards 3 times a day)')}</p></div>`:''}`}
 function nodeModal(g,i){const a=aqState(g,i),d=aqDef(g,i),sk=skillOf(g,i),open=aqOpen(g,i),me=S.at.g===g&&S.at.i===i;sfx('tap');
  const del=S.deliveries.day===dayKey()?S.deliveries.n:0;
- modal(`<div class="bldmini">${buildingSVG(d)}</div><h2>${i+1}. ${esc(d.name)}</h2><p>${sk?`${sk.icon} <b>${esc(sk.name)}</b>`:''}</p>${plusTag(g,i)?`<p>${plusBadge(g,i)}</p>`:''}${sk&&OPT[sk.id]?`<p class="muted">${esc(optNote(sk.id))}</p>`:''}<p class="muted">${a.done?'⭐'.repeat(a.best)+' '+L('마스터!','Mastered!'):open?L(`수조 ${a.open}/5`,`Tanks ${a.open}/5`):L('앞 아쿠아리움을 완성하면 열려요.','Opens after the one before it.')}</p>
+ modal(`<div class="bldmini">${buildingSVG(d)}</div><h2>${i+1}. ${esc(d.name)}</h2><p>${sk?`${sk.icon} <b>${esc(sk.name)}</b>`:''}</p>${plusTag(g,i)?`<p>${plusBadge(g,i)}</p>`:''}${sk&&OPT[sk.id]?`<p class="muted">${esc(optNote(sk.id))}</p>`:''}<p class="muted">${a.done?'⭐'.repeat(a.best)+' '+L('마스터!','Mastered!'):open?L(`수조 ${a.open}/5`,`Tanks ${a.open}/5`):L('앞 아쿠아리움을 완성하면 열려요. 잘 아는 단원은 🚀 바로 마스터 도전으로 빨리 넘어갈 수 있어요.','Opens after the one before it. Already know a topic? The 🚀 skip-ahead challenge gets you there faster.')}</p>
   <div class="row wrap">${open&&!me?`<button class="btn" data-act="go">${a.open||a.done?'🚗 '+L('가기','Go'):'🚗 '+L('운전해서 가기','Drive there')}</button>`:''}${me?`<button class="btn" data-act="home">🐠 ${L('여기 있어요','You are here')}</button>`:''}${a.done&&UNLOCK.drive()&&!me?`<button class="btn ghost" data-act="deliver">🚚 ${L('배달 미션','Delivery')} ${del<3?`(${3-del})`:''}</button>`:''}</div>`,{acts:{go:()=>()=>travelTo(g,i),home:()=>()=>go('home'),deliver:()=>()=>startDrive({kind:'delivery',g,from:here().d.name,to:d.name,after:()=>{}})}})}
 function travelTo(g,i){if(!aqPlay(g,i)){plusLock(g,i);return}const a=aqState(g,i);const fresh=!a.open&&!a.done&&!(a.at);if(fresh&&UNLOCK.drive()){startDrive({kind:'move',g,from:here().d.name,to:aqDef(g,i).name,after:()=>arrive(g,i)})}else arrive(g,i)}
 function arrive(g,i){S.at=atOf(g,i);if(g!==S.grade&&!gradeDone(g))S.grade=g;REQ=null;const a=aqState(g,i);if(!a.at)a.at=now();save();go('home');const sk=skillOf(g,i);if(!a.open&&sk){setTimeout(()=>say(L(`${aqDef(g,i).name}에 도착했어요! 여기서는 ${sk.name}${josa(sk.name,'을','를')} 배워요.`,`We’re at ${aqDef(g,i).name}! Here we learn ${sk.name}.`),{raw:true}),400)}}
@@ -12440,7 +12497,7 @@ function quickItem(x,got,ok){try{const s=x&&x.src;if(!s||!s.o)return undefined;c
 let QA={r:0,w:0};
 function quickAns(ok,x,got){ok?QA.r++:QA.w++;try{LR.ans(ok,x&&x.id,got===undefined?undefined:quickItem(x,got,ok))}catch(e){}}
 function lrRest(res){lrCount(Math.max(0,(res.right||0)-QA.r),Math.max(0,(res.wrong||0)-QA.w));QA={r:0,w:0}}
-function startDrive(o){if(typeof Drive==='undefined'){o.after&&o.after();return}audio();const st=openStage();st.className='stage game';const turbo=(S.items.turbo||0)>0;if(turbo)S.items.turbo--;
+function startDrive(o){if(typeof Drive==='undefined'){o.after&&o.after();return}audio();const st=openStage(L('운전','Driving'));st.className='stage game';const turbo=(S.items.turbo||0)>0;if(turbo)S.items.turbo--;
  const car=CARS.find(c=>c[0]===S.car.model)||CARS[0];
  QA={r:0,w:0};try{Drive.start(st,{g:o.g||S.at.g,car:{emoji:car[1],model:car[0],color:S.car.color,speed:S.car.speed,magnet:S.car.magnet,shield:S.car.shield+(turbo?2:0)},from:o.from,to:o.to,gates:Math.min(10,5+Math.floor((S.grade||1)/2)),ask:askQuick,ans:quickAns,sfx,say:t=>say(t),
   onEnd:res=>{try{Drive.stop()}catch(e){}closeStage();finishDrive(o,res)}})}catch(e){console.warn(e);closeStage();o.after&&o.after()}}
@@ -12483,7 +12540,7 @@ function ticketQuiz(then){const need=5;let right=0;
   ask()},acts:{go:()=>()=>{if(then)then();else{go('sea')}}},onClose:()=>{if(VIEW==='sea')renderSea()}})}
 function startSea(mode){const g=TAB.sea||S.at.g;if(S.tickets<1){const c=itemCost(ITEM_BY.seaticket);modal(`<h2>${TICKET} ${L('바다 티켓이 없어요','No sea tickets')}</h2><p>${tkLine()}</p><p>${L('기다리지 않아도 돼요! 문제를 풀거나 코인으로 살 수 있어요.','No need to wait! Solve some problems or buy one with coins.')}</p>
   <div class="row wrap"><button class="btn" data-act="quiz">🧮 ${L('문제 5개 맞히기','Get 5 right')}</button><button class="btn ghost" data-act="buy">${L('코인으로 사기','Buy')} · ${COIN} ${short(c)}</button></div>`,{acts:{quiz:()=>()=>ticketQuiz(()=>startSea(mode)),buy:()=>{if(!spend(c))return false;S.tickets++;sfx('coin');toast(`${TICKET} +1`);save();return ()=>startSea(mode)}}});return}
- if(typeof Sea==='undefined')return;S.tickets--;S.stats.trips++;audio();const st=openStage();st.className='stage game';const bait=(S.items.bait||0)>0&&mode==='fish',air=(S.items.air||0)>0&&mode==='dive';if(bait)S.items.bait--;if(air)S.items.air--;save();
+ if(typeof Sea==='undefined')return;S.tickets--;S.stats.trips++;audio();const st=openStage(mode==='fish'?L('낚시','Fishing'):L('다이빙','Diving'));st.className='stage game';const bait=(S.items.bait||0)>0&&mode==='fish',air=(S.items.air||0)>0&&mode==='dive';if(bait)S.items.bait--;if(air)S.items.air--;save();
  const o={g,pool:seaPool(g),bait:bait?2:0,casts:6+(skl('dive')>=2?1:0)+(skl('dive')>=4?1:0),oxygen:60+8*skl('dive')+(air?20:0)+5*staffPower('diver'),ask:askQuick,ans:quickAns,sfx,say:t=>say(t),onEnd:res=>{try{Sea.stop()}catch(e){}closeStage();finishSea(mode,res)}};QA={r:0,w:0};
  try{mode==='fish'?Sea.fish(st,o):Sea.dive(st,o)}catch(e){console.warn(e);closeStage();S.tickets++}}
 function finishSea(mode,res){const caught=res.caught||[];const news=[];caught.forEach(id=>{if(addDex(id))news.push(id);S.store[id]=(S.store[id]||0)+1});S.stats.caught+=caught.length;S.pearls+=res.pearls||0;lrRest(res);S.stats.correct+=res.right||0;S.stats.solved+=(res.right||0)+(res.wrong||0);
@@ -12648,7 +12705,7 @@ function fbTank(){const F=FX,el=$('fTank');if(!F||!el)return;const R_=REGIONS[fb
 function fbFeed(){const F=FX;if(!F)return;const pool=fbPool(fbG(F.b)).filter(f=>!F.fish.includes(f.id)),f=pool.length?pick(pool):null;if(f)F.fish.push(f.id);
  fbTank();const t=$('fTank');popAt(t&&t.offsetParent?t:$('fFed'),`${artPic('🍤')} ${L('냠냠!','Yum!')}`);sfx('coin')}
 function startFirst(){audio();const age=FIRST_Q.age;FX={age,b0:0,b:0,n:0,items:[],r:Array(12).fill(0),w:Array(12).fill(0),s:Array(12).fill(0),used:new Set(),any:false,late:false,t0:0,fish:[],cur:null,view:null};
- const st=openStage();st.className='stage lesson first';st.setAttribute('role','dialog');st.setAttribute('aria-modal','true');st.setAttribute('aria-label',L('첫 탐험','First exploration'));
+ const st=openStage(L('첫 탐험','First exploration'));st.className='stage lesson first';
  st.innerHTML=`<div class="lbar"><button type="button" class="lx" data-f="quit" aria-label="${L('그만하기','Stop')}">✕</button><div class="ltitle"><b>🧭 ${L('첫 탐험','First exploration')}</b><small>${L('무니와 함께 바다 친구들에게 먹이를 줘요','Feed the sea friends with Mooni')}</small></div><div class="lcombo" id="fFed"></div></div>
   <div class="ftank" id="fTank" aria-hidden="true"></div><div class="lbody" id="fBody"></div>`;
  st.querySelector('[data-f=quit]').addEventListener('click',()=>{sfx('tap');fbQuit()});
@@ -12658,13 +12715,15 @@ function fbBegin(age){const F=FX;F.age=age;F.b0=F.b=fbStart(age);F.fish=shuffle(
 function fbAge(){const F=FX;F.fish=shuffle(fbPool(1)).slice(0,2).map(f=>f.id);fbTank();
  const msg=L('안녕! 나는 무니예요. 몇 살이에요?','Hi! I’m Mooni. How old are you?');
  $('fBody').innerHTML=`<div class="slide fintro"><div class="mooni">${MAV}<div class="bub">${msg}</div></div><div class="fages">${[6,7,8,9,10,11,12].map(a=>`<button type="button" class="btn ghost" data-age="${a}">${L(a+'살',String(a))}</button>`).join('')}</div></div>`;
- $('fBody').querySelectorAll('[data-age]').forEach(b=>b.addEventListener('click',()=>{sfx('tap');hush();fbBegin(+b.dataset.age);fbIntro(true)}));say(msg,{raw:true})}
+ $('fBody').querySelectorAll('[data-age]').forEach(b=>b.addEventListener('click',()=>{sfx('tap');hush();fbBegin(+b.dataset.age);fbIntro(true)}));fbHear(msg);say(msg,{raw:true})}
 function fbIntro(asked){const F=FX;if(!asked)fbBegin(F.age);
  const msg=L('안녕! 나는 무니예요. 바다 친구들이 배가 고프대요. 문제를 하나 풀 때마다 먹이를 하나 줄 수 있어요. 모르는 문제는 ‘모르겠어요’를 누르면 내가 알려 줄게요. 틀려도 괜찮아요!',
   'Hi! I’m Mooni. Our sea friends are hungry. Every question you try gives one of them food. If you don’t know one, tap “Show me” and I’ll teach you. Mistakes are okay!');
  $('fBody').innerHTML=`<div class="slide fintro"><div class="mooni">${MAV}<div class="bub">${msg}</div></div>
   <button type="button" class="bigbtn" data-f="go"><span class="bb-ic">${artPic('🍤')}</span><span class="bb-t"><b>${L('먹이 주러 가기','Let’s feed them')}</b><small>${L('10분쯤 걸려요','About 10 minutes')}</small></span><span class="bb-go">▶</span></button></div>`;
- $('fBody').querySelector('[data-f=go]').addEventListener('click',()=>{sfx('tap');hush();fbNext()});say(msg,{raw:true})}
+ $('fBody').querySelector('[data-f=go]').addEventListener('click',()=>{sfx('tap');hush();fbNext()});fbHear(msg);say(msg,{raw:true})}
+// Mooni's hello can't be heard before the first tap (browsers wait for one), so a tap on her bubble reads it again
+function fbHear(msg){const m=$('fBody').querySelector('.fintro .mooni');if(m)m.addEventListener('click',()=>{sfx('tap');say(msg,{raw:true})})}
 function fbNext(){const F=FX;if(!F)return;if(F.view){F.view.destroy();F.view=null}
  if(!F.t0)F.t0=now();else if(now()-F.t0>FB_LATE)F.late=true;
  if(F.n&&fbStop(F)){fbEnd();return}
@@ -12714,7 +12773,7 @@ function renderGrow(){const el=$('v-grow'),t=TAB.grow;let body='';
 function growMe(){const st=S.stats,acc=st.solved?Math.round(100*st.correct/st.solved):0,t=titleOf(S.lvl),days=Object.keys(S.hist).sort(),last14=[];const d0=new Date();
  for(let k=13;k>=0;k--){const d=new Date(d0);d.setDate(d.getDate()-k);const key=dayKey(d),h=S.hist[key]||{n:0,c:0};last14.push({k:key,l:String(d.getDate()),n:h.c,acc:h.n?h.c/h.n:0})}
  const mx=Math.max(5,...last14.map(x=>x.n));const W=330,H=150;
- const chart=`<svg class="vis chart14" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}">${last14.map((x,j)=>{const bw=W/14-6,bx=3+j*(W/14),bh=(H-30)*x.n/mx;return `<rect x="${bx}" y="${H-18-bh}" width="${bw}" height="${Math.max(1,bh)}" rx="4" fill="${j===13?'#ff8a5b':'#4cb4ff'}"/><text x="${bx+bw/2}" y="${H-5}" font-size="10" text-anchor="middle" fill="#7d89b8">${x.l}</text>${x.n?`<text x="${bx+bw/2}" y="${H-22-bh}" font-size="10" text-anchor="middle" fill="#24305e" font-weight="700">${x.n}</text>`:''}`}).join('')}</svg>`;
+ const chart=`<svg class="vis chart14" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}">${last14.map((x,j)=>{const bw=W/14-6,bx=3+j*(W/14),bh=(H-30)*x.n/mx;return `<rect x="${bx}" y="${H-18-bh}" width="${bw}" height="${Math.max(1,bh)}" rx="4" fill="${j===13?'#ff8a5b':'#4cb4ff'}"/><text x="${bx+bw/2}" y="${H-5}" font-size="12" text-anchor="middle" fill="#7d89b8">${x.l}</text>${x.n?`<text x="${bx+bw/2}" y="${H-22-bh}" font-size="12" text-anchor="middle" fill="#24305e" font-weight="700">${x.n}</text>`:''}`}).join('')}</svg>`;
  // which skills got faster, which strands are strong
  const gains=Object.keys(S.sk).map(id=>({id,g:speedGain(id)})).filter(x=>x.g>=1&&SKILL_BY[x.id]).sort((a,b)=>b.g-a.g).slice(0,3);
  const strand={};for(const id in S.sk){const sk=SKILL_BY[id];if(!sk)continue;const s=strand[sk.strand]=strand[sk.strand]||{n:0,c:0};s.n+=S.sk[id].n;s.c+=S.sk[id].c}
@@ -12765,7 +12824,7 @@ function dailyReview(){const ids=Object.keys(S.sk).filter(id=>S.sk[id].m&&SKILL_
 
 // ---------------------------------------------------------------- after a grand opening: on to the next aquarium, or graduation
 function afterGrandOpening(g,i){if(gradeDone(g)&&!gradeData(g).grad){graduation(g);return}
- if(i<gradeLen(g)-1&&!aqState(g,i+1).done){if(!aqPlay(g,i+1)&&plusTease(g,i+1))return;const nx=aqDef(g,i+1);modal(`<div class="big">${carPic('','hero')}</div><h2>${L('다음 아쿠아리움이 기다려요!','The next aquarium is waiting!')}</h2><p><b>${esc(nx.name)}</b> · ${skillOf(g,i+1)?esc(skillOf(g,i+1).name):''}</p><div class="row"><button class="btn ghost" data-act="close">${L('조금 있다가','Later')}</button><button class="btn" data-act="go">${L('운전해서 가기','Drive there')} ▶</button></div>`,{acts:{go:()=>()=>travelTo(g,i+1)}})}}
+ if(i<gradeLen(g)-1&&!aqState(g,i+1).done){if(!aqPlay(g,i+1)&&plusTease(g,i+1))return;const nx=aqDef(g,i+1);modal(`<div class="big">${carPic('','hero')}</div><h2>${L('다음 아쿠아리움이 기다려요!','The next aquarium is waiting!')}</h2><p><b>${esc(nx.name)}</b> · ${skillOf(g,i+1)?esc(skillOf(g,i+1).name):''}</p><div class="nextfish" aria-hidden="true">${nx.tanks.map(id=>fishImgTag(id,S.dex[id]?'':'shadow')).join('')}</div><p class="muted">${L('수조 5개에 새 친구들이 기다려요.','New friends are waiting in its 5 tanks.')}</p><div class="row"><button class="btn ghost" data-act="close">${L('조금 있다가','Later')}</button><button class="btn" data-act="go">${L('운전해서 가기','Drive there')} ▶</button></div>`,{acts:{go:()=>()=>travelTo(g,i+1)}})}}
 function graduation(g){const gd=gradeData(g),c=coreLen(g),ids=GL[g].slice(0,c);gd.grad=dayKey();gradeCert(g);const t=tier(g,c-1),coins=Math.round(1500*t);earn(coins,{pop:false});S.pearls+=20;S.tickets+=5;const leg='leg'+g;addDex(leg);S.store[leg]=(S.store[leg]||0)+1;S.sp+=2;
  const stars=ids.reduce((x,id)=>x+slotOf(id).best,0),probs=ids.reduce((x,id)=>x+(S.sk[id]?S.sk[id].c:0),0);
  logEvent('🎓',`${g}학년 수학 마스터! 졸업!`,`Grade ${g} math mastered! Graduated!`);checkAch();save();sfx('fanfare');celebrate('confetti',70);setTimeout(()=>celebrate('stars',40),900);
@@ -12820,7 +12879,10 @@ function wire(){
  $('hudCoinPill').addEventListener('click',()=>{sfx('tap');go('shop','items')});$('hudTicketPill').addEventListener('click',()=>{sfx('tap');go('sea')});$('hudPearlPill').addEventListener('click',()=>{sfx('tap');go('shop','items')});
  $('hudStreakPill').addEventListener('click',()=>{sfx('tap');modal(`<div class="big">🔥</div><h2>${L(`${S.streak.n}일 연속!`,`${S.streak.n}-day streak!`)}</h2><p>${L('하루에 문제 5개를 맞히면 그날 공부한 걸로 쳐요.','Get 5 problems right in a day to count it.')}</p><p>${L(`최고 기록 ${S.streak.best}일 · 쉬는 날 카드 ${S.streak.shields}장`,`Best ${S.streak.best} days · ${S.streak.shields} rest-day card${S.streak.shields===1?'':'s'}`)}</p><p class="muted">${L('7일 연속마다 쉬는 날 카드를 받아요. 하루 빠져도 카드가 기록을 지켜줘요.','Every 7 days you get a rest-day card. It saves your streak if you miss a day.')}</p>`)});
  $('hudLvlBtn').addEventListener('click',()=>{sfx('tap');go('grow','me')});
- document.querySelector('main').addEventListener('click',e=>{const b=e.target.closest('[data-a],[data-tab]');if(!b)return;
+ document.querySelector('main').addEventListener('click',e=>{
+  // Mooni on the aquarium screen: a tap reads her bubble (what to press next), for children who can't read it yet
+  const mo=!e.target.closest('button,a')&&e.target.closest('.cta .mooni');if(mo){const t=mo.querySelector('.bub');if(t){sfx('tap');say(t.textContent)}return}
+  const b=e.target.closest('[data-a],[data-tab]');if(!b)return;
   if(b.dataset.tab){sfx('tap');const v=b.closest('.view').id.slice(2);TAB[v]=b.dataset.tab;go(v);return}
   const a=b.dataset.a,{g,i}=here();
   switch(a){

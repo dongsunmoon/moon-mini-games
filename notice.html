@@ -26,13 +26,13 @@ body{min-height:100vh;min-height:100dvh;color:var(--ink);background:radial-gradi
 .top{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
 .home{display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:0 16px;border-radius:999px;background:#fff;border:1px solid var(--line);font-weight:800;color:var(--ink);text-decoration:none}
 .lang{display:inline-flex;padding:4px;border-radius:999px;background:#fff;border:1px solid var(--line)}
-.lang button{font:inherit;font-size:14px;font-weight:800;border:0;border-radius:999px;padding:9px 15px;min-height:40px;background:transparent;color:var(--muted);cursor:pointer}
+.lang button{font:inherit;font-size:14px;font-weight:800;border:0;border-radius:999px;padding:9px 15px;min-height:44px;background:transparent;color:var(--muted);cursor:pointer}
 .lang button[aria-pressed="true"]{background:var(--brand);color:#fff}
 a:focus-visible,button:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
 h1{margin:22px 0 4px;font-size:clamp(25px,5.6vw,34px);line-height:1.2;letter-spacing:-.4px;text-wrap:balance}
 .lead{margin:0 0 6px;color:var(--muted);font-weight:600;max-width:62ch}
 .toc{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0 4px;padding:0;list-style:none}
-.toc a{display:inline-flex;align-items:center;min-height:40px;padding:0 14px;border-radius:999px;background:#ffffffc7;border:1px solid var(--line);font-size:14px;font-weight:800;text-decoration:none}
+.toc a{display:inline-flex;align-items:center;min-height:44px;padding:0 14px;border-radius:999px;background:#ffffffc7;border:1px solid var(--line);font-size:14px;font-weight:800;text-decoration:none;color:var(--ink)}
 section{margin-top:18px;background:var(--card);border:1px solid var(--line);border-radius:22px;padding:18px 20px;box-shadow:0 10px 28px rgba(54,72,160,.08)}
 section h2{margin:0 0 10px;font-size:20px;line-height:1.3;text-wrap:balance}
 section ul{margin:0;padding:0;list-style:none;display:grid;gap:12px}
@@ -63,8 +63,10 @@ footer{margin-top:24px;text-align:center;color:#8a93b8;font-size:12.5px}
 // Notices for grown-ups: health and safety, privacy, no ads or purchases, the learning content, copyright and credits.
 // Every game's ⚙️ settings window links here (safeLink() in the coach block), and the main page has it in its footer.
 const UPDATED='2026-11-23';
-// in the Android/iPhone app (app-bridge.js sets __mgApp) Plus can be bought; on this website everything is free for now
-const APP=!!window.__mgApp;
+// in the Android/iPhone app (app-bridge.js sets __mgApp) Plus can be bought; on this website everything is free for now.
+// The Plus parent screen links here with &sale=1 wherever it sells (the app, a store-locked web, a ?plus= test), and a
+// ?plus= test in this tab counts too, so its "Terms of use" link always lands on the terms.
+const APP=!!window.__mgApp||/[?&]sale=1\b/.test(location.search)||(()=>{try{return !!sessionStorage.getItem('moonGames.plusDev')}catch(e){return false}})();
 const S=[
  {id:'safety',cls:'safe',h:['🛡️ 건강과 안전','🛡️ Health and safety'],items:[
   ['🔬','게임 속 실험은 어른과 함께','Try experiments only with a grown-up',

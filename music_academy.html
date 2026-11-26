@@ -91,11 +91,16 @@ function coachLine(k){const [pose,ls]=COACH[k];return `<div class="mcoach"><img 
 let coachAt=0,coachRun=0,coachMiss=0;
 // true while a game window (dialog) is open, so the bubble never covers one
 const coachBusy=()=>[...document.querySelectorAll('[role="dialog"],[aria-modal="true"]')].some(e=>e.getAttribute('aria-hidden')!=='true'&&e.getClientRects().length&&getComputedStyle(e).visibility!=='hidden');
-function coachLater(fn,left=180){if(!coachBusy()){fn();return}if(left>0)setTimeout(()=>coachLater(fn,left-1),1000)}
+// the hello and the break line also wait while a play area marked data-coach-quiet (the chess board) is on screen;
+// quick praise during play still shows
+const coachQuiet=()=>coachBusy()||[...document.querySelectorAll('[data-coach-quiet]')].some(e=>e.getClientRects().length&&getComputedStyle(e).visibility!=='hidden');
+function coachLater(fn,left=180){if(!coachQuiet()){fn();return}if(left>0)setTimeout(()=>coachLater(fn,left-1),1000)}
 function coachPop(pose,ko,en,o={}){const now=Date.now();if(!o.force&&now-coachAt<(o.gap||60000))return false;if(!o.force&&coachBusy())return false;coachAt=now;
  let el=document.getElementById('coachPop');if(!el){el=document.createElement('div');el.id='coachPop';el.setAttribute('role','status');document.body.appendChild(el)}
  el.innerHTML=`<img src="images/coach-moon-${pose}.webp" alt="" onerror="this.remove()"><p><b>${L('문 코치','Coach Moon')}</b>${L(ko,en)}</p>`;
- el.classList.remove('show');void el.offsetWidth;el.classList.add('show');clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove('show'),o.ms||4500);return true}
+ el.classList.remove('show');void el.offsetWidth;el.classList.add('show');clearTimeout(el._t);clearInterval(el._w);
+ // a window that opens while the bubble shows wins: the bubble steps aside instead of covering its title and ✕
+ el._w=setInterval(()=>{if(coachBusy()){el.classList.remove('show');clearInterval(el._w)}},300);el._t=setTimeout(()=>{el.classList.remove('show');clearInterval(el._w)},o.ms||4500);return true}
 // call with every final answer: praise runs of right answers, and help after two misses in a row.
 // The optional skill id (one of the skill ids in the game's LR summary) counts the answer for that skill in the report,
 // and the optional item (see LR above) lets the report list the kinds of questions the child often gets wrong.
@@ -107,8 +112,10 @@ function coachAnswer(ok,skill,item){try{LR.ans(ok,skill,item)}catch(e){}
 function coachStart(hello,tips){const game=(location.pathname.split('/').pop()||'index').replace(/\.html$/,''),k='moonGames.coach'+(MGP.me?'@'+MGP.me.id:''),d=new Date().toLocaleDateString('en-CA');
  const notes=f=>{let st={};try{st=JSON.parse(localStorage.getItem(k)||'{}')||{}}catch(e){}f(st);try{localStorage.setItem(k,JSON.stringify(st))}catch(e){}return st};
  const st=notes(st=>{st.played=(st.played||[]).filter(x=>x!==d).concat(d).slice(-14)}),nm=coachEsc(coachNm());
+ // the very first visit to a game belongs to the game's own welcome: Coach Moon says hello from the next day on
+ if(!st.hello||!(game in st.hello)){notes(st=>{(st.hello=st.hello||{})[game]=d})}
  // the hello counts as said only once it has really been shown
- if((st.hello||{})[game]!==d)setTimeout(()=>coachLater(()=>setTimeout(()=>{if(coachPop('hi',`${hello[0]} ${nm?`문 코치는 언제나 ${nm} 편이에요 🌙`:'문 코치가 응원해요 🌙'}`,`${hello[1]} ${nm?`Coach Moon is always on your side, ${nm} 🌙`:'Coach Moon is cheering for you 🌙'}`,{force:true,ms:6000}))notes(st=>{(st.hello=st.hello||{})[game]=d})},900)),2500);
+ else if(st.hello[game]!==d)setTimeout(()=>coachLater(()=>setTimeout(()=>coachLater(()=>{if(coachPop('hi',`${hello[0]} ${nm?`문 코치는 언제나 ${nm} 편이에요 🌙`:'문 코치가 응원해요 🌙'}`,`${hello[1]} ${nm?`Coach Moon is always on your side, ${nm} 🌙`:'Coach Moon is cheering for you 🌙'}`,{force:true,ms:6000}))notes(st=>{(st.hello=st.hello||{})[game]=d})}),900)),2500); // checks again just before it shows: a lesson may have opened meanwhile
  if(tips&&tips.length)setTimeout(()=>{const t=coachPick(tips);coachPop('idea',t[0],t[1],{ms:6000})},4*60000);
  setTimeout(()=>coachLater(()=>coachPop('go','벌써 20분이나 열심히 했어요! 눈이 피곤하면 잠깐 쉬어도 좋아요 🌙','20 minutes of hard work already! Rest your eyes for a bit if they’re tired 🌙',{force:true,ms:7000})),20*60000)}
 /*SAYABLE:BEGIN*/
@@ -331,9 +338,12 @@ const CSS=':host{all:initial}*{box-sizing:border-box;font-family:system-ui,-appl
  '.fine{font-size:12.5px;color:#6b7390;line-height:1.55;margin:8px 0 0}.code{display:flex;gap:8px;margin:6px 0}.code input{flex:1;min-width:0;min-height:48px;border:2px solid #d7def0;border-radius:12px;padding:0 12px;font-size:17px;font-weight:800;letter-spacing:1px;text-transform:uppercase}'+
  '.code button{min-height:48px;border:0;border-radius:12px;background:#4656c8;color:#fff;font-weight:900;padding:0 16px;font-size:15px;cursor:pointer}'+
  '.on{background:#e9f8ef;border-radius:14px;padding:12px;font-weight:800;color:#1f6b3e;margin:6px 0}'+
- '.q{font-size:28px;font-weight:900;margin:8px 0}.gin{width:100%;min-height:52px;font-size:24px;font-weight:900;text-align:center;border:2px solid #d7def0;border-radius:14px}'+
+ '.q{font-size:22px;font-weight:900;margin:8px 0;line-height:1.35;word-break:keep-all}.gin{width:100%;min-height:52px;font-size:24px;font-weight:900;text-align:center;border:2px solid #d7def0;border-radius:14px}'+
+ '.plan i small{font-size:13px;font-weight:800;color:#56607a}.keep{background:#f6f7fb;border-radius:14px;padding:9px 12px;font-size:13.5px;line-height:1.5;color:#3b4677;margin:0 0 10px}'+
  'button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid #ffb703;outline-offset:2px}'+
- '@media (max-height:560px){.pic{width:96px;height:96px;font-size:48px}.card{padding:12px 14px}}';
+ '@media (max-height:560px){.pic{width:96px;height:96px;font-size:48px}.card{padding:12px 14px}}'+
+ // a phone turned sideways: a wider parent screen with the list in two columns, so the prices are not far below
+ '@media (max-height:560px) and (min-width:700px){.wide{width:min(760px,100%)}.wide .list{grid-template-columns:1fr 1fr;column-gap:16px}}';
 function layer(html,onClose){const host=document.createElement('div');host.setAttribute('data-mg-plus','');const root=host.attachShadow?host.attachShadow({mode:'open'}):host;
  const st=document.createElement('style');st.textContent=CSS;root.appendChild(st);const bg=document.createElement('div');bg.className='bg';bg.setAttribute('role','dialog');bg.setAttribute('aria-modal','true');bg.innerHTML=html;root.appendChild(bg);(document.body||document.documentElement).appendChild(host);
  const prev=document.activeElement,close=()=>{try{host.remove()}catch(e){}try{prev&&prev.focus&&prev.focus()}catch(e){}onClose&&onClose()};
@@ -343,13 +353,15 @@ function layer(html,onClose){const host=document.createElement('div');host.setAt
 // ---- the child's lock card: a preview and a neutral line, no price
 let lockOpen=false;
 function lock(c){c=c||{};if(lockOpen)return false;lockOpen=true;
+ // say:true → the card reads its title and line aloud (games that speak their own lock line leave it off)
+ if(c.say)setTimeout(()=>{try{if(!('speechSynthesis' in window))return;speechSynthesis.cancel();const u=new SpeechSynthesisUtterance((two(c.title)?two(c.title)+'. ':'')+(two(c.text)||T('다음 이야기는 문코치 Plus에서 열려요.','The next part opens with Coach Moon Plus.')));u.lang=lang()==='en'?'en-US':'ko-KR';speechSynthesis.speak(u)}catch(e){}},250);
  const pic=c.pic?`<img src="${esc(c.pic)}" alt="" onerror="this.remove()">`:'';
  const L1=two(c.text)||T('다음 이야기는 문코치 Plus에서 열려요.','The next part opens with Coach Moon Plus.');
  const F=two(c.free)||T('이달의 단원, 매일 목표, 다른 게임은 지금도 할 수 있어요.','This month’s units, daily goals and other games are open now.');
  const w=layer(`<div class="card"><button class="x" type="button" aria-label="${T('닫기','Close')}">✕</button>
   <div class="pic" aria-hidden="true">${esc(c.emoji||'🌙')}${pic}<span class="star">⭐ Plus</span></div>
   <h2>${esc(two(c.title)||T('새로운 곳이 기다려요','Something new is waiting'))}</h2><p class="t">${esc(L1)}</p><p class="free">${esc(F)}</p>
-  <button class="go" type="button">▶ ${T('무료로 계속하기','Keep playing free')}</button>
+  <button class="go" type="button">▶ ${T('계속 놀기','Keep playing')}</button>
   <button class="ask" type="button">👨‍👩‍👧 ${T('어른에게 보여 주기','Show a grown-up')}</button></div>`,()=>{lockOpen=false;c.onClose&&c.onClose()});
  w.$('.go').addEventListener('click',()=>{w.close();c.onFree&&c.onFree()});
  w.$('.ask').addEventListener('click',()=>{w.close();parent(c.ctx)});return true}
@@ -357,23 +369,32 @@ function lock(c){c=c||{};if(lockOpen)return false;lockOpen=true;
 function tease(c){if(has()||!c||!c.game)return false;let s={};try{s=JSON.parse(localStorage.getItem(SEEN)||'{}')||{}}catch(e){}
  if(s[c.game]===day())return false;s[c.game]=day();try{localStorage.setItem(SEEN,JSON.stringify(s))}catch(e){}return lock(c)}
 // ---- grown-up check: the app's mgGate (app-bridge.js); on the web a simple question
+// numbers written as words, like the app's check: a child who can multiply still has to read 이십육 / twenty-six
+const KD=['','일','이','삼','사','오','육','칠','팔','구'],koN=n=>{const t=Math.floor(n/10),o=n%10;return (t?(t>1?KD[t]:'')+'십':'')+KD[o]};
+const EO=['zero','one','two','three','four','five','six','seven','eight','nine','ten','eleven','twelve','thirteen','fourteen','fifteen','sixteen','seventeen','eighteen','nineteen'],enN=n=>n<20?EO[n]:['','','twenty','thirty'][Math.floor(n/10)]+(n%10?'-'+EO[n%10]:'');
+const gq=(a,b)=>{const w=koN(b),c=w.charCodeAt(w.length-1)-0xAC00;return T(`${koN(a)} 곱하기 ${w}${c%28?'은':'는'}?`,`What is ${enN(a)} times ${enN(b)}?`)};
 function gate(cb,kind){if(typeof window.mgGate==='function'){window.mgGate(kind||'buy',ok=>cb(!!ok));return}
- const a=12+Math.floor(Math.random()*17),b=6+Math.floor(Math.random()*4);
+ let a=13+Math.floor(Math.random()*17),b=3+Math.floor(Math.random()*7);if(a===20)a=23;
  const w=layer(`<div class="card"><button class="x" type="button" aria-label="${T('닫기','Close')}">✕</button><h2>🔒 ${T('보호자 확인','Grown-ups only')}</h2>
   <p class="free">${T('어린이는 보호자에게 보여 주세요. 아래 계산의 답을 입력해 주세요.','Kids: please show this to a grown-up. Type the answer below.')}</p>
-  <p class="q" aria-hidden="true">${a} × ${b} = ?</p><input class="gin" inputmode="numeric" autocomplete="off" aria-label="${T(a+' 곱하기 '+b,a+' times '+b)}"><p class="msg" aria-live="polite"></p>
+  <p class="q">${gq(a,b)}</p><input class="gin" inputmode="numeric" autocomplete="off" aria-label="${T('숫자로 답해 주세요','Answer with numbers')}" placeholder="${T('숫자로','numbers')}"><p class="msg" aria-live="polite"></p>
   <button class="go" type="button">${T('확인','Continue')}</button></div>`);
- const go=()=>{if(w.$('.gin').value.trim()===String(a*b)){w.close();cb(true)}else{w.$('.msg').textContent=T('답이 달라요.','Not quite.');w.$('.gin').value=''}};
+ const go=()=>{if(w.$('.gin').value.trim()===String(a*b)){w.close();cb(true)}else{a=13+Math.floor(Math.random()*17);if(a===20)a=23;b=3+Math.floor(Math.random()*7);w.$('.q').textContent=gq(a,b);w.$('.msg').textContent=T('답이 달라요. 새 문제예요.','Not quite. Here’s a new one.');w.$('.gin').value=''}};
  w.$('.go').addEventListener('click',go);w.$('.gin').addEventListener('keydown',e=>{if(e.key==='Enter')go()});setTimeout(()=>{try{w.$('.gin').focus()}catch(e){}},60)}
 function parent(ctx){if(has()&&mode!=='app'&&mode!=='test'){paywall(ctx);return}gate(ok=>{if(ok)paywall(ctx)})}
 // ---- the parent screen: what Plus opens, the store's prices, restore, licence code, the fine print
 const OPENS=()=>[T('수학 아쿠아리움: 1~6학년 수족관 120곳 모두','Math Aquarium: all 120 aquariums, grades 1–6'),T('코딩 섬: 파이썬 미션 84개와 보스 13명','Coding Island: all 84 Python missions and 13 bosses'),
- T('체스 기사단: 보스 8명, 스파링, 대국 복기, 보스 코스, 레슨 57개','Chess Knights: all 8 bosses, sparring, game review, boss courses, 57 lessons'),T('과학·음악의 모든 세계와 단원, 꼬마 탐정의 모든 사건, 구슬 레이스의 모든 세계','Every science world and music unit, every detective case, every Marble Rush world'),
- T('부모 리포트 전체: 과목별 분석, 틀린 문제, 집에서 돕기, 인쇄','The full parents’ report: subjects, missed questions, home plan, printing'),T('모든 수료증, 이 기기의 모든 아이 프로필','All certificates, and every child profile on this device')];
+ T('꼬마 체스 기사단: 보스 8명, 연습 상대, 대국 복기, 보스 코스, 레슨 57개','Little Chess Knights: all 8 bosses, practice partners, game review, boss courses, 57 lessons'),T('과학·음악의 모든 세계와 단원, 꼬마 탐정의 모든 사건, 구슬 레이스의 모든 세계','Every science world and music unit, every detective case, every Marble Rush world'),
+ T('부모 리포트 전체: 과목별 분석, 틀린 문제, 집에서 돕기, 인쇄','The full parents’ report: subjects, missed questions, home plan, printing'),T('모든 수료증','Every certificate')];
+// what stays free without Plus (the same as FREE/MONTHLY and the report's free part), and that one Plus covers the family
+const KEEP=()=>T('Plus가 없어도 각 게임의 앞부분, 이달의 무료 단원, 매일 목표, 리포트의 ‘한눈에’ 화면, 보호자 도구는 계속 무료예요. Plus 하나면 이 기기의 모든 아이 프로필에 적용돼요.','Free without Plus: the first part of every game, this month’s free units, daily goals, the report overview and the grown-up tools. One Plus covers every child profile on this device.');
 const perLabel=p=>p.period==='month'?T('월간','Monthly'):T('연간','Yearly');
+const perUnit=p=>p.period==='month'?T('월','mo'):T('년','yr');
 const trialLabel=t=>{const m=/P(\d+)([DWMY])/.exec(t||'');if(!m)return '';const n=+m[1],u=m[2];if(u==='M'||u==='Y')return u==='M'?T(`${n}개월 무료 체험 뒤 결제`,`${n}-month free trial, then`):T(`${n}년 무료 체험 뒤 결제`,`${n}-year free trial, then`);const d=n*(u==='W'?7:1);return T(`${d}일 무료 체험 뒤 결제`,`${d}-day free trial, then`)};
 // in the app the notice page opens in the same view (a new window would go nowhere); on the web in a new tab
 const tgt=inApp?'':' target="_blank" rel="noopener"';
+// where Plus is on sale (the app, a store-locked web, ?plus= tests) the notice page shows its Plus and terms sections
+const nq=()=>`?lang=${lang()}${mode==='open'?'':'&sale=1'}`;
 function paywall(ctx){if(sheet){sheet.render();return}
  const w=layer(`<div class="card wide"><button class="x" type="button" aria-label="${T('닫기','Close')}">✕</button><div class="body"></div></div>`,()=>{sheet=null});
  let codeOpen=false,note='',good=false;
@@ -383,16 +404,16 @@ function paywall(ctx){if(sheet){sheet.render();return}
   if(ctx)h+=`<p class="ctx">${esc(two(ctx))}</p>`;
   if(has()){h+=`<div class="on">✅ ${mode==='open'||mode==='on'?T('이 웹사이트에서는 지금 모든 내용이 열려 있어요.','Everything is open on this website for now.'):l&&!s?T(`기관 코드로 Plus가 열려 있어요 (${l.until?l.until+'까지':'기한 없음'}).`,`Plus is on with an organization code (${l.until?'until '+l.until:'no end date'}).`):T('Plus를 쓰고 있어요. 고마워요!','Plus is on. Thank you!')}</div>`;
    if(s&&s.until)h+=`<p class="fine">${T('다음 갱신일','Next renewal')}: ${esc(new Date(s.until).toLocaleDateString(lang()==='en'?'en-CA':'ko-KR'))}</p>`}
-  else{h+=`<p class="t" style="text-align:left">${T('Plus로 열리는 것','What Plus opens')}</p><ul class="list">${OPENS().map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`;
+  else{h+=`<p class="t" style="text-align:left">${T('Plus로 열리는 것','What Plus opens')}</p><ul class="list">${OPENS().map(x=>`<li>${esc(x)}</li>`).join('')}</ul><p class="keep">${esc(KEEP())}</p>`;
    if(mode==='stores')h+=`<p class="ctx">${T('Plus는 앱에서 시작할 수 있어요. App Store나 Google Play에서 "문코치"를 찾아 주세요.','Plus starts in the app. Look for “Coach Moon” on the App Store or Google Play.')}</p>`;
    else if(ps&&ps.length){const sorted=ps.slice().sort((a,b)=>(a.period==='year'?0:1)-(b.period==='year'?0:1));
-    h+=`<div class="plans">${sorted.map((p,i)=>`<button class="plan${i?'':' best'}" type="button" data-id="${esc(p.id)}"${pending?' disabled':''}><span><b>${perLabel(p)}${i?'':' · '+T('추천','best value')}</b><span>${esc(trialLabel(p.trial)||(p.period==='month'?T('매달 자동 갱신','Renews every month'):T('매년 자동 갱신','Renews every year')))}</span></span><i>${esc(p.price)}</i></button>`).join('')}</div>`}
+    h+=`<div class="plans">${sorted.map((p,i)=>`<button class="plan${i?'':' best'}" type="button" data-id="${esc(p.id)}"${pending?' disabled':''}><span><b>${perLabel(p)}${i?'':' · '+T('추천','best value')}</b><span>${esc(trialLabel(p.trial)||(p.period==='month'?T('매달 자동 갱신','Renews every month'):T('매년 자동 갱신','Renews every year')))}</span></span><i>${esc(p.price)}<small>/${perUnit(p)}</small></i></button>`).join('')}</div>`}
    else if(!msg)h+=`<p class="ctx">${mode==='app'?T('스토어에서 가격을 불러오고 있어요…','Loading prices from the store…'):T('이 웹사이트에서는 아직 Plus를 팔지 않아요.','Plus is not sold on this website yet.')}</p>`}
   h+=`<p class="msg${good?' ok':''}" aria-live="polite">${esc(note||msg||(pending?T('스토어 화면을 기다리는 중이에요…','Waiting for the store…'):''))}</p>`;
-  h+=`<div class="row">${mode==='app'||mode==='test'?`<button type="button" data-a="restore">${T('구매 복원','Restore purchases')}</button>`:''}${s&&mode==='app'?`<button type="button" data-a="manage">${T('구독 관리·해지','Manage or cancel')}</button>`:''}<button type="button" data-a="code">${T('기관·가족 코드 입력','Enter an organization code')}</button></div>`;
+  h+=`<div class="row">${mode==='app'||mode==='test'?`<button type="button" data-a="restore">${T('구매 복원','Restore purchases')}</button>`:''}${s&&mode==='app'?`<button type="button" data-a="manage">${T('구독 관리·해지','Manage or cancel')}</button>`:''}<button type="button" data-a="code">${T('기관·가족 코드 입력','Enter an organization or family code')}</button></div>`;
   if(codeOpen)h+=`<div class="code"><input class="cin" maxlength="24" autocomplete="off" aria-label="${T('코드','Code')}" placeholder="MOON-XXXX-XXXX-XXXX"><button type="button" data-a="redeem">${T('확인','Use')}</button></div>`;
   h+=`<p class="fine">${T('구독은 선택한 기간(1개월 또는 1년)마다 자동으로 갱신되고, 결제는 App Store 또는 Google Play 계정으로 돼요. 다음 갱신 24시간 전까지 스토어의 구독 설정에서 해지하면 다음 결제가 되지 않아요. 무료 체험이 있는 지역에서는 체험이 끝나면 자동으로 결제돼요. 환불은 각 스토어의 정책을 따라요. Plus가 끝나도 아이가 얻은 기록과 물건은 그대로 남아요.','Subscriptions renew automatically each period (1 month or 1 year) and are charged to your App Store or Google Play account. Cancel in the store’s subscription settings at least 24 hours before renewal to stop the next charge. Where a free trial is offered, it turns into a paid subscription when it ends. Refunds follow each store’s policy. When Plus ends, your child keeps everything they earned.')}</p>
-   <div class="row"><a href="notice.html?lang=${lang()}#terms"${tgt}>${T('이용 조건','Terms of use')}</a><a href="notice.html?lang=${lang()}#privacy"${tgt}>${T('개인정보 처리방침','Privacy policy')}</a></div>`;
+   <div class="row"><a href="notice.html${nq()}#terms"${tgt}>${T('이용 조건','Terms of use')}</a><a href="notice.html${nq()}#privacy"${tgt}>${T('개인정보 처리방침','Privacy policy')}</a></div>`;
   b.innerHTML=h;
   b.querySelectorAll('.plan').forEach(x=>x.addEventListener('click',()=>buy(x.dataset.id)));
   b.querySelectorAll('[data-a]').forEach(x=>x.addEventListener('click',()=>{const a=x.dataset.a,n=N();
@@ -437,6 +458,8 @@ const MGP=(()=>{let P=null;try{P=JSON.parse(localStorage.getItem('moonGames.prof
 }
 *{box-sizing:border-box}
 html,body{margin:0}
+/* Korean: wrap between words, not inside them (a child reading slowly loses a split word); a word too long for its box still wraps */
+html:lang(ko) body{word-break:keep-all;overflow-wrap:break-word}
 body{min-height:100vh;min-height:100dvh;color:var(--ink);font:16px/1.45 system-ui,-apple-system,'Apple SD Gothic Neo','Noto Sans KR','Malgun Gothic',sans-serif;
  background:radial-gradient(900px 500px at 85% -10%,#ff8fd144,transparent 60%),radial-gradient(800px 500px at -10% 110%,#5cc8ff33,transparent 60%),linear-gradient(170deg,#2a1466,#4b2a9e 55%,#2b6fc4);
  background-attachment:fixed;-webkit-tap-highlight-color:transparent;overflow-x:hidden}
@@ -878,6 +901,7 @@ main{width:min(980px,100%);margin:0 auto;padding:14px max(12px,env(safe-area-ins
 .rstars span.on.pop{color:#ffc83d;animation:starin .45s cubic-bezier(.2,1.6,.4,1);text-shadow:0 4px 12px rgba(255,180,0,.5)}
 @keyframes starin{from{transform:scale(0) rotate(-120deg)}}
 .rpct{font-size:44px;font-weight:900;color:var(--brand-d);margin:4px 0}
+.rpct.soft{font-size:24px;line-height:1.3;margin:8px 0}
 .rchips{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
 .rchips span{background:color-mix(in srgb,var(--c) 22%,#fff);border:2px solid var(--c);border-radius:99px;padding:3px 10px;font-weight:900;font-size:13.5px}
 .growth{margin:10px auto 0;display:inline-block;background:linear-gradient(90deg,#fff3c4,#ffd6ea);border-radius:99px;padding:6px 14px;font-weight:900}
@@ -930,10 +954,10 @@ main{width:min(980px,100%);margin:0 auto;padding:14px max(12px,env(safe-area-ins
 .contest .cmedal{font-size:34px}
 .contest.locked{filter:grayscale(.75);opacity:.75}
 /* Coach Moon Plus badges (only without Plus): ⭐ Plus on units, topics, drills, contests and Note Town friends it opens */
-.plusb{display:inline-block;padding:2px 8px;border-radius:99px;background:#ffd34d;color:#5a3d00;font-size:11.5px;font-weight:900;font-style:normal;line-height:1.3;letter-spacing:0;box-shadow:0 2px 0 #d9a400;white-space:nowrap;vertical-align:middle;opacity:1}
+.plusb{display:inline-block;padding:2px 8px;border-radius:99px;background:#ffd34d;color:#5a3d00;font-size:12px;font-weight:900;font-style:normal;line-height:1.3;letter-spacing:0;box-shadow:0 2px 0 #d9a400;white-space:nowrap;vertical-align:middle;opacity:1}
 .contest .plusb,.drill .plusb{align-self:flex-start;margin-top:3px}
 .tpb .plusb{margin-top:2px}
-@media (max-width:420px){.tpb{position:relative}.tpb .plusb{position:absolute;top:-7px;right:6px;margin:0;padding:1px 7px;font-size:11px}}
+@media (max-width:420px){.tpb{position:relative}.tpb .plusb{position:absolute;top:-7px;right:6px;margin:0;padding:1px 7px;font-size:12px}}
 .nr-chip.plus{background:#fffbea;color:#8a6400;box-shadow:inset 0 0 0 2px #ffe08a}
 .nr-chip.plus small{color:#8a6400}
 .poster{border-radius:20px;color:#fff;text-align:center;padding:16px;margin:-4px -4px 8px}
@@ -1074,6 +1098,8 @@ button.setrow{flex-wrap:nowrap}
 /* gentler answers in quizzes and key tasks: a tried answer fades (no red shake), the right one glows, help is one tap away */
 .opt.tried{opacity:.5;background:#f4f1fb;box-shadow:0 2px 0 #e4ddf8;transform:none}
 .opt.right.glow{animation:optglow 1s 3}
+.opt.ping{animation:optping .6s ease-out}
+@keyframes optping{30%{background:#fff3b0;box-shadow:0 4px 0 #ffcf4d,0 0 0 5px #ffe58a}}
 @keyframes optglow{50%{box-shadow:0 4px 0 #5fc98a,0 0 0 5px #9fe8b9}}
 .qhelp,.kt-help{display:flex;justify-content:center;margin-top:10px}
 .kt-help{margin:4px 0 0;min-height:48px;align-items:center} /* keeps its height when the 🤔 button goes, so the keys below never jump */
@@ -1579,7 +1605,7 @@ const LESSONS=[
   {t:'영어로는 C·D·E·F·G·A·B라고도 불러요. 도 = C예요.|In letters they are C, D, E, F, G, A, B. Do = C.',v:{kbd:{from:60,to:72,labels:true,names:'letter'}}}],
   a:{type:'keys',task:'name',range:[60,72],count:8}},
  {id:'b4',u:'B',t:'첫 노래 연습|Your first song',intro:[
-  {t:'도·레·미 세 음으로 “뜨거운 빵”을 쳐 봐요. 미-레-도!|Let’s play “Hot Cross Buns” with just Do, Re, Mi. Mi-Re-Do!',v:{kbd:{from:60,to:64,labels:true,hi:{60:'#ff5a5f',62:'#ff9f1c',64:'#ffd23f'}}},p:{song:'hotcross'}},
+  {t:'도·레·미 세 음으로 “뜨거운 빵”을 쳐 봐요. 미-레-도!|Let’s play “Hot Cross Buns” with just three notes: C, D and E (Do, Re, Mi). E-D-C!',v:{kbd:{from:60,to:64,labels:true,hi:{60:'#ff5a5f',62:'#ff9f1c',64:'#ffd23f'}}},p:{song:'hotcross'}},
   {t:'이번엔 천천히 기다려 주는 연습이에요. 빛나는 건반을 눌러요!|This is wait-for-me practice. Press the glowing key!'}],
   a:{type:'song',song:'hotcross',step:true}},
  {id:'b5',u:'B',t:'박자에 맞춰 뜨거운 빵|Hot Cross Buns in time',intro:[
@@ -1587,7 +1613,7 @@ const LESSONS=[
   {t:'가로줄 하나가 한 박이에요. 길쭉한 음표는 길게 이어지는 음이니까 다음 음을 기다려요.|Each line across is one beat. Long notes last longer, so wait for the next one.'}],
   a:{type:'song',song:'hotcross',speed:.85}},
  {id:'b6',u:'B',t:'메리의 어린 양|Mary Had a Little Lamb',intro:[
-  {t:'이번 노래에는 “솔”도 나와요. 도·레·미·솔!|This song has Sol too. Do, Re, Mi, Sol!',v:{kbd:{from:60,to:67,labels:true,hi:{60:'#ff5a5f',62:'#ff9f1c',64:'#ffd23f',67:'#1fb5c9'}}},p:{song:'mary'}}],
+  {t:'이번 노래에는 “솔”도 나와요. 도·레·미·솔!|This song has G (Sol) too. C, D, E and G!',v:{kbd:{from:60,to:67,labels:true,hi:{60:'#ff5a5f',62:'#ff9f1c',64:'#ffd23f',67:'#1fb5c9'}}},p:{song:'mary'}}],
   a:{type:'song',song:'mary',speed:.9}},
  {id:'b7',u:'B',t:'올라가요, 내려가요|Up or down?',intro:[
   {t:'소리 세 개가 계단처럼 올라가기도 하고 내려가기도 해요.|Three sounds can climb up like stairs, or go down.',v:{emoji:'📈 📉'},p:{seq:{notes:'C4/1 E4/1 G4/1 r/1 G4/1 E4/1 C4/1',bpm:100}}}],
@@ -1662,23 +1688,23 @@ const LESSONS=[
   {t:'음악을 적는 다섯 줄을 “오선”이라고 해요. 줄은 아래부터 첫째 줄, 둘째 줄… 하고 세요.|Music is written on five lines called the “staff”. Count the lines from the bottom up.',v:{staff:{notes:[]}}},
   {t:'맨 앞의 높은음자리표는 둘째 줄이 “솔”이라고 알려 줘요. 음표가 위로 갈수록 높은 소리예요.|The treble clef at the front marks the second line as Sol (G). The higher a note sits, the higher it sounds.',v:{staff:{notes:[{m:60},{m:64},{m:67},{m:72}],labels:true}},p:{seq:{notes:'C4/1 E4/1 G4/1 C5/1',bpm:80}}}],
   a:{type:'quiz',bank:'staffbasics',count:6}},
- {id:'e2',u:'E',t:'도·레·미 찾기|Find Do, Re, Mi',intro:[
+ {id:'e2',u:'E',t:'도·레·미 찾기|Find C, D and E',intro:[
   {t:'“가온 도”는 오선 아래 짧은 덧줄 위에 있어요. 레는 그 바로 위, 미는 첫째 줄!|Middle C (Do) sits on a little ledger line below the staff. Re (D) is just above it, and Mi (E) is on the first line!',v:{staff:{notes:[{m:60},{m:62},{m:64}],labels:true}},p:{seq:{notes:'C4/1 D4/1 E4/1',bpm:80}}}],
   a:{type:'notes',range:[60,64],count:8}},
- {id:'e3',u:'E',t:'도부터 솔까지|Do up to Sol',intro:[
+ {id:'e3',u:'E',t:'도부터 솔까지|C up to G',intro:[
   {t:'줄–칸–줄–칸, 한 칸씩 올라갈 때마다 한 음씩 높아져요.|Line, space, line, space: each step up is the next note up.',v:{staff:{notes:[{m:60},{m:62},{m:64},{m:65},{m:67}],labels:true}},p:{seq:{notes:'C4/.5 D4/.5 E4/.5 F4/.5 G4/1',bpm:80}}}],
   a:{type:'notes',range:[60,67],count:10}},
  {id:'e4',u:'E',t:'반짝반짝 작은 별|Twinkle Twinkle Little Star',intro:[
   {t:'위쪽 오선에 악보가 지나가요. 악보를 보면서 쳐 봐요!|Music scrolls across the staff at the top. Read it as you play!',v:{staff:{notes:'C4/1 C4/1 G4/1 G4/1 A4/1 A4/1 G4/2',labels:true}},p:{song:'twinkle'}}],
   a:{type:'song',song:'twinkle',mode:'both',speed:.85}},
- {id:'e5',u:'E',t:'높은 도까지|All the way to high Do',intro:[
-  {t:'라·시·높은 도까지 읽어 봐요. 높은 도는 셋째 칸이에요.|Now read La, Ti and high Do. High Do sits in the third space.',v:{staff:{notes:[{m:69},{m:71},{m:72}],labels:true}},p:{seq:{notes:'A4/1 B4/1 C5/2',bpm:80}}}],
+ {id:'e5',u:'E',t:'높은 도까지|All the way to high C',intro:[
+  {t:'라·시·높은 도까지 읽어 봐요. 높은 도는 셋째 칸이에요.|Now read A, B and high C (La, Ti and high Do). High C sits in the third space.',v:{staff:{notes:[{m:69},{m:71},{m:72}],labels:true}},p:{seq:{notes:'A4/1 B4/1 C5/2',bpm:80}}}],
   a:{type:'notes',range:[60,72],count:12}},
  {id:'e6',u:'E',t:'환희의 송가|Ode to Joy',intro:[
-  {t:'베토벤 아저씨가 만든 유명한 곡이에요. 미-미-파-솔!|A famous tune by Beethoven. Mi-Mi-Fa-Sol!',v:{staff:{notes:'E4/1 E4/1 F4/1 G4/1 G4/1 F4/1 E4/1 D4/1',labels:true}},p:{song:'ode'}}],
+  {t:'베토벤 아저씨가 만든 유명한 곡이에요. 미-미-파-솔!|A famous tune by Beethoven. E-E-F-G!',v:{staff:{notes:'E4/1 E4/1 F4/1 G4/1 G4/1 F4/1 E4/1 D4/1',labels:true}},p:{song:'ode'}}],
   a:{type:'song',song:'ode',mode:'both',speed:.9}},
  {id:'e7',u:'E',t:'작은 한스|Lightly Row',intro:[
-  {t:'솔-미-미, 파-레-레! 신나는 독일 동요예요.|Sol-Mi-Mi, Fa-Re-Re! A cheerful German folk song.',p:{song:'lightly'}}],
+  {t:'솔-미-미, 파-레-레! 신나는 독일 동요예요.|G-E-E, F-D-D! A cheerful German folk song.',p:{song:'lightly'}}],
   a:{type:'song',song:'lightly',mode:'both'}},
  // F ---- bars and time signatures
  {id:'f1',u:'F',t:'마디와 박자표|Bars and time signatures',intro:[
@@ -1694,29 +1720,29 @@ const LESSONS=[
   {t:'2/4박자는 “하나-둘, 하나-둘” 씩씩하게 걷는 행진곡에 잘 어울려요.|2/4 time is “left-right, left-right”, perfect for a march.',p:{drum:{pattern:'march',bars:4,bpm:104}}}],
   a:{type:'drum',pattern:'march',bars:8,bpm:96,lanes:['kick','snare']}},
  {id:'f5',u:'F',t:'자크 형제|Frère Jacques',intro:[
-  {t:'노래 끝에 낮은 “솔”이 나와요. 도 왼쪽의 솔을 찾아봐요!|There’s a low Sol near the end. Find the Sol to the left of Do!',v:{kbd:{from:55,to:69,labels:true,hi:{55:'#1fb5c9'}}},p:{song:'jacques'}}],
+  {t:'노래 끝에 낮은 “솔”이 나와요. 도 왼쪽의 솔을 찾아봐요!|There’s a low G (Sol) near the end. Find the G to the left of middle C!',v:{kbd:{from:55,to:69,labels:true,hi:{55:'#1fb5c9'}}},p:{song:'jacques'}}],
   a:{type:'song',song:'jacques',mode:'both'}},
  // G ---- scales and chords (with whole and half steps, major and minor)
  {id:'g1',u:'G',t:'반음과 온음|Half steps and whole steps',intro:[
   {t:'바로 옆 건반으로 가는 거리를 “반음”이라고 해요. 검은 건반도 한 칸으로 세요.|Moving to the very next key, black or white, is a “half step”.',v:{kbd:{from:60,to:67,labels:true,hi:{60:'#ff5a5f',61:'#ff5fa2'}}},p:{seq:{notes:'C4/1 C#4/1',bpm:70}}},
   {t:'반음 두 개를 합치면 “온음”이에요. 도에서 레는 온음!|Two half steps make a “whole step”. Do to Re is a whole step!',v:{kbd:{from:60,to:67,labels:true,hi:{60:'#ff5a5f',62:'#2a8df4'}}},p:{seq:{notes:'C4/1 D4/1',bpm:70}}},
-  {t:'미-파와 시-도 사이에는 검은 건반이 없어요. 그래서 흰 건반끼리인데도 반음이에요!|There’s no black key between Mi–Fa or Ti–Do, so those white keys are only a half step apart!',v:{kbd:{from:60,to:72,labels:true,hi:{64:'#ffd23f',65:'#ffd23f',71:'#a25cff',72:'#a25cff'}}}}],
+  {t:'미-파와 시-도 사이에는 검은 건반이 없어요. 그래서 흰 건반끼리인데도 반음이에요!|There’s no black key between E and F (Mi–Fa) or B and C (Ti–Do), so those white keys are only a half step apart!',v:{kbd:{from:60,to:72,labels:true,hi:{64:'#ffd23f',65:'#ffd23f',71:'#a25cff',72:'#a25cff'}}}}],
   a:{type:'steps',task:'name',count:8}},
  {id:'g2',u:'G',t:'반음·온음 건반 찾기|Find the step',intro:[
-  {t:'이번엔 직접 찾아요. “미에서 반음 위”는? 바로 옆 파!|Now you find it. A half step up from Mi? The very next key, Fa!',v:{kbd:{from:60,to:72,labels:true,hi:{64:'#ffd23f',65:'#3ec46d'}}}}],
+  {t:'이번엔 직접 찾아요. “미에서 반음 위”는? 바로 옆 파!|Now you find it. A half step up from E? The very next key, F!',v:{kbd:{from:60,to:72,labels:true,hi:{64:'#ffd23f',65:'#3ec46d'}}}}],
   a:{type:'steps',task:'find',count:8}},
  {id:'g3',u:'G',t:'장음계 만들기|Build a major scale',intro:[
-  {t:'도레미파솔라시도는 “온-온-반-온-온-온-반” 순서로 올라가요. 이것을 장음계라고 해요.|Do-Re-Mi-Fa-Sol-La-Ti-Do climbs whole, whole, half, whole, whole, whole, half. That’s a major scale.',v:{kbd:{from:60,to:72,labels:true}},p:{seq:{notes:'C4/.5 D4/.5 E4/.5 F4/.5 G4/.5 A4/.5 B4/.5 C5/1',bpm:90}}},
+  {t:'도레미파솔라시도는 “온-온-반-온-온-온-반” 순서로 올라가요. 이것을 장음계라고 해요.|C-D-E-F-G-A-B-C (Do to Do) climbs whole, whole, half, whole, whole, whole, half. That’s a major scale.',v:{kbd:{from:60,to:72,labels:true}},p:{seq:{notes:'C4/.5 D4/.5 E4/.5 F4/.5 G4/.5 A4/.5 B4/.5 C5/1',bpm:90}}},
   {t:'도(C, 음이름 “다”)에서 시작하는 장음계라서 “다장조”라고 불러요. 건반을 차례로 눌러 만들어 봐요!|It starts on C, so it’s called C major. Build it key by key!'}],
   a:{type:'scale',task:'build',key:'C'}},
  {id:'g4',u:'G',t:'장조와 단조|Major and minor',intro:[
   {t:'장조는 보통 밝고 신나는 느낌, 단조는 슬프거나 신비로운 느낌이 많이 나요.|Major usually sounds bright and happy; minor often sounds sad or mysterious.',v:{emoji:'😊  😢'}},
   {t:'같은 노래를 장조와 단조로 들어 봐요. 느낌이 어떻게 다른가요?|Listen to the same tune in major, then minor. How do they feel?',p:{majmin:0}},
-  {t:'라에서 시작하는 “라시도레미파솔라”는 단음계예요. 반음 자리가 달라서 느낌이 바뀌어요!|“La-Ti-Do-Re-Mi-Fa-Sol-La” starting on La is a minor scale. The half steps move, and the mood changes!',v:{kbd:{from:57,to:69,labels:true,hi:{57:'#a25cff',69:'#a25cff'}}},p:{seq:{notes:'A3/.5 B3/.5 C4/.5 D4/.5 E4/.5 F4/.5 G4/.5 A4/1',bpm:90}}}],
+  {t:'라에서 시작하는 “라시도레미파솔라”는 단음계예요. 반음 자리가 달라서 느낌이 바뀌어요!|“A-B-C-D-E-F-G-A”, starting on A (La), is a minor scale. The half steps move, and the mood changes!',v:{kbd:{from:57,to:69,labels:true,hi:{57:'#a25cff',69:'#a25cff'}}},p:{seq:{notes:'A3/.5 B3/.5 C4/.5 D4/.5 E4/.5 F4/.5 G4/.5 A4/1',bpm:90}}}],
   a:{type:'scale',task:'majmin',count:6}},
  {id:'g5',u:'G',t:'화음이란?|What is a chord?',intro:[
   {t:'여러 음을 한꺼번에 누르면 어울리는 소리, “화음”이 돼요.|Press several notes together and they blend into a “chord”.',v:{kbd:{from:60,to:72,labels:true,hi:{60:'#2a8df4',64:'#2a8df4',67:'#2a8df4'}}},p:{chord:[60,64,67]}},
-  {t:'도·미·솔! 하나 건너 하나씩 누르면 돼요.|Do, Mi, Sol! Skip one key between each.'}],
+  {t:'도·미·솔! 하나 건너 하나씩 누르면 돼요.|C, E and G (Do, Mi, Sol)! Skip one white key between each.'}],
   a:{type:'chord',task:'build',chords:['C'],count:3}},
  {id:'g6',u:'G',t:'으뜸·버금딸림·딸림화음|Three main chords',intro:[
   {t:'다장조에서 도미솔은 “으뜸화음”, 파라도는 “버금딸림화음”, 솔시레는 “딸림화음”이에요.|In C major, C–E–G is the home chord (I), F–A–C is chord IV and G–B–D is chord V.',v:{kbd:{from:60,to:76,labels:true,hi:{65:'#3ec46d',69:'#3ec46d',72:'#3ec46d'}}},p:{chords:['C','F','G','C']}},
@@ -1759,7 +1785,7 @@ const LESSONS=[
   {t:'점4분음표가 나와요. “따-안 따”처럼 길게-짧게!|Watch for the dotted quarter: long, then short!',p:{song:'london'}}],
   a:{type:'song',song:'london',mode:'both'}},
  {id:'i5',u:'I',t:'징글벨|Jingle Bells',intro:[
-  {t:'미미미-, 미미미-! 썰매처럼 신나게 달려요!|Mi-Mi-Mi, Mi-Mi-Mi! Dash along like a sleigh!',p:{song:'jingle'}}],
+  {t:'미미미-, 미미미-! 썰매처럼 신나게 달려요!|E-E-E, E-E-E! Dash along like a sleigh!',p:{song:'jingle'}}],
   a:{type:'song',song:'jingle',mode:'both',speed:.9}},
  // J ---- level up
  {id:'j1',u:'J',t:'점음표 리듬|Dotted rhythms',intro:[
@@ -1772,7 +1798,7 @@ const LESSONS=[
   {t:'도 바로 오른쪽 검은 건반은 도보다 반음 높은 “도♯(올림 도)”예요. 레보다 반음 낮으니 “레♭”이라고도 해요.|The black key just right of Do is Do♯, a half step higher. It’s also Re♭, a half step below Re.',v:{kbd:{from:60,to:72,labels:true,showBlack:true}},p:{seq:{notes:'C4/1 C#4/1 D4/1',bpm:80}}}],
   a:{type:'keys',task:'black',count:6}},
  {id:'j4',u:'J',t:'엘리제를 위하여|Für Elise',intro:[
-  {t:'베토벤의 유명한 피아노곡이에요. 미-레♯-미-레♯! 검은 건반이 나와요.|A famous piano piece by Beethoven. Mi-Re♯-Mi-Re♯! It uses black keys.',p:{song:'furelise'}}],
+  {t:'베토벤의 유명한 피아노곡이에요. 미-레♯-미-레♯! 검은 건반이 나와요.|A famous piano piece by Beethoven. E-D♯-E-D♯! It uses black keys.',p:{song:'furelise'}}],
   a:{type:'song',song:'furelise',mode:'both',speed:.85}},
  {id:'j5',u:'J',t:'16분음표 리듬|Sixteenth notes',intro:[
   {t:'16분음표는 8분음표의 절반! 네 개가 모여야 1박이에요. “따다다다”!|A sixteenth note is half of an eighth. Four make one beat: “ti-ka-ti-ka”!',v:{sym:[['s','4분의 1박|¼ beat']]},p:{rhy:{p:'s s s s q q q',bpm:70}}}],
@@ -2698,7 +2724,7 @@ function playClip(c,b){const t=AC?AC.currentTime+.08:0;
  return 0}
 // question generators for listening activities
 const LISTEN_GEN={
- hl(){let a=52+rnd(30),b2;do{b2=52+rnd(30)}while(Math.abs(b2-a)<3);return {q:'두 소리를 들어 봐요. 어느 소리가 더 높을까요?|Listen to the two sounds. Which one is higher?',a:a>b2?'첫 번째 소리|The first one':'두 번째 소리|The second one',o:[a>b2?'두 번째 소리|The second one':'첫 번째 소리|The first one'],clip:{pair:[a,b2]},art:'🎵❓🎵',keep:true,id:'pitch:higher',hint:'높은 소리는 새소리처럼 가늘고, 낮은 소리는 곰 소리처럼 굵어요.|High sounds are thin like a bird’s tweet; low sounds are deep like a bear’s growl.'}},
+ hl(){let a=52+rnd(30),b2;do{b2=52+rnd(30)}while(Math.abs(b2-a)<3);return {q:'두 소리를 들어 봐요. 어느 소리가 더 높을까요?|Listen to the two sounds. Which one is higher?',a:a>b2?'첫 번째 소리|The first one':'두 번째 소리|The second one',o:[a>b2?'두 번째 소리|The second one':'첫 번째 소리|The first one'],clip:{pair:[a,b2]},order:['첫 번째 소리|The first one','두 번째 소리|The second one'],art:'🎵❓🎵',keep:true,id:'pitch:higher',hint:'높은 소리는 새소리처럼 가늘고, 낮은 소리는 곰 소리처럼 굵어요.|High sounds are thin like a bird’s tweet; low sounds are deep like a bear’s growl.'}},
  contour(){const kind=pick(['up','down','same']),s=55+rnd(14),st=2+rnd(3),ms=kind==='up'?[s,s+st,s+2*st]:kind==='down'?[s+2*st,s+st,s]:[s,s,s];
   const A={up:'⬆️ 올라가요|⬆️ Going up',down:'⬇️ 내려가요|⬇️ Going down',same:'➡️ 그대로예요|➡️ Staying the same'};
   return {q:'소리 세 개가 어떻게 움직일까요?|How do the three sounds move?',a:A[kind],o:Object.values(A).filter(x=>x!==A[kind]),clip:{seq:ms.map(m=>`${PC[m%12]}${Math.floor(m/12)-1}/1`).join(' '),bpm:110},art:'🎶',keep:true,id:'pitch:contour-'+kind,hint:'세 소리를 하나씩 따라 흥얼거려 보면 올라가는지 내려가는지 느낄 수 있어요.|Hum the three sounds one by one to feel whether they climb or fall.'}},
@@ -2744,7 +2770,7 @@ function quizItem(spec,q,g){const qq=pair2(q.q),d=artDesc(q.art),lis=!!(q.clip||
  if(g!=null)it.g=g==='show'?['모르겠어요 (알려 줘요)','Not sure (Show me)']:pair2(g);if(q.why)it.tip=pair2(q.why);return it}
 function runQuiz(spec,host,opt){
  const gen=spec.type==='quiz'?()=>QUIZ[spec.bank](spec.set):spec.type==='pitch'?LISTEN_GEN[spec.task]:spec.type==='listen'?LISTEN_GEN.family:spec.type==='steps'?LISTEN_GEN.steps:spec.type==='scale'?LISTEN_GEN.majmin:LISTEN_GEN.chordmm;
- const N=spec.count||6,seen=new Set();let k=0,right=0,stopped=false,bs=bus(1),ended=false;
+ const N=spec.count||6,seen=new Set();let k=0,right=0,stopped=false,bs=bus(1),ended=false,saidQ='';
  want(['pluck','bow','flute','reed','brass','mallet','gayageum','daegeum'],0);
  host.innerHTML=`<div class="quiz"><div class="tline">${tface(opt.teacher||'mia')}<div class="tbub"></div></div><div class="qdots">${Array.from({length:N},()=>'<i></i>').join('')}</div><div class="qcard"></div></div>`;
  const card=host.querySelector('.qcard'),dots=[...host.querySelectorAll('.qdots i')];
@@ -2752,14 +2778,19 @@ function runQuiz(spec,host,opt){
  const finish=()=>{if(ended)return;ended=true;stop();const acc=right/N;opt.done({acc,stars:starsOf(acc),right,n:N,kind:'quiz'})};
  function next(){if(stopped)return;if(k>=N){finish();return}
   let q,tries=0;do{q=gen();tries++}while(seen.has(q.q+q.a)&&tries<12);seen.add(q.q+q.a);
-  const opts=shuffle([q.a,...shuffle(q.o.slice()).slice(0,3)]);dots[k].classList.add('cur');
+  const opts=q.order?q.order.slice():shuffle([q.a,...shuffle(q.o.slice()).slice(0,3)]);dots[k].classList.add('cur');
   const clip=q.clip||q.listen,my=k;let miss=0,shown=false,first=null,over=false;
   card.innerHTML=`<div class="qq">${esc(T(q.q))}</div>${artHTML(q.art)}${clip?`<button class="btn ghost small hear" type="button">🔊 ${T('다시 듣기|Play again')}</button>`:''}
    <div class="opts n${opts.length}">${opts.map((o,i)=>`<button class="opt" type="button" data-i="${i}">${esc(T(o))}</button>`).join('')}</div><div class="qfb" aria-live="polite"></div>
    <div class="qhelp"><button class="btn ghost small" type="button" data-show>🤔 ${T('모르겠어요 · 알려 줘요|Not sure? Show me')}</button></div>`;
   card.classList.remove('in');void card.offsetWidth;card.classList.add('in');
   const fb=card.querySelector('.qfb'),help=card.querySelector('.qhelp'),btns=[...card.querySelectorAll('.opt')],rightBtn=btns.find(b=>opts[+b.dataset.i]===q.a);
-  const hear=()=>{const b=bus(1);playClip(clip,b)};if(clip){card.querySelector('.hear').addEventListener('click',hear);setTimeout(()=>{if(!stopped&&k===my)hear()},350)}else speak(T(q.q));
+  // with answers in sound order, each answer lights up while its sound plays (the clip starts 80 ms after the call)
+  const ping=()=>{if(!q.order||!clip.pair)return;btns.forEach((b,i)=>setTimeout(()=>{if(stopped||k!==my)return;b.classList.remove('ping');void b.offsetWidth;b.classList.add('ping')},80+i*750))};
+  const hear=()=>{const b=bus(1);playClip(clip,b);ping()};
+  if(clip){card.querySelector('.hear').addEventListener('click',()=>{stopVoice();hear()});const qt=T(q.q);
+   if(qt!==saidQ){saidQ=qt;speak(qt,{onend:()=>setTimeout(()=>{if(!stopped&&k===my&&!over)hear()},200)})}else setTimeout(()=>{if(!stopped&&k===my)hear()},350)}
+  else speak(T(q.q));
   const record=ok=>{try{LR.ans(ok,lrSkill(spec),quizItem(spec,q,ok?null:first))}catch(e){}};
   const advance=()=>{if(over)return;over=true;k++;next()};
   // shown: the answer glows with its reason; tapping it (or Next) goes on
@@ -3468,7 +3499,7 @@ const musCert=u=>{const t=UNITS.find(x=>x.id===u).t.split('|');try{LR.cert('musi
 // the parent with real progress. "Keep playing free" goes to the lesson map, or home where daily practice is.
 function musCard(u){const U=UNITS.find(x=>x.id===u),t=TEACHERS[U.teacher],i=uIdx(u),n=doneCount(),k=UNITS.filter(x=>unitDone(x.id)).length,ti=T(U.t);
  return {game:'music',title:`${U.ic} ${ti}`,pic:t.img,emoji:t.icon,text:`“${T(t.hi[0])}” ${L('이 단원은 문코치 Plus에서 열려요.','This unit opens with Coach Moon Plus.')}`,
-  free:L('1~2단원, 음표 마을, 매일 연습은 지금도 할 수 있어요.','Units 1–2, Note Town and daily practice are open now.'),
+  free:L('1~2단원, 음표 마을의 첫 다섯 친구, 매일 연습은 지금도 할 수 있어요.','Units 1–2, Note Town’s first five friends and daily practice are open now.'),
   ctx:L(`${n?`레슨 ${n}개를 마쳤어요 (단원 수료 ${k}개)`:'아직 마친 레슨이 없어요'}. 다음: ${i}단원 ‘${ti}’`,`${n?`Finished ${n} lesson${n===1?'':'s'} (${k} unit${k===1?'':'s'} complete)`:'No lessons finished yet'}. Next: unit ${i}, “${ti}”`),
   onFree:()=>{if(VIEW!=='path'&&VIEW!=='home')go('home')}}}
 const musShow=(u,tease)=>{const c=musCard(u),shown=tease?mgPlus.tease(c):mgPlus.lock(c);if(shown)speak(T(TEACHERS[UNITS.find(x=>x.id===u).teacher].hi[0]));return shown};
@@ -3646,7 +3677,7 @@ RENDER.path=()=>{const nl=nextLesson();let html='<div class="path">';
 const CN=(id,icon,t,from,key,tr)=>({id,icon,t,from,key,tr});
 const TOPICS=[
  {id:'beat',ic:'💓',t:'박자·리듬|Beat and rhythm',teacher:'hop',ls:['A','C','F','j1','j5'],
-  cn:[CN('cn-beat','💓','박과 빠르기|The beat and tempo',['a1.0','a1.1','a2.0','a2.1'],['박은 시계처럼 똑같은 간격으로 계속되는 음악의 맥박이에요.|The beat is music’s steady pulse, even like a ticking clock.','박이 빠르고 느린 정도가 빠르기예요. 빨라져도 간격은 고르게 지켜요.|How fast the beat goes is the tempo. Fast or slow, keep it even.'],()=>tryTap(4,'북을 똑같은 간격으로 네 번 쳐 봐요. 하나, 둘, 셋, 넷!|Tap the drum four times, evenly. One, two, three, four!')),
+  cn:[CN('cn-beat','💓','박과 빠르기|The beat and tempo',['a1.0','a1.1','a2.0','a2.1'],['박은 시계처럼 똑같은 간격으로 계속되는 음악의 맥박이에요.|The beat is music’s steady pulse, as even as a ticking clock.','박이 빠르고 느린 정도가 빠르기예요. 빨라져도 간격은 고르게 지켜요.|How fast the beat goes is the tempo. Fast or slow, keep it even.'],()=>tryTap(4,'북을 똑같은 간격으로 네 번 쳐 봐요. 하나, 둘, 셋, 넷!|Tap the drum four times, evenly. One, two, three, four!')),
    CN('cn-accent','💥','센박과 여린박|Strong and weak beats',['a4.0','a4.1'],['박을 넷씩 묶으면 첫째 박이 가장 센 ‘센박’이에요.|Group the beats in fours and the first one is the strongest.','4박자는 센박-여린박-중간 센박-여린박 순서로 흘러가요.|Four-beat time goes strong, weak, medium, weak.']),
    CN('cn-notes','🎵','음표의 길이|How long notes last',['c1.0','c1.1','c5.0','j5.0'],['4분음표는 1박, 2분음표는 2박, 온음표는 4박이에요.|A quarter note is 1 beat, a half note 2, a whole note 4.','8분음표는 반 박이라 두 개가 1박, 16분음표는 네 개가 1박이에요.|Two eighth notes make one beat; so do four sixteenth notes.'],()=>tryTap(2,'2분음표는 2박이에요. “하나, 둘” 세면서 북을 두 번 쳐 봐요.|A half note lasts 2 beats. Count “one, two” and tap the drum twice.')),
    CN('cn-rests','🤫','쉼표|Rests',['c3.0','c3.1'],['쉼표는 소리를 내지 않고 쉬는 박이에요.|A rest is a beat of silence.','4분쉼표는 1박, 2분쉼표는 2박을 쉬어요.|A quarter rest is 1 beat; a half rest is 2.']),
@@ -3664,7 +3695,7 @@ const TOPICS=[
    {ic:'👂',t:'리듬 따라 하기 · 보통|Copy the rhythm · medium',spec:{type:'echo',level:3,count:4,bpm:80},cn:'cn-notes'},
    {ic:'👂',t:'리듬 따라 하기 · 어려움|Copy the rhythm · hard',spec:{type:'echo',level:5,count:4,bpm:70},cn:'cn-notes'}]},
  {id:'keys',ic:'🎹',t:'높낮이·건반|High, low and the keys',teacher:'mia',ls:['B','j3','j4'],
-  cn:[CN('cn-pitch','🐦','높은 소리, 낮은 소리|High and low sounds',['b1.0','b1.1','b7.0'],['소리가 높고 낮은 정도를 음높이라고 해요.|How high or low a sound is, is its pitch.','피아노는 오른쪽으로 갈수록 높은 소리가 나요.|On a piano, sounds get higher to the right.']),
+  cn:[CN('cn-pitch','🐦','높은 소리, 낮은 소리|High and low sounds',['b1.0','b1.1','b7.0'],['소리가 높고 낮은 정도를 음높이라고 해요.|Pitch is how high or low a sound is.','피아노는 오른쪽으로 갈수록 높은 소리가 나요.|On a piano, sounds get higher to the right.']),
    CN('cn-keymap','🗺️','건반 지도와 도레미|The key map and do-re-mi',['b2.0','b2.1','b3.0','b3.1'],['검은 건반 2개 묶음 바로 왼쪽 흰 건반이 도예요.|The white key just left of a pair of black keys is C (Do).','흰 건반은 도·레·미·파·솔·라·시, 그리고 다시 도예요.|The white keys go C D E F G A B, then C again.'],()=>tryKeys({from:60,to:72,labels:false,want:[60],say:'이름이 없는 건반이에요. 검은 건반 2개 바로 왼쪽, ‘도’를 찾아 눌러 봐요!|These keys have no names. Find C (Do), just left of the two black keys, and press it!'})),
    CN('cn-black','♯','검은 건반과 ♯·♭|Black keys, sharps and flats',['j3.0','i3.1'],['♯(올림표)는 반음 올리고, ♭(내림표)는 반음 내려요.|A sharp (♯) raises a note a half step; a flat (♭) lowers it.','도 바로 오른쪽 검은 건반은 도♯, 레♭이라고도 해요.|The black key just right of C is C♯, also called D♭.'])],
   dr:[{ic:'🎵',t:'높은 소리 낮은 소리|High or low',spec:{type:'pitch',task:'hl',count:6},cn:'cn-pitch'},
@@ -3793,13 +3824,14 @@ RENDER.lesson=()=>{if(!LES)return;const l=LES.l,k=teacherOf(l),t=TEACHERS[k],s=l
   <div class="lhead"><span class="sub">${unitOf(l).ic} ${esc(T(unitOf(l).t))}</span><h2>${esc(T(l.t))}</h2><div class="ldots">${l.intro.map((_,i)=>`<i class="${i<=LES.i?'on':''}"></i>`).join('')}<i class="act">${ACT_ICON[l.a.type]||'🎵'}</i></div></div>
   <div class="teach"><span class="tface huge" style="background:${t.bg}">${pic(t.img,t.icon)}</span><div class="say">${esc(T(s.t))}</div></div>
   <div class="vis" id="vis">${visHTML(s.v,s.p)}</div>
-  <div class="row lbtns"><button class="btn ghost small" id="sayAgain" type="button">🔊 ${L('다시 듣기','Hear again')}</button>${s.p?`<button class="btn ghost small" id="demoBtn" type="button">🎵 ${L('시범 보기','Watch the demo')}</button>`:''}</div>
+  <div class="row lbtns"><button class="btn ghost small" id="sayAgain" type="button">🔊 ${L('다시 듣기','Hear again')}</button>${s.p?`<button class="btn ghost small" id="demoBtn" type="button">🎵 ${L('시범 보기','Watch the demo')}</button>`:''}${!last&&lessonDone(l.id)?`<button class="btn ghost small" id="skipS" type="button">⏩ ${L('바로 해 보기','Skip to the try')}</button>`:''}</div>
   <div class="row"><button class="btn ghost" id="prevBtn" type="button" ${LES.i?'':'disabled'}>◀</button><button class="btn ${last?'green':'gold'} grow" id="nextS" type="button">${last?'🚀 '+L('해 보기!','Let’s try!'):L('다음 ▶','Next ▶')}</button></div></div>`;
  const runDemo=()=>{if(s.p)demo(s.p,$('vis'))};
  speak(T(s.t),{onend:()=>{if(VIEW==='lesson'&&LES&&LES.l===l&&l.intro[LES.i]===s)setTimeout(runDemo,250)}});
  $('sayAgain').addEventListener('click',()=>speak(T(s.t),{force:true}));if($('demoBtn'))$('demoBtn').addEventListener('click',()=>{stopVoice();runDemo()});
  $('prevBtn').addEventListener('click',()=>{if(LES.i>0){LES.i--;stopDemo();RENDER.lesson()}});
- $('nextS').addEventListener('click',()=>{SFX.click();stopDemo();if(!last){LES.i++;RENDER.lesson()}else startLessonActivity(l.id)})};
+ $('nextS').addEventListener('click',()=>{SFX.click();stopDemo();if(!last){LES.i++;RENDER.lesson()}else startLessonActivity(l.id)});
+ if($('skipS'))$('skipS').addEventListener('click',()=>{SFX.click();stopDemo();stopVoice();startLessonActivity(l.id)})};
 // what the teacher shows on a slide
 function staffNotes(n){return typeof n==='string'?parseMelody(n).filter(x=>!x.rest).map(x=>({m:x.m,d:x.d})):n}
 function visHTML(v,p){let h='';v=v||{};
@@ -3894,7 +3926,7 @@ function recordDrum(id,r){if(!id)return;const p=S.drums[id]||{best:0,stars:0,n:0
 // specific, kind feedback that tells the child what to try next
 function adviceOf(r){const a=[];
  if(r.timed&&r.n>=6&&!r.step){const ms=Math.round(r.avgOff*1000);if(ms<-35)a.push('⏩ '+L('조금 서두르는 편이에요. 소리를 듣고 살짝 기다렸다가 쳐 봐요.','You tend to rush a little. Listen, then wait a tiny bit before you tap.'));else if(ms>35)a.push('⏪ '+L('조금 늦는 편이에요. 음표가 줄에 닿기 직전에 손가락을 준비해요.','You tend to be a little late. Get your finger ready just before the note arrives.'));else if(r.acc>=.6)a.push('🎯 '+L('박자가 아주 정확해요!','Your timing is right on!'));
-  if(r.m>r.n*.3)a.push('🐢 '+L('놓친 음표가 많아요. “느리게 연습”으로 먼저 익혀요.','Lots of missed notes. Try “Practice slowly” first.'));
+  if(r.m>r.n*.3)a.push('🐢 '+(r.kind==='beat'?L('놓친 박이 많아요. “느리게 연습”으로 먼저 익혀요.','Lots of missed beats. Try “Practice slowly” first.'):L('놓친 음표가 많아요. “느리게 연습”으로 먼저 익혀요.','Lots of missed notes. Try “Practice slowly” first.')));
   if(r.extra>2)a.push('🤫 '+L('쉼표나 빈 곳에서 친 소리가 있어요. 쉼표에서는 쉬어요!','Some taps landed on rests. Stay quiet on the rests!'))}
  return a}
 function showResult(r,o){stopActivity();const host=$('host')||playView(o.title||'');const t=TEACHERS[o.teacher||'mia'],pct=Math.round(r.acc*100),calm=!!r.nr,line=T(pick(t.res[calm?(r.right>=r.n*.7?3:2):r.stars]));
@@ -3903,15 +3935,15 @@ function showResult(r,o){stopActivity();const host=$('host')||playView(o.title||
  const adv=adviceOf(r);if(o.practice)adv.push('🎼 '+L('음표 마을에서 음표 친구를 한 명씩 만나면 오선의 음표를 읽는 힘이 쑥쑥 자라요!','Meet the note friends one at a time in Note Town, and reading notes on the staff gets easier and easier!'));
  host.innerHTML=`<div class="result card">
   ${calm?nrResultHTML(r):`<div class="rstars">${[0,1,2].map(i=>`<span class="${i<r.stars?'on':''}">★</span>`).join('')}</div>`}
-  ${calm?'':`<div class="rpct">${r.self?L('잘 해냈어요!','Well done!'):`${pct}%`}</div>`}
+  ${calm?'':`<div class="rpct${!r.self&&!r.stars?' soft':''}">${r.self?L('잘 해냈어요!','Well done!'):r.stars?`${pct}%`:'💪 '+L('연습하면 늘어요!','Practice makes it easier!')}</div>`}
   ${r.timed?`<div class="rchips"><span style="--c:${JCOL.p}">${T(JTXT.p)} ${r.p}</span><span style="--c:${JCOL.g}">${T(JTXT.g)} ${r.g}</span><span style="--c:${JCOL.o}">${T(JTXT.o)} ${r.o}</span><span style="--c:${JCOL.m}">${T(JTXT.m)} ${r.m}</span>${r.maxCombo>=3?`<span style="--c:#ff9f1c">🔥 ${r.maxCombo} ${L('콤보','combo')}</span>`:''}</div>`:r.n&&!r.self?`<div class="rchips"><span style="--c:#3ee07a">✅ ${L(`${r.n}개 중 ${r.right}개`,`${r.right} of ${r.n}`)}</span></div>`:''}
   ${improved?`<div class="growth">📈 ${L(`개인 최고 기록! ${Math.round(o.prevBest*100)}% → ${pct}%`,`New personal best! ${Math.round(o.prevBest*100)}% → ${pct}%`)}</div>`:''}
   ${o.unlockedByEffort?`<div class="growth">💪 ${L('여러 번 노력했으니 다음 레슨도 열어 줄게요!','You worked so hard, the next lesson is open!')}</div>`:''}
   <div class="teach"><span class="tface huge" style="background:${t.bg}">${pic(t.img,t.icon)}</span><div class="say">${esc(line)}</div></div>
   ${adv.length?`<ul class="advice">${adv.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`:''}${coachLine(calm?(r.nr.grew.length?'up':'good'):r.stars>=3||improved?'up':r.stars>=1?'good':'try')}
   <div class="rewards">${o.xp?`<span>⭐ +${o.xp} XP</span>`:''}${o.coins?`<span>${COIN} +${o.coins}</span>`:''}${o.sticker?`<span class="stk">${o.sticker} ${L('새 스티커!','New sticker!')}</span>`:''}</div>
-  <div class="row rbtns">${o.home?`<button class="btn ghost" id="rHome" type="button">🏠 ${L('메인 화면으로','Main page')}</button>`:''}${o.again?`<button class="btn ghost" id="rAgain" type="button">↻ ${L('다시','Again')}</button>`:''}${o.easy?`<button class="btn ghost" id="rEasy" type="button">🐢 ${L('느리게 연습','Practice slowly')}</button>`:''}${o.step?`<button class="btn ghost" id="rStep" type="button">👣 ${L('기다려 주기 연습','Wait-for-me practice')}</button>`:''}${o.practice?`<button class="btn gold" id="rNR" type="button">🎼 ${L('음표 마을 연습','Note Town practice')}</button>`:''}${o.concept?`<button class="btn ghost" id="rCn" type="button">📖 ${L('개념 다시 보기','See the idea again')}</button>`:''}
-   ${o.next?`<button class="btn green" id="rNext" type="button">${o.nextLabel||L('다음 ▶','Next ▶')}</button>`:`<button class="btn gold" id="rDone" type="button">${o.doneLabel||L('확인','Done')}</button>`}</div></div>`;
+  <div class="row rbtns">${o.home?`<button class="btn ghost" id="rHome" type="button">🏠 ${L('메인 화면으로','Main page')}</button>`:''}${o.again?`<button class="btn ghost" id="rAgain" type="button">↻ ${L('다시','Again')}</button>`:''}${o.easy?`<button class="btn ${r.stars||o.next?'ghost':'gold'}" id="rEasy" type="button">🐢 ${L('느리게 연습','Practice slowly')}</button>`:''}${o.step?`<button class="btn ghost" id="rStep" type="button">👣 ${L('기다려 주기 연습','Wait-for-me practice')}</button>`:''}${o.practice?`<button class="btn gold" id="rNR" type="button">🎼 ${L('음표 마을 연습','Note Town practice')}</button>`:''}${o.concept?`<button class="btn ghost" id="rCn" type="button">📖 ${L('개념 다시 보기','See the idea again')}</button>`:''}
+   ${o.next?`<button class="btn green" id="rNext" type="button">${o.nextLabel||L('다음 ▶','Next ▶')}</button>`:`<button class="btn ${o.easy&&!r.stars?'ghost':'gold'}" id="rDone" type="button">${o.doneLabel||L('확인','Done')}</button>`}</div></div>`;
  host.querySelectorAll('.rstars span.on').forEach((s,i)=>setTimeout(()=>{s.classList.add('pop');SFX.star(i)},300+i*280));
  if(calm){if(r.nr.grew.length)setTimeout(()=>celebrate('stars'),400)}else if(r.stars>=3)setTimeout(()=>celebrate(),400);else if(r.stars>=1)setTimeout(()=>celebrate('stars'),400);
  speak(line+(adv.length?' '+adv[0]:''));
@@ -3936,7 +3968,8 @@ function makeDaily(){const D=lessonDone,n=doneCount();const tasks=[];
  const low=(ids,rec)=>ids.slice().sort((a,b)=>((rec[a]||{}).stars||0)-((rec[b]||{}).stars||0)||Math.random()-.5)[0];
  if(songs.length&&(!drums.length||Math.random()<.6)){const id=low(songs,S.songs);tasks.push({spec:{type:'song',song:id,mode:D('e4')?'both':'lanes'},icon:'🎹',t:SONGS[id].t,teacher:'mia'})}
  else if(drums.length){const id=low(drums,S.drums);tasks.push({spec:{type:'drum',pattern:id,bars:6},icon:'🥁',t:DRUMS[id].t,teacher:'boom'})}
- else tasks.push({spec:{type:'keys',task:'findCF',count:4},icon:'🎹',t:'도와 파 찾기|Find Do and Fa',teacher:'mia'});
+ // finding C and F is practice only after “The keyboard map” taught it; before that, the arrows of “up or down” need no teaching
+ else tasks.push(D('b2')?{spec:{type:'keys',task:'findCF',count:4},icon:'🎹',t:'도와 파 찾기|Find Do and Fa',teacher:'mia'}:{spec:{type:'pitch',task:'contour',count:4},icon:'📈',t:'올라가요, 내려가요|Up or down?',teacher:'mia'});
  return tasks}
 function startDaily(i){const tk=S.daily.tasks[i];if(!tk)return;RUN={kind:'daily',i};const host=playView('📅 '+T(tk.t));
  withHowTo(tk.spec,host,()=>runActivity(tk.spec,host,{teacher:tk.teacher,tier:1,done:r=>{const was=S.daily.done[i];S.daily.done[i]=true;trackStats(r);if(tk.spec.type==='song')recordSong(tk.spec.song,r);if(tk.spec.type==='drum')recordDrum(tk.spec.pattern,r);save();
@@ -4062,7 +4095,7 @@ function contestLobby(c){if(!contestFree(c)){musLock(LESSON_BY[c.after].u);retur
  $('v-contest').innerHTML=`<div class="lobby card" style="--bg:${c.bg}"><div class="poster" style="background:${c.bg}"><span class="cic">${pic(`images/mus-c-${c.id}.webp`,c.icon)}</span><h2>${esc(T(c.name))}</h2>${rec.medal?`<p>${L('최고 기록','Best')}: ${['','🥉','🥈','🥇'][rec.medal]}</p>`:''}</div>
   <h3>⚔️ ${L('함께 겨룰 친구들','Your rivals')}</h3><div class="rivals">${c.rivals.map(id=>{const r=RIVALS[id];return `<div class="rv"><span class="rf">${pic(r.img,r.icon)}</span><b>${esc(T(r.name))}</b><small>“${esc(T(r.hi))}”</small></div>`}).join('')}</div>
   <h3>🎯 ${L('라운드','Rounds')}</h3><ol class="rounds">${c.rounds.map(r=>`<li>${esc(roundName(r))}</li>`).join('')}</ol>
-  <p class="sub">🥇 ${L('1등','1st')} · 🥈 ${L('2등','2nd')} · 🥉 ${L('3등','3rd')} — ${L('정확하게 칠수록 순위가 올라가요!','The more accurate you are, the higher you place!')}</p>
+  <p class="sub">🎯 ${L(`라운드 평균 정확도 🥇 ${c.medal[0]}% · 🥈 ${c.medal[1]}% · 🥉 ${c.medal[2]}% 이상이면 메달! 정확하게 칠수록 순위가 올라가요.`,`Average accuracy for a medal: 🥇 ${c.medal[0]}% · 🥈 ${c.medal[1]}% · 🥉 ${c.medal[2]}% or more. The more accurate you are, the higher you place!`)}</p>
   <button class="btn gold cta" id="ctGo" type="button">🎤 ${L('무대에 오르기!','Take the stage!')}</button></div>`;
  speak(T(RIVALS[c.rivals[0]].hi));$('ctGo').addEventListener('click',()=>{SFX.fanfare();CT={c,i:0,accs:[],riv:c.rivals.map(()=>[])};contestRound()})}
 // rivals stay close to the player so every round feels like a real race

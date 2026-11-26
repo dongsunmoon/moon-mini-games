@@ -110,9 +110,12 @@ const CSS=':host{all:initial}*{box-sizing:border-box;font-family:system-ui,-appl
  '.fine{font-size:12.5px;color:#6b7390;line-height:1.55;margin:8px 0 0}.code{display:flex;gap:8px;margin:6px 0}.code input{flex:1;min-width:0;min-height:48px;border:2px solid #d7def0;border-radius:12px;padding:0 12px;font-size:17px;font-weight:800;letter-spacing:1px;text-transform:uppercase}'+
  '.code button{min-height:48px;border:0;border-radius:12px;background:#4656c8;color:#fff;font-weight:900;padding:0 16px;font-size:15px;cursor:pointer}'+
  '.on{background:#e9f8ef;border-radius:14px;padding:12px;font-weight:800;color:#1f6b3e;margin:6px 0}'+
- '.q{font-size:28px;font-weight:900;margin:8px 0}.gin{width:100%;min-height:52px;font-size:24px;font-weight:900;text-align:center;border:2px solid #d7def0;border-radius:14px}'+
+ '.q{font-size:22px;font-weight:900;margin:8px 0;line-height:1.35;word-break:keep-all}.gin{width:100%;min-height:52px;font-size:24px;font-weight:900;text-align:center;border:2px solid #d7def0;border-radius:14px}'+
+ '.plan i small{font-size:13px;font-weight:800;color:#56607a}.keep{background:#f6f7fb;border-radius:14px;padding:9px 12px;font-size:13.5px;line-height:1.5;color:#3b4677;margin:0 0 10px}'+
  'button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid #ffb703;outline-offset:2px}'+
- '@media (max-height:560px){.pic{width:96px;height:96px;font-size:48px}.card{padding:12px 14px}}';
+ '@media (max-height:560px){.pic{width:96px;height:96px;font-size:48px}.card{padding:12px 14px}}'+
+ // a phone turned sideways: a wider parent screen with the list in two columns, so the prices are not far below
+ '@media (max-height:560px) and (min-width:700px){.wide{width:min(760px,100%)}.wide .list{grid-template-columns:1fr 1fr;column-gap:16px}}';
 function layer(html,onClose){const host=document.createElement('div');host.setAttribute('data-mg-plus','');const root=host.attachShadow?host.attachShadow({mode:'open'}):host;
  const st=document.createElement('style');st.textContent=CSS;root.appendChild(st);const bg=document.createElement('div');bg.className='bg';bg.setAttribute('role','dialog');bg.setAttribute('aria-modal','true');bg.innerHTML=html;root.appendChild(bg);(document.body||document.documentElement).appendChild(host);
  const prev=document.activeElement,close=()=>{try{host.remove()}catch(e){}try{prev&&prev.focus&&prev.focus()}catch(e){}onClose&&onClose()};
@@ -122,13 +125,15 @@ function layer(html,onClose){const host=document.createElement('div');host.setAt
 // ---- the child's lock card: a preview and a neutral line, no price
 let lockOpen=false;
 function lock(c){c=c||{};if(lockOpen)return false;lockOpen=true;
+ // say:true → the card reads its title and line aloud (games that speak their own lock line leave it off)
+ if(c.say)setTimeout(()=>{try{if(!('speechSynthesis' in window))return;speechSynthesis.cancel();const u=new SpeechSynthesisUtterance((two(c.title)?two(c.title)+'. ':'')+(two(c.text)||T('다음 이야기는 문코치 Plus에서 열려요.','The next part opens with Coach Moon Plus.')));u.lang=lang()==='en'?'en-US':'ko-KR';speechSynthesis.speak(u)}catch(e){}},250);
  const pic=c.pic?`<img src="${esc(c.pic)}" alt="" onerror="this.remove()">`:'';
  const L1=two(c.text)||T('다음 이야기는 문코치 Plus에서 열려요.','The next part opens with Coach Moon Plus.');
  const F=two(c.free)||T('이달의 단원, 매일 목표, 다른 게임은 지금도 할 수 있어요.','This month’s units, daily goals and other games are open now.');
  const w=layer(`<div class="card"><button class="x" type="button" aria-label="${T('닫기','Close')}">✕</button>
   <div class="pic" aria-hidden="true">${esc(c.emoji||'🌙')}${pic}<span class="star">⭐ Plus</span></div>
   <h2>${esc(two(c.title)||T('새로운 곳이 기다려요','Something new is waiting'))}</h2><p class="t">${esc(L1)}</p><p class="free">${esc(F)}</p>
-  <button class="go" type="button">▶ ${T('무료로 계속하기','Keep playing free')}</button>
+  <button class="go" type="button">▶ ${T('계속 놀기','Keep playing')}</button>
   <button class="ask" type="button">👨‍👩‍👧 ${T('어른에게 보여 주기','Show a grown-up')}</button></div>`,()=>{lockOpen=false;c.onClose&&c.onClose()});
  w.$('.go').addEventListener('click',()=>{w.close();c.onFree&&c.onFree()});
  w.$('.ask').addEventListener('click',()=>{w.close();parent(c.ctx)});return true}
@@ -136,23 +141,32 @@ function lock(c){c=c||{};if(lockOpen)return false;lockOpen=true;
 function tease(c){if(has()||!c||!c.game)return false;let s={};try{s=JSON.parse(localStorage.getItem(SEEN)||'{}')||{}}catch(e){}
  if(s[c.game]===day())return false;s[c.game]=day();try{localStorage.setItem(SEEN,JSON.stringify(s))}catch(e){}return lock(c)}
 // ---- grown-up check: the app's mgGate (app-bridge.js); on the web a simple question
+// numbers written as words, like the app's check: a child who can multiply still has to read 이십육 / twenty-six
+const KD=['','일','이','삼','사','오','육','칠','팔','구'],koN=n=>{const t=Math.floor(n/10),o=n%10;return (t?(t>1?KD[t]:'')+'십':'')+KD[o]};
+const EO=['zero','one','two','three','four','five','six','seven','eight','nine','ten','eleven','twelve','thirteen','fourteen','fifteen','sixteen','seventeen','eighteen','nineteen'],enN=n=>n<20?EO[n]:['','','twenty','thirty'][Math.floor(n/10)]+(n%10?'-'+EO[n%10]:'');
+const gq=(a,b)=>{const w=koN(b),c=w.charCodeAt(w.length-1)-0xAC00;return T(`${koN(a)} 곱하기 ${w}${c%28?'은':'는'}?`,`What is ${enN(a)} times ${enN(b)}?`)};
 function gate(cb,kind){if(typeof window.mgGate==='function'){window.mgGate(kind||'buy',ok=>cb(!!ok));return}
- const a=12+Math.floor(Math.random()*17),b=6+Math.floor(Math.random()*4);
+ let a=13+Math.floor(Math.random()*17),b=3+Math.floor(Math.random()*7);if(a===20)a=23;
  const w=layer(`<div class="card"><button class="x" type="button" aria-label="${T('닫기','Close')}">✕</button><h2>🔒 ${T('보호자 확인','Grown-ups only')}</h2>
   <p class="free">${T('어린이는 보호자에게 보여 주세요. 아래 계산의 답을 입력해 주세요.','Kids: please show this to a grown-up. Type the answer below.')}</p>
-  <p class="q" aria-hidden="true">${a} × ${b} = ?</p><input class="gin" inputmode="numeric" autocomplete="off" aria-label="${T(a+' 곱하기 '+b,a+' times '+b)}"><p class="msg" aria-live="polite"></p>
+  <p class="q">${gq(a,b)}</p><input class="gin" inputmode="numeric" autocomplete="off" aria-label="${T('숫자로 답해 주세요','Answer with numbers')}" placeholder="${T('숫자로','numbers')}"><p class="msg" aria-live="polite"></p>
   <button class="go" type="button">${T('확인','Continue')}</button></div>`);
- const go=()=>{if(w.$('.gin').value.trim()===String(a*b)){w.close();cb(true)}else{w.$('.msg').textContent=T('답이 달라요.','Not quite.');w.$('.gin').value=''}};
+ const go=()=>{if(w.$('.gin').value.trim()===String(a*b)){w.close();cb(true)}else{a=13+Math.floor(Math.random()*17);if(a===20)a=23;b=3+Math.floor(Math.random()*7);w.$('.q').textContent=gq(a,b);w.$('.msg').textContent=T('답이 달라요. 새 문제예요.','Not quite. Here’s a new one.');w.$('.gin').value=''}};
  w.$('.go').addEventListener('click',go);w.$('.gin').addEventListener('keydown',e=>{if(e.key==='Enter')go()});setTimeout(()=>{try{w.$('.gin').focus()}catch(e){}},60)}
 function parent(ctx){if(has()&&mode!=='app'&&mode!=='test'){paywall(ctx);return}gate(ok=>{if(ok)paywall(ctx)})}
 // ---- the parent screen: what Plus opens, the store's prices, restore, licence code, the fine print
 const OPENS=()=>[T('수학 아쿠아리움: 1~6학년 수족관 120곳 모두','Math Aquarium: all 120 aquariums, grades 1–6'),T('코딩 섬: 파이썬 미션 84개와 보스 13명','Coding Island: all 84 Python missions and 13 bosses'),
- T('체스 기사단: 보스 8명, 스파링, 대국 복기, 보스 코스, 레슨 57개','Chess Knights: all 8 bosses, sparring, game review, boss courses, 57 lessons'),T('과학·음악의 모든 세계와 단원, 꼬마 탐정의 모든 사건, 구슬 레이스의 모든 세계','Every science world and music unit, every detective case, every Marble Rush world'),
- T('부모 리포트 전체: 과목별 분석, 틀린 문제, 집에서 돕기, 인쇄','The full parents’ report: subjects, missed questions, home plan, printing'),T('모든 수료증, 이 기기의 모든 아이 프로필','All certificates, and every child profile on this device')];
+ T('꼬마 체스 기사단: 보스 8명, 연습 상대, 대국 복기, 보스 코스, 레슨 57개','Little Chess Knights: all 8 bosses, practice partners, game review, boss courses, 57 lessons'),T('과학·음악의 모든 세계와 단원, 꼬마 탐정의 모든 사건, 구슬 레이스의 모든 세계','Every science world and music unit, every detective case, every Marble Rush world'),
+ T('부모 리포트 전체: 과목별 분석, 틀린 문제, 집에서 돕기, 인쇄','The full parents’ report: subjects, missed questions, home plan, printing'),T('모든 수료증','Every certificate')];
+// what stays free without Plus (the same as FREE/MONTHLY and the report's free part), and that one Plus covers the family
+const KEEP=()=>T('Plus가 없어도 각 게임의 앞부분, 이달의 무료 단원, 매일 목표, 리포트의 ‘한눈에’ 화면, 보호자 도구는 계속 무료예요. Plus 하나면 이 기기의 모든 아이 프로필에 적용돼요.','Free without Plus: the first part of every game, this month’s free units, daily goals, the report overview and the grown-up tools. One Plus covers every child profile on this device.');
 const perLabel=p=>p.period==='month'?T('월간','Monthly'):T('연간','Yearly');
+const perUnit=p=>p.period==='month'?T('월','mo'):T('년','yr');
 const trialLabel=t=>{const m=/P(\d+)([DWMY])/.exec(t||'');if(!m)return '';const n=+m[1],u=m[2];if(u==='M'||u==='Y')return u==='M'?T(`${n}개월 무료 체험 뒤 결제`,`${n}-month free trial, then`):T(`${n}년 무료 체험 뒤 결제`,`${n}-year free trial, then`);const d=n*(u==='W'?7:1);return T(`${d}일 무료 체험 뒤 결제`,`${d}-day free trial, then`)};
 // in the app the notice page opens in the same view (a new window would go nowhere); on the web in a new tab
 const tgt=inApp?'':' target="_blank" rel="noopener"';
+// where Plus is on sale (the app, a store-locked web, ?plus= tests) the notice page shows its Plus and terms sections
+const nq=()=>`?lang=${lang()}${mode==='open'?'':'&sale=1'}`;
 function paywall(ctx){if(sheet){sheet.render();return}
  const w=layer(`<div class="card wide"><button class="x" type="button" aria-label="${T('닫기','Close')}">✕</button><div class="body"></div></div>`,()=>{sheet=null});
  let codeOpen=false,note='',good=false;
@@ -162,16 +176,16 @@ function paywall(ctx){if(sheet){sheet.render();return}
   if(ctx)h+=`<p class="ctx">${esc(two(ctx))}</p>`;
   if(has()){h+=`<div class="on">✅ ${mode==='open'||mode==='on'?T('이 웹사이트에서는 지금 모든 내용이 열려 있어요.','Everything is open on this website for now.'):l&&!s?T(`기관 코드로 Plus가 열려 있어요 (${l.until?l.until+'까지':'기한 없음'}).`,`Plus is on with an organization code (${l.until?'until '+l.until:'no end date'}).`):T('Plus를 쓰고 있어요. 고마워요!','Plus is on. Thank you!')}</div>`;
    if(s&&s.until)h+=`<p class="fine">${T('다음 갱신일','Next renewal')}: ${esc(new Date(s.until).toLocaleDateString(lang()==='en'?'en-CA':'ko-KR'))}</p>`}
-  else{h+=`<p class="t" style="text-align:left">${T('Plus로 열리는 것','What Plus opens')}</p><ul class="list">${OPENS().map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`;
+  else{h+=`<p class="t" style="text-align:left">${T('Plus로 열리는 것','What Plus opens')}</p><ul class="list">${OPENS().map(x=>`<li>${esc(x)}</li>`).join('')}</ul><p class="keep">${esc(KEEP())}</p>`;
    if(mode==='stores')h+=`<p class="ctx">${T('Plus는 앱에서 시작할 수 있어요. App Store나 Google Play에서 "문코치"를 찾아 주세요.','Plus starts in the app. Look for “Coach Moon” on the App Store or Google Play.')}</p>`;
    else if(ps&&ps.length){const sorted=ps.slice().sort((a,b)=>(a.period==='year'?0:1)-(b.period==='year'?0:1));
-    h+=`<div class="plans">${sorted.map((p,i)=>`<button class="plan${i?'':' best'}" type="button" data-id="${esc(p.id)}"${pending?' disabled':''}><span><b>${perLabel(p)}${i?'':' · '+T('추천','best value')}</b><span>${esc(trialLabel(p.trial)||(p.period==='month'?T('매달 자동 갱신','Renews every month'):T('매년 자동 갱신','Renews every year')))}</span></span><i>${esc(p.price)}</i></button>`).join('')}</div>`}
+    h+=`<div class="plans">${sorted.map((p,i)=>`<button class="plan${i?'':' best'}" type="button" data-id="${esc(p.id)}"${pending?' disabled':''}><span><b>${perLabel(p)}${i?'':' · '+T('추천','best value')}</b><span>${esc(trialLabel(p.trial)||(p.period==='month'?T('매달 자동 갱신','Renews every month'):T('매년 자동 갱신','Renews every year')))}</span></span><i>${esc(p.price)}<small>/${perUnit(p)}</small></i></button>`).join('')}</div>`}
    else if(!msg)h+=`<p class="ctx">${mode==='app'?T('스토어에서 가격을 불러오고 있어요…','Loading prices from the store…'):T('이 웹사이트에서는 아직 Plus를 팔지 않아요.','Plus is not sold on this website yet.')}</p>`}
   h+=`<p class="msg${good?' ok':''}" aria-live="polite">${esc(note||msg||(pending?T('스토어 화면을 기다리는 중이에요…','Waiting for the store…'):''))}</p>`;
-  h+=`<div class="row">${mode==='app'||mode==='test'?`<button type="button" data-a="restore">${T('구매 복원','Restore purchases')}</button>`:''}${s&&mode==='app'?`<button type="button" data-a="manage">${T('구독 관리·해지','Manage or cancel')}</button>`:''}<button type="button" data-a="code">${T('기관·가족 코드 입력','Enter an organization code')}</button></div>`;
+  h+=`<div class="row">${mode==='app'||mode==='test'?`<button type="button" data-a="restore">${T('구매 복원','Restore purchases')}</button>`:''}${s&&mode==='app'?`<button type="button" data-a="manage">${T('구독 관리·해지','Manage or cancel')}</button>`:''}<button type="button" data-a="code">${T('기관·가족 코드 입력','Enter an organization or family code')}</button></div>`;
   if(codeOpen)h+=`<div class="code"><input class="cin" maxlength="24" autocomplete="off" aria-label="${T('코드','Code')}" placeholder="MOON-XXXX-XXXX-XXXX"><button type="button" data-a="redeem">${T('확인','Use')}</button></div>`;
   h+=`<p class="fine">${T('구독은 선택한 기간(1개월 또는 1년)마다 자동으로 갱신되고, 결제는 App Store 또는 Google Play 계정으로 돼요. 다음 갱신 24시간 전까지 스토어의 구독 설정에서 해지하면 다음 결제가 되지 않아요. 무료 체험이 있는 지역에서는 체험이 끝나면 자동으로 결제돼요. 환불은 각 스토어의 정책을 따라요. Plus가 끝나도 아이가 얻은 기록과 물건은 그대로 남아요.','Subscriptions renew automatically each period (1 month or 1 year) and are charged to your App Store or Google Play account. Cancel in the store’s subscription settings at least 24 hours before renewal to stop the next charge. Where a free trial is offered, it turns into a paid subscription when it ends. Refunds follow each store’s policy. When Plus ends, your child keeps everything they earned.')}</p>
-   <div class="row"><a href="notice.html?lang=${lang()}#terms"${tgt}>${T('이용 조건','Terms of use')}</a><a href="notice.html?lang=${lang()}#privacy"${tgt}>${T('개인정보 처리방침','Privacy policy')}</a></div>`;
+   <div class="row"><a href="notice.html${nq()}#terms"${tgt}>${T('이용 조건','Terms of use')}</a><a href="notice.html${nq()}#privacy"${tgt}>${T('개인정보 처리방침','Privacy policy')}</a></div>`;
   b.innerHTML=h;
   b.querySelectorAll('.plan').forEach(x=>x.addEventListener('click',()=>buy(x.dataset.id)));
   b.querySelectorAll('[data-a]').forEach(x=>x.addEventListener('click',()=>{const a=x.dataset.a,n=N();
@@ -220,9 +234,9 @@ a{color:inherit}
 .moon{width:58px;height:58px;flex:0 0 58px;border-radius:50%;display:grid;place-items:center;background:radial-gradient(circle at 35% 30%,#5a95ff,#1c4cc0);box-shadow:0 8px 22px rgba(40,90,200,.35),inset -5px -7px 0 rgba(10,40,130,.25)}
 .moon img{width:48px;height:48px;display:block}
 .brand h1{margin:0;font-size:clamp(24px,5.4vw,36px);line-height:1.05;letter-spacing:-.6px}
-.brand h1 small{display:block;font-size:.46em;letter-spacing:0;color:var(--muted);font-weight:700;margin-top:5px}
+.brand h1 small{display:block;font-size:max(12px,.46em);letter-spacing:0;color:var(--muted);font-weight:700;margin-top:5px}
 .lang{display:inline-flex;padding:4px;border-radius:999px;background:#fff;border:1px solid var(--line);box-shadow:0 4px 14px rgba(54,72,160,.08)}
-.lang button{font:inherit;font-size:14px;font-weight:800;border:0;border-radius:999px;padding:9px 15px;min-height:40px;background:transparent;color:var(--muted);cursor:pointer}
+.lang button{font:inherit;font-size:14px;font-weight:800;border:0;border-radius:999px;padding:9px 15px;min-height:44px;background:transparent;color:var(--muted);cursor:pointer}
 .lang button[aria-pressed="true"]{background:var(--brand);color:var(--brand-ink)}
 .lang button:focus-visible,.card:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
 .hello{margin:0 0 14px;color:var(--muted);font-size:14px;font-weight:700}
@@ -237,7 +251,7 @@ a{color:inherit}
 .co-talk{position:relative;flex:1;min-width:0;background:#fff;border:1px solid var(--line);border-radius:22px;padding:11px 16px 14px;box-shadow:var(--shadow);margin-bottom:16px}
 .co-talk::before{content:"";position:absolute;left:-9px;bottom:24px;width:16px;height:16px;background:#fff;border-left:1px solid var(--line);border-bottom:1px solid var(--line);transform:rotate(45deg)}
 .co-name{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:13px;font-weight:900;color:var(--brand)}
-.co-say{font:inherit;font-size:18px;border:0;border-radius:12px;background:#f0f3ff;min-width:40px;min-height:36px;cursor:pointer}
+.co-say{font:inherit;font-size:18px;border:0;border-radius:12px;background:#f0f3ff;min-width:44px;min-height:44px;cursor:pointer}
 .co-msg{margin:2px 0 0;font-size:clamp(16px,3.8vw,19px);font-weight:800;line-height:1.45;overflow-wrap:anywhere}
 .co-acts:empty{display:none}
 .co-acts{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
@@ -361,14 +375,14 @@ footer{margin-top:22px;text-align:center;color:#8a93b8;font-size:12px}
 .pbtn.red{background:#ff5a6a;box-shadow:0 5px 0 #d8344a}
 .pmask{position:fixed;inset:0;z-index:50;background:rgba(30,40,90,.5);display:grid;place-items:center;padding:16px}
 .pmodal{width:min(460px,100%);max-height:90dvh;overflow:auto;background:#fff;border-radius:26px;padding:22px 18px 18px;box-shadow:0 24px 60px rgba(0,0,0,.3);text-align:center}
-.pmodal h2{margin:0 0 6px;font-size:23px}
+.pmodal:focus{outline:none}.pmodal h2{margin:0 0 6px;font-size:23px}
 .pmodal p{color:var(--muted);font-weight:700;margin:6px 0 12px;line-height:1.45}
 .pgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin:12px 0}
 .pbig{font:inherit;border:2px solid var(--line);background:#f6f7ff;border-radius:22px;padding:14px 8px;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;color:var(--ink)}
 .pbig .pav{font-size:52px;line-height:1.1}
 .pbig b{font-size:20px}
 .pbig.last{border-color:var(--accent);box-shadow:0 0 0 3px #ffb84d44}
-.pin{width:100%;font:inherit;font-size:20px;font-weight:800;padding:12px 14px;border-radius:14px;border:2px solid var(--line);margin:4px 0 10px;text-align:center}
+.pin{width:100%;font:inherit;font-size:20px;font-weight:800;padding:12px 14px;min-height:48px;border-radius:14px;border:2px solid var(--line);margin:4px 0 10px;text-align:center}
 .avgrid{display:grid;grid-template-columns:repeat(8,1fr);gap:6px;margin-bottom:12px}
 .avgrid button{font-size:26px;aspect-ratio:1;border:0;border-radius:12px;background:#f6f7ff;cursor:pointer}
 .avgrid button.on{box-shadow:0 0 0 3px var(--brand);background:#eef0ff}
@@ -471,7 +485,7 @@ const GAMES=[
     thumb:'<div class="thumb t-aqua" aria-hidden="true"><img class="cover" src="images/cover-aquarium.webp" alt="" onerror="this.remove()"><div class="kelp" style="left:6%"></div><div class="kelp" style="left:88%;animation-delay:-1.4s"></div><span class="ic" style="left:12%;top:18%">🐠</span><span class="ic" style="left:70%;top:14%">🐙</span><span class="ic big" style="left:40%;top:34%">🐳</span><span class="ic" style="left:18%;top:60%">🦀</span><span class="ic" style="left:72%;top:58%">🐡</span><span class="math" style="left:56%;top:12%">7×8</span><span class="math" style="left:8%;top:42%">½+¼</span><span class="math" style="left:78%;top:36%">+</span><i class="bb" style="left:30%"></i><i class="bb" style="left:62%;animation-delay:-1.5s"></i><i class="bb" style="left:84%;animation-delay:-2.6s"></i></div>',
     title:['꼬마 수학 아쿠아리움','Little Math Aquarium'],
     age:['6~12세','Ages 6–12'],
-    desc:['수학을 풀면 수조가 열리고 손님이 와요! 학년마다 아쿠아리움 20곳을 키우면 1~6학년 수학을 한 학년씩 마스터해요. 매점·직원·낚시·다이빙·운전 미션까지!','Solve math to open tanks and welcome visitors! Grow 20 aquariums per grade to master Grade 1–6 math, one grade at a time. Shops, staff, fishing, diving and driving too!'],
+    desc:['수학을 풀면 수조가 열리고 손님이 와요! 학년마다 아쿠아리움 20곳을 키우면 1~6학년 수학을 한 학년씩 마스터해요. 매점·직원·낚시·다이빙·운전 미션까지!','Solve math to open tanks and welcome visitors! Grow an aquarium for each math topic to master Grade 1–6 math, one grade at a time. Shops, staff, fishing, diving and driving too!'],
     tags:[['🧮 1~6학년 수학','🧮 Grades 1–6 math'],['🐠 아쿠아리움 경영','🐠 Run an aquarium'],['🇰🇷🇨🇦 한국·캐나다 교육과정','🇰🇷🇨🇦 Korea + Canada curricula']],
     stat:()=>{const d=readSave('mathAquarium.v1');if(!d||!d.stats||!d.stats.correct)return '';const n=Object.values(d.G||{}).reduce((t,g)=>t+(g.aq||[]).filter(a=>a&&a.done).length,0);return L(`🐠 ${d.grade}학년 · 마스터한 단원 ${n}개 · 맞힌 문제 ${d.stats.correct}개`,`🐠 Grade ${d.grade} · ${n} skill${n===1?'':'s'} mastered · ${d.stats.correct} right`)}
   },
@@ -526,7 +540,7 @@ const GAMES=[
     title:['마블 레이스','Marble Rush'],
     age:['누구나','All ages'],
     desc:['진짜처럼 통통 튕기는 구슬 레이스! 내 구슬을 응원하고 5경기 리그 우승에 도전해요.','Marbles really bounce! Cheer for yours and go for the 5-race league title.'],
-    tags:[['🌈 7개 월드','🌈 7 worlds'],['🏆 리그전','🏆 League'],['📣 내 구슬 응원','📣 Cheer your marble']],
+    tags:[['🌈 8개 월드','🌈 8 worlds'],['🏆 리그전','🏆 League'],['📣 내 구슬 응원','📣 Cheer your marble']],
     stat:()=>{const m=(readSave('marbleRush.v2')||readSave('marble3dsettings'))?.mineStats;return m&&m.races>0?L(`🏆 내 구슬 우승 ${m.wins}번 / ${m.races}경기`,`🏆 Your marble won ${m.wins} of ${m.races} race${m.races===1?'':'s'}`):''}
   }
 ];
@@ -579,11 +593,15 @@ function renderGames(){document.getElementById('games').innerHTML=orderedGames()
  renderParent();renderCoach()}
 function renderWho(){const el=$('who');
  if(!PROF.list.length){el.innerHTML=`<div class="psetup"><b>👨‍👩‍👧 ${L('프로필을 만들면 형제자매가 모든 게임 기록을 따로 가질 수 있어요!','Make a profile for each player so everyone keeps their own progress in every game!')}</b><small class="pnote">🔒 ${L('별명으로 만들어요. 이 기기에만 저장돼요.','Use a nickname. It stays on this device.')}</small><button type="button" class="pbtn" data-pa="add">➕ ${L('프로필 만들기','Make a profile')}</button></div>`}
- else el.innerHTML=`<div class="pbar"><div class="ptop"><span class="plabel">🎮 ${L('지금 플레이하는 사람 (눌러서 바꿔요)','Now playing (tap to switch)')}</span><span><a class="prep" href="report.html?lang=${LANG}&p=${encodeURIComponent(PROF.cur||'')}">📊 ${L('학부모 리포트','Parent report')}</a>${mgPlus.mode!=='open'?` <button type="button" class="prep plusb" data-pa="plus">⭐ ${mgPlus.has()?'Plus':L('Plus 알아보기','Get Plus')}</button>`:''}</span></div><div class="pchips">${PROF.list.map(p=>`<button type="button" class="pchip ${p.id===PROF.cur?'on':''}" data-pid="${p.id}"><span class="pav">${avPic(p.av)}</span><b>${esc(p.name)}</b></button>`).join('')}<button type="button" class="pchip add" data-pa="add" aria-label="${esc(L('프로필 추가','Add a profile'))}">➕</button><button type="button" class="pchip edit" data-pa="manage" aria-label="${esc(L('프로필 고치기','Edit profiles'))}">✏️</button></div></div>`}
-function choose(id){PROF.cur=id;coachWait=false;saveProf();try{sessionStorage.setItem('moonGames.picked','1')}catch(e){}closeP();renderWho();renderGames()}
+ else el.innerHTML=`<div class="pbar"><div class="ptop"><span class="plabel">🎮 ${L('지금 플레이하는 사람 (눌러서 바꿔요)','Now playing (tap to switch)')}</span><span><a class="prep" href="report.html?lang=${LANG}&p=${encodeURIComponent(PROF.cur||'')}">📊 ${L('학부모 리포트','Parent report')}</a>${mgPlus.mode!=='open'?` <button type="button" class="prep plusb" data-pa="plus">⭐ ${mgPlus.has()?'Plus':L('Plus 알아보기','About Plus')}</button>`:''}</span></div><div class="pchips">${PROF.list.map(p=>`<button type="button" class="pchip ${p.id===PROF.cur?'on':''}" data-pid="${p.id}"><span class="pav">${avPic(p.av)}</span><b>${esc(p.name)}</b></button>`).join('')}<button type="button" class="pchip add" data-pa="add" aria-label="${esc(L('프로필 추가','Add a profile'))}">➕</button><button type="button" class="pchip edit" data-pa="manage" aria-label="${esc(L('프로필 고치기','Edit profiles'))}">✏️</button></div></div>`}
+function choose(id){PROF.cur=id;coachWait=false;saveProf();try{sessionStorage.setItem('moonGames.picked','1')}catch(e){}closeP();renderWho();renderGames();renderToday()}
 // ---- small dialogs
-function openP(html,bind){$('pm').innerHTML=`<div class="pmask"><div class="pmodal" role="dialog">${html}</div></div>`;bind&&bind($('pm').querySelector('.pmodal'))}
-function closeP(){$('pm').innerHTML=''}
+let pmPrev=null;
+function openP(html,bind){if(!$('pm').firstChild)pmPrev=document.activeElement;$('pm').innerHTML=`<div class="pmask"><div class="pmodal" role="dialog" aria-modal="true">${html}</div></div>`;const box=$('pm').querySelector('.pmodal'),h=box.querySelector('h2');if(h){h.id='pmT';box.setAttribute('aria-labelledby','pmT')}
+ box.tabIndex=-1;bind&&bind(box);setTimeout(()=>{if(!box.isConnected||box.contains(document.activeElement))return;try{box.focus({preventScroll:true})}catch(e){}},70)}
+function closeP(){$('pm').innerHTML='';const p=pmPrev;pmPrev=null;try{if(p&&p.isConnected&&p!==document.body)p.focus({preventScroll:true})}catch(e){}}
+// Escape presses the window's own "cancel / later / close" button (the "who's playing?" window has none: a player must be chosen)
+$('pm').addEventListener('keydown',e=>{if(e.key!=='Escape')return;const b=$('pm').querySelector('[data-pa="cancel"],[data-pa="later"],[data-pa="close"],[data-pa="go"],[data-o="done"]');if(b){e.preventDefault();b.click()}});
 function picker(){const last=PROF.cur;openP(`<h2>🎮 ${L('누가 놀까요?','Who’s playing?')}</h2><p>${L('내 프로필을 누르면 모든 게임이 내 기록으로 열려요.','Tap your profile and every game opens with your own progress.')}</p>
  <div class="pgrid">${PROF.list.map(p=>`<button type="button" class="pbig ${p.id===last?'last':''}" data-pid="${p.id}"><span class="pav">${avPic(p.av)}</span><b>${esc(p.name)}</b></button>`).join('')}</div>
  <div class="prow3"><button type="button" class="pbtn ghost" data-pa="add">➕ ${L('새 프로필','New profile')}</button></div>`,box=>{box.classList.toggle('wide',PROF.list.length>3);box.addEventListener('click',onAct)})}
@@ -744,7 +762,7 @@ function firstOffer(np){if(!np||getJ(FKEY()))return;
    location.href=`math_aquarium.html?first=1&age=${b.dataset.age}&lang=${LANG}`}))}
 function firstDone(){const r=getJ(FKEY());if(!r)return;
  openP(`<img src="images/coach-moon-medal.webp" alt="" width="112" height="136" onerror="this.remove()"><h2>🎉 ${L('첫 탐험 완료!','Exploration complete!')}</h2><p>${L('물고기들이 배불러요. 문코치가 시작할 곳을 맞춰 두었어요.','The fish are full! Coach Moon set up the best place to start.')}</p>
-  <div class="prow3"><button type="button" class="pbtn ghost" data-pa="show">👨‍👩‍👧 ${L('어른에게 결과 보여 주기','Show a grown-up')}</button><button type="button" class="pbtn" data-pa="go">▶ ${L('게임 하러 가기','Let’s play')}</button></div>`,
+  <div class="prow3"><button type="button" class="pbtn ghost" data-pa="show">👨‍👩‍👧 ${L('어른에게 결과 보여 주기','Show a grown-up')}</button><button type="button" class="pbtn" data-pa="go">👍 ${L('좋아요','Okay!')}</button></div>`,
   box=>box.addEventListener('click',e=>{const b=e.target.closest('[data-pa]');if(!b)return;if(b.dataset.pa==='go'){closeP();return}mgPlus.gate(ok=>{if(ok)firstCard();else closeP()},'report')}))}
 function firstCard(){const r=getJ(FKEY());if(!r){closeP();return}const pair=x=>Array.isArray(x)?esc(L(x[0],x[1])):'';
  const half=r.half===1?L(' 1학기',' (first half)'):r.half===2?L(' 2학기',' (second half)'):'';
@@ -772,11 +790,14 @@ function renderToday(){const el=$('today');if(!me()){el.hidden=true;return}el.hi
  else if(fs){lHref=`math_aquarium.html?go=${fs.id}&lang=${LANG}`;lName=L(`수학: ${fs.name?fs.name[0]:'연습할 단원'}`,`Math: ${fs.name?fs.name[1]:'a unit to practise'}`)}
  else{const f=(typeof CN!=='undefined'&&CN&&coachRec(CN))||CREC[0];lHref=`${f}?lang=${LANG}`;lName=gname(f)}
  const lockPlay=d.first&&!lDone;
+ // step 3 is a real reward: a 🌙 course stamp for each day both steps are done (moonGames.daily@id .cs: day → 1, 60 days)
+ const cs=d.cs||{};if(lDone&&pDone&&!cs[today()]){cs[today()]=1;const ks=Object.keys(cs).sort();ks.slice(0,Math.max(0,ks.length-60)).forEach(k=>delete cs[k]);d.cs=cs;setJ(DKEY(),d)}
+ const nCs=Object.keys(cs).length;let run=0;for(let i=0;i<60;i++){const x=new Date();x.setDate(x.getDate()-i);if(cs[x.toLocaleDateString('en-CA')])run++;else if(i)break}
  el.innerHTML=`<div class="thead"><h2>📅 ${L(`오늘의 ${d.min}분`,`Today’s ${d.min} minutes`)}<small>${L('배우고, 놀고, 도장 받기','Learn, play, get a stamp')}</small></h2><button type="button" class="tset" id="tSet">⚙️ ${L('보호자 설정','Grown-up settings')}</button></div>
   <div class="tdays">
    ${lHref?`<a class="tstep${lDone?' done':''}" href="${esc(lHref)}">`:`<button type="button" class="tstep" id="tFirst">`}<span class="ti">${lDone?'✅':'📚'}</span><span><b>1. ${L(`배우기 ${learn}분`,`Learn ${learn} min`)}</b><small>${esc(lName)} · ${Math.min(learn,Math.floor(lsec/60))}/${learn}${L('분',' min')}</small></span>${lHref?'</a>':'</button>'}
    ${lockPlay?`<div class="tstep lock" aria-disabled="true"><span class="ti">🔒</span><span><b>2. ${L(`놀이 ${play}분`,`Play ${play} min`)}</b><small>${L('배우기를 먼저 해요','Learn first')}</small></span></div>`:`<a class="tstep${pDone?' done':''}" href="marble_rush_3d.html?lang=${LANG}"><span class="ti">${pDone?'✅':'🔮'}</span><span><b>2. ${L(`놀이 ${play}분`,`Play ${play} min`)}</b><small>${esc(gname('marble_rush_3d.html'))} · ${Math.min(play,Math.floor(psec/60))}/${play}${L('분',' min')}</small></span></a>`}
-   <div class="tstep${lDone&&pDone?' done':''}"><span class="ti">${lDone&&pDone?'🌙':'⭐'}</span><span><b>3. ${L('문코치 도장','Coach Moon’s stamp')}</b><small>${lDone&&pDone?L('오늘 코스 완료! 잘했어요','All done today. Great job!'):L('1, 2를 마치면 받아요','After steps 1 and 2')}</small></span></div>
+   <div class="tstep${lDone&&pDone?' done':''}"><span class="ti">${lDone&&pDone?'🌙':'⭐'}</span><span><b>3. ${L('문코치 도장','Coach Moon’s stamp')}</b><small>${lDone&&pDone?L(`오늘 코스 완료! 코스 도장 ${nCs}개${run>1?` · 🔥 ${run}일 연속`:''}`,`All done today! ${nCs} course stamp${nCs>1?'s':''}${run>1?` · 🔥 ${run} days in a row`:''}`):L(`1, 2를 마치면 🌙 코스 도장${nCs?` (지금 ${nCs}개)`:''}`,`Finish 1 and 2 for a 🌙 course stamp${nCs?` (${nCs} so far)`:''}`)}</small></span></div>
   </div>`;
  const f=$('tFirst');if(f)f.addEventListener('click',()=>firstOffer(me()));
  $('tSet').addEventListener('click',()=>mgPlus.gate(ok=>{if(ok)todaySettings()},'settings'))}
@@ -784,8 +805,10 @@ function todaySettings(){const d=getJ(DKEY(),{min:15,first:true});
  openP(`<h2>⚙️ ${L('오늘의 코스 설정 (보호자)','Daily course (grown-ups)')}</h2><p>${L('하루에 쓸 시간을 고르세요. 이 기기의 이 프로필에만 적용돼요.','Choose the time for each day. It applies to this profile on this device.')}</p>
   <div class="ages" role="group">${[10,15,20,30].map(m=>`<button type="button" data-min="${m}" aria-pressed="${d.min===m}" style="${d.min===m?'background:#4656c8;color:#fff':''}">${m}${L('분',' min')}</button>`).join('')}</div>
   <label style="display:flex;gap:10px;align-items:center;justify-content:center;min-height:44px;font-weight:800"><input type="checkbox" id="tFirstChk" ${d.first?'checked':''} style="width:22px;height:22px"> ${L('공부 먼저, 놀이 나중','Learning first, then play')}</label>
-  <div class="prow3"><button type="button" class="pbtn" data-pa="ok">${L('저장','Save')}</button></div>`,
+  <p class="phint">${L('오늘의 코스 안내에만 쓰여요. 게임을 잠그거나 시간을 막지는 않아요.','This only shapes the daily course. It doesn’t lock games or limit screen time.')}</p>
+  <div class="prow3"><button type="button" class="pbtn ghost" data-pa="cancel">${L('취소','Cancel')}</button><button type="button" class="pbtn" data-pa="ok">${L('저장','Save')}</button></div>`,
   box=>box.addEventListener('click',e=>{const m=e.target.closest('[data-min]');if(m){d.min=+m.dataset.min;box.querySelectorAll('[data-min]').forEach(x=>{const on=x===m;x.setAttribute('aria-pressed',on);x.style.cssText=on?'background:#4656c8;color:#fff':''});return}
+   if(e.target.closest('[data-pa="cancel"]')){closeP();return}
    if(e.target.closest('[data-pa="ok"]')){d.first=$('tFirstChk').checked;setJ(DKEY(),d);closeP();renderToday()}}))}
 mgPlus.on(()=>renderWho());addEventListener('pageshow',e=>{if(e.persisted){renderToday()}});
 renderWho();renderGames();renderToday();

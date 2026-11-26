@@ -91,11 +91,16 @@ function coachLine(k){const [pose,ls]=COACH[k];return `<div class="mcoach"><img 
 let coachAt=0,coachRun=0,coachMiss=0;
 // true while a game window (dialog) is open, so the bubble never covers one
 const coachBusy=()=>[...document.querySelectorAll('[role="dialog"],[aria-modal="true"]')].some(e=>e.getAttribute('aria-hidden')!=='true'&&e.getClientRects().length&&getComputedStyle(e).visibility!=='hidden');
-function coachLater(fn,left=180){if(!coachBusy()){fn();return}if(left>0)setTimeout(()=>coachLater(fn,left-1),1000)}
+// the hello and the break line also wait while a play area marked data-coach-quiet (the chess board) is on screen;
+// quick praise during play still shows
+const coachQuiet=()=>coachBusy()||[...document.querySelectorAll('[data-coach-quiet]')].some(e=>e.getClientRects().length&&getComputedStyle(e).visibility!=='hidden');
+function coachLater(fn,left=180){if(!coachQuiet()){fn();return}if(left>0)setTimeout(()=>coachLater(fn,left-1),1000)}
 function coachPop(pose,ko,en,o={}){const now=Date.now();if(!o.force&&now-coachAt<(o.gap||60000))return false;if(!o.force&&coachBusy())return false;coachAt=now;
  let el=document.getElementById('coachPop');if(!el){el=document.createElement('div');el.id='coachPop';el.setAttribute('role','status');document.body.appendChild(el)}
  el.innerHTML=`<img src="images/coach-moon-${pose}.webp" alt="" onerror="this.remove()"><p><b>${L('문 코치','Coach Moon')}</b>${L(ko,en)}</p>`;
- el.classList.remove('show');void el.offsetWidth;el.classList.add('show');clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove('show'),o.ms||4500);return true}
+ el.classList.remove('show');void el.offsetWidth;el.classList.add('show');clearTimeout(el._t);clearInterval(el._w);
+ // a window that opens while the bubble shows wins: the bubble steps aside instead of covering its title and ✕
+ el._w=setInterval(()=>{if(coachBusy()){el.classList.remove('show');clearInterval(el._w)}},300);el._t=setTimeout(()=>{el.classList.remove('show');clearInterval(el._w)},o.ms||4500);return true}
 // call with every final answer: praise runs of right answers, and help after two misses in a row.
 // The optional skill id (one of the skill ids in the game's LR summary) counts the answer for that skill in the report,
 // and the optional item (see LR above) lets the report list the kinds of questions the child often gets wrong.
@@ -107,8 +112,10 @@ function coachAnswer(ok,skill,item){try{LR.ans(ok,skill,item)}catch(e){}
 function coachStart(hello,tips){const game=(location.pathname.split('/').pop()||'index').replace(/\.html$/,''),k='moonGames.coach'+(MGP.me?'@'+MGP.me.id:''),d=new Date().toLocaleDateString('en-CA');
  const notes=f=>{let st={};try{st=JSON.parse(localStorage.getItem(k)||'{}')||{}}catch(e){}f(st);try{localStorage.setItem(k,JSON.stringify(st))}catch(e){}return st};
  const st=notes(st=>{st.played=(st.played||[]).filter(x=>x!==d).concat(d).slice(-14)}),nm=coachEsc(coachNm());
+ // the very first visit to a game belongs to the game's own welcome: Coach Moon says hello from the next day on
+ if(!st.hello||!(game in st.hello)){notes(st=>{(st.hello=st.hello||{})[game]=d})}
  // the hello counts as said only once it has really been shown
- if((st.hello||{})[game]!==d)setTimeout(()=>coachLater(()=>setTimeout(()=>{if(coachPop('hi',`${hello[0]} ${nm?`문 코치는 언제나 ${nm} 편이에요 🌙`:'문 코치가 응원해요 🌙'}`,`${hello[1]} ${nm?`Coach Moon is always on your side, ${nm} 🌙`:'Coach Moon is cheering for you 🌙'}`,{force:true,ms:6000}))notes(st=>{(st.hello=st.hello||{})[game]=d})},900)),2500);
+ else if(st.hello[game]!==d)setTimeout(()=>coachLater(()=>setTimeout(()=>coachLater(()=>{if(coachPop('hi',`${hello[0]} ${nm?`문 코치는 언제나 ${nm} 편이에요 🌙`:'문 코치가 응원해요 🌙'}`,`${hello[1]} ${nm?`Coach Moon is always on your side, ${nm} 🌙`:'Coach Moon is cheering for you 🌙'}`,{force:true,ms:6000}))notes(st=>{(st.hello=st.hello||{})[game]=d})}),900)),2500); // checks again just before it shows: a lesson may have opened meanwhile
  if(tips&&tips.length)setTimeout(()=>{const t=coachPick(tips);coachPop('idea',t[0],t[1],{ms:6000})},4*60000);
  setTimeout(()=>coachLater(()=>coachPop('go','벌써 20분이나 열심히 했어요! 눈이 피곤하면 잠깐 쉬어도 좋아요 🌙','20 minutes of hard work already! Rest your eyes for a bit if they’re tired 🌙',{force:true,ms:7000})),20*60000)}
 /*SAYABLE:BEGIN*/
@@ -331,9 +338,12 @@ const CSS=':host{all:initial}*{box-sizing:border-box;font-family:system-ui,-appl
  '.fine{font-size:12.5px;color:#6b7390;line-height:1.55;margin:8px 0 0}.code{display:flex;gap:8px;margin:6px 0}.code input{flex:1;min-width:0;min-height:48px;border:2px solid #d7def0;border-radius:12px;padding:0 12px;font-size:17px;font-weight:800;letter-spacing:1px;text-transform:uppercase}'+
  '.code button{min-height:48px;border:0;border-radius:12px;background:#4656c8;color:#fff;font-weight:900;padding:0 16px;font-size:15px;cursor:pointer}'+
  '.on{background:#e9f8ef;border-radius:14px;padding:12px;font-weight:800;color:#1f6b3e;margin:6px 0}'+
- '.q{font-size:28px;font-weight:900;margin:8px 0}.gin{width:100%;min-height:52px;font-size:24px;font-weight:900;text-align:center;border:2px solid #d7def0;border-radius:14px}'+
+ '.q{font-size:22px;font-weight:900;margin:8px 0;line-height:1.35;word-break:keep-all}.gin{width:100%;min-height:52px;font-size:24px;font-weight:900;text-align:center;border:2px solid #d7def0;border-radius:14px}'+
+ '.plan i small{font-size:13px;font-weight:800;color:#56607a}.keep{background:#f6f7fb;border-radius:14px;padding:9px 12px;font-size:13.5px;line-height:1.5;color:#3b4677;margin:0 0 10px}'+
  'button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid #ffb703;outline-offset:2px}'+
- '@media (max-height:560px){.pic{width:96px;height:96px;font-size:48px}.card{padding:12px 14px}}';
+ '@media (max-height:560px){.pic{width:96px;height:96px;font-size:48px}.card{padding:12px 14px}}'+
+ // a phone turned sideways: a wider parent screen with the list in two columns, so the prices are not far below
+ '@media (max-height:560px) and (min-width:700px){.wide{width:min(760px,100%)}.wide .list{grid-template-columns:1fr 1fr;column-gap:16px}}';
 function layer(html,onClose){const host=document.createElement('div');host.setAttribute('data-mg-plus','');const root=host.attachShadow?host.attachShadow({mode:'open'}):host;
  const st=document.createElement('style');st.textContent=CSS;root.appendChild(st);const bg=document.createElement('div');bg.className='bg';bg.setAttribute('role','dialog');bg.setAttribute('aria-modal','true');bg.innerHTML=html;root.appendChild(bg);(document.body||document.documentElement).appendChild(host);
  const prev=document.activeElement,close=()=>{try{host.remove()}catch(e){}try{prev&&prev.focus&&prev.focus()}catch(e){}onClose&&onClose()};
@@ -343,13 +353,15 @@ function layer(html,onClose){const host=document.createElement('div');host.setAt
 // ---- the child's lock card: a preview and a neutral line, no price
 let lockOpen=false;
 function lock(c){c=c||{};if(lockOpen)return false;lockOpen=true;
+ // say:true → the card reads its title and line aloud (games that speak their own lock line leave it off)
+ if(c.say)setTimeout(()=>{try{if(!('speechSynthesis' in window))return;speechSynthesis.cancel();const u=new SpeechSynthesisUtterance((two(c.title)?two(c.title)+'. ':'')+(two(c.text)||T('다음 이야기는 문코치 Plus에서 열려요.','The next part opens with Coach Moon Plus.')));u.lang=lang()==='en'?'en-US':'ko-KR';speechSynthesis.speak(u)}catch(e){}},250);
  const pic=c.pic?`<img src="${esc(c.pic)}" alt="" onerror="this.remove()">`:'';
  const L1=two(c.text)||T('다음 이야기는 문코치 Plus에서 열려요.','The next part opens with Coach Moon Plus.');
  const F=two(c.free)||T('이달의 단원, 매일 목표, 다른 게임은 지금도 할 수 있어요.','This month’s units, daily goals and other games are open now.');
  const w=layer(`<div class="card"><button class="x" type="button" aria-label="${T('닫기','Close')}">✕</button>
   <div class="pic" aria-hidden="true">${esc(c.emoji||'🌙')}${pic}<span class="star">⭐ Plus</span></div>
   <h2>${esc(two(c.title)||T('새로운 곳이 기다려요','Something new is waiting'))}</h2><p class="t">${esc(L1)}</p><p class="free">${esc(F)}</p>
-  <button class="go" type="button">▶ ${T('무료로 계속하기','Keep playing free')}</button>
+  <button class="go" type="button">▶ ${T('계속 놀기','Keep playing')}</button>
   <button class="ask" type="button">👨‍👩‍👧 ${T('어른에게 보여 주기','Show a grown-up')}</button></div>`,()=>{lockOpen=false;c.onClose&&c.onClose()});
  w.$('.go').addEventListener('click',()=>{w.close();c.onFree&&c.onFree()});
  w.$('.ask').addEventListener('click',()=>{w.close();parent(c.ctx)});return true}
@@ -357,23 +369,32 @@ function lock(c){c=c||{};if(lockOpen)return false;lockOpen=true;
 function tease(c){if(has()||!c||!c.game)return false;let s={};try{s=JSON.parse(localStorage.getItem(SEEN)||'{}')||{}}catch(e){}
  if(s[c.game]===day())return false;s[c.game]=day();try{localStorage.setItem(SEEN,JSON.stringify(s))}catch(e){}return lock(c)}
 // ---- grown-up check: the app's mgGate (app-bridge.js); on the web a simple question
+// numbers written as words, like the app's check: a child who can multiply still has to read 이십육 / twenty-six
+const KD=['','일','이','삼','사','오','육','칠','팔','구'],koN=n=>{const t=Math.floor(n/10),o=n%10;return (t?(t>1?KD[t]:'')+'십':'')+KD[o]};
+const EO=['zero','one','two','three','four','five','six','seven','eight','nine','ten','eleven','twelve','thirteen','fourteen','fifteen','sixteen','seventeen','eighteen','nineteen'],enN=n=>n<20?EO[n]:['','','twenty','thirty'][Math.floor(n/10)]+(n%10?'-'+EO[n%10]:'');
+const gq=(a,b)=>{const w=koN(b),c=w.charCodeAt(w.length-1)-0xAC00;return T(`${koN(a)} 곱하기 ${w}${c%28?'은':'는'}?`,`What is ${enN(a)} times ${enN(b)}?`)};
 function gate(cb,kind){if(typeof window.mgGate==='function'){window.mgGate(kind||'buy',ok=>cb(!!ok));return}
- const a=12+Math.floor(Math.random()*17),b=6+Math.floor(Math.random()*4);
+ let a=13+Math.floor(Math.random()*17),b=3+Math.floor(Math.random()*7);if(a===20)a=23;
  const w=layer(`<div class="card"><button class="x" type="button" aria-label="${T('닫기','Close')}">✕</button><h2>🔒 ${T('보호자 확인','Grown-ups only')}</h2>
   <p class="free">${T('어린이는 보호자에게 보여 주세요. 아래 계산의 답을 입력해 주세요.','Kids: please show this to a grown-up. Type the answer below.')}</p>
-  <p class="q" aria-hidden="true">${a} × ${b} = ?</p><input class="gin" inputmode="numeric" autocomplete="off" aria-label="${T(a+' 곱하기 '+b,a+' times '+b)}"><p class="msg" aria-live="polite"></p>
+  <p class="q">${gq(a,b)}</p><input class="gin" inputmode="numeric" autocomplete="off" aria-label="${T('숫자로 답해 주세요','Answer with numbers')}" placeholder="${T('숫자로','numbers')}"><p class="msg" aria-live="polite"></p>
   <button class="go" type="button">${T('확인','Continue')}</button></div>`);
- const go=()=>{if(w.$('.gin').value.trim()===String(a*b)){w.close();cb(true)}else{w.$('.msg').textContent=T('답이 달라요.','Not quite.');w.$('.gin').value=''}};
+ const go=()=>{if(w.$('.gin').value.trim()===String(a*b)){w.close();cb(true)}else{a=13+Math.floor(Math.random()*17);if(a===20)a=23;b=3+Math.floor(Math.random()*7);w.$('.q').textContent=gq(a,b);w.$('.msg').textContent=T('답이 달라요. 새 문제예요.','Not quite. Here’s a new one.');w.$('.gin').value=''}};
  w.$('.go').addEventListener('click',go);w.$('.gin').addEventListener('keydown',e=>{if(e.key==='Enter')go()});setTimeout(()=>{try{w.$('.gin').focus()}catch(e){}},60)}
 function parent(ctx){if(has()&&mode!=='app'&&mode!=='test'){paywall(ctx);return}gate(ok=>{if(ok)paywall(ctx)})}
 // ---- the parent screen: what Plus opens, the store's prices, restore, licence code, the fine print
 const OPENS=()=>[T('수학 아쿠아리움: 1~6학년 수족관 120곳 모두','Math Aquarium: all 120 aquariums, grades 1–6'),T('코딩 섬: 파이썬 미션 84개와 보스 13명','Coding Island: all 84 Python missions and 13 bosses'),
- T('체스 기사단: 보스 8명, 스파링, 대국 복기, 보스 코스, 레슨 57개','Chess Knights: all 8 bosses, sparring, game review, boss courses, 57 lessons'),T('과학·음악의 모든 세계와 단원, 꼬마 탐정의 모든 사건, 구슬 레이스의 모든 세계','Every science world and music unit, every detective case, every Marble Rush world'),
- T('부모 리포트 전체: 과목별 분석, 틀린 문제, 집에서 돕기, 인쇄','The full parents’ report: subjects, missed questions, home plan, printing'),T('모든 수료증, 이 기기의 모든 아이 프로필','All certificates, and every child profile on this device')];
+ T('꼬마 체스 기사단: 보스 8명, 연습 상대, 대국 복기, 보스 코스, 레슨 57개','Little Chess Knights: all 8 bosses, practice partners, game review, boss courses, 57 lessons'),T('과학·음악의 모든 세계와 단원, 꼬마 탐정의 모든 사건, 구슬 레이스의 모든 세계','Every science world and music unit, every detective case, every Marble Rush world'),
+ T('부모 리포트 전체: 과목별 분석, 틀린 문제, 집에서 돕기, 인쇄','The full parents’ report: subjects, missed questions, home plan, printing'),T('모든 수료증','Every certificate')];
+// what stays free without Plus (the same as FREE/MONTHLY and the report's free part), and that one Plus covers the family
+const KEEP=()=>T('Plus가 없어도 각 게임의 앞부분, 이달의 무료 단원, 매일 목표, 리포트의 ‘한눈에’ 화면, 보호자 도구는 계속 무료예요. Plus 하나면 이 기기의 모든 아이 프로필에 적용돼요.','Free without Plus: the first part of every game, this month’s free units, daily goals, the report overview and the grown-up tools. One Plus covers every child profile on this device.');
 const perLabel=p=>p.period==='month'?T('월간','Monthly'):T('연간','Yearly');
+const perUnit=p=>p.period==='month'?T('월','mo'):T('년','yr');
 const trialLabel=t=>{const m=/P(\d+)([DWMY])/.exec(t||'');if(!m)return '';const n=+m[1],u=m[2];if(u==='M'||u==='Y')return u==='M'?T(`${n}개월 무료 체험 뒤 결제`,`${n}-month free trial, then`):T(`${n}년 무료 체험 뒤 결제`,`${n}-year free trial, then`);const d=n*(u==='W'?7:1);return T(`${d}일 무료 체험 뒤 결제`,`${d}-day free trial, then`)};
 // in the app the notice page opens in the same view (a new window would go nowhere); on the web in a new tab
 const tgt=inApp?'':' target="_blank" rel="noopener"';
+// where Plus is on sale (the app, a store-locked web, ?plus= tests) the notice page shows its Plus and terms sections
+const nq=()=>`?lang=${lang()}${mode==='open'?'':'&sale=1'}`;
 function paywall(ctx){if(sheet){sheet.render();return}
  const w=layer(`<div class="card wide"><button class="x" type="button" aria-label="${T('닫기','Close')}">✕</button><div class="body"></div></div>`,()=>{sheet=null});
  let codeOpen=false,note='',good=false;
@@ -383,16 +404,16 @@ function paywall(ctx){if(sheet){sheet.render();return}
   if(ctx)h+=`<p class="ctx">${esc(two(ctx))}</p>`;
   if(has()){h+=`<div class="on">✅ ${mode==='open'||mode==='on'?T('이 웹사이트에서는 지금 모든 내용이 열려 있어요.','Everything is open on this website for now.'):l&&!s?T(`기관 코드로 Plus가 열려 있어요 (${l.until?l.until+'까지':'기한 없음'}).`,`Plus is on with an organization code (${l.until?'until '+l.until:'no end date'}).`):T('Plus를 쓰고 있어요. 고마워요!','Plus is on. Thank you!')}</div>`;
    if(s&&s.until)h+=`<p class="fine">${T('다음 갱신일','Next renewal')}: ${esc(new Date(s.until).toLocaleDateString(lang()==='en'?'en-CA':'ko-KR'))}</p>`}
-  else{h+=`<p class="t" style="text-align:left">${T('Plus로 열리는 것','What Plus opens')}</p><ul class="list">${OPENS().map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`;
+  else{h+=`<p class="t" style="text-align:left">${T('Plus로 열리는 것','What Plus opens')}</p><ul class="list">${OPENS().map(x=>`<li>${esc(x)}</li>`).join('')}</ul><p class="keep">${esc(KEEP())}</p>`;
    if(mode==='stores')h+=`<p class="ctx">${T('Plus는 앱에서 시작할 수 있어요. App Store나 Google Play에서 "문코치"를 찾아 주세요.','Plus starts in the app. Look for “Coach Moon” on the App Store or Google Play.')}</p>`;
    else if(ps&&ps.length){const sorted=ps.slice().sort((a,b)=>(a.period==='year'?0:1)-(b.period==='year'?0:1));
-    h+=`<div class="plans">${sorted.map((p,i)=>`<button class="plan${i?'':' best'}" type="button" data-id="${esc(p.id)}"${pending?' disabled':''}><span><b>${perLabel(p)}${i?'':' · '+T('추천','best value')}</b><span>${esc(trialLabel(p.trial)||(p.period==='month'?T('매달 자동 갱신','Renews every month'):T('매년 자동 갱신','Renews every year')))}</span></span><i>${esc(p.price)}</i></button>`).join('')}</div>`}
+    h+=`<div class="plans">${sorted.map((p,i)=>`<button class="plan${i?'':' best'}" type="button" data-id="${esc(p.id)}"${pending?' disabled':''}><span><b>${perLabel(p)}${i?'':' · '+T('추천','best value')}</b><span>${esc(trialLabel(p.trial)||(p.period==='month'?T('매달 자동 갱신','Renews every month'):T('매년 자동 갱신','Renews every year')))}</span></span><i>${esc(p.price)}<small>/${perUnit(p)}</small></i></button>`).join('')}</div>`}
    else if(!msg)h+=`<p class="ctx">${mode==='app'?T('스토어에서 가격을 불러오고 있어요…','Loading prices from the store…'):T('이 웹사이트에서는 아직 Plus를 팔지 않아요.','Plus is not sold on this website yet.')}</p>`}
   h+=`<p class="msg${good?' ok':''}" aria-live="polite">${esc(note||msg||(pending?T('스토어 화면을 기다리는 중이에요…','Waiting for the store…'):''))}</p>`;
-  h+=`<div class="row">${mode==='app'||mode==='test'?`<button type="button" data-a="restore">${T('구매 복원','Restore purchases')}</button>`:''}${s&&mode==='app'?`<button type="button" data-a="manage">${T('구독 관리·해지','Manage or cancel')}</button>`:''}<button type="button" data-a="code">${T('기관·가족 코드 입력','Enter an organization code')}</button></div>`;
+  h+=`<div class="row">${mode==='app'||mode==='test'?`<button type="button" data-a="restore">${T('구매 복원','Restore purchases')}</button>`:''}${s&&mode==='app'?`<button type="button" data-a="manage">${T('구독 관리·해지','Manage or cancel')}</button>`:''}<button type="button" data-a="code">${T('기관·가족 코드 입력','Enter an organization or family code')}</button></div>`;
   if(codeOpen)h+=`<div class="code"><input class="cin" maxlength="24" autocomplete="off" aria-label="${T('코드','Code')}" placeholder="MOON-XXXX-XXXX-XXXX"><button type="button" data-a="redeem">${T('확인','Use')}</button></div>`;
   h+=`<p class="fine">${T('구독은 선택한 기간(1개월 또는 1년)마다 자동으로 갱신되고, 결제는 App Store 또는 Google Play 계정으로 돼요. 다음 갱신 24시간 전까지 스토어의 구독 설정에서 해지하면 다음 결제가 되지 않아요. 무료 체험이 있는 지역에서는 체험이 끝나면 자동으로 결제돼요. 환불은 각 스토어의 정책을 따라요. Plus가 끝나도 아이가 얻은 기록과 물건은 그대로 남아요.','Subscriptions renew automatically each period (1 month or 1 year) and are charged to your App Store or Google Play account. Cancel in the store’s subscription settings at least 24 hours before renewal to stop the next charge. Where a free trial is offered, it turns into a paid subscription when it ends. Refunds follow each store’s policy. When Plus ends, your child keeps everything they earned.')}</p>
-   <div class="row"><a href="notice.html?lang=${lang()}#terms"${tgt}>${T('이용 조건','Terms of use')}</a><a href="notice.html?lang=${lang()}#privacy"${tgt}>${T('개인정보 처리방침','Privacy policy')}</a></div>`;
+   <div class="row"><a href="notice.html${nq()}#terms"${tgt}>${T('이용 조건','Terms of use')}</a><a href="notice.html${nq()}#privacy"${tgt}>${T('개인정보 처리방침','Privacy policy')}</a></div>`;
   b.innerHTML=h;
   b.querySelectorAll('.plan').forEach(x=>x.addEventListener('click',()=>buy(x.dataset.id)));
   b.querySelectorAll('[data-a]').forEach(x=>x.addEventListener('click',()=>{const a=x.dataset.a,n=N();
@@ -749,6 +770,9 @@ main{width:min(1120px,100%);margin:0 auto;padding:14px max(12px,env(safe-area-in
 .modal .row .btn.rvgo{flex-basis:100%;white-space:nowrap} /* "review the game" gets its own line on a phone */
 .modal .x{position:absolute;top:8px;right:8px;width:44px;height:44px;border-radius:50%;border:0;background:#f0f1fa;font-size:18px;z-index:2}
 .modal .box:focus{outline:none}
+.modal p.chips{display:flex;flex-wrap:wrap;justify-content:center;gap:6px}
+.modal .row.stack{flex-direction:column}@media (min-width:561px){.modal .row.stack{flex-direction:row-reverse}} /* phones: one button per line, so neither label wraps */
+.modal .hearbtn{position:absolute;top:8px;right:8px;width:44px;height:44px;border-radius:50%;border:0;background:#f0f1fa;font-size:20px;z-index:2;cursor:pointer} /* 🔊 where ✕ sits on other windows */
 @keyframes fadeIn{from{opacity:0}}
 @keyframes popIn{from{opacity:0;transform:scale(.7)}}
 .bigstars{display:flex;justify-content:center;gap:6px;font-size:58px;margin:6px 0 2px;min-height:72px}
@@ -1090,6 +1114,7 @@ main{width:min(1120px,100%);margin:0 auto;padding:14px max(12px,env(safe-area-in
  .modal p{margin:4px 0}
  .modal .row{margin-top:8px}
  .modal .row .btn.rvgo{flex-basis:0}
+ .modal .box>.row:last-child{position:sticky;bottom:-12px;margin-bottom:-12px;padding:6px 0 12px;background:#fff;z-index:1} /* the buttons stay in view when a result window scrolls */
  .bigstars{font-size:36px;min-height:44px;margin:0}
  .rewards{margin:6px 0 2px}
  .levelup .rays{top:60px}
@@ -1228,7 +1253,7 @@ a.btn{text-decoration:none}
   <div class="game">
    <div class="boardcol">
     <div class="bar" id="topBar"></div>
-    <div class="frame" id="frame"><div class="board" id="board" aria-label="체스판" data-en-aria-label="Chess board"></div><div class="promo hidden" id="promo"></div><div class="boardmsg" id="boardMsg"></div></div>
+    <div class="frame" id="frame"><div class="board" id="board" data-coach-quiet aria-label="체스판" data-en-aria-label="Chess board"></div><div class="promo hidden" id="promo"></div><div class="boardmsg" id="boardMsg"></div></div>
     <div class="bar" id="botBar"></div>
    </div>
    <aside class="side">
@@ -5628,11 +5653,13 @@ function renderMap(){
 }
 $('v-map').addEventListener('click',e=>{
  const cp=e.target.closest('[data-chap]'),st=e.target.closest('[data-stage]'),bs=e.target.closest('[data-boss]'),ls=e.target.closest('[data-lesson]');
- if(cp){SFX.click();const i=+cp.dataset.chap;if(!chapterUnlocked(i)){toast('🔒 '+L('이전 지역의 보스를 이기면 열려요!','Beat the previous boss to open this land!'));return}mapChapter=i;S.lastChapter=i;save();renderMap();return}
+ if(cp){SFX.click();const i=+cp.dataset.chap;if(!chapterUnlocked(i)){const pb=BOTS[CHAPTERS[i-1].boss];lockSay(chapterUnlocked(i-1)?L(`${jo(pb.name,'을','를')} 이기면 열려요!`,`Beat ${pb.name} to open this land!`):L('지역은 하나씩 차례로 열려요!','The lands open one at a time!'));return}mapChapter=i;S.lastChapter=i;save();renderMap();return}
  if(ls){SFX.click();const id=CH_OF[+ls.dataset.lesson];if(lsGate(id))MiniLesson.open(chL(id));return}
- if(st){const k=+st.dataset.stage;if(!stageUnlocked(mapChapter,k)){toast('🔒 '+L('앞 스테이지를 먼저 깨요!','Clear the stage before it first!'));return}SFX.click();startStage(mapChapter,k);return}
- if(bs){if(!bossUnlocked(+bs.dataset.boss)){toast('🔒 '+L('스테이지 10개를 모두 깨면 보스가 나타나요!','Clear all 10 stages to meet the boss!'));return}SFX.click();bossIntro(+bs.dataset.boss)}
+ if(st){const k=+st.dataset.stage;if(!stageUnlocked(mapChapter,k)){lockSay(L('앞 스테이지를 먼저 깨요!','Clear the stage before this one first!'));return}SFX.click();startStage(mapChapter,k);return}
+ if(bs){if(!bossUnlocked(+bs.dataset.boss)){lockSay(L('스테이지 10개를 모두 깨면 보스가 나타나요!','Clear all 10 stages to meet the boss!'));return}SFX.click();bossIntro(+bs.dataset.boss)}
 });
+// a locked stage, land or rival: the reason in a toast, read aloud too
+function lockSay(t){toast('🔒 '+esc(t));speak(t)}
 function valuesRow(){return `<div class="values ps-${S.equip.pieces}">${[[1,1],[2,3],[3,3],[4,5],[5,9]].map(([t,v])=>`<span>${pieceHTML(t)}${v}${L('점','')}</span>`).join('')}</div>`}
 // ---------------------------------------------------------------- game screen
 let MODE=null; // 'puzzle' | 'battle'
@@ -5655,7 +5682,7 @@ let PZ=null;
 function startStage(c,k){
  mapChapter=c;S.lastChapter=c;save();
  const go=()=>startPuzzle(ADV_STAGES[c][k],'stage',{c,k});
- if(k===0)chBefore(CH_START[c],go);else go(); // the land's lesson (and one rules lesson it builds on) before its first stage
+ if(k===0)chBefore(CH_START[c],go);else if(k===1&&CH_SECOND[c])chBefore(CH_SECOND[c],go);else go(); // the land's lesson (and one rules lesson it builds on) before its first stage
 }
 function startRated(){
  const seen=new Set(S.seen);let pool=[];
@@ -5742,7 +5769,7 @@ function useHint(){
 }
 function puzzleMove(m){
  const z=PZ;if(!z||z.busy||z.done)return;
- const u=BD.pos.uci(m),exp=z.p.moves[z.step],lr=pzItem(z,m);
+ const u=BD.pos.uci(m),exp=z.p.moves[z.step],lr=pzItem(z,m),hintWas=BD.hint;
  boardPlay(m);
  const mate=BD.pos.status()==='mate';
  if(u===exp||mate||(z.mode==='mine'&&z.step===1&&(z.p.alts||[]).includes(u))){
@@ -5755,11 +5782,16 @@ function puzzleMove(m){
  z.busy=true;flashSq(m.t,'bad',700);shakeBoard();SFX.bad();
  if(z.mode==='rush'){try{LR.ans(false,pzSkill(z),lr)}catch(e){}rushMiss();return}
  if(!z.missed){z.missed=true;renderPuzzleGoal()} // the theme's lesson is now one tap away
+ // help fades in, free (no hint bulb): a second miss on the same move makes the piece to move glow, a third its square
+ // too (not in rated puzzles, which measure the score). A hint already bought keeps glowing after the take-back.
+ z.sm=z.smAt===z.step?(z.sm||0)+1:1;z.smAt=z.step;const help=z.mode!=='rated'&&z.sm>=2?(z.sm>=3?2:1):0;
  if(z.mode==='mine'&&z.due){myPzDone(z,false);z.due=false;renderPuzzleBars()} // a due puzzle missed comes back tomorrow; the rest of this try is practice
  if(S.shieldOn&&S.inv.shield>0&&!z.shieldUsed){S.inv.shield--;z.shieldUsed=true;try{LR.ans(false,pzSkill(z),lr)}catch(e){}say(L('🛡️ 방패가 실수를 막아 줬어요! 다시 생각해 봐요.','🛡️ Your shield blocked that mistake! Think again.'));boardMsg('🛡️')}
- else{z.mistakes++;if(z.mode!=='rush')coachAnswer(false,pzSkill(z),lr);say(z.missSaid?pick([L('괜찮아요, 다시 해 봐요!','That’s okay, try again!'),L('아깝다! 다른 수를 찾아봐요.','So close! Look for another move.')]):THEMES[z.p.theme].miss);z.missSaid=true}
+ else{z.mistakes++;if(z.mode!=='rush')coachAnswer(false,pzSkill(z),lr);if(!help)say(z.missSaid?pick([L('괜찮아요, 다시 해 봐요!','That’s okay, try again!'),L('아깝다! 다른 수를 찾아봐요.','So close! Look for another move.')]):THEMES[z.p.theme].miss);z.missSaid=true}
  save();renderPuzzleTools();
- setTimeout(()=>{if(PZ!==z)return;boardUndo();z.busy=false},850);
+ setTimeout(()=>{if(PZ!==z)return;boardUndo();z.busy=false;const g=BD.pos.fromUci(z.p.moves[z.step]);
+  if(help&&g){const to=help>1||!!(hintWas&&hintWas.t>=0);BD.hint={f:g.f,t:to?g.t:-1};marks();say(to?L('반짝이는 칸으로 옮겨 봐요!','Move it to the glowing square!'):L('반짝이는 기물을 움직여 봐요! 어디로 갈지 생각해요.','Move the glowing piece! Where should it go?'))}
+  else if(hintWas&&g&&hintWas.f===g.f){BD.hint=hintWas;marks()}},850);
 }
 function rateChange(z,score){
  if(!z.firstTry||z.mode==='rush'||z.mode==='mine')return 0;
@@ -5797,9 +5829,9 @@ function puzzleSolved(mate){
  const goFin=!!GO&&((GO.k==='daily'&&z.mode==='daily'&&!z.replay)||(gl&&GO.n>=GO_LAD))&&goFinish();
  head=stars===3?L('완벽해요!','Perfect!'):stars===2?L('잘했어요!','Well done!'):L('해냈어요!','You did it!');
  SFX.win();celebrate();boardMsg('🎉 '+L('정답!','Solved!'));
- say(`${COACHES[S.equip.coach].say} ${head} ${pick([L('멋진 수였어요!','What a move!'),L('역시 체스 기사!','A true chess knight!'),L('머리가 쑥쑥 자라고 있어요!','Your brain is growing!')])}`);
+ say(`${COACHES[S.equip.coach].say} ${head} ${pick(z.p.rating>=1200?[L('날카로운 수였어요!','Sharp move!'),L('끝까지 정확하게 읽었어요!','You read it right to the end!'),L('깔끔한 풀이예요!','Clean solve!')]:[L('멋진 수였어요!','What a move!'),L('역시 체스 기사!','A true chess knight!'),L('머리가 쑥쑥 자라고 있어요!','Your brain is growing!')])}`);
  const r=grant({coins,xp});
- if(dr)extra+=`<span class="rate">🧠 ${num(S.rating-dr)} → ${num(S.rating)} (${dr>0?'+':''}${dr})</span>`;
+ if(dr&&(dr>0||(z.mode!=='stage'&&z.mode!=='daily')))extra+=`<span class="rate">🧠 ${num(S.rating-dr)} → ${num(S.rating)} (${dr>0?'+':''}${dr})</span>`;
  const starRow=z.mode==='stage'?`<div class="bigstars">${[0,1,2].map(i=>`<span class="${i<stars?'':'dim'}">⭐</span>`).join('')}</div>`:`<div style="font-size:64px">${z.mode==='daily'?modePic('daily','📅'):modePic('rated','🧩')}</div>`;
  const tip=!clean?`<p>${L(`실수 ${z.mistakes}번 · 힌트 ${z.hints}번. 실수 없이 풀면 별 3개!`,`${z.mistakes} mistake(s) · ${z.hints} hint(s). Solve with none for 3 stars!`)}</p>`:'';
  let acts={},btns='';
@@ -5828,7 +5860,7 @@ function giveUp(){
  const play=()=>{if(PZ!==z)return;if(z.step>=z.p.moves.length){end();return}const m=BD.pos.fromUci(z.p.moves[z.step]);BD.hint={f:m.f,t:m.t};marks();setTimeout(()=>{if(PZ!==z)return;boardPlay(m);z.step++;setTimeout(play,650)},500)};
  const end=()=>{
   const ls=TH_LS[z.p.theme],acts={retry:()=>()=>startPuzzle(z.idx,z.mode,pzAgain(z)),next:()=>z.mode==='stage'?()=>go('map'):z.mode==='rated'?startRated:z.mode==='ladder'?()=>pzNextOf(z):z.mode==='mine'?()=>go(z.back||'grow'):()=>go('home'),close:()=>()=>go(gameBack()),les:()=>{if(lsGate(ls))MiniLesson.open(chL(ls));return false}};
-  modal(`<div style="font-size:64px">${pic((COACHES[S.equip.coach]||COACHES.puppy).img,'💪')}</div><h2>${L('다음엔 꼭 풀 수 있어요!','You will get it next time!')}</h2><p>${L('정답을 봤으니 이제 한 번 직접 풀어 봐요. 언제든 다시 도전할 수 있어요.','Now that you have seen it, try solving it yourself. You can retry anytime.')}</p>${ls?`<p><button class="mlx-chip" type="button" data-act="les">📖 ${L('개념 다시 보기','See the idea again')}${plusBadge(lsOK(ls))}</button></p>`:''}${dr?`<div class="rewards"><span class="rate">🧠 ${num(S.rating-dr)} → ${num(S.rating)} (${dr})</span></div>`:''}
+  modal(`<div style="font-size:64px">${pic((COACHES[S.equip.coach]||COACHES.puppy).img,'💪')}</div><h2>${L('다음엔 꼭 풀 수 있어요!','You will get it next time!')}</h2><p>${L('정답을 봤으니 이제 한 번 직접 풀어 봐요. 언제든 다시 도전할 수 있어요.','Now that you have seen it, try solving it yourself. You can retry anytime.')}</p>${ls?`<p><button class="mlx-chip" type="button" data-act="les">📖 ${L('개념 다시 보기','See the idea again')}${plusBadge(lsOK(ls))}</button></p>`:''}${dr&&z.mode!=='stage'&&z.mode!=='daily'?`<div class="rewards"><span class="rate">🧠 ${num(S.rating-dr)} → ${num(S.rating)} (${dr})</span></div>`:''}
    <div class="row"><button class="btn ghost" type="button" data-act="next">${z.mode==='stage'?L('지도로','Map'):z.mode==='rated'||z.mode==='ladder'?L('다른 퍼즐','Another puzzle'):z.mode==='mine'?L('돌아가기','Back'):L('홈','Home')}</button><button class="btn green" type="button" data-act="retry">↺ ${L('직접 풀어 보기','Try it myself')}</button></div>`,{acts,closable:false});
  };
  if(BD.pos.turn!==BD.side){setTimeout(play,900)}else play();
@@ -5908,7 +5940,7 @@ $('v-battle').addEventListener('click',e=>{
  if(spb){SFX.click();startSpar(+spb.dataset.spar,'battle');return}
  if(gw){SFX.click();growTab=gw.dataset.gw;growBack='battle';go('grow');return}
  if(c){SFX.click();S.color=+c.dataset.color;save();renderBattleSelect();return}
- if(b){const i=+b.dataset.bot;if(!botUnlocked(i)){toast('🔒 '+L(`${josa(BOTS[i-1].name,'을','를')} 먼저 이겨요!`,`Beat ${BOTS[i-1].name} first!`));return}SFX.click();
+ if(b){const i=+b.dataset.bot;if(!botUnlocked(i)){lockSay(L(`${jo(BOTS[i-1].name,'을','를')} 먼저 이겨요!`,`Beat ${BOTS[i-1].name} first!`));return}SFX.click();
   const col=S.color===-1?(Math.random()<.5?WHITE:BLACK):S.color;startBattle(i,col)}
 });
 function bossIntro(c){
@@ -6013,15 +6045,18 @@ function battleOver(res,why){
  if(gm){extra+=`<span class="rate">${powChip(gm)}</span>`;if(revOK)setTimeout(()=>runReview(gm),1200)} // the review is ready by the time it is opened
  // after a loss or a draw against a top boss or its sparring partner, Coach Moon points to the next course step and the review
  const cq=res!=='win'&&plusOK('course')?COURSES.find(c=>c.boss===b.id||c.spar===b.id):null,ci=cq?courseCurD(cq):-1,cs=ci>=0&&cq.steps[ci].k!=='boss'?cq.steps[ci]:null;
- say(res==='win'?`${b.icon} “${b.lose}” ${L('대단해요!','Amazing!')}`:cq?(cs?L(`괜찮아요! 대국을 돌아보고, 코스 ${ci+1}단계를 해 봐요.`,`That’s okay! Let’s review the game, then try course step ${ci+1}.`):L('괜찮아요! 대국을 돌아보고 다시 도전해요.','That’s okay! Let’s review the game and try again.'))
+ // a boss lost before the rival below it was ever beaten (in the adventure Prince Ribbit comes before any game with Chirpy)
+ const easy=res!=='win'&&!sp&&bt.bi>0&&bt.bi<BOTS.length&&!(S.botWins[BOTS[bt.bi-1].id]>0)&&bossOK(bt.bi-1)?BOTS[bt.bi-1]:null,
+  easyChip=easy?`<button class="mlx-chip" type="button" data-act="easy">${pic(easy.img,easy.icon)} ${L(`${jo(easy.name,'과','와')} 먼저 연습하기`,`Practice with ${easy.name} first`)}</button>`:'';
+ say(res==='win'?`${b.icon} “${b.lose}” ${L('대단해요!','Amazing!')}`:easy?L(`괜찮아요! ${jo(easy.name,'과','와')} 먼저 연습해 볼까요?`,`That’s okay! Want to practice with ${easy.name} first?`):cq?(cs?L(`괜찮아요! 대국을 돌아보고, 코스 ${ci+1}단계를 해 봐요.`,`That’s okay! Let’s review the game, then try course step ${ci+1}.`):L('괜찮아요! 대국을 돌아보고 다시 도전해요.','That’s okay! Let’s review the game and try again.'))
   :res==='lose'?L('괜찮아요! 퍼즐로 연습하면 더 강해져요. 다시 도전해 봐요!','That’s okay! Practice puzzles to get stronger, then try again!'):line);
  const coach=cq?`<div class="mcoach cqcoach"><img src="images/coach-moon-idea.webp" alt="" width="58" height="70" onerror="this.parentNode.remove()"><p><b>${L('문 코치','Coach Moon')}</b>${cs?L(`괜찮아요! 다음엔 코스 ${ci+1}단계 ‘${esc(tx(cs.t))}’${pcl(tx(cs.t),'을','를')} 해 봐요.`,`That’s okay! Next, try course step ${ci+1}: ${esc(tx(cs.t))}.`):L('괜찮아요! 코스를 다 끝냈으니 꼭 이길 수 있어요.','That’s okay! You finished the course, so you can do this.')}${gm&&revOK?' '+L('먼저 이 실수를 돌아봐요.','First, let’s look at this mistake.'):''}</p></div>`:coachLine(res==='win'?(bossFirst?'big':'up'):res==='draw'?'up':'try');
  const bossNext=res==='win'&&bt.boss!=null&&bt.boss+1<CHAPTERS.length,out=bt.back||(bt.boss!=null?'map':'battle');
  // the rule behind the ending, one tap away: stalemate, or how a checkmate happens
- const les=why==='stalemate'?'stale':res==='lose'&&why==='mate'?'mate':null,chip=les?`<p><button class="mlx-chip" type="button" data-act="les">📖 ${L(`${tx(CH_LS[les].title)} 다시 보기`,`Review: ${tx(CH_LS[les].title)}`)}${plusBadge(lsOK(les))}</button></p>`:'';
+ const les=why==='stalemate'?'stale':res==='lose'&&why==='mate'?'mate':null,chip=les||easy?`<p class="chips">${les?`<button class="mlx-chip" type="button" data-act="les">📖 ${L(`${tx(CH_LS[les].title)} 다시 보기`,`Review: ${tx(CH_LS[les].title)}`)}${plusBadge(lsOK(les))}</button>`:''}${easyChip}</p>`:'';
  setTimeout(()=>modal(`<div style="font-size:70px">${icon}</div><h2>${title}</h2><p class="opp">${pic(b.img,b.icon)} ${esc(b.name)}: “${esc(res==='draw'?line:res==='win'?b.lose:b.win)}”</p>${res==='draw'||cq?'':`<p>${esc(res==='lose'?L('질 때도 도전 보상을 받아요. 다음엔 이길 수 있어요!','You still get a reward for trying. You can win next time!'):'')}</p>`}${coach}${rewardChips(r,extra)}${chip}${gm&&!revOK?revLockLine():''}
   <div class="row">${gm&&revOK?`<button class="btn gold rvgo" type="button" data-act="review">🔍 ${cq?L('이 실수를 돌아봐요','Look at my mistake'):L('대국 돌아보기','Review game')}</button>`:''}${cs?`<button class="btn green" type="button" data-act="course">🧭 ${L(`코스 ${ci+1}단계`,`Step ${ci+1}`)}</button>`:''}${cs&&out==='course'?'':`<button class="btn ghost" type="button" data-act="out">${out==='course'?L('코스로','Course'):out==='map'?L('지도로','Map'):L('상대 고르기','Rivals')}</button>`}${res==='win'?(bossNext?`<button class="btn green" type="button" data-act="nextland">${CHAPTERS[bt.boss+1].icon} ${L('새 지역으로!','To the new land!')}</button>`:''):`<button class="btn red" type="button" data-act="again">⚔️ ${L('다시 도전','Rematch')}</button>`}${goFin?homeBtn():''}</div>`,
-  {closable:false,onClose:tz?()=>setTimeout(()=>plusLater(bearTease),300):null,acts:{revlock:()=>{plusLock(revCard());return false},review:()=>()=>openReview(gm.id,out),course:()=>()=>openCourse(cq.id,out==='course'?courseBack:out),les:()=>{if(lsGate(les))MiniLesson.open(chL(les));return false},out:()=>()=>go(out),again:()=>()=>startBattle(bt.bi,bt.me,{boss:bt.boss,back:bt.back}),nextland:()=>()=>{mapChapter=bt.boss+1;S.lastChapter=mapChapter;save();go('map')}}}),res==='win'?1200:900);
+  {closable:false,onClose:tz?()=>setTimeout(()=>plusLater(bearTease),300):null,acts:{revlock:()=>{plusLock(revCard());return false},easy:()=>()=>startBattle(bt.bi-1,bt.me,{back:out}),review:()=>()=>openReview(gm.id,out),course:()=>()=>openCourse(cq.id,out==='course'?courseBack:out),les:()=>{if(lsGate(les))MiniLesson.open(chL(les));return false},out:()=>()=>go(out),again:()=>()=>startBattle(bt.bi,bt.me,{boss:bt.boss,back:bt.back}),nextland:()=>()=>{mapChapter=bt.boss+1;S.lastChapter=mapChapter;save();go('map')}}}),res==='win'?1200:900);
 }
 // ---------------------------------------------------------------- growth: game review, my puzzles, chess power
 // Every battle is kept (S.games, the last 10). Right after it ends the engine looks it over in its own worker
@@ -7353,7 +7388,8 @@ function chDrillGoal(d,pos,n){
  return null}
 Object.assign(CH_LS,CH_LS_EXTRA);CH_GROUPS.push(...CH_GROUPS_EXTRA);
 const CH_OF=['free','mate1','fork','pin','mate2','mixed'];                                                     // each land's own lesson (map banner)
-const CH_START=[['values','free'],['check','mate1'],['knight','fork'],['rook','pin'],['queen','mate2'],['mixed','discover']]; // before a land's first stage
+const CH_START=[['free'],['check','mate1'],['knight','fork'],['rook','pin'],['queen','mate2'],['mixed','discover']]; // before a land's first stage
+const CH_SECOND={0:['values']};                                                                                   // before a land's second stage
 const TH_LS={h:'free',m1:'mate1',f:'fork',p:'pin',s:'pin',m2:'mate2',d:'discover',pr:'promo',a:'mixed',
  br:'backRank',m3:'mate3',sm:'smother',dc:'doubleCheck',xr:'xray',ov:'overload',iz:'zwisch',tp:'trapped',at:'attract',cd:'removeDef',df:'deflect',
  dm:'theirIdea',pe:'opposition',re:'rookBehind',qe:'kqk'}; // before the first puzzle of a theme (in, cl, qm and sc have none: thIntro shows their idea)
@@ -7476,6 +7512,14 @@ function goStart(){const u=GO_U;GO_U='';if(!u)return;try{const x=new URL(locatio
  if((m=/^ladder-(\w+)$/.exec(u))){const th=m[1];if(!LADDER[th])return;GO={u,k:'ladder',th,n:0};if(!ladGate(th))return;LAD.th=th;ladBack='home';go('ladder');
   if(ladNext(th)==null){goFinish();goDoneModal();return}startLadder(th,{back:'ladder'})}}
 
+// a new player: how every piece moves (rook and bishop, queen and king, knight, pawn), one short lesson after another.
+// Closing one half-way stops the row (the rest wait in the concept notebook); the adventure starts when the child says so.
+function learnMoves(){const ids=['rook','queen','knight','pawn'].filter(id=>CH_LS[id]&&lsOK(id)&&!chSeen(id));
+ const end=()=>{const t=L('와! 기물이 움직이는 법을 모두 배웠어요. 이제 모험을 떠나 볼까요?','Wow! You know how every piece moves. Ready for the adventure?');
+  modal(`<div style="font-size:64px">🎉</div><h2>${L('기물 움직이기 끝!','You know the moves!')}</h2><p>${esc(t)}</p><div class="row stack"><button class="btn green" type="button" data-act="go">▶ ${L('모험 시작!','Start the adventure!')}</button><button class="btn ghost" type="button" data-act="close">${L('나중에','Later')}</button></div>`,
+   {acts:{go:()=>()=>startStage(0,0)},onOpen:()=>speak(t)})};
+ const step=()=>{const id=ids.shift();if(!id){end();return}CH_OFFERED.add(id);MiniLesson.open(chL(id),{onDone:step,onClose:done=>{if(done)step()}})};step()}
+
 // ---------------------------------------------------------------- start
 boardBuild();applyLang();updateHud();ensureMissions();$('homeLink').href='index.html?lang='+LANG;
 if(!S.cdone)courseTick(true); // the course steps a save had already done count as done, quietly
@@ -7485,9 +7529,11 @@ try{mgPlus.on(plusRedraw)}catch(e){}
 {
  go('home');
  if(!S.intro&&!GO_U){S.intro=true;save();const c=COACHES[S.equip.coach];
-  modal(`<div style="font-size:70px">${pic(c.img,c.icon)}</div><h2>${L('안녕! 나는 멍멍 코치야','Hi! I am Coach Woof')}</h2><p>${L('체스 왕국에 온 걸 환영해! 퍼즐을 풀면 코인과 별을 받고, 레벨이 올라가. 지역마다 보스를 이기면 새 땅이 열려!','Welcome to the chess kingdom! Solve puzzles for coins and stars, and level up. Beat each land’s boss to open a new one!')}</p>
-   <div class="row"><button class="btn green" type="button" data-act="go">▶ ${L('모험 시작!','Start the adventure!')}</button></div>`,
-  {closable:false,acts:{go:()=>()=>startStage(0,0)},onOpen:()=>speak(L('안녕! 나는 멍멍 코치야. 체스 왕국에 온 걸 환영해! 퍼즐을 풀면 코인과 별을 받고, 레벨이 올라가. 지역마다 보스를 이기면 새 땅이 열려!','Hi! I am Coach Woof. Welcome to the chess kingdom! Solve puzzles for coins and stars, and level up. Beat each land’s boss to open a new one!'))});
+  const hi=L('안녕! 나는 멍멍 코치야. 체스 왕국에 온 걸 환영해! 퍼즐을 풀면 코인과 별을 받고, 레벨이 올라가. 지역마다 보스를 이기면 새 땅이 열려! 체스가 처음이면 병아리 버튼을 눌러. 기물이 움직이는 법부터 알려 줄게!','Hi! I’m Coach Woof. Welcome to the chess kingdom! Solve puzzles for coins and stars, and level up. Beat each land’s boss to open a new one! New to chess? Tap the chick button, and I’ll show you how the pieces move first!');
+  modal(`<button class="hearbtn" type="button" data-act="hear" aria-label="${L('다시 듣기','Hear again')}">🔊</button><div style="font-size:70px">${pic(c.img,c.icon)}</div><h2>${L('안녕! 나는 멍멍 코치야','Hi! I’m Coach Woof')}</h2><p>${L('체스 왕국에 온 걸 환영해! 퍼즐을 풀면 코인과 별을 받고, 레벨이 올라가. 지역마다 보스를 이기면 새 땅이 열려!','Welcome to the chess kingdom! Solve puzzles for coins and stars, and level up. Beat each land’s boss to open a new one!')}</p>
+   <p>${L('체스가 처음이면 🐣를 눌러. 기물이 움직이는 법부터 알려 줄게!','New to chess? Tap 🐣 and I’ll show you how the pieces move first!')}</p>
+   <div class="row stack"><button class="btn green" type="button" data-act="go">▶ ${L('모험 시작!','Start the adventure!')}</button><button class="btn ghost" type="button" data-act="newbie">🐣 ${L('처음이에요','New to chess')}</button></div>`,
+  {closable:false,acts:{go:()=>()=>startStage(0,0),newbie:()=>learnMoves,hear:()=>{speak(hi);return false}},onOpen:()=>speak(hi)});
  }
  dailyLogin();
  if(GO_U)plusLater(goStart); // after the daily gift window
